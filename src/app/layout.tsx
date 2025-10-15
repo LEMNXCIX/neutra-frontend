@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import './globals.css';
+import { CartProvider } from '@/context/cart-context';
+import { ToastProvider } from '@/context/toast-context';
+import { AuthProvider } from '@/context/auth-context';
+import Footer from '@/components/footer';
 import { Navigation } from "@/components/nav_bar";
 
 const geistSans = Geist({
@@ -29,8 +33,15 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <div className="pt-16">{/* give space for fixed navbar */}
-          <Navigation />
-          {children}
+          <ToastProvider>
+            <AuthProvider>
+              <CartProvider>
+                <Navigation />
+                {children}
+                <Footer />
+              </CartProvider>
+            </AuthProvider>
+          </ToastProvider>
         </div>
       </body>
     </html>

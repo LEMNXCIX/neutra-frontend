@@ -1,5 +1,7 @@
 "use client";
 import React, { useState } from "react";
+import { useCart } from "@/context/cart-context";
+import { useAuth } from '@/context/auth-context';
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -19,6 +21,7 @@ import {
   Menu,
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "./ui/input-group";
 import { Button } from "./ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
@@ -70,7 +73,12 @@ const components: { title: string; href: string; description: string }[] = [
 ];
 
 export function Navigation() {
-  const [cartCount] = useState<number>(2);
+  const [isOpen, setIsOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const router = useRouter();
+  // use cart context (layout will wrap with provider)
+  const { count, addItem, removeItem } = useCart();
+  const { user, logout } = useAuth();
 
   return (
     <NavigationMenu
@@ -82,13 +90,22 @@ export function Navigation() {
       <NavigationMenuList className="ml-0 mr-auto">
         <NavigationMenuItem>
           <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
-           
             <Link href="/">
-      <div className="flex items-center">
-        <Badge className="bg-pink-800 text-white" /> {/* Paint the icon pink */}
-        <span className="ml-2 text-zinc-900 dark:text-zinc-100">Neutra</span> {/* Add separation and text styling */}
-      </div>
-    </Link>
+              <div className="flex items-center gap-3">
+                {/* custom logo */}
+                <div className="text-zinc-900 dark:text-zinc-100">
+                  <svg width="36" height="36" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+                    <rect x="4" y="4" width="56" height="56" rx="12" fill="currentColor" opacity="0.08" />
+                    <path d="M16 42 C22 26, 42 22, 48 10" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+                    <circle cx="20" cy="20" r="4" fill="currentColor" />
+                  </svg>
+                </div>
+                <div className="flex flex-col leading-none">
+                  <span className="text-lg font-extrabold tracking-tight text-zinc-900 dark:text-zinc-100">Neutra</span>
+                  <span className="text-xs text-muted-foreground -mt-0.5">Minimal Interiors</span>
+                </div>
+              </div>
+            </Link>
           </NavigationMenuLink>
         </NavigationMenuItem>
       </NavigationMenuList>
@@ -230,13 +247,29 @@ export function Navigation() {
         {/* Search (desktop only) */}
         <div className="hidden md:flex items-center gap-3">
           <NavigationMenuItem>
-            <InputGroup>
-              <InputGroupInput placeholder="Search..." />
-              <InputGroupAddon>
-                <Search />
-              </InputGroupAddon>
-              <InputGroupAddon align="inline-end">12 results</InputGroupAddon>
-            </InputGroup>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                // navigate to products with query param
+                const trimmed = query.trim();
+                const url = trimmed ? `/products?search=${encodeURIComponent(trimmed)}` : '/products';
+                router.push(url);
+                setIsOpen(false);
+              }}
+            >
+              <InputGroup>
+                <InputGroupInput
+                  placeholder="Search products..."
+                  value={query}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuery(e.target.value)}
+                />
+                <InputGroupAddon>
+                  <button type="submit" aria-label="Search">
+                    <Search />
+                  </button>
+                </InputGroupAddon>
+              </InputGroup>
+            </form>
           </NavigationMenuItem>
         </div>
 
@@ -244,62 +277,103 @@ export function Navigation() {
         <NavigationMenuItem>
           <Button size={"icon-lg"} variant={"ghost"} className="relative">
             <ShoppingBagIcon />
-            {cartCount > 0 && (
+            {count > 0 && (
               <span className="absolute -top-1 -right-1 inline-flex items-center justify-center rounded-full bg-rose-600 text-white text-xs w-5 h-5 animate-pulse">
-                {cartCount}
+                {count}
               </span>
             )}
           </Button>
         </NavigationMenuItem>
 
-        <NavigationMenuItem>
-          <Button variant="ghost" className="text-sm px-3 py-1 hidden sm:inline-flex">Iniciar session</Button>
-        </NavigationMenuItem>
+        {user ? (
+          <NavigationMenu>
+            <DropdownMenu>
+              <DropdownMenuTrigger>
+                <Avatar>
+                  <AvatarImage src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}`} />
+                  <AvatarFallback>{user.name.slice(0,2).toUpperCase()}</AvatarFallback>
+                </Avatar>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuLabel>{user.name}</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>
+                  <Link href="/profile">Profile</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <button onClick={() => logout()}>Logout</button>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </NavigationMenu>
+        ) : (
+          <NavigationMenuItem>
+            <Link href="/login">
+              <Button variant="ghost" className="text-sm px-3 py-1 hidden sm:inline-flex">Iniciar sesión</Button>
+            </Link>
+          </NavigationMenuItem>
+        )}
 
-        <NavigationMenu>
-          <DropdownMenu>
-            <DropdownMenuTrigger>
-              <Avatar>
-                <AvatarImage src="https://github.com/shadcn.png" />
-                <AvatarFallback>CN</AvatarFallback>
-              </Avatar>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>Profile</DropdownMenuItem>
-              <DropdownMenuItem>Billing</DropdownMenuItem>
-              <DropdownMenuItem>Team</DropdownMenuItem>
-              <DropdownMenuItem>Subscription</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </NavigationMenu>
-
-        {/* Mobile: hamburger menu - visible on small screens */}
+        {/* Mobile: hamburger menu opens a left sidebar (drawer) */}
         <div className="flex md:hidden items-center">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon-lg" aria-label="Open menu">
-                <Menu />
+          <Button
+            variant="ghost"
+            size="icon-lg"
+            aria-label="Open menu"
+            onClick={() => setIsOpen(true)}
+          >
+            <Menu />
+          </Button>
+
+          {/* Overlay */}
+          {isOpen && (
+            <div
+              className="fixed inset-0 z-40 bg-black/40"
+              onClick={() => setIsOpen(false)}
+              aria-hidden
+            />
+          )}
+
+          {/* Sidebar drawer */}
+          <aside
+            className={`fixed top-0 left-0 z-50 h-full w-64 bg-white/95 dark:bg-black/90 transform transition-transform duration-300 ease-in-out ${
+              isOpen ? "translate-x-0" : "-translate-x-full"
+            }`}
+            aria-hidden={!isOpen}
+          >
+            <div className="flex items-center justify-between px-4 py-3 border-b">
+              <div className="flex items-center">
+                <Badge className="bg-pink-800 text-white" />
+                <span className="ml-2 font-medium">Neutra</span>
+              </div>
+              <Button variant="ghost" onClick={() => setIsOpen(false)} aria-label="Close">
+                ×
               </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="animate-fade-in">
-              <DropdownMenuLabel>Menu</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>
-                <Link href="/">Home</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Link href="/docs">Docs</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Link href="/cart">Cart</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Link href="/docs/primitives/typography">Components</Link>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+            </div>
+            <nav className="p-4">
+              <ul className="flex flex-col gap-3">
+                  <li>
+                    <Link href="/">Home</Link>
+                  </li>
+                  <li>
+                    <Link href="/docs">Docs</Link>
+                  </li>
+                  <li>
+                    <Link href="/cart">Cart</Link>
+                  </li>
+                  <li>
+                    <Link href="/docs/primitives/typography">Components</Link>
+                  </li>
+                  <li className="pt-4 border-t">
+                    {/* Demo controls to add/remove an item */}
+                    <div className="flex gap-2">
+                      <Button onClick={async () => { await addItem('p2','Demo product'); }}>Add demo</Button>
+                      <Button variant="ghost" onClick={async () => { await removeItem('p2'); }}>Remove demo</Button>
+                    </div>
+                  </li>
+                </ul>
+            </nav>
+          </aside>
         </div>
       </NavigationMenuList>
       </div>

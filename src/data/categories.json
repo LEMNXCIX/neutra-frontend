@@ -1,0 +1,6 @@
+[
+  { "id": "all", "name": "All" },
+  { "id": "seating", "name": "Seating" },
+  { "id": "lighting", "name": "Lighting" },
+  { "id": "table", "name": "Tables" }
+]
