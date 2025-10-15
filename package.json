@@ -6,7 +6,8 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test-local": "node tests/test-session.js && node tests/test-orders.js"
   },
   "dependencies": {
     "@radix-ui/react-avatar": "^1.1.10",

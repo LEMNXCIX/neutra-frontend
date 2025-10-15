@@ -1,3 +1,4 @@
+import React from 'react';
 import ProductDetailClient from '@/components/product-detail-client';
 
 async function fetchProduct(id: string) {
@@ -9,8 +10,10 @@ async function fetchProduct(id: string) {
   return data.product;
 }
 
-export default async function Page({ params }: { params: { id: string } }){
-  const product = await fetchProduct(params.id);
+export default async function Page(props: unknown){
+  const params = (props as { params?: { id?: string } })?.params;
+  const pid = params?.id || '';
+  const product = await fetchProduct(pid);
   if (!product) return <div className="p-6">Product not found</div>;
 
   return (

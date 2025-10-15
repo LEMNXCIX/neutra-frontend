@@ -1,6 +1,9 @@
 "use client";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { useToast } from './toast-context';
+import { apiFetch } from '@/lib/api-fetch';
+import { useAuth } from './auth-context';
+import { useRouter } from 'next/navigation';
 
 type CartItem = { id: string; name: string; qty: number };
 
@@ -24,36 +27,56 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const fetchCart = React.useCallback(async () => {
     setLoading(true);
-    const res = await fetch("/api/cart");
-    if (!res.ok) {
-      setError("Failed to fetch cart");
+    try {
+      const res = await apiFetch('/api/cart');
+      const data = await res.json();
+      setItems(data.items || []);
+    } catch {
+      setError('Failed to fetch cart');
+      showToast('Error fetching cart', 'error');
+    } finally {
       setLoading(false);
-      showToast("Error fetching cart", "error");
-      return;
     }
-    const data = await res.json();
-    setItems(data.items || []);
-    setLoading(false);
   }, [showToast]);
 
   useEffect(() => {
     fetchCart();
   }, [fetchCart]);
 
+  const auth = useAuth();
+  const router = useRouter();
+
   const addItem = async (id: string, name: string) => {
+    if (!auth?.user) {
+      showToast('Please log in to add items to your cart', 'error');
+      router.push('/login');
+      return;
+    }
     setLoading(true);
-    await fetch("/api/cart", { method: "POST", body: JSON.stringify({ id, name }), headers: { "Content-Type": "application/json" } });
-    await fetchCart();
-    setLoading(false);
-    showToast("Added to cart", "success");
+    try {
+      await apiFetch('/api/cart', { method: 'POST', body: JSON.stringify({ id, name }), headers: { 'Content-Type': 'application/json' } });
+      await fetchCart();
+      showToast('Added to cart', 'success');
+    } catch (errUnknown) {
+      const e = errUnknown as unknown as { message?: string };
+      showToast(e?.message || 'Failed to add to cart', 'error');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const removeItem = async (id: string) => {
     setLoading(true);
-    await fetch(`/api/cart?id=${encodeURIComponent(id)}`, { method: "DELETE" });
-    await fetchCart();
-    setLoading(false);
-    showToast("Removed from cart", "info");
+    try {
+      await apiFetch(`/api/cart?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
+      await fetchCart();
+      showToast('Removed from cart', 'info');
+    } catch (errUnknown) {
+      const e = errUnknown as unknown as { message?: string };
+      showToast(e?.message || 'Failed to remove item', 'error');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const value: CartContextType = {

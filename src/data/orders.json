@@ -1,0 +1,108 @@
+[
+  {
+    "id": "o1760557939877",
+    "userId": "u1",
+    "total": 3,
+    "status": "processing",
+    "tracking": "",
+    "address": "",
+    "items": [
+      {
+        "id": "p1",
+        "name": "Product 1",
+        "qty": 2
+      },
+      {
+        "id": "p2",
+        "name": "Desk Lamp",
+        "qty": 1
+      }
+    ],
+    "date": "2025-10-15"
+  },
+  {
+    "id": "o1",
+    "userId": "u1",
+    "total": 199,
+    "status": "delivered",
+    "tracking": "TRK123",
+    "address": "Calle Falsa 123, Ciudad",
+    "items": [
+      {
+        "id": "p1",
+        "name": "Minimal Chair",
+        "qty": 1
+      }
+    ],
+    "date": "2025-09-01"
+  },
+  {
+    "id": "o2",
+    "userId": "u2",
+    "total": 89,
+    "status": "shipped",
+    "tracking": "TRK124",
+    "address": "Av. Siempre Viva 5",
+    "items": [
+      {
+        "id": "p2",
+        "name": "Desk Lamp",
+        "qty": 1
+      }
+    ],
+    "date": "2025-09-12"
+  },
+  {
+    "id": "o3",
+    "userId": "u1",
+    "total": 579,
+    "status": "processing",
+    "tracking": "",
+    "address": "Calle Falsa 123, Ciudad",
+    "items": [
+      {
+        "id": "p4",
+        "name": "Minimal Sofa",
+        "qty": 1
+      },
+      {
+        "id": "p6",
+        "name": "Side Table",
+        "qty": 1
+      }
+    ],
+    "date": "2025-10-01"
+  },
+  {
+    "id": "o4",
+    "userId": "u1",
+    "total": 45,
+    "status": "delivered",
+    "tracking": "TRK125",
+    "address": "Calle Falsa 123, Ciudad",
+    "items": [
+      {
+        "id": "p2",
+        "name": "Desk Lamp",
+        "qty": 1
+      }
+    ],
+    "date": "2025-08-20"
+  },
+  {
+    "id": "o5",
+    "userId": "u3",
+    "total": 320,
+    "status": "processing",
+    "tracking": "",
+    "address": "R. de la Plata 42",
+    "items": [
+      {
+        "id": "p3",
+        "name": "Wooden Table",
+        "qty": 1
+      }
+    ],
+    "date": "2025-10-05"
+  }
+]

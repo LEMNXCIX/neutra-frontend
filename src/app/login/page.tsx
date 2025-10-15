@@ -12,9 +12,17 @@ export default function LoginPage(){
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await login(email, password);
-    router.push('/');
+    try {
+      await login(email, password);
+      router.push('/');
+    } catch (err) {
+      let msg = 'Login failed';
+      if (err instanceof Error) msg = err.message;
+      setError(msg);
+    }
   }
+
+  const [error, setError] = useState('');
 
   return (
     <main className="max-w-md mx-auto p-6">
@@ -23,6 +31,7 @@ export default function LoginPage(){
         <input className="border p-2 rounded" placeholder="Email" value={email} onChange={e=>setEmail(e.target.value)} />
         <input className="border p-2 rounded" placeholder="Password" type="password" value={password} onChange={e=>setPassword(e.target.value)} />
         <button className="px-4 py-2 bg-zinc-900 text-white rounded" disabled={loading}>{loading ? '...' : 'Entrar'}</button>
+        {error && <div className="text-sm text-rose-600 mt-2">{error}</div>}
       </form>
       <p className="mt-4 text-sm">¿No tienes cuenta? <Link href="/register" className="text-blue-600">Regístrate</Link></p>
     </main>

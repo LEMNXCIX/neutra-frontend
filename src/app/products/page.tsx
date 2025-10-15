@@ -15,7 +15,9 @@ async function fetchProducts(search?: string, category?: string) {
   return data.products;
 }
 
-export default async function Page({ searchParams }: { searchParams?: { [key: string]: string | string[] } }) {
+// Use loose typing for Next App Router page props to avoid build type conflicts
+export default async function Page(props: unknown) {
+  const searchParams = (props as { searchParams?: { [key: string]: string | string[] } })?.searchParams;
   // ensure searchParams is awaited in server component contexts
   const params = (await (searchParams as unknown)) as { [key: string]: string | string[] } | undefined || {};
   const getParam = (k: string) => {
