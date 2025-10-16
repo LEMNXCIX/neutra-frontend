@@ -6,6 +6,7 @@ import { ToastProvider } from '@/context/toast-context';
 import { AuthProvider } from '@/context/auth-context';
 import Footer from '@/components/footer';
 import { Navigation } from "@/components/nav_bar";
+import { Toaster } from 'sonner';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -42,6 +43,7 @@ export default function RootLayout({
               </CartProvider>
             </AuthProvider>
           </ToastProvider>
+           <Toaster richColors/>
         </div>
       </body>
     </html>

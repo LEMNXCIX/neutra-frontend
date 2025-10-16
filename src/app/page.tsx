@@ -5,26 +5,27 @@ import FeaturedProducts from '@/components/featured-products';
 export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-zinc-50 dark:from-black dark:to-zinc-900">
-      <main className="max-w-4xl mx-auto py-12 px-6 text-center space-y-8">
-        <div className="flex items-center justify-center mb-6">
-          <div className="text-zinc-900 dark:text-zinc-100">
-            <svg width="120" height="120" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
-              <rect x="4" y="4" width="56" height="56" rx="12" fill="currentColor" opacity="0.06" />
-              <path d="M16 42 C22 26, 42 22, 48 10" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
-              <circle cx="20" cy="20" r="4" fill="currentColor" />
-            </svg>
+      <main className="flex max-w-7xl mx-auto py-12 px-6 text-center space-y-8 gap-5">
+        <div className='max-w-1/4 self-center' >
+          <div className="flex items-center justify-center mb-6 " >
+            <div className="text-zinc-900 dark:text-zinc-100">
+              <svg width="120" height="120" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <rect x="2" y="2" width="60" height="60" rx="10" fill="currentColor" opacity="0" />
+                <path d="M 20 48.5 C 20 28.5 47 30.5 44 15.5" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
+                <circle cx="24" cy="26.5" r="5" fill="currentColor" />
+              </svg>
+            </div>
           </div>
+
+          <h1 className="text-4xl sm:text-5xl font-extrabold">Neutra</h1>
+          <p className="text-lg text-muted-foreground">Minimal interiors, mindful design — curated furniture and accessories with a clean aesthetic.</p>
         </div>
-
-        <h1 className="text-4xl sm:text-5xl font-extrabold">Neutra</h1>
-        <p className="text-lg text-muted-foreground">Minimal interiors, mindful design — curated furniture and accessories with a clean aesthetic.</p>
-
-        <div className="space-y-6">
+        <div className="w-full">
           <PromoSlider />
-          <div className="flex items-center justify-center gap-4">
+          {/* <div className="flex items-center justify-center gap-4">
             <Link href="/products" className="inline-flex items-center px-5 py-3 bg-zinc-900 text-white rounded-md">Shop products</Link>
             <Link href="/cart" className="inline-flex items-center px-4 py-3 border rounded-md">View cart</Link>
-          </div>
+          </div> */}
         </div>
       </main>
       <section className="max-w-7xl mx-auto px-6">

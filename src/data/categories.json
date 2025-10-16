@@ -1,5 +1,5 @@
 [
-  { "id": "all", "name": "All" },
+  { "id": "all", "name": "All","description":"Verifica todoas las categorias que poseemos." },
   { "id": "seating", "name": "Seating" },
   { "id": "lighting", "name": "Lighting" },
   { "id": "table", "name": "Tables" }

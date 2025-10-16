@@ -4,6 +4,7 @@ import { useToast } from './toast-context';
 import { apiFetch } from '@/lib/api-fetch';
 import { useAuth } from './auth-context';
 import { useRouter } from 'next/navigation';
+import { toast } from "sonner";
 
 type CartItem = { id: string; name: string; qty: number };
 
@@ -33,6 +34,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setItems(data.items || []);
     } catch {
       setError('Failed to fetch cart');
+      toast.error("Be at the area 10 minutes before the event time")
       showToast('Error fetching cart', 'error');
     } finally {
       setLoading(false);

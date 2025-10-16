@@ -5,6 +5,7 @@ import { useCart } from '@/context/cart-context';
 import { apiFetch } from '@/lib/api-fetch';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/context/toast-context';
+import { toast } from "sonner"
 
 export default function CartClient() {
   const { items, removeItem, loading, refresh } = useCart();
@@ -22,6 +23,7 @@ export default function CartClient() {
       const res = await apiFetch('/api/orders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ items: items.map(i=>({ id: i.id, qty: i.qty })), address }) });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
+        toast.info("Be at the area 10 minutes before the event time")
         showToast(data?.error || 'Failed to place order', 'error');
         setPlacing(false);
         return;
