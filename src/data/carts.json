@@ -1,8 +1,13 @@
 {
   "u1": [
     {
-      "id": "p5",
-      "name": "Floor Lamp",
+      "id": "p1",
+      "name": "Minimal Chair",
+      "qty": 1
+    },
+    {
+      "id": "p2",
+      "name": "Desk Lamp",
       "qty": 1
     }
   ]

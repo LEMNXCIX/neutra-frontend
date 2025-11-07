@@ -1,7 +1,9 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useCart } from "@/context/cart-context";
+import { toast } from 'sonner';
 import { useAuth } from '@/context/auth-context';
+import { useTheme } from 'next-themes';
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -20,7 +22,7 @@ import {
   ShoppingBagIcon,
   Menu,
 } from "lucide-react";
-import Link from "next/link";
+import Link from "@/components/ui/link";
 import { useRouter } from "next/navigation";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "./ui/input-group";
 import { Button } from "./ui/button";
@@ -79,10 +81,83 @@ const components: { title: string; href: string; description: string }[] = [
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const [konami, setKonami] = useState<string[]>([]);
+  const [lastTap, setLastTap] = useState(0);
   const router = useRouter();
-  // use cart context (layout will wrap with provider)
-  const { count, addItem, removeItem } = useCart();
+  const { theme, setTheme } = useTheme();
+  const { count } = useCart();
   const { user, logout } = useAuth();
+
+  const handleThemeToggle = () => {
+    setTheme(theme === 'dark' ? 'light' : 'dark');
+    // Agregar efecto de giro al logo
+    const logo = document.querySelector('#logo-svg');
+    if (logo) {
+      logo.classList.add('spin-once');
+      setTimeout(() => logo.classList.remove('spin-once'), 500);
+    }
+  };
+
+  // Konami code easter egg
+  useEffect(() => {
+    const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+    
+    const handleKeyDown = (e: KeyboardEvent) => {
+      setKonami(prev => {
+        const newKonami = [...prev, e.key];
+        if (newKonami.length > konamiCode.length) {
+          newKonami.shift();
+        }
+        
+        if (newKonami.join(',') === konamiCode.join(',')) {
+          // Easter egg triggered!
+          document.body.style.animation = 'spin 1s linear';
+          setTimeout(() => {
+            document.body.style.animation = '';
+          }, 1000);
+        }
+        
+        return newKonami;
+      });
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  // Secret sequence 'neutra' easter egg + console hint
+  useEffect(() => {
+    // console hint for devs / curious users
+    console.log(`\n¡Has encontrado un huevo de pascua!\n🥚 Neutra tiene secretos ocultos...\nIntenta presionar estas teclas: ↑↑↓↓←→←→BA\n`);
+
+    const seq = ['n','e','u','t','r','a'];
+    let buffer: string[] = [];
+
+    const onKey = (e: KeyboardEvent) => {
+      buffer.push(e.key.toLowerCase());
+      if (buffer.length > seq.length) buffer.shift();
+      if (buffer.join('') === seq.join('')) {
+        // trigger rainbow effect on brand name
+        const el = document.querySelector('#brand-name');
+        if (el) {
+          el.classList.add('rainbow-text');
+          setTimeout(() => el.classList.remove('rainbow-text'), 3000);
+          toast('Easter egg: Neutra unlocked!');
+        }
+        buffer = [];
+      }
+    };
+
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
+  // Cart special: if user reaches exactly 7 items, show a secret
+  useEffect(() => {
+    if (count === 7) {
+      toast('🎉 Easter egg: you added 7 items!');
+    }
+  }, [count]);
 
   const getParam = (k: string) => {
     const v = null;
@@ -103,15 +178,38 @@ export function Navigation() {
             <Link href="/">
               <div className="flex items-center gap-0">
                 {/* custom logo */}
-                <div className="text-zinc-900 dark:text-zinc-100">
-                  <svg className="size-12" width="36" height="36" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+                <div 
+                  className="text-zinc-900 dark:text-zinc-100 hover-scale cursor-pointer"
+                  onDoubleClick={handleThemeToggle}
+                  onTouchEnd={(e) => {
+                    const now = Date.now();
+                    const DOUBLE_TAP_DELAY = 300; // ms
+                    
+                    if (lastTap && (now - lastTap) < DOUBLE_TAP_DELAY) {
+                      handleThemeToggle();
+                      setLastTap(0);
+                    } else {
+                      setLastTap(now);
+                    }
+                  }}
+                >
+                  <svg 
+                    id="logo-svg"
+                    className="size-12" 
+                    width="36" 
+                    height="36" 
+                    viewBox="0 0 64 64" 
+                    fill="none" 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    aria-hidden
+                  >
                     <rect x="4" y="4" width="56" height="56" rx="12" fill="currentColor" opacity="0" />
                     <path d="M 20 48.5 C 20 28.5 47 30.5 44 15.5" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
                     <circle cx="24" cy="26.5" r="5" fill="currentColor" />
                   </svg>
                 </div>
                 <div className="flex flex-col leading-none -right-5">
-                  <span className="text-lg font-extrabold tracking-tight text-zinc-900 dark:text-zinc-100">Neutra</span>
+                  <span id="brand-name" className="text-lg font-extrabold tracking-tight text-zinc-900 dark:text-zinc-100">Neutra</span>
                   <span className="text-xs text-muted-foreground -mt-0.5">Minimal Interiors</span>
                 </div>
               </div>
@@ -119,8 +217,8 @@ export function Navigation() {
 
           </NavigationMenuItem>
         </NavigationMenuList>
-        {/* Center: full menu - hidden on small screens */}
-        <NavigationMenuList className="mx-auto hidden md:flex">
+  {/* Center: full menu - hidden on small and medium screens, visible on large+ */}
+  <NavigationMenuList className="mx-auto hidden lg:flex">
           <NavigationMenuItem>
             <NavigationMenuTrigger>Productos</NavigationMenuTrigger>
             <NavigationMenuContent>
@@ -131,7 +229,7 @@ export function Navigation() {
                       className="from-muted/50 to-muted flex h-full w-full flex-col justify-end rounded-md bg-linear-to-b p-6 no-underline outline-hidden select-none focus:shadow-md"
                       href="/products"
                     >
-                      <div className="mt-4 mb-2 text-lg font-medium">
+                        <div className="mt-4 mb-2 text-lg font-medium hover-elevate">
                         Ver productos
                       </div>
                       <p className="text-muted-foreground text-sm leading-tight">
@@ -177,7 +275,7 @@ export function Navigation() {
           </NavigationMenuItem>
           <NavigationMenuItem>
             <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
-              <Link href="/docs">Docs</Link>
+              <Link href="/docs" className="hover-slide-up inline-block">Docs</Link>
             </NavigationMenuLink>
           </NavigationMenuItem>
           <NavigationMenuItem>
@@ -262,7 +360,7 @@ export function Navigation() {
         {/* Right: actions - compact on small screens */}
         <NavigationMenuList className="ml-auto mr-0 flex items-center gap-3">
           {/* Search (desktop only) */}
-          <div className="hidden md:flex items-center gap-3">
+          <div className="hidden lg:flex items-center gap-3">
             <NavigationMenuItem>
               <form
                 onSubmit={(e) => {
@@ -292,8 +390,8 @@ export function Navigation() {
 
           {/* Always visible actions: cart, login, avatar (compact on mobile) */}
           <NavigationMenuItem>
-            <Link href='/cart'>
-              <ShoppingBagIcon />
+            <Link href='/cart' className="relative flex items-center">
+              <ShoppingBagIcon className="hover-scale click-pulse" />
               {count > 0 && (
                 <span className="absolute -top-1 -right-1 inline-flex items-center justify-center rounded-full bg-rose-600 text-white text-xs w-5 h-5">
                   {count}
@@ -305,7 +403,7 @@ export function Navigation() {
           {user ? (
             <NavigationMenu>
               <DropdownMenu>
-                <DropdownMenuTrigger>
+                <DropdownMenuTrigger className="hover-scale">
                   <Avatar>
                     <AvatarImage src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}`} />
                     <AvatarFallback>{user.name.slice(0, 2).toUpperCase()}</AvatarFallback>
@@ -332,13 +430,13 @@ export function Navigation() {
           )}
 
           {/* Mobile: hamburger menu opens a left sidebar (drawer) */}
-          <div className="flex md:hidden items-center">
+          <div className="flex lg:hidden items-center">
             <Button
               variant="ghost"
               size="icon-lg"
               aria-label="Open menu"
               onClick={() => setIsOpen(true)}
-            >
+              className="hover-scale click-pulse">
               <Menu />
             </Button>
 
@@ -351,41 +449,48 @@ export function Navigation() {
               />
             )}
 
-            {/* Sidebar drawer */}
+            {/* Sidebar drawer - mirrors desktop menu but vertically */}
             <aside
-              className={`fixed top-0 left-0 z-50 h-full w-64 bg-white/95 dark:bg-black/90 transform transition-transform duration-300 ease-in-out ${isOpen ? "translate-x-0" : "-translate-x-full"
-                }`}
+className={`fixed top-0 left-0 z-50 h-svh w-72 backdrop-blur-lg bg-white/90 dark:bg-black/20 border border-white/10 rounded-r-2xl shadow-lg transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
+
               aria-hidden={!isOpen}
             >
               <div className="flex items-center justify-between px-4 py-3 border-b">
                 <div className="flex items-center">
-                  <Badge className="bg-pink-800 text-white" />
-                  <span className="ml-2 font-medium">Neutra</span>
+                  <span className="ml-2 font-medium">Menu</span>
                 </div>
                 <Button variant="ghost" onClick={() => setIsOpen(false)} aria-label="Close">
                   ×
                 </Button>
               </div>
               <nav className="p-4">
-                <ul className="flex flex-col gap-3">
+                <ul className="flex flex-col gap-4">
                   <li>
-                    <Link href="/">Home</Link>
+                    <Link href="/products" onClick={() => setIsOpen(false)} className="text-base font-medium">Productos</Link>
                   </li>
                   <li>
-                    <Link href="/docs">Docs</Link>
+                    <div className="text-sm font-medium mb-2">Categorias</div>
+                    <div className="flex flex-col gap-2 pl-2">
+                      {(categories as Category[]).map((c) => (
+                        <Link key={c.id} href={c.id === 'all' ? '/products' : `/products?category=${encodeURIComponent(c.id)}`} onClick={() => setIsOpen(false)} className="text-sm text-muted-foreground">{c.name}</Link>
+                      ))}
+                    </div>
                   </li>
                   <li>
-                    <Link href="/cart">Cart</Link>
+                    <Link href="/docs" onClick={() => setIsOpen(false)} className="text-base font-medium">Docs</Link>
                   </li>
                   <li>
-                    <Link href="/docs/primitives/typography">Components</Link>
+                    <Link href="/cart" onClick={() => setIsOpen(false)} className="text-base font-medium">Carrito</Link>
                   </li>
                   <li className="pt-4 border-t">
-                    {/* Demo controls to add/remove an item */}
-                    <div className="flex gap-2">
-                      <Button onClick={async () => { await addItem('p2', 'Demo product'); }}>Add demo</Button>
-                      <Button variant="ghost" onClick={async () => { await removeItem('p2'); }}>Remove demo</Button>
-                    </div>
+                    {user ? (
+                      <div className="flex flex-col gap-2">
+                        <Link href="/profile" onClick={() => setIsOpen(false)} className="text-sm">Mi perfil</Link>
+                        <button onClick={() => { logout(); setIsOpen(false); }} className="text-sm text-left">Cerrar sesión</button>
+                      </div>
+                    ) : (
+                      <Link href="/login" onClick={() => setIsOpen(false)} className="text-base font-medium">Iniciar sesión</Link>
+                    )}
                   </li>
                 </ul>
               </nav>
@@ -405,7 +510,7 @@ function ListItem({
   return (
     <li {...props}>
       <NavigationMenuLink asChild>
-        <Link href={href}>
+          <Link href={href} className="hover-slide-up block p-2">
           <div className="text-sm leading-none font-medium">{title}</div>
           <p className="text-muted-foreground line-clamp-2 text-sm leading-snug">
             {children}

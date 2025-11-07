@@ -65,10 +65,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const register = async (name: string, email: string) => {
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 400));
-    const u = { id: String(Date.now()), name, email };
-    setUser(u);
-    setLoading(false);
+    try {
+      const resp = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password: 'changeme' }), // TODO: collect password client-side
+      });
+      if (!resp.ok) {
+        const err = await resp.json().catch(() => ({}));
+        throw new Error(err?.error || 'Register failed');
+      }
+      const data = await resp.json();
+      setUser({ id: data.user.id, name: data.user.name, email: data.user.email });
+    } catch (err) {
+      // bubble up or ignore — keep UI informed via returned error
+      console.error('register failed', err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
   };
 
   const logout = async () => {

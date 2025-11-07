@@ -1,0 +1,6 @@
+[
+  { "code": "SAVE10", "type": "percent", "value": 10 },
+  { "code": "OFF5", "type": "amount", "value": 5 },
+  { "code": "USED10", "type": "percent", "value": 10, "used": true },
+  { "code": "EXPIRED20", "type": "amount", "value": 20, "expires": "2020-01-01" }
+]

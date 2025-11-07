@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import Image from "next/image";
+import Image from "@/components/ui/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const slides = [
@@ -45,7 +45,7 @@ export default function PromoSlider() {
   }, []);
 
   return (
-    <div className="relative group rounded-xl overflow-hidden h-[420px] sm:h-[520px] shadow-lg">
+    <div className="relative group rounded-xl overflow-hidden h-[300px] sm:h-[420px] lg:h-[520px] shadow-lg">
       {/* Contenedor de slides */}
       <div className="relative w-full h-full bg-zinc-100 dark:bg-zinc-800">
         {slides.map((slide, index) => {
@@ -81,10 +81,10 @@ export default function PromoSlider() {
       {/* Texto con animación de entrada */}
       <div
         key={slides[currentIndex].id}
-        className="absolute bottom-10 left-8 text-white transition-all duration-700 ease-out animate-slide-up delay-100"
+        className="absolute bottom-6 sm:bottom-10 left-4 sm:left-8 text-white transition-all duration-700 ease-out animate-slide-up delay-100"
       >
         <div className="overflow-hidden ">
-          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight ">
+          <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight">
             {slides[currentIndex].title}
           </h2>
         </div>

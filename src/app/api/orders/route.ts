@@ -17,6 +17,8 @@ type Order = {
   date: string;
 };
 
+type CouponRecord = { code: string; type: 'amount' | 'percent'; value: number; used?: boolean; expires?: string };
+
 function readOrders(): Order[] {
   try {
     const raw = fs.readFileSync(DATA_PATH, 'utf-8');
@@ -109,6 +111,43 @@ export async function POST(req: Request) {
     computedTotal += line;
   }
 
+  // Optional coupon handling
+  const couponCode = body.couponCode ? String(body.couponCode).trim().toUpperCase() : null;
+  let couponApplied: { code: string; type: string; value: number; discount: number } | null = null;
+  // We will compute the discount now but defer marking the coupon as used until after the order and stock writes succeed.
+  let couponsPathForMark: string | null = null;
+  let couponsListForMark: CouponRecord[] | null = null;
+  let couponIndexForMark: number | null = null;
+  if (couponCode) {
+    // read coupons file
+    const COUPONS_PATH = path.join(process.cwd(), 'src', 'data', 'coupons.json');
+    try {
+        const raw = fs.readFileSync(COUPONS_PATH, 'utf-8');
+        const coupons = JSON.parse(raw) as Array<CouponRecord>;
+        const foundIndex = coupons.findIndex((c: CouponRecord) => String(c.code).toUpperCase() === couponCode);
+      if (foundIndex === -1) return NextResponse.json({ error: 'Invalid coupon' }, { status: 400 });
+      const found = coupons[foundIndex];
+      if (found.used) return NextResponse.json({ error: 'Coupon already used' }, { status: 400 });
+      if (found.expires) {
+        const now = new Date();
+        const exp = new Date(found.expires);
+        if (exp < now) return NextResponse.json({ error: 'Coupon expired' }, { status: 400 });
+      }
+      let discountAmount = 0;
+      if (found.type === 'percent') discountAmount = Math.round((computedTotal * (found.value / 100)) * 100) / 100;
+      else discountAmount = Math.min(computedTotal, Number(found.value || 0));
+      computedTotal = Math.max(0, Math.round((computedTotal - discountAmount) * 100) / 100);
+      couponApplied = { code: found.code, type: found.type, value: found.value, discount: discountAmount };
+
+      // Keep coupon list + index to mark used later (after order persistence succeeds)
+      couponsPathForMark = COUPONS_PATH;
+      couponsListForMark = coupons as CouponRecord[];
+      couponIndexForMark = foundIndex;
+    } catch {
+      // ignore coupon persistence errors for now
+    }
+  }
+
   // Check inventory availability for all items before committing
   const products = readProducts();
   for (const it of itemsIn) {
@@ -129,6 +168,8 @@ export async function POST(req: Request) {
     tracking: '',
     address: String(body.address || ''),
     items: resolvedItems,
+    // include coupon metadata if applied
+    ...(couponApplied ? { coupon: couponApplied } : {}),
     date: new Date().toISOString().slice(0,10),
   };
   all.unshift(newOrder);
@@ -143,6 +184,19 @@ export async function POST(req: Request) {
     }
   }
   writeProducts(productsAfter);
+
+  // Now that order and product updates succeeded, mark coupon used and persist (if there was one)
+  if (couponApplied && couponsPathForMark && couponsListForMark && couponIndexForMark !== null) {
+    try {
+      // mark and persist
+      couponsListForMark[couponIndexForMark] = { ...couponsListForMark[couponIndexForMark], used: true };
+      await fs.promises.writeFile(couponsPathForMark, JSON.stringify(couponsListForMark, null, 2), 'utf-8');
+    } catch (e) {
+      // If marking the coupon fails, we log but still return success for the order to avoid blocking the customer.
+      // In a real system you'd add retry/compensation logic here.
+      console.error('Failed persisting coupon used flag', e);
+    }
+  }
 
   return NextResponse.json({ order: newOrder }, { status: 201 });
 }

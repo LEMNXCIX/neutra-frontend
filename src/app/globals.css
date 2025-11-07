@@ -120,3 +120,115 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Interactive Animations */
+@keyframes spin-once {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes scale-up {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+@keyframes pulse-soft {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(0.97); opacity: 0.9; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes slide-up-fade {
+  from {
+    transform: translateY(0.5rem);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.hover-scale {
+  @apply transition-transform duration-300 hover:scale-103 active:scale-95;
+}
+
+.hover-elevate {
+  @apply transition-all duration-200 hover:-translate-y-1 hover:shadow-lg active:translate-y-0 active:shadow-md;
+}
+
+.hover-glow {
+  @apply transition-all duration-200 hover:brightness-110 hover:contrast-110;
+}
+
+.click-pulse {
+  @apply active:animate-[pulse-soft_200ms_ease-in-out];
+}
+
+.hover-slide-up {
+  @apply transition-all duration-200 hover:-translate-y-0.5;
+}
+
+.menu-item-hover {
+  @apply transition-colors duration-200 hover:bg-zinc-100/80 dark:hover:bg-zinc-800/80 rounded-md;
+}
+
+.link-underline {
+  @apply relative after:absolute after:bottom-0 after:left-0 after:w-full after:h-[1px] after:bg-current 
+         after:origin-left after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-200;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spin-once {
+  animation: spin-once 0.5s ease-in-out;
+}
+
+/* Konami code effect */
+@keyframes rainbow {
+  0% { color: red; }
+  15% { color: orange; }
+  30% { color: yellow; }
+  45% { color: green; }
+  60% { color: blue; }
+  75% { color: indigo; }
+  90% { color: violet; }
+  100% { color: red; }
+}
+
+.rainbow-text {
+  animation: rainbow 2s linear infinite;
+}
+
+/* Secret hover effect */
+.secret-hover {
+  transition: all 0.3s ease;
+}
+
+.secret-hover:hover {
+  text-shadow: 0 0 10px currentColor;
+  letter-spacing: 2px;
+}
+
+/* Hidden until discovered */
+.easter-egg-discovered {
+  opacity: 1;
+  transition: opacity 0.5s ease;
+}
+
+.easter-egg-hidden {
+  opacity: 0;
+  pointer-events: none;
+}
