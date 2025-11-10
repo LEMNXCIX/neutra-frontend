@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 import { readProducts, writeProducts, findProduct } from '@/data/products';
+import { extractTokenFromRequest, verifyToken } from '@/lib/auth';
 
 const DATA_PATH = path.join(process.cwd(), 'src', 'data', 'orders.json');
 
@@ -71,6 +72,16 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
+  // require valid JWT (either Authorization Bearer or cookie `neutra_jwt`)
+  try {
+    const token = extractTokenFromRequest(req as Request);
+    if (!token) return NextResponse.json({ error: 'Missing token' }, { status: 401 });
+    const payload = verifyToken(token as string);
+    if (!payload) return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+  } catch {
+    return NextResponse.json({ error: 'Auth error' }, { status: 401 });
+  }
+
   const cookieHeader = req.headers.get('cookie') || '';
   const cookiePairs = cookieHeader.split(';').map(s => s.trim()).filter(Boolean);
   let rawSid: string | undefined;

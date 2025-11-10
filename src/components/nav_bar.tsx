@@ -21,6 +21,7 @@ import {
   Search,
   ShoppingBagIcon,
   Menu,
+  LayoutDashboard,
 } from "lucide-react";
 import Link from "@/components/ui/link";
 import { useRouter } from "next/navigation";
@@ -175,7 +176,7 @@ export function Navigation() {
         {/* Left: logo */}
         <NavigationMenuList className="ml-0 mr-auto">
           <NavigationMenuItem>
-            <Link href="/">
+            
               <div className="flex items-center gap-0">
                 {/* custom logo */}
                 <div 
@@ -183,8 +184,8 @@ export function Navigation() {
                   onDoubleClick={handleThemeToggle}
                   onTouchEnd={(e) => {
                     const now = Date.now();
-                    const DOUBLE_TAP_DELAY = 300; // ms
-                    
+                    const DOUBLE_TAP_DELAY = 1000; // ms
+                    console.log('dsd')
                     if (lastTap && (now - lastTap) < DOUBLE_TAP_DELAY) {
                       handleThemeToggle();
                       setLastTap(0);
@@ -208,12 +209,14 @@ export function Navigation() {
                     <circle cx="24" cy="26.5" r="5" fill="currentColor" />
                   </svg>
                 </div>
+                <Link href="/">
                 <div className="flex flex-col leading-none -right-5">
                   <span id="brand-name" className="text-lg font-extrabold tracking-tight text-zinc-900 dark:text-zinc-100">Neutra</span>
                   <span className="text-xs text-muted-foreground -mt-0.5">Minimal Interiors</span>
                 </div>
+                </Link>
               </div>
-            </Link>
+            
 
           </NavigationMenuItem>
         </NavigationMenuList>
@@ -389,6 +392,14 @@ export function Navigation() {
           </div>
 
           {/* Always visible actions: cart, login, avatar (compact on mobile) */}
+          {user ? (
+          <NavigationMenuItem>
+            <Link href='/admin' className="relative flex items-center">
+              <LayoutDashboard className="hover-scale click-pulse" />
+            </Link>
+          </NavigationMenuItem> 
+          ) : <></>}
+
           <NavigationMenuItem>
             <Link href='/cart' className="relative flex items-center">
               <ShoppingBagIcon className="hover-scale click-pulse" />
@@ -451,7 +462,7 @@ export function Navigation() {
 
             {/* Sidebar drawer - mirrors desktop menu but vertically */}
             <aside
-className={`fixed top-0 left-0 z-50 h-svh w-72 backdrop-blur-lg bg-white/90 dark:bg-black/20 border border-white/10 rounded-r-2xl shadow-lg transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
+className={`fixed top-0 left-0 z-50 h-svh w-72 backdrop-blur-lg bg-white/90 dark:bg-black/90 border border-white/10 rounded-r-2xl shadow-lg transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
 
               aria-hidden={!isOpen}
             >

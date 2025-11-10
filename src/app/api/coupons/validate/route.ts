@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import fs from 'fs';
 import path from 'path';
+import { extractTokenFromRequest, verifyToken } from '@/lib/auth';
 
 const COUPONS_PATH = path.join(process.cwd(), 'src', 'data', 'coupons.json');
 
@@ -15,6 +16,16 @@ async function readCoupons() {
 }
 
 export async function POST(req: NextRequest) {
+  // require a valid JWT (either Authorization: Bearer or cookie `neutra_jwt`)
+  try {
+    const token = extractTokenFromRequest(req as unknown as Request);
+    if (!token) return NextResponse.json({ valid: false, reason: 'missing_token' }, { status: 401 });
+    const payload = verifyToken(token as string);
+    if (!payload) return NextResponse.json({ valid: false, reason: 'invalid_token' }, { status: 401 });
+  } catch {
+    return NextResponse.json({ valid: false, reason: 'auth_error' }, { status: 401 });
+  }
+
   try {
     const body = await req.json();
     const code = String((body?.code || '')).trim().toUpperCase();

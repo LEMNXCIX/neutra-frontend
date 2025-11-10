@@ -1,6 +1,39 @@
 [
-  { "code": "SAVE10", "type": "percent", "value": 10 },
-  { "code": "OFF5", "type": "amount", "value": 5 },
-  { "code": "USED10", "type": "percent", "value": 10, "used": true },
-  { "code": "EXPIRED20", "type": "amount", "value": 20, "expires": "2020-01-01" }
+  {
+    "code": "SAVE10",
+    "type": "percent",
+    "value": 10
+  },
+  {
+    "code": "OFF5",
+    "type": "amount",
+    "value": 5,
+    "used": true
+  },
+  {
+    "code": "USED10",
+    "type": "percent",
+    "value": 10,
+    "used": true
+  },
+  {
+    "code": "EXPIRED20",
+    "type": "amount",
+    "value": 21,
+    "expires": "2020-01-01"
+  },
+  {
+    "code": "SS",
+    "type": "amount",
+    "value": 11,
+    "expires": null,
+    "used": false
+  },
+  {
+    "code": "@",
+    "type": "percent",
+    "value": 110,
+    "expires": "2025-13-99",
+    "used": true
+  }
 ]

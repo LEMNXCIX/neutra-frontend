@@ -2,7 +2,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { apiFetch } from '@/lib/api-fetch';
 
-type User = { id: string; name: string; email?: string } | null;
+type User = { id: string; name: string; email?: string, isAdmin: boolean } | null;
 
 type AuthContextType = {
   user: User;
@@ -26,7 +26,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const resp = await apiFetch('/api/auth/me');
         if (!mounted) return;
         const data = await resp.json().catch(() => ({ user: null }));
-        if (data?.user) setUser({ id: data.user.id, name: data.user.name, email: data.user.email });
+        if (data?.user) setUser({ id: data.user.id, name: data.user.name, email: data.user.email, isAdmin: data.user.isAdmin });
       } catch {
         // ignore - no user
       }
@@ -57,7 +57,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       const data = await resp.json();
       // server sets httpOnly cookie; we keep a lightweight client copy for UI
-      setUser({ id: data.user.id, name: data.user.name, email: data.user.email });
+      setUser({ id: data.user.id, name: data.user.name, email: data.user.email, isAdmin: data.user.isAdmin });
     } finally {
       setLoading(false);
     }
@@ -76,7 +76,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw new Error(err?.error || 'Register failed');
       }
       const data = await resp.json();
-      setUser({ id: data.user.id, name: data.user.name, email: data.user.email });
+      setUser({ id: data.user.id, name: data.user.name, email: data.user.email, isAdmin: data.user.isAdmin  });
     } catch (err) {
       // bubble up or ignore — keep UI informed via returned error
       console.error('register failed', err);

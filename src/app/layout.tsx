@@ -5,8 +5,8 @@ import './globals.css';
 import { CartProvider } from '@/context/cart-context';
 import { AuthProvider } from '@/context/auth-context';
 import { Navigation as NavBar } from "@/components/nav_bar";
-import Footer from '@/components/footer';
 import { Toaster } from 'sonner';
+import FooterWrapper from "@/components/footer-wrapper"; // 👈 nuevo componente cliente
 
 const geist = Geist({
   subsets: ["latin"],
@@ -24,9 +24,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es" suppressHydrationWarning>
-      <body
-        className={`${geist.className} antialiased`}
-      >
+      <body className={`${geist.className} antialiased`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
@@ -35,12 +33,20 @@ export default function RootLayout({
         >
           <AuthProvider>
             <CartProvider>
-              <NavBar />
-              {/* Add top padding so fixed navbar doesn't cover page content on all screens */}
-              <div className="pt-16">
-                {children}
+              <div
+                id="root-content"
+                className="transition-all duration-300 ease-in-out"
+                style={{
+                  marginLeft: 'var(--sidebar-width, 0px)',
+                } as React.CSSProperties}
+              >
+                <NavBar />
+                <div className="pt-16">{children}</div>
+
+                {/* 👇 Footer controlado desde un Client Component */}
+                <FooterWrapper />
+
               </div>
-              <Footer />
               <Toaster richColors />
             </CartProvider>
           </AuthProvider>

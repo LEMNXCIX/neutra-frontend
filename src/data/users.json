@@ -1,5 +1,28 @@
 [
-  { "id": "u1", "name": "alice", "email": "alice@example.com", "password": "password123" },
-  { "id": "u2", "name": "bob", "email": "bob@example.com", "password": "secret456" },
-  { "id": "u3", "name": "carol", "email": "carol@example.com", "password": "hunter2" }
+  {
+    "id": "u1",
+    "name": "alice",
+    "email": "alice@example.com",
+    "password": "password123",
+    "isAdmin": true
+  },
+  {
+    "id": "u2",
+    "name": "bob",
+    "email": "bob@example.com",
+    "password": "secret456"
+  },
+  {
+    "id": "u3",
+    "name": "carol",
+    "email": "carol@example.com",
+    "password": "hunter2"
+  },
+  {
+    "id": "u_1762563018580",
+    "name": "Leonardo",
+    "email": "fake@mail.com",
+    "password": "123",
+    "isAdmin": true
+  }
 ]

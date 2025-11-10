@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 import { createSession } from '@/lib/session';
+import { signJwt } from '@/lib/jwt';
 
 const USERS_PATH = path.join(process.cwd(), 'src', 'data', 'users.json');
 
@@ -39,6 +40,10 @@ export async function POST(req: Request) {
     const sid = createSession(id);
     const res = NextResponse.json({ user: { id, name, email } });
     res.cookies.set('_neutra_sid', sid, { httpOnly: true, path: '/' });
+    try {
+      const token = signJwt({ sub: id, email }, { expiresIn: 60 * 60 * 24 });
+      res.cookies.set('neutra_jwt', token, { httpOnly: true, path: '/' });
+    } catch {}
     return res;
   } catch {
     return NextResponse.json({ error: 'server_error' }, { status: 500 });
