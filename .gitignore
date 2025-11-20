@@ -39,3 +39,14 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Local data files (keep data/json out of the repository)
+/src/data/*.json
+/public/data/*.json
+
+# Uploaded assets produced at runtime
+/public/uploads/
+
+# Backup/temp files created by server-side writes
+/src/data/*.bak
+/src/data/*.tmp
