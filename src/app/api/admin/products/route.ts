@@ -28,7 +28,25 @@ export async function POST(req: Request) {
     type Product = { id: string; title: string; price: number; stock?: number };
   const products = JSON.parse(raw) as Array<Product>;
     const id = `p_${Date.now()}`;
-    const newP = { id, title: String(body.title), price: Number(body.price||0), stock: Number(body.stock||0) };
+    const newP: any = { id, title: String(body.title), price: Number(body.price||0), stock: Number(body.stock||0) };
+    if (body.category) newP.category = String(body.category);
+    // handle imageBase64 upload
+    if (body.imageBase64) {
+      try{
+        const UPLOADS_DIR = path.join(process.cwd(), 'public', 'uploads');
+        if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+        const m = String(body.imageBase64).match(/^data:(image\/(\w+));base64,(.+)$/);
+        if (m) {
+          const ext = m[2] || 'png';
+          const b64 = m[3];
+          const buf = Buffer.from(b64, 'base64');
+          const filename = `upload_${Date.now()}.${ext}`;
+          const dest = path.join(UPLOADS_DIR, filename);
+          fs.writeFileSync(dest, buf);
+          newP.image = `/uploads/${filename}`;
+        }
+      }catch{}
+    } else if (body.image) newP.image = String(body.image);
     products.push(newP);
     // atomic write
     const tmp = `${PRODUCTS_PATH}.tmp`;

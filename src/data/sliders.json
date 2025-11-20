@@ -1,0 +1,11 @@
+[
+  {
+    "id": "s1",
+    "title": "Welcome — Free shipping over $100",
+    "subtitle": "Limited time",
+    "image": "https://picsum.photos/seed/slide1/1200/500",
+    "startsAt": "2025-11-01T00:00:00.000Z",
+    "endsAt": "2026-01-01T00:00:00.000Z",
+    "active": true
+  }
+]

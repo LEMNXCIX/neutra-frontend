@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import Image from "@/components/ui/image";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -23,7 +24,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 
-type Product = { id: string; title: string; price: number; stock?: number };
+type Product = { id: string; title: string; price: number; stock?: number; category?: string; image?: string };
 
 async function fetchProducts(search?: string, category?: string) {
   const base =
@@ -43,7 +44,10 @@ async function fetchProducts(search?: string, category?: string) {
 export default function ProductsAdminClient() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
-  const [form, setForm] = useState({ title: "", price: "", stock: "" });
+  const [form, setForm] = useState({ title: "", price: "", stock: "", category: "", imageBase64: "" });
+  const [preview, setPreview] = useState<string | null>(null);
+  const [editingImageBase64, setEditingImageBase64] = useState<string | null>(null);
+  const [categories, setCategories] = useState<Array<{ id: string; name: string }>>([]);
   const [editing, setEditing] = useState<Product | null>(null);
   const [open, setOpen] = useState(false);
 
@@ -52,6 +56,12 @@ export default function ProductsAdminClient() {
     try {
       const data = await fetchProducts("", "all");
       setProducts(data || []);
+      // load categories (public)
+      try {
+        const cRes = await fetch('/api/categories');
+        const cJson = await cRes.json().catch(() => ({}));
+        setCategories(Array.isArray(cJson.categories) ? cJson.categories : []);
+      } catch {}
     } catch {
       toast.error("Failed loading");
     } finally {
@@ -69,6 +79,7 @@ export default function ProductsAdminClient() {
         title: form.title,
         price: Number(form.price || 0),
         stock: Number(form.stock || 0),
+        category: form.category || undefined,
       };
       const res = await fetch("/api/admin/products", {
         method: "POST",
@@ -111,10 +122,12 @@ export default function ProductsAdminClient() {
   const saveEdit = async () => {
     if (!editing) return;
     try {
+      const payload: Record<string, unknown> = { ...editing } as Record<string, unknown>;
+      if (editingImageBase64) payload.imageBase64 = editingImageBase64;
       const res = await fetch(`/api/admin/products/${editing.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(editing),
+        body: JSON.stringify(payload),
         credentials: "same-origin",
       });
       const data = await res.json().catch(() => ({}));
@@ -125,6 +138,7 @@ export default function ProductsAdminClient() {
       toast.success("Saved");
       setOpen(false);
       setEditing(null);
+      setEditingImageBase64(null);
       load();
     } catch {
       toast.error("Request failed");
@@ -177,6 +191,28 @@ export default function ProductsAdminClient() {
             }
             className="w-24"
           />
+          <div className="flex items-center gap-2">
+            <input type="file" accept="image/*" onChange={(e)=>{
+              const file = e.target.files && e.target.files[0];
+              if(!file) return;
+              const reader = new FileReader();
+              reader.onload = ()=>{
+                const data = reader.result as string;
+                setForm(f=> ({...f, imageBase64: data}));
+                setPreview(data);
+              };
+              reader.readAsDataURL(file);
+            }} />
+            {preview && <Image src={preview} alt="preview" width={48} height={48} className="object-cover rounded" />}
+          </div>
+          <select
+            value={form.category}
+            onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
+            className="border rounded px-2 py-1"
+          >
+            <option value="">(none)</option>
+            {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+          </select>
           <Button onClick={create}>Create</Button>
         </CardContent>
       </Card>
@@ -267,6 +303,28 @@ export default function ProductsAdminClient() {
                   setEditing((p) => p && { ...p, title: e.target.value })
                 }
               />
+              <div className="flex items-center gap-2">
+                <input type="file" accept="image/*" onChange={(e)=>{
+                  const file = e.target.files && e.target.files[0];
+                  if(!file) return;
+                  const reader = new FileReader();
+                  reader.onload = ()=>{
+                    const data = reader.result as string;
+                    setEditingImageBase64(data);
+                  };
+                  reader.readAsDataURL(file);
+                }} />
+                {editing.image && <Image src={editing.image} alt="current" width={48} height={48} className="object-cover rounded" />}
+              </div>
+              <label className="text-sm">Category</label>
+              <select
+                value={editing.category || ''}
+                onChange={(e) => setEditing((p) => p && { ...p, category: e.target.value })}
+                className="border rounded px-2 py-1"
+              >
+                <option value="">(none)</option>
+                {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
               <Input
                 value={String(editing.price)}
                 placeholder="Price"

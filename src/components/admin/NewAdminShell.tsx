@@ -15,14 +15,22 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
 import AnalyticsCharts from "./AnalyticsCharts";
+import AnalyticsOverview from "./AnalyticsOverview";
+import AnalyticsChartsDetailed from "./AnalyticsChartsDetailed";
 import UsersAdminClient from "./UserAdminClient";
 import ProductsAdminClient from "./ProductsAdminClient";
 import OrdersAdminClient from "./OrdersAdminClient";
 import CouponsAdminClient from "./CouponsAdminClient";
+import CategoriesAdminClient from "./CategoriesAdminClient";
+import BannersAdminClient from "./BannersAdminClient";
+import SlidersAdminClient from "./SlidersAdminClient";
 
 const menuItems = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { id: "products", label: "Products", icon: Package },
+  { id: "categories", label: "Categories", icon: Package },
+  { id: "banners", label: "Banners", icon: Ticket },
+  { id: "sliders", label: "Sliders", icon: Package },
   { id: "orders", label: "Orders", icon: ShoppingCart },
   { id: "coupons", label: "Coupons", icon: Ticket },
   { id: "users", label: "Users", icon: Users },
@@ -103,8 +111,17 @@ export default function AdminShell() {
           </Button>
         </div>
 
-        {active === "dashboard" && <AnalyticsCharts />}
+        {active === "dashboard" && (
+          <>
+            <AnalyticsOverview />
+            <AnalyticsCharts />
+            <AnalyticsChartsDetailed />
+          </>
+        )}
         {active === "products" && <ProductsAdminClient />}
+        {active === "categories" && <CategoriesAdminClient />}
+        {active === "banners" && <BannersAdminClient />}
+        {active === "sliders" && <SlidersAdminClient />}
         {active === "orders" && <OrdersAdminClient />}
         {active === "coupons" && <CouponsAdminClient />}
         {active === "users" && <UsersAdminClient />}

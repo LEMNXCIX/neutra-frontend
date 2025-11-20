@@ -1,10 +1,12 @@
 import Link from 'next/link';
 import PromoSlider from '@/components/promo-slider';
+import BannerBar from '@/components/banner-bar';
 import FeaturedProducts from '@/components/featured-products';
 
 export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-zinc-50 dark:from-black dark:to-zinc-900">
+      <BannerBar />
       <main className="max-w-7xl mx-auto py-12 px-6 text-center">
         <div className="flex flex-col lg:flex-row gap-8 items-center">
           <div className='lg:max-w-[25%] lg:self-center' >

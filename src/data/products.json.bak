@@ -51,7 +51,7 @@
     "category": "table",
     "description": "Compact side table for small spaces.",
     "image": "https://picsum.photos/seed/p6/600/400",
-    "stock": 4
+    "stock": 3
   },
   {
     "id": "p7",
@@ -60,6 +60,12 @@
     "category": "seating",
     "description": "Comfortable accent chair with fabric upholstery.",
     "image": "https://picsum.photos/seed/p7/600/400",
-    "stock": 3
+    "stock": 2
+  },
+  {
+    "id": "p_1762565015587",
+    "title": "Producto corregido",
+    "price": 2000,
+    "stock": 0
   }
 ]

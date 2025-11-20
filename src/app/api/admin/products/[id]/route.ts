@@ -18,6 +18,24 @@ export async function PUT(req: any, context: any) {
     const products = JSON.parse(raw) as Array<Product>;
     const idx = products.findIndex(p => p.id === id);
     if (idx === -1) return NextResponse.json({ error: 'not_found' }, { status: 404 });
+    // if imageBase64 provided, save file and set image field
+    if (body.imageBase64) {
+      try{
+        const UPLOADS_DIR = path.join(process.cwd(), 'public', 'uploads');
+        if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+        const m = String(body.imageBase64).match(/^data:(image\/(\w+));base64,(.+)$/);
+        if (m) {
+          const ext = m[2] || 'png';
+          const b64 = m[3];
+          const buf = Buffer.from(b64, 'base64');
+          const filename = `upload_${Date.now()}.${ext}`;
+          const dest = path.join(UPLOADS_DIR, filename);
+          fs.writeFileSync(dest, buf);
+          body.image = `/uploads/${filename}`;
+        }
+      }catch{}
+    }
+    delete body.imageBase64;
     products[idx] = { ...products[idx], ...body };
     const tmp = `${PRODUCTS_PATH}.tmp`;
     const bak = `${PRODUCTS_PATH}.bak`;

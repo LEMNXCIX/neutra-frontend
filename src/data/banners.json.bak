@@ -1,0 +1,12 @@
+[
+  {
+    "id": "b_1",
+    "title": "Black Friday - 25% OFF",
+    "subtitle": "Only today! Use code BF25",
+    "cta": "Shop now",
+    "ctaUrl": "/products",
+    "startsAt": "2025-11-20T00:00:00.000Z",
+    "endsAt": "2025-11-21T16:02",
+    "active": true
+  }
+]

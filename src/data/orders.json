@@ -1,5 +1,22 @@
 [
   {
+    "id": "o1762789230312",
+    "userId": "u_1762563018580",
+    "total": 8000,
+    "status": "processing",
+    "tracking": "",
+    "address": " gf",
+    "items": [
+      {
+        "id": "p_1762565015587",
+        "name": "Producto corregido",
+        "qty": 4,
+        "price": 2000
+      }
+    ],
+    "date": "2025-11-10"
+  },
+  {
     "id": "o1762574865219",
     "userId": "u_1762563018580",
     "total": 0,
