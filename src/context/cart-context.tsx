@@ -1,7 +1,7 @@
 "use client";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { apiFetch } from '@/lib/api-fetch';
-import { useAuth } from './auth-context';
+import { useAuthStore } from '@/store/auth-store';
 import { useRouter } from 'next/navigation';
 import { toast } from "sonner";
 
@@ -81,12 +81,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const subtotal = computeSubtotal(items);
   const total = Math.max(0, Math.round((subtotal - discount) * 100) / 100);
-
-  const auth = useAuth();
+  const user = useAuthStore((state) => state.user);
   const router = useRouter();
 
   const addItem = async (id: string, name: string) => {
-    if (!auth?.user) {
+    if (!user) {
       toast.error('Please log in to add items to your cart');
       router.push('/login');
       return;

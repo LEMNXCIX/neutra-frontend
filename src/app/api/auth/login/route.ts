@@ -1,13 +1,16 @@
 import { NextResponse } from 'next/server';
+import fs from 'fs';
+import path from 'path';
 import { createSession } from '@/lib/session';
 import { signJwt } from '@/lib/jwt';
 
 export async function POST(req: Request) {
   const body = await req.json();
   const { email, password } = body;
-  // read users from public file
-  const usersRes = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/data/users.json`);
-  const users = await usersRes.json() as { id: string; name: string; email: string; password: string }[];
+  // read users from local file
+  const usersPath = path.join(process.cwd(), 'src', 'data', 'users.json');
+  const usersRaw = fs.readFileSync(usersPath, 'utf-8');
+  const users = JSON.parse(usersRaw) as { id: string; name: string; email: string; password: string }[];
   console.log(password)
   console.log(email)
   console.log(users)
@@ -23,6 +26,6 @@ export async function POST(req: Request) {
   try {
     const token = signJwt({ sub: found.id, email: found.email }, { expiresIn: 60 * 60 * 24 });
     res.cookies.set('neutra_jwt', token, { httpOnly: true, path: '/' });
-  } catch {}
+  } catch { }
   return res;
 }

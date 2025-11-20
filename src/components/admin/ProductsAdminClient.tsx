@@ -23,6 +23,14 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Upload, X } from "lucide-react";
 
 type Product = { id: string; title: string; price: number; stock?: number; category?: string; image?: string };
 
@@ -61,7 +69,7 @@ export default function ProductsAdminClient() {
         const cRes = await fetch('/api/categories');
         const cJson = await cRes.json().catch(() => ({}));
         setCategories(Array.isArray(cJson.categories) ? cJson.categories : []);
-      } catch {}
+      } catch { }
     } catch {
       toast.error("Failed loading");
     } finally {
@@ -93,7 +101,7 @@ export default function ProductsAdminClient() {
         return;
       }
       toast.success("Created");
-      setForm({ title: "", price: "", stock: "" });
+      setForm({ title: "", price: "", stock: "", category: "", imageBase64: "" });
       load();
     } catch {
       toast.error("Request failed");
@@ -173,6 +181,39 @@ export default function ProductsAdminClient() {
             }
             className="min-w-[160px]"
           />
+          <div className="flex items-center gap-2">
+            <label className="cursor-pointer flex items-center justify-center w-10 h-10 rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground">
+              <Upload className="h-4 w-4" />
+              <input type="file" className="hidden" accept="image/*" onChange={(e) => {
+                const file = e.target.files && e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = () => {
+                  const data = reader.result as string;
+                  setForm(f => ({ ...f, imageBase64: data }));
+                  setPreview(data);
+                };
+                reader.readAsDataURL(file);
+              }} />
+            </label>
+            {preview && (
+              <div className="relative">
+                <Image src={preview} alt="preview" width={40} height={40} className="object-cover rounded-md border" />
+                <button onClick={() => { setPreview(null); setForm(f => ({ ...f, imageBase64: '' })) }} className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-0.5">
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            )}
+          </div>
+          <Select value={form.category} onValueChange={(v) => setForm(f => ({ ...f, category: v === 'none' ? '' : v }))}>
+            <SelectTrigger className="w-[140px]">
+              <SelectValue placeholder="Category" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">(None)</SelectItem>
+              {categories.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+            </SelectContent>
+          </Select>
           <Input
             placeholder="Price"
             value={form.price}
@@ -191,28 +232,6 @@ export default function ProductsAdminClient() {
             }
             className="w-24"
           />
-          <div className="flex items-center gap-2">
-            <input type="file" accept="image/*" onChange={(e)=>{
-              const file = e.target.files && e.target.files[0];
-              if(!file) return;
-              const reader = new FileReader();
-              reader.onload = ()=>{
-                const data = reader.result as string;
-                setForm(f=> ({...f, imageBase64: data}));
-                setPreview(data);
-              };
-              reader.readAsDataURL(file);
-            }} />
-            {preview && <Image src={preview} alt="preview" width={48} height={48} className="object-cover rounded" />}
-          </div>
-          <select
-            value={form.category}
-            onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
-            className="border rounded px-2 py-1"
-          >
-            <option value="">(none)</option>
-            {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-          </select>
           <Button onClick={create}>Create</Button>
         </CardContent>
       </Card>
@@ -224,6 +243,7 @@ export default function ProductsAdminClient() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead>Image</TableHead>
                   <TableHead>Title</TableHead>
                   <TableHead>Price</TableHead>
                   <TableHead>Stock</TableHead>
@@ -233,6 +253,13 @@ export default function ProductsAdminClient() {
               <TableBody>
                 {products.map((p) => (
                   <TableRow key={p.id}>
+                    <TableCell>
+                      {p.image ? (
+                        <Image src={p.image} alt={p.title} width={40} height={40} className="object-cover rounded-md border" />
+                      ) : (
+                        <div className="w-10 h-10 bg-muted rounded-md border flex items-center justify-center text-muted-foreground text-[10px]">No img</div>
+                      )}
+                    </TableCell>
                     <TableCell>{p.title}</TableCell>
                     <TableCell>${p.price.toFixed(2)}</TableCell>
                     <TableCell>
@@ -268,14 +295,23 @@ export default function ProductsAdminClient() {
           <Card key={p.id}>
             <CardHeader className="pb-2 flex justify-between items-center">
               <CardTitle className="text-base">{p.title}</CardTitle>
-              <Badge variant="outline">{p.stock ?? 0}</Badge>
+              <Badge variant="outline">{p.stock ?? 0} in stock</Badge>
             </CardHeader>
             <CardContent className="text-sm flex flex-col gap-2">
-              <div className="flex justify-between">
+              {p.image ? (
+                <div className="w-full h-32 relative rounded overflow-hidden">
+                  <Image src={p.image} alt={p.title} fill className="object-cover" />
+                </div>
+              ) : (
+                <div className="w-full h-32 bg-muted rounded flex items-center justify-center text-muted-foreground">
+                  No Image
+                </div>
+              )}
+              <div className="flex justify-between items-center mt-1">
                 <span className="text-muted-foreground">Price</span>
-                <span>${p.price.toFixed(2)}</span>
+                <span className="font-medium text-lg">${p.price.toFixed(2)}</span>
               </div>
-              <div className="flex gap-2 justify-end">
+              <div className="flex gap-2 justify-end mt-2">
                 <Button size="sm" variant="ghost" onClick={() => openEdit(p)}>
                   Edit
                 </Button>
@@ -287,7 +323,6 @@ export default function ProductsAdminClient() {
           </Card>
         ))}
       </div>
-
       {/* === EDIT DIALOG === */}
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-md">
@@ -303,28 +338,40 @@ export default function ProductsAdminClient() {
                   setEditing((p) => p && { ...p, title: e.target.value })
                 }
               />
-              <div className="flex items-center gap-2">
-                <input type="file" accept="image/*" onChange={(e)=>{
-                  const file = e.target.files && e.target.files[0];
-                  if(!file) return;
-                  const reader = new FileReader();
-                  reader.onload = ()=>{
-                    const data = reader.result as string;
-                    setEditingImageBase64(data);
-                  };
-                  reader.readAsDataURL(file);
-                }} />
-                {editing.image && <Image src={editing.image} alt="current" width={48} height={48} className="object-cover rounded" />}
+              <div className="flex items-center gap-4">
+                <div className="relative">
+                  {editing.image || editingImageBase64 ? (
+                    <Image src={editingImageBase64 || editing.image!} alt="current" width={80} height={80} className="object-cover rounded-md border" />
+                  ) : (
+                    <div className="w-20 h-20 bg-muted rounded-md border flex items-center justify-center text-muted-foreground text-xs">No image</div>
+                  )}
+                  <label className="absolute -bottom-2 -right-2 cursor-pointer bg-primary text-primary-foreground rounded-full p-1.5 shadow-sm hover:bg-primary/90">
+                    <Upload className="h-3 w-3" />
+                    <input type="file" className="hidden" accept="image/*" onChange={(e) => {
+                      const file = e.target.files && e.target.files[0];
+                      if (!file) return;
+                      const reader = new FileReader();
+                      reader.onload = () => {
+                        const data = reader.result as string;
+                        setEditingImageBase64(data);
+                      };
+                      reader.readAsDataURL(file);
+                    }} />
+                  </label>
+                </div>
+                <div className="flex-1">
+                  <label className="text-sm font-medium">Category</label>
+                  <Select value={editing.category || 'none'} onValueChange={(v) => setEditing(p => p && ({ ...p, category: v === 'none' ? '' : v }))}>
+                    <SelectTrigger className="w-full mt-1">
+                      <SelectValue placeholder="Category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">(None)</SelectItem>
+                      {categories.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
-              <label className="text-sm">Category</label>
-              <select
-                value={editing.category || ''}
-                onChange={(e) => setEditing((p) => p && { ...p, category: e.target.value })}
-                className="border rounded px-2 py-1"
-              >
-                <option value="">(none)</option>
-                {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-              </select>
               <Input
                 value={String(editing.price)}
                 placeholder="Price"
@@ -361,6 +408,6 @@ export default function ProductsAdminClient() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </div >
   );
 }

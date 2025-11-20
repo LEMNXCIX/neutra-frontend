@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/context/auth-context';
+import { useAuthStore } from '@/store/auth-store';
 import Link from 'next/link';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,8 +10,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
 
-export default function LoginPage(){
-  const { login, loading } = useAuth();
+export default function LoginPage() {
+  const login = useAuthStore((state) => state.login);
+  const loading = useAuthStore((state) => state.loading);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const router = useRouter();
@@ -40,14 +41,14 @@ export default function LoginPage(){
           <form onSubmit={onSubmit} className="flex flex-col gap-4">
             <div className="flex flex-col gap-2">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" placeholder="Email" value={email} onChange={e=>setEmail(e.target.value)} />
+              <Input id="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} />
             </div>
             <div className="flex flex-col gap-2">
               <Label htmlFor="password">Password</Label>
-              <Input id="password" placeholder="Password" type="password" value={password} onChange={e=>setPassword(e.target.value)} />
+              <Input id="password" placeholder="Password" type="password" value={password} onChange={e => setPassword(e.target.value)} />
             </div>
-            <Button 
-              className="bg-zinc-900 hover:bg-zinc-800 text-white transition-colors" 
+            <Button
+              className="bg-zinc-900 hover:bg-zinc-800 text-white transition-colors"
               disabled={loading}
             >
               {loading ? (

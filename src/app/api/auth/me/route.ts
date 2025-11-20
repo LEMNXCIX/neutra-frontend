@@ -17,10 +17,11 @@ export async function GET(req: Request) {
     const userId = getUserId(rawSid);
     if (!userId) return NextResponse.json({ user: null });
 
-    const base = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-    const res = await fetch(`${base}/data/users.json`);
-    if (!res.ok) return NextResponse.json({ user: null });
-    const users = await res.json() as { id: string; name: string; email: string; password?: string }[];
+    const path = await import('path');
+    const fs = await import('fs');
+    const usersPath = path.join(process.cwd(), 'src', 'data', 'users.json');
+    const usersRaw = fs.readFileSync(usersPath, 'utf-8');
+    const users = JSON.parse(usersRaw) as { id: string; name: string; email: string; password?: string }[];
     const found = users.find((u) => u.id === userId);
     if (!found) return NextResponse.json({ user: null });
     return NextResponse.json({ user: { id: found.id, name: found.name, email: found.email } });

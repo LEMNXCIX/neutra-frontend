@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useAuth } from "@/context/auth-context";
+import { useAuthStore } from '@/store/auth-store';
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,7 +35,8 @@ type Order = {
 };
 
 export default function ProfilePage() {
-  const { user, loading } = useAuth();
+  const user = useAuthStore((state) => state.user);
+  const loading = useAuthStore((state) => state.loading);
   const router = useRouter();
 
   const [orders, setOrders] = useState<Order[] | null>(null);
@@ -171,8 +172,8 @@ export default function ProfilePage() {
                             o.status === "delivered"
                               ? "secondary"
                               : o.status === "shipped"
-                              ? "secondary"
-                              : "outline"
+                                ? "secondary"
+                                : "outline"
                           }
                         >
                           {o.status || "Pending"}

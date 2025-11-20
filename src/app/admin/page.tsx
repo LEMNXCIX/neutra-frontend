@@ -8,8 +8,9 @@ import AdminShell from "@/components/admin/NewAdminShell";
 
 type User = { id: string; name: string; email: string; password?: string; isAdmin?: boolean };
 
-export default function AdminPage() {
-    const cookieHeader = (headers() as unknown as { get: (k: string) => string | null }).get('cookie') || '';
+export default async function AdminPage() {
+    const headersList = await headers();
+    const cookieHeader = headersList.get('cookie') || '';
     const pairs = cookieHeader.split(';').map((s: string) => s.trim()).filter(Boolean);
     let rawSid: string | undefined;
     for (const p of pairs) {

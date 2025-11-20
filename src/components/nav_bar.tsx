@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useCart } from "@/context/cart-context";
 import { toast } from 'sonner';
-import { useAuth } from '@/context/auth-context';
+import { useAuthStore } from '@/store/auth-store';
 import { useTheme } from 'next-themes';
 import {
   NavigationMenu,
@@ -39,7 +39,7 @@ import {
 import { ScrollArea } from "./ui/scroll-area";
 import categories from '@/data/categories.json';
 
-type Category = { id: string; name: string, description: string};
+type Category = { id: string; name: string, description: string };
 
 const components: { title: string; href: string; description: string }[] = [
   {
@@ -87,7 +87,8 @@ export function Navigation() {
   const router = useRouter();
   const { theme, setTheme } = useTheme();
   const { count } = useCart();
-  const { user, logout } = useAuth();
+  const user = useAuthStore((state) => state.user);
+  const logout = useAuthStore((state) => state.logout);
 
   const handleThemeToggle = () => {
     setTheme(theme === 'dark' ? 'light' : 'dark');
@@ -102,14 +103,14 @@ export function Navigation() {
   // Konami code easter egg
   useEffect(() => {
     const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
-    
+
     const handleKeyDown = (e: KeyboardEvent) => {
       setKonami(prev => {
         const newKonami = [...prev, e.key];
         if (newKonami.length > konamiCode.length) {
           newKonami.shift();
         }
-        
+
         if (newKonami.join(',') === konamiCode.join(',')) {
           // Easter egg triggered!
           document.body.style.animation = 'spin 1s linear';
@@ -117,7 +118,7 @@ export function Navigation() {
             document.body.style.animation = '';
           }, 1000);
         }
-        
+
         return newKonami;
       });
     };
@@ -131,7 +132,7 @@ export function Navigation() {
     // console hint for devs / curious users
     console.log(`\n¡Has encontrado un huevo de pascua!\n🥚 Neutra tiene secretos ocultos...\nIntenta presionar estas teclas: ↑↑↓↓←→←→BA\n`);
 
-    const seq = ['n','e','u','t','r','a'];
+    const seq = ['n', 'e', 'u', 't', 'r', 'a'];
     let buffer: string[] = [];
 
     const onKey = (e: KeyboardEvent) => {
@@ -176,52 +177,52 @@ export function Navigation() {
         {/* Left: logo */}
         <NavigationMenuList className="ml-0 mr-auto">
           <NavigationMenuItem>
-            
-              <div className="flex items-center gap-0">
-                {/* custom logo */}
-                <div 
-                  className="text-zinc-900 dark:text-zinc-100 hover-scale cursor-pointer"
-                  onDoubleClick={handleThemeToggle}
-                  onTouchEnd={(e) => {
-                    const now = Date.now();
-                    const DOUBLE_TAP_DELAY = 1000; // ms
-                    console.log('dsd')
-                    if (lastTap && (now - lastTap) < DOUBLE_TAP_DELAY) {
-                      handleThemeToggle();
-                      setLastTap(0);
-                    } else {
-                      setLastTap(now);
-                    }
-                  }}
+
+            <div className="flex items-center gap-0">
+              {/* custom logo */}
+              <div
+                className="text-zinc-900 dark:text-zinc-100 hover-scale cursor-pointer"
+                onDoubleClick={handleThemeToggle}
+                onTouchEnd={(e) => {
+                  const now = Date.now();
+                  const DOUBLE_TAP_DELAY = 1000; // ms
+                  console.log('dsd')
+                  if (lastTap && (now - lastTap) < DOUBLE_TAP_DELAY) {
+                    handleThemeToggle();
+                    setLastTap(0);
+                  } else {
+                    setLastTap(now);
+                  }
+                }}
+              >
+                <svg
+                  id="logo-svg"
+                  className="size-12"
+                  width="36"
+                  height="36"
+                  viewBox="0 0 64 64"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  aria-hidden
                 >
-                  <svg 
-                    id="logo-svg"
-                    className="size-12" 
-                    width="36" 
-                    height="36" 
-                    viewBox="0 0 64 64" 
-                    fill="none" 
-                    xmlns="http://www.w3.org/2000/svg" 
-                    aria-hidden
-                  >
-                    <rect x="4" y="4" width="56" height="56" rx="12" fill="currentColor" opacity="0" />
-                    <path d="M 20 48.5 C 20 28.5 47 30.5 44 15.5" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
-                    <circle cx="24" cy="26.5" r="5" fill="currentColor" />
-                  </svg>
-                </div>
-                <Link href="/">
+                  <rect x="4" y="4" width="56" height="56" rx="12" fill="currentColor" opacity="0" />
+                  <path d="M 20 48.5 C 20 28.5 47 30.5 44 15.5" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
+                  <circle cx="24" cy="26.5" r="5" fill="currentColor" />
+                </svg>
+              </div>
+              <Link href="/">
                 <div className="flex flex-col leading-none -right-5">
                   <span id="brand-name" className="text-lg font-extrabold tracking-tight text-zinc-900 dark:text-zinc-100">Neutra</span>
                   <span className="text-xs text-muted-foreground -mt-0.5">Minimal Interiors</span>
                 </div>
-                </Link>
-              </div>
-            
+              </Link>
+            </div>
+
 
           </NavigationMenuItem>
         </NavigationMenuList>
-  {/* Center: full menu - hidden on small and medium screens, visible on large+ */}
-  <NavigationMenuList className="mx-auto hidden lg:flex">
+        {/* Center: full menu - hidden on small and medium screens, visible on large+ */}
+        <NavigationMenuList className="mx-auto hidden lg:flex">
           <NavigationMenuItem>
             <NavigationMenuTrigger>Productos</NavigationMenuTrigger>
             <NavigationMenuContent>
@@ -232,7 +233,7 @@ export function Navigation() {
                       className="from-muted/50 to-muted flex h-full w-full flex-col justify-end rounded-md bg-linear-to-b p-6 no-underline outline-hidden select-none focus:shadow-md"
                       href="/products"
                     >
-                        <div className="mt-4 mb-2 text-lg font-medium hover-elevate">
+                      <div className="mt-4 mb-2 text-lg font-medium hover-elevate">
                         Ver productos
                       </div>
                       <p className="text-muted-foreground text-sm leading-tight">
@@ -393,11 +394,11 @@ export function Navigation() {
 
           {/* Always visible actions: cart, login, avatar (compact on mobile) */}
           {user ? (
-          <NavigationMenuItem>
-            <Link href='/admin' className="relative flex items-center">
-              <LayoutDashboard className="hover-scale click-pulse" />
-            </Link>
-          </NavigationMenuItem> 
+            <NavigationMenuItem>
+              <Link href='/admin' className="relative flex items-center">
+                <LayoutDashboard className="hover-scale click-pulse" />
+              </Link>
+            </NavigationMenuItem>
           ) : <></>}
 
           <NavigationMenuItem>
@@ -462,7 +463,7 @@ export function Navigation() {
 
             {/* Sidebar drawer - mirrors desktop menu but vertically */}
             <aside
-className={`fixed top-0 left-0 z-50 h-svh w-72 backdrop-blur-lg bg-white/90 dark:bg-black/90 border border-white/10 rounded-r-2xl shadow-lg transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
+              className={`fixed top-0 left-0 z-50 h-svh w-72 backdrop-blur-lg bg-white/90 dark:bg-black/90 border border-white/10 rounded-r-2xl shadow-lg transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
 
               aria-hidden={!isOpen}
             >
@@ -521,7 +522,7 @@ function ListItem({
   return (
     <li {...props}>
       <NavigationMenuLink asChild>
-          <Link href={href} className="hover-slide-up block p-2">
+        <Link href={href} className="hover-slide-up block p-2">
           <div className="text-sm leading-none font-medium">{title}</div>
           <p className="text-muted-foreground line-clamp-2 text-sm leading-snug">
             {children}

@@ -1,0 +1,9 @@
+[
+    {
+        "id": "u_1",
+        "name": "Admin User",
+        "email": "admin@neutra.com",
+        "password": "password123",
+        "isAdmin": true
+    }
+]

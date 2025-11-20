@@ -2,31 +2,37 @@
 import React, { useState, useEffect } from "react";
 import Image from "@/components/ui/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
-const slides = [
-  {
-    id: "s1",
-    title: "Autumn Sale",
-    subtitle: "Up to 30% off selected items",
-    image: "https://picsum.photos/seed/slide1/1200/500",
-  },
-  {
-    id: "s2",
-    title: "New Arrivals",
-    subtitle: "Minimal sofas and chairs",
-    image: "https://picsum.photos/seed/slide2/1200/500",
-  },
-  {
-    id: "s3",
-    title: "Free Shipping",
-    subtitle: "On orders over $100",
-    image: "https://picsum.photos/seed/slide3/1200/500",
-  },
-];
+type Slide = {
+  id: string;
+  title: string;
+  subtitle?: string;
+  image?: string;
+};
 
 export default function PromoSlider() {
+  const [slides, setSlides] = useState<Slide[]>([]);
+  const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState<"next" | "prev">("next");
+
+  useEffect(() => {
+    const fetchSlides = async () => {
+      try {
+        const res = await fetch('/api/sliders');
+        const data = await res.json();
+        if (data.sliders && Array.isArray(data.sliders)) {
+          setSlides(data.sliders);
+        }
+      } catch (error) {
+        console.error("Failed to fetch sliders", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchSlides();
+  }, []);
 
   const prev = () => {
     setDirection("prev");
@@ -40,9 +46,20 @@ export default function PromoSlider() {
 
   // Autoplay con pausa al hover
   useEffect(() => {
+    if (slides.length === 0) return;
     const interval = setInterval(() => next(), 20000);
     return () => clearInterval(interval);
-  }, []);
+  }, [slides.length]);
+
+  if (loading) {
+    return (
+      <div className="relative group rounded-xl overflow-hidden h-[300px] sm:h-[420px] lg:h-[520px] shadow-lg bg-muted">
+        <Skeleton className="w-full h-full" />
+      </div>
+    );
+  }
+
+  if (slides.length === 0) return null;
 
   return (
     <div className="relative group rounded-xl overflow-hidden h-[300px] sm:h-[420px] lg:h-[520px] shadow-lg">
@@ -62,14 +79,16 @@ export default function PromoSlider() {
                     : "translate-x-10 opacity-0 scale-105"
                 }`}
             >
-              <Image
-                src={slide.image}
-                alt={slide.title}
-                fill
-                priority={isActive}
-                className="object-cover rounded-xl"
-                sizes="100vw"
-              />
+              {slide.image && (
+                <Image
+                  src={slide.image}
+                  alt={slide.title}
+                  fill
+                  priority={isActive}
+                  className="object-cover rounded-xl"
+                  sizes="100vw"
+                />
+              )}
 
               {/* Fondo de gradiente para mejorar la legibilidad del texto */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent"></div>
@@ -119,8 +138,8 @@ export default function PromoSlider() {
             key={index}
             onClick={() => setCurrentIndex(index)}
             className={`h-2.5 w-2.5 rounded-full transition-all duration-300 ${index === currentIndex
-                ? "bg-white scale-125 shadow-md"
-                : "bg-white/50 hover:bg-white/80"
+              ? "bg-white scale-125 shadow-md"
+              : "bg-white/50 hover:bg-white/80"
               }`}
             aria-label={`Go to slide ${index + 1}`}
           />

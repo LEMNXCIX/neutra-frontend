@@ -11,7 +11,7 @@ import {
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
 import AnalyticsCharts from "./AnalyticsCharts";
@@ -44,9 +44,8 @@ export default function AdminShell() {
     <div className="flex min-h-[calc(100vh-4rem)] flex-col md:flex-row pt-2 border rounded-md overflow-hidden shadow-sm transition-all duration-300">
       {/* === SIDEBAR (solo desktop) === */}
       <aside
-        className={`hidden md:flex flex-col border-r bg-muted/70 backdrop-blur-md transition-all duration-300 ease-in-out ${
-          sidebarOpen ? "w-64" : "w-16"
-        }`}
+        className={`hidden md:flex flex-col border-r bg-muted/70 backdrop-blur-md transition-all duration-300 ease-in-out ${sidebarOpen ? "w-64" : "w-16"
+          }`}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-3 py-3 border-b">
@@ -75,11 +74,10 @@ export default function AdminShell() {
                   key={id}
                   onClick={() => setActive(id)}
                   variant={activeState ? "secondary" : "ghost"}
-                  className={`w-full justify-start gap-2 ${
-                    activeState
-                      ? "bg-primary/10 text-primary font-medium"
-                      : "text-foreground hover:bg-accent/60"
-                  }`}
+                  className={`w-full justify-start gap-2 ${activeState
+                    ? "bg-primary/10 text-primary font-medium"
+                    : "text-foreground hover:bg-accent/60"
+                    }`}
                 >
                   <Icon className="w-4 h-4" />
                   {sidebarOpen && <span>{label}</span>}
@@ -128,22 +126,26 @@ export default function AdminShell() {
       </main>
 
       {/* === BOTTOM NAVBAR (solo móvil) === */}
-      <nav className="fixed bottom-0 left-0 right-0 md:hidden border-t bg-background/80 backdrop-blur-md flex justify-around py-2 shadow-md z-50 pb-[env(safe-area-inset-bottom)]">
-        {menuItems.map(({ id, label, icon: Icon }) => {
-          const activeState = id === active;
-          return (
-            <button
-              key={id}
-              onClick={() => setActive(id)}
-              className={`flex flex-col items-center text-xs ${
-                activeState ? "text-primary" : "text-muted-foreground"
-              }`}
-            >
-              <Icon className="w-5 h-5 mb-1" />
-              <span>{label}</span>
-            </button>
-          );
-        })}
+      <nav className="fixed bottom-0 left-0 right-0 md:hidden border-t bg-background/80 backdrop-blur-md shadow-md z-50 pb-[env(safe-area-inset-bottom)]">
+        <ScrollArea className="w-full whitespace-nowrap">
+          <div className="flex w-max space-x-4 p-2 px-4">
+            {menuItems.map(({ id, label, icon: Icon }) => {
+              const activeState = id === active;
+              return (
+                <button
+                  key={id}
+                  onClick={() => setActive(id)}
+                  className={`flex flex-col items-center text-xs min-w-[60px] ${activeState ? "text-primary" : "text-muted-foreground"
+                    }`}
+                >
+                  <Icon className="w-5 h-5 mb-1" />
+                  <span>{label}</span>
+                </button>
+              );
+            })}
+          </div>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
       </nav>
     </div>
   );

@@ -1,11 +1,23 @@
 [
   {
     "id": "s1",
-    "title": "Welcome — Free shipping over $100",
-    "subtitle": "Limited time",
+    "title": "Autumn Sale",
+    "subtitle": "Up to 30% off selected items",
     "image": "https://picsum.photos/seed/slide1/1200/500",
-    "startsAt": "2025-11-01T00:00:00.000Z",
-    "endsAt": "2026-01-01T00:00:00.000Z",
+    "active": true
+  },
+  {
+    "id": "s2",
+    "title": "New Arrivals",
+    "subtitle": "Minimal sofas and chairs",
+    "image": "https://picsum.photos/seed/slide2/1200/500",
+    "active": true
+  },
+  {
+    "id": "s3",
+    "title": "Free Shipping",
+    "subtitle": "On orders over $100",
+    "image": "https://picsum.photos/seed/slide3/1200/500",
     "active": true
   }
 ]
