@@ -38,12 +38,12 @@ export async function POST(req: Request) {
 
     // create session and set cookie
     const sid = createSession(id);
-    const res = NextResponse.json({ user: { id, name, email } });
+    const res = NextResponse.json({ user: { id, name, email, isAdmin: false, avatar: null } });
     res.cookies.set('_neutra_sid', sid, { httpOnly: true, path: '/' });
     try {
       const token = signJwt({ sub: id, email }, { expiresIn: 60 * 60 * 24 });
       res.cookies.set('neutra_jwt', token, { httpOnly: true, path: '/' });
-    } catch {}
+    } catch { }
     return res;
   } catch {
     return NextResponse.json({ error: 'server_error' }, { status: 500 });

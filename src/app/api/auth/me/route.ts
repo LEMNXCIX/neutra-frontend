@@ -21,10 +21,10 @@ export async function GET(req: Request) {
     const fs = await import('fs');
     const usersPath = path.join(process.cwd(), 'src', 'data', 'users.json');
     const usersRaw = fs.readFileSync(usersPath, 'utf-8');
-    const users = JSON.parse(usersRaw) as { id: string; name: string; email: string; password?: string }[];
+    const users = JSON.parse(usersRaw) as { id: string; name: string; email: string; password?: string; isAdmin?: boolean; avatar?: string }[];
     const found = users.find((u) => u.id === userId);
     if (!found) return NextResponse.json({ user: null });
-    return NextResponse.json({ user: { id: found.id, name: found.name, email: found.email } });
+    return NextResponse.json({ user: { id: found.id, name: found.name, email: found.email, isAdmin: !!found.isAdmin, avatar: found.avatar || null } });
   } catch {
     return NextResponse.json({ user: null });
   }

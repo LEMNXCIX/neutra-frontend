@@ -3,16 +3,16 @@
     "id": "p1",
     "title": "Minimal Chair",
     "price": 129,
-    "category": "seating",
+    "category": "table",
     "description": "A stylish minimal chair.",
     "image": "https://picsum.photos/seed/p1/600/400",
-    "stock": 2
+    "stock": 20
   },
   {
     "id": "p2",
     "title": "Desk Lamp",
     "price": 59,
-    "category": "lighting",
+    "category": "seating",
     "description": "Warm LED desk lamp.",
     "image": "https://picsum.photos/seed/p2/600/400",
     "stock": 8
@@ -42,7 +42,7 @@
     "category": "lighting",
     "description": "Tall floor lamp with soft light.",
     "image": "https://picsum.photos/seed/p5/600/400",
-    "stock": 7
+    "stock": 12
   },
   {
     "id": "p6",
@@ -67,5 +67,13 @@
     "title": "Producto corregido",
     "price": 2000,
     "stock": 0
+  },
+  {
+    "id": "p_1763682047571",
+    "title": "Product is not working ",
+    "price": 100.6,
+    "stock": 3,
+    "category": "lighting",
+    "image": "/uploads/upload_1763682047573.jpeg"
   }
 ]

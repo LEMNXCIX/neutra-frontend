@@ -2,7 +2,8 @@
   {
     "code": "SAVE10",
     "type": "percent",
-    "value": 10
+    "value": 10,
+    "used": true
   },
   {
     "code": "OFF5",
@@ -33,7 +34,14 @@
     "code": "@",
     "type": "percent",
     "value": 110,
-    "expires": null,
+    "expires": "2025-13-99",
+    "used": true
+  },
+  {
+    "code": "FLASHSALE",
+    "type": "percent",
+    "value": 11,
+    "expires": "2025-11-30",
     "used": false
   }
 ]

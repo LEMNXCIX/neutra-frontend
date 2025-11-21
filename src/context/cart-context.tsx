@@ -5,7 +5,7 @@ import { useAuthStore } from '@/store/auth-store';
 import { useRouter } from 'next/navigation';
 import { toast } from "sonner";
 
-type CartItem = { id: string; name: string; qty: number };
+type CartItem = { id: string; name: string; qty: number; price?: number; image?: string; stock?: number };
 type Coupon = { code: string; type: 'amount' | 'percent'; value: number } | null;
 
 type CartContextType = {
@@ -20,6 +20,7 @@ type CartContextType = {
   refresh: () => Promise<void>;
   addItem: (id: string, name: string) => Promise<void>;
   removeItem: (id: string) => Promise<void>;
+  updateQuantity: (id: string, newQty: number) => Promise<void>;
   applyCoupon: (code: string) => Promise<{ success: boolean; reason?: string }>;
   removeCoupon: () => void;
 };
@@ -117,6 +118,38 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const updateQuantity = async (id: string, newQty: number) => {
+    if (newQty < 1) {
+      toast.error('Quantity must be at least 1');
+      return;
+    }
+
+    // Find item in cart to get stock info
+    const item = items.find(i => i.id === id);
+    if (!item) return;
+
+    // Check stock if available
+    if (item.stock !== undefined && newQty > item.stock) {
+      toast.error(`Only ${item.stock} items available in stock`);
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await apiFetch('/api/cart', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, qty: newQty })
+      });
+      await fetchCart();
+    } catch (errUnknown) {
+      const e = errUnknown as unknown as { message?: string };
+      toast.error(e?.message || 'Failed to update quantity');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const applyCoupon = async (code: string) => {
     setLoading(true);
     try {
@@ -159,6 +192,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     refresh: fetchCart,
     addItem,
     removeItem,
+    updateQuantity,
     applyCoupon,
     removeCoupon,
   };

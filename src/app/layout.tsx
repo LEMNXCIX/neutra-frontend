@@ -47,7 +47,7 @@ export default function RootLayout({
               <FooterWrapper />
 
             </div>
-            <Toaster richColors />
+            <Toaster richColors theme="system" />
           </CartProvider>
         </ThemeProvider>
       </body>

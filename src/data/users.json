@@ -4,7 +4,7 @@
     "name": "alice",
     "email": "alice@example.com",
     "password": "password123",
-    "isAdmin": true
+    "isAdmin": false
   },
   {
     "id": "u2",
@@ -16,20 +16,22 @@
     "id": "u3",
     "name": "carol",
     "email": "carol@example.com",
-    "password": "hunter2"
+    "password": "hunter2",
+    "isAdmin": false
   },
   {
     "id": "u_1762563018580",
     "name": "Leonardo",
     "email": "fake@mail.com",
     "password": "123",
-    "isAdmin": true
+    "isAdmin": true,
+    "avatar": "/uploads/avatar_1763687217634.png"
   },
   {
     "id": "u_1763672701334",
     "name": "Leonardo Mero",
     "email": "fake1@mail.com",
     "password": "changeme",
-    "isAdmin": true
+    "isAdmin": false
   }
 ]

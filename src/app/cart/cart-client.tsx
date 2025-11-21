@@ -15,14 +15,29 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Trash, Loader2 } from "lucide-react";
+import {
+  Trash2,
+  Loader2,
+  ShoppingBag,
+  Plus,
+  Minus,
+  Tag,
+  MapPin,
+  CreditCard,
+  Percent,
+  DollarSign,
+  ShoppingCart,
+  Package,
+} from "lucide-react";
+import Image from "@/components/ui/image";
 
 export default function CartClient() {
   const {
     items,
     removeItem,
+    updateQuantity,
     loading,
     refresh,
     applyCoupon,
@@ -35,7 +50,34 @@ export default function CartClient() {
   const [address, setAddress] = useState("");
   const [placing, setPlacing] = useState(false);
   const [code, setCode] = useState("");
+  const [applyingCoupon, setApplyingCoupon] = useState(false);
   const router = useRouter();
+
+  const handleApplyCoupon = async () => {
+    if (!code.trim()) {
+      toast.error("Please enter a coupon code");
+      return;
+    }
+    setApplyingCoupon(true);
+    try {
+      await applyCoupon(code);
+      setCode("");
+    } finally {
+      setApplyingCoupon(false);
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    removeCoupon();
+    setCode("");
+  };
+
+  const handleQuantityChange = async (itemId: string, newQty: number) => {
+    if (newQty < 1) return;
+    if (typeof updateQuantity === 'function') {
+      await updateQuantity(itemId, newQty);
+    }
+  };
 
   const placeOrder = async () => {
     if (items.length === 0) return toast.error("Cart is empty");
@@ -67,7 +109,7 @@ export default function CartClient() {
       if (coupon) removeCoupon();
 
       setCode("");
-      toast.success("Order placed successfully");
+      toast.success("Order placed successfully! 🎉");
 
       const orderId = data?.order?.id;
       router.push(orderId ? `/orders/${orderId}` : "/profile");
@@ -82,142 +124,281 @@ export default function CartClient() {
     }
   };
 
+  const total = Math.max(0, subtotal - discount);
+  const savings = discount;
+
   if (!items || items.length === 0)
     return (
-      <Card className="mx-auto max-w-md mt-10 text-center p-6">
-        <CardContent>
-          <p className="text-muted-foreground mb-3">Your cart is empty.</p>
-          <Button variant="outline" onClick={() => router.push("/")}>
-            Go Shopping
-          </Button>
-        </CardContent>
-      </Card>
+      <div className="min-h-[60vh] flex items-center justify-center p-4">
+        <Card className="max-w-md w-full text-center border-none shadow-lg">
+          <CardContent className="pt-12 pb-8">
+            <div className="w-24 h-24 mx-auto mb-6 bg-muted rounded-full flex items-center justify-center">
+              <ShoppingBag className="h-12 w-12 text-muted-foreground" />
+            </div>
+            <h2 className="text-2xl font-bold mb-2">Your cart is empty</h2>
+            <p className="text-muted-foreground mb-6">
+              Looks like you haven't added anything to your cart yet
+            </p>
+            <Button size="lg" onClick={() => router.push("/")}>
+              <ShoppingBag className="mr-2 h-5 w-5" />
+              Start Shopping
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
     );
 
   return (
-    <div className="p-4 sm:p-6 max-w-3xl mx-auto">
-      <Card className="shadow-sm border border-muted/30">
-        <CardHeader>
-          <CardTitle className="text-2xl font-semibold">Your Cart</CardTitle>
-        </CardHeader>
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 py-8 px-4">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold mb-2 flex items-center gap-3">
+            <ShoppingCart className="h-8 w-8" />
+            Shopping Cart
+          </h1>
+          <p className="text-muted-foreground">
+            {items.length} {items.length === 1 ? 'item' : 'items'} in your cart
+          </p>
+        </div>
 
-        <CardContent>
-          <ScrollArea className="max-h-[350px] pr-2">
-            <ul className="space-y-3">
-              {items.map((it) => (
-                <li
-                  key={it.id}
-                  className="flex flex-col sm:flex-row sm:items-center justify-between border rounded-lg p-3 hover:bg-muted/40 transition"
-                >
-                  <div>
-                    <p className="font-medium text-sm sm:text-base">{it.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      Quantity: {it.qty}
-                    </p>
-                  </div>
-                  <div className="mt-2 sm:mt-0 flex items-center gap-2">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => removeItem(it.id)}
-                      disabled={loading}
-                      className="text-destructive hover:bg-destructive/10"
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Cart Items */}
+          <div className="lg:col-span-2 space-y-4">
+            <Card className="border-none shadow-lg">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Package className="h-5 w-5" />
+                  Cart Items
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {items.map((item) => {
+                  const itemTotal = (item.price || 0) * item.qty;
+                  return (
+                    <div
+                      key={item.id}
+                      className="flex gap-4 p-4 rounded-lg border bg-card hover:bg-muted/30 transition-colors"
                     >
-                      {loading ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Trash className="h-4 w-4" />
-                      )}
-                    </Button>
+                      {/* Product Image */}
+                      <div className="flex-shrink-0 w-24 h-24 bg-muted rounded-lg overflow-hidden">
+                        {item.image ? (
+                          <Image
+                            src={item.image}
+                            alt={item.name}
+                            width={96}
+                            height={96}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <Package className="h-8 w-8 text-muted-foreground" />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Product Details */}
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-lg mb-1 truncate">
+                          {item.name}
+                        </h3>
+                        <p className="text-sm text-muted-foreground mb-3">
+                          ${(item.price || 0).toFixed(2)} each
+                        </p>
+
+                        {/* Quantity Controls */}
+                        <div className="flex items-center gap-3">
+                          <div className="flex items-center border rounded-lg">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 rounded-r-none"
+                              onClick={() => handleQuantityChange(item.id, item.qty - 1)}
+                              disabled={loading || item.qty <= 1}
+                            >
+                              <Minus className="h-3 w-3" />
+                            </Button>
+                            <div className="w-12 text-center font-medium">
+                              {item.qty}
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 rounded-l-none"
+                              onClick={() => handleQuantityChange(item.id, item.qty + 1)}
+                              disabled={loading}
+                            >
+                              <Plus className="h-3 w-3" />
+                            </Button>
+                          </div>
+                          <span className="text-sm text-muted-foreground">
+                            Total: <strong className="text-foreground">${itemTotal.toFixed(2)}</strong>
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Remove Button */}
+                      <div className="flex-shrink-0">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => removeItem(item.id)}
+                          disabled={loading}
+                          className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                        >
+                          {loading ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Trash2 className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Order Summary */}
+          <div className="lg:col-span-1">
+            <div className="sticky top-4 space-y-4">
+              {/* Coupon Card */}
+              <Card className="border-none shadow-lg">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-base">
+                    <Tag className="h-5 w-5" />
+                    Promo Code
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex gap-2">
+                    <Input
+                      value={code}
+                      onChange={(e) => setCode(e.target.value.toUpperCase())}
+                      placeholder="ENTER CODE"
+                      className="flex-1"
+                      disabled={!!coupon}
+                    />
+                    {!coupon ? (
+                      <Button
+                        onClick={handleApplyCoupon}
+                        disabled={applyingCoupon || !code.trim()}
+                      >
+                        {applyingCoupon ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          "Apply"
+                        )}
+                      </Button>
+                    ) : (
+                      <Button variant="outline" onClick={handleRemoveCoupon}>
+                        Remove
+                      </Button>
+                    )}
                   </div>
-                </li>
-              ))}
-            </ul>
-          </ScrollArea>
+                  {coupon && (
+                    <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/20">
+                      <div className="flex items-start gap-2">
+                        {coupon.type === "percent" ? (
+                          <Percent className="h-4 w-4 text-green-600 mt-0.5" />
+                        ) : (
+                          <DollarSign className="h-4 w-4 text-green-600 mt-0.5" />
+                        )}
+                        <div className="flex-1">
+                          <p className="font-semibold text-sm text-green-700">
+                            {coupon.code}
+                          </p>
+                          <p className="text-xs text-green-600">
+                            {coupon.type === "percent"
+                              ? `${coupon.value}% discount`
+                              : `$${coupon.value.toFixed(2)} off`}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
 
-          <Separator className="my-5" />
+              {/* Address Card */}
+              <Card className="border-none shadow-lg">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-base">
+                    <MapPin className="h-5 w-5" />
+                    Delivery Address
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Input
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    placeholder="Enter your delivery address"
+                    className="w-full"
+                  />
+                </CardContent>
+              </Card>
 
-          {/* Coupon */}
-          <div className="mb-5">
-            <Label htmlFor="coupon" className="text-sm mb-1 block">
-              Coupon
-            </Label>
-            <div className="flex flex-col sm:flex-row gap-2">
-              <Input
-                id="coupon"
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-                placeholder="Enter code"
-                className="flex-1"
-              />
-              <Button
-                variant="secondary"
-                onClick={async () => {
-                  if (!code) return;
-                  await applyCoupon(code);
-                }}
-                disabled={loading}
-              >
-                {loading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  "Apply"
-                )}
-              </Button>
-              {coupon && (
-                <Button variant="outline" onClick={() => removeCoupon()}>
-                  Remove
-                </Button>
-              )}
+              {/* Summary Card */}
+              <Card className="border-none shadow-lg bg-gradient-to-br from-primary/5 to-primary/10">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-base">
+                    <CreditCard className="h-5 w-5" />
+                    Order Summary
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Subtotal</span>
+                      <span className="font-medium">${subtotal.toFixed(2)}</span>
+                    </div>
+                    {discount > 0 && (
+                      <div className="flex justify-between text-sm text-green-600">
+                        <span className="flex items-center gap-1">
+                          <Tag className="h-3 w-3" />
+                          Discount
+                        </span>
+                        <span className="font-medium">-${discount.toFixed(2)}</span>
+                      </div>
+                    )}
+                    <Separator />
+                    <div className="flex justify-between text-lg font-bold">
+                      <span>Total</span>
+                      <span>${total.toFixed(2)}</span>
+                    </div>
+                    {savings > 0 && (
+                      <Badge variant="secondary" className="w-full justify-center bg-green-500/10 text-green-700 hover:bg-green-500/20">
+                        You save ${savings.toFixed(2)}!
+                      </Badge>
+                    )}
+                  </div>
+                </CardContent>
+                <CardFooter>
+                  <Button
+                    className="w-full h-12 text-lg font-semibold"
+                    onClick={placeOrder}
+                    disabled={placing || loading || !address.trim()}
+                    size="lg"
+                  >
+                    {placing ? (
+                      <>
+                        <Loader2 className="h-5 w-5 animate-spin mr-2" />
+                        Processing...
+                      </>
+                    ) : (
+                      <>
+                        <CreditCard className="h-5 w-5 mr-2" />
+                        Place Order
+                      </>
+                    )}
+                  </Button>
+                </CardFooter>
+              </Card>
             </div>
-            {coupon && (
-              <p className="text-xs mt-2">
-                Applied: <strong>{coupon.code}</strong> —{" "}
-                {coupon.type === "percent"
-                  ? `${coupon.value}% off`
-                  : `$${coupon.value.toFixed(2)}`}
-              </p>
-            )}
           </div>
-
-          {/* Address */}
-          <div className="mb-4">
-            <Label htmlFor="address" className="text-sm mb-1 block">
-              Delivery address
-            </Label>
-            <Input
-              id="address"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              placeholder="Street, city, etc."
-            />
-          </div>
-        </CardContent>
-
-        <CardFooter className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-          <div className="flex flex-col text-sm text-muted-foreground w-full sm:w-auto">
-            <span>
-              Subtotal: <strong>${subtotal.toFixed(2)}</strong>
-            </span>
-            <span>
-              Discount: <strong>-${discount.toFixed(2)}</strong>
-            </span>
-            <span className="text-foreground font-semibold mt-1">
-              Total: ${(Math.max(0, subtotal - discount)).toFixed(2)}
-            </span>
-          </div>
-          <Button
-            className="w-full sm:w-auto"
-            onClick={placeOrder}
-            disabled={placing || loading}
-          >
-            {placing ? (
-              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-            ) : null}
-            {placing ? "Placing..." : "Place Order"}
-          </Button>
-        </CardFooter>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

@@ -10,7 +10,7 @@ export async function POST(req: Request) {
   // read users from local file
   const usersPath = path.join(process.cwd(), 'src', 'data', 'users.json');
   const usersRaw = fs.readFileSync(usersPath, 'utf-8');
-  const users = JSON.parse(usersRaw) as { id: string; name: string; email: string; password: string }[];
+  const users = JSON.parse(usersRaw) as { id: string; name: string; email: string; password: string; isAdmin?: boolean; avatar?: string }[];
   console.log(password)
   console.log(email)
   console.log(users)
@@ -19,7 +19,7 @@ export async function POST(req: Request) {
   if (!found) return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
 
   const sid = createSession(found.id);
-  const res = NextResponse.json({ user: { id: found.id, name: found.name, email: found.email } });
+  const res = NextResponse.json({ user: { id: found.id, name: found.name, email: found.email, isAdmin: !!found.isAdmin, avatar: found.avatar || null } });
   // set demo session cookie (httpOnly) with session id
   res.cookies.set('_neutra_sid', sid, { httpOnly: true, path: '/' });
   // also emit an httpOnly JWT token for optional API usage

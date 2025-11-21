@@ -3,10 +3,10 @@
     "id": "p1",
     "title": "Minimal Chair",
     "price": 129,
-    "category": "seating",
+    "category": "table",
     "description": "A stylish minimal chair.",
     "image": "https://picsum.photos/seed/p1/600/400",
-    "stock": 2
+    "stock": 15
   },
   {
     "id": "p2",
@@ -42,7 +42,7 @@
     "category": "lighting",
     "description": "Tall floor lamp with soft light.",
     "image": "https://picsum.photos/seed/p5/600/400",
-    "stock": 7
+    "stock": 12
   },
   {
     "id": "p6",

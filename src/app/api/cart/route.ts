@@ -41,8 +41,12 @@ export async function GET(req: Request) {
   const products = readProducts();
   const items = (carts[userId] || []).map(it => {
     const prod = products.find(p => p.id === it.id);
-    const available = prod?.stock ?? 0;
-    return { ...it, available };
+    return {
+      ...it,
+      price: prod?.price ?? 0,
+      image: prod?.image ?? '',
+      stock: prod?.stock ?? 0,
+    };
   });
   return NextResponse.json({ items });
 }
@@ -75,7 +79,59 @@ export async function POST(request: Request) {
   else carts[userId].push({ id, name, qty: 1 });
   writeCarts(carts);
   const products = readProducts();
-  const items = (carts[userId] || []).map(it => ({ ...it, available: products.find(p => p.id === it.id)?.stock ?? 0 }));
+  const items = (carts[userId] || []).map(it => {
+    const prod = products.find(p => p.id === it.id);
+    return {
+      ...it,
+      price: prod?.price ?? 0,
+      image: prod?.image ?? '',
+      stock: prod?.stock ?? 0,
+    };
+  });
+  return NextResponse.json({ items });
+}
+
+export async function PUT(request: Request) {
+  const rawSid = parseSid(request as unknown as Request);
+  const userId = getUserId(rawSid);
+  if (!userId) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+
+  const body = await request.json();
+  const { id, qty } = body;
+  if (!id || typeof qty !== 'number' || qty < 1) {
+    return NextResponse.json({ error: 'Invalid payload' }, { status: 400 });
+  }
+
+  // Validate product exists and check inventory
+  const prod = findProduct(id);
+  if (!prod) return NextResponse.json({ error: 'Unknown product' }, { status: 400 });
+
+  const available = prod.stock ?? 0;
+  if (qty > available) {
+    return NextResponse.json({ error: `Only ${available} items available in stock`, available }, { status: 400 });
+  }
+
+  const carts = readCarts();
+  if (!carts[userId]) carts[userId] = [];
+  const existing = carts[userId].find((s) => s.id === id);
+
+  if (existing) {
+    existing.qty = qty;
+  } else {
+    return NextResponse.json({ error: 'Item not in cart' }, { status: 404 });
+  }
+
+  writeCarts(carts);
+  const products = readProducts();
+  const items = (carts[userId] || []).map(it => {
+    const prod = products.find(p => p.id === it.id);
+    return {
+      ...it,
+      price: prod?.price ?? 0,
+      image: prod?.image ?? '',
+      stock: prod?.stock ?? 0,
+    };
+  });
   return NextResponse.json({ items });
 }
 

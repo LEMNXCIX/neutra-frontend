@@ -32,6 +32,8 @@ export async function GET(req: Request) {
   const searchQuery = url.searchParams.get('search') || '';
   const dateFrom = url.searchParams.get('dateFrom') || '';
   const dateTo = url.searchParams.get('dateTo') || '';
+  const page = parseInt(url.searchParams.get('page') || '1', 10);
+  const limit = parseInt(url.searchParams.get('limit') || '10', 10);
 
   try {
     const raw = fs.readFileSync(ORDERS_PATH, 'utf-8');
@@ -49,35 +51,51 @@ export async function GET(req: Request) {
       );
     }
     if (dateFrom) {
-      orders = orders.filter(o => new Date(o.date) >= new Date(dateFrom));
+      orders = orders.filter(o => o.date >= dateFrom);
     }
     if (dateTo) {
-      orders = orders.filter(o => new Date(o.date) <= new Date(dateTo));
+      orders = orders.filter(o => o.date <= dateTo);
     }
 
-    // Calculate statistics
+    // Calculate stats from ALL filtered orders (before pagination)
+    const totalOrders = orders.length;
     const totalRevenue = orders.reduce((sum, o) => sum + o.total, 0);
-    const statusCounts = orders.reduce((acc, o) => {
-      acc[o.status] = (acc[o.status] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    const statusCounts: Record<string, number> = {};
+    orders.forEach(o => {
+      statusCounts[o.status] = (statusCounts[o.status] || 0) + 1;
+    });
+
+    // Apply pagination
+    const startIndex = (page - 1) * limit;
+    const endIndex = startIndex + limit;
+    const paginatedOrders = orders.slice(startIndex, endIndex);
+    const totalPages = Math.ceil(totalOrders / limit);
 
     return NextResponse.json({
-      orders,
-      stats: {
-        totalOrders: orders.length,
-        totalRevenue,
-        statusCounts
-      }
+      orders: paginatedOrders,
+      stats: { totalOrders, totalRevenue, statusCounts },
+      pagination: {
+        currentPage: page,
+        totalPages,
+        totalItems: totalOrders,
+        itemsPerPage: limit,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1,
+      },
     });
-  } catch {
+  } catch (err) {
+    console.error('Error reading orders:', err);
     return NextResponse.json({
       orders: [],
-      stats: {
-        totalOrders: 0,
-        totalRevenue: 0,
-        statusCounts: {}
-      }
+      stats: { totalOrders: 0, totalRevenue: 0, statusCounts: {} },
+      pagination: {
+        currentPage: 1,
+        totalPages: 0,
+        totalItems: 0,
+        itemsPerPage: limit,
+        hasNextPage: false,
+        hasPreviousPage: false,
+      },
     });
   }
 }

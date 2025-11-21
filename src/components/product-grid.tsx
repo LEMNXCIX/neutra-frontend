@@ -1,23 +1,29 @@
 "use client";
 import React, { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useCart } from "@/context/cart-context";
-import { Loader2 } from "lucide-react";
+import { Loader2, ShoppingCart, Eye, Package } from "lucide-react";
+
+type Product = {
+  id: string;
+  title: string;
+  price: number;
+  description?: string;
+  image?: string;
+  category?: string;
+  stock?: number;
+};
 
 export default function ProductGrid({
   products,
+  viewMode = 'grid',
 }: {
-  products: {
-    id: string;
-    title: string;
-    price: number;
-    description?: string;
-    image?: string;
-    category?: string;
-  }[];
+  products: Product[];
+  viewMode?: 'grid' | 'list';
 }) {
   const { addItem } = useCart();
   const [loadingId, setLoadingId] = useState<string | null>(null);
@@ -31,60 +37,195 @@ export default function ProductGrid({
     }
   };
 
+  if (viewMode === 'list') {
+    return (
+      <div className="space-y-4">
+        {products.map((p) => {
+          const inStock = (p.stock ?? 0) > 0;
+          const lowStock = (p.stock ?? 0) > 0 && (p.stock ?? 0) <= 5;
+
+          return (
+            <Card
+              key={p.id}
+              className="overflow-hidden border-none shadow-md hover:shadow-xl transition-all"
+            >
+              <div className="flex flex-col sm:flex-row gap-6 p-6">
+                {/* Image */}
+                <Link
+                  href={`/products/${p.id}`}
+                  className="flex-shrink-0 w-full sm:w-48 h-48 relative group overflow-hidden rounded-lg bg-muted"
+                >
+                  {p.image ? (
+                    <Image
+                      src={p.image}
+                      alt={p.title}
+                      fill
+                      sizes="192px"
+                      className="object-cover transition-transform duration-300 group-hover:scale-110"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <Package className="h-16 w-16 text-muted-foreground" />
+                    </div>
+                  )}
+                  {!inStock && (
+                    <Badge variant="destructive" className="absolute top-2 right-2">
+                      Out of Stock
+                    </Badge>
+                  )}
+                  {lowStock && inStock && (
+                    <Badge variant="secondary" className="absolute top-2 right-2 bg-yellow-500 text-white">
+                      Low Stock
+                    </Badge>
+                  )}
+                </Link>
+
+                {/* Content */}
+                <div className="flex-1 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-start justify-between gap-4 mb-2">
+                      <div>
+                        {p.category && (
+                          <Badge variant="secondary" className="mb-2">
+                            {p.category}
+                          </Badge>
+                        )}
+                        <h3 className="text-xl font-semibold mb-2">
+                          <Link href={`/products/${p.id}`} className="hover:text-primary transition-colors">
+                            {p.title}
+                          </Link>
+                        </h3>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-2xl font-bold text-primary">${p.price}</div>
+                      </div>
+                    </div>
+                    {p.description && (
+                      <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
+                        {p.description}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-3">
+                    <Button
+                      onClick={() => handleAdd(p.id, p.title)}
+                      disabled={loadingId === p.id || !inStock}
+                      className="flex-1 sm:flex-none"
+                    >
+                      {loadingId === p.id ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Adding...
+                        </>
+                      ) : (
+                        <>
+                          <ShoppingCart className="mr-2 h-4 w-4" />
+                          Add to Cart
+                        </>
+                      )}
+                    </Button>
+                    <Button variant="outline" asChild className="flex-1 sm:flex-none">
+                      <Link href={`/products/${p.id}`}>
+                        <Eye className="mr-2 h-4 w-4" />
+                        View Details
+                      </Link>
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          );
+        })}
+      </div>
+    );
+  }
+
+  // Grid View
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
-      {products.map((p) => (
-        <Card
-          key={p.id}
-          className="overflow-hidden border-none shadow-md hover:shadow-lg transition-shadow rounded-2xl"
-        >
-          <div className="relative aspect-[4/3] overflow-hidden">
-            {p.image ? (
-              <a href={`/products/${p.id}`} className="block w-full h-full">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      {products.map((p) => {
+        const inStock = (p.stock ?? 0) > 0;
+        const lowStock = (p.stock ?? 0) > 0 && (p.stock ?? 0) <= 5;
+
+        return (
+          <Card
+            key={p.id}
+            className="overflow-hidden border-none shadow-md hover:shadow-xl transition-all group"
+          >
+            {/* Image */}
+            <Link href={`/products/${p.id}`} className="block relative aspect-square overflow-hidden bg-muted">
+              {p.image ? (
                 <Image
                   src={p.image}
                   alt={p.title}
                   fill
-                  sizes="(max-width: 640px) 100vw, 33vw"
-                  className="object-cover transition-transform duration-300 hover:scale-105"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                  className="object-cover transition-transform duration-500 group-hover:scale-110"
                 />
-              </a>
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-muted-foreground bg-zinc-100 dark:bg-zinc-800">
-                No image
-              </div>
-            )}
-          </div>
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <Package className="h-20 w-20 text-muted-foreground" />
+                </div>
+              )}
 
-          <CardContent className="p-4">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <h3 className="font-medium text-base">
-                  <a href={`/products/${p.id}`} className="hover:underline">
-                    {p.title}
-                  </a>
-                </h3>
-                {p.description && (
-                  <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                    {p.description}
-                  </p>
-                )}
+              {/* Overlay on hover */}
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                <Button variant="secondary" size="sm">
+                  <Eye className="h-4 w-4 mr-2" />
+                  View Details
+                </Button>
               </div>
-              <div className="text-right">
-                <div className="text-sm font-semibold">${p.price}</div>
-                {p.category && (
-                  <Badge variant="secondary" className="mt-1 text-xs">
-                    {p.category}
-                  </Badge>
-                )}
-              </div>
-            </div>
 
-            <div className="mt-4 flex items-center gap-2">
+              {/* Stock Badge */}
+              {!inStock && (
+                <Badge variant="destructive" className="absolute top-3 right-3">
+                  Out of Stock
+                </Badge>
+              )}
+              {lowStock && inStock && (
+                <Badge variant="secondary" className="absolute top-3 right-3 bg-yellow-500 text-white hover:bg-yellow-500">
+                  Low Stock
+                </Badge>
+              )}
+            </Link>
+
+            {/* Content */}
+            <CardContent className="p-4 space-y-3">
+              {/* Category */}
+              {p.category && (
+                <Badge variant="secondary" className="text-xs">
+                  {p.category}
+                </Badge>
+              )}
+
+              {/* Title */}
+              <h3 className="font-semibold text-lg line-clamp-2 min-h-[3.5rem]">
+                <Link href={`/products/${p.id}`} className="hover:text-primary transition-colors">
+                  {p.title}
+                </Link>
+              </h3>
+
+              {/* Description */}
+              {p.description && (
+                <p className="text-xs text-muted-foreground line-clamp-2">
+                  {p.description}
+                </p>
+              )}
+
+              {/* Price */}
+              <div className="flex items-center justify-between pt-2">
+                <div className="text-2xl font-bold text-primary">
+                  ${p.price}
+                </div>
+              </div>
+
+              {/* Add to Cart Button */}
               <Button
                 onClick={() => handleAdd(p.id, p.title)}
-                disabled={loadingId === p.id}
-                className="w-full justify-center bg-zinc-900 hover:bg-zinc-800 text-white transition-colors"
+                disabled={loadingId === p.id || !inStock}
+                className="w-full"
+                size="lg"
               >
                 {loadingId === p.id ? (
                   <>
@@ -92,13 +233,16 @@ export default function ProductGrid({
                     Adding...
                   </>
                 ) : (
-                  "Add to cart"
+                  <>
+                    <ShoppingCart className="mr-2 h-4 w-4" />
+                    Add to Cart
+                  </>
                 )}
               </Button>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
+            </CardContent>
+          </Card>
+        );
+      })}
     </div>
   );
 }

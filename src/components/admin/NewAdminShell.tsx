@@ -9,6 +9,9 @@ import {
   Ticket,
   Menu,
   X,
+  LayoutList,
+  Megaphone,
+  Images,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
@@ -28,9 +31,9 @@ import SlidersAdminClient from "./SlidersAdminClient";
 const menuItems = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { id: "products", label: "Products", icon: Package },
-  { id: "categories", label: "Categories", icon: Package },
-  { id: "banners", label: "Banners", icon: Ticket },
-  { id: "sliders", label: "Sliders", icon: Package },
+  { id: "categories", label: "Categories", icon: LayoutList },
+  { id: "banners", label: "Banners", icon: Megaphone },
+  { id: "sliders", label: "Sliders", icon: Images },
   { id: "orders", label: "Orders", icon: ShoppingCart },
   { id: "coupons", label: "Coupons", icon: Ticket },
   { id: "users", label: "Users", icon: Users },
@@ -39,6 +42,11 @@ const menuItems = [
 export default function AdminShell() {
   const [active, setActive] = useState("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const handleRefresh = () => {
+    setRefreshKey(prev => prev + 1);
+  };
 
   return (
     <div className="flex min-h-[calc(100vh-4rem)] flex-col md:flex-row pt-2 border rounded-md overflow-hidden shadow-sm transition-all duration-300">
@@ -104,25 +112,25 @@ export default function AdminShell() {
       <main className="flex-1 p-6 overflow-y-auto pb-20 md:pb-6 transition-all duration-300">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-2xl font-semibold capitalize">{active}</h2>
-          <Button variant="ghost" onClick={() => window.location.reload()}>
+          <Button variant="ghost" onClick={handleRefresh}>
             Refresh
           </Button>
         </div>
 
         {active === "dashboard" && (
-          <>
+          <div key={refreshKey}>
             <AnalyticsOverview />
             <AnalyticsCharts />
             <AnalyticsChartsDetailed />
-          </>
+          </div>
         )}
-        {active === "products" && <ProductsAdminClient />}
-        {active === "categories" && <CategoriesAdminClient />}
-        {active === "banners" && <BannersAdminClient />}
-        {active === "sliders" && <SlidersAdminClient />}
-        {active === "orders" && <OrdersAdminClient />}
-        {active === "coupons" && <CouponsAdminClient />}
-        {active === "users" && <UsersAdminClient />}
+        {active === "products" && <ProductsAdminClient key={refreshKey} />}
+        {active === "categories" && <CategoriesAdminClient key={refreshKey} />}
+        {active === "banners" && <BannersAdminClient key={refreshKey} />}
+        {active === "sliders" && <SlidersAdminClient key={refreshKey} />}
+        {active === "orders" && <OrdersAdminClient key={refreshKey} />}
+        {active === "coupons" && <CouponsAdminClient key={refreshKey} />}
+        {active === "users" && <UsersAdminClient key={refreshKey} />}
       </main>
 
       {/* === BOTTOM NAVBAR (solo móvil) === */}

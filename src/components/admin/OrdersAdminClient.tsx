@@ -430,7 +430,25 @@ export default function OrdersAdminClient() {
                   <p className="text-sm p-3 bg-muted/50 rounded">{selectedOrder.address}</p>
                 </div>
               )}
-
+              {/* Update Order Status */}
+              <div>
+                <h3 className="font-semibold mb-2">Update Order Status</h3>
+                <Select
+                  value={selectedOrder.status}
+                  onValueChange={(newStatus) => updateOrderStatus(selectedOrder.id, newStatus)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="processing">Processing</SelectItem>
+                    <SelectItem value="shipped">Shipped</SelectItem>
+                    <SelectItem value="delivered">Delivered</SelectItem>
+                    <SelectItem value="cancelled">Cancelled</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
               {/* Tracking */}
               <div>
                 <h3 className="font-semibold mb-2 flex items-center gap-2">
@@ -507,6 +525,6 @@ export default function OrdersAdminClient() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </div >
   );
 }

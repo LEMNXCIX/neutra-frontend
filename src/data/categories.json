@@ -1,6 +1,20 @@
 [
-  { "id": "all", "name": "All","description":"Verifica todoas las categorias que poseemos." },
-  { "id": "seating", "name": "Seating" },
-  { "id": "lighting", "name": "Lighting" },
-  { "id": "table", "name": "Tables" }
+  {
+    "id": "all",
+    "name": "All",
+    "description": "Verifica todoas las categorias que poseemos."
+  },
+  {
+    "id": "seating",
+    "name": "Seating"
+  },
+  {
+    "id": "lighting",
+    "name": "Lighting",
+    "description": "Las luces harán un espacio más acogedor para tu he. "
+  },
+  {
+    "id": "table",
+    "name": "Tables"
+  }
 ]

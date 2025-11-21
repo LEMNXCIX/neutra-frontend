@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-type User = { id: string; name: string; email?: string, isAdmin: boolean } | null;
+type User = { id: string; name: string; email?: string, isAdmin: boolean; avatar?: string } | null;
 
 type AuthState = {
     user: User;
@@ -10,6 +10,7 @@ type AuthState = {
     register: (name: string, email: string, password: string) => Promise<void>;
     logout: () => Promise<void>;
     checkSession: () => Promise<void>;
+    updateUser: (userData: Partial<{ name: string; email: string; avatar: string; isAdmin: boolean }>) => void;
 };
 
 export const useAuthStore = create<AuthState>()(
@@ -30,7 +31,7 @@ export const useAuthStore = create<AuthState>()(
                         throw new Error(err?.error || 'Login failed');
                     }
                     const data = await resp.json();
-                    set({ user: { id: data.user.id, name: data.user.name, email: data.user.email, isAdmin: data.user.isAdmin } });
+                    set({ user: { id: data.user.id, name: data.user.name, email: data.user.email, isAdmin: data.user.isAdmin, avatar: data.user.avatar } });
                 } finally {
                     set({ loading: false });
                 }
@@ -48,7 +49,7 @@ export const useAuthStore = create<AuthState>()(
                         throw new Error(err?.error || 'Register failed');
                     }
                     const data = await resp.json();
-                    set({ user: { id: data.user.id, name: data.user.name, email: data.user.email, isAdmin: data.user.isAdmin } });
+                    set({ user: { id: data.user.id, name: data.user.name, email: data.user.email, isAdmin: data.user.isAdmin, avatar: data.user.avatar } });
                 } catch (err) {
                     console.error('register failed', err);
                     throw err;
@@ -72,7 +73,7 @@ export const useAuthStore = create<AuthState>()(
                     if (resp.ok) {
                         const data = await resp.json();
                         if (data?.user) {
-                            set({ user: { id: data.user.id, name: data.user.name, email: data.user.email, isAdmin: data.user.isAdmin } });
+                            set({ user: { id: data.user.id, name: data.user.name, email: data.user.email, isAdmin: data.user.isAdmin, avatar: data.user.avatar } });
                             return;
                         }
                     }
@@ -84,6 +85,17 @@ export const useAuthStore = create<AuthState>()(
                 // For now, let's assume if /me fails with 401, we clear.
                 // But existing logic was: hydrate from server.
                 // Here we hydrate from localStorage (via persist), but we should validate.
+            },
+            updateUser: (userData) => {
+                set((state) => {
+                    if (!state.user) return state;
+                    return {
+                        user: {
+                            ...state.user,
+                            ...userData,
+                        }
+                    };
+                });
             }
         }),
         {
