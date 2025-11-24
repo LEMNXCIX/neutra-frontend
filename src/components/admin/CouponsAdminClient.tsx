@@ -49,7 +49,7 @@ import {
   Percent,
   DollarSign,
 } from "lucide-react";
-
+import { useConfirm } from "@/hooks/use-confirm";
 type Coupon = {
   code: string;
   type: "amount" | "percent";
@@ -94,6 +94,7 @@ export default function CouponsAdminClient() {
     value: "",
     expires: "",
   });
+  const { confirm, ConfirmDialog } = useConfirm();
 
   const load = async () => {
     setLoading(true);
@@ -184,7 +185,13 @@ export default function CouponsAdminClient() {
   };
 
   const deleteCoupon = async (code: string) => {
-    if (!confirm("Are you sure you want to delete this coupon?")) return;
+    const confirmed = await confirm({
+      title: "Delete Coupon",
+      description: "Are you sure you want to delete this coupon ? This action cannot be undone.",
+      confirmText: "Delete",
+      variant: "destructive",
+    });
+    if (!confirmed) return;
     try {
       const res = await fetch(`/api/admin/coupons/${encodeURIComponent(code)}`, {
         method: "DELETE",
@@ -686,6 +693,7 @@ export default function CouponsAdminClient() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <ConfirmDialog />
     </div>
   );
 }

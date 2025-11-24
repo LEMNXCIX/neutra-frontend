@@ -46,6 +46,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { useConfirm } from "@/hooks/use-confirm";
 
 type Banner = {
   id: string;
@@ -88,6 +89,7 @@ export default function BannersAdminClient() {
     endsAt: "",
     active: true
   });
+  const { confirm, ConfirmDialog } = useConfirm();
 
   const load = async () => {
     setLoading(true);
@@ -160,7 +162,13 @@ export default function BannersAdminClient() {
   };
 
   const deleteBanner = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this banner?")) return;
+    const confirmed = await confirm({
+      title: "Delete Banner",
+      description: "Are you sure you want to delete this banner? This action cannot be undone.",
+      confirmText: "Delete",
+      variant: "destructive",
+    });
+    if (!confirmed) return;
     try {
       const res = await fetch(`/api/admin/banners/${id}`, {
         method: "DELETE",
@@ -651,6 +659,8 @@ export default function BannersAdminClient() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <ConfirmDialog />
     </div>
   );
 }

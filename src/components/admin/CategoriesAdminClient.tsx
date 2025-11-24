@@ -38,6 +38,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { useConfirm } from "@/hooks/use-confirm";
 
 type Category = {
   id: string;
@@ -67,6 +68,7 @@ export default function CategoriesAdminClient() {
   const [editOpen, setEditOpen] = useState(false);
   const [editing, setEditing] = useState<Category | null>(null);
   const [form, setForm] = useState({ name: "", description: "" });
+  const { confirm, ConfirmDialog } = useConfirm();
 
   const load = async () => {
     setLoading(true);
@@ -133,7 +135,13 @@ export default function CategoriesAdminClient() {
   };
 
   const deleteCategory = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this category?")) return;
+    const confirmed = await confirm({
+      title: "Delete Category",
+      description: "Are you sure you want to delete this category? This action cannot be undone.",
+      confirmText: "Delete",
+      variant: "destructive",
+    });
+    if (!confirmed) return;
     try {
       const res = await fetch(`/api/admin/categories/${id}`, {
         method: "DELETE",
@@ -498,6 +506,8 @@ export default function CategoriesAdminClient() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <ConfirmDialog />
     </div>
   );
 }

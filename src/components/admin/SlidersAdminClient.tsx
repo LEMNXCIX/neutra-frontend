@@ -48,7 +48,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-
+import { useConfirm } from "@/hooks/use-confirm";
 type Slide = {
   id: string;
   title: string;
@@ -90,7 +90,7 @@ export default function SlidersAdminClient() {
     imageBase64: "",
   });
   const [imagePreview, setImagePreview] = useState("");
-
+  const { confirm, ConfirmDialog } = useConfirm();
   const load = async () => {
     setLoading(true);
     try {
@@ -181,7 +181,13 @@ export default function SlidersAdminClient() {
   };
 
   const deleteSlider = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this slider?")) return;
+    const confirmed = await confirm({
+      title: "Delete Slider",
+      description: "Are you sure you want to delete this slider? This action cannot be undone.",
+      confirmText: "Delete",
+      variant: "destructive",
+    });
+    if (!confirmed) return;
     try {
       const res = await fetch(`/api/admin/sliders/${id}`, {
         method: "DELETE",
@@ -717,6 +723,7 @@ export default function SlidersAdminClient() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <ConfirmDialog />
     </div>
   );
 }

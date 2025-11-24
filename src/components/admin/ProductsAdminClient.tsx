@@ -48,6 +48,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { useConfirm } from "@/hooks/use-confirm";
 
 type Product = {
   id: string;
@@ -82,6 +83,7 @@ export default function ProductsAdminClient() {
   const [editing, setEditing] = useState<Product | null>(null);
   const [form, setForm] = useState({ title: "", price: "", stock: "", category: "", imageBase64: "" });
   const [preview, setPreview] = useState<string | null>(null);
+  const { confirm, ConfirmDialog } = useConfirm();
 
   const load = async () => {
     setLoading(true);
@@ -190,7 +192,13 @@ export default function ProductsAdminClient() {
   };
 
   const deleteProduct = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this product?")) return;
+    const confirmed = await confirm({
+      title: "Delete Product",
+      description: "Are you sure you want to delete this product? This action cannot be undone.",
+      confirmText: "Delete",
+      variant: "destructive",
+    });
+    if (!confirmed) return;
     try {
       const res = await fetch(`/api/admin/products/${id}`, {
         method: "DELETE",
@@ -729,6 +737,8 @@ export default function ProductsAdminClient() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <ConfirmDialog />
     </div>
   );
 }

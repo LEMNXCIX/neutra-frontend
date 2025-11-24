@@ -6,7 +6,7 @@
     "category": "table",
     "description": "A stylish minimal chair.",
     "image": "https://picsum.photos/seed/p1/600/400",
-    "stock": 20
+    "stock": 15
   },
   {
     "id": "p2",
@@ -67,13 +67,5 @@
     "title": "Producto corregido",
     "price": 2000,
     "stock": 0
-  },
-  {
-    "id": "p_1763682047571",
-    "title": "Product is not working ",
-    "price": 100.6,
-    "stock": 3,
-    "category": "lighting",
-    "image": "/uploads/upload_1763682047573.jpeg"
   }
 ]
