@@ -1,7 +1,6 @@
-"use client";
-
-import React from 'react';
-import { SidebarProvider } from "@/components/ui/new-sidebar";
+import React from "react";
+import AdminSidebar from "@/components/admin/AdminSidebar";
+import AdminMobileNav from "@/components/admin/AdminMobileNav";
 
 export default function AdminLayout({
     children,
@@ -9,10 +8,14 @@ export default function AdminLayout({
     children: React.ReactNode;
 }) {
     return (
+        <div className="flex min-h-[calc(100vh-4rem)] flex-col md:flex-row pt-2 border rounded-md overflow-hidden shadow-sm transition-all duration-300">
+            <AdminSidebar />
 
-        <div >
-            {children}
+            <main className="flex-1 p-6 overflow-y-auto pb-20 md:pb-6 transition-all duration-300 bg-background">
+                {children}
+            </main>
+
+            <AdminMobileNav />
         </div>
-
     );
 }

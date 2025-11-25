@@ -4,7 +4,9 @@ import React from 'react';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { getUserId } from '@/lib/session';
-import AdminShell from "@/components/admin/NewAdminShell";
+import AnalyticsCharts from "@/components/admin/AnalyticsCharts";
+import AnalyticsOverview from "@/components/admin/AnalyticsOverview";
+import AnalyticsChartsDetailed from "@/components/admin/AnalyticsChartsDetailed";
 
 type User = { id: string; name: string; email: string; password?: string; isAdmin?: boolean };
 
@@ -32,5 +34,12 @@ export default async function AdminPage() {
     const me = users.find(u => u.id === userId);
     if (!me || !me.isAdmin) return redirect('/');
 
-    return <AdminShell />;
+    return (
+        <div className="space-y-6">
+            <h2 className="text-2xl font-semibold capitalize">Dashboard</h2>
+            <AnalyticsOverview />
+            <AnalyticsCharts />
+            <AnalyticsChartsDetailed />
+        </div>
+    );
 }
