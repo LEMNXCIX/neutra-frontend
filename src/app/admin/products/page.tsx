@@ -1,10 +1,9 @@
 import React from "react";
-import { productsService } from "@/services";
-import { categoriesService } from "@/services";
+import { cookies } from 'next/headers';
 import ProductsTableClient from "@/components/admin/products/ProductsTableClient";
-import type { Product as BackendProduct } from "@/types/frontend-api";
 
-// Frontend expects 'title' but backend uses 'name'
+const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001/api';
+
 type FrontendProduct = {
     id: string;
     title: string;
@@ -16,22 +15,46 @@ type FrontendProduct = {
 
 async function getProducts(search: string, category: string, page: number, limit: number) {
     try {
-        // Use productsService which uses apiClient
-        const allProducts = await productsService.getAll();
+        // Get cookies from request
+        const cookieStore = await cookies();
+        const cookieString = cookieStore.toString();
+
+        // Fetch products from backend with cookies
+        const productsResponse = await fetch(`${BACKEND_API_URL}/products`, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Cookie': cookieString,
+            },
+            cache: 'no-store',
+        });
+
+        if (!productsResponse.ok) {
+            console.error('Failed to fetch products:', productsResponse.status);
+            return {
+                products: [],
+                stats: { totalProducts: 0, totalValue: 0, lowStockCount: 0 },
+                pagination: { currentPage: 1, totalPages: 0, totalItems: 0, itemsPerPage: limit },
+            };
+        }
+
+        const productsData = await productsResponse.json();
 
         // Map backend Product to frontend Product
-        let products: FrontendProduct[] = allProducts.map((p) => ({
-            id: p.id,
-            title: p.name,
-            price: p.price,
-            stock: p.stock,
-            category: (() => {
-                const cat = p.categories?.[0];
-                if (!cat) return undefined;
-                return typeof cat === 'string' ? cat : (cat.name || cat.id || undefined);
-            })(),
-            image: p.image || undefined,
-        }));
+        let products: FrontendProduct[] = [];
+        if (productsData.success && productsData.data) {
+            products = (Array.isArray(productsData.data) ? productsData.data : []).map((p: any) => ({
+                id: p.id,
+                title: p.name,
+                price: p.price,
+                stock: p.stock,
+                category: (() => {
+                    const cat = p.categories?.[0];
+                    if (!cat) return undefined;
+                    return typeof cat === 'string' ? cat : (cat.name || cat.id || undefined);
+                })(),
+                image: p.image || undefined,
+            }));
+        }
 
         // Apply filters
         if (search) {
@@ -92,9 +115,23 @@ async function getProducts(search: string, category: string, page: number, limit
 
 async function getCategories() {
     try {
-        // Use categoriesService which uses apiClient
-        const categories = await categoriesService.getAll();
-        return categories;
+        const cookieStore = await cookies();
+        const cookieString = cookieStore.toString();
+
+        const response = await fetch(`${BACKEND_API_URL}/categories`, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Cookie': cookieString,
+            },
+            cache: 'no-store',
+        });
+
+        if (!response.ok) {
+            return [];
+        }
+
+        const data = await response.json();
+        return data.success && data.data ? data.data : [];
     } catch (error) {
         console.error("Error fetching categories:", error);
         return [];

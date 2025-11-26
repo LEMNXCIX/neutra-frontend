@@ -1,6 +1,8 @@
 import React from "react";
-import { usersService } from "@/services";
+import { cookies } from 'next/headers';
 import UsersTableClient from "@/components/admin/users/UsersTableClient";
+
+const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001/api';
 
 type User = {
     id: string;
@@ -8,6 +10,10 @@ type User = {
     email: string;
     isAdmin: boolean;
     avatar?: string;
+    role?: {
+        id: string;
+        name: string;
+    };
 };
 
 type Stats = {
@@ -25,17 +31,45 @@ type PaginationProps = {
 
 async function getUsers(search: string, role: string, page: number, limit: number) {
     try {
-        // Use usersService which uses apiClient
-        const allUsers = await usersService.getAll();
+        // Get cookies from request
+        const cookieStore = await cookies();
+        const cookieString = cookieStore.toString();
+
+        // Fetch from backend with cookies
+        const response = await fetch(`${BACKEND_API_URL}/users`, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Cookie': cookieString,
+            },
+            cache: 'no-store',
+        });
+
+        if (!response.ok) {
+            console.error('Failed to fetch users:', response.status);
+            return {
+                users: [],
+                stats: { totalUsers: 0, adminUsers: 0, regularUsers: 0 },
+                pagination: { currentPage: 1, totalPages: 0, totalItems: 0, itemsPerPage: limit },
+            };
+        }
+
+        const data = await response.json();
 
         // Map backend users to frontend format
-        let users: User[] = allUsers.map((u) => ({
-            id: u.id,
-            name: u.name,
-            email: u.email,
-            isAdmin: u.role?.name === 'ADMIN',
-            avatar: u.profilePic || undefined,
-        }));
+        let users: User[] = [];
+        if (data.success && data.data) {
+            users = (Array.isArray(data.data) ? data.data : []).map((u: any) => ({
+                id: u.id,
+                name: u.name,
+                email: u.email,
+                isAdmin: u.role?.name === 'SUPER_ADMIN' || u.role?.name === 'ADMIN',
+                avatar: u.profilePic || undefined,
+                role: u.role ? {
+                    id: u.role.id,
+                    name: u.role.name,
+                } : undefined,
+            }));
+        }
 
         // Apply filters
         if (search) {

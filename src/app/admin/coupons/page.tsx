@@ -1,26 +1,51 @@
 import React from "react";
-import { couponsService } from "@/services";
+import { cookies } from 'next/headers';
 import CouponsTableClient from "@/components/admin/coupons/CouponsTableClient";
 
-type Coupon = {
-    code: string;
-    type: "amount" | "percent";
-    value: number;
-    used?: boolean;
-    expires?: string;
-};
+const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001/api';
 
 async function getCoupons(search: string, type: string, status: string, page: number, limit: number) {
     try {
-        // Use couponsService which uses apiClient
-        const allCoupons = await couponsService.getAll();
+        // Get cookies from request
+        const cookieStore = await cookies();
+        const cookieString = cookieStore.toString();
 
-        let coupons = allCoupons;
+        // Fetch from backend with cookies
+        const response = await fetch(`${BACKEND_API_URL}/coupons`, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Cookie': cookieString,
+            },
+            cache: 'no-store',
+        });
+
+        if (!response.ok) {
+            console.error('Failed to fetch coupons:', response.status);
+            return {
+                coupons: [],
+                stats: {
+                    totalCoupons: 0,
+                    usedCoupons: 0,
+                    unusedCoupons: 0,
+                    expiredCoupons: 0,
+                    activeCoupons: 0,
+                },
+                pagination: {
+                    currentPage: 1,
+                    totalPages: 0,
+                    totalItems: 0,
+                    itemsPerPage: limit,
+                },
+            };
+        }
+
+        const data = await response.json();
+        let coupons = data.success && data.data ? data.data : [];
 
         // Apply filters
         if (search) {
             const query = search.toLowerCase();
-            coupons = coupons.filter((c: any) => c.code.toLowerCase().includes(query));
+            coupons = coupons.filter((c: any) => c.code?.toLowerCase().includes(query));
         }
 
         if (type && type !== "all") {

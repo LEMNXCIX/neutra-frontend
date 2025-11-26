@@ -19,3 +19,5 @@ export { categoriesService } from './categories.service';
 export { bannersService } from './banners.service';
 export { slidersService } from './sliders.service';
 export { couponsService } from './coupons.service';
+export { rolesService } from './roles.service';
+export { permissionsService } from './permissions.service';

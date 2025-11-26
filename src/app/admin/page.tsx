@@ -39,7 +39,7 @@ async function validateAdminAccess() {
         const user = data.data.user;
 
         // Check if user has admin role
-        const isAdmin = user.role?.name === 'ADMIN';
+        const isAdmin = user.role?.name === 'SUPER_ADMIN' || user.role?.name === 'ADMIN';
 
         return { isValid: isAdmin, user };
     } catch (error) {

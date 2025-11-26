@@ -1,20 +1,52 @@
 import React from "react";
-import { slidersService } from "@/services";
+import { cookies } from 'next/headers';
 import SlidersTableClient from "@/components/admin/sliders/SlidersTableClient";
+
+const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001/api';
 
 async function getSliders(search: string, status: string, page: number, limit: number) {
     try {
-        // Use slidersService which uses apiClient
-        const allSliders = await slidersService.getAll();
+        // Get cookies from request
+        const cookieStore = await cookies();
+        const cookieString = cookieStore.toString();
 
-        let sliders = allSliders;
+        // Fetch from backend with cookies
+        const response = await fetch(`${BACKEND_API_URL}/sliders`, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Cookie': cookieString,
+            },
+            cache: 'no-store',
+        });
+
+        if (!response.ok) {
+            console.error('Failed to fetch sliders:', response.status);
+            return {
+                sliders: [],
+                stats: {
+                    totalSliders: 0,
+                    activeSliders: 0,
+                    inactiveSliders: 0,
+                    withImages: 0,
+                },
+                pagination: {
+                    currentPage: 1,
+                    totalPages: 0,
+                    totalItems: 0,
+                    itemsPerPage: limit,
+                },
+            };
+        }
+
+        const data = await response.json();
+        let sliders = data.success && data.data ? data.data : [];
 
         // Apply filters
         if (search) {
             const query = search.toLowerCase();
             sliders = sliders.filter((s: any) =>
-                s.title.toLowerCase().includes(query) ||
-                (s.subtitle && s.subtitle.toLowerCase().includes(query))
+                s.title?.toLowerCase().includes(query) ||
+                s.subtitle?.toLowerCase().includes(query)
             );
         }
 

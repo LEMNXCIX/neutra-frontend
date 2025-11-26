@@ -14,6 +14,9 @@ import {
     LayoutList,
     Megaphone,
     Images,
+    ShieldCheckIcon,
+    ShieldCheck,
+    BrickWallShield,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -28,6 +31,7 @@ const menuItems = [
     { href: "/admin/orders", label: "Orders", icon: ShoppingCart },
     { href: "/admin/coupons", label: "Coupons", icon: Ticket },
     { href: "/admin/users", label: "Users", icon: Users },
+    { href: "/admin/roles", label: "Roles", icon: BrickWallShield },
 ];
 
 export default function AdminSidebar() {
@@ -69,8 +73,8 @@ export default function AdminSidebar() {
                                 <Button
                                     variant={isActive ? "secondary" : "ghost"}
                                     className={`w-full justify-start gap-2 ${isActive
-                                            ? "bg-primary/10 text-primary font-medium"
-                                            : "text-foreground hover:bg-accent/60"
+                                        ? "bg-primary/10 text-primary font-medium"
+                                        : "text-foreground hover:bg-accent/60"
                                         }`}
                                 >
                                     <Icon className="w-4 h-4" />

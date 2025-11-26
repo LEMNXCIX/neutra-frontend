@@ -1,4 +1,5 @@
 import { StandardResponse } from '@/types/frontend-api';
+import { toast } from 'sonner';
 
 /**
  * Base API URL - defaults to localhost in development
@@ -58,6 +59,7 @@ export async function apiClient<T = any>(
             if (typeof window !== 'undefined') {
                 window.dispatchEvent(new CustomEvent('unauthorized'));
             }
+            toast.error('Ups, parece que no tienes permiso para acceder a esta página');
             throw new ApiError('Unauthorized', 401);
         }
 

@@ -1,11 +1,39 @@
 import React from "react";
-import { bannersService } from "@/services";
+import { cookies } from 'next/headers';
 import BannersTableClient from "@/components/admin/banners/BannersTableClient";
+
+const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001/api';
 
 async function getBanners() {
     try {
-        // Use bannersService which uses apiClient
-        const banners = await bannersService.getAll();
+        // Get cookies from request
+        const cookieStore = await cookies();
+        const cookieString = cookieStore.toString();
+
+        // Fetch from backend with cookies
+        const response = await fetch(`${BACKEND_API_URL}/banners`, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Cookie': cookieString,
+            },
+            cache: 'no-store',
+        });
+
+        if (!response.ok) {
+            console.error('Failed to fetch banners:', response.status);
+            return {
+                banners: [],
+                stats: {
+                    totalBanners: 0,
+                    activeBanners: 0,
+                    inactiveBanners: 0,
+                    withImages: 0,
+                },
+            };
+        }
+
+        const data = await response.json();
+        const banners = data.success && data.data ? data.data : [];
 
         // Calculate stats
         const totalBanners = banners.length;

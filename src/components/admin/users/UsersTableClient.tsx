@@ -8,6 +8,8 @@ import { ApiError } from "@/lib/api-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
+import { AssignRoleDialog } from "./AssignRoleDialog";
+
 import {
     Table,
     TableHeader,
@@ -45,6 +47,7 @@ import {
     Users,
     ChevronLeft,
     ChevronRight,
+    UserCog,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
@@ -54,6 +57,10 @@ type User = {
     email: string;
     isAdmin: boolean;
     avatar?: string;
+    role?: {
+        name: string;
+        id: string;
+    };
 };
 
 type Stats = {
@@ -83,6 +90,8 @@ export default function UsersTableClient({ users, stats, pagination }: Props) {
     const [editOpen, setEditOpen] = useState(false);
     const [editing, setEditing] = useState<User | null>(null);
     const [form, setForm] = useState({ name: "", email: "", isAdmin: false });
+    const [roleDialogOpen, setRoleDialogOpen] = useState(false);
+    const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
     // URL State
     const searchQuery = searchParams.get("search") || "";
@@ -164,6 +173,26 @@ export default function UsersTableClient({ users, stats, pagination }: Props) {
         } catch (err) {
             const message = err instanceof ApiError ? err.message : "Failed to update user";
             toast.error(message);
+        }
+    };
+
+    // Helper function to get role badge color
+    const getRoleColor = (roleName?: string) => {
+        if (!roleName) return "bg-gray-500";
+
+        switch (roleName.toUpperCase()) {
+            case 'SUPER_ADMIN':
+                return "bg-pink-600";
+            case 'ADMIN':
+                return "bg-purple-500";
+            case 'MANAGER':
+                return "bg-blue-500";
+            case 'MODERATOR':
+                return "bg-green-500";
+            case 'USER':
+                return "bg-gray-500";
+            default:
+                return "bg-slate-500";
         }
     };
 
@@ -285,11 +314,9 @@ export default function UsersTableClient({ users, stats, pagination }: Props) {
                                         <TableCell className="font-medium">{u.name}</TableCell>
                                         <TableCell className="text-sm text-muted-foreground">{u.email}</TableCell>
                                         <TableCell>
-                                            {u.isAdmin ? (
-                                                <Badge className="bg-purple-500">Admin</Badge>
-                                            ) : (
-                                                <Badge variant="secondary">User</Badge>
-                                            )}
+                                            <Badge className={getRoleColor(u.role?.name)}>
+                                                {u.role?.name || 'No Role'}
+                                            </Badge>
                                         </TableCell>
                                         <TableCell>
                                             <div className="flex gap-2">
@@ -302,6 +329,16 @@ export default function UsersTableClient({ users, stats, pagination }: Props) {
                                                     onClick={() => toggleAdmin(u.id)}
                                                 >
                                                     {u.isAdmin ? "Revoke Admin" : "Make Admin"}
+                                                </Button>
+                                                <Button
+                                                    size="sm"
+                                                    variant="ghost"
+                                                    onClick={() => {
+                                                        setSelectedUser(u);
+                                                        setRoleDialogOpen(true);
+                                                    }}
+                                                >
+                                                    <UserCog className="h-4 w-4" />
                                                 </Button>
                                             </div>
                                         </TableCell>
@@ -384,11 +421,9 @@ export default function UsersTableClient({ users, stats, pagination }: Props) {
                                     <h3 className="font-semibold truncate">{u.name}</h3>
                                     <p className="text-sm text-muted-foreground truncate">{u.email}</p>
                                     <div className="mt-1">
-                                        {u.isAdmin ? (
-                                            <Badge className="bg-purple-500">Admin</Badge>
-                                        ) : (
-                                            <Badge variant="secondary">User</Badge>
-                                        )}
+                                        <Badge className={getRoleColor(u.role?.name)}>
+                                            {u.role?.name || 'No Role'}
+                                        </Badge>
                                     </div>
                                 </div>
                             </div>
@@ -476,6 +511,13 @@ export default function UsersTableClient({ users, stats, pagination }: Props) {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
+            {/*  Assign Role Dialog */}
+            <AssignRoleDialog
+                user={selectedUser}
+                open={roleDialogOpen}
+                onOpenChange={setRoleDialogOpen}
+                onSuccess={() => router.refresh()}
+            />
         </div>
     );
 }
