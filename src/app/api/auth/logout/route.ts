@@ -1,17 +1,43 @@
-import { NextResponse } from 'next/server';
-import { invalidateSession } from '@/lib/session';
+import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(req: Request) {
-  // try to invalidate server session and clear cookie
-  const cookieHeader = req.headers.get('cookie') || '';
-  const cookiePairs = cookieHeader.split(';').map(s => s.trim()).filter(Boolean);
-  let sid: string | undefined;
-  for (const p of cookiePairs) {
-    const [k, ...v] = p.split('=');
-    if (k === '_neutra_sid') sid = decodeURIComponent(v.join('='));
+const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api";
+
+/**
+ * POST /api/auth/logout
+ * Proxy to backend API for logout
+ */
+export async function POST(req: NextRequest) {
+  try {
+    const backendUrl = `${BACKEND_API_URL}/auth/logout`;
+
+    const response = await fetch(backendUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(req.headers.get("cookie") && { Cookie: req.headers.get("cookie")! }),
+      },
+      cache: "no-store",
+    });
+
+    const data = await response.json();
+
+    // Forward set-cookie headers to clear cookies
+    const setCookieHeader = response.headers.get("set-cookie");
+    const headers: Record<string, string> = {};
+
+    if (setCookieHeader) {
+      headers["Set-Cookie"] = setCookieHeader;
+    }
+
+    return NextResponse.json(data, {
+      status: response.status,
+      headers,
+    });
+  } catch (error) {
+    console.error("Error during logout:", error);
+    return NextResponse.json(
+      { success: true },
+      { status: 200 }
+    );
   }
-  if (sid) invalidateSession(sid);
-  const res = NextResponse.json({ ok: true });
-  res.cookies.set('_neutra_sid', '', { httpOnly: true, path: '/', maxAge: 0 });
-  return res;
 }

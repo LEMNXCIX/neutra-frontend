@@ -1,155 +1,131 @@
-import { NextResponse } from 'next/server';
-import { getUserId } from '@/lib/session';
-import fs from 'fs';
-import path from 'path';
-import { readProducts, findProduct } from '@/data/products';
+import { NextRequest, NextResponse } from "next/server";
 
-const CARTS_PATH = path.join(process.cwd(), 'src', 'data', 'carts.json');
+const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api";
 
-function readCarts(): Record<string, { id: string; name: string; qty: number }[]> {
+/**
+ * GET /api/cart
+ * Proxy to backend API for cart
+ */
+export async function GET(req: NextRequest) {
   try {
-    const raw = fs.readFileSync(CARTS_PATH, 'utf-8');
-    return JSON.parse(raw);
-  } catch {
-    return {};
+    const backendUrl = `${BACKEND_API_URL}/cart`;
+
+    const response = await fetch(backendUrl, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        ...(req.headers.get("cookie") && { Cookie: req.headers.get("cookie")! }),
+      },
+      credentials: "include",
+      cache: "no-store",
+    });
+
+    const data = await response.json();
+
+    return NextResponse.json(data, { status: response.status });
+  } catch (error) {
+    console.error("Error fetching cart from backend:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch cart" },
+      { status: 500 }
+    );
   }
 }
 
-function writeCarts(obj: Record<string, { id: string; name: string; qty: number }[]>) {
-  fs.writeFileSync(CARTS_PATH, JSON.stringify(obj, null, 2), 'utf-8');
+/**
+ * POST /api/cart
+ * Proxy to backend API to add item to cart
+ */
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.json();
+    const backendUrl = `${BACKEND_API_URL}/cart/add`;
+
+    const response = await fetch(backendUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(req.headers.get("cookie") && { Cookie: req.headers.get("cookie")! }),
+      },
+      body: JSON.stringify(body),
+      cache: "no-store",
+    });
+
+    const data = await response.json();
+
+    return NextResponse.json(data, { status: response.status });
+  } catch (error) {
+    console.error("Error adding to cart:", error);
+    return NextResponse.json(
+      { error: "Failed to add item to cart" },
+      { status: 500 }
+    );
+  }
 }
 
-// inventory is stored as `stock` inside products.json now
+/**
+ * DELETE /api/cart
+ * Proxy to backend API to remove item from cart
+ */
+export async function DELETE(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const itemId = searchParams.get("id");
 
-function parseSid(req: Request) {
-  const cookieHeader = req.headers.get('cookie') || '';
-  const cookiePairs = cookieHeader.split(';').map(s => s.trim()).filter(Boolean);
-  let rawSid: string | undefined;
-  for (const p of cookiePairs) {
-    const [k, ...v] = p.split('=');
-    if (k === '_neutra_sid') rawSid = decodeURIComponent(v.join('='));
+    if (!itemId) {
+      return NextResponse.json({ error: "Item ID required" }, { status: 400 });
+    }
+
+    const backendUrl = `${BACKEND_API_URL}/cart/remove/${itemId}`;
+
+    const response = await fetch(backendUrl, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        ...(req.headers.get("cookie") && { Cookie: req.headers.get("cookie")! }),
+      },
+      cache: "no-store",
+    });
+
+    const data = await response.json();
+
+    return NextResponse.json(data, { status: response.status });
+  } catch (error) {
+    console.error("Error removing from cart:", error);
+    return NextResponse.json(
+      { error: "Failed to remove item from cart" },
+      { status: 500 }
+    );
   }
-  return rawSid;
 }
 
-export async function GET(req: Request) {
-  const rawSid = parseSid(req);
-  const userId = getUserId(rawSid);
-  if (!userId) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+/**
+ * PUT /api/cart
+ * Proxy to backend API to update cart item quantity
+ */
+export async function PUT(req: NextRequest) {
+  try {
+    const body = await req.json();
+    const backendUrl = `${BACKEND_API_URL}/cart/add`; // Backend uses add for update too
 
-  const carts = readCarts();
-  const products = readProducts();
-  const items = (carts[userId] || []).map(it => {
-    const prod = products.find(p => p.id === it.id);
-    return {
-      ...it,
-      price: prod?.price ?? 0,
-      image: prod?.image ?? '',
-      stock: prod?.stock ?? 0,
-    };
-  });
-  return NextResponse.json({ items });
-}
+    const response = await fetch(backendUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(req.headers.get("cookie") && { Cookie: req.headers.get("cookie")! }),
+      },
+      body: JSON.stringify({ productId: body.id, quantity: body.qty }),
+      cache: "no-store",
+    });
 
-export async function POST(request: Request) {
-  const rawSid = parseSid(request as unknown as Request);
-  const userId = getUserId(rawSid);
-  if (!userId) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+    const data = await response.json();
 
-  const body = await request.json();
-  const { id, name } = body;
-  if (!id || !name) return NextResponse.json({ error: 'Invalid payload' }, { status: 400 });
-
-  // Validate product exists and check inventory
-  const prod = findProduct(id);
-  if (!prod) return NextResponse.json({ error: 'Unknown product' }, { status: 400 });
-
-  const available = prod.stock ?? 0;
-
-  const carts = readCarts();
-  if (!carts[userId]) carts[userId] = [];
-  const existing = carts[userId].find((s) => s.id === id);
-
-  const currentQty = existing ? existing.qty : 0;
-  if (currentQty + 1 > available) {
-    return NextResponse.json({ error: 'Out of stock', available }, { status: 400 });
+    return NextResponse.json(data, { status: response.status });
+  } catch (error) {
+    console.error("Error updating cart:", error);
+    return NextResponse.json(
+      { error: "Failed to update cart" },
+      { status: 500 }
+    );
   }
-
-  if (existing) existing.qty += 1;
-  else carts[userId].push({ id, name, qty: 1 });
-  writeCarts(carts);
-  const products = readProducts();
-  const items = (carts[userId] || []).map(it => {
-    const prod = products.find(p => p.id === it.id);
-    return {
-      ...it,
-      price: prod?.price ?? 0,
-      image: prod?.image ?? '',
-      stock: prod?.stock ?? 0,
-    };
-  });
-  return NextResponse.json({ items });
-}
-
-export async function PUT(request: Request) {
-  const rawSid = parseSid(request as unknown as Request);
-  const userId = getUserId(rawSid);
-  if (!userId) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
-
-  const body = await request.json();
-  const { id, qty } = body;
-  if (!id || typeof qty !== 'number' || qty < 1) {
-    return NextResponse.json({ error: 'Invalid payload' }, { status: 400 });
-  }
-
-  // Validate product exists and check inventory
-  const prod = findProduct(id);
-  if (!prod) return NextResponse.json({ error: 'Unknown product' }, { status: 400 });
-
-  const available = prod.stock ?? 0;
-  if (qty > available) {
-    return NextResponse.json({ error: `Only ${available} items available in stock`, available }, { status: 400 });
-  }
-
-  const carts = readCarts();
-  if (!carts[userId]) carts[userId] = [];
-  const existing = carts[userId].find((s) => s.id === id);
-
-  if (existing) {
-    existing.qty = qty;
-  } else {
-    return NextResponse.json({ error: 'Item not in cart' }, { status: 404 });
-  }
-
-  writeCarts(carts);
-  const products = readProducts();
-  const items = (carts[userId] || []).map(it => {
-    const prod = products.find(p => p.id === it.id);
-    return {
-      ...it,
-      price: prod?.price ?? 0,
-      image: prod?.image ?? '',
-      stock: prod?.stock ?? 0,
-    };
-  });
-  return NextResponse.json({ items });
-}
-
-export async function DELETE(request: Request) {
-  const url = new URL(request.url);
-  const id = url.searchParams.get('id');
-  const rawSid = parseSid(request as unknown as Request);
-  const userId = getUserId(rawSid);
-  if (!userId) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
-
-  const carts = readCarts();
-  if (!carts[userId]) carts[userId] = [];
-  if (id) {
-    carts[userId] = carts[userId].filter((s) => s.id !== id);
-  } else {
-    // clear cart for user
-    carts[userId] = [];
-  }
-  writeCarts(carts);
-  return NextResponse.json({ items: carts[userId] });
 }

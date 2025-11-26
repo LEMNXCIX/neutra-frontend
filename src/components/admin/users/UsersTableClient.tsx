@@ -3,6 +3,8 @@
 import React, { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
+import { usersService } from "@/services";
+import { ApiError } from "@/lib/api-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -116,11 +118,13 @@ export default function UsersTableClient({ users, stats, pagination }: Props) {
 
     const toggleAdmin = async (id: string) => {
         try {
+            // For now, using direct API call as backend doesn't have role toggle endpoint
+            // This should be migrated when backend API is updated
             const res = await fetch("/api/admin/users/toggle", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ userId: id }),
-                credentials: "same-origin",
+                credentials: "include",
             });
             if (!res.ok) {
                 const data = await res.json();
@@ -129,8 +133,9 @@ export default function UsersTableClient({ users, stats, pagination }: Props) {
             }
             toast.success("Role updated");
             router.refresh();
-        } catch {
-            toast.error("Network error");
+        } catch (err) {
+            const message = err instanceof ApiError ? err.message : "Network error";
+            toast.error(message);
         }
     };
 
@@ -147,24 +152,18 @@ export default function UsersTableClient({ users, stats, pagination }: Props) {
     const saveEdit = async () => {
         if (!editing) return;
         try {
-            const res = await fetch(`/api/admin/users/${editing.id}`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(form),
-                credentials: "same-origin",
+            await usersService.update(editing.id, {
+                name: form.name,
+                email: form.email,
             });
-            if (!res.ok) {
-                const data = await res.json();
-                toast.error(data?.error || "Failed to update");
-                return;
-            }
             toast.success("User updated");
             setEditOpen(false);
             setEditing(null);
             setForm({ name: "", email: "", isAdmin: false });
             router.refresh();
-        } catch {
-            toast.error("Network error");
+        } catch (err) {
+            const message = err instanceof ApiError ? err.message : "Failed to update user";
+            toast.error(message);
         }
     };
 

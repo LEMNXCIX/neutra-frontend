@@ -1,98 +1,104 @@
-import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
-import { requireAdminFromRequest } from '@/lib/auth';
+import { NextRequest, NextResponse } from "next/server";
 
-const USERS_PATH = path.join(process.cwd(), 'src', 'data', 'users.json');
+const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api";
 
-type User = {
-  id: string;
-  name: string;
-  email: string;
-  isAdmin?: boolean;
-  avatar?: string;
-};
-
-export async function GET(req: Request) {
-  const check = requireAdminFromRequest(req);
-  if (!check.ok) return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
-
-  const url = new URL(req.url);
-  const searchQuery = url.searchParams.get('search') || '';
-  const roleFilter = url.searchParams.get('role') || '';
-  const page = parseInt(url.searchParams.get('page') || '1', 10);
-  const limit = parseInt(url.searchParams.get('limit') || '10', 10);
-
+/**
+ * GET /api/admin/users
+ * Proxy to backend API for admin user management
+ */
+export async function GET(req: NextRequest) {
   try {
-    const raw = fs.readFileSync(USERS_PATH, 'utf-8');
-    let users = JSON.parse(raw) as Array<User>;
+    const { searchParams } = new URL(req.url);
+    const backendUrl = `${BACKEND_API_URL}/users?${searchParams.toString()}`;
 
-    // Hide password
-    users = users.map((u: any) => ({
-      id: u.id,
-      name: u.name,
-      email: u.email,
-      isAdmin: !!u.isAdmin,
-      avatar: u.avatar || null,
-    }));
+    const response = await fetch(backendUrl, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        ...(req.headers.get("cookie") && { Cookie: req.headers.get("cookie")! }),
+      },
+      cache: "no-store",
+    });
 
-    // Apply search filter
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      users = users.filter(u =>
-        u.name.toLowerCase().includes(query) ||
-        u.email.toLowerCase().includes(query) ||
-        u.id.toLowerCase().includes(query)
+    const data = await response.json();
+
+    // Transform backend response to match expected format
+    if (data.success && data.data) {
+      const users = Array.isArray(data.data) ? data.data : [];
+
+      // Calculate stats
+      const totalUsers = users.length;
+      const adminUsers = users.filter((u: any) => u.role?.name === 'admin').length;
+      const regularUsers = totalUsers - adminUsers;
+
+      return NextResponse.json({
+        users: users.map((u: any) => ({
+          id: u.id,
+          name: u.name,
+          email: u.email,
+          isAdmin: u.role?.name === 'admin',
+          avatar: u.profilePic,
+        })),
+        stats: {
+          totalUsers,
+          adminUsers,
+          regularUsers,
+        },
+        pagination: {
+          currentPage: 1,
+          totalPages: 1,
+          totalItems: totalUsers,
+          itemsPerPage: totalUsers,
+        },
+      });
+    }
+
+    return NextResponse.json(data, { status: response.status });
+  } catch (error) {
+    console.error("Error fetching users from backend:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch users" },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * PUT /api/admin/users/[id]
+ * Update user via backend
+ */
+export async function PUT(req: NextRequest) {
+  try {
+    const body = await req.json();
+    const { userId } = body;
+
+    if (!userId) {
+      return NextResponse.json(
+        { error: "User ID required" },
+        { status: 400 }
       );
     }
 
-    // Apply role filter
-    if (roleFilter === 'admin') {
-      users = users.filter(u => u.isAdmin);
-    } else if (roleFilter === 'user') {
-      users = users.filter(u => !u.isAdmin);
-    }
+    const backendUrl = `${BACKEND_API_URL}/users/${userId}`;
 
-    // Calculate stats from ALL filtered users (before pagination)
-    const totalUsers = users.length;
-    const adminUsers = users.filter(u => u.isAdmin).length;
-    const regularUsers = users.filter(u => !u.isAdmin).length;
-
-    // Apply pagination
-    const startIndex = (page - 1) * limit;
-    const endIndex = startIndex + limit;
-    const paginatedUsers = users.slice(startIndex, endIndex);
-    const totalPages = Math.ceil(totalUsers / limit);
-
-    return NextResponse.json({
-      users: paginatedUsers,
-      stats: {
-        totalUsers,
-        adminUsers,
-        regularUsers,
+    const response = await fetch(backendUrl, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        ...(req.headers.get("cookie") && { Cookie: req.headers.get("cookie")! }),
       },
-      pagination: {
-        currentPage: page,
-        totalPages,
-        totalItems: totalUsers,
-        itemsPerPage: limit,
-        hasNextPage: page < totalPages,
-        hasPreviousPage: page > 1,
-      },
+      body: JSON.stringify(body),
+      cache: "no-store",
     });
-  } catch (err) {
-    console.error('Error reading users:', err);
-    return NextResponse.json({
-      users: [],
-      stats: { totalUsers: 0, adminUsers: 0, regularUsers: 0 },
-      pagination: {
-        currentPage: 1,
-        totalPages: 0,
-        totalItems: 0,
-        itemsPerPage: limit,
-        hasNextPage: false,
-        hasPreviousPage: false,
-      },
-    });
+
+    const data = await response.json();
+
+    return NextResponse.json(data, { status: response.status });
+  } catch (error) {
+    console.error("Error updating user:", error);
+    return NextResponse.json(
+      { error: "Failed to update user" },
+      { status: 500 }
+    );
   }
 }

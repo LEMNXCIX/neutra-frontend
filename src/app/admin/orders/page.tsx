@@ -1,9 +1,6 @@
 import React from "react";
-import fs from "fs";
-import path from "path";
 import OrdersTableClient from "@/components/admin/orders/OrdersTableClient";
-
-const ORDERS_PATH = path.join(process.cwd(), "src", "data", "orders.json");
+import { ordersService } from "@/services";
 
 type OrderItem = { id: string; name: string; qty: number; price: number };
 type Order = {
@@ -25,29 +22,33 @@ type Order = {
 
 async function getOrders(search: string, status: string) {
     try {
-        const raw = fs.readFileSync(ORDERS_PATH, "utf-8");
-        let orders = JSON.parse(raw) as Order[];
+        // Use ordersService to get all orders from backend
+        const allOrders = await ordersService.getAll();
 
-        // Apply filters
+        // Apply filters client-side (ideally backend should support these)
+        let orders = allOrders as any[];
+
         if (search) {
             const query = search.toLowerCase();
             orders = orders.filter(
-                (o) =>
+                (o: any) =>
                     o.id.toLowerCase().includes(query) ||
-                    o.userId.toLowerCase().includes(query)
+                    (o.userId && o.userId.toLowerCase().includes(query))
             );
         }
 
         if (status && status !== "all") {
-            orders = orders.filter((o) => o.status.toLowerCase() === status.toLowerCase());
+            orders = orders.filter((o: any) =>
+                o.status && o.status.toLowerCase() === status.toLowerCase()
+            );
         }
 
         // Calculate stats
         const totalOrders = orders.length;
-        const totalRevenue = orders.reduce((sum, o) => sum + o.total, 0);
+        const totalRevenue = orders.reduce((sum: number, o: any) => sum + (o.total || 0), 0);
         const statusCounts: Record<string, number> = {};
-        orders.forEach((o) => {
-            const s = o.status.toLowerCase();
+        orders.forEach((o: any) => {
+            const s = (o.status || '').toLowerCase();
             statusCounts[s] = (statusCounts[s] || 0) + 1;
         });
 
@@ -60,7 +61,7 @@ async function getOrders(search: string, status: string) {
             },
         };
     } catch (err) {
-        console.error("Error reading orders:", err);
+        console.error("Error fetching orders:", err);
         return {
             orders: [],
             stats: { totalOrders: 0, totalRevenue: 0, statusCounts: {} },

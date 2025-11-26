@@ -1,31 +1,44 @@
-import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
-import { createSession } from '@/lib/session';
-import { signJwt } from '@/lib/jwt';
+import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(req: Request) {
-  const body = await req.json();
-  const { email, password } = body;
-  // read users from local file
-  const usersPath = path.join(process.cwd(), 'src', 'data', 'users.json');
-  const usersRaw = fs.readFileSync(usersPath, 'utf-8');
-  const users = JSON.parse(usersRaw) as { id: string; name: string; email: string; password: string; isAdmin?: boolean; avatar?: string }[];
-  console.log(password)
-  console.log(email)
-  console.log(users)
-  const found = users.find((u) => u.email === email && u.password === password);
-  console.log(found)
-  if (!found) return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
+const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api";
 
-  const sid = createSession(found.id);
-  const res = NextResponse.json({ user: { id: found.id, name: found.name, email: found.email, isAdmin: !!found.isAdmin, avatar: found.avatar || null } });
-  // set demo session cookie (httpOnly) with session id
-  res.cookies.set('_neutra_sid', sid, { httpOnly: true, path: '/' });
-  // also emit an httpOnly JWT token for optional API usage
+/**
+ * POST /api/auth/login
+ * Proxy to backend API for authentication
+ */
+export async function POST(req: NextRequest) {
   try {
-    const token = signJwt({ sub: found.id, email: found.email }, { expiresIn: 60 * 60 * 24 });
-    res.cookies.set('neutra_jwt', token, { httpOnly: true, path: '/' });
-  } catch { }
-  return res;
+    const body = await req.json();
+    const backendUrl = `${BACKEND_API_URL}/auth/login`;
+
+    const response = await fetch(backendUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+      cache: "no-store",
+    });
+
+    const data = await response.json();
+
+    // Forward set-cookie headers from backend
+    const setCookieHeader = response.headers.get("set-cookie");
+    const headers: Record<string, string> = {};
+
+    if (setCookieHeader) {
+      headers["Set-Cookie"] = setCookieHeader;
+    }
+
+    return NextResponse.json(data, {
+      status: response.status,
+      headers,
+    });
+  } catch (error) {
+    console.error("Error during login:", error);
+    return NextResponse.json(
+      { error: "Login failed" },
+      { status: 500 }
+    );
+  }
 }

@@ -1,111 +1,85 @@
-import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
-import { getUserFromRequest } from '@/lib/auth';
+import { NextRequest, NextResponse } from "next/server";
 
-const USERS_PATH = path.join(process.cwd(), 'src', 'data', 'users.json');
-const UPLOADS_DIR = path.join(process.cwd(), 'public', 'uploads');
+const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api";
 
-function ensureUploads() { if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR, { recursive: true }) }
-
-function saveBase64Image(dataUrl: string) {
+/**
+ * GET /api/profile
+ * Proxy to backend API for user profile
+ */
+export async function GET(req: NextRequest) {
     try {
-        const m = dataUrl.match(/^data:(image\/\w+);base64,(.+)$/);
-        if (!m) return null;
-        const mime = m[1];
-        const ext = mime.split('/')[1] || 'png';
-        const b64 = m[2];
-        const buf = Buffer.from(b64, 'base64');
-        ensureUploads();
-        const filename = `avatar_${Date.now()}.${ext}`;
-        const dest = path.join(UPLOADS_DIR, filename);
-        fs.writeFileSync(dest, buf);
-        return `/uploads/${filename}`;
-    } catch { return null }
-}
+        const backendUrl = `${BACKEND_API_URL}/auth/validate`;
 
-// GET: get current user profile
-export async function GET(req: Request) {
-    const userCheck = getUserFromRequest(req);
-    if (!userCheck.ok) {
-        return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
-    }
-
-    try {
-        const raw = fs.readFileSync(USERS_PATH, 'utf-8');
-        const users = JSON.parse(raw) as Array<any>;
-        const user = users.find(u => u.id === userCheck.user?.id);
-
-        if (!user) {
-            return NextResponse.json({ error: 'user_not_found' }, { status: 404 });
-        }
-
-        return NextResponse.json({
-            user: {
-                id: user.id,
-                name: user.name,
-                email: user.email,
-                isAdmin: !!user.isAdmin,
-                avatar: user.avatar || null,
-            }
+        const response = await fetch(backendUrl, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                ...(req.headers.get("cookie") && { Cookie: req.headers.get("cookie")! }),
+            },
+            cache: "no-store",
         });
-    } catch {
-        return NextResponse.json({ error: 'read_failed' }, { status: 500 });
+
+        const data = await response.json();
+
+        return NextResponse.json(data, { status: response.status });
+    } catch (error) {
+        console.error("Error fetching profile:", error);
+        return NextResponse.json(
+            { error: "Failed to fetch profile" },
+            { status: 401 }
+        );
     }
 }
 
-// PUT: update current user profile
-export async function PUT(req: Request) {
-    const userCheck = getUserFromRequest(req);
-    if (!userCheck.ok) {
-        return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
-    }
-    const userId = userCheck.user.id;
-
-    const body = await req.json().catch(() => null);
-    if (!body) {
-        return NextResponse.json({ error: 'invalid_body' }, { status: 400 });
-    }
-
+/**
+ * PUT /api/profile
+ * Proxy to backend API to update user profile
+ */
+export async function PUT(req: NextRequest) {
     try {
-        const raw = fs.readFileSync(USERS_PATH, 'utf-8');
-        const users = JSON.parse(raw) as Array<any>;
-        const userIndex = users.findIndex(u => u.id === userId);
+        const body = await req.json();
 
-        if (userIndex === -1) {
-            return NextResponse.json({ error: 'user_not_found' }, { status: 404 });
-        }
-
-        // Update allowed fields
-        if (body.name) users[userIndex].name = String(body.name);
-        if (body.email) users[userIndex].email = String(body.email);
-
-        // Handle avatar upload
-        if (body.avatarBase64) {
-            const avatarUrl = saveBase64Image(String(body.avatarBase64));
-            if (avatarUrl) {
-                users[userIndex].avatar = avatarUrl;
-            }
-        }
-
-        // Write updated users
-        const tmp = `${USERS_PATH}.tmp`;
-        const bak = `${USERS_PATH}.bak`;
-        if (fs.existsSync(USERS_PATH)) fs.copyFileSync(USERS_PATH, bak);
-        fs.writeFileSync(tmp, JSON.stringify(users, null, 2), 'utf-8');
-        fs.renameSync(tmp, USERS_PATH);
-
-        return NextResponse.json({
-            user: {
-                id: users[userIndex].id,
-                name: users[userIndex].name,
-                email: users[userIndex].email,
-                isAdmin: !!users[userIndex].isAdmin,
-                avatar: users[userIndex].avatar || null,
-            }
+        // First get current user ID
+        const validateUrl = `${BACKEND_API_URL}/auth/validate`;
+        const validateResponse = await fetch(validateUrl, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                ...(req.headers.get("cookie") && { Cookie: req.headers.get("cookie")! }),
+            },
+            cache: "no-store",
         });
-    } catch (err) {
-        console.error('Error updating profile:', err);
-        return NextResponse.json({ error: 'update_failed' }, { status: 500 });
+
+        const validateData = await validateResponse.json();
+
+        if (!validateData.success || !validateData.data?.user?.id) {
+            return NextResponse.json(
+                { error: "Unauthorized" },
+                { status: 401 }
+            );
+        }
+
+        const userId = validateData.data.user.id;
+        const backendUrl = `${BACKEND_API_URL}/users/${userId}`;
+
+        const response = await fetch(backendUrl, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                ...(req.headers.get("cookie") && { Cookie: req.headers.get("cookie")! }),
+            },
+            body: JSON.stringify(body),
+            cache: "no-store",
+        });
+
+        const data = await response.json();
+
+        return NextResponse.json(data, { status: response.status });
+    } catch (error) {
+        console.error("Error updating profile:", error);
+        return NextResponse.json(
+            { error: "Failed to update profile" },
+            { status: 500 }
+        );
     }
 }

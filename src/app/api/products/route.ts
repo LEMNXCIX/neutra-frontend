@@ -1,28 +1,36 @@
-import { NextResponse } from 'next/server';
-import { readProducts } from '@/data/products';
+import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(req: Request) {
+const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api";
+
+/**
+ * GET /api/products
+ * Proxy to backend API for products
+ */
+export async function GET(req: NextRequest) {
   try {
-    const url = new URL(req.url);
-    const search = url.searchParams.get('search') || '';
-    const category = url.searchParams.get('category') || '';
+    const { searchParams } = new URL(req.url);
 
-  let filtered = readProducts();
+    // Forward all query params to backend
+    const backendUrl = `${BACKEND_API_URL}/products?${searchParams.toString()}`;
 
-    if (search) {
-      const q = search.trim().toLowerCase();
-      filtered = filtered.filter(p =>
-        p.title.toLowerCase().includes(q) || (p.description || '').toLowerCase().includes(q)
-      );
-    }
+    const response = await fetch(backendUrl, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        // Forward cookies for authentication
+        ...(req.headers.get("cookie") && { Cookie: req.headers.get("cookie")! }),
+      },
+      cache: "no-store",
+    });
 
-    if (category) {
-      const c = category.trim().toLowerCase();
-      filtered = filtered.filter(p => (p.category || '').toLowerCase() === c);
-    }
+    const data = await response.json();
 
-    return NextResponse.json({ products: filtered });
-  } catch {
-    return NextResponse.json({ products: [] });
+    return NextResponse.json(data, { status: response.status });
+  } catch (error) {
+    console.error("Error fetching products from backend:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch products" },
+      { status: 500 }
+    );
   }
 }

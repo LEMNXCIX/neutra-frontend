@@ -1,46 +1,35 @@
 import React from "react";
-import fs from "fs";
-import path from "path";
+import { slidersService } from "@/services";
 import SlidersTableClient from "@/components/admin/sliders/SlidersTableClient";
-
-const SLIDERS_PATH = path.join(process.cwd(), "src", "data", "sliders.json");
-
-type Slide = {
-    id: string;
-    title: string;
-    subtitle?: string;
-    image?: string;
-    startsAt?: string;
-    endsAt?: string;
-    active?: boolean;
-};
 
 async function getSliders(search: string, status: string, page: number, limit: number) {
     try {
-        const raw = fs.readFileSync(SLIDERS_PATH, "utf-8");
-        let sliders = JSON.parse(raw) as Slide[];
+        // Use slidersService which uses apiClient
+        const allSliders = await slidersService.getAll();
+
+        let sliders = allSliders;
 
         // Apply filters
         if (search) {
             const query = search.toLowerCase();
-            sliders = sliders.filter(
-                (s) =>
-                    s.title.toLowerCase().includes(query) ||
-                    s.id.toLowerCase().includes(query) ||
-                    (s.subtitle && s.subtitle.toLowerCase().includes(query))
+            sliders = sliders.filter((s: any) =>
+                s.title.toLowerCase().includes(query) ||
+                (s.subtitle && s.subtitle.toLowerCase().includes(query))
             );
         }
 
         if (status && status !== "all") {
-            const isActive = status === "active";
-            sliders = sliders.filter((s) => (s.active ?? true) === isActive);
+            if (status === "active") {
+                sliders = sliders.filter((s: any) => s.active);
+            } else if (status === "inactive") {
+                sliders = sliders.filter((s: any) => !s.active);
+            }
         }
 
         // Calculate stats
         const totalSliders = sliders.length;
-        const activeSliders = sliders.filter((s) => s.active ?? true).length;
-        const inactiveSliders = totalSliders - activeSliders;
-        const withImages = sliders.filter((s) => s.image).length;
+        const activeSliders = sliders.filter((s: any) => s.active).length;
+        const withImages = sliders.filter((s: any) => s.image).length;
 
         // Apply pagination
         const startIndex = (page - 1) * limit;
@@ -53,7 +42,7 @@ async function getSliders(search: string, status: string, page: number, limit: n
             stats: {
                 totalSliders,
                 activeSliders,
-                inactiveSliders,
+                inactiveSliders: totalSliders - activeSliders,
                 withImages,
             },
             pagination: {
@@ -64,10 +53,15 @@ async function getSliders(search: string, status: string, page: number, limit: n
             },
         };
     } catch (err) {
-        console.error("Error reading sliders:", err);
+        console.error("Error fetching sliders:", err);
         return {
             sliders: [],
-            stats: { totalSliders: 0, activeSliders: 0, inactiveSliders: 0, withImages: 0 },
+            stats: {
+                totalSliders: 0,
+                activeSliders: 0,
+                inactiveSliders: 0,
+                withImages: 0,
+            },
             pagination: {
                 currentPage: 1,
                 totalPages: 0,

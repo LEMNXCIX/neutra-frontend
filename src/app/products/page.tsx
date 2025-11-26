@@ -1,40 +1,86 @@
-import ProductsPage from "./products-client"; // 👈 importar tu componente cliente
-import categories from "@/data/categories.json";
+import ProductsPage from "./products-client";
+import { productsService } from "@/services";
+import type { Product as BackendProduct } from "@/types/frontend-api";
 
-type Category = { id: string; name: string };
+// Frontend expects 'title' but backend uses 'name'
+type FrontendProduct = {
+  id: string;
+  title: string;
+  price: number;
+  description?: string;
+  image?: string;
+  category?: string;
+  stock?: number;
+};
 
-async function fetchProducts(search?: string, category?: string) {
-  const base =
-    process.env.NEXT_PUBLIC_BASE_URL ||
-    process.env.BASE_URL ||
-    "http://localhost:3000";
+async function fetchProducts(search?: string, category?: string): Promise<FrontendProduct[]> {
+  try {
+    // Use productsService which handles the backend API correctly
+    const allProducts = await productsService.getAll();
 
-  const url = new URL("/api/products", base);
-  if (search) url.searchParams.set("search", search);
-  if (category && category !== "all") url.searchParams.set("category", category);
+    let filtered = allProducts;
 
-  const res = await fetch(url.toString(), { cache: "no-store" });
-  if (!res.ok) throw new Error("Failed to fetch products");
-  const data = await res.json();
-  return data.products;
+    // Apply search filter
+    if (search) {
+      const query = search.toLowerCase().trim();
+      filtered = filtered.filter(
+        (p) =>
+          p.name.toLowerCase().includes(query) ||
+          (p.description || "").toLowerCase().includes(query)
+      );
+    }
+
+    // Apply category filter
+    if (category && category !== "all") {
+      filtered = filtered.filter((p) => {
+        // Check if product has categories array
+        if (p.categories && Array.isArray(p.categories)) {
+          return p.categories.some(
+            (c: any) =>
+              (typeof c === "string" ? c : c.id || c.name) === category
+          );
+        }
+        return false;
+      });
+    }
+
+    // Map backend Product to frontend Product
+    return filtered.map((p) => ({
+      id: p.id,
+      title: p.name, // Map name to title
+      price: p.price,
+      description: p.description,
+      image: p.image || undefined,
+      category: (() => {
+        const cat = p.categories?.[0];
+        if (!cat) return undefined;
+        return typeof cat === 'string' ? cat : (cat.name || cat.id || undefined);
+      })(),
+      stock: p.stock,
+    }));
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    return [];
+  }
 }
 
-export default async function Page({
-  searchParams,
-}: {
-  searchParams?: { [key: string]: string | string[] };
-}) {
-  const getParam = (k: string) => {
-    const v = searchParams?.[k];
-    if (!v) return "";
-    return Array.isArray(v) ? v[0] : v;
-  };
+type Props = {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+};
 
-  const search = getParam("search") || "";
-  const category = getParam("category") || "all";
+export default async function Page({ searchParams }: Props) {
+  const resolvedSearchParams = await searchParams;
+
+  const search =
+    typeof resolvedSearchParams.search === "string"
+      ? resolvedSearchParams.search
+      : "";
+  const category =
+    typeof resolvedSearchParams.category === "string"
+      ? resolvedSearchParams.category
+      : "all";
 
   const products = await fetchProducts(search, category);
 
-  // 👇 Pasamos los productos al componente cliente
   return <ProductsPage products={products} />;
 }

@@ -1,31 +1,32 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(req: Request) {
-  const cookieHeader = req.headers.get('cookie') || '';
-  const cookiePairs = cookieHeader.split(';').map(s => s.trim()).filter(Boolean);
-  const cookieMap: Record<string, string> = {};
-  for (const p of cookiePairs) {
-    const [k, ...v] = p.split('=');
-    cookieMap[k] = decodeURIComponent(v.join('='));
-  }
-  const rawSid = cookieMap['_neutra_sid'];
-  if (!rawSid) return NextResponse.json({ user: null });
+const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api";
 
-  // resolve session id to user id
+/**
+ * GET /api/auth/me
+ * Proxy to backend API to get current user
+ */
+export async function GET(req: NextRequest) {
   try {
-    const { getUserId } = await import('@/lib/session');
-    const userId = getUserId(rawSid);
-    if (!userId) return NextResponse.json({ user: null });
+    const backendUrl = `${BACKEND_API_URL}/auth/validate`;
 
-    const path = await import('path');
-    const fs = await import('fs');
-    const usersPath = path.join(process.cwd(), 'src', 'data', 'users.json');
-    const usersRaw = fs.readFileSync(usersPath, 'utf-8');
-    const users = JSON.parse(usersRaw) as { id: string; name: string; email: string; password?: string; isAdmin?: boolean; avatar?: string }[];
-    const found = users.find((u) => u.id === userId);
-    if (!found) return NextResponse.json({ user: null });
-    return NextResponse.json({ user: { id: found.id, name: found.name, email: found.email, isAdmin: !!found.isAdmin, avatar: found.avatar || null } });
-  } catch {
-    return NextResponse.json({ user: null });
+    const response = await fetch(backendUrl, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        ...(req.headers.get("cookie") && { Cookie: req.headers.get("cookie")! }),
+      },
+      cache: "no-store",
+    });
+
+    const data = await response.json();
+
+    return NextResponse.json(data, { status: response.status });
+  } catch (error) {
+    console.error("Error validating session:", error);
+    return NextResponse.json(
+      { error: "Failed to validate session" },
+      { status: 401 }
+    );
   }
 }

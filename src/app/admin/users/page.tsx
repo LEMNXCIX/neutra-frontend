@@ -1,4 +1,5 @@
 import React from "react";
+import { usersService } from "@/services";
 import UsersTableClient from "@/components/admin/users/UsersTableClient";
 
 type User = {
@@ -9,42 +10,74 @@ type User = {
     avatar?: string;
 };
 
+type Stats = {
+    totalUsers: number;
+    adminUsers: number;
+    regularUsers: number;
+};
+
+type PaginationProps = {
+    currentPage: number;
+    totalPages: number;
+    totalItems: number;
+    itemsPerPage: number;
+};
+
 async function getUsers(search: string, role: string, page: number, limit: number) {
     try {
-        const params = new URLSearchParams();
-        if (search) params.set("search", search);
-        if (role && role !== "all") params.set("role", role);
-        params.set("page", page.toString());
-        params.set("limit", limit.toString());
+        // Use usersService which uses apiClient
+        const allUsers = await usersService.getAll();
 
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/api/admin/users?${params.toString()}`, {
-            cache: "no-store",
-            credentials: "same-origin",
-        });
+        // Map backend users to frontend format
+        let users: User[] = allUsers.map((u) => ({
+            id: u.id,
+            name: u.name,
+            email: u.email,
+            isAdmin: u.role?.name === 'ADMIN',
+            avatar: u.profilePic || undefined,
+        }));
 
-        if (!res.ok) {
-            console.error("Failed to fetch users");
-            return {
-                users: [],
-                stats: { totalUsers: 0, adminUsers: 0, regularUsers: 0 },
-                pagination: {
-                    currentPage: 1,
-                    totalPages: 0,
-                    totalItems: 0,
-                    itemsPerPage: limit,
-                },
-            };
+        // Apply filters
+        if (search) {
+            const query = search.toLowerCase();
+            users = users.filter(
+                (u) =>
+                    u.name.toLowerCase().includes(query) ||
+                    u.email.toLowerCase().includes(query) ||
+                    u.id.toLowerCase().includes(query)
+            );
         }
 
-        const data = await res.json();
+        if (role && role !== "all") {
+            if (role === "admin") {
+                users = users.filter((u) => u.isAdmin);
+            } else if (role === "user") {
+                users = users.filter((u) => !u.isAdmin);
+            }
+        }
+
+        // Calculate stats
+        const totalUsers = users.length;
+        const adminUsers = users.filter((u) => u.isAdmin).length;
+        const regularUsers = totalUsers - adminUsers;
+
+        // Apply pagination
+        const startIndex = (page - 1) * limit;
+        const endIndex = startIndex + limit;
+        const paginatedUsers = users.slice(startIndex, endIndex);
+        const totalPages = Math.ceil(totalUsers / limit);
 
         return {
-            users: data.users || [],
-            stats: data.stats || { totalUsers: 0, adminUsers: 0, regularUsers: 0 },
-            pagination: data.pagination || {
+            users: paginatedUsers,
+            stats: {
+                totalUsers,
+                adminUsers,
+                regularUsers,
+            },
+            pagination: {
                 currentPage: page,
-                totalPages: 0,
-                totalItems: 0,
+                totalPages,
+                totalItems: totalUsers,
                 itemsPerPage: limit,
             },
         };

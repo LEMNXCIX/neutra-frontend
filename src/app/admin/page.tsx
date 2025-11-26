@@ -1,38 +1,60 @@
-import fs from 'fs';
-import path from 'path';
 import React from 'react';
-import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { getUserId } from '@/lib/session';
+import { cookies } from 'next/headers';
 import AnalyticsCharts from "@/components/admin/AnalyticsCharts";
 import AnalyticsOverview from "@/components/admin/AnalyticsOverview";
 import AnalyticsChartsDetailed from "@/components/admin/AnalyticsChartsDetailed";
 
-type User = { id: string; name: string; email: string; password?: string; isAdmin?: boolean };
+const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001/api';
+
+async function validateAdminAccess() {
+    try {
+        const cookieStore = await cookies();
+        const tokenCookie = cookieStore.get('token');
+
+        if (!tokenCookie) {
+            return { isValid: false, user: null };
+        }
+
+        // Validate session with backend
+        const response = await fetch(`${BACKEND_API_URL}/auth/validate`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Cookie': `token=${tokenCookie.value}`,
+            },
+            cache: 'no-store',
+        });
+
+        if (!response.ok) {
+            return { isValid: false, user: null };
+        }
+
+        const data = await response.json();
+
+        if (!data.success || !data.data?.user) {
+            return { isValid: false, user: null };
+        }
+
+        const user = data.data.user;
+
+        // Check if user has admin role
+        const isAdmin = user.role?.name === 'ADMIN';
+
+        return { isValid: isAdmin, user };
+    } catch (error) {
+        console.error('Admin validation error:', error);
+        return { isValid: false, user: null };
+    }
+}
 
 export default async function AdminPage() {
-    const headersList = await headers();
-    const cookieHeader = headersList.get('cookie') || '';
-    const pairs = cookieHeader.split(';').map((s: string) => s.trim()).filter(Boolean);
-    let rawSid: string | undefined;
-    for (const p of pairs) {
-        const [k, ...v] = p.split('=');
-        if (k === '_neutra_sid') rawSid = decodeURIComponent(v.join('='));
-    }
-    const userId = getUserId(rawSid || null);
-    if (!userId) return redirect('/login');
+    const { isValid, user } = await validateAdminAccess();
 
-    const USERS_PATH = path.join(process.cwd(), 'src', 'data', 'users.json');
-    let users: User[] = [];
-    try {
-        const raw = fs.readFileSync(USERS_PATH, 'utf-8');
-        users = JSON.parse(raw) as User[];
-    } catch {
-        users = [];
+    if (!isValid) {
+        // Not authenticated or not admin, redirect to login
+        redirect('/login');
     }
-
-    const me = users.find(u => u.id === userId);
-    if (!me || !me.isAdmin) return redirect('/');
 
     return (
         <div className="space-y-6">

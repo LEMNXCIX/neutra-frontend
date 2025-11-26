@@ -1,12 +1,11 @@
 import React from "react";
-import fs from "fs";
-import path from "path";
+import { productsService } from "@/services";
+import { categoriesService } from "@/services";
 import ProductsTableClient from "@/components/admin/products/ProductsTableClient";
+import type { Product as BackendProduct } from "@/types/frontend-api";
 
-const PRODUCTS_PATH = path.join(process.cwd(), "src", "data", "products.json");
-const CATEGORIES_PATH = path.join(process.cwd(), "src", "data", "categories.json");
-
-type Product = {
+// Frontend expects 'title' but backend uses 'name'
+type FrontendProduct = {
     id: string;
     title: string;
     price: number;
@@ -16,15 +15,23 @@ type Product = {
 };
 
 async function getProducts(search: string, category: string, page: number, limit: number) {
-    // SIMULATION: In a real scenario, this would be:
-    // const res = await fetch(`https://api.external.com/products?search=${search}...`, {
-    //   headers: { Authorization: `Bearer ${process.env.API_KEY}` }
-    // });
-    // return res.json();
-
     try {
-        const raw = fs.readFileSync(PRODUCTS_PATH, "utf-8");
-        let products = JSON.parse(raw) as Array<Product>;
+        // Use productsService which uses apiClient
+        const allProducts = await productsService.getAll();
+
+        // Map backend Product to frontend Product
+        let products: FrontendProduct[] = allProducts.map((p) => ({
+            id: p.id,
+            title: p.name,
+            price: p.price,
+            stock: p.stock,
+            category: (() => {
+                const cat = p.categories?.[0];
+                if (!cat) return undefined;
+                return typeof cat === 'string' ? cat : (cat.name || cat.id || undefined);
+            })(),
+            image: p.image || undefined,
+        }));
 
         // Apply filters
         if (search) {
@@ -69,7 +76,7 @@ async function getProducts(search: string, category: string, page: number, limit
             },
         };
     } catch (err) {
-        console.error("Error reading products:", err);
+        console.error("Error fetching products:", err);
         return {
             products: [],
             stats: { totalProducts: 0, totalValue: 0, lowStockCount: 0 },
@@ -85,10 +92,11 @@ async function getProducts(search: string, category: string, page: number, limit
 
 async function getCategories() {
     try {
-        const raw = fs.readFileSync(CATEGORIES_PATH, "utf-8");
-        const data = JSON.parse(raw);
-        return Array.isArray(data) ? data : (data.categories || []);
-    } catch {
+        // Use categoriesService which uses apiClient
+        const categories = await categoriesService.getAll();
+        return categories;
+    } catch (error) {
+        console.error("Error fetching categories:", error);
         return [];
     }
 }

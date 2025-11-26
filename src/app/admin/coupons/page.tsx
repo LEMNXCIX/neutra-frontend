@@ -1,9 +1,6 @@
 import React from "react";
-import fs from "fs";
-import path from "path";
+import { couponsService } from "@/services";
 import CouponsTableClient from "@/components/admin/coupons/CouponsTableClient";
-
-const COUPONS_PATH = path.join(process.cwd(), "src", "data", "coupons.json");
 
 type Coupon = {
     code: string;
@@ -15,38 +12,40 @@ type Coupon = {
 
 async function getCoupons(search: string, type: string, status: string, page: number, limit: number) {
     try {
-        const raw = fs.readFileSync(COUPONS_PATH, "utf-8");
-        let coupons = JSON.parse(raw) as Coupon[];
+        // Use couponsService which uses apiClient
+        const allCoupons = await couponsService.getAll();
+
+        let coupons = allCoupons;
 
         // Apply filters
         if (search) {
             const query = search.toLowerCase();
-            coupons = coupons.filter((c) => c.code.toLowerCase().includes(query));
+            coupons = coupons.filter((c: any) => c.code.toLowerCase().includes(query));
         }
 
         if (type && type !== "all") {
-            coupons = coupons.filter((c) => c.type === type);
+            coupons = coupons.filter((c: any) => c.type === type);
         }
 
         if (status && status !== "all") {
             const now = new Date();
             if (status === "used") {
-                coupons = coupons.filter((c) => c.used);
+                coupons = coupons.filter((c: any) => c.used);
             } else if (status === "unused") {
-                coupons = coupons.filter((c) => !c.used);
+                coupons = coupons.filter((c: any) => !c.used);
             } else if (status === "expired") {
-                coupons = coupons.filter((c) => c.expires && new Date(c.expires) < now);
+                coupons = coupons.filter((c: any) => c.expires && new Date(c.expires) < now);
             } else if (status === "active") {
-                coupons = coupons.filter((c) => !c.used && (!c.expires || new Date(c.expires) >= now));
+                coupons = coupons.filter((c: any) => !c.used && (!c.expires || new Date(c.expires) >= now));
             }
         }
 
         // Calculate stats
         const totalCoupons = coupons.length;
         const now = new Date();
-        const usedCoupons = coupons.filter((c) => c.used).length;
-        const expiredCoupons = coupons.filter((c) => c.expires && new Date(c.expires) < now).length;
-        const activeCoupons = coupons.filter((c) => !c.used && (!c.expires || new Date(c.expires) >= now)).length;
+        const usedCoupons = coupons.filter((c: any) => c.used).length;
+        const expiredCoupons = coupons.filter((c: any) => c.expires && new Date(c.expires) < now).length;
+        const activeCoupons = coupons.filter((c: any) => !c.used && (!c.expires || new Date(c.expires) >= now)).length;
         const unusedCoupons = totalCoupons - usedCoupons;
 
         // Apply pagination
@@ -72,10 +71,16 @@ async function getCoupons(search: string, type: string, status: string, page: nu
             },
         };
     } catch (err) {
-        console.error("Error reading coupons:", err);
+        console.error("Error fetching coupons:", err);
         return {
             coupons: [],
-            stats: { totalCoupons: 0, usedCoupons: 0, unusedCoupons: 0, expiredCoupons: 0, activeCoupons: 0 },
+            stats: {
+                totalCoupons: 0,
+                usedCoupons: 0,
+                unusedCoupons: 0,
+                expiredCoupons: 0,
+                activeCoupons: 0,
+            },
             pagination: {
                 currentPage: 1,
                 totalPages: 0,

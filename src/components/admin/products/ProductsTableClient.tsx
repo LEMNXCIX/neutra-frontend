@@ -219,6 +219,7 @@ export default function ProductsTableClient({ products, stats, pagination, categ
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(body),
             });
+            console.log(res);
             if (!res.ok) {
                 const data = await res.json();
                 toast.error(data?.error || "Failed to update");

@@ -1,51 +1,44 @@
-import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
-import { createSession } from '@/lib/session';
-import { signJwt } from '@/lib/jwt';
+import { NextRequest, NextResponse } from "next/server";
 
-const USERS_PATH = path.join(process.cwd(), 'src', 'data', 'users.json');
+const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api";
 
-function readUsers() {
-  try {
-    const raw = fs.readFileSync(USERS_PATH, 'utf-8');
-    return JSON.parse(raw) as Array<{ id: string; name: string; email: string; password?: string }>;
-  } catch {
-    return [];
-  }
-}
-
-function writeUsers(users: Array<{ id: string; name: string; email: string; password?: string }>) {
-  fs.writeFileSync(USERS_PATH, JSON.stringify(users, null, 2), 'utf-8');
-}
-
-export async function POST(req: Request) {
+/**
+ * POST /api/auth/register
+ * Proxy to backend API for user registration
+ */
+export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const name = String(body?.name || '').trim();
-    const email = String(body?.email || '').trim().toLowerCase();
-    const password = String(body?.password || '').trim();
+    const backendUrl = `${BACKEND_API_URL}/auth/signup`;
 
-    if (!name || !email || !password) return NextResponse.json({ error: 'invalid' }, { status: 400 });
+    const response = await fetch(backendUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+      cache: "no-store",
+    });
 
-    const users = readUsers();
-    if (users.find(u => u.email === email)) return NextResponse.json({ error: 'email_taken' }, { status: 409 });
+    const data = await response.json();
 
-    const id = `u_${Date.now()}`;
-    const newUser = { id, name, email, password };
-    users.push(newUser);
-    writeUsers(users);
+    // Forward set-cookie headers from backend
+    const setCookieHeader = response.headers.get("set-cookie");
+    const headers: Record<string, string> = {};
 
-    // create session and set cookie
-    const sid = createSession(id);
-    const res = NextResponse.json({ user: { id, name, email, isAdmin: false, avatar: null } });
-    res.cookies.set('_neutra_sid', sid, { httpOnly: true, path: '/' });
-    try {
-      const token = signJwt({ sub: id, email }, { expiresIn: 60 * 60 * 24 });
-      res.cookies.set('neutra_jwt', token, { httpOnly: true, path: '/' });
-    } catch { }
-    return res;
-  } catch {
-    return NextResponse.json({ error: 'server_error' }, { status: 500 });
+    if (setCookieHeader) {
+      headers["Set-Cookie"] = setCookieHeader;
+    }
+
+    return NextResponse.json(data, {
+      status: response.status,
+      headers,
+    });
+  } catch (error) {
+    console.error("Error during registration:", error);
+    return NextResponse.json(
+      { error: "Registration failed" },
+      { status: 500 }
+    );
   }
 }
