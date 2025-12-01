@@ -20,7 +20,7 @@ export default function PromoSlider() {
   useEffect(() => {
     const fetchSlides = async () => {
       try {
-        const res = await fetch('/api/sliders');
+        const res = await fetch('/api/slide');
         const data = await res.json();
         if (data.sliders && Array.isArray(data.sliders)) {
           setSlides(data.sliders);

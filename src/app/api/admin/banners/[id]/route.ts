@@ -1,49 +1,57 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
-import { requireAdminFromRequest } from '@/lib/auth';
+import { NextRequest, NextResponse } from "next/server";
+import { backendPut, backendDelete } from "@/lib/backend-api";
+import { extractTokenFromRequest } from "@/lib/server-auth";
 
-const BANNERS_PATH = path.join(process.cwd(), 'src', 'data', 'banners.json');
-
-export async function PUT(req: any, context: any) {
-  const check = requireAdminFromRequest(req);
-  if (!check.ok) return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
-  const id = context.params?.id;
-  const body = await req.json().catch(() => null);
-  if (!body) return NextResponse.json({ error: 'invalid' }, { status: 400 });
+/**
+ * PUT /api/admin/banners/[id]
+ * Update banner via backend
+ */
+export async function PUT(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
-    const raw = fs.readFileSync(BANNERS_PATH, 'utf-8');
-    const banners = JSON.parse(raw) as Array<any>;
-    const idx = banners.findIndex(b => b.id === id);
-    if (idx === -1) return NextResponse.json({ error: 'not_found' }, { status: 404 });
-    banners[idx] = { ...banners[idx], ...body };
-    const tmp = `${BANNERS_PATH}.tmp`;
-    const bak = `${BANNERS_PATH}.bak`;
-    if (fs.existsSync(BANNERS_PATH)) fs.copyFileSync(BANNERS_PATH, bak);
-    fs.writeFileSync(tmp, JSON.stringify(banners, null, 2), 'utf-8');
-    fs.renameSync(tmp, BANNERS_PATH);
-    return NextResponse.json(banners[idx]);
-  } catch {
-    return NextResponse.json({ error: 'write_failed' }, { status: 500 });
+    const body = await req.json();
+    const token = extractTokenFromRequest(req);
+    const result = await backendPut(`/banners/${params.id}`, body, token);
+
+    return NextResponse.json(result, {
+      status: result.success ? 200 : 500
+    });
+  } catch (error) {
+    console.error("Error updating banner:", error);
+    return NextResponse.json(
+      { success: false, error: "Failed to update banner" },
+      { status: 500 }
+    );
   }
 }
 
-export async function DELETE(req: any, context: any) {
-  const check = requireAdminFromRequest(req);
-  if (!check.ok) return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
-  const id = context.params?.id;
+/**
+ * DELETE /api/admin/banners/[id]
+ * Delete banner via backend
+ */
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
-    const raw = fs.readFileSync(BANNERS_PATH, 'utf-8');
-    let banners = JSON.parse(raw) as Array<any>;
-    banners = banners.filter(b => b.id !== id);
-    const tmp = `${BANNERS_PATH}.tmp`;
-    const bak = `${BANNERS_PATH}.bak`;
-    if (fs.existsSync(BANNERS_PATH)) fs.copyFileSync(BANNERS_PATH, bak);
-    fs.writeFileSync(tmp, JSON.stringify(banners, null, 2), 'utf-8');
-    fs.renameSync(tmp, BANNERS_PATH);
-    return NextResponse.json({ ok: true });
-  } catch {
-    return NextResponse.json({ error: 'write_failed' }, { status: 500 });
+    const token = extractTokenFromRequest(req);
+    const result = await backendDelete(`/banners/${params.id}`, token);
+
+    // Handle 204 No Content
+    if (result.success && !result.data) {
+      return new NextResponse(null, { status: 204 });
+    }
+
+    return NextResponse.json(result, {
+      status: result.success ? 200 : 500
+    });
+  } catch (error) {
+    console.error("Error deleting banner:", error);
+    return NextResponse.json(
+      { success: false, error: "Failed to delete banner" },
+      { status: 500 }
+    );
   }
 }

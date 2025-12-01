@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-
-const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api";
+import { backendGet, backendPost } from "@/lib/backend-api";
+import { extractTokenFromRequest } from "@/lib/server-auth";
 
 /**
  * GET /api/admin/categories
@@ -8,24 +8,18 @@ const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:400
  */
 export async function GET(req: NextRequest) {
   try {
-    const backendUrl = `${BACKEND_API_URL}/categories`;
+    const token = extractTokenFromRequest(req);
+    console.log('[Categories GET] Extracted token:', token ? 'present' : 'missing');
 
-    const response = await fetch(backendUrl, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        ...(req.headers.get("cookie") && { Cookie: req.headers.get("cookie")! }),
-      },
-      cache: "no-store",
+    const result = await backendGet('/categories', token);
+
+    return NextResponse.json(result, {
+      status: result.success ? 200 : 500
     });
-
-    const data = await response.json();
-
-    return NextResponse.json(data, { status: response.status });
   } catch (error) {
     console.error("Error fetching categories from backend:", error);
     return NextResponse.json(
-      { error: "Failed to fetch categories" },
+      { success: false, error: "Failed to fetch categories" },
       { status: 500 }
     );
   }
@@ -38,25 +32,18 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const backendUrl = `${BACKEND_API_URL}/categories`;
+    const token = extractTokenFromRequest(req);
+    console.log('[Categories POST] Extracted token:', token ? 'present' : 'missing');
 
-    const response = await fetch(backendUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        ...(req.headers.get("cookie") && { Cookie: req.headers.get("cookie")! }),
-      },
-      body: JSON.stringify(body),
-      cache: "no-store",
+    const result = await backendPost('/categories', body, token);
+
+    return NextResponse.json(result, {
+      status: result.success ? 201 : 500
     });
-
-    const data = await response.json();
-
-    return NextResponse.json(data, { status: response.status });
   } catch (error) {
     console.error("Error creating category:", error);
     return NextResponse.json(
-      { error: "Failed to create category" },
+      { success: false, error: "Failed to create category" },
       { status: 500 }
     );
   }

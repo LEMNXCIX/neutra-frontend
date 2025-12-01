@@ -2,7 +2,7 @@ import React from "react";
 import { cookies } from 'next/headers';
 import RolesTableClient from "@/components/admin/roles/RolesTableClient";
 
-const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001/api';
+const BACKEND_API_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:4001/api';
 
 async function getRolesAndPermissions() {
     try {

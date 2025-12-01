@@ -1,20 +1,20 @@
 import React from "react";
 import { cookies } from 'next/headers';
 import OrdersTableClient from "@/components/admin/orders/OrdersTableClient";
-
-const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001/api';
+import { extractTokenFromCookies, getCookieString } from "@/lib/server-auth";
+import { getBackendUrl } from "@/lib/backend-api";
 
 async function getOrders(search: string, status: string, page: number, limit: number) {
     try {
-        // Get cookies from request
-        const cookieStore = await cookies();
-        const cookieString = cookieStore.toString();
+        const token = await extractTokenFromCookies();
+        const cookieString = await getCookieString();
 
         // Fetch from backend with cookies
-        const response = await fetch(`${BACKEND_API_URL}/order`, {
+        const response = await fetch(`${getBackendUrl()}/orders`, {
             headers: {
                 'Content-Type': 'application/json',
                 'Cookie': cookieString,
+                ...(token && { 'Authorization': `Bearer ${token}` }),
             },
             cache: 'no-store',
         });
@@ -23,7 +23,7 @@ async function getOrders(search: string, status: string, page: number, limit: nu
             console.error('Failed to fetch orders:', response.status);
             return {
                 orders: [],
-                stats: { totalOrders: 0, totalRevenue: 0, pendingOrders: 0, completedOrders: 0 },
+                stats: { totalOrders: 0, totalRevenue: 0, statusCounts: {} },
                 pagination: { currentPage: 1, totalPages: 0, totalItems: 0, itemsPerPage: limit },
             };
         }
@@ -48,8 +48,12 @@ async function getOrders(search: string, status: string, page: number, limit: nu
         // Calculate stats
         const totalOrders = orders.length;
         const totalRevenue = orders.reduce((sum: number, o: any) => sum + (o.total || 0), 0);
-        const pendingOrders = orders.filter((o: any) => o.status === 'pending').length;
-        const completedOrders = orders.filter((o: any) => o.status === 'completed').length;
+
+        const statusCounts = orders.reduce((acc: Record<string, number>, o: any) => {
+            const s = o.status?.toLowerCase() || 'unknown';
+            acc[s] = (acc[s] || 0) + 1;
+            return acc;
+        }, {});
 
         // Apply pagination
         const startIndex = (page - 1) * limit;
@@ -62,8 +66,7 @@ async function getOrders(search: string, status: string, page: number, limit: nu
             stats: {
                 totalOrders,
                 totalRevenue,
-                pendingOrders,
-                completedOrders,
+                statusCounts,
             },
             pagination: {
                 currentPage: page,
@@ -76,7 +79,7 @@ async function getOrders(search: string, status: string, page: number, limit: nu
         console.error("Error fetching orders:", err);
         return {
             orders: [],
-            stats: { totalOrders: 0, totalRevenue: 0, pendingOrders: 0, completedOrders: 0 },
+            stats: { totalOrders: 0, totalRevenue: 0, statusCounts: {} },
             pagination: {
                 currentPage: 1,
                 totalPages: 0,

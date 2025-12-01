@@ -36,24 +36,7 @@ import {
     DialogFooter,
 } from "@/components/ui/dialog";
 import { Package, TrendingUp, ShoppingCart, Eye, Truck } from "lucide-react";
-
-type OrderItem = { id: string; name: string; qty: number; price: number };
-type Order = {
-    id: string;
-    userId: string;
-    total: number;
-    status: string;
-    tracking: string;
-    address: string;
-    items: OrderItem[];
-    date: string;
-    coupon?: {
-        code: string;
-        type: string;
-        value: number;
-        discount: number;
-    };
-};
+import { Order, OrderStatus } from "@/types/order.types";
 
 type Stats = {
     totalOrders: number;
@@ -64,6 +47,12 @@ type Stats = {
 type Props = {
     orders: Order[];
     stats: Stats;
+    pagination: {
+        currentPage: number;
+        totalPages: number;
+        totalItems: number;
+        itemsPerPage: number;
+    };
 };
 
 export default function OrdersTableClient({ orders, stats }: Props) {
@@ -117,7 +106,7 @@ export default function OrdersTableClient({ orders, stats }: Props) {
 
             // Update local state for immediate feedback if dialog is open
             if (selectedOrder && selectedOrder.id === orderId) {
-                setSelectedOrder({ ...selectedOrder, status: newStatus });
+                setSelectedOrder({ ...selectedOrder, status: newStatus as OrderStatus });
             }
         } catch {
             toast.error("Network error");
@@ -153,20 +142,26 @@ export default function OrdersTableClient({ orders, stats }: Props) {
     };
 
     const getStatusColor = (status: string) => {
-        switch (status.toLowerCase()) {
-            case "delivered":
+        switch (status) {
+            case "COMPLETADO":
                 return "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400";
-            case "shipped":
+            case "ENVIADO": // Assuming ENVIADO might exist or map to something
                 return "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400";
-            case "processing":
+            case "PENDIENTE":
                 return "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400";
-            case "cancelled":
+            case "CANCELADO":
                 return "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400";
-            case "pending":
-                return "bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400";
             default:
                 return "bg-muted text-foreground";
         }
+    };
+
+    const calculateTotal = (order: Order) => {
+        // If total is provided (extended field), use it. Otherwise calculate from items.
+        // Note: The extended type definition has 'total' implicitly via 'any' or if we added it. 
+        // But strictly based on types, we should calculate.
+        // However, for now, let's assume items have price and amount.
+        return order.items.reduce((sum, item) => sum + (item.price * item.amount), 0);
     };
 
     const StatCard = ({ icon: Icon, title, value, color }: { icon: React.ElementType; title: string; value: string | number; color: string }) => (
@@ -205,8 +200,8 @@ export default function OrdersTableClient({ orders, stats }: Props) {
                 />
                 <StatCard
                     icon={Package}
-                    title="Processing"
-                    value={stats.statusCounts.processing || 0}
+                    title="Pending"
+                    value={stats.statusCounts.PENDIENTE || 0}
                     color="bg-yellow-500"
                 />
             </div>
@@ -221,11 +216,9 @@ export default function OrdersTableClient({ orders, stats }: Props) {
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="all">All Statuses</SelectItem>
-                                <SelectItem value="pending">Pending</SelectItem>
-                                <SelectItem value="processing">Processing</SelectItem>
-                                <SelectItem value="shipped">Shipped</SelectItem>
-                                <SelectItem value="delivered">Delivered</SelectItem>
-                                <SelectItem value="cancelled">Cancelled</SelectItem>
+                                <SelectItem value="PENDIENTE">Pending</SelectItem>
+                                <SelectItem value="COMPLETADO">Completed</SelectItem>
+                                <SelectItem value="CANCELADO">Cancelled</SelectItem>
                             </SelectContent>
                         </Select>
 
@@ -274,49 +267,50 @@ export default function OrdersTableClient({ orders, stats }: Props) {
                                         </TableCell>
                                     </TableRow>
                                 ) : (
-                                    orders.map((o) => (
-                                        <TableRow key={o.id} className="hover:bg-muted/30">
-                                            <TableCell className="font-medium">{o.id}</TableCell>
-                                            <TableCell>{o.userId}</TableCell>
-                                            <TableCell>{o.items?.length || 0} items</TableCell>
-                                            <TableCell className="font-semibold">${o.total.toFixed(2)}</TableCell>
-                                            <TableCell>
-                                                <Select
-                                                    value={o.status}
-                                                    onValueChange={(val) => updateOrderStatus(o.id, val)}
-                                                >
-                                                    <SelectTrigger className="w-[130px]">
-                                                        <Badge className={getStatusColor(o.status)}>
-                                                            {o.status}
-                                                        </Badge>
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        <SelectItem value="pending">Pending</SelectItem>
-                                                        <SelectItem value="processing">Processing</SelectItem>
-                                                        <SelectItem value="shipped">Shipped</SelectItem>
-                                                        <SelectItem value="delivered">Delivered</SelectItem>
-                                                        <SelectItem value="cancelled">Cancelled</SelectItem>
-                                                    </SelectContent>
-                                                </Select>
-                                            </TableCell>
-                                            <TableCell className="text-muted-foreground text-sm">
-                                                {o.tracking || "—"}
-                                            </TableCell>
-                                            <TableCell className="text-muted-foreground">
-                                                {o.date}
-                                            </TableCell>
-                                            <TableCell>
-                                                <Button
-                                                    size="sm"
-                                                    variant="ghost"
-                                                    onClick={() => openOrderDetails(o)}
-                                                >
-                                                    <Eye className="h-4 w-4 mr-1" />
-                                                    Details
-                                                </Button>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))
+                                    orders.map((o) => {
+                                        const total = calculateTotal(o);
+                                        return (
+                                            <TableRow key={o.id} className="hover:bg-muted/30">
+                                                <TableCell className="font-medium">{o.id}</TableCell>
+                                                <TableCell>{o.user?.name || o.userId}</TableCell>
+                                                <TableCell>{o.items?.length || 0} items</TableCell>
+                                                <TableCell className="font-semibold">${total.toFixed(2)}</TableCell>
+                                                <TableCell>
+                                                    <Select
+                                                        value={o.status}
+                                                        onValueChange={(val) => updateOrderStatus(o.id, val)}
+                                                    >
+                                                        <SelectTrigger className="w-[130px]">
+                                                            <Badge className={getStatusColor(o.status)}>
+                                                                {o.status}
+                                                            </Badge>
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            <SelectItem value="PENDIENTE">Pending</SelectItem>
+                                                            <SelectItem value="COMPLETADO">Completed</SelectItem>
+                                                            <SelectItem value="CANCELADO">Cancelled</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                </TableCell>
+                                                <TableCell className="text-muted-foreground text-sm">
+                                                    {o.tracking || "—"}
+                                                </TableCell>
+                                                <TableCell className="text-muted-foreground">
+                                                    {new Date(o.createdAt).toLocaleDateString()}
+                                                </TableCell>
+                                                <TableCell>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="ghost"
+                                                        onClick={() => openOrderDetails(o)}
+                                                    >
+                                                        <Eye className="h-4 w-4 mr-1" />
+                                                        Details
+                                                    </Button>
+                                                </TableCell>
+                                            </TableRow>
+                                        );
+                                    })
                                 )}
                             </TableBody>
                         </Table>
@@ -326,40 +320,43 @@ export default function OrdersTableClient({ orders, stats }: Props) {
 
             {/* Orders - Mobile View */}
             <div className="flex flex-col gap-3 md:hidden">
-                {orders.map((o) => (
-                    <Card key={o.id} className="shadow-sm border-muted/50">
-                        <CardHeader className="pb-2">
-                            <CardTitle className="text-base flex justify-between items-center">
-                                <span>Order #{o.id}</span>
-                                <Badge className={`${getStatusColor(o.status)} text-xs`}>
-                                    {o.status}
-                                </Badge>
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="text-sm flex flex-col gap-2">
-                            <div className="flex justify-between">
-                                <span className="text-muted-foreground">User</span>
-                                <span>{o.userId}</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-muted-foreground">Total</span>
-                                <span className="font-semibold">${o.total.toFixed(2)}</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-muted-foreground">Date</span>
-                                <span>{o.date}</span>
-                            </div>
-                            <Button
-                                size="sm"
-                                className="mt-2 w-full"
-                                onClick={() => openOrderDetails(o)}
-                            >
-                                <Eye className="h-4 w-4 mr-1" />
-                                View Details
-                            </Button>
-                        </CardContent>
-                    </Card>
-                ))}
+                {orders.map((o) => {
+                    const total = calculateTotal(o);
+                    return (
+                        <Card key={o.id} className="shadow-sm border-muted/50">
+                            <CardHeader className="pb-2">
+                                <CardTitle className="text-base flex justify-between items-center">
+                                    <span>Order #{o.id}</span>
+                                    <Badge className={`${getStatusColor(o.status)} text-xs`}>
+                                        {o.status}
+                                    </Badge>
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="text-sm flex flex-col gap-2">
+                                <div className="flex justify-between">
+                                    <span className="text-muted-foreground">User</span>
+                                    <span>{o.user?.name || o.userId}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-muted-foreground">Total</span>
+                                    <span className="font-semibold">${total.toFixed(2)}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-muted-foreground">Date</span>
+                                    <span>{new Date(o.createdAt).toLocaleDateString()}</span>
+                                </div>
+                                <Button
+                                    size="sm"
+                                    className="mt-2 w-full"
+                                    onClick={() => openOrderDetails(o)}
+                                >
+                                    <Eye className="h-4 w-4 mr-1" />
+                                    View Details
+                                </Button>
+                            </CardContent>
+                        </Card>
+                    );
+                })}
             </div>
 
             {/* Order Details Dialog */}
@@ -374,12 +371,15 @@ export default function OrdersTableClient({ orders, stats }: Props) {
                             {/* Order Info */}
                             <div className="grid grid-cols-2 gap-4 p-4 bg-muted/50 rounded-lg">
                                 <div>
-                                    <p className="text-sm text-muted-foreground">User ID</p>
-                                    <p className="font-medium">{selectedOrder.userId}</p>
+                                    <p className="text-sm text-muted-foreground">User</p>
+                                    <p className="font-medium">{selectedOrder.user?.name || selectedOrder.userId}</p>
+                                    {selectedOrder.user?.email && (
+                                        <p className="text-xs text-muted-foreground">{selectedOrder.user.email}</p>
+                                    )}
                                 </div>
                                 <div>
                                     <p className="text-sm text-muted-foreground">Date</p>
-                                    <p className="font-medium">{selectedOrder.date}</p>
+                                    <p className="font-medium">{new Date(selectedOrder.createdAt).toLocaleString()}</p>
                                 </div>
                                 <div>
                                     <p className="text-sm text-muted-foreground">Status</p>
@@ -389,7 +389,7 @@ export default function OrdersTableClient({ orders, stats }: Props) {
                                 </div>
                                 <div>
                                     <p className="text-sm text-muted-foreground">Total</p>
-                                    <p className="text-lg font-bold">${selectedOrder.total.toFixed(2)}</p>
+                                    <p className="text-lg font-bold">${calculateTotal(selectedOrder).toFixed(2)}</p>
                                 </div>
                             </div>
 
@@ -411,11 +411,9 @@ export default function OrdersTableClient({ orders, stats }: Props) {
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="pending">Pending</SelectItem>
-                                        <SelectItem value="processing">Processing</SelectItem>
-                                        <SelectItem value="shipped">Shipped</SelectItem>
-                                        <SelectItem value="delivered">Delivered</SelectItem>
-                                        <SelectItem value="cancelled">Cancelled</SelectItem>
+                                        <SelectItem value="PENDIENTE">Pending</SelectItem>
+                                        <SelectItem value="COMPLETADO">Completed</SelectItem>
+                                        <SelectItem value="CANCELADO">Cancelled</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
@@ -455,11 +453,11 @@ export default function OrdersTableClient({ orders, stats }: Props) {
                                         <TableBody>
                                             {selectedOrder.items?.map((item, idx) => (
                                                 <TableRow key={idx}>
-                                                    <TableCell>{item.name}</TableCell>
-                                                    <TableCell className="text-center">{item.qty}</TableCell>
+                                                    <TableCell>{item.product?.name || item.productId}</TableCell>
+                                                    <TableCell className="text-center">{item.amount}</TableCell>
                                                     <TableCell className="text-right">${item.price.toFixed(2)}</TableCell>
                                                     <TableCell className="text-right font-medium">
-                                                        ${(item.price * item.qty).toFixed(2)}
+                                                        ${(item.price * item.amount).toFixed(2)}
                                                     </TableCell>
                                                 </TableRow>
                                             ))}

@@ -50,7 +50,7 @@ export const authService = {
      * Redirect to Google OAuth
      */
     googleLogin: () => {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+        const apiUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:4000/api';
         window.location.href = `${apiUrl}/auth/google`;
     },
 };

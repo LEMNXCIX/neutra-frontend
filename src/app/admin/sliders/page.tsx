@@ -1,20 +1,20 @@
 import React from "react";
 import { cookies } from 'next/headers';
 import SlidersTableClient from "@/components/admin/sliders/SlidersTableClient";
-
-const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001/api';
+import { extractTokenFromCookies, getCookieString } from "@/lib/server-auth";
+import { getBackendUrl } from "@/lib/backend-api";
 
 async function getSliders(search: string, status: string, page: number, limit: number) {
     try {
-        // Get cookies from request
-        const cookieStore = await cookies();
-        const cookieString = cookieStore.toString();
+        const token = await extractTokenFromCookies();
+        const cookieString = await getCookieString();
 
         // Fetch from backend with cookies
-        const response = await fetch(`${BACKEND_API_URL}/sliders`, {
+        const response = await fetch(`${getBackendUrl()}/slide`, {
             headers: {
                 'Content-Type': 'application/json',
                 'Cookie': cookieString,
+                ...(token && { 'Authorization': `Bearer ${token}` }),
             },
             cache: 'no-store',
         });

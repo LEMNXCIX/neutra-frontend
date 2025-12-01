@@ -1,95 +1,81 @@
-import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
-import { requireAdminFromRequest } from '@/lib/auth';
+import { NextRequest, NextResponse } from "next/server";
+import { backendGet, backendPut, backendDelete } from "@/lib/backend-api";
+import { extractTokenFromRequest } from "@/lib/server-auth";
 
-const ORDERS_PATH = path.join(process.cwd(), 'src', 'data', 'orders.json');
-
-type OrderItem = { id: string; name: string; qty: number; price: number };
-type Order = {
-    id: string;
-    userId: string;
-    total: number;
-    status: string;
-    tracking: string;
-    address: string;
-    items: OrderItem[];
-    date: string;
-    coupon?: {
-        code: string;
-        type: string;
-        value: number;
-        discount: number;
-    };
-};
-
-function readOrders(): Order[] {
+/**
+ * GET /api/admin/orders/[id]
+ * Get order details via backend
+ */
+export async function GET(
+    req: NextRequest,
+    { params }: { params: { id: string } }
+) {
     try {
-        const raw = fs.readFileSync(ORDERS_PATH, 'utf-8');
-        return JSON.parse(raw) as Order[];
-    } catch {
-        return [];
+        const token = extractTokenFromRequest(req);
+        const result = await backendGet(`/orders/${params.id}`, token);
+
+        return NextResponse.json(result, {
+            status: result.success ? 200 : 500
+        });
+    } catch (error) {
+        console.error("Error fetching order:", error);
+        return NextResponse.json(
+            { success: false, error: "Failed to fetch order" },
+            { status: 500 }
+        );
     }
 }
 
-function writeOrders(arr: Order[]) {
-    fs.writeFileSync(ORDERS_PATH, JSON.stringify(arr, null, 2), 'utf-8');
+/**
+ * PUT /api/admin/orders/[id]
+ * Update order via backend
+ */
+export async function PUT(
+    req: NextRequest,
+    { params }: { params: { id: string } }
+) {
+    try {
+        const body = await req.json();
+        const token = extractTokenFromRequest(req);
+        const result = await backendPut(`/orders/${params.id}`, body, token);
+
+        return NextResponse.json(result, {
+            status: result.success ? 200 : 500
+        });
+    } catch (error) {
+        console.error("Error updating order:", error);
+        return NextResponse.json(
+            { success: false, error: "Failed to update order" },
+            { status: 500 }
+        );
+    }
 }
 
-// GET /api/admin/orders/[id] - Get detailed order information
-export async function GET(req: Request, { params }: { params: { id: string } }) {
-    const check = requireAdminFromRequest(req);
-    if (!check.ok) return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
+/**
+ * DELETE /api/admin/orders/[id]
+ * Delete order via backend
+ */
+export async function DELETE(
+    req: NextRequest,
+    { params }: { params: { id: string } }
+) {
+    try {
+        const token = extractTokenFromRequest(req);
+        const result = await backendDelete(`/orders/${params.id}`, token);
 
-    const { id } = params;
-    const orders = readOrders();
-    const order = orders.find(o => o.id === id);
+        // Handle 204 No Content
+        if (result.success && !result.data) {
+            return new NextResponse(null, { status: 204 });
+        }
 
-    if (!order) {
-        return NextResponse.json({ error: 'Order not found' }, { status: 404 });
+        return NextResponse.json(result, {
+            status: result.success ? 200 : 500
+        });
+    } catch (error) {
+        console.error("Error deleting order:", error);
+        return NextResponse.json(
+            { success: false, error: "Failed to delete order" },
+            { status: 500 }
+        );
     }
-
-    return NextResponse.json({ order });
-}
-
-// PUT /api/admin/orders/[id] - Update order status and/or tracking
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
-    const check = requireAdminFromRequest(req);
-    if (!check.ok) return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
-
-    const { id } = params;
-    const body = await req.json().catch(() => null);
-
-    if (!body) {
-        return NextResponse.json({ error: 'Invalid payload' }, { status: 400 });
-    }
-
-    const { status, tracking } = body;
-
-    // Validate status if provided
-    const validStatuses = ['processing', 'shipped', 'delivered', 'cancelled', 'pending'];
-    if (status !== undefined && !validStatuses.includes(status)) {
-        return NextResponse.json({
-            error: 'Invalid status. Must be one of: ' + validStatuses.join(', ')
-        }, { status: 400 });
-    }
-
-    const orders = readOrders();
-    const orderIndex = orders.findIndex(o => o.id === id);
-
-    if (orderIndex === -1) {
-        return NextResponse.json({ error: 'Order not found' }, { status: 404 });
-    }
-
-    // Update order fields
-    if (status !== undefined) {
-        orders[orderIndex].status = status;
-    }
-    if (tracking !== undefined) {
-        orders[orderIndex].tracking = String(tracking);
-    }
-
-    writeOrders(orders);
-
-    return NextResponse.json({ order: orders[orderIndex] });
 }

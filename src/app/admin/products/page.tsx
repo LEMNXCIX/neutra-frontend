@@ -1,29 +1,21 @@
 import React from "react";
 import { cookies } from 'next/headers';
 import ProductsTableClient from "@/components/admin/products/ProductsTableClient";
-
-const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001/api';
-
-type FrontendProduct = {
-    id: string;
-    title: string;
-    price: number;
-    stock?: number;
-    category?: string;
-    image?: string;
-};
+import { extractTokenFromCookies, getCookieString } from "@/lib/server-auth";
+import { getBackendUrl } from "@/lib/backend-api";
+import { Product } from '@/types/product.types';
 
 async function getProducts(search: string, category: string, page: number, limit: number) {
     try {
-        // Get cookies from request
-        const cookieStore = await cookies();
-        const cookieString = cookieStore.toString();
+        const token = await extractTokenFromCookies();
+        const cookieString = await getCookieString();
 
         // Fetch products from backend with cookies
-        const productsResponse = await fetch(`${BACKEND_API_URL}/products`, {
+        const productsResponse = await fetch(`${getBackendUrl()}/products`, {
             headers: {
                 'Content-Type': 'application/json',
                 'Cookie': cookieString,
+                ...(token && { 'Authorization': `Bearer ${token}` }),
             },
             cache: 'no-store',
         });
@@ -40,19 +32,19 @@ async function getProducts(search: string, category: string, page: number, limit
         const productsData = await productsResponse.json();
 
         // Map backend Product to frontend Product
-        let products: FrontendProduct[] = [];
+        let products: Product[] = [];
         if (productsData.success && productsData.data) {
             products = (Array.isArray(productsData.data) ? productsData.data : []).map((p: any) => ({
                 id: p.id,
-                title: p.name,
+                name: p.name,
+                description: p.description || '',
                 price: p.price,
                 stock: p.stock,
-                category: (() => {
-                    const cat = p.categories?.[0];
-                    if (!cat) return undefined;
-                    return typeof cat === 'string' ? cat : (cat.name || cat.id || undefined);
-                })(),
+                categories: p.categories || [],
                 image: p.image || undefined,
+                ownerId: p.ownerId || '',
+                createdAt: p.createdAt || new Date(),
+                updatedAt: p.updatedAt || new Date(),
             }));
         }
 
@@ -61,13 +53,17 @@ async function getProducts(search: string, category: string, page: number, limit
             const query = search.toLowerCase();
             products = products.filter(
                 (p) =>
-                    p.title.toLowerCase().includes(query) ||
+                    p.name.toLowerCase().includes(query) ||
                     p.id.toLowerCase().includes(query)
             );
         }
 
         if (category && category !== "all") {
-            products = products.filter((p) => p.category === category);
+            products = products.filter((p) =>
+                p.categories?.some((cat) =>
+                    typeof cat === 'string' ? cat === category : cat.id === category || cat.name === category
+                )
+            );
         }
 
         // Calculate stats from ALL filtered products (before pagination)
@@ -115,13 +111,14 @@ async function getProducts(search: string, category: string, page: number, limit
 
 async function getCategories() {
     try {
-        const cookieStore = await cookies();
-        const cookieString = cookieStore.toString();
+        const token = await extractTokenFromCookies();
+        const cookieString = await getCookieString();
 
-        const response = await fetch(`${BACKEND_API_URL}/categories`, {
+        const response = await fetch(`${getBackendUrl()}/categories`, {
             headers: {
                 'Content-Type': 'application/json',
                 'Cookie': cookieString,
+                ...(token && { 'Authorization': `Bearer ${token}` }),
             },
             cache: 'no-store',
         });

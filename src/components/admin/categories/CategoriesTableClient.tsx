@@ -40,10 +40,9 @@ import {
 } from "@/components/ui/accordion";
 import { useConfirm } from "@/hooks/use-confirm";
 
-type Category = {
-    id: string;
-    name: string;
-    description?: string;
+import { Category } from "@/types/category.types";
+
+type CategoryWithCount = Category & {
     productCount?: number;
 };
 
@@ -61,7 +60,7 @@ type PaginationProps = {
 };
 
 type Props = {
-    categories: Category[];
+    categories: CategoryWithCount[];
     stats: Stats;
     pagination: PaginationProps;
 };
@@ -74,7 +73,7 @@ export default function CategoriesTableClient({ categories, stats, pagination }:
     // Dialog states
     const [createOpen, setCreateOpen] = useState(false);
     const [editOpen, setEditOpen] = useState(false);
-    const [editing, setEditing] = useState<Category | null>(null);
+    const [editing, setEditing] = useState<CategoryWithCount | null>(null);
     const [form, setForm] = useState({ name: "", description: "" });
 
     // URL State
@@ -145,7 +144,7 @@ export default function CategoriesTableClient({ categories, stats, pagination }:
         }
     };
 
-    const openEdit = (c: Category) => {
+    const openEdit = (c: CategoryWithCount) => {
         setEditing(c);
         setForm({
             name: c.name,

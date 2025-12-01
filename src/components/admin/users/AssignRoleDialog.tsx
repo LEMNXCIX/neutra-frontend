@@ -76,7 +76,7 @@ export function AssignRoleDialog({
     // Helper function to refresh permissions cache
     const refreshPermissions = async () => {
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/validate`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/auth/validate`, {
                 credentials: 'include',
             });
             if (response.ok) {

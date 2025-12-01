@@ -1,32 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
-
-const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api";
+import { backendGet, backendPost } from "@/lib/backend-api";
+import { extractTokenFromRequest } from "@/lib/server-auth";
 
 /**
  * GET /api/admin/products
- * Proxy to backend API for admin product management
+ * Proxy to backend API for products
  */
 export async function GET(req: NextRequest) {
   try {
-    const { searchParams } = new URL(req.url);
-    const backendUrl = `${BACKEND_API_URL}/products?${searchParams.toString()}`;
+    const token = extractTokenFromRequest(req);
+    const result = await backendGet('/products', token);
 
-    const response = await fetch(backendUrl, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        ...(req.headers.get("cookie") && { Cookie: req.headers.get("cookie")! }),
-      },
-      cache: "no-store",
+    return NextResponse.json(result, {
+      status: result.success ? 200 : 500
     });
-
-    const data = await response.json();
-
-    return NextResponse.json(data, { status: response.status });
   } catch (error) {
     console.error("Error fetching products from backend:", error);
     return NextResponse.json(
-      { error: "Failed to fetch products" },
+      { success: false, error: "Failed to fetch products" },
       { status: 500 }
     );
   }
@@ -39,25 +30,16 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const backendUrl = `${BACKEND_API_URL}/products`;
+    const token = extractTokenFromRequest(req);
+    const result = await backendPost('/products', body, token);
 
-    const response = await fetch(backendUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        ...(req.headers.get("cookie") && { Cookie: req.headers.get("cookie")! }),
-      },
-      body: JSON.stringify(body),
-      cache: "no-store",
+    return NextResponse.json(result, {
+      status: result.success ? 201 : 500
     });
-
-    const data = await response.json();
-
-    return NextResponse.json(data, { status: response.status });
   } catch (error) {
     console.error("Error creating product:", error);
     return NextResponse.json(
-      { error: "Failed to create product" },
+      { success: false, error: "Failed to create product" },
       { status: 500 }
     );
   }

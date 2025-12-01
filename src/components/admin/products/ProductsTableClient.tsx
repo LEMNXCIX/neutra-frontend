@@ -49,15 +49,7 @@ import {
     AccordionTrigger,
 } from "@/components/ui/accordion";
 import { useConfirm } from "@/hooks/use-confirm";
-
-type Product = {
-    id: string;
-    title: string;
-    price: number;
-    stock?: number;
-    category?: string;
-    image?: string;
-};
+import { Product } from "@/types/product.types";
 
 type Stats = {
     totalProducts: number;
@@ -88,7 +80,7 @@ export default function ProductsTableClient({ products, stats, pagination, categ
     const [createOpen, setCreateOpen] = useState(false);
     const [editOpen, setEditOpen] = useState(false);
     const [editing, setEditing] = useState<Product | null>(null);
-    const [form, setForm] = useState({ title: "", price: "", stock: "", category: "", imageBase64: "" });
+    const [form, setForm] = useState({ name: "", price: "", stock: "", category: "", imageBase64: "" });
     const [preview, setPreview] = useState<string | null>(null);
 
     // URL State
@@ -136,17 +128,19 @@ export default function ProductsTableClient({ products, stats, pagination, categ
     };
 
     const createProduct = async () => {
-        if (!form.title) {
-            toast.error("Title is required");
+        if (!form.name) {
+            toast.error("Name is required");
             return;
         }
         try {
             const body = {
-                title: form.title,
+                name: form.name,
+                description: "", // Added description as it's required in DTO
                 price: Number(form.price || 0),
                 stock: Number(form.stock || 0),
-                category: form.category || undefined,
-                imageBase64: form.imageBase64 || undefined,
+                categoryIds: form.category ? [form.category] : [],
+                image: form.imageBase64 || undefined, // DTO uses 'image' for base64 string apparently, or we map it
+                ownerId: "admin", // Placeholder, should come from context or auth
             };
             const res = await fetch("/api/admin/products", {
                 method: "POST",
@@ -160,7 +154,7 @@ export default function ProductsTableClient({ products, stats, pagination, categ
             }
             toast.success("Product created");
             setCreateOpen(false);
-            setForm({ title: "", price: "", stock: "", category: "", imageBase64: "" });
+            setForm({ name: "", price: "", stock: "", category: "", imageBase64: "" });
             setPreview(null);
             router.refresh(); // Refresh server data
         } catch {
@@ -194,10 +188,10 @@ export default function ProductsTableClient({ products, stats, pagination, categ
     const openEdit = (p: Product) => {
         setEditing(p);
         setForm({
-            title: p.title,
+            name: p.name,
             price: String(p.price),
             stock: String(p.stock || 0),
-            category: p.category || "",
+            category: p.categories?.[0]?.id || "", // Assuming first category for now
             imageBase64: "",
         });
         setPreview(p.image || null);
@@ -208,12 +202,13 @@ export default function ProductsTableClient({ products, stats, pagination, categ
         if (!editing) return;
         try {
             const body: any = {
-                title: form.title,
+                name: form.name,
                 price: Number(form.price || 0),
                 stock: Number(form.stock || 0),
-                category: form.category || undefined,
+                categoryIds: form.category ? [form.category] : [],
             };
-            if (form.imageBase64) body.imageBase64 = form.imageBase64;
+            if (form.imageBase64) body.image = form.imageBase64;
+
             const res = await fetch(`/api/admin/products/${editing.id}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
@@ -228,7 +223,7 @@ export default function ProductsTableClient({ products, stats, pagination, categ
             toast.success("Product updated");
             setEditOpen(false);
             setEditing(null);
-            setForm({ title: "", price: "", stock: "", category: "", imageBase64: "" });
+            setForm({ name: "", price: "", stock: "", category: "", imageBase64: "" });
             setPreview(null);
             router.refresh();
         } catch {
@@ -338,7 +333,7 @@ export default function ProductsTableClient({ products, stats, pagination, categ
                             <TableRow>
                                 <TableHead className="w-[80px]">Image</TableHead>
                                 <TableHead className="w-[120px]">ID</TableHead>
-                                <TableHead className="w-[200px]">Title</TableHead>
+                                <TableHead className="w-[200px]">Name</TableHead>
                                 <TableHead className="w-[120px]">Category</TableHead>
                                 <TableHead className="w-[100px]">Price</TableHead>
                                 <TableHead className="w-[80px]">Stock</TableHead>
@@ -360,7 +355,7 @@ export default function ProductsTableClient({ products, stats, pagination, categ
                                             {p.image ? (
                                                 <Image
                                                     src={p.image}
-                                                    alt={p.title}
+                                                    alt={p.name}
                                                     width={48}
                                                     height={48}
                                                     className="rounded object-cover"
@@ -372,9 +367,9 @@ export default function ProductsTableClient({ products, stats, pagination, categ
                                             )}
                                         </TableCell>
                                         <TableCell className="font-mono text-xs">{p.id}</TableCell>
-                                        <TableCell className="font-medium">{p.title}</TableCell>
+                                        <TableCell className="font-medium">{p.name}</TableCell>
                                         <TableCell className="text-sm text-muted-foreground">
-                                            {p.category ? categories.find(c => c.id === p.category)?.name || p.category : "—"}
+                                            {p.categories?.map(c => c.name).join(", ") || "—"}
                                         </TableCell>
                                         <TableCell className="font-semibold">${p.price.toFixed(2)}</TableCell>
                                         <TableCell>{p.stock || 0}</TableCell>
@@ -384,7 +379,7 @@ export default function ProductsTableClient({ products, stats, pagination, categ
                                                 <Button size="sm" variant="ghost" onClick={() => openEdit(p)}>
                                                     <Edit className="h-4 w-4" />
                                                 </Button>
-                                                <Button size="sm" variant="ghost" onClick={() => deleteProduct(p.id)}>
+                                                <Button size="sm" variant="destructive" onClick={() => deleteProduct(p.id)}>
                                                     <Trash2 className="h-4 w-4 text-red-500" />
                                                 </Button>
                                             </div>
@@ -439,7 +434,7 @@ export default function ProductsTableClient({ products, stats, pagination, categ
                             {p.image ? (
                                 <Image
                                     src={p.image}
-                                    alt={p.title}
+                                    alt={p.name}
                                     fill
                                     className="object-cover"
                                 />
@@ -451,7 +446,7 @@ export default function ProductsTableClient({ products, stats, pagination, categ
                         </div>
                         <CardContent className="pt-4 space-y-3">
                             <div>
-                                <h3 className="font-semibold text-sm line-clamp-2">{p.title}</h3>
+                                <h3 className="font-semibold text-sm line-clamp-2">{p.name}</h3>
                                 <p className="text-xs text-muted-foreground font-mono mt-1">{p.id}</p>
                             </div>
                             <div className="flex justify-between items-center text-sm">
@@ -507,10 +502,10 @@ export default function ProductsTableClient({ products, stats, pagination, categ
                     </DialogHeader>
                     <div className="space-y-4">
                         <div>
-                            <label className="text-sm font-medium">Title</label>
+                            <label className="text-sm font-medium">Name</label>
                             <Input
-                                value={form.title}
-                                onChange={(e) => setForm({ ...form, title: e.target.value })}
+                                value={form.name}
+                                onChange={(e) => setForm({ ...form, name: e.target.value })}
                                 placeholder="Product name"
                             />
                         </div>
@@ -596,10 +591,10 @@ export default function ProductsTableClient({ products, stats, pagination, categ
                     </DialogHeader>
                     <div className="space-y-4">
                         <div>
-                            <label className="text-sm font-medium">Title</label>
+                            <label className="text-sm font-medium">Name</label>
                             <Input
-                                value={form.title}
-                                onChange={(e) => setForm({ ...form, title: e.target.value })}
+                                value={form.name}
+                                onChange={(e) => setForm({ ...form, name: e.target.value })}
                                 placeholder="Product name"
                             />
                         </div>

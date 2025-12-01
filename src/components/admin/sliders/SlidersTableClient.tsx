@@ -49,16 +49,7 @@ import {
     AccordionTrigger,
 } from "@/components/ui/accordion";
 import { useConfirm } from "@/hooks/use-confirm";
-
-type Slide = {
-    id: string;
-    title: string;
-    subtitle?: string;
-    image?: string;
-    startsAt?: string;
-    endsAt?: string;
-    active?: boolean;
-};
+import { Slide } from "@/types/slide.types";
 
 type Stats = {
     totalSliders: number;

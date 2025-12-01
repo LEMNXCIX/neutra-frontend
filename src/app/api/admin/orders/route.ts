@@ -1,101 +1,46 @@
-import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
-import { requireAdminFromRequest } from '@/lib/auth';
+import { NextRequest, NextResponse } from "next/server";
+import { backendGet, backendPost } from "@/lib/backend-api";
+import { extractTokenFromRequest } from "@/lib/server-auth";
 
-const ORDERS_PATH = path.join(process.cwd(), 'src', 'data', 'orders.json');
-
-type OrderItem = { id: string; name: string; qty: number; price: number };
-type Order = {
-  id: string;
-  userId: string;
-  total: number;
-  status: string;
-  tracking: string;
-  address: string;
-  items: OrderItem[];
-  date: string;
-  coupon?: {
-    code: string;
-    type: string;
-    value: number;
-    discount: number;
-  };
-};
-
-export async function GET(req: Request) {
-  const check = requireAdminFromRequest(req);
-  if (!check.ok) return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
-
-  const url = new URL(req.url);
-  const statusFilter = url.searchParams.get('status') || '';
-  const searchQuery = url.searchParams.get('search') || '';
-  const dateFrom = url.searchParams.get('dateFrom') || '';
-  const dateTo = url.searchParams.get('dateTo') || '';
-  const page = parseInt(url.searchParams.get('page') || '1', 10);
-  const limit = parseInt(url.searchParams.get('limit') || '10', 10);
-
+/**
+ * GET /api/admin/orders
+ * Proxy to backend API for orders
+ */
+export async function GET(req: NextRequest) {
   try {
-    const raw = fs.readFileSync(ORDERS_PATH, 'utf-8');
-    let orders = JSON.parse(raw) as Array<Order>;
+    const token = extractTokenFromRequest(req);
+    const result = await backendGet('/orders', token);
 
-    // Apply filters
-    if (statusFilter) {
-      orders = orders.filter(o => o.status === statusFilter);
-    }
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      orders = orders.filter(o =>
-        o.id.toLowerCase().includes(query) ||
-        o.userId.toLowerCase().includes(query)
-      );
-    }
-    if (dateFrom) {
-      orders = orders.filter(o => o.date >= dateFrom);
-    }
-    if (dateTo) {
-      orders = orders.filter(o => o.date <= dateTo);
-    }
-
-    // Calculate stats from ALL filtered orders (before pagination)
-    const totalOrders = orders.length;
-    const totalRevenue = orders.reduce((sum, o) => sum + o.total, 0);
-    const statusCounts: Record<string, number> = {};
-    orders.forEach(o => {
-      statusCounts[o.status] = (statusCounts[o.status] || 0) + 1;
+    return NextResponse.json(result, {
+      status: result.success ? 200 : 500
     });
+  } catch (error) {
+    console.error("Error fetching orders from backend:", error);
+    return NextResponse.json(
+      { success: false, error: "Failed to fetch orders" },
+      { status: 500 }
+    );
+  }
+}
 
-    // Apply pagination
-    const startIndex = (page - 1) * limit;
-    const endIndex = startIndex + limit;
-    const paginatedOrders = orders.slice(startIndex, endIndex);
-    const totalPages = Math.ceil(totalOrders / limit);
+/**
+ * POST /api/admin/orders
+ * Create order via backend
+ */
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.json();
+    const token = extractTokenFromRequest(req);
+    const result = await backendPost('/orders', body, token);
 
-    return NextResponse.json({
-      orders: paginatedOrders,
-      stats: { totalOrders, totalRevenue, statusCounts },
-      pagination: {
-        currentPage: page,
-        totalPages,
-        totalItems: totalOrders,
-        itemsPerPage: limit,
-        hasNextPage: page < totalPages,
-        hasPreviousPage: page > 1,
-      },
+    return NextResponse.json(result, {
+      status: result.success ? 201 : 500
     });
-  } catch (err) {
-    console.error('Error reading orders:', err);
-    return NextResponse.json({
-      orders: [],
-      stats: { totalOrders: 0, totalRevenue: 0, statusCounts: {} },
-      pagination: {
-        currentPage: 1,
-        totalPages: 0,
-        totalItems: 0,
-        itemsPerPage: limit,
-        hasNextPage: false,
-        hasPreviousPage: false,
-      },
-    });
+  } catch (error) {
+    console.error("Error creating order:", error);
+    return NextResponse.json(
+      { success: false, error: "Failed to create order" },
+      { status: 500 }
+    );
   }
 }

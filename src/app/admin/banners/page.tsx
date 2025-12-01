@@ -1,20 +1,20 @@
 import React from "react";
 import { cookies } from 'next/headers';
 import BannersTableClient from "@/components/admin/banners/BannersTableClient";
-
-const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001/api';
+import { extractTokenFromCookies, getCookieString } from "@/lib/server-auth";
+import { getBackendUrl } from "@/lib/backend-api";
 
 async function getBanners() {
     try {
-        // Get cookies from request
-        const cookieStore = await cookies();
-        const cookieString = cookieStore.toString();
+        const token = await extractTokenFromCookies();
+        const cookieString = await getCookieString();
 
         // Fetch from backend with cookies
-        const response = await fetch(`${BACKEND_API_URL}/banners`, {
+        const response = await fetch(`${getBackendUrl()}/banners`, {
             headers: {
                 'Content-Type': 'application/json',
                 'Cookie': cookieString,
+                ...(token && { 'Authorization': `Bearer ${token}` }),
             },
             cache: 'no-store',
         });
