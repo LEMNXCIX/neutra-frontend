@@ -13,6 +13,7 @@ import {
     LayoutList,
     Megaphone,
     Images,
+    BrickWallShield,
 } from "lucide-react";
 
 const menuItems = [
@@ -24,6 +25,7 @@ const menuItems = [
     { href: "/admin/orders", label: "Orders", icon: ShoppingCart },
     { href: "/admin/coupons", label: "Coupons", icon: Ticket },
     { href: "/admin/users", label: "Users", icon: Users },
+    { href: "/admin/roles", label: "Roles", icon: BrickWallShield },
 ];
 
 export default function AdminMobileNav() {

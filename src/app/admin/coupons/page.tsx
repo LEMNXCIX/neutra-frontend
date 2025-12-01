@@ -18,7 +18,7 @@ async function getCoupons(search: string, type: string, status: string, page: nu
             },
             cache: 'no-store',
         });
-
+        console.log(response);
         if (!response.ok) {
             console.error('Failed to fetch coupons:', response.status);
             return {

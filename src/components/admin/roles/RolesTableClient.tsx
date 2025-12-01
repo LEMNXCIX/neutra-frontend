@@ -83,6 +83,21 @@ export default function RolesTableClient({ roles, permissions, stats }: Props) {
         description: "",
     });
 
+    // Helper function to refresh permissions cache
+    const refreshPermissions = async () => {
+        try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/validate`, {
+                credentials: 'include',
+            });
+            if (response.ok) {
+                const data = await response.json();
+                console.log('Permissions refreshed:', data.data?.permissions);
+            }
+        } catch (err) {
+            console.error('Failed to refresh permissions:', err);
+        }
+    };
+
     // Roles handlers
     const openCreate = () => {
         setForm({ name: "", description: "", level: 1, permissionIds: [] });
@@ -110,6 +125,10 @@ export default function RolesTableClient({ roles, permissions, stats }: Props) {
             await rolesService.create(form);
             toast.success("Role created successfully");
             setCreateOpen(false);
+
+            // Refresh permissions cache in backend
+            await refreshPermissions();
+
             router.refresh();
         } catch (err) {
             const message = err instanceof ApiError ? err.message : "Failed to create role";
@@ -124,6 +143,10 @@ export default function RolesTableClient({ roles, permissions, stats }: Props) {
             await rolesService.update(editing.id, form);
             toast.success("Role updated successfully");
             setEditOpen(false);
+
+            // Refresh permissions cache in backend
+            await refreshPermissions();
+
             router.refresh();
         } catch (err) {
             const message = err instanceof ApiError ? err.message : "Failed to update role";

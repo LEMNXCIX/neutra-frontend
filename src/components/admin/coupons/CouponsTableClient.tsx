@@ -3,6 +3,8 @@
 import React, { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
+import { couponsService } from "@/services";
+import { ApiError } from "@/lib/api-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -35,6 +37,8 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import {
     Edit,
     Trash2,
@@ -50,14 +54,7 @@ import {
     DollarSign,
 } from "lucide-react";
 import { useConfirm } from "@/hooks/use-confirm";
-
-type Coupon = {
-    code: string;
-    type: "amount" | "percent";
-    value: number;
-    used?: boolean;
-    expires?: string;
-};
+import { Coupon, CouponType, CreateCouponDTO, UpdateCouponDTO } from "@/types/coupon.types";
 
 type Stats = {
     totalCoupons: number;
@@ -88,12 +85,29 @@ export default function CouponsTableClient({ coupons, stats, pagination }: Props
     // Dialog states
     const [createOpen, setCreateOpen] = useState(false);
     const [editOpen, setEditOpen] = useState(false);
+    const [viewOpen, setViewOpen] = useState(false);
     const [editing, setEditing] = useState<Coupon | null>(null);
-    const [form, setForm] = useState({
+    const [viewing, setViewing] = useState<Coupon | null>(null);
+    const [form, setForm] = useState<{
+        code: string;
+        type: CouponType;
+        value: string;
+        description: string;
+        minPurchaseAmount: string;
+        maxDiscountAmount: string;
+        usageLimit: string;
+        active: boolean;
+        expiresAt: string;
+    }>({
         code: "",
-        type: "amount" as "amount" | "percent",
+        type: CouponType.FIXED,
         value: "",
-        expires: "",
+        description: "",
+        minPurchaseAmount: "",
+        maxDiscountAmount: "",
+        usageLimit: "",
+        active: true,
+        expiresAt: "",
     });
 
     // URL State
@@ -140,121 +154,150 @@ export default function CouponsTableClient({ coupons, stats, pagination }: Props
         router.push(`?${params.toString()}`);
     };
 
+    const resetForm = () => {
+        setForm({
+            code: "",
+            type: CouponType.FIXED,
+            value: "",
+            description: "",
+            minPurchaseAmount: "",
+            maxDiscountAmount: "",
+            usageLimit: "",
+            active: true,
+            expiresAt: "",
+        });
+    };
+
     const createCoupon = async () => {
         if (!form.code) {
             toast.error("Code is required");
             return;
         }
         try {
-            const body = {
+            const body: CreateCouponDTO = {
                 code: form.code.trim().toUpperCase(),
                 type: form.type,
                 value: Number(form.value || 0),
-                expires: form.expires || null,
+                description: form.description || undefined,
+                minPurchaseAmount: form.minPurchaseAmount ? Number(form.minPurchaseAmount) : undefined,
+                maxDiscountAmount: form.maxDiscountAmount ? Number(form.maxDiscountAmount) : undefined,
+                usageLimit: form.usageLimit ? Number(form.usageLimit) : undefined,
+                active: form.active,
+                expiresAt: form.expiresAt ? new Date(form.expiresAt) : new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
             };
-            const res = await fetch("/api/admin/coupons", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(body),
-            });
-            if (!res.ok) {
-                const data = await res.json();
-                toast.error(data?.error || "Failed to create coupon");
-                return;
-            }
+            await couponsService.create(body);
             toast.success("Coupon created");
             setCreateOpen(false);
-            setForm({ code: "", type: "amount", value: "", expires: "" });
+            resetForm();
             router.refresh();
-        } catch {
-            toast.error("Network error");
+        } catch (err) {
+            const message = err instanceof ApiError ? err.message : "Failed to create coupon";
+            toast.error(message);
         }
     };
 
-    const deleteCoupon = async (code: string) => {
+    const deleteCoupon = async (id: string) => {
         const confirmed = await confirm({
             title: "Delete Coupon",
-            description: "Are you sure you want to delete this coupon ? This action cannot be undone.",
+            description: "Are you sure you want to delete this coupon? This action cannot be undone.",
             confirmText: "Delete",
             variant: "destructive",
         });
         if (!confirmed) return;
         try {
-            const res = await fetch(`/api/admin/coupons/${encodeURIComponent(code)}`, {
-                method: "DELETE",
-            });
-            if (!res.ok) {
-                toast.error("Failed to delete");
-                return;
-            }
+            await couponsService.delete(id);
             toast.success("Coupon deleted");
             router.refresh();
-        } catch {
-            toast.error("Network error");
+        } catch (err) {
+            const message = err instanceof ApiError ? err.message : "Failed to delete coupon";
+            toast.error(message);
         }
     };
 
     const openEdit = (c: Coupon) => {
         setEditing(c);
+        // Format date for datetime-local input (YYYY-MM-DDTHH:mm)
+        let formattedDate = "";
+        if (c.expiresAt) {
+            try {
+                const date = new Date(c.expiresAt);
+                const offset = date.getTimezoneOffset() * 60000;
+                const localISOTime = (new Date(date.getTime() - offset)).toISOString().slice(0, 16);
+                formattedDate = localISOTime;
+            } catch (e) {
+                console.error("Error parsing date", e);
+            }
+        }
+
         setForm({
             code: c.code,
             type: c.type,
             value: String(c.value),
-            expires: c.expires || "",
+            description: c.description || "",
+            minPurchaseAmount: c.minPurchaseAmount ? String(c.minPurchaseAmount) : "",
+            maxDiscountAmount: c.maxDiscountAmount ? String(c.maxDiscountAmount) : "",
+            usageLimit: c.usageLimit ? String(c.usageLimit) : "",
+            active: c.active,
+            expiresAt: formattedDate,
         });
         setEditOpen(true);
+    };
+
+    const openView = (c: Coupon) => {
+        setViewing(c);
+        setViewOpen(true);
     };
 
     const saveEdit = async () => {
         if (!editing) return;
         try {
-            const body = {
+            const body: UpdateCouponDTO = {
                 code: form.code.trim().toUpperCase(),
                 type: form.type,
                 value: Number(form.value || 0),
-                expires: form.expires || null,
+                description: form.description || undefined,
+                minPurchaseAmount: form.minPurchaseAmount ? Number(form.minPurchaseAmount) : undefined,
+                maxDiscountAmount: form.maxDiscountAmount ? Number(form.maxDiscountAmount) : undefined,
+                usageLimit: form.usageLimit ? Number(form.usageLimit) : undefined,
+                active: form.active,
+                expiresAt: form.expiresAt ? new Date(form.expiresAt) : undefined,
             };
-            const res = await fetch(`/api/admin/coupons/${encodeURIComponent(editing.code)}`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(body),
-            });
-            if (!res.ok) {
-                const data = await res.json();
-                toast.error(data?.error || "Failed to update");
-                return;
-            }
+            await couponsService.update(editing.id, body);
             toast.success("Coupon updated");
             setEditOpen(false);
             setEditing(null);
-            setForm({ code: "", type: "amount", value: "", expires: "" });
+            resetForm();
             router.refresh();
-        } catch {
-            toast.error("Network error");
+        } catch (err) {
+            const message = err instanceof ApiError ? err.message : "Failed to update coupon";
+            toast.error(message);
         }
     };
 
-    const isExpired = (expiresStr?: string) => {
-        if (!expiresStr) return false;
+    const isExpired = (date?: Date | string) => {
+        if (!date) return false;
         try {
-            return new Date(expiresStr) < new Date();
+            return new Date(date) < new Date();
         } catch {
             return false;
         }
     };
 
-    const formatDate = (dateStr?: string) => {
-        if (!dateStr) return "—";
+    const formatDate = (date?: Date | string) => {
+        if (!date) return "—";
         try {
-            return new Date(dateStr).toLocaleDateString();
+            return new Date(date).toLocaleDateString() + " " + new Date(date).toLocaleTimeString();
         } catch {
-            return dateStr;
+            return String(date);
         }
     };
 
     const getCouponStatus = (c: Coupon) => {
-        if (c.used) return { label: "Used", variant: "secondary" as const, color: "text-muted-foreground" };
-        if (isExpired(c.expires)) return { label: "Expired", variant: "destructive" as const, color: "text-red-500" };
+        const isFullyUsed = c.usageLimit ? c.usageCount >= c.usageLimit : false;
+
+        if (!c.active) return { label: "Inactive", variant: "secondary" as const, color: "text-gray-500" };
+        if (isFullyUsed) return { label: "Used/Limit Reached", variant: "secondary" as const, color: "text-muted-foreground" };
+        if (isExpired(c.expiresAt)) return { label: "Expired", variant: "destructive" as const, color: "text-red-500" };
         return { label: "Active", variant: "default" as const, color: "text-green-500" };
     };
 
@@ -274,11 +317,115 @@ export default function CouponsTableClient({ coupons, stats, pagination }: Props
         </Card>
     );
 
+    const renderFormFields = () => (
+        <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                    <Label>Code *</Label>
+                    <Input
+                        value={form.code}
+                        onChange={(e) => setForm({ ...form, code: e.target.value })}
+                        placeholder="COUPON CODE"
+                        className="uppercase"
+                    />
+                </div>
+                <div className="space-y-2">
+                    <Label>Type</Label>
+                    <Select
+                        value={form.type}
+                        onValueChange={(v) => setForm({ ...form, type: v as CouponType })}
+                    >
+                        <SelectTrigger>
+                            <SelectValue placeholder="Select type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value={CouponType.FIXED}>Amount ($)</SelectItem>
+                            <SelectItem value={CouponType.PERCENT}>Percent (%)</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                    <Label>Value *</Label>
+                    <Input
+                        type="number"
+                        value={form.value}
+                        onChange={(e) => setForm({ ...form, value: e.target.value })}
+                        placeholder={form.type === CouponType.PERCENT ? "10" : "25"}
+                    />
+                </div>
+                <div className="space-y-2">
+                    <Label>Expires (Optional)</Label>
+                    <Input
+                        type="datetime-local"
+                        value={form.expiresAt}
+                        onChange={(e) => setForm({ ...form, expiresAt: e.target.value })}
+                    />
+                </div>
+            </div>
+
+            <div className="space-y-2">
+                <Label>Description</Label>
+                <Input
+                    value={form.description}
+                    onChange={(e) => setForm({ ...form, description: e.target.value })}
+                    placeholder="Optional description"
+                />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                    <Label>Min Purchase Amount</Label>
+                    <Input
+                        type="number"
+                        value={form.minPurchaseAmount}
+                        onChange={(e) => setForm({ ...form, minPurchaseAmount: e.target.value })}
+                        placeholder="0"
+                    />
+                </div>
+                <div className="space-y-2">
+                    <Label>Max Discount Amount</Label>
+                    <Input
+                        type="number"
+                        value={form.maxDiscountAmount}
+                        onChange={(e) => setForm({ ...form, maxDiscountAmount: e.target.value })}
+                        placeholder="0"
+                        disabled={form.type !== CouponType.PERCENT}
+                    />
+                </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                    <Label>Usage Limit</Label>
+                    <Input
+                        type="number"
+                        value={form.usageLimit}
+                        onChange={(e) => setForm({ ...form, usageLimit: e.target.value })}
+                        placeholder="Unlimited"
+                    />
+                </div>
+                <div className="flex items-center space-x-2 pt-8">
+                    <Switch
+                        checked={form.active}
+                        onCheckedChange={(checked) => setForm({ ...form, active: checked })}
+                    />
+                    <Label>Active</Label>
+                </div>
+            </div>
+        </div>
+    );
+
     return (
         <div className="w-full space-y-6">
             <div className="flex justify-between items-center">
                 <h2 className="text-xl font-medium">Coupons Management</h2>
-                <Button onClick={() => setCreateOpen(true)}>
+                <Button onClick={() => {
+                    resetForm();
+                    setCreateOpen(true);
+                }}>
                     <Plus className="h-4 w-4 mr-2" />
                     Add Coupon
                 </Button>
@@ -324,8 +471,8 @@ export default function CouponsTableClient({ coupons, stats, pagination }: Props
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="all">All Types</SelectItem>
-                                <SelectItem value="amount">Amount</SelectItem>
-                                <SelectItem value="percent">Percent</SelectItem>
+                                <SelectItem value={CouponType.FIXED}>Amount</SelectItem>
+                                <SelectItem value={CouponType.PERCENT}>Percent</SelectItem>
                             </SelectContent>
                         </Select>
 
@@ -387,33 +534,36 @@ export default function CouponsTableClient({ coupons, stats, pagination }: Props
                                 coupons.map((c) => {
                                     const status = getCouponStatus(c);
                                     return (
-                                        <TableRow key={c.code} className="hover:bg-muted/30">
+                                        <TableRow key={c.id} className="hover:bg-muted/30">
                                             <TableCell className="font-mono font-bold">{c.code}</TableCell>
                                             <TableCell>
                                                 <div className="flex items-center gap-2">
-                                                    {c.type === "percent" ? (
+                                                    {c.type === CouponType.PERCENT ? (
                                                         <Percent className="h-4 w-4 text-muted-foreground" />
                                                     ) : (
                                                         <DollarSign className="h-4 w-4 text-muted-foreground" />
                                                     )}
-                                                    <span className="capitalize">{c.type}</span>
+                                                    <span className="capitalize">{c.type === CouponType.PERCENT ? 'Percent' : 'Fixed'}</span>
                                                 </div>
                                             </TableCell>
                                             <TableCell className="font-medium">
-                                                {c.type === "percent" ? `${c.value}%` : `$${c.value}`}
+                                                {c.type === CouponType.PERCENT ? `${c.value}%` : `$${c.value}`}
                                             </TableCell>
                                             <TableCell>
                                                 <Badge variant={status.variant}>{status.label}</Badge>
                                             </TableCell>
                                             <TableCell className="text-sm text-muted-foreground">
-                                                {formatDate(c.expires)}
+                                                {formatDate(c.expiresAt)}
                                             </TableCell>
                                             <TableCell>
                                                 <div className="flex gap-2">
-                                                    <Button size="sm" variant="ghost" onClick={() => openEdit(c)}>
+                                                    <Button size="sm" variant="ghost" onClick={() => openView(c)} title="View Details">
+                                                        <Ticket className="h-4 w-4 text-blue-500" />
+                                                    </Button>
+                                                    <Button size="sm" variant="ghost" onClick={() => openEdit(c)} title="Edit">
                                                         <Edit className="h-4 w-4" />
                                                     </Button>
-                                                    <Button size="sm" variant="ghost" onClick={() => deleteCoupon(c.code)}>
+                                                    <Button size="sm" variant="ghost" onClick={() => deleteCoupon(c.id)} title="Delete">
                                                         <Trash2 className="h-4 w-4 text-red-500" />
                                                     </Button>
                                                 </div>
@@ -466,34 +616,38 @@ export default function CouponsTableClient({ coupons, stats, pagination }: Props
                 {coupons.map((c) => {
                     const status = getCouponStatus(c);
                     return (
-                        <Card key={c.code} className="shadow-sm border-muted/50">
+                        <Card key={c.id} className="shadow-sm border-muted/50">
                             <CardContent className="pt-4 space-y-3">
                                 <div className="flex justify-between items-start">
                                     <div className="flex-1">
                                         <h3 className="font-mono font-bold text-lg">{c.code}</h3>
                                         <div className="flex items-center gap-2 mt-1">
-                                            {c.type === "percent" ? (
+                                            {c.type === CouponType.PERCENT ? (
                                                 <Percent className="h-4 w-4 text-muted-foreground" />
                                             ) : (
                                                 <DollarSign className="h-4 w-4 text-muted-foreground" />
                                             )}
-                                            <span className="text-sm capitalize">{c.type}</span>
+                                            <span className="text-sm capitalize">{c.type === CouponType.PERCENT ? 'Percent' : 'Fixed'}</span>
                                             <span className="font-medium">
-                                                {c.type === "percent" ? `${c.value}%` : `$${c.value}`}
+                                                {c.type === CouponType.PERCENT ? `${c.value}%` : `$${c.value}`}
                                             </span>
                                         </div>
                                     </div>
                                     <Badge variant={status.variant}>{status.label}</Badge>
                                 </div>
                                 <div className="text-sm text-muted-foreground">
-                                    Expires: {formatDate(c.expires)}
+                                    Expires: {formatDate(c.expiresAt)}
                                 </div>
                                 <div className="flex gap-2">
+                                    <Button size="sm" variant="outline" className="flex-1" onClick={() => openView(c)}>
+                                        <Ticket className="h-4 w-4 mr-1" />
+                                        View
+                                    </Button>
                                     <Button size="sm" className="flex-1" onClick={() => openEdit(c)}>
                                         <Edit className="h-4 w-4 mr-1" />
                                         Edit
                                     </Button>
-                                    <Button size="sm" variant="destructive" onClick={() => deleteCoupon(c.code)}>
+                                    <Button size="sm" variant="destructive" onClick={() => deleteCoupon(c.id)}>
                                         <Trash2 className="h-4 w-4" />
                                     </Button>
                                 </div>
@@ -536,49 +690,7 @@ export default function CouponsTableClient({ coupons, stats, pagination }: Props
                     <DialogHeader>
                         <DialogTitle>Add New Coupon</DialogTitle>
                     </DialogHeader>
-                    <div className="space-y-4">
-                        <div>
-                            <label className="text-sm font-medium">Code *</label>
-                            <Input
-                                value={form.code}
-                                onChange={(e) => setForm({ ...form, code: e.target.value })}
-                                placeholder="COUPON CODE"
-                                className="uppercase"
-                            />
-                        </div>
-                        <div>
-                            <label className="text-sm font-medium">Type</label>
-                            <Select
-                                value={form.type}
-                                onValueChange={(v) => setForm({ ...form, type: v as "amount" | "percent" })}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select type" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="amount">Amount ($)</SelectItem>
-                                    <SelectItem value="percent">Percent (%)</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        <div>
-                            <label className="text-sm font-medium">Value *</label>
-                            <Input
-                                type="number"
-                                value={form.value}
-                                onChange={(e) => setForm({ ...form, value: e.target.value })}
-                                placeholder={form.type === "percent" ? "10" : "25"}
-                            />
-                        </div>
-                        <div>
-                            <label className="text-sm font-medium">Expires (Optional)</label>
-                            <Input
-                                type="date"
-                                value={form.expires}
-                                onChange={(e) => setForm({ ...form, expires: e.target.value })}
-                            />
-                        </div>
-                    </div>
+                    {renderFormFields()}
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setCreateOpen(false)}>Cancel</Button>
                         <Button onClick={createCoupon}>Create Coupon</Button>
@@ -592,52 +704,89 @@ export default function CouponsTableClient({ coupons, stats, pagination }: Props
                     <DialogHeader>
                         <DialogTitle>Edit Coupon</DialogTitle>
                     </DialogHeader>
-                    <div className="space-y-4">
-                        <div>
-                            <label className="text-sm font-medium">Code *</label>
-                            <Input
-                                value={form.code}
-                                onChange={(e) => setForm({ ...form, code: e.target.value })}
-                                placeholder="COUPON CODE"
-                                className="uppercase"
-                            />
-                        </div>
-                        <div>
-                            <label className="text-sm font-medium">Type</label>
-                            <Select
-                                value={form.type}
-                                onValueChange={(v) => setForm({ ...form, type: v as "amount" | "percent" })}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select type" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="amount">Amount ($)</SelectItem>
-                                    <SelectItem value="percent">Percent (%)</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        <div>
-                            <label className="text-sm font-medium">Value *</label>
-                            <Input
-                                type="number"
-                                value={form.value}
-                                onChange={(e) => setForm({ ...form, value: e.target.value })}
-                                placeholder={form.type === "percent" ? "10" : "25"}
-                            />
-                        </div>
-                        <div>
-                            <label className="text-sm font-medium">Expires (Optional)</label>
-                            <Input
-                                type="date"
-                                value={form.expires}
-                                onChange={(e) => setForm({ ...form, expires: e.target.value })}
-                            />
-                        </div>
-                    </div>
+                    {renderFormFields()}
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setEditOpen(false)}>Cancel</Button>
                         <Button onClick={saveEdit}>Save Changes</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* View Coupon Dialog */}
+            <Dialog open={viewOpen} onOpenChange={setViewOpen}>
+                <DialogContent className="max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Coupon Details</DialogTitle>
+                    </DialogHeader>
+                    {viewing && (
+                        <div className="space-y-4">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="text-sm font-medium text-muted-foreground">Code</label>
+                                    <p className="font-mono font-bold text-lg">{viewing.code}</p>
+                                </div>
+                                <div>
+                                    <label className="text-sm font-medium text-muted-foreground">Status</label>
+                                    <div className="mt-1">
+                                        <Badge variant={getCouponStatus(viewing).variant}>{getCouponStatus(viewing).label}</Badge>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="text-sm font-medium text-muted-foreground">Type</label>
+                                    <p className="capitalize">{viewing.type === CouponType.PERCENT ? 'Percent' : 'Fixed Amount'}</p>
+                                </div>
+                                <div>
+                                    <label className="text-sm font-medium text-muted-foreground">Value</label>
+                                    <p className="font-medium">
+                                        {viewing.type === CouponType.PERCENT ? `${viewing.value}%` : `$${viewing.value}`}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="text-sm font-medium text-muted-foreground">Description</label>
+                                <p className="text-sm">{viewing.description || "—"}</p>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="text-sm font-medium text-muted-foreground">Min Purchase</label>
+                                    <p>${viewing.minPurchaseAmount || 0}</p>
+                                </div>
+                                <div>
+                                    <label className="text-sm font-medium text-muted-foreground">Max Discount</label>
+                                    <p>{viewing.maxDiscountAmount ? `$${viewing.maxDiscountAmount}` : "Unlimited"}</p>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="text-sm font-medium text-muted-foreground">Usage</label>
+                                    <p>{viewing.usageCount} / {viewing.usageLimit || "∞"}</p>
+                                </div>
+                                <div>
+                                    <label className="text-sm font-medium text-muted-foreground">Expires</label>
+                                    <p>{formatDate(viewing.expiresAt)}</p>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4 text-xs text-muted-foreground pt-2 border-t">
+                                <div>
+                                    <span className="block">Created</span>
+                                    {formatDate(viewing.createdAt)}
+                                </div>
+                                <div>
+                                    <span className="block">Updated</span>
+                                    {formatDate(viewing.updatedAt)}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                    <DialogFooter>
+                        <Button onClick={() => setViewOpen(false)}>Close</Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>

@@ -1,21 +1,10 @@
 import { api } from '@/lib/api-client';
-
-export type Coupon = {
-    code: string;
-    type: 'amount' | 'percent';
-    value: number;
-    used?: boolean;
-    expires?: string;
-    createdAt?: string;
-    updatedAt?: string;
-};
-
-export type CreateCouponDto = {
-    code: string;
-    type: 'amount' | 'percent';
-    value: number;
-    expires?: string;
-};
+import {
+    Coupon,
+    CreateCouponDTO,
+    UpdateCouponDTO,
+    CouponValidationResult
+} from '@/types/coupon.types';
 
 /**
  * Coupons Service
@@ -39,28 +28,33 @@ export const couponsService = {
     /**
      * Validate coupon
      */
-    validate: async (code: string): Promise<{ valid: boolean; coupon?: Coupon }> => {
-        return api.post<{ valid: boolean; coupon?: Coupon }>('/coupons/validate', { code });
+    validate: async (code: string, orderTotal: number, productIds?: string[], categoryIds?: string[]): Promise<CouponValidationResult> => {
+        return api.post<CouponValidationResult>('/coupons/validate', {
+            code,
+            orderTotal,
+            productIds,
+            categoryIds
+        });
     },
 
     /**
      * Create new coupon (requires authentication)
      */
-    create: async (data: CreateCouponDto): Promise<Coupon> => {
+    create: async (data: CreateCouponDTO): Promise<Coupon> => {
         return api.post<Coupon>('/coupons', data);
     },
 
     /**
      * Update coupon (requires authentication)
      */
-    update: async (code: string, data: Partial<CreateCouponDto>): Promise<Coupon> => {
-        return api.put<Coupon>(`/coupons/${code}`, data);
+    update: async (id: string, data: UpdateCouponDTO): Promise<Coupon> => {
+        return api.put<Coupon>(`/coupons/${id}`, data);
     },
 
     /**
      * Delete coupon (requires authentication)
      */
-    delete: async (code: string): Promise<Coupon> => {
-        return api.delete<Coupon>(`/coupons/${code}`);
+    delete: async (id: string): Promise<Coupon> => {
+        return api.delete<Coupon>(`/coupons/${id}`);
     },
 };

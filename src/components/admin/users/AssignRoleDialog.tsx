@@ -73,6 +73,21 @@ export function AssignRoleDialog({
         }
     };
 
+    // Helper function to refresh permissions cache
+    const refreshPermissions = async () => {
+        try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/validate`, {
+                credentials: 'include',
+            });
+            if (response.ok) {
+                const data = await response.json();
+                console.log('Permissions refreshed after role assignment:', data.data?.permissions);
+            }
+        } catch (err) {
+            console.error('Failed to refresh permissions:', err);
+        }
+    };
+
     const handleAssign = async () => {
         if (!user || !selectedRoleId) {
             toast.error("Please select a role");
@@ -83,6 +98,10 @@ export function AssignRoleDialog({
         try {
             await usersService.assignRole(user.id, selectedRoleId);
             toast.success(`Role assigned to ${user.name}`);
+
+            // Refresh permissions cache in backend
+            await refreshPermissions();
+
             setSelectedRoleId("");
             onOpenChange(false);
             onSuccess?.();
