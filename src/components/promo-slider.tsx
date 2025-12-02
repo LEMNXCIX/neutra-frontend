@@ -20,7 +20,7 @@ export default function PromoSlider() {
   useEffect(() => {
     const fetchSlides = async () => {
       try {
-        const res = await fetch('/api/slide');
+        const res = await fetch('/api/sliders');
         const data = await res.json();
         if (data.sliders && Array.isArray(data.sliders)) {
           setSlides(data.sliders);
@@ -86,7 +86,7 @@ export default function PromoSlider() {
                   fill
                   priority={isActive}
                   className="object-cover rounded-xl"
-                  sizes="100vw"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 1280px"
                 />
               )}
 

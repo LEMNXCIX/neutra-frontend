@@ -1,19 +1,18 @@
-export interface Category {
+export interface Permission {
     id: string;
     name: string;
     description?: string | null;
     active: boolean;
     createdAt: Date;
-    updatedAt: Date;
 }
 
-export interface CreateCategoryDTO {
+export interface CreatePermissionDTO {
     name: string;
     description?: string;
     active?: boolean;
 }
 
-export interface UpdateCategoryDTO {
+export interface UpdatePermissionDTO {
     name?: string;
     description?: string;
     active?: boolean;

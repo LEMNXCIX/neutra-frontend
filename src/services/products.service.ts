@@ -1,5 +1,5 @@
 import { api } from '@/lib/api-client';
-import { Product, ProductCreateDto } from '@/types/frontend-api';
+import { Product, CreateProductDTO, UpdateProductDTO } from '@/types/product.types';
 
 /**
  * Products Service
@@ -30,14 +30,14 @@ export const productsService = {
     /**
      * Create new product (requires authentication)
      */
-    create: async (data: ProductCreateDto): Promise<Product> => {
+    create: async (data: CreateProductDTO): Promise<Product> => {
         return api.post<Product>('/products', data);
     },
 
     /**
      * Update product (requires authentication)
      */
-    update: async (id: string, data: Partial<ProductCreateDto>): Promise<Product> => {
+    update: async (id: string, data: UpdateProductDTO): Promise<Product> => {
         return api.put<Product>(`/products/${id}`, data);
     },
 

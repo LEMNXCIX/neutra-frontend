@@ -1,20 +1,9 @@
 import React from "react";
 import { cookies } from 'next/headers';
 import UsersTableClient from "@/components/admin/users/UsersTableClient";
+import { User } from "@/types/user.types";
 
 const BACKEND_API_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:4001/api';
-
-type User = {
-    id: string;
-    name: string;
-    email: string;
-    isAdmin: boolean;
-    avatar?: string;
-    role?: {
-        id: string;
-        name: string;
-    };
-};
 
 type Stats = {
     totalUsers: number;
@@ -62,12 +51,16 @@ async function getUsers(search: string, role: string, page: number, limit: numbe
                 id: u.id,
                 name: u.name,
                 email: u.email,
-                isAdmin: u.role?.name === 'SUPER_ADMIN' || u.role?.name === 'ADMIN',
-                avatar: u.profilePic || undefined,
+                roleId: u.roleId || u.role?.id || '',
+                active: u.active !== undefined ? u.active : true,
+                profilePic: u.profilePic || undefined,
                 role: u.role ? {
                     id: u.role.id,
                     name: u.role.name,
+                    permissions: u.role.permissions || []
                 } : undefined,
+                createdAt: u.createdAt ? new Date(u.createdAt) : undefined,
+                updatedAt: u.updatedAt ? new Date(u.updatedAt) : undefined,
             }));
         }
 
@@ -84,15 +77,15 @@ async function getUsers(search: string, role: string, page: number, limit: numbe
 
         if (role && role !== "all") {
             if (role === "admin") {
-                users = users.filter((u) => u.isAdmin);
+                users = users.filter((u) => u.role?.name === 'SUPER_ADMIN' || u.role?.name === 'ADMIN');
             } else if (role === "user") {
-                users = users.filter((u) => !u.isAdmin);
+                users = users.filter((u) => u.role?.name !== 'SUPER_ADMIN' && u.role?.name !== 'ADMIN');
             }
         }
 
         // Calculate stats
         const totalUsers = users.length;
-        const adminUsers = users.filter((u) => u.isAdmin).length;
+        const adminUsers = users.filter((u) => u.role?.name === 'SUPER_ADMIN' || u.role?.name === 'ADMIN').length;
         const regularUsers = totalUsers - adminUsers;
 
         // Apply pagination

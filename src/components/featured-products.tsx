@@ -22,7 +22,11 @@ export default function FeaturedProducts() {
     fetch('/api/products')
       .then(r => r.json())
       .then(d => {
-        if (mounted) setProducts(d.products.slice(0, 4));
+        if (mounted && d.products && Array.isArray(d.products)) {
+          setProducts(d.products.slice(0, 4));
+        } else {
+          setProducts([]);
+        }
       })
       .finally(() => mounted && setLoading(false));
 

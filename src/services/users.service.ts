@@ -1,5 +1,5 @@
 import { api } from '@/lib/api-client';
-import { User } from '@/types/frontend-api';
+import { User, CreateUserDTO } from '@/types/user.types';
 
 /**
  * Users Service

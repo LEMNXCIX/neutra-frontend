@@ -138,6 +138,7 @@ export function Navigation() {
     let buffer: string[] = [];
 
     const onKey = (e: KeyboardEvent) => {
+      if (!e.key) return;
       buffer.push(e.key.toLowerCase());
       if (buffer.length > seq.length) buffer.shift();
       if (buffer.join('') === seq.join('')) {

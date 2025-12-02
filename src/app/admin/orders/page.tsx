@@ -10,7 +10,7 @@ async function getOrders(search: string, status: string, page: number, limit: nu
         const cookieString = await getCookieString();
 
         // Fetch from backend with cookies
-        const response = await fetch(`${getBackendUrl()}/orders`, {
+        const response = await fetch(`${getBackendUrl()}/order`, {
             headers: {
                 'Content-Type': 'application/json',
                 'Cookie': cookieString,

@@ -22,17 +22,8 @@ import {
 } from "@/components/ui/select";
 import { Loader2, UserCog } from "lucide-react";
 
-type Role = {
-    id: string;
-    name: string;
-    description?: string;
-};
-
-type User = {
-    id: string;
-    name: string;
-    email: string;
-};
+import { Role } from "@/types/role.types";
+import { User } from "@/types/user.types";
 
 type AssignRoleDialogProps = {
     user: User | null;

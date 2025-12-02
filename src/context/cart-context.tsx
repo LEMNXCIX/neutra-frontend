@@ -5,10 +5,12 @@ import { useAuthStore } from '@/store/auth-store';
 import { useRouter } from 'next/navigation';
 import { toast } from "sonner";
 import { ApiError } from '@/lib/api-client';
-import { Product } from '@/types/frontend-api';
+import { Product } from '@/types/product.types';
+import { Coupon, CouponType } from '@/types/coupon.types';
 
 type CartItem = {
-  id: string;
+  id: string; // productId
+  cartItemId: string;
   name: string;
   qty: number;
   price?: number;
@@ -16,7 +18,7 @@ type CartItem = {
   stock?: number;
 };
 
-type Coupon = {
+type ContextCoupon = {
   code: string;
   type: 'amount' | 'percent';
   value: number;
@@ -30,7 +32,7 @@ type CartContextType = {
   subtotal: number;
   discount: number;
   total: number;
-  coupon: Coupon;
+  coupon: ContextCoupon;
   refresh: () => Promise<void>;
   addItem: (id: string, name: string) => Promise<void>;
   removeItem: (id: string) => Promise<void>;
@@ -45,7 +47,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [items, setItems] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [coupon, setCoupon] = useState<Coupon>(null);
+  const [coupon, setCoupon] = useState<ContextCoupon>(null);
   const [discount, setDiscount] = useState(0);
   const [productMap, setProductMap] = useState<Record<string, Product>>({});
 
@@ -61,18 +63,19 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLoading(true);
     setError(null);
     try {
-      const cartProducts = await cartService.get();
+      const cart = await cartService.get();
 
-      const mappedItems: CartItem[] = cartProducts.map((p: any) => ({
-        id: p.id,
-        name: p.name,
-        qty: p.amount || 1,
-        price: p.price,
-        image: p.image || undefined,
-        stock: p.stock,
+      const mappedItems: CartItem[] = cart?.items?.map((item) => ({
+        id: item.productId,
+        cartItemId: item.id,
+        name: item.product?.name || 'Unknown',
+        qty: item.amount,
+        price: item.product?.price,
+        image: item.product?.image,
+        stock: item.product?.stock,
       }));
 
-      setItems(mappedItems);
+      setItems(mappedItems || []);
     } catch (err) {
       const errorMsg = err instanceof ApiError ? err.message : 'Failed to fetch cart';
       setError(errorMsg);
@@ -139,9 +142,12 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const removeItem = async (id: string) => {
     setLoading(true);
     try {
-      await cartService.removeItem(id);
-      await fetchCart();
-      toast('Removed from cart');
+      const item = items.find(i => i.id === id);
+      if (item) {
+        await cartService.removeItem(item.cartItemId);
+        await fetchCart();
+        toast('Removed from cart');
+      }
     } catch (err) {
       const message = err instanceof ApiError ? err.message : 'Failed to remove item';
       toast.error(message);
@@ -167,7 +173,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     setLoading(true);
     try {
-      await cartService.removeItem(id);
+      await cartService.removeItem(item.cartItemId);
       await cartService.addItem({ productId: id, quantity: newQty });
       await fetchCart();
     } catch (err) {
@@ -181,16 +187,36 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const applyCoupon = async (code: string) => {
     setLoading(true);
     try {
-      const result = await couponsService.validate(code);
+      const productIds = items.map(i => i.id);
+      // Collect category IDs from all products in cart
+      const categoryIds = new Set<string>();
+      items.forEach(item => {
+        const product = productMap[item.id];
+        if (product?.categories) {
+          product.categories.forEach(c => categoryIds.add(c.id));
+        }
+      });
+
+      const result = await couponsService.validate(
+        code,
+        subtotal,
+        productIds,
+        Array.from(categoryIds)
+      );
 
       if (result.valid && result.coupon) {
-        setCoupon(result.coupon);
+        const couponType = result.coupon.type === CouponType.PERCENT ? 'percent' : 'amount';
+        setCoupon({
+          code: result.coupon.code,
+          type: couponType,
+          value: result.coupon.value
+        });
 
         // Calculate discount
         let discountAmount = 0;
-        if (result.coupon.type === 'amount') {
+        if (couponType === 'amount') {
           discountAmount = result.coupon.value;
-        } else if (result.coupon.type === 'percent') {
+        } else if (couponType === 'percent') {
           discountAmount = (subtotal * result.coupon.value) / 100;
         }
 

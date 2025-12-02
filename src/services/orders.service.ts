@@ -1,5 +1,5 @@
 import { api } from '@/lib/api-client';
-import { Order, CreateOrderDto } from '@/types/frontend-api';
+import { Order, CreateOrderDTO } from '@/types/order.types';
 
 /**
  * Orders Service
@@ -10,7 +10,7 @@ export const ordersService = {
     /**
      * Create new order
      */
-    create: async (data: CreateOrderDto): Promise<Order> => {
+    create: async (data: CreateOrderDTO): Promise<Order> => {
         return api.post<Order>('/order', data);
     },
 

@@ -1,5 +1,5 @@
 import { api } from '@/lib/api-client';
-import { Cart, Product, AddToCartDto } from '@/types/frontend-api';
+import { Cart, AddToCartDTO } from '@/types/cart.types';
 
 /**
  * Cart Service
@@ -9,10 +9,9 @@ import { Cart, Product, AddToCartDto } from '@/types/frontend-api';
 export const cartService = {
     /**
      * Get current user's cart
-     * Returns products with amount
      */
-    get: async (): Promise<Product[]> => {
-        return api.get<Product[]>('/cart');
+    get: async (): Promise<Cart> => {
+        return api.get<Cart>('/cart');
     },
 
     /**
@@ -25,7 +24,7 @@ export const cartService = {
     /**
      * Add item to cart
      */
-    addItem: async (data: AddToCartDto): Promise<Cart> => {
+    addItem: async (data: AddToCartDTO): Promise<Cart> => {
         return api.post<Cart>('/cart/add', data);
     },
 

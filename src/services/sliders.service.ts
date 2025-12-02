@@ -1,25 +1,5 @@
 import { api } from '@/lib/api-client';
-
-export type Slider = {
-    id: string;
-    title: string;
-    subtitle?: string;
-    image?: string;
-    startsAt?: string;
-    endsAt?: string;
-    active?: boolean;
-    createdAt?: string;
-    updatedAt?: string;
-};
-
-export type CreateSliderDto = {
-    title: string;
-    subtitle?: string;
-    image?: string;
-    startsAt?: string;
-    endsAt?: string;
-    active?: boolean;
-};
+import { Slideshow, CreateSlideshowDTO, UpdateSlideshowDTO } from '@/types/slide.types';
 
 /**
  * Sliders Service
@@ -29,35 +9,35 @@ export const slidersService = {
     /**
      * Get all sliders
      */
-    getAll: async (): Promise<Slider[]> => {
-        return api.get<Slider[]>('/sliders');
+    getAll: async (): Promise<Slideshow[]> => {
+        return api.get<Slideshow[]>('/slide');
     },
 
     /**
      * Get slider by ID
      */
-    getById: async (id: string): Promise<Slider> => {
-        return api.get<Slider>(`/sliders/${id}`);
+    getById: async (id: string): Promise<Slideshow> => {
+        return api.get<Slideshow>(`/slide/${id}`);
     },
 
     /**
      * Create new slider (requires authentication)
      */
-    create: async (data: CreateSliderDto): Promise<Slider> => {
-        return api.post<Slider>('/sliders', data);
+    create: async (data: CreateSlideshowDTO): Promise<Slideshow> => {
+        return api.post<Slideshow>('/slide', data);
     },
 
     /**
      * Update slider (requires authentication)
      */
-    update: async (id: string, data: Partial<CreateSliderDto>): Promise<Slider> => {
-        return api.put<Slider>(`/sliders/${id}`, data);
+    update: async (id: string, data: UpdateSlideshowDTO): Promise<Slideshow> => {
+        return api.put<Slideshow>(`/slide/${id}`, data);
     },
 
     /**
      * Delete slider (requires authentication)
      */
-    delete: async (id: string): Promise<Slider> => {
-        return api.delete<Slider>(`/sliders/${id}`);
+    delete: async (id: string): Promise<Slideshow> => {
+        return api.delete<Slideshow>(`/slide/${id}`);
     },
 };

@@ -1,20 +1,5 @@
 import { api } from '@/lib/api-client';
-
-export type Role = {
-    id: string;
-    name: string;
-    description?: string;
-    permissions?: any[];
-    createdAt?: string;
-    updatedAt?: string;
-};
-
-export type CreateRoleDto = {
-    name: string;
-    description?: string;
-    level?: number;
-    permissionIds?: string[];
-};
+import { Role, CreateRoleDTO, UpdateRoleDTO } from '@/types/role.types';
 
 /**
  * Roles Service
@@ -38,14 +23,14 @@ export const rolesService = {
     /**
      * Create new role (requires authentication)
      */
-    create: async (data: CreateRoleDto): Promise<Role> => {
+    create: async (data: CreateRoleDTO): Promise<Role> => {
         return api.post<Role>('/roles', data);
     },
 
     /**
      * Update role (requires authentication)
      */
-    update: async (id: string, data: Partial<CreateRoleDto>): Promise<Role> => {
+    update: async (id: string, data: UpdateRoleDTO): Promise<Role> => {
         return api.put<Role>(`/roles/${id}`, data);
     },
 

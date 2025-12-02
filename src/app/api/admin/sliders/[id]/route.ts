@@ -8,12 +8,13 @@ import { extractTokenFromRequest } from "@/lib/server-auth";
  */
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<any> }
 ) {
   try {
+    const { id } = await params;
     const body = await req.json();
     const token = extractTokenFromRequest(req);
-    const result = await backendPut(`/slide/${params.id}`, body, token);
+    const result = await backendPut(`/slide/${id}`, body, token);
 
     return NextResponse.json(result, {
       status: result.success ? 200 : 500
@@ -33,11 +34,12 @@ export async function PUT(
  */
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<any> }
 ) {
   try {
+    const { id } = await params;
     const token = extractTokenFromRequest(req);
-    const result = await backendDelete(`/slide/${params.id}`, token);
+    const result = await backendDelete(`/slide/${id}`, token);
 
     // Handle 204 No Content
     if (result.success && !result.data) {

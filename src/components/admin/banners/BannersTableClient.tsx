@@ -48,16 +48,7 @@ import {
 } from "@/components/ui/accordion";
 import { useConfirm } from "@/hooks/use-confirm";
 
-type Banner = {
-    id: string;
-    title: string;
-    subtitle?: string;
-    cta?: string;
-    ctaUrl?: string;
-    startsAt?: string;
-    endsAt?: string;
-    active?: boolean;
-};
+import { Banner } from "@/types/banner.types";
 
 type Stats = {
     totalBanners: number;
@@ -184,8 +175,8 @@ export default function BannersTableClient({ banners, stats, pagination }: Props
             subtitle: b.subtitle || "",
             cta: b.cta || "",
             ctaUrl: b.ctaUrl || "",
-            startsAt: b.startsAt || "",
-            endsAt: b.endsAt || "",
+            startsAt: b.startsAt ? new Date(b.startsAt).toISOString().slice(0, 16) : "",
+            endsAt: b.endsAt ? new Date(b.endsAt).toISOString().slice(0, 16) : "",
             active: b.active ?? true,
         });
         setEditOpen(true);
@@ -214,12 +205,12 @@ export default function BannersTableClient({ banners, stats, pagination }: Props
         }
     };
 
-    const formatDateTime = (dateStr?: string) => {
-        if (!dateStr) return "—";
+    const formatDateTime = (date?: Date | string) => {
+        if (!date) return "—";
         try {
-            return new Date(dateStr).toLocaleString();
+            return new Date(date).toLocaleString();
         } catch {
-            return dateStr;
+            return String(date);
         }
     };
 

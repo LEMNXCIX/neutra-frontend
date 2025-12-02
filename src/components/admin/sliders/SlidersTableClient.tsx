@@ -49,7 +49,7 @@ import {
     AccordionTrigger,
 } from "@/components/ui/accordion";
 import { useConfirm } from "@/hooks/use-confirm";
-import { Slide } from "@/types/slide.types";
+import { Slideshow } from "@/types/slide.types";
 
 type Stats = {
     totalSliders: number;
@@ -66,7 +66,7 @@ type PaginationProps = {
 };
 
 type Props = {
-    sliders: Slide[];
+    sliders: Slideshow[];
     stats: Stats;
     pagination: PaginationProps;
 };
@@ -79,14 +79,12 @@ export default function SlidersTableClient({ sliders, stats, pagination }: Props
     // Dialog states
     const [createOpen, setCreateOpen] = useState(false);
     const [editOpen, setEditOpen] = useState(false);
-    const [editing, setEditing] = useState<Slide | null>(null);
+    const [editing, setEditing] = useState<Slideshow | null>(null);
     const [form, setForm] = useState({
         title: "",
-        subtitle: "",
-        startsAt: "",
-        endsAt: "",
+        desc: "",
         active: true,
-        imageBase64: "",
+        img: "",
     });
     const [imagePreview, setImagePreview] = useState("");
 
@@ -130,10 +128,10 @@ export default function SlidersTableClient({ sliders, stats, pagination }: Props
         reader.onload = () => {
             const result = reader.result as string;
             if (isEdit) {
-                setEditing(s => s && ({ ...s, imageBase64: result } as any));
+                setEditing(s => s && ({ ...s, img: result } as any));
                 setImagePreview(result);
             } else {
-                setForm(f => ({ ...f, imageBase64: result }));
+                setForm(f => ({ ...f, img: result }));
                 setImagePreview(result);
             }
         };
@@ -158,7 +156,7 @@ export default function SlidersTableClient({ sliders, stats, pagination }: Props
             }
             toast.success("Slider created");
             setCreateOpen(false);
-            setForm({ title: "", subtitle: "", startsAt: "", endsAt: "", active: true, imageBase64: "" });
+            setForm({ title: "", desc: "", active: true, img: "" });
             setImagePreview("");
             router.refresh();
         } catch {
@@ -189,17 +187,15 @@ export default function SlidersTableClient({ sliders, stats, pagination }: Props
         }
     };
 
-    const openEdit = (s: Slide) => {
+    const openEdit = (s: Slideshow) => {
         setEditing(s);
         setForm({
             title: s.title,
-            subtitle: s.subtitle || "",
-            startsAt: s.startsAt || "",
-            endsAt: s.endsAt || "",
+            desc: s.desc || "",
             active: s.active ?? true,
-            imageBase64: "",
+            img: "",
         });
-        setImagePreview(s.image || "");
+        setImagePreview(s.img || "");
         setEditOpen(true);
     };
 
@@ -209,14 +205,18 @@ export default function SlidersTableClient({ sliders, stats, pagination }: Props
             const body: any = {
                 ...editing,
                 title: form.title,
-                subtitle: form.subtitle,
-                startsAt: form.startsAt,
-                endsAt: form.endsAt,
+                desc: form.desc,
                 active: form.active,
             };
-            if (form.imageBase64) {
-                body.imageBase64 = form.imageBase64;
+            if (form.img) {
+                body.img = form.img;
             }
+            // If editing.img was updated via handleImageUpload directly to editing state, use it?
+            // handleImageUpload updates editing state directly for img.
+            // But form.img is used for new uploads in create mode.
+            // In edit mode, handleImageUpload updates `editing.img` (via `setEditing`).
+            // So `body` already has updated `img` from `...editing`.
+
             const res = await fetch(`/api/admin/sliders/${editing.id}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
@@ -230,20 +230,11 @@ export default function SlidersTableClient({ sliders, stats, pagination }: Props
             toast.success("Slider updated");
             setEditOpen(false);
             setEditing(null);
-            setForm({ title: "", subtitle: "", startsAt: "", endsAt: "", active: true, imageBase64: "" });
+            setForm({ title: "", desc: "", active: true, img: "" });
             setImagePreview("");
             router.refresh();
         } catch {
             toast.error("Network error");
-        }
-    };
-
-    const formatDateTime = (dateStr?: string) => {
-        if (!dateStr) return "—";
-        try {
-            return new Date(dateStr).toLocaleString();
-        } catch {
-            return dateStr;
         }
     };
 
@@ -318,7 +309,7 @@ export default function SlidersTableClient({ sliders, stats, pagination }: Props
 
                         <div className="flex gap-2 flex-1">
                             <Input
-                                placeholder="Search by title, ID, or subtitle..."
+                                placeholder="Search by title, ID, or description..."
                                 defaultValue={searchQuery}
                                 onKeyDown={(e) => {
                                     if (e.key === 'Enter') {
@@ -328,7 +319,7 @@ export default function SlidersTableClient({ sliders, stats, pagination }: Props
                                 className="max-w-md"
                             />
                             <Button onClick={() => {
-                                const input = document.querySelector('input[placeholder="Search by title, ID, or subtitle..."]') as HTMLInputElement;
+                                const input = document.querySelector('input[placeholder="Search by title, ID, or description..."]') as HTMLInputElement;
                                 handleSearch(input?.value || "");
                             }}>Search</Button>
                         </div>
@@ -346,14 +337,13 @@ export default function SlidersTableClient({ sliders, stats, pagination }: Props
                                 <TableHead className="w-[120px]">Image</TableHead>
                                 <TableHead className="w-[220px]">Title</TableHead>
                                 <TableHead className="w-[100px]">Active</TableHead>
-                                <TableHead className="w-[250px]">Period</TableHead>
                                 <TableHead className="w-[150px]">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {sliders.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                                    <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
                                         No sliders found
                                     </TableCell>
                                 </TableRow>
@@ -362,9 +352,9 @@ export default function SlidersTableClient({ sliders, stats, pagination }: Props
                                     <TableRow key={s.id} className="hover:bg-muted/30">
                                         <TableCell className="font-mono text-xs">{s.id}</TableCell>
                                         <TableCell>
-                                            {s.image ? (
+                                            {s.img ? (
                                                 <Image
-                                                    src={s.image}
+                                                    src={s.img}
                                                     alt={s.title}
                                                     width={100}
                                                     height={60}
@@ -379,8 +369,8 @@ export default function SlidersTableClient({ sliders, stats, pagination }: Props
                                         <TableCell>
                                             <div>
                                                 <div className="font-medium">{s.title}</div>
-                                                {s.subtitle && (
-                                                    <div className="text-xs text-muted-foreground">{s.subtitle}</div>
+                                                {s.desc && (
+                                                    <div className="text-xs text-muted-foreground">{s.desc}</div>
                                                 )}
                                             </div>
                                         </TableCell>
@@ -390,10 +380,6 @@ export default function SlidersTableClient({ sliders, stats, pagination }: Props
                                             ) : (
                                                 <Badge variant="secondary">Inactive</Badge>
                                             )}
-                                        </TableCell>
-                                        <TableCell className="text-xs text-muted-foreground">
-                                            <div>{formatDateTime(s.startsAt)}</div>
-                                            <div>→ {formatDateTime(s.endsAt)}</div>
                                         </TableCell>
                                         <TableCell>
                                             <div className="flex gap-2">
@@ -452,10 +438,10 @@ export default function SlidersTableClient({ sliders, stats, pagination }: Props
                 {sliders.map((s) => (
                     <Card key={s.id} className="shadow-sm border-muted/50">
                         <CardContent className="pt-4 space-y-3">
-                            {s.image && (
+                            {s.img && (
                                 <div className="relative w-full h-40 rounded overflow-hidden">
                                     <Image
-                                        src={s.image}
+                                        src={s.img}
                                         alt={s.title}
                                         fill
                                         className="object-cover"
@@ -465,8 +451,8 @@ export default function SlidersTableClient({ sliders, stats, pagination }: Props
                             <div className="flex justify-between items-start">
                                 <div className="flex-1">
                                     <h3 className="font-semibold">{s.title}</h3>
-                                    {s.subtitle && (
-                                        <p className="text-sm text-muted-foreground mt-1">{s.subtitle}</p>
+                                    {s.desc && (
+                                        <p className="text-sm text-muted-foreground mt-1">{s.desc}</p>
                                     )}
                                     <p className="text-xs text-muted-foreground font-mono mt-1">{s.id}</p>
                                 </div>
@@ -475,10 +461,6 @@ export default function SlidersTableClient({ sliders, stats, pagination }: Props
                                 ) : (
                                     <Badge variant="secondary">Inactive</Badge>
                                 )}
-                            </div>
-                            <div className="text-xs text-muted-foreground space-y-1">
-                                <div>Starts: {formatDateTime(s.startsAt)}</div>
-                                <div>Ends: {formatDateTime(s.endsAt)}</div>
                             </div>
                             <div className="flex gap-2">
                                 <Button size="sm" className="flex-1" onClick={() => openEdit(s)}>
@@ -537,11 +519,11 @@ export default function SlidersTableClient({ sliders, stats, pagination }: Props
                             />
                         </div>
                         <div>
-                            <label className="text-sm font-medium">Subtitle</label>
+                            <label className="text-sm font-medium">Description</label>
                             <Input
-                                value={form.subtitle}
-                                onChange={(e) => setForm({ ...form, subtitle: e.target.value })}
-                                placeholder="Optional subtitle"
+                                value={form.desc}
+                                onChange={(e) => setForm({ ...form, desc: e.target.value })}
+                                placeholder="Optional description"
                             />
                         </div>
                         <div>
@@ -561,22 +543,6 @@ export default function SlidersTableClient({ sliders, stats, pagination }: Props
                                     />
                                 </div>
                             )}
-                        </div>
-                        <div>
-                            <label className="text-sm font-medium">Starts At</label>
-                            <Input
-                                type="datetime-local"
-                                value={form.startsAt}
-                                onChange={(e) => setForm({ ...form, startsAt: e.target.value })}
-                            />
-                        </div>
-                        <div>
-                            <label className="text-sm font-medium">Ends At</label>
-                            <Input
-                                type="datetime-local"
-                                value={form.endsAt}
-                                onChange={(e) => setForm({ ...form, endsAt: e.target.value })}
-                            />
                         </div>
                         <div className="flex items-center space-x-2">
                             <Switch
@@ -612,11 +578,11 @@ export default function SlidersTableClient({ sliders, stats, pagination }: Props
                             />
                         </div>
                         <div>
-                            <label className="text-sm font-medium">Subtitle</label>
+                            <label className="text-sm font-medium">Description</label>
                             <Input
-                                value={form.subtitle}
-                                onChange={(e) => setForm({ ...form, subtitle: e.target.value })}
-                                placeholder="Optional subtitle"
+                                value={form.desc}
+                                onChange={(e) => setForm({ ...form, desc: e.target.value })}
+                                placeholder="Optional description"
                             />
                         </div>
                         <div>
@@ -636,22 +602,6 @@ export default function SlidersTableClient({ sliders, stats, pagination }: Props
                                     />
                                 </div>
                             )}
-                        </div>
-                        <div>
-                            <label className="text-sm font-medium">Starts At</label>
-                            <Input
-                                type="datetime-local"
-                                value={form.startsAt}
-                                onChange={(e) => setForm({ ...form, startsAt: e.target.value })}
-                            />
-                        </div>
-                        <div>
-                            <label className="text-sm font-medium">Ends At</label>
-                            <Input
-                                type="datetime-local"
-                                value={form.endsAt}
-                                onChange={(e) => setForm({ ...form, endsAt: e.target.value })}
-                            />
                         </div>
                         <div className="flex items-center space-x-2">
                             <Switch

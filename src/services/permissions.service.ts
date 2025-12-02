@@ -1,21 +1,5 @@
 import { api } from '@/lib/api-client';
-
-export type Permission = {
-    id: string;
-    name: string;
-    description?: string;
-    resource?: string;
-    action?: string;
-    createdAt?: string;
-    updatedAt?: string;
-};
-
-export type CreatePermissionDto = {
-    name: string;
-    description?: string;
-    resource?: string;
-    action?: string;
-};
+import { Permission, CreatePermissionDTO, UpdatePermissionDTO } from '@/types/permission.types';
 
 /**
  * Permissions Service
@@ -39,14 +23,14 @@ export const permissionsService = {
     /**
      * Create new permission (requires authentication)
      */
-    create: async (data: CreatePermissionDto): Promise<Permission> => {
+    create: async (data: CreatePermissionDTO): Promise<Permission> => {
         return api.post<Permission>('/permissions', data);
     },
 
     /**
      * Update permission (requires authentication)
      */
-    update: async (id: string, data: Partial<CreatePermissionDto>): Promise<Permission> => {
+    update: async (id: string, data: UpdatePermissionDTO): Promise<Permission> => {
         return api.put<Permission>(`/permissions/${id}`, data);
     },
 

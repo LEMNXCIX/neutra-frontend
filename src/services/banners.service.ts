@@ -1,23 +1,5 @@
 import { api } from '@/lib/api-client';
-
-export type Banner = {
-    id: string;
-    title: string;
-    subtitle?: string;
-    image?: string;
-    link?: string;
-    active?: boolean;
-    createdAt?: string;
-    updatedAt?: string;
-};
-
-export type CreateBannerDto = {
-    title: string;
-    subtitle?: string;
-    image?: string;
-    link?: string;
-    active?: boolean;
-};
+import { Banner, CreateBannerDTO, UpdateBannerDTO } from '@/types/banner.types';
 
 /**
  * Banners Service
@@ -41,14 +23,14 @@ export const bannersService = {
     /**
      * Create new banner (requires authentication)
      */
-    create: async (data: CreateBannerDto): Promise<Banner> => {
+    create: async (data: CreateBannerDTO): Promise<Banner> => {
         return api.post<Banner>('/banners', data);
     },
 
     /**
      * Update banner (requires authentication)
      */
-    update: async (id: string, data: Partial<CreateBannerDto>): Promise<Banner> => {
+    update: async (id: string, data: UpdateBannerDTO): Promise<Banner> => {
         return api.put<Banner>(`/banners/${id}`, data);
     },
 

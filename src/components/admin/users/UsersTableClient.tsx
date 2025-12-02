@@ -50,18 +50,7 @@ import {
     UserCog,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-
-type User = {
-    id: string;
-    name: string;
-    email: string;
-    isAdmin: boolean;
-    avatar?: string;
-    role?: {
-        name: string;
-        id: string;
-    };
-};
+import { User } from "@/types/user.types";
 
 type Stats = {
     totalUsers: number;
@@ -148,12 +137,14 @@ export default function UsersTableClient({ users, stats, pagination }: Props) {
         }
     };
 
+    const isUserAdmin = (u: User) => u.role?.name === 'SUPER_ADMIN' || u.role?.name === 'ADMIN';
+
     const openEdit = (u: User) => {
         setEditing(u);
         setForm({
             name: u.name,
             email: u.email,
-            isAdmin: u.isAdmin,
+            isAdmin: isUserAdmin(u),
         });
         setEditOpen(true);
     };
@@ -307,7 +298,7 @@ export default function UsersTableClient({ users, stats, pagination }: Props) {
                                     <TableRow key={u.id} className="hover:bg-muted/30">
                                         <TableCell>
                                             <Avatar>
-                                                <AvatarImage src={u.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}`} />
+                                                <AvatarImage src={u.profilePic || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}`} />
                                                 <AvatarFallback>{u.name.slice(0, 2).toUpperCase()}</AvatarFallback>
                                             </Avatar>
                                         </TableCell>
@@ -328,7 +319,7 @@ export default function UsersTableClient({ users, stats, pagination }: Props) {
                                                     variant="ghost"
                                                     onClick={() => toggleAdmin(u.id)}
                                                 >
-                                                    {u.isAdmin ? "Revoke Admin" : "Make Admin"}
+                                                    {isUserAdmin(u) ? "Revoke Admin" : "Make Admin"}
                                                 </Button>
                                                 <Button
                                                     size="sm"
@@ -414,7 +405,7 @@ export default function UsersTableClient({ users, stats, pagination }: Props) {
                         <CardContent className="pt-4 space-y-3">
                             <div className="flex items-start gap-3">
                                 <Avatar>
-                                    <AvatarImage src={u.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}`} />
+                                    <AvatarImage src={u.profilePic || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}`} />
                                     <AvatarFallback>{u.name.slice(0, 2).toUpperCase()}</AvatarFallback>
                                 </Avatar>
                                 <div className="flex-1 min-w-0">
@@ -438,7 +429,7 @@ export default function UsersTableClient({ users, stats, pagination }: Props) {
                                     onClick={() => toggleAdmin(u.id)}
                                     className="flex-1"
                                 >
-                                    {u.isAdmin ? "Revoke" : "Make Admin"}
+                                    {isUserAdmin(u) ? "Revoke" : "Make Admin"}
                                 </Button>
                             </div>
                         </CardContent>

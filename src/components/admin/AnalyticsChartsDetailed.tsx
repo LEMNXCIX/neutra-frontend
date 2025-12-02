@@ -20,7 +20,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Line, Bar, Doughnut } from 'react-chartjs-2';
+// @ts-ignore
+import { Line as LineChart, Bar as BarChart, Doughnut as DoughnutChart } from 'react-chartjs-2';
+
+const Line = LineChart as any;
+const Bar = BarChart as any;
+const Doughnut = DoughnutChart as any;
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, ArcElement, Tooltip, Legend);
 

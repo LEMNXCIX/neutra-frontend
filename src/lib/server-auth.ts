@@ -17,17 +17,12 @@ const TOKEN_COOKIE_NAME = 'token'; // Changed from 'neutra_jwt' to match backend
 export function extractTokenFromRequest(req: NextRequest): string | undefined {
     const cookieHeader = req.headers.get('cookie') || '';
 
-    console.log('[extractTokenFromRequest] Full cookie header:', cookieHeader);
-
     // Split cookies and find neutra_jwt
     const cookies = cookieHeader.split(';').map(c => c.trim());
-    console.log('[extractTokenFromRequest] All cookies:', cookies);
 
     const neutraJwtCookie = cookies.find((c) => c.startsWith(`${TOKEN_COOKIE_NAME}=`));
-    console.log('[extractTokenFromRequest] neutra_jwt cookie:', neutraJwtCookie);
 
     if (!neutraJwtCookie) {
-        console.log('[extractTokenFromRequest] Token not found in cookies');
         return undefined;
     }
 
@@ -36,9 +31,6 @@ export function extractTokenFromRequest(req: NextRequest): string | undefined {
 
     // Decode if URL encoded
     const decodedToken = decodeURIComponent(token);
-
-    console.log('[extractTokenFromRequest] Raw token:', token.substring(0, 30) + '...');
-    console.log('[extractTokenFromRequest] Decoded token:', decodedToken.substring(0, 30) + '...');
 
     return decodedToken;
 }

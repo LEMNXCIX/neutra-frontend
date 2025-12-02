@@ -8,11 +8,12 @@ import { extractTokenFromRequest } from "@/lib/server-auth";
  */
 export async function GET(
     req: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<any> }
 ) {
     try {
+        const { id } = await params;
         const token = extractTokenFromRequest(req);
-        const result = await backendGet(`/orders/${params.id}`, token);
+        const result = await backendGet(`/orders/${id}`, token);
 
         return NextResponse.json(result, {
             status: result.success ? 200 : 500
@@ -32,12 +33,13 @@ export async function GET(
  */
 export async function PUT(
     req: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<any> }
 ) {
     try {
+        const { id } = await params;
         const body = await req.json();
         const token = extractTokenFromRequest(req);
-        const result = await backendPut(`/orders/${params.id}`, body, token);
+        const result = await backendPut(`/orders/${id}`, body, token);
 
         return NextResponse.json(result, {
             status: result.success ? 200 : 500
@@ -57,11 +59,12 @@ export async function PUT(
  */
 export async function DELETE(
     req: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<any> }
 ) {
     try {
+        const { id } = await params;
         const token = extractTokenFromRequest(req);
-        const result = await backendDelete(`/orders/${params.id}`, token);
+        const result = await backendDelete(`/orders/${id}`, token);
 
         // Handle 204 No Content
         if (result.success && !result.data) {

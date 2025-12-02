@@ -33,21 +33,12 @@ import {
     Edit,
     Trash2,
     Key,
+    ChevronLeft,
+    ChevronRight,
 } from "lucide-react";
 
-type Role = {
-    id: string;
-    name: string;
-    description?: string;
-    level?: number;
-    permissions?: any[];
-};
-
-type Permission = {
-    id: string;
-    name: string;
-    description?: string;
-};
+import { Role } from "@/types/role.types";
+import { Permission } from "@/types/permission.types";
 
 type Stats = {
     totalRoles: number;
@@ -82,6 +73,18 @@ export default function RolesTableClient({ roles, permissions, stats }: Props) {
         name: "",
         description: "",
     });
+
+    // Pagination state
+    const [rolePage, setRolePage] = useState(1);
+    const [permissionPage, setPermissionPage] = useState(1);
+    const itemsPerPage = 10;
+
+    // Pagination logic
+    const roleTotalPages = Math.ceil(roles.length / itemsPerPage);
+    const paginatedRoles = roles.slice((rolePage - 1) * itemsPerPage, rolePage * itemsPerPage);
+
+    const permissionTotalPages = Math.ceil(permissions.length / itemsPerPage);
+    const paginatedPermissions = permissions.slice((permissionPage - 1) * itemsPerPage, permissionPage * itemsPerPage);
 
     // Helper function to refresh permissions cache
     const refreshPermissions = async () => {
@@ -279,7 +282,8 @@ export default function RolesTableClient({ roles, permissions, stats }: Props) {
                         </Button>
                     </div>
 
-                    <Card>
+                    {/* Desktop Table View */}
+                    <Card className="hidden lg:block">
                         <div className="overflow-x-auto">
                             <Table>
                                 <TableHeader>
@@ -299,7 +303,7 @@ export default function RolesTableClient({ roles, permissions, stats }: Props) {
                                             </TableCell>
                                         </TableRow>
                                     ) : (
-                                        roles.map((role) => (
+                                        paginatedRoles.map((role) => (
                                             <TableRow key={role.id} className="hover:bg-muted/30">
                                                 <TableCell className="font-medium">{role.name}</TableCell>
                                                 <TableCell className="text-sm text-muted-foreground">
@@ -334,6 +338,88 @@ export default function RolesTableClient({ roles, permissions, stats }: Props) {
                             </Table>
                         </div>
                     </Card>
+
+                    {/* Mobile Card View */}
+                    <div className="lg:hidden grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {roles.length === 0 ? (
+                            <Card>
+                                <CardContent className="py-8 text-center text-muted-foreground">
+                                    No roles found
+                                </CardContent>
+                            </Card>
+                        ) : (
+                            paginatedRoles.map((role) => (
+                                <Card key={role.id} className="overflow-hidden">
+                                    <CardContent className="p-4 space-y-3">
+                                        <div className="flex items-start justify-between">
+                                            <div className="flex-1">
+                                                <h3 className="font-semibold text-lg">{role.name}</h3>
+                                                <p className="text-sm text-muted-foreground mt-1">
+                                                    {role.description || "No description"}
+                                                </p>
+                                            </div>
+                                            <Badge variant="outline" className="ml-2">
+                                                Level {role.level || 0}
+                                            </Badge>
+                                        </div>
+
+                                        <div className="flex items-center gap-2">
+                                            <Shield className="h-4 w-4 text-muted-foreground" />
+                                            <Badge variant="secondary">
+                                                {role.permissions?.length || 0} permissions
+                                            </Badge>
+                                        </div>
+
+                                        <div className="flex gap-2 pt-2 border-t">
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                className="flex-1"
+                                                onClick={() => openEdit(role)}
+                                            >
+                                                <Edit className="h-4 w-4 mr-2" />
+                                                Edit
+                                            </Button>
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                className="flex-1"
+                                                onClick={() => handleDelete(role.id)}
+                                            >
+                                                <Trash2 className="h-4 w-4 mr-2" />
+                                                Delete
+                                            </Button>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            ))
+                        )}
+                    </div>
+
+                    {/* Roles Pagination */}
+                    {roleTotalPages > 1 && (
+                        <div className="flex items-center justify-end space-x-2 py-4">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setRolePage((p) => Math.max(1, p - 1))}
+                                disabled={rolePage === 1}
+                            >
+                                <ChevronLeft className="h-4 w-4" />
+                            </Button>
+                            <div className="text-sm font-medium">
+                                Page {rolePage} of {roleTotalPages}
+                            </div>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setRolePage((p) => Math.min(roleTotalPages, p + 1))}
+                                disabled={rolePage === roleTotalPages}
+                            >
+                                <ChevronRight className="h-4 w-4" />
+                            </Button>
+                        </div>
+                    )}
                 </TabsContent>
 
                 {/* Permissions Tab */}
@@ -345,7 +431,8 @@ export default function RolesTableClient({ roles, permissions, stats }: Props) {
                         </Button>
                     </div>
 
-                    <Card>
+                    {/* Desktop Table View */}
+                    <Card className="hidden lg:block">
                         <div className="overflow-x-auto">
                             <Table>
                                 <TableHeader>
@@ -363,7 +450,7 @@ export default function RolesTableClient({ roles, permissions, stats }: Props) {
                                             </TableCell>
                                         </TableRow>
                                     ) : (
-                                        permissions.map((permission) => (
+                                        paginatedPermissions.map((permission) => (
                                             <TableRow key={permission.id} className="hover:bg-muted/30">
                                                 <TableCell className="font-medium">{permission.name}</TableCell>
                                                 <TableCell className="text-sm text-muted-foreground">
@@ -390,6 +477,79 @@ export default function RolesTableClient({ roles, permissions, stats }: Props) {
                             </Table>
                         </div>
                     </Card>
+
+                    {/* Mobile Card View */}
+                    <div className="lg:hidden grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {permissions.length === 0 ? (
+                            <Card>
+                                <CardContent className="py-8 text-center text-muted-foreground">
+                                    No permissions found
+                                </CardContent>
+                            </Card>
+                        ) : (
+                            paginatedPermissions.map((permission) => (
+                                <Card key={permission.id} className="overflow-hidden">
+                                    <CardContent className="p-4 space-y-3">
+                                        <div>
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <Key className="h-4 w-4 text-muted-foreground" />
+                                                <h3 className="font-semibold text-lg">{permission.name}</h3>
+                                            </div>
+                                            <p className="text-sm text-muted-foreground">
+                                                {permission.description || "No description"}
+                                            </p>
+                                        </div>
+
+                                        <div className="flex gap-2 pt-2 border-t">
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                className="flex-1"
+                                                onClick={() => openPermEdit(permission)}
+                                            >
+                                                <Edit className="h-4 w-4 mr-2" />
+                                                Edit
+                                            </Button>
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                className="flex-1"
+                                                onClick={() => handlePermDelete(permission.id)}
+                                            >
+                                                <Trash2 className="h-4 w-4 mr-2" />
+                                                Delete
+                                            </Button>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            ))
+                        )}
+                    </div>
+
+                    {/* Permissions Pagination */}
+                    {permissionTotalPages > 1 && (
+                        <div className="flex items-center justify-end space-x-2 py-4">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setPermissionPage((p) => Math.max(1, p - 1))}
+                                disabled={permissionPage === 1}
+                            >
+                                <ChevronLeft className="h-4 w-4" />
+                            </Button>
+                            <div className="text-sm font-medium">
+                                Page {permissionPage} of {permissionTotalPages}
+                            </div>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setPermissionPage((p) => Math.min(permissionTotalPages, p + 1))}
+                                disabled={permissionPage === permissionTotalPages}
+                            >
+                                <ChevronRight className="h-4 w-4" />
+                            </Button>
+                        </div>
+                    )}
                 </TabsContent>
             </Tabs>
 

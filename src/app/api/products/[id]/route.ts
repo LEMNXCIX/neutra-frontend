@@ -8,7 +8,7 @@ const BACKEND_API_URL = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:40
  */
 export async function GET(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<any> }
 ) {
   try {
     const { id } = await params;

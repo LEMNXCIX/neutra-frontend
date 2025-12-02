@@ -1,162 +1,268 @@
 /**
- * Centralized Backend API Client
- * Handles all communication with the external backend API
+ * Backend API Client
+ * Centralized, type-safe client for external backend communication
  */
+
+// ============================================================================
+// Configuration
+// ============================================================================
 
 const BACKEND_API_URL = process.env.BACKEND_API_URL || 'http://localhost:4001/api';
+const TOKEN_COOKIE_NAME = 'token';
 
 /**
- * Ensure the URL has a protocol (http:// or https://)
+ * Ensure URL has protocol prefix
  */
-function ensureProtocol(url: string): string {
-    if (url.startsWith('http://') || url.startsWith('https://')) {
-        return url;
-    }
-    return `http://${url}`;
-}
+const ensureProtocol = (url: string): string => {
+    return url.startsWith('http://') || url.startsWith('https://')
+        ? url
+        : `http://${url}`;
+};
 
 const BASE_URL = ensureProtocol(BACKEND_API_URL);
 
-export interface BackendFetchOptions {
-    method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
-    body?: any;
+// ============================================================================
+// Types
+// ============================================================================
+
+export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+
+export interface ApiRequestConfig {
+    method?: HttpMethod;
+    body?: unknown;
     headers?: Record<string, string>;
     token?: string;
+    timeout?: number;
 }
 
-export interface BackendResponse<T = any> {
+export interface ApiResponse<T = unknown> {
     success: boolean;
     data?: T;
     error?: string;
     message?: string;
+    statusCode?: number;
 }
 
-/**
- * Make a request to the backend API
- * @param endpoint - API endpoint (e.g., '/categories', '/products/123')
- * @param options - Request options
- * @returns Parsed response or throws error
- */
-export async function backendFetch<T = any>(
-    endpoint: string,
-    options: BackendFetchOptions = {}
-): Promise<BackendResponse<T>> {
-    const { method = 'GET', body, headers = {}, token } = options;
+export interface ApiError extends Error {
+    statusCode?: number;
+    response?: ApiResponse;
+}
 
-    // Ensure endpoint starts with /
+// ============================================================================
+// Error Handling
+// ============================================================================
+
+class BackendApiError extends Error implements ApiError {
+    statusCode?: number;
+    response?: ApiResponse;
+
+    constructor(message: string, statusCode?: number, response?: ApiResponse) {
+        super(message);
+        this.name = 'BackendApiError';
+        this.statusCode = statusCode;
+        this.response = response;
+    }
+}
+
+// ============================================================================
+// Core Client
+// ============================================================================
+
+/**
+ * Make HTTP request to backend API
+ */
+async function request<T = unknown>(
+    endpoint: string,
+    config: ApiRequestConfig = {}
+): Promise<ApiResponse<T>> {
+    const {
+        method = 'GET',
+        body,
+        headers = {},
+        token,
+        timeout = 30000,
+    } = config;
+
+    // Normalize endpoint
     const normalizedEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
     const url = `${BASE_URL}${normalizedEndpoint}`;
 
-    const fetchOptions: RequestInit = {
-        method,
-        headers: {
-            'Content-Type': 'application/json',
-            ...headers,
-        },
-        cache: 'no-store',
-        credentials: 'include', // Important: include cookies
+    // Build headers
+    const requestHeaders: Record<string, string> = {
+        'Content-Type': 'application/json',
+        ...headers,
     };
 
-    // Add token as cookie, not Authorization header
-    // The backend expects: req.cookies.token
+    // Add authentication cookie if token provided
     if (token) {
-        fetchOptions.headers = {
-            ...fetchOptions.headers,
-            'Cookie': `token=${token}`,
-        };
+        requestHeaders['Cookie'] = `${TOKEN_COOKIE_NAME}=${token}`;
     }
 
-    if (body && (method === 'POST' || method === 'PUT')) {
+    // Build fetch options
+    const fetchOptions: RequestInit = {
+        method,
+        headers: requestHeaders,
+        credentials: 'include',
+        cache: 'no-store',
+    };
+
+    // Add body for mutation requests
+    if (body && ['POST', 'PUT', 'PATCH'].includes(method)) {
         fetchOptions.body = JSON.stringify(body);
     }
 
-    // Debug logging
-    console.log(`[backendFetch] ${method} ${url}`);
-    console.log(`[backendFetch] Sending token as cookie:`, token ? 'yes' : 'no');
-    console.log(`[backendFetch] Headers:`, fetchOptions.headers);
+    // Create abort controller for timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeout);
 
     try {
-        const response = await fetch(url, fetchOptions);
+        const response = await fetch(url, {
+            ...fetchOptions,
+            signal: controller.signal,
+        });
+
+        clearTimeout(timeoutId);
 
         // Handle 204 No Content
         if (response.status === 204) {
-            console.log(`[backendFetch] Response: 204 No Content`);
             return { success: true };
         }
 
-        // Parse JSON response
-        const data = await response.json();
-        console.log(`[backendFetch] Response status:`, response.status);
-        console.log(`[backendFetch] Response data:`, data);
+        // Parse response
+        const data = await response.json().catch(() => ({}));
 
-        // Return the response with status indication
+        // Handle error responses
         if (!response.ok) {
-            return {
+            const errorMessage = data.error || data.message || `Request failed with status ${response.status}`;
+            throw new BackendApiError(errorMessage, response.status, {
                 success: false,
-                error: data.error || data.message || 'Request failed',
+                error: errorMessage,
+                statusCode: response.status,
                 ...data,
-            };
+            });
         }
 
         return {
             success: true,
+            statusCode: response.status,
             ...data,
         };
     } catch (error) {
-        console.error(`Backend API Error [${method} ${endpoint}]:`, error);
-        throw error;
+        clearTimeout(timeoutId);
+
+        // Re-throw BackendApiError
+        if (error instanceof BackendApiError) {
+            throw error;
+        }
+
+        // Handle abort/timeout
+        if (error instanceof Error && error.name === 'AbortError') {
+            throw new BackendApiError('Request timeout', 408);
+        }
+
+        // Handle network errors
+        if (error instanceof Error) {
+            throw new BackendApiError(
+                `Network error: ${error.message}`,
+                0,
+                { success: false, error: error.message }
+            );
+        }
+
+        throw new BackendApiError('Unknown error occurred');
     }
 }
 
+// ============================================================================
+// HTTP Method Helpers
+// ============================================================================
+
 /**
- * GET request to backend
+ * GET request
  */
-export async function backendGet<T = any>(
+export const get = <T = unknown>(
     endpoint: string,
     token?: string,
     headers?: Record<string, string>
-): Promise<BackendResponse<T>> {
-    return backendFetch<T>(endpoint, { method: 'GET', token, headers });
-}
+): Promise<ApiResponse<T>> => {
+    return request<T>(endpoint, { method: 'GET', token, headers });
+};
 
 /**
- * POST request to backend
+ * POST request
  */
-export async function backendPost<T = any>(
+export const post = <T = unknown>(
     endpoint: string,
-    body: any,
+    body: unknown,
     token?: string,
     headers?: Record<string, string>
-): Promise<BackendResponse<T>> {
-    return backendFetch<T>(endpoint, { method: 'POST', body, token, headers });
-}
+): Promise<ApiResponse<T>> => {
+    return request<T>(endpoint, { method: 'POST', body, token, headers });
+};
 
 /**
- * PUT request to backend
+ * PUT request
  */
-export async function backendPut<T = any>(
+export const put = <T = unknown>(
     endpoint: string,
-    body: any,
+    body: unknown,
     token?: string,
     headers?: Record<string, string>
-): Promise<BackendResponse<T>> {
-    return backendFetch<T>(endpoint, { method: 'PUT', body, token, headers });
-}
+): Promise<ApiResponse<T>> => {
+    return request<T>(endpoint, { method: 'PUT', body, token, headers });
+};
 
 /**
- * DELETE request to backend
+ * PATCH request
  */
-export async function backendDelete<T = any>(
+export const patch = <T = unknown>(
+    endpoint: string,
+    body: unknown,
+    token?: string,
+    headers?: Record<string, string>
+): Promise<ApiResponse<T>> => {
+    return request<T>(endpoint, { method: 'PATCH', body, token, headers });
+};
+
+/**
+ * DELETE request
+ */
+export const del = <T = unknown>(
     endpoint: string,
     token?: string,
     headers?: Record<string, string>
-): Promise<BackendResponse<T>> {
-    return backendFetch<T>(endpoint, { method: 'DELETE', token, headers });
-}
+): Promise<ApiResponse<T>> => {
+    return request<T>(endpoint, { method: 'DELETE', token, headers });
+};
+
+// ============================================================================
+// Legacy Exports (for backward compatibility)
+// ============================================================================
+
+export const backendFetch = request;
+export const backendGet = get;
+export const backendPost = post;
+export const backendPut = put;
+export const backendDelete = del;
+
+export type BackendResponse<T = unknown> = ApiResponse<T>;
+export type BackendFetchOptions = ApiRequestConfig;
 
 /**
- * Get the configured backend API URL
+ * Get configured backend URL
  */
-export function getBackendUrl(): string {
-    return BASE_URL;
-}
+export const getBackendUrl = (): string => BASE_URL;
+
+// ============================================================================
+// Default Export (API Client Object)
+// ============================================================================
+
+export default {
+    get,
+    post,
+    put,
+    patch,
+    delete: del,
+    request,
+    getBaseUrl: getBackendUrl,
+} as const;

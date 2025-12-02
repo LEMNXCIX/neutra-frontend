@@ -6,6 +6,7 @@ export interface Product {
     description: string;
     image: string;
     price: number;
+    active: boolean;
     ownerId: string;
     createdAt?: Date;
     updatedAt?: Date;
@@ -18,6 +19,7 @@ export interface CreateProductDTO {
     description: string;
     image?: string;
     price: number;
+    active?: boolean;
     ownerId: string;
     categoryIds?: string[];
 }
@@ -27,5 +29,6 @@ export interface UpdateProductDTO {
     description?: string;
     image?: string;
     price?: number;
+    active?: boolean;
     categoryIds?: string[];
 }
