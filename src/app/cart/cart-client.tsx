@@ -86,7 +86,7 @@ export default function CartClient() {
     setPlacing(true);
     try {
       const bodyPayload = {
-        items: items.map((i) => ({ id: i.id, qty: i.qty })),
+        items: items.map((i) => ({ id: i.id, amount: i.amount })),
         address,
         couponCode: coupon?.code || null,
       };
@@ -104,7 +104,7 @@ export default function CartClient() {
         return;
       }
 
-      await apiFetch("/api/cart", { method: "DELETE" });
+      await apiFetch("/api/cart/clear", { method: "DELETE" });
       await refresh();
       if (coupon) removeCoupon();
 
@@ -174,7 +174,7 @@ export default function CartClient() {
               </CardHeader>
               <CardContent className="space-y-4">
                 {items.map((item) => {
-                  const itemTotal = (item.price || 0) * item.qty;
+                  const itemTotal = (item.price || 0) * item.amount;
                   return (
                     <div
                       key={item.id}
@@ -213,19 +213,19 @@ export default function CartClient() {
                               variant="ghost"
                               size="icon"
                               className="h-8 w-8 rounded-r-none"
-                              onClick={() => handleQuantityChange(item.id, item.qty - 1)}
-                              disabled={loading || item.qty <= 1}
+                              onClick={() => handleQuantityChange(item.id, item.amount - 1)}
+                              disabled={loading || item.amount <= 1}
                             >
                               <Minus className="h-3 w-3" />
                             </Button>
                             <div className="w-12 text-center font-medium">
-                              {item.qty}
+                              {item.amount}
                             </div>
                             <Button
                               variant="ghost"
                               size="icon"
                               className="h-8 w-8 rounded-l-none"
-                              onClick={() => handleQuantityChange(item.id, item.qty + 1)}
+                              onClick={() => handleQuantityChange(item.id, item.amount + 1)}
                               disabled={loading}
                             >
                               <Plus className="h-3 w-3" />

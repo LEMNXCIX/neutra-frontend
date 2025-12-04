@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const BACKEND_API_URL = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:4000/api";
+const BACKEND_API_URL = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:4001/api";
 
 /**
  * GET /api/orders
@@ -38,8 +38,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const backendUrl = `${BACKEND_API_URL}/order/create`;
-
+    const backendUrl = `${BACKEND_API_URL}/order`;
     const response = await fetch(backendUrl, {
       method: "POST",
       headers: {

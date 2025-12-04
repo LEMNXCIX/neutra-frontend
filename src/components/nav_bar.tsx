@@ -36,9 +36,9 @@ import {
 } from "./ui/dropdown-menu";
 import { ScrollArea } from "./ui/scroll-area";
 import { Card } from "./ui/card";
-import categories from '@/data/categories.json';
+import { categoriesService } from '@/services/categories.service';
+import { Category } from '@/types/category.types';
 
-type Category = { id: string; name: string; description: string };
 type Product = { id: string; name: string; price: number; image?: string; stock: number };
 
 export function Navigation() {
@@ -55,6 +55,20 @@ export function Navigation() {
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
   const searchRef = useRef<HTMLDivElement>(null);
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  // Fetch categories from API
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await categoriesService.getAll();
+        setCategories(response || []);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   const handleThemeToggle = () => {
     setTheme(theme === 'dark' ? 'light' : 'dark');
@@ -231,9 +245,9 @@ export function Navigation() {
               <NavigationMenuTrigger>Categories</NavigationMenuTrigger>
               <NavigationMenuContent>
                 <ul className="grid w-[400px] gap-2 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
-                  {(categories as Category[]).map((c) => {
+                  {categories.map((c) => {
                     const active = c.id === category;
-                    const href = c.id === 'all' ? `/products${search ? `?search=${encodeURIComponent(search)}` : ''}` : `/products?category=${encodeURIComponent(c.id)}${search ? `&search=${encodeURIComponent(search)}` : ''}`;
+                    const href = `/products?category=${encodeURIComponent(c.id)}${search ? `&search=${encodeURIComponent(search)}` : ''}`;
                     return (
                       <ListItem
                         key={c.id}
@@ -446,8 +460,8 @@ export function Navigation() {
                   <li>
                     <div className="text-sm font-medium mb-2">Categories</div>
                     <div className="flex flex-col gap-2 pl-2">
-                      {(categories as Category[]).map((c) => (
-                        <Link key={c.id} href={c.id === 'all' ? '/products' : `/products?category=${encodeURIComponent(c.id)}`} onClick={() => setIsOpen(false)} className="text-sm text-muted-foreground">{c.name}</Link>
+                      {categories.map((c) => (
+                        <Link key={c.id} href={`/products?category=${encodeURIComponent(c.id)}`} onClick={() => setIsOpen(false)} className="text-sm text-muted-foreground">{c.name}</Link>
                       ))}
                     </div>
                   </li>

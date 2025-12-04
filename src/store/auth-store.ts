@@ -50,9 +50,9 @@ export const useAuthStore = create<AuthState>()(
                 set({ loading: true, error: null });
                 try {
                     const apiUser = await authService.login({ email, password });
-                    console.log(apiUser);
+
                     const user = mapAPIUserToStoreUser(apiUser);
-                    console.log(user);
+
                     set({ user, loading: false });
                 } catch (err) {
                     const errorMessage = err instanceof ApiError

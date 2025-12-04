@@ -57,4 +57,11 @@ export const couponsService = {
     delete: async (id: string): Promise<Coupon> => {
         return api.delete<Coupon>(`/coupons/${id}`);
     },
+
+    /**
+     * Get coupon statistics (requires authentication)
+     */
+    getStats: async (): Promise<{ totalCoupons: number; activeCoupons: number; usedCoupons: number }> => {
+        return api.get<{ totalCoupons: number; activeCoupons: number; usedCoupons: number }>('/coupons/stats');
+    },
 };

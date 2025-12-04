@@ -61,7 +61,7 @@ async function getSliders(search: string, status: string, page: number, limit: n
         // Calculate stats
         const totalSliders = sliders.length;
         const activeSliders = sliders.filter((s: any) => s.active).length;
-        const withImages = sliders.filter((s: any) => s.image).length;
+        const withImages = sliders.filter((s: any) => s.img).length;
 
         // Apply pagination
         const startIndex = (page - 1) * limit;

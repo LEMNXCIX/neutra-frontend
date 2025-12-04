@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { rolesService, permissionsService } from "@/services";
 import { ApiError } from "@/lib/api-client";
@@ -45,14 +45,24 @@ type Stats = {
     totalPermissions: number;
 };
 
+type Pagination = {
+    currentPage: number;
+    totalPages: number;
+    totalItems: number;
+    itemsPerPage: number;
+};
+
 type Props = {
     roles: Role[];
     permissions: Permission[];
     stats: Stats;
+    rolePagination: Pagination;
+    permissionPagination: Pagination;
 };
 
-export default function RolesTableClient({ roles, permissions, stats }: Props) {
+export default function RolesTableClient({ roles, permissions, stats, rolePagination, permissionPagination }: Props) {
     const router = useRouter();
+    const searchParams = useSearchParams();
 
     // Roles state
     const [createOpen, setCreateOpen] = useState(false);
@@ -74,18 +84,6 @@ export default function RolesTableClient({ roles, permissions, stats }: Props) {
         description: "",
     });
 
-    // Pagination state
-    const [rolePage, setRolePage] = useState(1);
-    const [permissionPage, setPermissionPage] = useState(1);
-    const itemsPerPage = 10;
-
-    // Pagination logic
-    const roleTotalPages = Math.ceil(roles.length / itemsPerPage);
-    const paginatedRoles = roles.slice((rolePage - 1) * itemsPerPage, rolePage * itemsPerPage);
-
-    const permissionTotalPages = Math.ceil(permissions.length / itemsPerPage);
-    const paginatedPermissions = permissions.slice((permissionPage - 1) * itemsPerPage, permissionPage * itemsPerPage);
-
     // Helper function to refresh permissions cache
     const refreshPermissions = async () => {
         try {
@@ -94,7 +92,6 @@ export default function RolesTableClient({ roles, permissions, stats }: Props) {
             });
             if (response.ok) {
                 const data = await response.json();
-                console.log('Permissions refreshed:', data.data?.permissions);
             }
         } catch (err) {
             console.error('Failed to refresh permissions:', err);
@@ -303,7 +300,7 @@ export default function RolesTableClient({ roles, permissions, stats }: Props) {
                                             </TableCell>
                                         </TableRow>
                                     ) : (
-                                        paginatedRoles.map((role) => (
+                                        roles.map((role) => (
                                             <TableRow key={role.id} className="hover:bg-muted/30">
                                                 <TableCell className="font-medium">{role.name}</TableCell>
                                                 <TableCell className="text-sm text-muted-foreground">
@@ -337,6 +334,75 @@ export default function RolesTableClient({ roles, permissions, stats }: Props) {
                                 </TableBody>
                             </Table>
                         </div>
+
+                        {/* Roles Pagination */}
+                        {rolePagination.totalItems > 0 && (
+                            <div className="flex flex-col sm:flex-row items-center justify-between px-4 py-3 border-t gap-3">
+                                <div className="text-sm text-muted-foreground">
+                                    Showing {((rolePagination.currentPage - 1) * rolePagination.itemsPerPage) + 1} to {Math.min(rolePagination.currentPage * rolePagination.itemsPerPage, rolePagination.totalItems)} of {rolePagination.totalItems} results
+                                </div>
+                                <div className="flex gap-2">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => {
+                                            const params = new URLSearchParams(searchParams);
+                                            params.set("rolePage", (rolePagination.currentPage - 1).toString());
+                                            router.push(`?${params.toString()}`);
+                                        }}
+                                        disabled={rolePagination.currentPage === 1}
+                                    >
+                                        <ChevronLeft className="h-4 w-4 mr-1" />
+                                        Previous
+                                    </Button>
+                                    <div className="hidden sm:flex items-center gap-1">
+                                        {Array.from({ length: Math.min(5, rolePagination.totalPages) }, (_, i) => {
+                                            let pageNum;
+                                            if (rolePagination.totalPages <= 5) {
+                                                pageNum = i + 1;
+                                            } else if (rolePagination.currentPage <= 3) {
+                                                pageNum = i + 1;
+                                            } else if (rolePagination.currentPage >= rolePagination.totalPages - 2) {
+                                                pageNum = rolePagination.totalPages - 4 + i;
+                                            } else {
+                                                pageNum = rolePagination.currentPage - 2 + i;
+                                            }
+                                            return (
+                                                <Button
+                                                    key={pageNum}
+                                                    variant={rolePagination.currentPage === pageNum ? "default" : "outline"}
+                                                    size="sm"
+                                                    onClick={() => {
+                                                        const params = new URLSearchParams(searchParams);
+                                                        params.set("rolePage", pageNum.toString());
+                                                        router.push(`?${params.toString()}`);
+                                                    }}
+                                                    className="min-w-[2.5rem]"
+                                                >
+                                                    {pageNum}
+                                                </Button>
+                                            );
+                                        })}
+                                    </div>
+                                    <div className="sm:hidden text-sm text-muted-foreground px-2">
+                                        Page {rolePagination.currentPage} of {rolePagination.totalPages}
+                                    </div>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => {
+                                            const params = new URLSearchParams(searchParams);
+                                            params.set("rolePage", (rolePagination.currentPage + 1).toString());
+                                            router.push(`?${params.toString()}`);
+                                        }}
+                                        disabled={rolePagination.currentPage === rolePagination.totalPages}
+                                    >
+                                        Next
+                                        <ChevronRight className="h-4 w-4 ml-1" />
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
                     </Card>
 
                     {/* Mobile Card View */}
@@ -348,7 +414,7 @@ export default function RolesTableClient({ roles, permissions, stats }: Props) {
                                 </CardContent>
                             </Card>
                         ) : (
-                            paginatedRoles.map((role) => (
+                            roles.map((role) => (
                                 <Card key={role.id} className="overflow-hidden">
                                     <CardContent className="p-4 space-y-3">
                                         <div className="flex items-start justify-between">
@@ -394,32 +460,42 @@ export default function RolesTableClient({ roles, permissions, stats }: Props) {
                                 </Card>
                             ))
                         )}
-                    </div>
 
-                    {/* Roles Pagination */}
-                    {roleTotalPages > 1 && (
-                        <div className="flex items-center justify-end space-x-2 py-4">
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => setRolePage((p) => Math.max(1, p - 1))}
-                                disabled={rolePage === 1}
-                            >
-                                <ChevronLeft className="h-4 w-4" />
-                            </Button>
-                            <div className="text-sm font-medium">
-                                Page {rolePage} of {roleTotalPages}
-                            </div>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => setRolePage((p) => Math.min(roleTotalPages, p + 1))}
-                                disabled={rolePage === roleTotalPages}
-                            >
-                                <ChevronRight className="h-4 w-4" />
-                            </Button>
-                        </div>
-                    )}
+                        {/* Mobile Pagination */}
+                        {rolePagination.totalItems > 0 && (
+                            <Card className="col-span-full">
+                                <div className="flex items-center justify-between px-4 py-3">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => {
+                                            const params = new URLSearchParams(searchParams);
+                                            params.set("rolePage", (rolePagination.currentPage - 1).toString());
+                                            router.push(`?${params.toString()}`);
+                                        }}
+                                        disabled={rolePagination.currentPage === 1}
+                                    >
+                                        <ChevronLeft className="h-4 w-4" />
+                                    </Button>
+                                    <span className="text-sm text-muted-foreground">
+                                        Page {rolePagination.currentPage} of {rolePagination.totalPages}
+                                    </span>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => {
+                                            const params = new URLSearchParams(searchParams);
+                                            params.set("rolePage", (rolePagination.currentPage + 1).toString());
+                                            router.push(`?${params.toString()}`);
+                                        }}
+                                        disabled={rolePagination.currentPage === rolePagination.totalPages}
+                                    >
+                                        <ChevronRight className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            </Card>
+                        )}
+                    </div>
                 </TabsContent>
 
                 {/* Permissions Tab */}
@@ -450,7 +526,7 @@ export default function RolesTableClient({ roles, permissions, stats }: Props) {
                                             </TableCell>
                                         </TableRow>
                                     ) : (
-                                        paginatedPermissions.map((permission) => (
+                                        permissions.map((permission) => (
                                             <TableRow key={permission.id} className="hover:bg-muted/30">
                                                 <TableCell className="font-medium">{permission.name}</TableCell>
                                                 <TableCell className="text-sm text-muted-foreground">
@@ -476,6 +552,75 @@ export default function RolesTableClient({ roles, permissions, stats }: Props) {
                                 </TableBody>
                             </Table>
                         </div>
+
+                        {/* Permissions Pagination */}
+                        {permissionPagination.totalItems > 0 && (
+                            <div className="flex flex-col sm:flex-row items-center justify-between px-4 py-3 border-t gap-3">
+                                <div className="text-sm text-muted-foreground">
+                                    Showing {((permissionPagination.currentPage - 1) * permissionPagination.itemsPerPage) + 1} to {Math.min(permissionPagination.currentPage * permissionPagination.itemsPerPage, permissionPagination.totalItems)} of {permissionPagination.totalItems} results
+                                </div>
+                                <div className="flex gap-2">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => {
+                                            const params = new URLSearchParams(searchParams);
+                                            params.set("permissionPage", (permissionPagination.currentPage - 1).toString());
+                                            router.push(`?${params.toString()}`);
+                                        }}
+                                        disabled={permissionPagination.currentPage === 1}
+                                    >
+                                        <ChevronLeft className="h-4 w-4 mr-1" />
+                                        Previous
+                                    </Button>
+                                    <div className="hidden sm:flex items-center gap-1">
+                                        {Array.from({ length: Math.min(5, permissionPagination.totalPages) }, (_, i) => {
+                                            let pageNum;
+                                            if (permissionPagination.totalPages <= 5) {
+                                                pageNum = i + 1;
+                                            } else if (permissionPagination.currentPage <= 3) {
+                                                pageNum = i + 1;
+                                            } else if (permissionPagination.currentPage >= permissionPagination.totalPages - 2) {
+                                                pageNum = permissionPagination.totalPages - 4 + i;
+                                            } else {
+                                                pageNum = permissionPagination.currentPage - 2 + i;
+                                            }
+                                            return (
+                                                <Button
+                                                    key={pageNum}
+                                                    variant={permissionPagination.currentPage === pageNum ? "default" : "outline"}
+                                                    size="sm"
+                                                    onClick={() => {
+                                                        const params = new URLSearchParams(searchParams);
+                                                        params.set("permissionPage", pageNum.toString());
+                                                        router.push(`?${params.toString()}`);
+                                                    }}
+                                                    className="min-w-[2.5rem]"
+                                                >
+                                                    {pageNum}
+                                                </Button>
+                                            );
+                                        })}
+                                    </div>
+                                    <div className="sm:hidden text-sm text-muted-foreground px-2">
+                                        Page {permissionPagination.currentPage} of {permissionPagination.totalPages}
+                                    </div>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => {
+                                            const params = new URLSearchParams(searchParams);
+                                            params.set("permissionPage", (permissionPagination.currentPage + 1).toString());
+                                            router.push(`?${params.toString()}`);
+                                        }}
+                                        disabled={permissionPagination.currentPage === permissionPagination.totalPages}
+                                    >
+                                        Next
+                                        <ChevronRight className="h-4 w-4 ml-1" />
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
                     </Card>
 
                     {/* Mobile Card View */}
@@ -487,7 +632,7 @@ export default function RolesTableClient({ roles, permissions, stats }: Props) {
                                 </CardContent>
                             </Card>
                         ) : (
-                            paginatedPermissions.map((permission) => (
+                            permissions.map((permission) => (
                                 <Card key={permission.id} className="overflow-hidden">
                                     <CardContent className="p-4 space-y-3">
                                         <div>
@@ -524,32 +669,42 @@ export default function RolesTableClient({ roles, permissions, stats }: Props) {
                                 </Card>
                             ))
                         )}
-                    </div>
 
-                    {/* Permissions Pagination */}
-                    {permissionTotalPages > 1 && (
-                        <div className="flex items-center justify-end space-x-2 py-4">
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => setPermissionPage((p) => Math.max(1, p - 1))}
-                                disabled={permissionPage === 1}
-                            >
-                                <ChevronLeft className="h-4 w-4" />
-                            </Button>
-                            <div className="text-sm font-medium">
-                                Page {permissionPage} of {permissionTotalPages}
-                            </div>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => setPermissionPage((p) => Math.min(permissionTotalPages, p + 1))}
-                                disabled={permissionPage === permissionTotalPages}
-                            >
-                                <ChevronRight className="h-4 w-4" />
-                            </Button>
-                        </div>
-                    )}
+                        {/* Mobile Pagination */}
+                        {permissionPagination.totalItems > 0 && (
+                            <Card className="col-span-full">
+                                <div className="flex items-center justify-between px-4 py-3">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => {
+                                            const params = new URLSearchParams(searchParams);
+                                            params.set("permissionPage", (permissionPagination.currentPage - 1).toString());
+                                            router.push(`?${params.toString()}`);
+                                        }}
+                                        disabled={permissionPagination.currentPage === 1}
+                                    >
+                                        <ChevronLeft className="h-4 w-4" />
+                                    </Button>
+                                    <span className="text-sm text-muted-foreground">
+                                        Page {permissionPagination.currentPage} of {permissionPagination.totalPages}
+                                    </span>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => {
+                                            const params = new URLSearchParams(searchParams);
+                                            params.set("permissionPage", (permissionPagination.currentPage + 1).toString());
+                                            router.push(`?${params.toString()}`);
+                                        }}
+                                        disabled={permissionPagination.currentPage === permissionPagination.totalPages}
+                                    >
+                                        <ChevronRight className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            </Card>
+                        )}
+                    </div>
                 </TabsContent>
             </Tabs>
 

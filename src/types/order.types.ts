@@ -1,6 +1,7 @@
 import { Product } from './product.types';
 
-export type OrderStatus = 'PENDIENTE' | 'COMPLETADO' | 'CANCELADO';
+// Updated to match API OrderStatus
+export type OrderStatus = 'PENDIENTE' | 'PAGADO' | 'ENVIADO' | 'ENTREGADO';
 
 export interface OrderItem {
     id: string;
@@ -16,20 +17,16 @@ export interface Order {
     userId: string;
     status: OrderStatus;
     items: OrderItem[];
+    subtotal: number;  // Added from API
+    total: number;  // Added from API
+    discountAmount: number;  // Added from API
+    couponId?: string | null;  // Added from API
+    trackingNumber?: string | null;  // From API
     createdAt: Date | string;
     updatedAt: Date | string;
     user?: {
         name: string;
         email: string;
-    };
-    // Extended fields for frontend compatibility (based on existing usage)
-    tracking?: string;
-    address?: string;
-    coupon?: {
-        code: string;
-        type: string;
-        value: number;
-        discount: number;
     };
 }
 
@@ -40,4 +37,10 @@ export interface CreateOrderDTO {
         amount: number;
         price: number;
     }[];
+    couponId?: string;
+}
+
+export interface UpdateOrderDTO {
+    status?: OrderStatus;
+    trackingNumber?: string;
 }

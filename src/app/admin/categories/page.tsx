@@ -35,16 +35,16 @@ async function getCategories() {
         const data = await response.json();
         const categories = data.success && data.data ? data.data : [];
 
-        // Calculate stats
+        // Calculate stats using productCount from backend
         const totalCategories = categories.length;
         const totalProducts = categories.reduce((sum: number, c: any) => {
-            return sum + (c.products?.length || 0);
+            return sum + (c.productCount || c._count?.products || 0);
         }, 0);
         const averageProductsPerCategory = totalCategories > 0
             ? Math.round(totalProducts / totalCategories)
             : 0;
         const withProducts = categories.filter((c: any) =>
-            c.products && c.products.length > 0
+            (c.productCount || c._count?.products || 0) > 0
         ).length;
 
         return {

@@ -9,7 +9,6 @@ function read() {
 
 function write(o) { fs.writeFileSync(SESSIONS, JSON.stringify(o, null, 2)); }
 
-console.log('Running session file tests...');
 const before = read();
 const sid = `t_${Date.now()}`;
 before[sid] = { userId: 'u_test', created: new Date().toISOString() };
@@ -21,5 +20,4 @@ if (!after[sid] || after[sid].userId !== 'u_test') {
 }
 delete after[sid];
 write(after);
-console.log('Session tests passed');
 process.exit(0);

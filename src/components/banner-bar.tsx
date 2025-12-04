@@ -4,16 +4,10 @@ import Link from "next/link";
 import { X, Sparkles } from "lucide-react";
 import { Button } from "./ui/button";
 
-type Banner = {
-  id: string;
-  title: string;
-  subtitle?: string;
-  cta?: string;
-  ctaUrl?: string;
-  startsAt?: string;
-  endsAt?: string;
-  active?: boolean
-};
+import { bannersService } from "@/services/banners.service";
+import { Banner } from "@/types/banner.types";
+
+// Removed local Banner type definition
 
 export default function BannerBar() {
   const [banners, setBanners] = useState<Banner[]>([]);
@@ -23,12 +17,10 @@ export default function BannerBar() {
     let mounted = true;
     (async () => {
       try {
-        const res = await fetch('/api/banners', { cache: 'no-store' });
-        const json = await res.json().catch(() => ({}));
-        const list = Array.isArray(json.banners) ? json.banners : [];
+        const list = await bannersService.getAll();
         if (!mounted) return;
-        setBanners(list);
-        if (list.length) setVisibleId(list[0].id);
+        setBanners(list || []);
+        if (list && list.length) setVisibleId(list[0].id);
       } catch { }
     })();
     return () => { mounted = false };

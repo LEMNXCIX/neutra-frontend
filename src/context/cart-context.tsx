@@ -7,12 +7,14 @@ import { toast } from "sonner";
 import { ApiError } from '@/lib/api-client';
 import { Product } from '@/types/product.types';
 import { Coupon, CouponType } from '@/types/coupon.types';
+import { CartItem } from '@/types/cart.types';
 
-type CartItem = {
+// Internal representation for the context state
+type MappedCartItem = {
   id: string; // productId
   cartItemId: string;
   name: string;
-  qty: number;
+  amount: number;
   price?: number;
   image?: string;
   stock?: number;
@@ -25,7 +27,7 @@ type ContextCoupon = {
 } | null;
 
 type CartContextType = {
-  items: CartItem[];
+  items: MappedCartItem[];
   count: number;
   loading: boolean;
   error?: string | null;
@@ -44,7 +46,7 @@ type CartContextType = {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [items, setItems] = useState<CartItem[]>([]);
+  const [items, setItems] = useState<MappedCartItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [coupon, setCoupon] = useState<ContextCoupon>(null);
@@ -65,21 +67,24 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const cart = await cartService.get();
 
-      const mappedItems: CartItem[] = cart?.items?.map((item) => ({
-        id: item.productId,
-        cartItemId: item.id,
-        name: item.product?.name || 'Unknown',
-        qty: item.amount,
-        price: item.product?.price,
-        image: item.product?.image,
-        stock: item.product?.stock,
-      }));
 
-      setItems(mappedItems || []);
+      const mappedItems: MappedCartItem[] = cart?.map((item) => {
+        return {
+          id: item.id,
+          cartItemId: item.id,
+          name: item.name || 'Unknown',
+          amount: item.amount,
+          price: item.price,
+          image: item.image || undefined,
+          stock: item.stock,
+        };
+      }) ?? [];
+
+      setItems(mappedItems);
     } catch (err) {
       const errorMsg = err instanceof ApiError ? err.message : 'Failed to fetch cart';
       setError(errorMsg);
-      console.error('Cart fetch error:', err);
+      console.error('❌ Cart fetch error:', err);
     } finally {
       setLoading(false);
     }
@@ -109,10 +114,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => { mounted = false; };
   }, []);
 
-  const computeSubtotal = (itemsList: CartItem[]) => {
+  const computeSubtotal = (itemsList: MappedCartItem[]) => {
     return itemsList.reduce((s, it) => {
       const price = productMap[it.id]?.price ?? it.price ?? 0;
-      return s + price * it.qty;
+      return s + price * it.amount;
     }, 0);
   };
 
@@ -128,7 +133,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     setLoading(true);
     try {
-      await cartService.addItem({ productId: id, quantity: 1 });
+      await cartService.addItem({ productId: id, amount: 1 });
       await fetchCart();
       toast.success('Added to cart');
     } catch (err) {
@@ -174,7 +179,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLoading(true);
     try {
       await cartService.removeItem(item.cartItemId);
-      await cartService.addItem({ productId: id, quantity: newQty });
+      await cartService.addItem({ productId: id, amount: newQty });
       await fetchCart();
     } catch (err) {
       const message = err instanceof ApiError ? err.message : 'Failed to update quantity';
@@ -203,8 +208,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         productIds,
         Array.from(categoryIds)
       );
-
-      if (result.valid && result.coupon) {
+      if (result.coupon) {
         const couponType = result.coupon.type === CouponType.PERCENT ? 'percent' : 'amount';
         setCoupon({
           code: result.coupon.code,
@@ -244,7 +248,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const value: CartContextType = {
     items,
-    count: items.reduce((s, it) => s + it.qty, 0),
+    count: items.reduce((s, it) => s + it.amount, 0),
     loading,
     error,
     subtotal,

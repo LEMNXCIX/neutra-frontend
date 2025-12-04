@@ -9,10 +9,36 @@ import { extractTokenFromRequest } from "@/lib/server-auth";
 export async function GET(req: NextRequest) {
   try {
     const token = extractTokenFromRequest(req);
-    const result = await backendGet('/banners', token);
 
-    return NextResponse.json(result, {
-      status: result.success ? 200 : 500
+    // Fetch banners and stats in parallel, handling errors gracefully
+    const [bannersResult, statsResult] = await Promise.all([
+      backendGet('/banners/all/list', token).catch(err => ({ success: false, error: err.message, data: [] })),
+      backendGet('/banners/stats', token).catch(err => ({ success: false, error: err.message }))
+    ]);
+
+    if (!bannersResult.success) {
+      console.error("Failed to fetch banners:", bannersResult);
+      return NextResponse.json(bannersResult, { status: 500 });
+    }
+
+    const banners = Array.isArray(bannersResult.data) ? bannersResult.data : [];
+
+    if (!statsResult.success) {
+      console.warn("Failed to fetch banner stats, using fallback:", statsResult);
+    }
+
+    const stats = statsResult.success && (statsResult as any).data ? (statsResult as any).data : {
+      totalBanners: banners.length,
+      activeBanners: 0
+    };
+
+
+    return NextResponse.json({
+      success: true,
+      data: banners,
+      stats: stats
+    }, {
+      status: 200
     });
   } catch (error) {
     console.error("Error fetching banners from backend:", error);

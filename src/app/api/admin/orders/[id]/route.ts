@@ -13,7 +13,7 @@ export async function GET(
     try {
         const { id } = await params;
         const token = extractTokenFromRequest(req);
-        const result = await backendGet(`/orders/${id}`, token);
+        const result = await backendGet(`/order/${id}`, token);
 
         return NextResponse.json(result, {
             status: result.success ? 200 : 500
@@ -39,7 +39,7 @@ export async function PUT(
         const { id } = await params;
         const body = await req.json();
         const token = extractTokenFromRequest(req);
-        const result = await backendPut(`/orders/${id}`, body, token);
+        const result = await backendPut(`/order/${id}`, body, token);
 
         return NextResponse.json(result, {
             status: result.success ? 200 : 500
@@ -64,7 +64,7 @@ export async function DELETE(
     try {
         const { id } = await params;
         const token = extractTokenFromRequest(req);
-        const result = await backendDelete(`/orders/${id}`, token);
+        const result = await backendDelete(`/order/${id}`, token);
 
         // Handle 204 No Content
         if (result.success && !result.data) {

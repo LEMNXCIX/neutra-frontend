@@ -23,9 +23,10 @@ import {
   X,
 } from "lucide-react";
 import ProductGrid from "@/components/product-grid";
-import categories from "@/data/categories.json";
+import { categoriesService } from "@/services/categories.service";
+import { Category } from "@/types/category.types";
 
-type Category = { id: string; name: string };
+// Removed local Category type definition as we import it now
 type Product = {
   id: string;
   title: string;
@@ -42,6 +43,19 @@ export default function ProductsPage({ products }: { products: Product[] }) {
   const [isPending, startTransition] = useTransition();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showFilters, setShowFilters] = useState(false);
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  React.useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const data = await categoriesService.getAll();
+        setCategories(data || []);
+      } catch (error) {
+        console.error("Failed to fetch categories", error);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   const search = params.get("search") || "";
   const category = params.get("category") || "all";
@@ -71,7 +85,7 @@ export default function ProductsPage({ products }: { products: Product[] }) {
   };
 
   const activeFiltersCount = [search, category !== "all" ? category : null].filter(Boolean).length;
-  const selectedCategory = categories.find((c: Category) => c.id === category);
+  const selectedCategory = categories.find((c) => c.id === category);
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-background to-muted/20">
@@ -201,7 +215,7 @@ export default function ProductsPage({ products }: { products: Product[] }) {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Categories</SelectItem>
-                    {(categories as Category[]).map((c) => (
+                    {categories.map((c) => (
                       <SelectItem key={c.id} value={c.id}>
                         {c.name}
                       </SelectItem>

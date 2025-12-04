@@ -42,12 +42,30 @@ export default function AnalyticsOverview() {
           fetch('/api/admin/categories', { credentials: 'same-origin' }),
         ]);
 
-        const usersData = await usersRes.json().catch(() => ({ stats: { totalUsers: 0, adminUsers: 0, regularUsers: 0 } }));
-        const productsData = await productsRes.json().catch(() => ({ stats: { totalProducts: 0, totalValue: 0, lowStockCount: 0 } }));
-        const ordersData = await ordersRes.json().catch(() => ({ stats: { totalOrders: 0, totalRevenue: 0 } }));
-        const couponsData = await couponsRes.json().catch(() => ({ stats: { totalCoupons: 0, activeCoupons: 0, usedCoupons: 0 } }));
-        const slidersData = await slidersRes.json().catch(() => ({ stats: { totalSliders: 0, activeSliders: 0, withImages: 0 } }));
-        const bannersData = await bannersRes.json().catch(() => ({ stats: { totalBanners: 0, activeBanners: 0 } }));
+        const usersData = await usersRes.json().catch((e) => {
+          console.error("Error parsing users response:", e);
+          return { stats: { totalUsers: 0, adminUsers: 0, regularUsers: 0 } };
+        });
+        const productsData = await productsRes.json().catch((e) => {
+          console.error("Error parsing products response:", e);
+          return { stats: { totalProducts: 0, totalValue: 0, lowStockCount: 0 } };
+        });
+        const ordersData = await ordersRes.json().catch((e) => {
+          console.error("Error parsing orders response:", e);
+          return { stats: { totalOrders: 0, totalRevenue: 0 } };
+        });
+        const couponsData = await couponsRes.json().catch((e) => {
+          console.error("Error parsing coupons response:", e);
+          return { stats: { totalCoupons: 0, activeCoupons: 0, usedCoupons: 0 } };
+        });
+        const slidersData = await slidersRes.json().catch((e) => {
+          console.error("Error parsing sliders response:", e);
+          return { stats: { totalSliders: 0, activeSliders: 0, withImages: 0 } };
+        });
+        const bannersData = await bannersRes.json().catch((e) => {
+          console.error("Error parsing banners response:", e);
+          return { stats: { totalBanners: 0, activeBanners: 0 } };
+        });
         const categoriesData = await categoriesRes.json().catch(() => ({ stats: { totalCategories: 0, avgProductsPerCategory: 0 } }));
 
         const ordersCount = ordersData.stats?.totalOrders || 0;

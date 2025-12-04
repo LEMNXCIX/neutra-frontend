@@ -1,22 +1,32 @@
 import React from "react";
 import { cookies } from 'next/headers';
 import OrdersTableClient from "@/components/admin/orders/OrdersTableClient";
-import { extractTokenFromCookies, getCookieString } from "@/lib/server-auth";
-import { getBackendUrl } from "@/lib/backend-api";
 
 async function getOrders(search: string, status: string, page: number, limit: number) {
     try {
-        const token = await extractTokenFromCookies();
-        const cookieString = await getCookieString();
+        // Build query string
+        const queryParams = new URLSearchParams();
+        if (search) queryParams.set('search', search);
+        if (status && status !== 'all') queryParams.set('status', status);
+        queryParams.set('page', page.toString());
+        queryParams.set('limit', limit.toString());
 
-        // Fetch from backend with cookies
-        const response = await fetch(`${getBackendUrl()}/order`, {
-            headers: {
-                'Content-Type': 'application/json',
-                'Cookie': cookieString,
-                ...(token && { 'Authorization': `Bearer ${token}` }),
-            },
+        const queryString = queryParams.toString();
+
+        // Server Components need absolute URLs for fetch
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+        const url = `${baseUrl}/api/admin/orders${queryString ? `?${queryString}` : ''}`;
+
+        // Get cookies to pass to BFF route
+        const cookieStore = await cookies();
+        const cookieHeader = cookieStore.toString();
+
+        // Fetch from BFF route with cookies
+        const response = await fetch(url, {
             cache: 'no-store',
+            headers: {
+                'Cookie': cookieHeader
+            }
         });
 
         if (!response.ok) {
@@ -29,50 +39,20 @@ async function getOrders(search: string, status: string, page: number, limit: nu
         }
 
         const data = await response.json();
-        let orders = data.success && data.data ? (Array.isArray(data.data) ? data.data : []) : [];
-
-        // Apply filters
-        if (search) {
-            const query = search.toLowerCase();
-            orders = orders.filter((o: any) =>
-                o.id?.toLowerCase().includes(query) ||
-                o.user?.name?.toLowerCase().includes(query) ||
-                o.user?.email?.toLowerCase().includes(query)
-            );
-        }
-
-        if (status && status !== "all") {
-            orders = orders.filter((o: any) => o.status === status);
-        }
-
-        // Calculate stats
-        const totalOrders = orders.length;
-        const totalRevenue = orders.reduce((sum: number, o: any) => sum + (o.total || 0), 0);
-
-        const statusCounts = orders.reduce((acc: Record<string, number>, o: any) => {
-            const s = o.status?.toLowerCase() || 'unknown';
-            acc[s] = (acc[s] || 0) + 1;
-            return acc;
-        }, {});
-
-        // Apply pagination
-        const startIndex = (page - 1) * limit;
-        const endIndex = startIndex + limit;
-        const paginatedOrders = orders.slice(startIndex, endIndex);
-        const totalPages = Math.ceil(totalOrders / limit);
 
         return {
-            orders: paginatedOrders,
-            stats: {
-                totalOrders,
-                totalRevenue,
-                statusCounts,
-            },
-            pagination: {
-                currentPage: page,
-                totalPages,
-                totalItems: totalOrders,
-                itemsPerPage: limit,
+            orders: data.data || [],
+            stats: data.stats || { totalOrders: 0, totalRevenue: 0, statusCounts: {} },
+            pagination: data.pagination ? {
+                currentPage: data.pagination.page,
+                totalPages: data.pagination.totalPages,
+                totalItems: data.pagination.total,
+                itemsPerPage: data.pagination.limit
+            } : {
+                currentPage: 1,
+                totalPages: 0,
+                totalItems: 0,
+                itemsPerPage: limit
             },
         };
     } catch (err) {

@@ -17,7 +17,7 @@ type Order = {
   total?: number;
   date?: string;
   status?: string;
-  items?: Array<{ id: string; qty: number; name: string }>;
+  items?: Array<{ id: string; productId?: string; qty?: number; amount?: number; name: string; price?: number; product?: { name: string } }>;
 };
 
 type Product = {
@@ -85,11 +85,16 @@ export default function AnalyticsCharts() {
   const productSales = new Map<string, { name: string; qty: number; revenue: number }>();
   for (const ord of orders) {
     for (const item of ord.items || []) {
-      const current = productSales.get(item.id) || { name: item.name, qty: 0, revenue: 0 };
-      current.qty += item.qty;
-      const product = products.find(p => p.id === item.id);
-      current.revenue += item.qty * (product?.price || 0);
-      productSales.set(item.id, current);
+      // Use productId if available, otherwise fallback to id (which might be productId in some contexts, but usually is orderItemId)
+      const productId = (item as any).productId || item.id;
+      const qty = (item as any).amount || item.qty || 0;
+      const price = (item as any).price || 0;
+      const name = (item as any).product?.name || item.name || 'Unknown Product';
+
+      const current = productSales.get(productId) || { name, qty: 0, revenue: 0 };
+      current.qty += qty;
+      current.revenue += qty * price;
+      productSales.set(productId, current);
     }
   }
   const topProducts = Array.from(productSales.values())

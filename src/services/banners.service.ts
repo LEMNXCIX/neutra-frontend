@@ -40,4 +40,11 @@ export const bannersService = {
     delete: async (id: string): Promise<Banner> => {
         return api.delete<Banner>(`/banners/${id}`);
     },
+
+    /**
+     * Get banner statistics (requires authentication)
+     */
+    getStats: async (): Promise<{ totalBanners: number; activeBanners: number }> => {
+        return api.get<{ totalBanners: number; activeBanners: number }>('/banners/stats');
+    },
 };

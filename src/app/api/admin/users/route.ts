@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { backendGet, backendPost } from "@/lib/backend-api";
+import { extractTokenFromRequest } from "@/lib/server-auth";
 
 const BACKEND_API_URL = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:4000/api";
 
@@ -9,51 +11,47 @@ const BACKEND_API_URL = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:40
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const backendUrl = `${BACKEND_API_URL}/users?${searchParams.toString()}`;
+    const token = extractTokenFromRequest(req);
 
-    const response = await fetch(backendUrl, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        ...(req.headers.get("cookie") && { Cookie: req.headers.get("cookie")! }),
-      },
-      cache: "no-store",
-    });
+    const [usersResult, statsResult] = await Promise.all([
+      backendGet(`/users?${searchParams.toString()}`, token).catch(err => ({ success: false, error: err.message, data: [] })),
+      backendGet('/users/stats/summary', token).catch(err => ({ success: false, error: err.message }))
+    ]);
 
-    const data = await response.json();
-
-    // Transform backend response to match expected format
-    if (data.success && data.data) {
-      const users = Array.isArray(data.data) ? data.data : [];
-
-      // Calculate stats
-      const totalUsers = users.length;
-      const adminUsers = users.filter((u: any) => u.role?.name === 'admin').length;
-      const regularUsers = totalUsers - adminUsers;
-
-      return NextResponse.json({
-        users: users.map((u: any) => ({
-          id: u.id,
-          name: u.name,
-          email: u.email,
-          isAdmin: u.role?.name === 'admin',
-          avatar: u.profilePic,
-        })),
-        stats: {
-          totalUsers,
-          adminUsers,
-          regularUsers,
-        },
-        pagination: {
-          currentPage: 1,
-          totalPages: 1,
-          totalItems: totalUsers,
-          itemsPerPage: totalUsers,
-        },
-      });
+    if (!usersResult.success) {
+      console.error("Backend returned unsuccessful response for users:", usersResult);
+      return NextResponse.json(usersResult, { status: 500 });
     }
 
-    return NextResponse.json(data, { status: response.status });
+    const users = Array.isArray(usersResult.data) ? usersResult.data : [];
+    const stats = statsResult.success && (statsResult as any).data ? (statsResult as any).data : {
+      totalUsers: users.length,
+      adminUsers: 0,
+      regularUsers: users.length
+    };
+
+    return NextResponse.json({
+      users: users.map((u: any) => ({
+        id: u.id,
+        name: u.name,
+        email: u.email,
+        role: u.role, // Pass full role object
+        isAdmin: u.role?.name === 'ADMIN' || u.role?.name === 'SUPER_ADMIN', // Updated check
+        profilePic: u.profilePic, // Updated field name to match frontend expectation if needed, or keep avatar
+        avatar: u.profilePic
+      })),
+      stats: {
+        totalUsers: stats.totalUsers,
+        adminUsers: stats.adminUsers,
+        regularUsers: stats.regularUsers,
+      },
+      pagination: {
+        currentPage: 1,
+        totalPages: 1,
+        totalItems: users.length,
+        itemsPerPage: users.length,
+      },
+    });
   } catch (error) {
     console.error("Error fetching users from backend:", error);
     return NextResponse.json(

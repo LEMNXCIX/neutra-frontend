@@ -55,17 +55,35 @@ type Props = {
     };
 };
 
-export default function OrdersTableClient({ orders, stats }: Props) {
+export default function OrdersTableClient({ orders, stats, pagination }: Props) {
     const router = useRouter();
     const searchParams = useSearchParams();
 
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
     const [detailsOpen, setDetailsOpen] = useState(false);
     const [editingTracking, setEditingTracking] = useState("");
+    const [statuses, setStatuses] = useState<{ value: string; label: string }[]>([]);
 
     // URL State
     const searchQuery = searchParams.get("search") || "";
     const statusFilter = searchParams.get("status") || "all";
+
+    React.useEffect(() => {
+        const fetchStatuses = async () => {
+            try {
+                const res = await fetch('/api/admin/orders/statuses');
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.success && Array.isArray(data.data)) {
+                        setStatuses(data.data);
+                    }
+                }
+            } catch (error) {
+                console.error("Failed to fetch statuses", error);
+            }
+        };
+        fetchStatuses();
+    }, []);
 
     const handleSearch = (term: string) => {
         const params = new URLSearchParams(searchParams);
@@ -118,7 +136,7 @@ export default function OrdersTableClient({ orders, stats }: Props) {
             const res = await fetch(`/api/admin/orders/${orderId}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ tracking }),
+                body: JSON.stringify({ trackingNumber: tracking }),
             });
 
             if (!res.ok) {
@@ -137,16 +155,19 @@ export default function OrdersTableClient({ orders, stats }: Props) {
 
     const openOrderDetails = (order: Order) => {
         setSelectedOrder(order);
-        setEditingTracking(order.tracking || "");
+        setEditingTracking(order.trackingNumber || order.tracking || "");
         setDetailsOpen(true);
     };
 
     const getStatusColor = (status: string) => {
         switch (status) {
             case "COMPLETADO":
+            case "ENTREGADO":
                 return "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400";
-            case "ENVIADO": // Assuming ENVIADO might exist or map to something
+            case "ENVIADO":
                 return "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400";
+            case "PAGADO":
+                return "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400";
             case "PENDIENTE":
                 return "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400";
             case "CANCELADO":
@@ -157,10 +178,6 @@ export default function OrdersTableClient({ orders, stats }: Props) {
     };
 
     const calculateTotal = (order: Order) => {
-        // If total is provided (extended field), use it. Otherwise calculate from items.
-        // Note: The extended type definition has 'total' implicitly via 'any' or if we added it. 
-        // But strictly based on types, we should calculate.
-        // However, for now, let's assume items have price and amount.
         return order.items.reduce((sum, item) => sum + (item.price * item.amount), 0);
     };
 
@@ -216,9 +233,11 @@ export default function OrdersTableClient({ orders, stats }: Props) {
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="all">All Statuses</SelectItem>
-                                <SelectItem value="PENDIENTE">Pending</SelectItem>
-                                <SelectItem value="COMPLETADO">Completed</SelectItem>
-                                <SelectItem value="CANCELADO">Cancelled</SelectItem>
+                                {statuses.map((s) => (
+                                    <SelectItem key={s.value} value={s.value}>
+                                        {s.label}
+                                    </SelectItem>
+                                ))}
                             </SelectContent>
                         </Select>
 
@@ -286,14 +305,16 @@ export default function OrdersTableClient({ orders, stats }: Props) {
                                                             </Badge>
                                                         </SelectTrigger>
                                                         <SelectContent>
-                                                            <SelectItem value="PENDIENTE">Pending</SelectItem>
-                                                            <SelectItem value="COMPLETADO">Completed</SelectItem>
-                                                            <SelectItem value="CANCELADO">Cancelled</SelectItem>
+                                                            {statuses.map((s) => (
+                                                                <SelectItem key={s.value} value={s.value}>
+                                                                    {s.label}
+                                                                </SelectItem>
+                                                            ))}
                                                         </SelectContent>
                                                     </Select>
                                                 </TableCell>
                                                 <TableCell className="text-muted-foreground text-sm">
-                                                    {o.tracking || "—"}
+                                                    {o.trackingNumber || o.tracking || "—"}
                                                 </TableCell>
                                                 <TableCell className="text-muted-foreground">
                                                     {new Date(o.createdAt).toLocaleDateString()}
@@ -316,6 +337,45 @@ export default function OrdersTableClient({ orders, stats }: Props) {
                         </Table>
                     </ScrollArea>
                 </CardContent>
+                {/* Pagination */}
+                {pagination.totalItems > 0 && (
+                    <div className="flex flex-col sm:flex-row items-center justify-between px-4 py-3 border-t gap-3">
+                        <div className="text-sm text-muted-foreground">
+                            Showing {((pagination.currentPage - 1) * pagination.itemsPerPage) + 1} to {Math.min(pagination.currentPage * pagination.itemsPerPage, pagination.totalItems)} of {pagination.totalItems} results
+                        </div>
+                        <div className="flex gap-2">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                    const params = new URLSearchParams(searchParams);
+                                    params.set("page", (pagination.currentPage - 1).toString());
+                                    router.push(`?${params.toString()}`);
+                                }}
+                                disabled={pagination.currentPage === 1}
+                            >
+                                Previous
+                            </Button>
+                            <div className="hidden sm:flex items-center gap-1">
+                                <span className="text-sm text-muted-foreground px-2">
+                                    Page {pagination.currentPage} of {pagination.totalPages}
+                                </span>
+                            </div>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                    const params = new URLSearchParams(searchParams);
+                                    params.set("page", (pagination.currentPage + 1).toString());
+                                    router.push(`?${params.toString()}`);
+                                }}
+                                disabled={pagination.currentPage === pagination.totalPages || pagination.totalPages === 0}
+                            >
+                                Next
+                            </Button>
+                        </div>
+                    </div>
+                )}
             </Card>
 
             {/* Orders - Mobile View */}
@@ -411,9 +471,11 @@ export default function OrdersTableClient({ orders, stats }: Props) {
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="PENDIENTE">Pending</SelectItem>
-                                        <SelectItem value="COMPLETADO">Completed</SelectItem>
-                                        <SelectItem value="CANCELADO">Cancelled</SelectItem>
+                                        {statuses.map((s) => (
+                                            <SelectItem key={s.value} value={s.value}>
+                                                {s.label}
+                                            </SelectItem>
+                                        ))}
                                     </SelectContent>
                                 </Select>
                             </div>
@@ -493,6 +555,6 @@ export default function OrdersTableClient({ orders, stats }: Props) {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
-        </div >
+        </div>
     );
 }

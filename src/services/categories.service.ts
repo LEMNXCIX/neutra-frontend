@@ -7,10 +7,12 @@ import { Category, CreateCategoryDTO, UpdateCategoryDTO } from '@/types/category
  */
 export const categoriesService = {
     /**
-     * Get all categories
+     * Get all categories (with optional pagination)
+     * Note: Pagination info is lost when not using pagination params
      */
-    getAll: async (): Promise<Category[]> => {
-        return api.get<Category[]>('/categories');
+    getAll: async (page?: number, limit?: number): Promise<Category[]> => {
+        const url = page && limit ? `/categories?page=${page}&limit=${limit}` : '/categories';
+        return api.get<Category[]>(url);
     },
 
     /**
@@ -39,5 +41,13 @@ export const categoriesService = {
      */
     delete: async (id: string): Promise<Category> => {
         return api.delete<Category>(`/categories/${id}`);
+    },
+
+    /**
+     * Get category statistics (requires authentication)
+     */
+    getStats: async (): Promise<{ totalCategories: number; avgProductsPerCategory: number }> => {
+        const response = await api.get('/categories/stats');
+        return response.data;
     },
 };

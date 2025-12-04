@@ -72,7 +72,6 @@ export function AssignRoleDialog({
             });
             if (response.ok) {
                 const data = await response.json();
-                console.log('Permissions refreshed after role assignment:', data.data?.permissions);
             }
         } catch (err) {
             console.error('Failed to refresh permissions:', err);

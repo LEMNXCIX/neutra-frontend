@@ -22,11 +22,12 @@ export async function GET(req: NextRequest) {
 
     const data = await response.json();
 
+    // Backend returns StandardResponse, just forward it
     return NextResponse.json(data, { status: response.status });
   } catch (error) {
     console.error("Error fetching cart from backend:", error);
     return NextResponse.json(
-      { error: "Failed to fetch cart" },
+      { success: false, message: "Failed to fetch cart", statusCode: 500 },
       { status: 500 }
     );
   }
@@ -53,11 +54,12 @@ export async function POST(req: NextRequest) {
 
     const data = await response.json();
 
+    // Backend returns StandardResponse, just forward it
     return NextResponse.json(data, { status: response.status });
   } catch (error) {
     console.error("Error adding to cart:", error);
     return NextResponse.json(
-      { error: "Failed to add item to cart" },
+      { success: false, message: "Failed to add item to cart", statusCode: 500 },
       { status: 500 }
     );
   }
@@ -73,7 +75,10 @@ export async function DELETE(req: NextRequest) {
     const itemId = searchParams.get("id");
 
     if (!itemId) {
-      return NextResponse.json({ error: "Item ID required" }, { status: 400 });
+      return NextResponse.json(
+        { success: false, message: "Item ID required", statusCode: 400 },
+        { status: 400 }
+      );
     }
 
     const backendUrl = `${BACKEND_API_URL}/cart/remove/${itemId}`;
@@ -89,11 +94,12 @@ export async function DELETE(req: NextRequest) {
 
     const data = await response.json();
 
+    // Backend returns StandardResponse, just forward it
     return NextResponse.json(data, { status: response.status });
   } catch (error) {
     console.error("Error removing from cart:", error);
     return NextResponse.json(
-      { error: "Failed to remove item from cart" },
+      { success: false, message: "Failed to remove item from cart", statusCode: 500 },
       { status: 500 }
     );
   }
@@ -120,11 +126,12 @@ export async function PUT(req: NextRequest) {
 
     const data = await response.json();
 
+    // Backend returns StandardResponse, just forward it
     return NextResponse.json(data, { status: response.status });
   } catch (error) {
     console.error("Error updating cart:", error);
     return NextResponse.json(
-      { error: "Failed to update cart" },
+      { success: false, message: "Failed to update cart", statusCode: 500 },
       { status: 500 }
     );
   }

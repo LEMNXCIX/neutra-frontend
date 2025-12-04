@@ -9,12 +9,29 @@ import { extractTokenFromRequest } from "@/lib/server-auth";
 export async function GET(req: NextRequest) {
   try {
     const token = extractTokenFromRequest(req);
-    console.log('[Categories GET] Extracted token:', token ? 'present' : 'missing');
 
-    const result = await backendGet('/categories', token);
+    // Fetch categories and stats in parallel, handling errors gracefully
+    const [categoriesResult, statsResult] = await Promise.all([
+      backendGet('/categories', token).catch(err => ({ success: false, error: err.message, data: [] })),
+      backendGet('/categories/stats', token).catch(err => ({ success: false, error: err.message }))
+    ]);
 
-    return NextResponse.json(result, {
-      status: result.success ? 200 : 500
+    if (!categoriesResult.success) {
+      return NextResponse.json(categoriesResult, { status: 500 });
+    }
+
+    const categories = Array.isArray(categoriesResult.data) ? categoriesResult.data : [];
+    const stats = statsResult.success && (statsResult as any).data ? (statsResult as any).data : {
+      totalCategories: categories.length,
+      avgProductsPerCategory: 0
+    };
+
+    return NextResponse.json({
+      success: true,
+      data: categories,
+      stats: stats
+    }, {
+      status: 200
     });
   } catch (error) {
     console.error("Error fetching categories from backend:", error);
@@ -33,7 +50,6 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const token = extractTokenFromRequest(req);
-    console.log('[Categories POST] Extracted token:', token ? 'present' : 'missing');
 
     const result = await backendPost('/categories', body, token);
 

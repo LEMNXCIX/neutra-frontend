@@ -12,6 +12,7 @@ export interface User {
     googleId?: string;
     facebookId?: string;
     githubId?: string;
+    twitterId?: string;
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -26,4 +27,5 @@ export interface CreateUserDTO {
     googleId?: string;
     facebookId?: string;
     githubId?: string;
+    twitterId?: string;
 }

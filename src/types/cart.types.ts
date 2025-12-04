@@ -1,11 +1,7 @@
 import { Product } from './product.types';
 
-export interface CartItem {
-    id: string;
-    cartId: string;
-    productId: string;
+export interface CartItem extends Product {
     amount: number;
-    product?: Product;
 }
 
 export interface Cart {
@@ -18,5 +14,5 @@ export interface Cart {
 
 export interface AddToCartDTO {
     productId: string;
-    quantity: number;
+    amount: number;
 }

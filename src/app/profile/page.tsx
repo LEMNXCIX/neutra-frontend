@@ -47,17 +47,10 @@ import {
   Download,
 } from "lucide-react";
 
-type OrderItem = { id: string; name: string; qty: number };
-type Order = {
-  id: string;
-  userId: string;
-  total: number;
-  items: OrderItem[];
-  date: string;
-  status?: string;
-  address?: string;
-  tracking?: string;
-};
+import { ordersService } from "@/services/orders.service";
+import { Order, OrderStatus } from "@/types/order.types";
+
+// Removed local Order type definition
 
 export default function ProfilePage() {
   const user = useAuthStore((state) => state.user);
@@ -69,11 +62,12 @@ export default function ProfilePage() {
   const [page, setPage] = useState(1);
   const [pageSize] = useState(5);
   const [total, setTotal] = useState(0);
-  const [statusFilter, setStatusFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState<OrderStatus | "all" | "">("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
   const [expanded, setExpanded] = useState<string | null>(null);
   const [isLoadingOrders, setIsLoadingOrders] = useState(true);
+  const [statuses, setStatuses] = useState<{ value: string; label: string }[]>([]);
 
   // Profile edit states
   const [editOpen, setEditOpen] = useState(false);
@@ -84,6 +78,19 @@ export default function ProfilePage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    // Fetch statuses
+    const fetchStatuses = async () => {
+      try {
+        const data = await ordersService.getStatuses();
+        setStatuses(data);
+      } catch (err) {
+        console.error("Failed to fetch statuses", err);
+      }
+    };
+    fetchStatuses();
+  }, []);
+
+  useEffect(() => {
     if (!loading && !user) {
       router.push("/login");
       return;
@@ -91,23 +98,32 @@ export default function ProfilePage() {
 
     if (user) {
       setIsLoadingOrders(true);
-      const qp = new URLSearchParams();
-      qp.set("userId", user.id);
-      qp.set("page", String(page));
-      qp.set("pageSize", String(pageSize));
-      if (statusFilter) qp.set("status", statusFilter);
-      if (dateFrom) qp.set("dateFrom", dateFrom);
-      if (dateTo) qp.set("dateTo", dateTo);
 
-      fetch(`/api/orders?${qp.toString()}`)
-        .then((r) => r.json())
-        .then((d) => {
-          setOrders(d.orders || []);
-          setTotal(d.total || 0);
-        })
-        .finally(() => setIsLoadingOrders(false));
+      if (user) {
+        setIsLoadingOrders(true);
+
+        const fetchOrders = async () => {
+          try {
+            const status = statusFilter && statusFilter !== "all" ? (statusFilter as OrderStatus) : undefined;
+            const data = await ordersService.getByUser(status);
+            if (Array.isArray(data)) {
+              setOrders(data);
+              setTotal(data.length);
+            } else {
+              setOrders([]);
+              setTotal(0);
+            }
+          } catch (err) {
+            console.error("Error fetching orders", err);
+            setOrders([]);
+          } finally {
+            setIsLoadingOrders(false);
+          }
+        };
+        fetchOrders();
+      }
     }
-  }, [user, loading, router, page, pageSize, statusFilter, dateFrom, dateTo]);
+  }, [user, loading, router, statusFilter]);
 
   const openEditProfile = () => {
     if (user) {
@@ -190,6 +206,24 @@ export default function ProfilePage() {
       toast.error('Network error');
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "COMPLETADO":
+      case "ENTREGADO":
+        return "bg-green-500 hover:bg-green-600 text-white";
+      case "ENVIADO":
+        return "bg-blue-500 hover:bg-blue-600 text-white";
+      case "PAGADO":
+        return "bg-purple-500 hover:bg-purple-600 text-white";
+      case "PENDIENTE":
+        return "bg-yellow-500 hover:bg-yellow-600 text-white";
+      case "CANCELADO":
+        return "bg-red-500 hover:bg-red-600 text-white";
+      default:
+        return "bg-gray-500 text-white";
     }
   };
 
@@ -335,15 +369,17 @@ export default function ProfilePage() {
           <CardContent className="space-y-4">
             {/* Filters */}
             <div className="flex flex-col sm:flex-row flex-wrap gap-3 items-start sm:items-center p-4 bg-muted/50 rounded-lg">
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <Select value={statusFilter} onValueChange={(val) => setStatusFilter(val as OrderStatus | "all")}>
                 <SelectTrigger className="w-full sm:w-48">
                   <SelectValue placeholder="All statuses" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All statuses</SelectItem>
-                  <SelectItem value="processing">Processing</SelectItem>
-                  <SelectItem value="shipped">Shipped</SelectItem>
-                  <SelectItem value="delivered">Delivered</SelectItem>
+                  {statuses.map((s) => (
+                    <SelectItem key={s.value} value={s.value}>
+                      {s.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
 
@@ -396,13 +432,7 @@ export default function ProfilePage() {
               <>
                 <div className="space-y-4">
                   {orders?.map((o) => {
-                    const statusStyles = {
-                      processing: 'bg-yellow-500 hover:bg-yellow-600 text-white',
-                      shipped: 'bg-blue-500 hover:bg-blue-600 text-white',
-                      delivered: 'bg-green-500 hover:bg-green-600 text-white',
-                      cancelled: 'bg-red-500 hover:bg-red-600 text-white',
-                    };
-                    const statusStyle = statusStyles[o.status as keyof typeof statusStyles] || 'bg-gray-500 text-white';
+                    const statusStyle = getStatusColor(o.status || "");
 
                     return (
                       <Card key={o.id} className="overflow-hidden border-none shadow-md hover:shadow-xl transition-all">
@@ -419,7 +449,7 @@ export default function ProfilePage() {
                                   </CardTitle>
                                   <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
                                     <Calendar className="h-3 w-3" />
-                                    <span>{o.date}</span>
+                                    <span>{new Date(o.createdAt).toLocaleDateString()}</span>
                                   </div>
                                 </div>
                               </div>
@@ -445,12 +475,12 @@ export default function ProfilePage() {
                             </div>
                             <div className="flex items-center gap-2 text-sm">
                               <MapPin className="h-4 w-4 text-muted-foreground" />
-                              <span className="text-muted-foreground truncate">{o.address?.split(',')[0] || 'No address'}</span>
+                              <span className="text-muted-foreground truncate">Address not available</span>
                             </div>
-                            {o.tracking && (
+                            {o.trackingNumber && (
                               <div className="flex items-center gap-2 text-sm">
                                 <Truck className="h-4 w-4 text-muted-foreground" />
-                                <span className="text-muted-foreground font-mono text-xs">{o.tracking.slice(0, 8)}...</span>
+                                <span className="text-muted-foreground font-mono text-xs">{o.trackingNumber.slice(0, 8)}...</span>
                               </div>
                             )}
                           </div>
@@ -494,13 +524,13 @@ export default function ProfilePage() {
                                       </div>
                                       <div className="flex-1 min-w-0">
                                         <p className="text-xs font-medium text-muted-foreground mb-1">Delivery Address</p>
-                                        <p className="text-sm font-medium break-words">{o.address || "—"}</p>
+                                        <p className="text-sm font-medium break-words">Address not available</p>
                                       </div>
                                     </div>
                                   </CardContent>
                                 </Card>
 
-                                {o.tracking && (
+                                {o.trackingNumber && (
                                   <Card className="border border-muted/50 shadow-sm">
                                     <CardContent className="p-4">
                                       <div className="flex items-start gap-3">
@@ -509,7 +539,7 @@ export default function ProfilePage() {
                                         </div>
                                         <div className="flex-1 min-w-0">
                                           <p className="text-xs font-medium text-muted-foreground mb-1">Tracking Number</p>
-                                          <p className="text-sm font-mono font-medium break-all">{o.tracking}</p>
+                                          <p className="text-sm font-mono font-medium break-all">{o.trackingNumber}</p>
                                         </div>
                                       </div>
                                     </CardContent>
@@ -535,9 +565,9 @@ export default function ProfilePage() {
                                         <div className="w-8 h-8 rounded bg-primary/10 flex items-center justify-center">
                                           <Package className="h-4 w-4 text-primary" />
                                         </div>
-                                        <span className="text-sm font-medium">{it.name}</span>
+                                        <span className="text-sm font-medium">{it.product?.name || 'Unknown Product'}</span>
                                       </div>
-                                      <Badge variant="secondary" className="font-mono">{it.qty}×</Badge>
+                                      <Badge variant="secondary" className="font-mono">{it.amount}×</Badge>
                                     </div>
                                   ))}
                                 </div>

@@ -40,4 +40,11 @@ export const slidersService = {
     delete: async (id: string): Promise<Slideshow> => {
         return api.delete<Slideshow>(`/slide/${id}`);
     },
+
+    /**
+     * Get slider statistics (requires authentication)
+     */
+    getStats: async (): Promise<{ totalSliders: number; activeSliders: number; withImages: number }> => {
+        return api.get<{ totalSliders: number; activeSliders: number; withImages: number }>('/slide/stats');
+    },
 };
