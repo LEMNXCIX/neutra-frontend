@@ -1,25 +1,30 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
 
-const SLIDERS_PATH = path.join(process.cwd(), 'src', 'data', 'sliders.json');
+const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001/api';
 
 export async function GET() {
   try {
-    const raw = fs.readFileSync(SLIDERS_PATH, 'utf-8');
-    const sliders = JSON.parse(raw) as Array<any>;
-    const now = new Date();
-    const visible = sliders.filter(s => s.active).filter(s => {
-      try {
-        const st = s.startsAt ? new Date(s.startsAt) : null;
-        const en = s.endsAt ? new Date(s.endsAt) : null;
-        if (st && now < st) return false;
-        if (en && now > en) return false;
-        return true;
-      } catch { return false }
+    const res = await fetch(`${BACKEND_API_URL}/slide`, {
+      cache: 'no-store',
+      headers: {
+        'Content-Type': 'application/json',
+      }
     });
-    return NextResponse.json({ sliders: visible });
-  } catch {
+
+    if (!res.ok) {
+      // If the backend returns 404 or 500, we should probably return empty sliders
+      // to avoid breaking the frontend.
+      console.error(`Failed to fetch sliders from backend: ${res.status} ${res.statusText}`);
+      return NextResponse.json({ sliders: [] });
+    }
+
+    const data = await res.json();
+    // Assuming backend returns StandardResponse format: { success: true, data: [...] }
+    const sliders = data.data || [];
+
+    return NextResponse.json({ sliders });
+  } catch (error) {
+    console.error('Error fetching sliders:', error);
     return NextResponse.json({ sliders: [] });
   }
 }

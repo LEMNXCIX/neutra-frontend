@@ -7,8 +7,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 type Slide = {
   id: string;
   title: string;
-  subtitle?: string;
-  image?: string;
+  desc?: string;
+  img?: string;
 };
 
 export default function PromoSlider() {
@@ -79,9 +79,9 @@ export default function PromoSlider() {
                     : "translate-x-10 opacity-0 scale-105"
                 }`}
             >
-              {slide.image && (
+              {slide.img && (
                 <Image
-                  src={slide.image}
+                  src={slide.img}
                   alt={slide.title}
                   fill
                   priority={isActive}
@@ -109,7 +109,7 @@ export default function PromoSlider() {
         </div>
         <div className="overflow-hidden">
           <p className="text-sm sm:text-base opacity-90">
-            {slides[currentIndex].subtitle}
+            {slides[currentIndex].desc}
           </p>
         </div>
       </div>

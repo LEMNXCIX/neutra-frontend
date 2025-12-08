@@ -22,8 +22,10 @@ export default function FeaturedProducts() {
     fetch('/api/products')
       .then(r => r.json())
       .then(d => {
-        if (mounted && d.products && Array.isArray(d.products)) {
-          setProducts(d.products.slice(0, 4));
+        // Handle both StandardResponse (d.data) and direct array/object (d.products)
+        const list = d.data || d.products;
+        if (mounted && list && Array.isArray(list)) {
+          setProducts(list.slice(0, 4));
         } else {
           setProducts([]);
         }
@@ -32,7 +34,6 @@ export default function FeaturedProducts() {
 
     return () => { mounted = false };
   }, []);
-
   // Skeleton con exactamente 4 tarjetas (mismo grid que el real)
   if (loading) {
     return (

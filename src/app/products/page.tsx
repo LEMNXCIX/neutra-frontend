@@ -15,8 +15,23 @@ type FrontendProduct = {
 
 async function fetchProducts(search?: string, category?: string): Promise<FrontendProduct[]> {
   try {
-    // Use productsService which handles the backend API correctly
-    const allProducts = await productsService.getAll();
+    // Server-side fetch to our own API route
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001/api';
+    const res = await fetch(`${baseUrl}/products`, {
+      cache: 'no-store',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    });
+
+    if (!res.ok) {
+      console.error(`Failed to fetch products: ${res.status}`);
+      return [];
+    }
+
+    const data = await res.json();
+    // Handle StandardResponse format
+    const allProducts = (data.data || data.products || []) as BackendProduct[];
 
     let filtered = allProducts;
 

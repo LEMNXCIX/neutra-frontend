@@ -16,20 +16,19 @@ import Image from "@/components/ui/image";
 
 async function fetchProduct(id: string) {
   const base =
-    process.env.NEXT_PUBLIC_BASE_URL ||
-    process.env.BASE_URL ||
-    "http://localhost:3000";
+    process.env.NEXT_PUBLIC_API_URL ||
+    "http://localhost:4001/api";
   const url = new URL(`/api/products/${id}`, base).toString();
   const res = await fetch(url, { cache: "no-store" });
   if (!res.ok) return null;
   const data = await res.json();
-  return data.product;
+  // Handle both StandardResponse (data.data) and direct response (data.product)
+  return data.data || data.product;
 }
 
-export default async function Page(props: unknown) {
-  const paramsProp = (props as { params?: { id?: string } })?.params;
-  const params = (await (paramsProp as unknown)) as { id?: string } | undefined;
-  const pid = params?.id || "";
+export default async function Page(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
+  const pid = params.id;
   const product = await fetchProduct(pid);
 
   if (!product)

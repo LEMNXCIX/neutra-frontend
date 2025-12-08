@@ -382,7 +382,7 @@ export function Navigation() {
                     <Link href="/profile">Profile</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem>
-                    <button onClick={() => logout()}>Logout</button>
+                    <button onClick={async () => { await logout(); router.push('/'); }}>Logout</button>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -475,7 +475,7 @@ export function Navigation() {
                         {user.isAdmin && (
                           <Link href="/admin" onClick={() => setIsOpen(false)} className="text-sm">Admin Dashboard</Link>
                         )}
-                        <button onClick={() => { logout(); setIsOpen(false); }} className="text-sm text-left">Sign Out</button>
+                        <button onClick={async () => { await logout(); setIsOpen(false); router.push('/'); }} className="text-sm text-left">Sign Out</button>
                       </div>
                     ) : (
                       <Link href="/login" onClick={() => setIsOpen(false)} className="text-base font-medium">Sign In</Link>

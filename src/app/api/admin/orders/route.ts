@@ -26,20 +26,32 @@ export async function GET(req: NextRequest) {
     const page = searchParams.get('page') || '1';
     const limit = searchParams.get('limit') || '10';
 
+    const startDate = searchParams.get('startDate');
+    const endDate = searchParams.get('endDate');
+
     // Build query string for backend
     const queryParams = new URLSearchParams();
     if (search) queryParams.set('search', search);
     if (status && status !== 'all') queryParams.set('status', status);
     if (page) queryParams.set('page', page);
     if (limit) queryParams.set('limit', limit);
+    if (startDate) queryParams.set('startDate', startDate);
+    if (endDate) queryParams.set('endDate', endDate);
 
     const queryString = queryParams.toString();
     const ordersUrl = queryString ? `/order?${queryString}` : '/order';
 
+    // Build stats query string
+    const statsParams = new URLSearchParams();
+    if (startDate) statsParams.set('startDate', startDate);
+    if (endDate) statsParams.set('endDate', endDate);
+    const statsQuery = statsParams.toString();
+    const statsUrl = statsQuery ? `/order/stats?${statsQuery}` : '/order/stats';
+
     // Fetch orders and stats in parallel, handling errors gracefully
     const [ordersResult, statsResult] = await Promise.all([
       backendGet(ordersUrl, token).catch(err => ({ success: false, error: err.message, data: [] })),
-      backendGet('/order/stats', token).catch(err => ({ success: false, error: err.message }))
+      backendGet(statsUrl, token).catch(err => ({ success: false, error: err.message }))
     ]);
 
     if (!ordersResult.success) {

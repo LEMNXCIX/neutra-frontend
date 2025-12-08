@@ -58,7 +58,7 @@ export default function ProductGrid({
                   {p.image ? (
                     <Image
                       src={p.image}
-                      alt={p.title}
+                      alt={p.title || 'Product image'}
                       fill
                       sizes="192px"
                       className="object-cover transition-transform duration-300 group-hover:scale-110"
@@ -158,7 +158,7 @@ export default function ProductGrid({
               {p.image ? (
                 <Image
                   src={p.image}
-                  alt={p.title}
+                  alt={p.title || 'Product image'}
                   fill
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                   className="object-cover transition-transform duration-500 group-hover:scale-110"
