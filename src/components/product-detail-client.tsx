@@ -3,8 +3,9 @@ import React, { useState } from "react";
 import { useCart } from "@/context/cart-context";
 import { Button } from "./ui/button";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
-type Product = { id: string; title: string; price?: number };
+type Product = { id: string; title: string; price?: number; stock?: number };
 
 export default function ProductDetailClient({ product }: { product: Product }) {
   const { addItem } = useCart();
@@ -13,12 +14,18 @@ export default function ProductDetailClient({ product }: { product: Product }) {
 
   const handleAdd = async () => {
     if (qty < 1) return;
+
+    // Validate quantity against stock if available
+    if (product.stock !== undefined && qty > product.stock) {
+      toast.error(`Only ${product.stock} items available in stock`);
+      return;
+    }
+
     setLoading(true);
     try {
-      // Añade el producto N veces según cantidad
-      for (let i = 0; i < qty; i++) {
-        await addItem(product.id, product.title);
-      }
+      // Send quantity in a single request
+      await addItem(product.id, product.title, qty);
+      setQty(1); // Reset quantity after successful add
     } finally {
       setLoading(false);
     }
@@ -29,6 +36,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
       <input
         type="number"
         min={1}
+        max={product.stock}
         value={qty}
         onChange={(e) => setQty(Number(e.target.value))}
         className="w-20 border border-zinc-300 dark:border-zinc-700 p-2 rounded-md text-center"

@@ -36,7 +36,7 @@ type CartContextType = {
   total: number;
   coupon: ContextCoupon;
   refresh: () => Promise<void>;
-  addItem: (id: string, name: string) => Promise<void>;
+  addItem: (id: string, name: string, quantity?: number) => Promise<void>;
   removeItem: (id: string) => Promise<void>;
   updateQuantity: (id: string, newQty: number) => Promise<void>;
   applyCoupon: (code: string) => Promise<{ success: boolean; reason?: string }>;
@@ -124,18 +124,25 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const subtotal = computeSubtotal(items);
   const total = Math.max(0, Math.round((subtotal - discount) * 100) / 100);
 
-  const addItem = async (id: string, name: string) => {
+  const addItem = async (id: string, name: string, quantity: number = 1) => {
     if (!user) {
       toast.error('Please log in to add items to your cart');
       router.push('/login');
       return;
     }
 
+    // Validate quantity against product stock
+    const product = productMap[id];
+    if (product?.stock !== undefined && quantity > product.stock) {
+      toast.error(`Only ${product.stock} items available in stock`);
+      return;
+    }
+
     setLoading(true);
     try {
-      await cartService.addItem({ productId: id, amount: 1 });
+      await cartService.addItem({ productId: id, amount: quantity });
       await fetchCart();
-      toast.success('Added to cart');
+      toast.success(quantity > 1 ? `Added ${quantity} items to cart` : 'Added to cart');
     } catch (err) {
       const message = err instanceof ApiError ? err.message : 'Failed to add to cart';
       toast.error(message);

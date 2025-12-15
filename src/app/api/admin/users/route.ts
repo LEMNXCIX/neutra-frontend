@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { backendGet, backendPost } from "@/lib/backend-api";
 import { extractTokenFromRequest } from "@/lib/server-auth";
 
-const BACKEND_API_URL = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:4000/api";
+const BACKEND_API_URL = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:4001/api";
 
 /**
  * GET /api/admin/users

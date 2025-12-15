@@ -17,6 +17,13 @@ export default function PromoSlider() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState<"next" | "prev">("next");
 
+  // Touch/Swipe state
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+
+  // Minimum swipe distance (in px) to trigger slide change
+  const minSwipeDistance = 50;
+
   useEffect(() => {
     const fetchSlides = async () => {
       try {
@@ -44,6 +51,30 @@ export default function PromoSlider() {
     setCurrentIndex((prev) => (prev + 1) % slides.length);
   };
 
+  // Touch event handlers for swipe detection
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null); // Reset touch end
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe) {
+      next(); // Swipe left = next slide
+    } else if (isRightSwipe) {
+      prev(); // Swipe right = previous slide
+    }
+  };
+
   // Autoplay con pausa al hover
   useEffect(() => {
     if (slides.length === 0) return;
@@ -62,7 +93,12 @@ export default function PromoSlider() {
   if (slides.length === 0) return null;
 
   return (
-    <div className="relative group rounded-xl overflow-hidden h-[300px] sm:h-[420px] lg:h-[520px] shadow-lg">
+    <div
+      className="relative group rounded-xl overflow-hidden h-[300px] sm:h-[420px] lg:h-[520px] shadow-lg"
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+    >
       {/* Contenedor de slides */}
       <div className="relative w-full h-full bg-zinc-100 dark:bg-zinc-800">
         {slides.map((slide, index) => {

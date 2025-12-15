@@ -24,7 +24,7 @@ export const authService = {
      * Logout current user (clears HttpOnly cookie)
      */
     logout: async (): Promise<void> => {
-        return api.get<void>('/auth/logout');
+        return api.post<void>('/auth/logout', {});
     },
 
     /**
@@ -50,7 +50,7 @@ export const authService = {
      * Redirect to Google OAuth
      */
     googleLogin: () => {
-        const apiUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:4000/api';
+        const apiUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:4001/api';
         window.location.href = `${apiUrl}/auth/google`;
     },
 };

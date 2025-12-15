@@ -48,10 +48,10 @@ export async function apiClient<T = any>(
         },
     };
 
-    //const url = endpoint.startsWith('http') ? endpoint : `${API_BASE_URL}${endpoint}`;
-    const url = "http://192.168.68.105:4001/api" + endpoint;
+    // Use Next.js API routes (/api/...) which proxy to the backend
+    // This ensures proper cookie handling and avoids CORS issues
+    const url = endpoint.startsWith('http') ? endpoint : `/api${endpoint}`;
 
-    toast.info('Cargando... ' + url);
     try {
         const res = await fetch(url, config);
 
