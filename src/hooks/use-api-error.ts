@@ -19,7 +19,7 @@ export function useApiError() {
 
             // Handle validation errors
             if (error.errors && error.errors.length > 0) {
-                error.errors.forEach((e: any) => {
+                (error.errors as Array<{ field?: string; message?: string }>).forEach((e) => {
                     if (e.field) {
                         // Show field-specific error
                         toast.error(`${e.field}: ${e.message}`);

@@ -5,7 +5,9 @@ import AnalyticsCharts from "@/components/admin/AnalyticsCharts";
 import AnalyticsOverview from "@/components/admin/AnalyticsOverview";
 import AnalyticsChartsDetailed from "@/components/admin/AnalyticsChartsDetailed";
 
-const BACKEND_API_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:4001/api';
+export const dynamic = 'force-dynamic';
+
+const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001/api';
 
 async function validateAdminAccess() {
     try {
@@ -49,7 +51,7 @@ async function validateAdminAccess() {
 }
 
 export default async function AdminPage() {
-    const { isValid, user } = await validateAdminAccess();
+    const { isValid } = await validateAdminAccess();
 
     if (!isValid) {
         // Not authenticated or not admin, redirect to login

@@ -170,13 +170,14 @@ export default function ProfilePage() {
 
     setIsSaving(true);
     try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const body: any = {
         name: profileForm.name,
         email: profileForm.email,
       };
 
       if (avatarBase64) {
-        body.avatarBase64 = avatarBase64;
+        body.profilePic = avatarBase64;
       }
 
       const res = await fetch('/api/profile', {
@@ -194,8 +195,13 @@ export default function ProfilePage() {
 
       const data = await res.json();
 
-      if (data.user) {
-        updateUser(data.user);
+      if (data.success && data.data) {
+        // Map backend profilePic to frontend avatar
+        const updatedStoreUser = {
+          ...data.data,
+          avatar: data.data.profilePic
+        };
+        updateUser(updatedStoreUser);
         toast.success('Profile updated successfully! 🎉');
         setEditOpen(false);
         setAvatarPreview(null);
@@ -334,7 +340,7 @@ export default function ProfilePage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground mb-1">Pending</p>
-                  <p className="text-3xl font-bold">{ordersByStatus['processing'] || 0}</p>
+                  <p className="text-3xl font-bold">{ordersByStatus['PENDIENTE'] || 0}</p>
                 </div>
                 <div className="p-3 rounded-full bg-yellow-500/10">
                   <Calendar className="h-6 w-6 text-yellow-500" />
@@ -348,7 +354,7 @@ export default function ProfilePage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground mb-1">Delivered</p>
-                  <p className="text-3xl font-bold">{ordersByStatus['delivered'] || 0}</p>
+                  <p className="text-3xl font-bold">{ordersByStatus['ENTREGADO'] || 0}</p>
                 </div>
                 <div className="p-3 rounded-full bg-purple-500/10">
                   <Package className="h-6 w-6 text-purple-500" />
@@ -423,7 +429,7 @@ export default function ProfilePage() {
                   <ShoppingBag className="h-10 w-10 text-muted-foreground" />
                 </div>
                 <h3 className="text-xl font-semibold mb-2">No orders found</h3>
-                <p className="text-muted-foreground mb-6">You haven't placed any orders yet</p>
+                <p className="text-muted-foreground mb-6">You haven&apos;t placed any orders yet</p>
                 <Button onClick={() => router.push('/')}>
                   Start Shopping
                 </Button>

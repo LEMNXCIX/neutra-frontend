@@ -1,16 +1,24 @@
 import React from "react";
 import { cookies } from 'next/headers';
 import RolesTableClient from "@/components/admin/roles/RolesTableClient";
+import { Permission } from "@/types/permission.types";
 
-const BACKEND_API_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:4001/api';
+export const dynamic = 'force-dynamic';
 
-async function getRolesAndPermissions(rolePage: number, permissionPage: number) {
+const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001/api';
+
+async function getRolesAndPermissions(rolePage: number, permissionPage: number, roleSearch?: string, permissionSearch?: string) {
     try {
         const cookieStore = await cookies();
         const cookieString = cookieStore.toString();
 
         // Fetch roles (paginated)
-        const rolesResponse = await fetch(`${BACKEND_API_URL}/roles?page=${rolePage}&limit=10`, {
+        const roleUrl = new URL(`${BACKEND_API_URL}/roles`);
+        roleUrl.searchParams.set('page', rolePage.toString());
+        roleUrl.searchParams.set('limit', '10');
+        if (roleSearch) roleUrl.searchParams.set('search', roleSearch);
+
+        const rolesResponse = await fetch(roleUrl.toString(), {
             headers: {
                 'Content-Type': 'application/json',
                 'Cookie': cookieString,
@@ -19,7 +27,12 @@ async function getRolesAndPermissions(rolePage: number, permissionPage: number) 
         });
 
         // Fetch permissions (paginated)
-        const permissionsResponse = await fetch(`${BACKEND_API_URL}/permissions?page=${permissionPage}&limit=10`, {
+        const permUrl = new URL(`${BACKEND_API_URL}/permissions`);
+        permUrl.searchParams.set('page', permissionPage.toString());
+        permUrl.searchParams.set('limit', '10');
+        if (permissionSearch) permUrl.searchParams.set('search', permissionSearch);
+
+        const permissionsResponse = await fetch(permUrl.toString(), {
             headers: {
                 'Content-Type': 'application/json',
                 'Cookie': cookieString,
@@ -32,6 +45,7 @@ async function getRolesAndPermissions(rolePage: number, permissionPage: number) 
             return {
                 roles: [],
                 permissions: [],
+                allPermissions: [],
                 stats: { totalRoles: 0, totalPermissions: 0 },
                 rolePagination: { currentPage: 1, totalPages: 0, totalItems: 0, itemsPerPage: 10 },
                 permissionPagination: { currentPage: 1, totalPages: 0, totalItems: 0, itemsPerPage: 10 },
@@ -46,9 +60,28 @@ async function getRolesAndPermissions(rolePage: number, permissionPage: number) 
         const roles = rolesData.success && rolesData.data ? rolesData.data : [];
         const permissions = permissionsData.success && permissionsData.data ? permissionsData.data : [];
 
+        // Fetch all permissions for selection in forms (non-paginated)
+        let allPermissions: Permission[] = [];
+        try {
+            const allPermsResponse = await fetch(`${BACKEND_API_URL}/permissions`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Cookie': cookieString,
+                },
+                cache: 'no-store',
+            });
+            if (allPermsResponse.ok) {
+                const allPermsData = await allPermsResponse.json();
+                allPermissions = allPermsData.success && allPermsData.data ? allPermsData.data : [];
+            }
+        } catch (error) {
+            console.error("Failed to fetch all permissions:", error);
+        }
+
         return {
             roles,
             permissions,
+            allPermissions,
             stats: {
                 totalRoles: rolesData.pagination?.total || roles.length,
                 totalPermissions: permissionsData.pagination?.total || permissions.length,
@@ -81,6 +114,7 @@ async function getRolesAndPermissions(rolePage: number, permissionPage: number) 
         return {
             roles: [],
             permissions: [],
+            allPermissions: [],
             stats: { totalRoles: 0, totalPermissions: 0 },
             rolePagination: { currentPage: 1, totalPages: 0, totalItems: 0, itemsPerPage: 10 },
             permissionPagination: { currentPage: 1, totalPages: 0, totalItems: 0, itemsPerPage: 10 },
@@ -96,13 +130,16 @@ export default async function RolesPage({ searchParams }: Props) {
     const resolvedSearchParams = await searchParams;
     const rolePage = typeof resolvedSearchParams.rolePage === "string" ? parseInt(resolvedSearchParams.rolePage) : 1;
     const permissionPage = typeof resolvedSearchParams.permissionPage === "string" ? parseInt(resolvedSearchParams.permissionPage) : 1;
+    const roleSearch = typeof resolvedSearchParams.roleSearch === "string" ? resolvedSearchParams.roleSearch : undefined;
+    const permissionSearch = typeof resolvedSearchParams.permissionSearch === "string" ? resolvedSearchParams.permissionSearch : undefined;
 
-    const data = await getRolesAndPermissions(rolePage, permissionPage);
+    const data = await getRolesAndPermissions(rolePage, permissionPage, roleSearch, permissionSearch);
 
     return (
         <RolesTableClient
             roles={data.roles}
             permissions={data.permissions}
+            allPermissions={data.allPermissions}
             stats={data.stats}
             rolePagination={data.rolePagination}
             permissionPagination={data.permissionPagination}

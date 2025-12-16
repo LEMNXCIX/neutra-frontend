@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -14,6 +14,7 @@ import {
   Shield,
   AlertTriangle,
 } from "lucide-react";
+import { useApiQuery } from "@/hooks/use-api";
 
 type Stats = {
   users: { total: number; admins: number; regular: number };
@@ -26,104 +27,11 @@ type Stats = {
 };
 
 export default function AnalyticsOverview() {
-  const [stats, setStats] = useState<Stats | null>(null);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const [usersRes, productsRes, ordersRes, couponsRes, slidersRes, bannersRes, categoriesRes] = await Promise.all([
-          fetch('/api/admin/users', { credentials: 'same-origin' }),
-          fetch('/api/admin/products', { credentials: 'same-origin' }),
-          fetch('/api/admin/orders', { credentials: 'same-origin' }),
-          fetch('/api/admin/coupons', { credentials: 'same-origin' }),
-          fetch('/api/admin/sliders', { credentials: 'same-origin' }),
-          fetch('/api/admin/banners', { credentials: 'same-origin' }),
-          fetch('/api/admin/categories', { credentials: 'same-origin' }),
-        ]);
-
-        const usersData = await usersRes.json().catch((e) => {
-          console.error("Error parsing users response:", e);
-          return { stats: { totalUsers: 0, adminUsers: 0, regularUsers: 0 } };
-        });
-        const productsData = await productsRes.json().catch((e) => {
-          console.error("Error parsing products response:", e);
-          return { stats: { totalProducts: 0, totalValue: 0, lowStockCount: 0 } };
-        });
-        const ordersData = await ordersRes.json().catch((e) => {
-          console.error("Error parsing orders response:", e);
-          return { stats: { totalOrders: 0, totalRevenue: 0 } };
-        });
-        const couponsData = await couponsRes.json().catch((e) => {
-          console.error("Error parsing coupons response:", e);
-          return { stats: { totalCoupons: 0, activeCoupons: 0, usedCoupons: 0 } };
-        });
-        const slidersData = await slidersRes.json().catch((e) => {
-          console.error("Error parsing sliders response:", e);
-          return { stats: { totalSliders: 0, activeSliders: 0, withImages: 0 } };
-        });
-        const bannersData = await bannersRes.json().catch((e) => {
-          console.error("Error parsing banners response:", e);
-          return { stats: { totalBanners: 0, activeBanners: 0 } };
-        });
-        const categoriesData = await categoriesRes.json().catch(() => ({ stats: { totalCategories: 0, avgProductsPerCategory: 0 } }));
-
-        const ordersCount = ordersData.stats?.totalOrders || 0;
-        const ordersRevenue = ordersData.stats?.totalRevenue || 0;
-
-        setStats({
-          users: {
-            total: usersData.stats?.totalUsers || 0,
-            admins: usersData.stats?.adminUsers || 0,
-            regular: usersData.stats?.regularUsers || 0,
-          },
-          products: {
-            total: productsData.stats?.totalProducts || 0,
-            totalValue: productsData.stats?.totalValue || 0,
-            lowStock: productsData.stats?.lowStockCount || 0,
-            outOfStock: productsData.products?.filter((p: any) => Number(p.stock || 0) === 0).length || 0,
-          },
-          orders: {
-            total: ordersCount,
-            revenue: ordersRevenue,
-            avgOrderValue: ordersCount > 0 ? ordersRevenue / ordersCount : 0,
-          },
-          coupons: {
-            total: couponsData.stats?.totalCoupons || 0,
-            active: couponsData.stats?.activeCoupons || 0,
-            used: couponsData.stats?.usedCoupons || 0,
-          },
-          sliders: {
-            total: slidersData.stats?.totalSliders || 0,
-            active: slidersData.stats?.activeSliders || 0,
-            withImages: slidersData.stats?.withImages || 0,
-          },
-          banners: {
-            total: bannersData.stats?.totalBanners || 0,
-            active: bannersData.stats?.activeBanners || 0,
-          },
-          categories: {
-            total: categoriesData.stats?.totalCategories || 0,
-            avgProducts: categoriesData.stats?.avgProductsPerCategory || 0,
-          },
-        });
-      } catch (e) {
-        console.error('Error loading analytics:', e);
-        setStats({
-          users: { total: 0, admins: 0, regular: 0 },
-          products: { total: 0, totalValue: 0, lowStock: 0, outOfStock: 0 },
-          orders: { total: 0, revenue: 0, avgOrderValue: 0 },
-          coupons: { total: 0, active: 0, used: 0 },
-          sliders: { total: 0, active: 0, withImages: 0 },
-          banners: { total: 0, active: 0 },
-          categories: { total: 0, avgProducts: 0 },
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
-  }, []);
+  const { data: stats, isLoading: loading } = useApiQuery<Stats>(
+    ['admin', 'stats', 'overview'],
+    '/admin/stats/overview'
+  );
 
   const StatCard = ({
     icon: Icon,

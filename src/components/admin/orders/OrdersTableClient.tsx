@@ -155,7 +155,7 @@ export default function OrdersTableClient({ orders, stats, pagination }: Props) 
 
     const openOrderDetails = (order: Order) => {
         setSelectedOrder(order);
-        setEditingTracking(order.trackingNumber || order.tracking || "");
+        setEditingTracking(order.trackingNumber || "");
         setDetailsOpen(true);
     };
 
@@ -314,7 +314,7 @@ export default function OrdersTableClient({ orders, stats, pagination }: Props) 
                                                     </Select>
                                                 </TableCell>
                                                 <TableCell className="text-muted-foreground text-sm">
-                                                    {o.trackingNumber || o.tracking || "—"}
+                                                    {o.trackingNumber || "—"}
                                                 </TableCell>
                                                 <TableCell className="text-muted-foreground">
                                                     {new Date(o.createdAt).toLocaleDateString()}

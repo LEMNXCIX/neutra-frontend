@@ -22,6 +22,13 @@ export interface Order {
     discountAmount: number;  // Added from API
     couponId?: string | null;  // Added from API
     trackingNumber?: string | null;  // From API
+    address?: string | null;  // Shipping address
+    coupon?: {  // Applied coupon details
+        code: string;
+        type: 'percent' | 'fixed';
+        value: number;
+        discount: number;
+    } | null;
     createdAt: Date | string;
     updatedAt: Date | string;
     user?: {

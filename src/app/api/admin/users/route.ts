@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { backendGet, backendPost } from "@/lib/backend-api";
+import { backendGet } from "@/lib/backend-api";
 import { extractTokenFromRequest } from "@/lib/server-auth";
 
-const BACKEND_API_URL = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:4001/api";
+const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4001/api";
 
 /**
  * GET /api/admin/users
@@ -24,22 +24,26 @@ export async function GET(req: NextRequest) {
     }
 
     const users = Array.isArray(usersResult.data) ? usersResult.data : [];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const stats = statsResult.success && (statsResult as any).data ? (statsResult as any).data : {
       totalUsers: users.length,
       adminUsers: 0,
       regularUsers: users.length
     };
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const mappedUsers = users.map((u: any) => ({
+      id: u.id,
+      name: u.name,
+      email: u.email,
+      role: u.role, // Pass full role object
+      isAdmin: u.role?.name === 'ADMIN' || u.role?.name === 'SUPER_ADMIN', // Updated check
+      profilePic: u.profilePic, // Updated field name to match frontend expectation if needed, or keep avatar
+      avatar: u.profilePic
+    }));
+
     return NextResponse.json({
-      users: users.map((u: any) => ({
-        id: u.id,
-        name: u.name,
-        email: u.email,
-        role: u.role, // Pass full role object
-        isAdmin: u.role?.name === 'ADMIN' || u.role?.name === 'SUPER_ADMIN', // Updated check
-        profilePic: u.profilePic, // Updated field name to match frontend expectation if needed, or keep avatar
-        avatar: u.profilePic
-      })),
+      users: mappedUsers,
       stats: {
         totalUsers: stats.totalUsers,
         adminUsers: stats.adminUsers,

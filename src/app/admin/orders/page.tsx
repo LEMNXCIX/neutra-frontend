@@ -2,6 +2,8 @@ import React from "react";
 import { cookies } from 'next/headers';
 import OrdersTableClient from "@/components/admin/orders/OrdersTableClient";
 
+export const dynamic = 'force-dynamic';
+
 async function getOrders(search: string, status: string, page: number, limit: number) {
     try {
         // Build query string

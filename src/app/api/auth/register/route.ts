@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const BACKEND_API_URL = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:4001/api";
+const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4001/api";
 
 /**
  * POST /api/auth/register
@@ -19,6 +19,14 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify(body),
       cache: "no-store",
     });
+
+    console.log(`[Register] Request to ${backendUrl} ended with status ${response.status}`);
+
+    if (!response.ok) {
+      const text = await response.text();
+      console.error(`[Register] Backend error (${response.status}):`, text.slice(0, 500));
+      return new NextResponse(text, { status: response.status, headers: { 'Content-Type': response.headers.get('content-type') || 'text/html' } });
+    }
 
     const data = await response.json();
 

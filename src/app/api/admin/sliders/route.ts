@@ -21,11 +21,13 @@ export async function GET(req: NextRequest) {
     }
 
     const sliders = Array.isArray(slidersResult.data) ? slidersResult.data : [];
-    const stats = statsResult.success && (statsResult as any).data ? (statsResult as any).data : {
-      totalSliders: sliders.length,
-      activeSliders: 0,
-      withImages: 0
-    };
+    const stats = statsResult.success && 'data' in statsResult && statsResult.data
+      ? (statsResult as { success: boolean; data: { totalSliders: number; activeSliders: number; withImages: number } }).data
+      : {
+        totalSliders: sliders.length,
+        activeSliders: 0,
+        withImages: 0
+      };
 
     return NextResponse.json({
       success: true,

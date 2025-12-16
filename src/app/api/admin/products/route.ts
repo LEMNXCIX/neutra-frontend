@@ -27,6 +27,7 @@ export async function GET(req: NextRequest) {
       console.warn("Failed to fetch product stats, using fallback:", statsResult);
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const stats = statsResult.success && (statsResult as any).data ? (statsResult as any).data : {
       totalProducts: products.length,
       totalValue: 0, // Fallback if stats fail

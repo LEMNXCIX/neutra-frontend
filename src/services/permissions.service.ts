@@ -9,8 +9,9 @@ export const permissionsService = {
     /**
      * Get all permissions
      */
-    getAll: async (): Promise<Permission[]> => {
-        return api.get<Permission[]>('/permissions');
+    getAll: async (search?: string): Promise<Permission[]> => {
+        const url = search ? `/permissions?search=${encodeURIComponent(search)}` : '/permissions';
+        return api.get<Permission[]>(url);
     },
 
     /**

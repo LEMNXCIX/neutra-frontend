@@ -1,9 +1,10 @@
 import React from "react";
-import { cookies } from 'next/headers';
 import ProductsTableClient from "@/components/admin/products/ProductsTableClient";
 import { extractTokenFromCookies, getCookieString } from "@/lib/server-auth";
 import { getBackendUrl } from "@/lib/backend-api";
 import { Product } from '@/types/product.types';
+
+export const dynamic = 'force-dynamic';
 
 async function getProducts(search: string, category: string, page: number, limit: number) {
     try {
@@ -33,8 +34,20 @@ async function getProducts(search: string, category: string, page: number, limit
 
         // Map backend Product to frontend Product
         let products: Product[] = [];
+        type BackendProduct = {
+            id: string;
+            name: string;
+            description?: string;
+            price: number;
+            stock?: number;
+            categories?: Array<{ id: string; name: string }>;
+            image?: string;
+            ownerId?: string;
+            createdAt?: string;
+            updatedAt?: string;
+        };
         if (productsData.success && productsData.data) {
-            products = (Array.isArray(productsData.data) ? productsData.data : []).map((p: any) => ({
+            products = (Array.isArray(productsData.data) ? productsData.data : []).map((p: BackendProduct) => ({
                 id: p.id,
                 name: p.name,
                 description: p.description || '',

@@ -40,7 +40,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
           </div>
           <h2 className="text-2xl font-bold mb-2">Product not found</h2>
           <p className="text-muted-foreground mb-6">
-            The product you're looking for doesn't exist or has been removed
+            The product you&apos;re looking for doesn&apos;t exist or has been removed
           </p>
           <Button asChild>
             <Link href="/products">

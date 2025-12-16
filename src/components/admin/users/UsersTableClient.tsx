@@ -78,7 +78,7 @@ export default function UsersTableClient({ users, stats, pagination }: Props) {
     // Dialog states
     const [editOpen, setEditOpen] = useState(false);
     const [editing, setEditing] = useState<User | null>(null);
-    const [form, setForm] = useState({ name: "", email: "", isAdmin: false });
+    const [form, setForm] = useState({ name: "", email: "" });
     const [roleDialogOpen, setRoleDialogOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
@@ -114,28 +114,7 @@ export default function UsersTableClient({ users, stats, pagination }: Props) {
         router.push(`?${params.toString()}`);
     };
 
-    const toggleAdmin = async (id: string) => {
-        try {
-            // For now, using direct API call as backend doesn't have role toggle endpoint
-            // This should be migrated when backend API is updated
-            const res = await fetch("/api/admin/users/toggle", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ userId: id }),
-                credentials: "include",
-            });
-            if (!res.ok) {
-                const data = await res.json();
-                toast.error(data?.error || "Failed to toggle role");
-                return;
-            }
-            toast.success("Role updated");
-            router.refresh();
-        } catch (err) {
-            const message = err instanceof ApiError ? err.message : "Network error";
-            toast.error(message);
-        }
-    };
+
 
     const isUserAdmin = (u: User) => u.role?.name === 'SUPER_ADMIN' || u.role?.name === 'ADMIN';
 
@@ -144,7 +123,6 @@ export default function UsersTableClient({ users, stats, pagination }: Props) {
         setForm({
             name: u.name,
             email: u.email,
-            isAdmin: isUserAdmin(u),
         });
         setEditOpen(true);
     };
@@ -159,7 +137,7 @@ export default function UsersTableClient({ users, stats, pagination }: Props) {
             toast.success("User updated");
             setEditOpen(false);
             setEditing(null);
-            setForm({ name: "", email: "", isAdmin: false });
+            setForm({ name: "", email: "" });
             router.refresh();
         } catch (err) {
             const message = err instanceof ApiError ? err.message : "Failed to update user";
@@ -317,19 +295,13 @@ export default function UsersTableClient({ users, stats, pagination }: Props) {
                                                 <Button
                                                     size="sm"
                                                     variant="ghost"
-                                                    onClick={() => toggleAdmin(u.id)}
-                                                >
-                                                    {isUserAdmin(u) ? "Revoke Admin" : "Make Admin"}
-                                                </Button>
-                                                <Button
-                                                    size="sm"
-                                                    variant="ghost"
                                                     onClick={() => {
                                                         setSelectedUser(u);
                                                         setRoleDialogOpen(true);
                                                     }}
                                                 >
-                                                    <UserCog className="h-4 w-4" />
+                                                    <UserCog className="h-4 w-4 mr-2" />
+                                                    Change Role
                                                 </Button>
                                             </div>
                                         </TableCell>
@@ -426,10 +398,14 @@ export default function UsersTableClient({ users, stats, pagination }: Props) {
                                 <Button
                                     size="sm"
                                     variant="outline"
-                                    onClick={() => toggleAdmin(u.id)}
+                                    onClick={() => {
+                                        setSelectedUser(u);
+                                        setRoleDialogOpen(true);
+                                    }}
                                     className="flex-1"
                                 >
-                                    {isUserAdmin(u) ? "Revoke" : "Make Admin"}
+                                    <UserCog className="h-4 w-4 mr-1" />
+                                    Change Role
                                 </Button>
                             </div>
                         </CardContent>
@@ -488,13 +464,7 @@ export default function UsersTableClient({ users, stats, pagination }: Props) {
                                 placeholder="user@example.com"
                             />
                         </div>
-                        <div className="flex items-center space-x-2">
-                            <Switch
-                                checked={form.isAdmin}
-                                onCheckedChange={(checked) => setForm({ ...form, isAdmin: checked })}
-                            />
-                            <label className="text-sm font-medium">Administrator</label>
-                        </div>
+
                     </div>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setEditOpen(false)}>Cancel</Button>

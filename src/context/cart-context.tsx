@@ -6,8 +6,7 @@ import { useRouter } from 'next/navigation';
 import { toast } from "sonner";
 import { ApiError } from '@/lib/api-client';
 import { Product } from '@/types/product.types';
-import { Coupon, CouponType } from '@/types/coupon.types';
-import { CartItem } from '@/types/cart.types';
+import { CouponType } from '@/types/coupon.types';
 
 // Internal representation for the context state
 type MappedCartItem = {

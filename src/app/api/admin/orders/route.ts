@@ -55,10 +55,11 @@ export async function GET(req: NextRequest) {
     ]);
 
     if (!ordersResult.success) {
-      return NextResponse.json(ordersResult, { status: (ordersResult as any).statusCode || 500 });
+      return NextResponse.json(ordersResult, { status: (ordersResult as { statusCode?: number }).statusCode || 500 });
     }
 
     const orders = Array.isArray(ordersResult.data) ? ordersResult.data : [];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const pagination = (ordersResult as any).pagination || {
       page: parseInt(page),
       limit: parseInt(limit),
@@ -66,6 +67,7 @@ export async function GET(req: NextRequest) {
       totalPages: Math.ceil(orders.length / parseInt(limit))
     };
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const stats = statsResult.success && (statsResult as any).data ? (statsResult as any).data : {
       totalOrders: orders.length,
       totalRevenue: 0,

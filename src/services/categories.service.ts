@@ -47,7 +47,6 @@ export const categoriesService = {
      * Get category statistics (requires authentication)
      */
     getStats: async (): Promise<{ totalCategories: number; avgProductsPerCategory: number }> => {
-        const response = await api.get('/categories/stats');
-        return response.data;
+        return api.get<{ totalCategories: number; avgProductsPerCategory: number }>('/categories/stats');
     },
 };

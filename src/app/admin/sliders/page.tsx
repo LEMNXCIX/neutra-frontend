@@ -1,8 +1,9 @@
 import React from "react";
-import { cookies } from 'next/headers';
 import SlidersTableClient from "@/components/admin/sliders/SlidersTableClient";
 import { extractTokenFromCookies, getCookieString } from "@/lib/server-auth";
 import { getBackendUrl } from "@/lib/backend-api";
+
+export const dynamic = 'force-dynamic';
 
 async function getSliders(search: string, status: string, page: number, limit: number) {
     try {
@@ -41,10 +42,17 @@ async function getSliders(search: string, status: string, page: number, limit: n
         const data = await response.json();
         let sliders = data.success && data.data ? data.data : [];
 
+        type Slider = {
+            title?: string;
+            subtitle?: string;
+            active?: boolean;
+            img?: string;
+        };
+
         // Apply filters
         if (search) {
             const query = search.toLowerCase();
-            sliders = sliders.filter((s: any) =>
+            sliders = sliders.filter((s: Slider) =>
                 s.title?.toLowerCase().includes(query) ||
                 s.subtitle?.toLowerCase().includes(query)
             );
@@ -52,16 +60,16 @@ async function getSliders(search: string, status: string, page: number, limit: n
 
         if (status && status !== "all") {
             if (status === "active") {
-                sliders = sliders.filter((s: any) => s.active);
+                sliders = sliders.filter((s: Slider) => s.active);
             } else if (status === "inactive") {
-                sliders = sliders.filter((s: any) => !s.active);
+                sliders = sliders.filter((s: Slider) => !s.active);
             }
         }
 
         // Calculate stats
         const totalSliders = sliders.length;
-        const activeSliders = sliders.filter((s: any) => s.active).length;
-        const withImages = sliders.filter((s: any) => s.img).length;
+        const activeSliders = sliders.filter((s: Slider) => s.active).length;
+        const withImages = sliders.filter((s: Slider) => s.img).length;
 
         // Apply pagination
         const startIndex = (page - 1) * limit;

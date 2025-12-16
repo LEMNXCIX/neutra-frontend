@@ -2,6 +2,8 @@ import React from "react";
 import { cookies } from 'next/headers';
 import CouponsTableClient from "@/components/admin/coupons/CouponsTableClient";
 
+export const dynamic = 'force-dynamic';
+
 async function getCoupons(search: string, type: string, status: string, page: number, limit: number) {
     try {
         // Build query string

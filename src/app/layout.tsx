@@ -5,8 +5,10 @@ import './globals.css';
 import { CartProvider } from '@/context/cart-context';
 import { AuthInitializer } from '@/components/auth-initializer';
 import { Navigation as NavBar } from "@/components/nav_bar";
-import { Toaster } from 'sonner';
+import { Toaster } from "@/components/ui/sonner";
 import FooterWrapper from "@/components/footer-wrapper"; // 👈 nuevo componente cliente
+import { QueryProvider } from '@/providers/query-provider';
+
 
 const geist = Geist({
   subsets: ["latin"],
@@ -32,23 +34,25 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <AuthInitializer />
-          <CartProvider>
-            <div
-              id="root-content"
-              className="transition-all duration-300 ease-in-out"
-              style={{
-                marginLeft: 'var(--sidebar-width, 0px)',
-              } as React.CSSProperties}
-            >
-              <NavBar />
-              <div className="pt-16">{children}</div>
+          <QueryProvider>
+            <CartProvider>
+              <div
+                id="root-content"
+                className="transition-all duration-300 ease-in-out"
+                style={{
+                  marginLeft: 'var(--sidebar-width, 0px)',
+                } as React.CSSProperties}
+              >
+                <NavBar />
+                <div className="pt-16">{children}</div>
 
-              {/* 👇 Footer controlado desde un Client Component */}
-              <FooterWrapper />
+                {/* 👇 Footer controlado desde un Client Component */}
+                <FooterWrapper />
 
-            </div>
-            <Toaster richColors theme="system" />
-          </CartProvider>
+              </div>
+              <Toaster richColors />
+            </CartProvider>
+          </QueryProvider>
         </ThemeProvider>
       </body>
     </html>

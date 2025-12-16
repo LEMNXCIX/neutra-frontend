@@ -27,10 +27,12 @@ export async function GET(req: NextRequest) {
       console.warn("Failed to fetch banner stats, using fallback:", statsResult);
     }
 
-    const stats = statsResult.success && (statsResult as any).data ? (statsResult as any).data : {
-      totalBanners: banners.length,
-      activeBanners: 0
-    };
+    const stats = statsResult.success && 'data' in statsResult && statsResult.data
+      ? (statsResult as { success: boolean; data: { totalBanners: number; activeBanners: number } }).data
+      : {
+        totalBanners: banners.length,
+        activeBanners: 0
+      };
 
 
     return NextResponse.json({

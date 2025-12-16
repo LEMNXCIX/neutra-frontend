@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { useDebouncedCallback } from "use-debounce";
 import { toast } from "sonner";
 import { rolesService, permissionsService } from "@/services";
 import { ApiError } from "@/lib/api-client";
@@ -35,7 +36,9 @@ import {
     Key,
     ChevronLeft,
     ChevronRight,
+    Search,
 } from "lucide-react";
+import { useConfirm } from "@/hooks/use-confirm";
 
 import { Role } from "@/types/role.types";
 import { Permission } from "@/types/permission.types";
@@ -58,11 +61,29 @@ type Props = {
     stats: Stats;
     rolePagination: Pagination;
     permissionPagination: Pagination;
+    allPermissions?: Permission[];
 };
 
-export default function RolesTableClient({ roles, permissions, stats, rolePagination, permissionPagination }: Props) {
+export default function RolesTableClient({ roles, permissions, allPermissions = [], stats, rolePagination, permissionPagination }: Props) {
     const router = useRouter();
     const searchParams = useSearchParams();
+    const pathname = usePathname();
+    const { confirm, ConfirmDialog } = useConfirm();
+
+    const handleSearch = useDebouncedCallback((term: string, type: 'role' | 'permission') => {
+        const params = new URLSearchParams(searchParams);
+        const pageKey = type === 'role' ? 'rolePage' : 'permissionPage';
+        const searchKey = type === 'role' ? 'roleSearch' : 'permissionSearch';
+
+        if (term) {
+            params.set(searchKey, term);
+        } else {
+            params.delete(searchKey);
+        }
+        params.set(pageKey, '1'); // Reset pagination to page 1 on search
+
+        router.replace(`${pathname}?${params.toString()}`);
+    }, 300);
 
     // Roles state
     const [createOpen, setCreateOpen] = useState(false);
@@ -74,6 +95,36 @@ export default function RolesTableClient({ roles, permissions, stats, rolePagina
         level: 1,
         permissionIds: [] as string[],
     });
+
+    const [rolePermissionSearch, setRolePermissionSearch] = useState("");
+    const [availablePermissions, setAvailablePermissions] = useState<Permission[]>(allPermissions.length > 0 ? allPermissions : permissions);
+    const [isSearchingPerms, setIsSearchingPerms] = useState(false);
+
+    // Debounced search for permissions in dialog
+    const handleDialogPermissionSearch = useDebouncedCallback(async (term: string) => {
+        setIsSearchingPerms(true);
+        try {
+            // If term is empty and we have allPermissions, reset to that
+            if (!term && allPermissions.length > 0) {
+                setAvailablePermissions(allPermissions);
+                return;
+            }
+
+            const results = await permissionsService.getAll(term);
+            setAvailablePermissions(results);
+        } catch (error) {
+            console.error("Failed to search permissions:", error);
+            toast.error("Failed to search permissions");
+        } finally {
+            setIsSearchingPerms(false);
+        }
+    }, 300);
+
+    // Update available permissions when search changes
+    const onSearchChange = (value: string) => {
+        setRolePermissionSearch(value);
+        handleDialogPermissionSearch(value);
+    };
 
     // Permissions state
     const [permCreateOpen, setPermCreateOpen] = useState(false);
@@ -91,7 +142,7 @@ export default function RolesTableClient({ roles, permissions, stats, rolePagina
                 credentials: 'include',
             });
             if (response.ok) {
-                const data = await response.json();
+                await response.json();
             }
         } catch (err) {
             console.error('Failed to refresh permissions:', err);
@@ -101,6 +152,10 @@ export default function RolesTableClient({ roles, permissions, stats, rolePagina
     // Roles handlers
     const openCreate = () => {
         setForm({ name: "", description: "", level: 1, permissionIds: [] });
+        setRolePermissionSearch("");
+        if (allPermissions.length > 0) {
+            setAvailablePermissions(allPermissions);
+        }
         setCreateOpen(true);
     };
 
@@ -110,8 +165,13 @@ export default function RolesTableClient({ roles, permissions, stats, rolePagina
             name: role.name,
             description: role.description || "",
             level: role.level || 1,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             permissionIds: role.permissions?.map((p: any) => p.id) || [],
         });
+        setRolePermissionSearch("");
+        if (allPermissions.length > 0) {
+            setAvailablePermissions(allPermissions);
+        }
         setEditOpen(true);
     };
 
@@ -155,9 +215,16 @@ export default function RolesTableClient({ roles, permissions, stats, rolePagina
     };
 
     const handleDelete = async (id: string) => {
-        if (!confirm("Are you sure you want to delete this role?")) return;
+        const confirmed = await confirm({
+            title: "Delete Role",
+            description: "Are you sure you want to delete this role?",
+            confirmText: "Delete",
+            variant: "destructive",
+        });
+        if (!confirmed) return;
 
         try {
+            console.log("id", id);
             await rolesService.delete(id);
             toast.success("Role deleted successfully");
             router.refresh();
@@ -223,11 +290,19 @@ export default function RolesTableClient({ roles, permissions, stats, rolePagina
     };
 
     const handlePermDelete = async (id: string) => {
-        if (!confirm("Are you sure you want to delete this permission?")) return;
+        const confirmed = await confirm({
+            title: "Delete Permission",
+            description: "Are you sure you want to delete this permission?",
+            confirmText: "Delete",
+            variant: "destructive",
+        });
+        if (!confirmed) return;
 
         try {
             await permissionsService.delete(id);
             toast.success("Permission deleted successfully");
+            // Refresh cache
+            await refreshPermissions();
             router.refresh();
         } catch (err) {
             const message = err instanceof ApiError ? err.message : "Failed to delete permission";
@@ -272,7 +347,16 @@ export default function RolesTableClient({ roles, permissions, stats, rolePagina
 
                 {/* Roles Tab */}
                 <TabsContent value="roles" className="space-y-4">
-                    <div className="flex justify-end">
+                    <div className="flex flex-col sm:flex-row justify-between gap-4 mb-4">
+                        <div className="relative w-full sm:w-72">
+                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                            <Input
+                                placeholder="Search roles..."
+                                className="pl-9"
+                                onChange={(e) => handleSearch(e.target.value, 'role')}
+                                defaultValue={searchParams.get('roleSearch')?.toString()}
+                            />
+                        </div>
                         <Button onClick={openCreate}>
                             <Plus className="h-4 w-4 mr-2" />
                             Create Role
@@ -500,7 +584,16 @@ export default function RolesTableClient({ roles, permissions, stats, rolePagina
 
                 {/* Permissions Tab */}
                 <TabsContent value="permissions" className="space-y-4">
-                    <div className="flex justify-end">
+                    <div className="flex flex-col sm:flex-row justify-between gap-4 mb-4">
+                        <div className="relative w-full sm:w-72">
+                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                            <Input
+                                placeholder="Search permissions..."
+                                className="pl-9"
+                                onChange={(e) => handleSearch(e.target.value, 'permission')}
+                                defaultValue={searchParams.get('permissionSearch')?.toString()}
+                            />
+                        </div>
                         <Button onClick={openPermCreate}>
                             <Plus className="h-4 w-4 mr-2" />
                             Create Permission
@@ -715,7 +808,7 @@ export default function RolesTableClient({ roles, permissions, stats, rolePagina
                         <DialogTitle>Create New Role</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4">
-                        <div>
+                        <div className="space-y-2">
                             <Label htmlFor="name">Role Name*</Label>
                             <Input
                                 id="name"
@@ -724,7 +817,7 @@ export default function RolesTableClient({ roles, permissions, stats, rolePagina
                                 placeholder="e.g., EDITOR"
                             />
                         </div>
-                        <div>
+                        <div className="space-y-2">
                             <Label htmlFor="description">Description</Label>
                             <Input
                                 id="description"
@@ -733,7 +826,7 @@ export default function RolesTableClient({ roles, permissions, stats, rolePagina
                                 placeholder="Role description"
                             />
                         </div>
-                        <div>
+                        <div className="space-y-2">
                             <Label htmlFor="level">Level</Label>
                             <Input
                                 id="level"
@@ -743,29 +836,44 @@ export default function RolesTableClient({ roles, permissions, stats, rolePagina
                                 min={1}
                             />
                         </div>
-                        <div>
+                        <div className="space-y-2">
                             <Label>Permissions</Label>
+                            <div className="relative">
+                                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                                <Input
+                                    placeholder="Search permissions..."
+                                    className="pl-9 mb-2"
+                                    value={rolePermissionSearch}
+                                    onChange={(e) => onSearchChange(e.target.value)}
+                                />
+                            </div>
                             <div className="mt-2 space-y-2 max-h-60 overflow-y-auto border rounded-md p-3">
-                                {permissions.map((permission) => (
-                                    <div key={permission.id} className="flex items-center space-x-2">
-                                        <Checkbox
-                                            id={permission.id}
-                                            checked={form.permissionIds.includes(permission.id)}
-                                            onCheckedChange={() => togglePermission(permission.id)}
-                                        />
-                                        <label
-                                            htmlFor={permission.id}
-                                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                                        >
-                                            {permission.name}
-                                            {permission.description && (
-                                                <span className="text-xs text-muted-foreground ml-2">
-                                                    ({permission.description})
-                                                </span>
-                                            )}
-                                        </label>
-                                    </div>
-                                ))}
+                                {isSearchingPerms ? (
+                                    <div className="text-center py-4 text-sm text-muted-foreground">Searching...</div>
+                                ) : availablePermissions.length === 0 ? (
+                                    <div className="text-center py-4 text-sm text-muted-foreground">No permissions found</div>
+                                ) : (
+                                    availablePermissions.map((permission) => (
+                                        <div key={permission.id} className="flex items-center space-x-2">
+                                            <Checkbox
+                                                id={permission.id}
+                                                checked={form.permissionIds.includes(permission.id)}
+                                                onCheckedChange={() => togglePermission(permission.id)}
+                                            />
+                                            <label
+                                                htmlFor={permission.id}
+                                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                            >
+                                                {permission.name}
+                                                {permission.description && (
+                                                    <span className="text-xs text-muted-foreground ml-2">
+                                                        ({permission.description})
+                                                    </span>
+                                                )}
+                                            </label>
+                                        </div>
+                                    ))
+                                )}
                             </div>
                         </div>
                     </div>
@@ -785,7 +893,7 @@ export default function RolesTableClient({ roles, permissions, stats, rolePagina
                         <DialogTitle>Edit Role</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4">
-                        <div>
+                        <div className="space-y-2">
                             <Label htmlFor="edit-name">Role Name*</Label>
                             <Input
                                 id="edit-name"
@@ -793,7 +901,7 @@ export default function RolesTableClient({ roles, permissions, stats, rolePagina
                                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                             />
                         </div>
-                        <div>
+                        <div className="space-y-2">
                             <Label htmlFor="edit-description">Description</Label>
                             <Input
                                 id="edit-description"
@@ -801,7 +909,7 @@ export default function RolesTableClient({ roles, permissions, stats, rolePagina
                                 onChange={(e) => setForm({ ...form, description: e.target.value })}
                             />
                         </div>
-                        <div>
+                        <div className="space-y-2">
                             <Label htmlFor="edit-level">Level</Label>
                             <Input
                                 id="edit-level"
@@ -811,29 +919,44 @@ export default function RolesTableClient({ roles, permissions, stats, rolePagina
                                 min={1}
                             />
                         </div>
-                        <div>
+                        <div className="space-y-2">
                             <Label>Permissions</Label>
+                            <div className="relative">
+                                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                                <Input
+                                    placeholder="Search permissions..."
+                                    className="pl-9 mb-2"
+                                    value={rolePermissionSearch}
+                                    onChange={(e) => onSearchChange(e.target.value)}
+                                />
+                            </div>
                             <div className="mt-2 space-y-2 max-h-60 overflow-y-auto border rounded-md p-3">
-                                {permissions.map((permission) => (
-                                    <div key={permission.id} className="flex items-center space-x-2">
-                                        <Checkbox
-                                            id={`edit-${permission.id}`}
-                                            checked={form.permissionIds.includes(permission.id)}
-                                            onCheckedChange={() => togglePermission(permission.id)}
-                                        />
-                                        <label
-                                            htmlFor={`edit-${permission.id}`}
-                                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                                        >
-                                            {permission.name}
-                                            {permission.description && (
-                                                <span className="text-xs text-muted-foreground ml-2">
-                                                    ({permission.description})
-                                                </span>
-                                            )}
-                                        </label>
-                                    </div>
-                                ))}
+                                {isSearchingPerms ? (
+                                    <div className="text-center py-4 text-sm text-muted-foreground">Searching...</div>
+                                ) : availablePermissions.length === 0 ? (
+                                    <div className="text-center py-4 text-sm text-muted-foreground">No permissions found</div>
+                                ) : (
+                                    availablePermissions.map((permission) => (
+                                        <div key={permission.id} className="flex items-center space-x-2">
+                                            <Checkbox
+                                                id={`edit-${permission.id}`}
+                                                checked={form.permissionIds.includes(permission.id)}
+                                                onCheckedChange={() => togglePermission(permission.id)}
+                                            />
+                                            <label
+                                                htmlFor={`edit-${permission.id}`}
+                                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                            >
+                                                {permission.name}
+                                                {permission.description && (
+                                                    <span className="text-xs text-muted-foreground ml-2">
+                                                        ({permission.description})
+                                                    </span>
+                                                )}
+                                            </label>
+                                        </div>
+                                    ))
+                                )}
                             </div>
                         </div>
                     </div>
@@ -913,6 +1036,8 @@ export default function RolesTableClient({ roles, permissions, stats, rolePagina
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
+            {/* Confirmation Dialog */}
+            <ConfirmDialog />
         </div>
     );
 }

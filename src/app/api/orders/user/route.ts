@@ -1,14 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { backendGet, backendPost } from "@/lib/backend-api";
+import { backendGet } from "@/lib/backend-api";
 import { extractTokenFromRequest } from "@/lib/server-auth";
 
-export async function POST(req: NextRequest) {
+export async function GET(req: NextRequest) {
     try {
         const token = extractTokenFromRequest(req);
-        const body = await req.json();
+        // Forward query parameters (e.g. status)
+        const searchParams = req.nextUrl.search;
 
-        // Proxy to /order/getOrderByUser with userId in body
-        const result = await backendGet('/order/getOrderByUser', token);
+        // Proxy to /order/getOrderByUser
+        const result = await backendGet(`/order/getOrderByUser${searchParams}`, token);
 
         return NextResponse.json(result, {
             status: result.success ? 200 : 500

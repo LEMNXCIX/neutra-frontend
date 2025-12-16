@@ -1,8 +1,9 @@
 import React from "react";
-import { cookies } from 'next/headers';
 import CategoriesTableClient from "@/components/admin/categories/CategoriesTableClient";
 import { extractTokenFromCookies, getCookieString } from "@/lib/server-auth";
 import { getBackendUrl } from "@/lib/backend-api";
+
+export const dynamic = 'force-dynamic';
 
 async function getCategories() {
     try {
@@ -37,13 +38,13 @@ async function getCategories() {
 
         // Calculate stats using productCount from backend
         const totalCategories = categories.length;
-        const totalProducts = categories.reduce((sum: number, c: any) => {
+        const totalProducts = categories.reduce((sum: number, c: { productCount?: number; _count?: { products?: number } }) => {
             return sum + (c.productCount || c._count?.products || 0);
         }, 0);
         const averageProductsPerCategory = totalCategories > 0
             ? Math.round(totalProducts / totalCategories)
             : 0;
-        const withProducts = categories.filter((c: any) =>
+        const withProducts = categories.filter((c: { productCount?: number; _count?: { products?: number } }) =>
             (c.productCount || c._count?.products || 0) > 0
         ).length;
 

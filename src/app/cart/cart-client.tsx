@@ -13,7 +13,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
@@ -137,7 +137,7 @@ export default function CartClient() {
             </div>
             <h2 className="text-2xl font-bold mb-2">Your cart is empty</h2>
             <p className="text-muted-foreground mb-6">
-              Looks like you haven't added anything to your cart yet
+              Looks like you haven&apos;t added anything to your cart yet
             </p>
             <Button size="lg" onClick={() => router.push("/")}>
               <ShoppingBag className="mr-2 h-5 w-5" />

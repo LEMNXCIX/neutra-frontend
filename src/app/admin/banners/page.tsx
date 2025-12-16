@@ -1,8 +1,9 @@
 import React from "react";
-import { cookies } from 'next/headers';
 import BannersTableClient from "@/components/admin/banners/BannersTableClient";
 import { extractTokenFromCookies, getCookieString } from "@/lib/server-auth";
 import { getBackendUrl } from "@/lib/backend-api";
+
+export const dynamic = 'force-dynamic';
 
 async function getBanners() {
     try {
@@ -37,8 +38,8 @@ async function getBanners() {
 
         // Calculate stats
         const totalBanners = banners.length;
-        const activeBanners = banners.filter((b: any) => b.active).length;
-        const withImages = banners.filter((b: any) => b.image).length;
+        const activeBanners = banners.filter((b: { active?: boolean }) => b.active).length;
+        const withImages = banners.filter((b: { image?: string }) => b.image).length;
 
         return {
             banners,
@@ -63,11 +64,7 @@ async function getBanners() {
     }
 }
 
-type Props = {
-    searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-};
-
-export default async function BannersPage({ searchParams }: Props) {
+export default async function BannersPage() {
     const data = await getBanners();
 
     return (

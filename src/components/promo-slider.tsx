@@ -80,6 +80,7 @@ export default function PromoSlider() {
     if (slides.length === 0) return;
     const interval = setInterval(() => next(), 20000);
     return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slides.length]);
 
   if (loading) {

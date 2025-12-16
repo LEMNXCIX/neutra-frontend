@@ -3,20 +3,9 @@ import { cookies } from 'next/headers';
 import UsersTableClient from "@/components/admin/users/UsersTableClient";
 import { User } from "@/types/user.types";
 
-const BACKEND_API_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:4001/api';
+export const dynamic = 'force-dynamic';
 
-type Stats = {
-    totalUsers: number;
-    adminUsers: number;
-    regularUsers: number;
-};
-
-type PaginationProps = {
-    currentPage: number;
-    totalPages: number;
-    totalItems: number;
-    itemsPerPage: number;
-};
+const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001/api';
 
 async function getUsers(search: string, role: string, page: number, limit: number) {
     try {
@@ -44,10 +33,25 @@ async function getUsers(search: string, role: string, page: number, limit: numbe
 
         const data = await response.json();
 
+        type BackendUser = {
+            id: string;
+            name: string;
+            email: string;
+            roleId?: string;
+            active?: boolean;
+            profilePic?: string;
+            role?: {
+                id: string;
+                name: string;
+                permissions?: unknown[];
+            };
+            createdAt?: string;
+            updatedAt?: string;
+        };
         // Map backend users to frontend format
         let users: User[] = [];
         if (data.success && data.data) {
-            users = (Array.isArray(data.data) ? data.data : []).map((u: any) => ({
+            users = (Array.isArray(data.data) ? data.data : []).map((u: BackendUser) => ({
                 id: u.id,
                 name: u.name,
                 email: u.email,

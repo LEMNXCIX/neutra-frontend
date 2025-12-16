@@ -115,6 +115,7 @@ export default function ProductsTableClient({ products, stats, pagination, categ
         router.push(`?${params.toString()}`);
     };
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, isEdit: boolean) => {
         const file = e.target.files?.[0];
         if (!file) return;
@@ -130,6 +131,10 @@ export default function ProductsTableClient({ products, stats, pagination, categ
     const createProduct = async () => {
         if (!form.name) {
             toast.error("Name is required");
+            return;
+        }
+        if (Number(form.price) < 0 || Number(form.stock) < 0) {
+            toast.error("Price and Stock cannot be negative");
             return;
         }
         try {
@@ -200,7 +205,12 @@ export default function ProductsTableClient({ products, stats, pagination, categ
 
     const saveEdit = async () => {
         if (!editing) return;
+        if (Number(form.price) < 0 || Number(form.stock) < 0) {
+            toast.error("Price and Stock cannot be negative");
+            return;
+        }
         try {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const body: any = {
                 name: form.name,
                 price: Number(form.price || 0),

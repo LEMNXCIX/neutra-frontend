@@ -1,5 +1,4 @@
-import fs from 'fs';
-import path from 'path';
+
 import { notFound, redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -26,7 +25,7 @@ type Order = {
   userId: string;
   total: number;
   status: string;
-  tracking?: string;
+  trackingNumber?: string;
   address: string;
   items: OrderItem[];
   date: string;
@@ -75,8 +74,9 @@ export default async function OrderPage(props: { params: Promise<{ id: string }>
       userId: rawOrder.userId,
       total: rawOrder.total,
       status: rawOrder.status,
-      tracking: rawOrder.trackingNumber,
+      trackingNumber: rawOrder.trackingNumber,
       address: rawOrder.user?.email || 'Address not available', // Fallback since address might not be in response
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       items: rawOrder.items?.map((item: any) => ({
         id: item.id,
         name: item.product?.name || 'Unknown Product',
@@ -89,6 +89,7 @@ export default async function OrderPage(props: { params: Promise<{ id: string }>
     };
 
     // Status configurations
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const statusConfig: Record<string, { label: string; color: string; icon: any; description: string }> = {
       processing: {
         label: 'Processing',
@@ -242,18 +243,18 @@ export default async function OrderPage(props: { params: Promise<{ id: string }>
                     <p className="text-sm text-muted-foreground mb-1">Delivery Address</p>
                     <p className="font-medium">{order.address}</p>
                   </div>
-                  {order.tracking && (
+                  {order.trackingNumber && (
                     <div>
                       <p className="text-sm text-muted-foreground mb-1">Tracking Number</p>
                       <div className="flex items-center gap-2">
                         <code className="bg-muted px-3 py-1 rounded font-mono text-sm">
-                          {order.tracking}
+                          {order.trackingNumber}
                         </code>
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => {
-                            navigator.clipboard.writeText(order.tracking || '');
+                            navigator.clipboard.writeText(order.trackingNumber || '');
                           }}
                         >
                           Copy

@@ -47,7 +47,7 @@ export function Navigation() {
   const [searchResults, setSearchResults] = useState<Product[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [showResults, setShowResults] = useState(false);
-  const [konami, setKonami] = useState<string[]>([]);
+  // const [konami, setKonami] = useState<string[]>([]);
   const [lastTap, setLastTap] = useState(0);
   const router = useRouter();
   const { theme, setTheme } = useTheme();
@@ -119,30 +119,30 @@ export function Navigation() {
   }, []);
 
   // Konami code easter egg
-  useEffect(() => {
-    const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+  // useEffect(() => {
+  //   const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
 
-    const handleKeyDown = (e: KeyboardEvent) => {
-      setKonami(prev => {
-        const newKonami = [...prev, e.key];
-        if (newKonami.length > konamiCode.length) {
-          newKonami.shift();
-        }
+  //   const handleKeyDown = (e: KeyboardEvent) => {
+  //     // setKonami(prev => {
+  //     //   const newKonami = [...prev, e.key];
+  //     //   if (newKonami.length > konamiCode.length) {
+  //     //     newKonami.shift();
+  //     //   }
 
-        if (newKonami.join(',') === konamiCode.join(',')) {
-          document.body.style.animation = 'spin 1s linear';
-          setTimeout(() => {
-            document.body.style.animation = '';
-          }, 1000);
-        }
+  //     //   if (newKonami.join(',') === konamiCode.join(',')) {
+  //     //     document.body.style.animation = 'spin 1s linear';
+  //     //     setTimeout(() => {
+  //     //       document.body.style.animation = '';
+  //     //     }, 1000);
+  //     //   }
 
-        return newKonami;
-      });
-    };
+  //     //   return newKonami;
+  //     // });
+  //   };
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  //   window.addEventListener('keydown', handleKeyDown);
+  //   return () => window.removeEventListener('keydown', handleKeyDown);
+  // }, []);
 
   // Secret sequence 'neutra' easter egg
   useEffect(() => {
@@ -177,13 +177,13 @@ export function Navigation() {
     }
   }, [count]);
 
-  const getParam = (k: string) => {
-    const v = null;
-    if (!v) return '';
-    return Array.isArray(v) ? v[0] : v;
-  };
-  const search = getParam('search') || '';
-  const category = getParam('category') || 'all';
+  // const getParam = (_k: string) => {
+  //   const v = null;
+  //   if (!v) return '';
+  //   return Array.isArray(v) ? v[0] : v;
+  // };
+  // const search = '';
+  // const category = 'all';
 
   return (
     <NavigationMenu
@@ -198,7 +198,7 @@ export function Navigation() {
               <div
                 className="text-zinc-900 dark:text-zinc-100 hover-scale cursor-pointer"
                 onDoubleClick={handleThemeToggle}
-                onTouchEnd={(e) => {
+                onTouchEnd={() => {
                   const now = Date.now();
                   const DOUBLE_TAP_DELAY = 1000;
                   if (lastTap && (now - lastTap) < DOUBLE_TAP_DELAY) {
@@ -246,8 +246,8 @@ export function Navigation() {
               <NavigationMenuContent>
                 <ul className="grid w-[400px] gap-2 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
                   {categories.map((c) => {
-                    const active = c.id === category;
-                    const href = `/products?category=${encodeURIComponent(c.id)}${search ? `&search=${encodeURIComponent(search)}` : ''}`;
+                    // const active = c.id === category;
+                    const href = `/products?category=${encodeURIComponent(c.id)}`;
                     return (
                       <ListItem
                         key={c.id}
@@ -311,6 +311,7 @@ export function Navigation() {
                         >
                           <div className="w-12 h-12 bg-muted rounded flex items-center justify-center overflow-hidden">
                             {product.image ? (
+                              /* eslint-disable-next-line @next/next/no-img-element */
                               <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
                             ) : (
                               <ShoppingBagIcon className="h-6 w-6 text-muted-foreground" />

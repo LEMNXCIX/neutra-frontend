@@ -15,7 +15,7 @@ export const couponsService = {
      * Get all coupons
      */
     getAll: async (): Promise<Coupon[]> => {
-        return api.get<Coupon[]>('/coupons');
+        return api.get<Coupon[]>('/admin/coupons');
     },
 
     /**
@@ -41,21 +41,21 @@ export const couponsService = {
      * Create new coupon (requires authentication)
      */
     create: async (data: CreateCouponDTO): Promise<Coupon> => {
-        return api.post<Coupon>('/coupons', data);
+        return api.post<Coupon>('/admin/coupons', data);
     },
 
     /**
      * Update coupon (requires authentication)
      */
     update: async (id: string, data: UpdateCouponDTO): Promise<Coupon> => {
-        return api.put<Coupon>(`/coupons/${id}`, data);
+        return api.put<Coupon>(`/admin/coupons/${id}`, data);
     },
 
     /**
      * Delete coupon (requires authentication)
      */
     delete: async (id: string): Promise<Coupon> => {
-        return api.delete<Coupon>(`/coupons/${id}`);
+        return api.delete<Coupon>(`/admin/coupons/${id}`);
     },
 
     /**

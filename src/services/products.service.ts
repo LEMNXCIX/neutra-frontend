@@ -52,7 +52,6 @@ export const productsService = {
      * Get product statistics (requires authentication)
      */
     getStats: async (): Promise<{ totalProducts: number; outOfStock: number; lowStock: number }> => {
-        const response = await api.get('/products/stats');
-        return response.data;
+        return api.get<{ totalProducts: number; outOfStock: number; lowStock: number }>('/products/stats');
     },
 };

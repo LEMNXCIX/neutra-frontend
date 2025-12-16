@@ -128,6 +128,7 @@ export default function SlidersTableClient({ sliders, stats, pagination }: Props
         reader.onload = () => {
             const result = reader.result as string;
             if (isEdit) {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 setEditing(s => s && ({ ...s, img: result } as any));
                 setImagePreview(result);
             } else {
@@ -202,6 +203,7 @@ export default function SlidersTableClient({ sliders, stats, pagination }: Props
     const saveEdit = async () => {
         if (!editing) return;
         try {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const body: any = {
                 ...editing,
                 title: form.title,

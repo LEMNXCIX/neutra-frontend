@@ -20,13 +20,13 @@ import Link from "next/link";
 import AnalyticsCharts from "./AnalyticsCharts";
 import AnalyticsOverview from "./AnalyticsOverview";
 import AnalyticsChartsDetailed from "./AnalyticsChartsDetailed";
-import UsersAdminClient from "./users/UsersTableClient";
-import ProductsAdminClient from "./products/ProductsTableClient";
-import OrdersAdminClient from "./orders/OrdersTableClient";
-import CouponsAdminClient from "./coupons/CouponsTableClient";
-import CategoriesAdminClient from "./categories/CategoriesTableClient";
-import BannersAdminClient from "./banners/BannersTableClient";
-import SlidersAdminClient from "./sliders/SlidersTableClient";
+// import UsersAdminClient from "./users/UsersTableClient";
+// import ProductsAdminClient from "./products/ProductsTableClient";
+// import OrdersAdminClient from "./orders/OrdersTableClient";
+// import CouponsAdminClient from "./coupons/CouponsTableClient";
+// import CategoriesAdminClient from "./categories/CategoriesTableClient";
+// import BannersAdminClient from "./banners/BannersTableClient";
+// import SlidersAdminClient from "./sliders/SlidersTableClient";
 
 const menuItems = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },

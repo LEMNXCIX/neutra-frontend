@@ -1,5 +1,5 @@
 import ProductsPage from "./products-client";
-import { productsService } from "@/services";
+
 import type { Product as BackendProduct } from "@/types/frontend-api";
 
 // Frontend expects 'title' but backend uses 'name'
@@ -51,6 +51,7 @@ async function fetchProducts(search?: string, category?: string): Promise<Fronte
         // Check if product has categories array
         if (p.categories && Array.isArray(p.categories)) {
           return p.categories.some(
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             (c: any) =>
               (typeof c === "string" ? c : c.id || c.name) === category
           );

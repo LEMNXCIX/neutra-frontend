@@ -21,10 +21,12 @@ export async function GET(req: NextRequest) {
     }
 
     const categories = Array.isArray(categoriesResult.data) ? categoriesResult.data : [];
-    const stats = statsResult.success && (statsResult as any).data ? (statsResult as any).data : {
-      totalCategories: categories.length,
-      avgProductsPerCategory: 0
-    };
+    const stats = statsResult.success && 'data' in statsResult && statsResult.data
+      ? (statsResult as { success: boolean; data: { totalCategories: number; avgProductsPerCategory: number } }).data
+      : {
+        totalCategories: categories.length,
+        avgProductsPerCategory: 0
+      };
 
     return NextResponse.json({
       success: true,

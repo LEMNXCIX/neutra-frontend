@@ -71,7 +71,7 @@ export function AssignRoleDialog({
                 credentials: 'include',
             });
             if (response.ok) {
-                const data = await response.json();
+                await response.json();
             }
         } catch (err) {
             console.error('Failed to refresh permissions:', err);

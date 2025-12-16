@@ -146,7 +146,7 @@ export default function LoginPage() {
               {/* Register Link */}
               <div className="text-center space-y-4">
                 <p className="text-sm text-muted-foreground">
-                  Don't have an account?
+                  Don&apos;t have an account?
                 </p>
                 <Button
                   variant="outline"

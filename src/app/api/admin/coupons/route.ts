@@ -45,10 +45,11 @@ export async function GET(req: NextRequest) {
     ]);
 
     if (!couponsResult.success) {
-      return NextResponse.json(couponsResult, { status: (couponsResult as any).statusCode || 500 });
+      return NextResponse.json(couponsResult, { status: (couponsResult as { statusCode?: number }).statusCode || 500 });
     }
 
     const coupons = Array.isArray(couponsResult.data) ? couponsResult.data : [];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const pagination = (couponsResult as any).pagination || {
       page: parseInt(page),
       limit: parseInt(limit),
@@ -56,6 +57,7 @@ export async function GET(req: NextRequest) {
       totalPages: Math.ceil(coupons.length / parseInt(limit))
     };
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const stats = statsResult.success && (statsResult as any).data ? (statsResult as any).data : {
       totalCoupons: coupons.length,
       activeCoupons: 0,

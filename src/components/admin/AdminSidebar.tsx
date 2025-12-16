@@ -14,8 +14,6 @@ import {
     LayoutList,
     Megaphone,
     Images,
-    ShieldCheckIcon,
-    ShieldCheck,
     BrickWallShield,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";

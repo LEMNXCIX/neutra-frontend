@@ -9,12 +9,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { TrendingUp, Package, DollarSign } from "lucide-react";
+import { Package } from "lucide-react";
 
 type Order = { id: string; total?: number; date?: string; items?: Array<{ id?: string; name?: string; qty?: number; price?: number }> };
 
 export default function AnalyticsChartsDetailed() {
   const [orders, setOrders] = useState<Order[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [range, setRange] = useState("7d");
@@ -55,17 +56,81 @@ export default function AnalyticsChartsDetailed() {
 
   if (loading) {
     return (
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 p-6">
-        {[1, 2, 3].map(i => (
-          <Card key={i} className="overflow-hidden border-none shadow-md rounded-2xl">
+      <div className="p-6 space-y-6">
+        {/* Header Skeleton */}
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-7 w-32" />
+          <Skeleton className="h-10 w-[180px]" />
+        </div>
+
+        {/* Summary Stats Skeletons */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Card className="md:col-span-2 border-none shadow-md rounded-2xl">
             <CardHeader>
-              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-4 w-24" />
             </CardHeader>
             <CardContent>
-              <Skeleton className="h-36 w-full mb-2" />
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                {[1, 2, 3, 4].map(i => (
+                  <div key={i} className="space-y-2">
+                    <Skeleton className="h-3 w-16" />
+                    <Skeleton className="h-6 w-8" />
+                  </div>
+                ))}
+              </div>
             </CardContent>
           </Card>
-        ))}
+          <Card className="border-none shadow-md rounded-2xl">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-8 w-20" />
+                </div>
+                <Skeleton className="h-10 w-10 rounded-xl" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Timeline Skeletons */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {[1, 2].map(i => (
+            <Card key={i} className="border-none shadow-md rounded-2xl">
+              <CardHeader><Skeleton className="h-4 w-32" /></CardHeader>
+              <CardContent className="space-y-3">
+                {[1, 2, 3, 4, 5].map(j => (
+                  <div key={j} className="space-y-1">
+                    <div className="flex justify-between"><Skeleton className="h-3 w-12" /><Skeleton className="h-3 w-16" /></div>
+                    <Skeleton className="h-2 w-full rounded-full" />
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Top Products Skeleton */}
+        <Card className="border-none shadow-md rounded-2xl">
+          <CardHeader><Skeleton className="h-4 w-40" /></CardHeader>
+          <CardContent className="space-y-4">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="space-y-2">
+                <div className="flex justify-between">
+                  <div className="flex gap-3 items-center">
+                    <Skeleton className="h-6 w-6 rounded-full" />
+                    <Skeleton className="h-4 w-32" />
+                  </div>
+                  <div className="flex gap-4">
+                    <Skeleton className="h-3 w-12" />
+                    <Skeleton className="h-3 w-16" />
+                  </div>
+                </div>
+                <Skeleton className="h-3 w-full rounded-full" />
+              </div>
+            ))}
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -88,10 +153,12 @@ export default function AnalyticsChartsDetailed() {
   for (const o of orders) {
     (o.items || []).forEach(it => {
       // Resolve name: try it.product.name first, then it.name, then fallback
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const rawName = (it as any).product?.name || it.name || (it as any).title || 'Unknown Product';
       const name = rawName.trim();
 
       // Backend returns 'amount', frontend might expect 'qty'
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const quantity = Number((it as any).amount || it.qty || 0);
       const price = Number(it.price || 0);
 
@@ -189,7 +256,7 @@ export default function AnalyticsChartsDetailed() {
           <CardContent>
             {dates.length ? (
               <div className="space-y-3">
-                {dates.slice(-10).map((date, idx) => {
+                {dates.slice(-10).map((date) => {
                   const count = orderCounts[dates.indexOf(date)];
                   const percentage = (count / maxOrderCount) * 100;
                   const formattedDate = new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
@@ -224,7 +291,7 @@ export default function AnalyticsChartsDetailed() {
           <CardContent>
             {dates.length ? (
               <div className="space-y-3">
-                {dates.slice(-10).map((date, idx) => {
+                {dates.slice(-10).map((date) => {
                   const revenue = revenues[dates.indexOf(date)];
                   const percentage = (revenue / maxRevenue) * 100;
                   const formattedDate = new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });

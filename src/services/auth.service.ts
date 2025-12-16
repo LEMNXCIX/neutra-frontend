@@ -17,7 +17,7 @@ export const authService = {
      * Register a new user
      */
     signup: async (userData: CreateUserDto): Promise<User> => {
-        return api.post<User>('/auth/signup', userData);
+        return api.post<User>('/auth/register', userData);
     },
 
     /**
@@ -41,7 +41,7 @@ export const authService = {
         try {
             const response = await authService.validate();
             return response.user;
-        } catch (error) {
+        } catch {
             return null;
         }
     },

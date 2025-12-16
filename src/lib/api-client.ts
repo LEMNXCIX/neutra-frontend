@@ -1,23 +1,33 @@
 import { StandardResponse } from '@/types/frontend-api';
 import { toast } from 'sonner';
 
-/**
- * Base API URL - defaults to localhost in development
- */
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001/api';
+// Note: API_BASE_URL not used - requests go through Next.js API routes
 
 /**
- * Custom error class for API errors
+ * Custom error class for API errors with context for debugging
  */
 export class ApiError extends Error {
     constructor(
         message: string,
         public statusCode: number,
-        public errors?: any[],
-        public traceId?: string
+        public errors?: unknown[],
+        public traceId?: string,
+        public endpoint?: string,
+        public method?: string
     ) {
         super(message);
         this.name = 'ApiError';
+    }
+
+    /**
+     * Create a detailed error message for logging
+     */
+    toDetailedString(): string {
+        const parts = [`[${this.statusCode}] ${this.message}`];
+        if (this.endpoint) parts.push(`Endpoint: ${this.endpoint}`);
+        if (this.method) parts.push(`Method: ${this.method}`);
+        if (this.traceId) parts.push(`TraceId: ${this.traceId}`);
+        return parts.join(' | ');
     }
 }
 
@@ -34,7 +44,7 @@ export class ApiError extends Error {
  * @param options - Fetch options
  * @returns Promise with the response data
  */
-export async function apiClient<T = any>(
+export async function apiClient<T = unknown>(
     endpoint: string,
     options: RequestInit = {}
 ): Promise<T> {
@@ -65,9 +75,13 @@ export async function apiClient<T = any>(
             throw new ApiError('Unauthorized', 401);
         }
 
+        // Handle 204 No Content
+        if (res.status === 204) {
+            return null as T;
+        }
+
         // Parse response as StandardResponse
         const data: StandardResponse<T> = await res.json();
-
         // Check if the request was successful
         if (!data?.success) {
             throw new ApiError(
@@ -129,27 +143,27 @@ export async function apiFetch(input: RequestInfo, init?: RequestInit) {
  * Helper functions for common HTTP methods
  */
 export const api = {
-    get: <T = any>(endpoint: string, options?: RequestInit) =>
+    get: <T = unknown>(endpoint: string, options?: RequestInit) =>
         apiClient<T>(endpoint, { ...options, method: 'GET' }),
 
-    post: <T = any>(endpoint: string, body?: any, options?: RequestInit) =>
+    post: <T = unknown>(endpoint: string, body?: unknown, options?: RequestInit) =>
         apiClient<T>(endpoint, {
             ...options,
             method: 'POST',
             body: body ? JSON.stringify(body) : undefined,
         }),
 
-    put: <T = any>(endpoint: string, body?: any, options?: RequestInit) =>
+    put: <T = unknown>(endpoint: string, body?: unknown, options?: RequestInit) =>
         apiClient<T>(endpoint, {
             ...options,
             method: 'PUT',
             body: body ? JSON.stringify(body) : undefined,
         }),
 
-    delete: <T = any>(endpoint: string, options?: RequestInit) =>
+    delete: <T = unknown>(endpoint: string, options?: RequestInit) =>
         apiClient<T>(endpoint, { ...options, method: 'DELETE' }),
 
-    patch: <T = any>(endpoint: string, body?: any, options?: RequestInit) =>
+    patch: <T = unknown>(endpoint: string, body?: unknown, options?: RequestInit) =>
         apiClient<T>(endpoint, {
             ...options,
             method: 'PATCH',

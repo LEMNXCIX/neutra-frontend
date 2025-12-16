@@ -52,7 +52,7 @@ export async function extractTokenFromCookies(): Promise<string | undefined> {
  */
 export async function getCookieString(): Promise<string> {
     const cookieStore = await cookies();
-    return cookieStore.toString();
+    return cookieStore.getAll().map((c) => `${c.name}=${c.value}`).join('; ');
 }
 
 /**

@@ -142,8 +142,8 @@ export default function RegisterPage() {
                         <div
                           key={level}
                           className={`h-1 flex-1 rounded-full transition-colors ${level <= passwordStrength.strength
-                              ? passwordStrength.color
-                              : 'bg-muted'
+                            ? passwordStrength.color
+                            : 'bg-muted'
                             }`}
                         />
                       ))}
@@ -183,7 +183,7 @@ export default function RegisterPage() {
                     ) : (
                       <>
                         <AlertCircle className="h-3 w-3 text-red-500" />
-                        <span className="text-red-600">Passwords don't match</span>
+                        <span className="text-red-600">Passwords don&apos;t match</span>
                       </>
                     )}
                   </div>

@@ -1,5 +1,5 @@
 import { api } from '@/lib/api-client';
-import { User, CreateUserDTO } from '@/types/user.types';
+import { User } from '@/types/user.types';
 
 /**
  * Users Service
@@ -24,8 +24,8 @@ export const usersService = {
     /**
      * Get user statistics
      */
-    getStats: async (): Promise<any> => {
-        return api.get('/users/stats');
+    getStats: async (): Promise<{ totalUsers: number; activeUsers: number }> => {
+        return api.get<{ totalUsers: number; activeUsers: number }>('/users/stats');
     },
 
     /**

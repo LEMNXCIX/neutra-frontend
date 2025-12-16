@@ -3,10 +3,10 @@ export interface ErrorDetail {
     message: string;
     field?: string;
     domain?: string;
-    metadata?: any;
+    metadata?: Record<string, unknown>;
 }
 
-export interface StandardResponse<T = any> {
+export interface StandardResponse<T = unknown> {
     success: boolean;
     statusCode: number;
     message: string;
@@ -15,7 +15,7 @@ export interface StandardResponse<T = any> {
     meta: {
         traceId: string;
         timestamp: string;
-        [key: string]: any;
+        [key: string]: unknown;
     };
 }
 

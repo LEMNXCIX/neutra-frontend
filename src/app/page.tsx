@@ -8,14 +8,10 @@ import PromoSlider from "@/components/promo-slider";
 import BannerBar from "@/components/banner-bar";
 import FeaturedProducts from "@/components/featured-products";
 import {
-  ShoppingBag,
   Truck,
   Shield,
-  Sparkles,
   ArrowRight,
   Tag,
-  Star,
-  TrendingUp,
   Heart,
   Box,
   Zap,
