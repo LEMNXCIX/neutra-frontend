@@ -49,6 +49,7 @@ import {
 import { useConfirm } from "@/hooks/use-confirm";
 
 import { Banner } from "@/types/banner.types";
+import { Spinner } from "@/components/ui/spinner";
 
 type Stats = {
     totalBanners: number;
@@ -87,6 +88,9 @@ export default function BannersTableClient({ banners, stats, pagination }: Props
         endsAt: "",
         active: true
     });
+    const [isCreating, setIsCreating] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [isDeleting, setIsDeleting] = useState<string | null>(null);
 
     // URL State
     const searchQuery = searchParams.get("search") || "";
@@ -125,6 +129,7 @@ export default function BannersTableClient({ banners, stats, pagination }: Props
             toast.error("Title is required");
             return;
         }
+        setIsCreating(true);
         try {
             const res = await fetch("/api/admin/banners", {
                 method: "POST",
@@ -142,6 +147,8 @@ export default function BannersTableClient({ banners, stats, pagination }: Props
             router.refresh();
         } catch {
             toast.error("Network error");
+        } finally {
+            setIsCreating(false);
         }
     };
 
@@ -153,6 +160,7 @@ export default function BannersTableClient({ banners, stats, pagination }: Props
             variant: "destructive",
         });
         if (!confirmed) return;
+        setIsDeleting(id);
         try {
             const res = await fetch(`/api/admin/banners/${id}`, {
                 method: "DELETE",
@@ -165,6 +173,8 @@ export default function BannersTableClient({ banners, stats, pagination }: Props
             router.refresh();
         } catch {
             toast.error("Network error");
+        } finally {
+            setIsDeleting(null);
         }
     };
 
@@ -184,6 +194,7 @@ export default function BannersTableClient({ banners, stats, pagination }: Props
 
     const saveEdit = async () => {
         if (!editing) return;
+        setIsEditing(true);
         try {
             const res = await fetch(`/api/admin/banners/${editing.id}`, {
                 method: "PUT",
@@ -202,6 +213,8 @@ export default function BannersTableClient({ banners, stats, pagination }: Props
             router.refresh();
         } catch {
             toast.error("Network error");
+        } finally {
+            setIsEditing(false);
         }
     };
 
@@ -350,11 +363,11 @@ export default function BannersTableClient({ banners, stats, pagination }: Props
                                         </TableCell>
                                         <TableCell>
                                             <div className="flex gap-2">
-                                                <Button size="sm" variant="ghost" onClick={() => openEdit(b)}>
-                                                    <Edit className="h-4 w-4" />
+                                                <Button size="sm" variant="destructive" onClick={() => deleteBanner(b.id)} disabled={isDeleting === b.id}>
+                                                    {isDeleting === b.id ? <Spinner className="h-4 w-4" /> : <Trash2 className="h-4 w-4" />}
                                                 </Button>
-                                                <Button size="sm" variant="ghost" onClick={() => deleteBanner(b.id)}>
-                                                    <Trash2 className="h-4 w-4 text-red-500" />
+                                                <Button size="sm" variant="ghost" onClick={() => deleteBanner(b.id)} disabled={isDeleting === b.id}>
+                                                    {isDeleting === b.id ? <Spinner className="h-4 w-4" /> : <Trash2 className="h-4 w-4 text-red-500" />}
                                                 </Button>
                                             </div>
                                         </TableCell>
@@ -530,7 +543,9 @@ export default function BannersTableClient({ banners, stats, pagination }: Props
                     </div>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setCreateOpen(false)}>Cancel</Button>
-                        <Button onClick={createBanner}>Create Banner</Button>
+                        <Button onClick={createBanner} disabled={isCreating}>
+                            {isCreating ? <><Spinner className="mr-2" /> Creating...</> : "Create Banner"}
+                        </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
@@ -600,7 +615,9 @@ export default function BannersTableClient({ banners, stats, pagination }: Props
                     </div>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setEditOpen(false)}>Cancel</Button>
-                        <Button onClick={saveEdit}>Save Changes</Button>
+                        <Button onClick={saveEdit} disabled={isEditing}>
+                            {isEditing ? <><Spinner className="mr-2" /> Saving...</> : "Save Changes"}
+                        </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>

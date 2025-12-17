@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/dialog";
 import { Package, TrendingUp, ShoppingCart, Eye, Truck } from "lucide-react";
 import { Order, OrderStatus } from "@/types/order.types";
+import { Spinner } from "@/components/ui/spinner";
 
 type Stats = {
     totalOrders: number;
@@ -63,6 +64,8 @@ export default function OrdersTableClient({ orders, stats, pagination }: Props) 
     const [detailsOpen, setDetailsOpen] = useState(false);
     const [editingTracking, setEditingTracking] = useState("");
     const [statuses, setStatuses] = useState<{ value: string; label: string }[]>([]);
+    const [isUpdatingStatus, setIsUpdatingStatus] = useState<string | null>(null);
+    const [isUpdatingTracking, setIsUpdatingTracking] = useState(false);
 
     // URL State
     const searchQuery = searchParams.get("search") || "";
@@ -106,6 +109,7 @@ export default function OrdersTableClient({ orders, stats, pagination }: Props) 
     };
 
     const updateOrderStatus = async (orderId: string, newStatus: string) => {
+        setIsUpdatingStatus(orderId);
         try {
             const res = await fetch(`/api/admin/orders/${orderId}`, {
                 method: "PUT",
@@ -128,10 +132,13 @@ export default function OrdersTableClient({ orders, stats, pagination }: Props) 
             }
         } catch {
             toast.error("Network error");
+        } finally {
+            setIsUpdatingStatus(null);
         }
     };
 
     const updateOrderTracking = async (orderId: string, tracking: string) => {
+        setIsUpdatingTracking(true);
         try {
             const res = await fetch(`/api/admin/orders/${orderId}`, {
                 method: "PUT",
@@ -150,6 +157,8 @@ export default function OrdersTableClient({ orders, stats, pagination }: Props) 
             router.refresh();
         } catch {
             toast.error("Network error");
+        } finally {
+            setIsUpdatingTracking(false);
         }
     };
 
@@ -298,11 +307,19 @@ export default function OrdersTableClient({ orders, stats, pagination }: Props) 
                                                     <Select
                                                         value={o.status}
                                                         onValueChange={(val) => updateOrderStatus(o.id, val)}
+                                                        disabled={isUpdatingStatus === o.id}
                                                     >
                                                         <SelectTrigger className="w-[130px]">
-                                                            <Badge className={getStatusColor(o.status)}>
-                                                                {o.status}
-                                                            </Badge>
+                                                            {isUpdatingStatus === o.id ? (
+                                                                <div className="flex items-center gap-2">
+                                                                    <Spinner className="h-4 w-4" />
+                                                                    <span>Updating...</span>
+                                                                </div>
+                                                            ) : (
+                                                                <Badge className={getStatusColor(o.status)}>
+                                                                    {o.status}
+                                                                </Badge>
+                                                            )}
                                                         </SelectTrigger>
                                                         <SelectContent>
                                                             {statuses.map((s) => (
@@ -466,6 +483,7 @@ export default function OrdersTableClient({ orders, stats, pagination }: Props) 
                                 <Select
                                     value={selectedOrder.status}
                                     onValueChange={(newStatus) => updateOrderStatus(selectedOrder.id, newStatus)}
+                                    disabled={isUpdatingStatus === selectedOrder.id}
                                 >
                                     <SelectTrigger>
                                         <SelectValue />
@@ -493,8 +511,9 @@ export default function OrdersTableClient({ orders, stats, pagination }: Props) 
                                     />
                                     <Button
                                         onClick={() => updateOrderTracking(selectedOrder.id, editingTracking)}
+                                        disabled={isUpdatingTracking}
                                     >
-                                        Update
+                                        {isUpdatingTracking ? <Spinner className="h-4 w-4" /> : "Update"}
                                     </Button>
                                 </div>
                             </div>

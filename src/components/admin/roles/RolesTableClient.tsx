@@ -42,6 +42,7 @@ import { useConfirm } from "@/hooks/use-confirm";
 
 import { Role } from "@/types/role.types";
 import { Permission } from "@/types/permission.types";
+import { Spinner } from "@/components/ui/spinner";
 
 type Stats = {
     totalRoles: number;
@@ -95,6 +96,9 @@ export default function RolesTableClient({ roles, permissions, allPermissions = 
         level: 1,
         permissionIds: [] as string[],
     });
+    const [isCreatingRole, setIsCreatingRole] = useState(false);
+    const [isEditingRole, setIsEditingRole] = useState(false);
+    const [isDeletingRole, setIsDeletingRole] = useState<string | null>(null);
 
     const [rolePermissionSearch, setRolePermissionSearch] = useState("");
     const [availablePermissions, setAvailablePermissions] = useState<Permission[]>(allPermissions.length > 0 ? allPermissions : permissions);
@@ -134,6 +138,9 @@ export default function RolesTableClient({ roles, permissions, allPermissions = 
         name: "",
         description: "",
     });
+    const [isCreatingPerm, setIsCreatingPerm] = useState(false);
+    const [isEditingPerm, setIsEditingPerm] = useState(false);
+    const [isDeletingPerm, setIsDeletingPerm] = useState<string | null>(null);
 
     // Helper function to refresh permissions cache
     const refreshPermissions = async () => {
@@ -181,6 +188,8 @@ export default function RolesTableClient({ roles, permissions, allPermissions = 
             return;
         }
 
+
+        setIsCreatingRole(true);
         try {
             await rolesService.create(form);
             toast.success("Role created successfully");
@@ -193,12 +202,15 @@ export default function RolesTableClient({ roles, permissions, allPermissions = 
         } catch (err) {
             const message = err instanceof ApiError ? err.message : "Failed to create role";
             toast.error(message);
+        } finally {
+            setIsCreatingRole(false);
         }
     };
 
     const handleUpdate = async () => {
         if (!editing) return;
 
+        setIsEditingRole(true);
         try {
             await rolesService.update(editing.id, form);
             toast.success("Role updated successfully");
@@ -211,6 +223,8 @@ export default function RolesTableClient({ roles, permissions, allPermissions = 
         } catch (err) {
             const message = err instanceof ApiError ? err.message : "Failed to update role";
             toast.error(message);
+        } finally {
+            setIsEditingRole(false);
         }
     };
 
@@ -223,6 +237,9 @@ export default function RolesTableClient({ roles, permissions, allPermissions = 
         });
         if (!confirmed) return;
 
+        if (!confirmed) return;
+
+        setIsDeletingRole(id);
         try {
             console.log("id", id);
             await rolesService.delete(id);
@@ -231,6 +248,8 @@ export default function RolesTableClient({ roles, permissions, allPermissions = 
         } catch (err) {
             const message = err instanceof ApiError ? err.message : "Failed to delete role";
             toast.error(message);
+        } finally {
+            setIsDeletingRole(null);
         }
     };
 
@@ -264,6 +283,8 @@ export default function RolesTableClient({ roles, permissions, allPermissions = 
             return;
         }
 
+
+        setIsCreatingPerm(true);
         try {
             await permissionsService.create(permForm);
             toast.success("Permission created successfully");
@@ -272,12 +293,15 @@ export default function RolesTableClient({ roles, permissions, allPermissions = 
         } catch (err) {
             const message = err instanceof ApiError ? err.message : "Failed to create permission";
             toast.error(message);
+        } finally {
+            setIsCreatingPerm(false);
         }
     };
 
     const handlePermUpdate = async () => {
         if (!permEditing) return;
 
+        setIsEditingPerm(true);
         try {
             await permissionsService.update(permEditing.id, permForm);
             toast.success("Permission updated successfully");
@@ -286,6 +310,8 @@ export default function RolesTableClient({ roles, permissions, allPermissions = 
         } catch (err) {
             const message = err instanceof ApiError ? err.message : "Failed to update permission";
             toast.error(message);
+        } finally {
+            setIsEditingPerm(false);
         }
     };
 
@@ -298,6 +324,8 @@ export default function RolesTableClient({ roles, permissions, allPermissions = 
         });
         if (!confirmed) return;
 
+
+        setIsDeletingPerm(id);
         try {
             await permissionsService.delete(id);
             toast.success("Permission deleted successfully");
@@ -307,6 +335,8 @@ export default function RolesTableClient({ roles, permissions, allPermissions = 
         } catch (err) {
             const message = err instanceof ApiError ? err.message : "Failed to delete permission";
             toast.error(message);
+        } finally {
+            setIsDeletingPerm(null);
         }
     };
 
@@ -407,8 +437,9 @@ export default function RolesTableClient({ roles, permissions, allPermissions = 
                                                             size="sm"
                                                             variant="ghost"
                                                             onClick={() => handleDelete(role.id)}
+                                                            disabled={isDeletingRole === role.id}
                                                         >
-                                                            <Trash2 className="h-4 w-4" />
+                                                            {isDeletingRole === role.id ? <Spinner className="h-4 w-4" /> : <Trash2 className="h-4 w-4" />}
                                                         </Button>
                                                     </div>
                                                 </TableCell>
@@ -535,8 +566,9 @@ export default function RolesTableClient({ roles, permissions, allPermissions = 
                                                 variant="outline"
                                                 className="flex-1"
                                                 onClick={() => handleDelete(role.id)}
+                                                disabled={isDeletingRole === role.id}
                                             >
-                                                <Trash2 className="h-4 w-4 mr-2" />
+                                                {isDeletingRole === role.id ? <Spinner className="h-4 w-4 mr-2" /> : <Trash2 className="h-4 w-4 mr-2" />}
                                                 Delete
                                             </Button>
                                         </div>
@@ -634,8 +666,9 @@ export default function RolesTableClient({ roles, permissions, allPermissions = 
                                                             size="sm"
                                                             variant="ghost"
                                                             onClick={() => handlePermDelete(permission.id)}
+                                                            disabled={isDeletingPerm === permission.id}
                                                         >
-                                                            <Trash2 className="h-4 w-4" />
+                                                            {isDeletingPerm === permission.id ? <Spinner className="h-4 w-4" /> : <Trash2 className="h-4 w-4" />}
                                                         </Button>
                                                     </div>
                                                 </TableCell>
@@ -753,8 +786,9 @@ export default function RolesTableClient({ roles, permissions, allPermissions = 
                                                 variant="outline"
                                                 className="flex-1"
                                                 onClick={() => handlePermDelete(permission.id)}
+                                                disabled={isDeletingPerm === permission.id}
                                             >
-                                                <Trash2 className="h-4 w-4 mr-2" />
+                                                {isDeletingPerm === permission.id ? <Spinner className="h-4 w-4 mr-2" /> : <Trash2 className="h-4 w-4 mr-2" />}
                                                 Delete
                                             </Button>
                                         </div>
@@ -881,7 +915,9 @@ export default function RolesTableClient({ roles, permissions, allPermissions = 
                         <Button variant="outline" onClick={() => setCreateOpen(false)}>
                             Cancel
                         </Button>
-                        <Button onClick={handleCreate}>Create Role</Button>
+                        <Button onClick={handleCreate} disabled={isCreatingRole}>
+                            {isCreatingRole ? <><Spinner className="mr-2" /> Creating...</> : "Create Role"}
+                        </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
@@ -964,7 +1000,9 @@ export default function RolesTableClient({ roles, permissions, allPermissions = 
                         <Button variant="outline" onClick={() => setEditOpen(false)}>
                             Cancel
                         </Button>
-                        <Button onClick={handleUpdate}>Update Role</Button>
+                        <Button onClick={handleUpdate} disabled={isEditingRole}>
+                            {isEditingRole ? <><Spinner className="mr-2" /> Updating...</> : "Update Role"}
+                        </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
@@ -999,7 +1037,9 @@ export default function RolesTableClient({ roles, permissions, allPermissions = 
                         <Button variant="outline" onClick={() => setPermCreateOpen(false)}>
                             Cancel
                         </Button>
-                        <Button onClick={handlePermCreate}>Create Permission</Button>
+                        <Button onClick={handlePermCreate} disabled={isCreatingPerm}>
+                            {isCreatingPerm ? <><Spinner className="mr-2" /> Creating...</> : "Create Permission"}
+                        </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
@@ -1032,7 +1072,9 @@ export default function RolesTableClient({ roles, permissions, allPermissions = 
                         <Button variant="outline" onClick={() => setPermEditOpen(false)}>
                             Cancel
                         </Button>
-                        <Button onClick={handlePermUpdate}>Update Permission</Button>
+                        <Button onClick={handlePermUpdate} disabled={isEditingPerm}>
+                            {isEditingPerm ? <><Spinner className="mr-2" /> Updating...</> : "Update Permission"}
+                        </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>

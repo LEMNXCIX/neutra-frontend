@@ -50,6 +50,7 @@ import {
 } from "@/components/ui/accordion";
 import { useConfirm } from "@/hooks/use-confirm";
 import { Slideshow } from "@/types/slide.types";
+import { Spinner } from "@/components/ui/spinner";
 
 type Stats = {
     totalSliders: number;
@@ -87,6 +88,9 @@ export default function SlidersTableClient({ sliders, stats, pagination }: Props
         img: "",
     });
     const [imagePreview, setImagePreview] = useState("");
+    const [isCreating, setIsCreating] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [isDeleting, setIsDeleting] = useState<string | null>(null);
 
     // URL State
     const searchQuery = searchParams.get("search") || "";
@@ -144,6 +148,7 @@ export default function SlidersTableClient({ sliders, stats, pagination }: Props
             toast.error("Title is required");
             return;
         }
+        setIsCreating(true);
         try {
             const res = await fetch("/api/admin/sliders", {
                 method: "POST",
@@ -162,6 +167,8 @@ export default function SlidersTableClient({ sliders, stats, pagination }: Props
             router.refresh();
         } catch {
             toast.error("Network error");
+        } finally {
+            setIsCreating(false);
         }
     };
 
@@ -173,6 +180,7 @@ export default function SlidersTableClient({ sliders, stats, pagination }: Props
             variant: "destructive",
         });
         if (!confirmed) return;
+        setIsDeleting(id);
         try {
             const res = await fetch(`/api/admin/sliders/${id}`, {
                 method: "DELETE",
@@ -185,6 +193,8 @@ export default function SlidersTableClient({ sliders, stats, pagination }: Props
             router.refresh();
         } catch {
             toast.error("Network error");
+        } finally {
+            setIsDeleting(null);
         }
     };
 
@@ -202,6 +212,7 @@ export default function SlidersTableClient({ sliders, stats, pagination }: Props
 
     const saveEdit = async () => {
         if (!editing) return;
+        setIsEditing(true);
         try {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const body: any = {
@@ -237,6 +248,8 @@ export default function SlidersTableClient({ sliders, stats, pagination }: Props
             router.refresh();
         } catch {
             toast.error("Network error");
+        } finally {
+            setIsEditing(false);
         }
     };
 
@@ -385,11 +398,11 @@ export default function SlidersTableClient({ sliders, stats, pagination }: Props
                                         </TableCell>
                                         <TableCell>
                                             <div className="flex gap-2">
-                                                <Button size="sm" variant="ghost" onClick={() => openEdit(s)}>
-                                                    <Edit className="h-4 w-4" />
+                                                <Button size="sm" variant="destructive" onClick={() => deleteSlider(s.id)} disabled={isDeleting === s.id}>
+                                                    {isDeleting === s.id ? <Spinner className="h-4 w-4" /> : <Trash2 className="h-4 w-4" />}
                                                 </Button>
-                                                <Button size="sm" variant="ghost" onClick={() => deleteSlider(s.id)}>
-                                                    <Trash2 className="h-4 w-4 text-red-500" />
+                                                <Button size="sm" variant="ghost" onClick={() => deleteSlider(s.id)} disabled={isDeleting === s.id}>
+                                                    {isDeleting === s.id ? <Spinner className="h-4 w-4" /> : <Trash2 className="h-4 w-4 text-red-500" />}
                                                 </Button>
                                             </div>
                                         </TableCell>
@@ -559,7 +572,9 @@ export default function SlidersTableClient({ sliders, stats, pagination }: Props
                             setCreateOpen(false);
                             setImagePreview("");
                         }}>Cancel</Button>
-                        <Button onClick={createSlider}>Create Slider</Button>
+                        <Button onClick={createSlider} disabled={isCreating}>
+                            {isCreating ? <><Spinner className="mr-2" /> Creating...</> : "Create Slider"}
+                        </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
@@ -618,7 +633,9 @@ export default function SlidersTableClient({ sliders, stats, pagination }: Props
                             setEditOpen(false);
                             setImagePreview("");
                         }}>Cancel</Button>
-                        <Button onClick={saveEdit}>Save Changes</Button>
+                        <Button onClick={saveEdit} disabled={isEditing}>
+                            {isEditing ? <><Spinner className="mr-2" /> Saving...</> : "Save Changes"}
+                        </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>

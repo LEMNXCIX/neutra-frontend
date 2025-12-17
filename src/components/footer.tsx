@@ -1,8 +1,27 @@
+"use client";
+
 import Link from 'next/link';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Facebook, Twitter, Instagram, Linkedin, Youtube, Mail } from 'lucide-react';
+import { categoriesService } from '@/services/categories.service';
+import { Category } from '@/types/category.types';
 
 export default function Footer() {
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const data = await categoriesService.getAll();
+        // Take only the first 5 active categories
+        setCategories(data.filter(c => c.active).slice(0, 5));
+      } catch (error) {
+        console.error("Failed to fetch footer categories", error);
+      }
+    };
+    fetchCategories();
+  }, []);
+
   return (
     <footer className="bg-background border-t">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -68,9 +87,16 @@ export default function Footer() {
             <h4 className="font-semibold mb-4">Shop</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li><Link href="/products" className="hover:text-foreground transition-colors">All Products</Link></li>
-              <li><Link href="/products?category=furniture" className="hover:text-foreground transition-colors">Furniture</Link></li>
-              <li><Link href="/products?category=decor" className="hover:text-foreground transition-colors">Decor</Link></li>
-              <li><Link href="/products?category=lighting" className="hover:text-foreground transition-colors">Lighting</Link></li>
+              {categories.map((category) => (
+                <li key={category.id}>
+                  <Link
+                    href={`/products?category=${category.id}`}
+                    className="hover:text-foreground transition-colors"
+                  >
+                    {category.name}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 

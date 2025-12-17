@@ -30,6 +30,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { Spinner } from "@/components/ui/spinner";
 import {
     Upload,
     X,
@@ -82,6 +83,9 @@ export default function ProductsTableClient({ products, stats, pagination, categ
     const [editing, setEditing] = useState<Product | null>(null);
     const [form, setForm] = useState({ name: "", price: "", stock: "", category: "", imageBase64: "" });
     const [preview, setPreview] = useState<string | null>(null);
+    const [isCreating, setIsCreating] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [isDeleting, setIsDeleting] = useState<string | null>(null);
 
     // URL State
     const searchQuery = searchParams.get("search") || "";
@@ -137,15 +141,17 @@ export default function ProductsTableClient({ products, stats, pagination, categ
             toast.error("Price and Stock cannot be negative");
             return;
         }
+
+        setIsCreating(true);
         try {
             const body = {
                 name: form.name,
-                description: "", // Added description as it's required in DTO
+                description: "",
                 price: Number(form.price || 0),
                 stock: Number(form.stock || 0),
                 categoryIds: form.category ? [form.category] : [],
-                image: form.imageBase64 || undefined, // DTO uses 'image' for base64 string apparently, or we map it
-                ownerId: "admin", // Placeholder, should come from context or auth
+                image: form.imageBase64 || undefined,
+                ownerId: "admin",
             };
             const res = await fetch("/api/admin/products", {
                 method: "POST",
@@ -161,9 +167,11 @@ export default function ProductsTableClient({ products, stats, pagination, categ
             setCreateOpen(false);
             setForm({ name: "", price: "", stock: "", category: "", imageBase64: "" });
             setPreview(null);
-            router.refresh(); // Refresh server data
+            router.refresh();
         } catch {
             toast.error("Network error");
+        } finally {
+            setIsCreating(false);
         }
     };
 
@@ -175,6 +183,7 @@ export default function ProductsTableClient({ products, stats, pagination, categ
             variant: "destructive",
         });
         if (!confirmed) return;
+        setIsDeleting(id);
         try {
             const res = await fetch(`/api/admin/products/${id}`, {
                 method: "DELETE",
@@ -187,6 +196,8 @@ export default function ProductsTableClient({ products, stats, pagination, categ
             router.refresh();
         } catch {
             toast.error("Network error");
+        } finally {
+            setIsDeleting(null);
         }
     };
 
@@ -209,6 +220,8 @@ export default function ProductsTableClient({ products, stats, pagination, categ
             toast.error("Price and Stock cannot be negative");
             return;
         }
+
+        setIsEditing(true);
         try {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const body: any = {
@@ -237,6 +250,8 @@ export default function ProductsTableClient({ products, stats, pagination, categ
             router.refresh();
         } catch {
             toast.error("Network error");
+        } finally {
+            setIsEditing(false);
         }
     };
 
@@ -467,8 +482,8 @@ export default function ProductsTableClient({ products, stats, pagination, categ
                                     <Edit className="h-4 w-4 mr-1" />
                                     Edit
                                 </Button>
-                                <Button size="sm" variant="destructive" onClick={() => deleteProduct(p.id)}>
-                                    <Trash2 className="h-4 w-4" />
+                                <Button size="sm" variant="destructive" onClick={() => deleteProduct(p.id)} disabled={isDeleting === p.id}>
+                                    {isDeleting === p.id ? <Spinner className="h-4 w-4" /> : <Trash2 className="h-4 w-4" />}
                                 </Button>
                             </div>
                         </CardContent>
@@ -586,8 +601,10 @@ export default function ProductsTableClient({ products, stats, pagination, categ
                         </div>
                     </div>
                     <DialogFooter>
-                        <Button variant="outline" onClick={() => setCreateOpen(false)}>Cancel</Button>
-                        <Button onClick={createProduct}>Create Product</Button>
+                        <Button variant="outline" onClick={() => setCreateOpen(false)} disabled={isCreating}>Cancel</Button>
+                        <Button onClick={createProduct} disabled={isCreating}>
+                            {isCreating ? <><Spinner className="mr-2" /> Creating...</> : "Create Product"}
+                        </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
@@ -675,8 +692,10 @@ export default function ProductsTableClient({ products, stats, pagination, categ
                         </div>
                     </div>
                     <DialogFooter>
-                        <Button variant="outline" onClick={() => setEditOpen(false)}>Cancel</Button>
-                        <Button onClick={saveEdit}>Save Changes</Button>
+                        <Button variant="outline" onClick={() => setEditOpen(false)} disabled={isEditing}>Cancel</Button>
+                        <Button onClick={saveEdit} disabled={isEditing}>
+                            {isEditing ? <><Spinner className="mr-2" /> Saving...</> : "Save Changes"}
+                        </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>

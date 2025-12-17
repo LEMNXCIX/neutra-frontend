@@ -34,6 +34,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { Spinner } from "@/components/ui/spinner";
 import {
     Accordion,
     AccordionContent,
@@ -81,6 +82,7 @@ export default function UsersTableClient({ users, stats, pagination }: Props) {
     const [form, setForm] = useState({ name: "", email: "" });
     const [roleDialogOpen, setRoleDialogOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
+    const [isSaving, setIsSaving] = useState(false);
 
     // URL State
     const searchQuery = searchParams.get("search") || "";
@@ -129,6 +131,7 @@ export default function UsersTableClient({ users, stats, pagination }: Props) {
 
     const saveEdit = async () => {
         if (!editing) return;
+        setIsSaving(true);
         try {
             await usersService.update(editing.id, {
                 name: form.name,
@@ -142,6 +145,8 @@ export default function UsersTableClient({ users, stats, pagination }: Props) {
         } catch (err) {
             const message = err instanceof ApiError ? err.message : "Failed to update user";
             toast.error(message);
+        } finally {
+            setIsSaving(false);
         }
     };
 
@@ -467,8 +472,10 @@ export default function UsersTableClient({ users, stats, pagination }: Props) {
 
                     </div>
                     <DialogFooter>
-                        <Button variant="outline" onClick={() => setEditOpen(false)}>Cancel</Button>
-                        <Button onClick={saveEdit}>Save Changes</Button>
+                        <Button variant="outline" onClick={() => setEditOpen(false)} disabled={isSaving}>Cancel</Button>
+                        <Button onClick={saveEdit} disabled={isSaving}>
+                            {isSaving ? <><Spinner className="mr-2" /> Saving...</> : "Save Changes"}
+                        </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>

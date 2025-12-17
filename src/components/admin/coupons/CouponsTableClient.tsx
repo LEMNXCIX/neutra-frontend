@@ -55,6 +55,7 @@ import {
 } from "lucide-react";
 import { useConfirm } from "@/hooks/use-confirm";
 import { Coupon, CouponType, CreateCouponDTO, UpdateCouponDTO } from "@/types/coupon.types";
+import { Spinner } from "@/components/ui/spinner";
 
 type Stats = {
     totalCoupons: number;
@@ -88,6 +89,9 @@ export default function CouponsTableClient({ coupons, stats, pagination }: Props
     const [viewOpen, setViewOpen] = useState(false);
     const [editing, setEditing] = useState<Coupon | null>(null);
     const [viewing, setViewing] = useState<Coupon | null>(null);
+    const [isCreating, setIsCreating] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [isDeleting, setIsDeleting] = useState<string | null>(null);
     const [form, setForm] = useState<{
         code: string;
         type: CouponType;
@@ -173,6 +177,7 @@ export default function CouponsTableClient({ coupons, stats, pagination }: Props
             toast.error("Code is required");
             return;
         }
+        setIsCreating(true);
         try {
             const body: CreateCouponDTO = {
                 code: form.code.trim().toUpperCase(),
@@ -193,6 +198,8 @@ export default function CouponsTableClient({ coupons, stats, pagination }: Props
         } catch (err) {
             const message = err instanceof ApiError ? err.message : "Failed to create coupon";
             toast.error(message);
+        } finally {
+            setIsCreating(false);
         }
     };
 
@@ -204,6 +211,7 @@ export default function CouponsTableClient({ coupons, stats, pagination }: Props
             variant: "destructive",
         });
         if (!confirmed) return;
+        setIsDeleting(id);
         try {
             await couponsService.delete(id);
             toast.success("Coupon deleted");
@@ -211,6 +219,8 @@ export default function CouponsTableClient({ coupons, stats, pagination }: Props
         } catch (err) {
             const message = err instanceof ApiError ? err.message : "Failed to delete coupon";
             toast.error(message);
+        } finally {
+            setIsDeleting(null);
         }
     };
 
@@ -250,6 +260,7 @@ export default function CouponsTableClient({ coupons, stats, pagination }: Props
 
     const saveEdit = async () => {
         if (!editing) return;
+        setIsEditing(true);
         try {
             const body: UpdateCouponDTO = {
                 code: form.code.trim().toUpperCase(),
@@ -271,6 +282,8 @@ export default function CouponsTableClient({ coupons, stats, pagination }: Props
         } catch (err) {
             const message = err instanceof ApiError ? err.message : "Failed to update coupon";
             toast.error(message);
+        } finally {
+            setIsEditing(false);
         }
     };
 
@@ -563,8 +576,8 @@ export default function CouponsTableClient({ coupons, stats, pagination }: Props
                                                     <Button size="sm" variant="ghost" onClick={() => openEdit(c)} title="Edit">
                                                         <Edit className="h-4 w-4" />
                                                     </Button>
-                                                    <Button size="sm" variant="ghost" onClick={() => deleteCoupon(c.id)} title="Delete">
-                                                        <Trash2 className="h-4 w-4 text-red-500" />
+                                                    <Button size="sm" variant="ghost" onClick={() => deleteCoupon(c.id)} title="Delete" disabled={isDeleting === c.id}>
+                                                        {isDeleting === c.id ? <Spinner className="h-4 w-4" /> : <Trash2 className="h-4 w-4 text-red-500" />}
                                                     </Button>
                                                 </div>
                                             </TableCell>
@@ -647,8 +660,8 @@ export default function CouponsTableClient({ coupons, stats, pagination }: Props
                                         <Edit className="h-4 w-4 mr-1" />
                                         Edit
                                     </Button>
-                                    <Button size="sm" variant="destructive" onClick={() => deleteCoupon(c.id)}>
-                                        <Trash2 className="h-4 w-4" />
+                                    <Button size="sm" variant="destructive" onClick={() => deleteCoupon(c.id)} disabled={isDeleting === c.id}>
+                                        {isDeleting === c.id ? <Spinner className="h-4 w-4" /> : <Trash2 className="h-4 w-4" />}
                                     </Button>
                                 </div>
                             </CardContent>
@@ -693,7 +706,9 @@ export default function CouponsTableClient({ coupons, stats, pagination }: Props
                     {renderFormFields()}
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setCreateOpen(false)}>Cancel</Button>
-                        <Button onClick={createCoupon}>Create Coupon</Button>
+                        <Button onClick={createCoupon} disabled={isCreating}>
+                            {isCreating ? <><Spinner className="mr-2" /> Creating...</> : "Create Coupon"}
+                        </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
@@ -707,7 +722,9 @@ export default function CouponsTableClient({ coupons, stats, pagination }: Props
                     {renderFormFields()}
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setEditOpen(false)}>Cancel</Button>
-                        <Button onClick={saveEdit}>Save Changes</Button>
+                        <Button onClick={saveEdit} disabled={isEditing}>
+                            {isEditing ? <><Spinner className="mr-2" /> Saving...</> : "Save Changes"}
+                        </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>

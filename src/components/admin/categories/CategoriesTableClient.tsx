@@ -41,6 +41,7 @@ import {
 import { useConfirm } from "@/hooks/use-confirm";
 
 import { Category } from "@/types/category.types";
+import { Spinner } from "@/components/ui/spinner";
 
 type CategoryWithCount = Category & {
     productCount?: number;
@@ -75,6 +76,9 @@ export default function CategoriesTableClient({ categories, stats, pagination }:
     const [editOpen, setEditOpen] = useState(false);
     const [editing, setEditing] = useState<CategoryWithCount | null>(null);
     const [form, setForm] = useState({ name: "", description: "" });
+    const [isCreating, setIsCreating] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [isDeleting, setIsDeleting] = useState<string | null>(null);
 
     // URL State
     const searchQuery = searchParams.get("search") || "";
@@ -101,6 +105,7 @@ export default function CategoriesTableClient({ categories, stats, pagination }:
             toast.error("Name is required");
             return;
         }
+        setIsCreating(true);
         try {
             const res = await fetch("/api/admin/categories", {
                 method: "POST",
@@ -118,6 +123,8 @@ export default function CategoriesTableClient({ categories, stats, pagination }:
             router.refresh();
         } catch {
             toast.error("Network error");
+        } finally {
+            setIsCreating(false);
         }
     };
 
@@ -129,6 +136,7 @@ export default function CategoriesTableClient({ categories, stats, pagination }:
             variant: "destructive",
         });
         if (!confirmed) return;
+        setIsDeleting(id);
         try {
             const res = await fetch(`/api/admin/categories/${id}`, {
                 method: "DELETE",
@@ -141,6 +149,8 @@ export default function CategoriesTableClient({ categories, stats, pagination }:
             router.refresh();
         } catch {
             toast.error("Network error");
+        } finally {
+            setIsDeleting(null);
         }
     };
 
@@ -155,6 +165,7 @@ export default function CategoriesTableClient({ categories, stats, pagination }:
 
     const saveEdit = async () => {
         if (!editing) return;
+        setIsEditing(true);
         try {
             const res = await fetch(`/api/admin/categories/${editing.id}`, {
                 method: "PUT",
@@ -173,6 +184,8 @@ export default function CategoriesTableClient({ categories, stats, pagination }:
             router.refresh();
         } catch {
             toast.error("Network error");
+        } finally {
+            setIsEditing(false);
         }
     };
 
@@ -288,8 +301,8 @@ export default function CategoriesTableClient({ categories, stats, pagination }:
                                                 <Button size="sm" variant="ghost" onClick={() => openEdit(c)}>
                                                     <Edit className="h-4 w-4" />
                                                 </Button>
-                                                <Button size="sm" variant="ghost" onClick={() => deleteCategory(c.id)}>
-                                                    <Trash2 className="h-4 w-4 text-red-500" />
+                                                <Button size="sm" variant="destructive" onClick={() => deleteCategory(c.id)} disabled={isDeleting === c.id}>
+                                                    {isDeleting === c.id ? <Spinner className="h-4 w-4" /> : <Trash2 className="h-4 w-4" />}
                                                 </Button>
                                             </div>
                                         </TableCell>
@@ -419,7 +432,9 @@ export default function CategoriesTableClient({ categories, stats, pagination }:
                     </div>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setCreateOpen(false)}>Cancel</Button>
-                        <Button onClick={createCategory}>Create Category</Button>
+                        <Button onClick={createCategory} disabled={isCreating}>
+                            {isCreating ? <><Spinner className="mr-2" /> Creating...</> : "Create Category"}
+                        </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
@@ -450,7 +465,9 @@ export default function CategoriesTableClient({ categories, stats, pagination }:
                     </div>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setEditOpen(false)}>Cancel</Button>
-                        <Button onClick={saveEdit}>Save Changes</Button>
+                        <Button onClick={saveEdit} disabled={isEditing}>
+                            {isEditing ? <><Spinner className="mr-2" /> Saving...</> : "Save Changes"}
+                        </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
