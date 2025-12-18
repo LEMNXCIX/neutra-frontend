@@ -4,10 +4,9 @@ import { ThemeProvider } from 'next-themes';
 import './globals.css';
 import { CartProvider } from '@/context/cart-context';
 import { AuthInitializer } from '@/components/auth-initializer';
-import { Navigation as NavBar } from "@/components/nav_bar";
 import { Toaster } from "@/components/ui/sonner";
-import FooterWrapper from "@/components/footer-wrapper"; // 👈 nuevo componente cliente
 import { QueryProvider } from '@/providers/query-provider';
+import { TenantProvider } from '@/context/tenant-context';
 
 
 const geist = Geist({
@@ -15,8 +14,8 @@ const geist = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "Neutra - Minimal Interiors",
-  description: "Minimal interiors, mindful design — curated furniture and accessories with a clean aesthetic.",
+  title: "Neutra - Your Business Platform",
+  description: "E-Commerce and Booking solutions in one platform",
 };
 
 export default function RootLayout({
@@ -33,26 +32,15 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <AuthInitializer />
-          <QueryProvider>
-            <CartProvider>
-              <div
-                id="root-content"
-                className="transition-all duration-300 ease-in-out"
-                style={{
-                  marginLeft: 'var(--sidebar-width, 0px)',
-                } as React.CSSProperties}
-              >
-                <NavBar />
-                <div className="pt-16">{children}</div>
-
-                {/* 👇 Footer controlado desde un Client Component */}
-                <FooterWrapper />
-
-              </div>
-              <Toaster richColors />
-            </CartProvider>
-          </QueryProvider>
+          <TenantProvider>
+            <AuthInitializer />
+            <QueryProvider>
+              <CartProvider>
+                {children}
+                <Toaster richColors />
+              </CartProvider>
+            </QueryProvider>
+          </TenantProvider>
         </ThemeProvider>
       </body>
     </html>

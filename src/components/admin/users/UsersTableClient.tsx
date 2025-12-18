@@ -70,9 +70,10 @@ type Props = {
     users: User[];
     stats: Stats;
     pagination: PaginationProps;
+    showTenant?: boolean;
 };
 
-export default function UsersTableClient({ users, stats, pagination }: Props) {
+export default function UsersTableClient({ users, stats, pagination, showTenant = false }: Props) {
     const router = useRouter();
     const searchParams = useSearchParams();
 
@@ -265,6 +266,7 @@ export default function UsersTableClient({ users, stats, pagination }: Props) {
                                 <TableHead className="w-[80px]">Avatar</TableHead>
                                 <TableHead className="w-[200px]">Name</TableHead>
                                 <TableHead className="w-[250px]">Email</TableHead>
+                                {showTenant && <TableHead className="w-[150px]">Tenant</TableHead>}
                                 <TableHead className="w-[120px]">Role</TableHead>
                                 <TableHead className="w-[200px]">Actions</TableHead>
                             </TableRow>
@@ -287,6 +289,13 @@ export default function UsersTableClient({ users, stats, pagination }: Props) {
                                         </TableCell>
                                         <TableCell className="font-medium">{u.name}</TableCell>
                                         <TableCell className="text-sm text-muted-foreground">{u.email}</TableCell>
+                                        {showTenant && (
+                                            <TableCell className="text-sm">
+                                                <Badge variant="outline" className="font-normal">
+                                                    {u.tenant?.name || 'Global'}
+                                                </Badge>
+                                            </TableCell>
+                                        )}
                                         <TableCell>
                                             <Badge className={getRoleColor(u.role?.name)}>
                                                 {u.role?.name || 'No Role'}
@@ -388,10 +397,15 @@ export default function UsersTableClient({ users, stats, pagination }: Props) {
                                 <div className="flex-1 min-w-0">
                                     <h3 className="font-semibold truncate">{u.name}</h3>
                                     <p className="text-sm text-muted-foreground truncate">{u.email}</p>
-                                    <div className="mt-1">
+                                    <div className="flex flex-wrap gap-1 mt-1">
                                         <Badge className={getRoleColor(u.role?.name)}>
                                             {u.role?.name || 'No Role'}
                                         </Badge>
+                                        {showTenant && (
+                                            <Badge variant="outline" className="font-normal">
+                                                {u.tenant?.name || 'Global'}
+                                            </Badge>
+                                        )}
                                     </div>
                                 </div>
                             </div>

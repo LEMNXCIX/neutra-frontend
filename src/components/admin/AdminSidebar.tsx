@@ -15,24 +15,35 @@ import {
     Megaphone,
     Images,
     BrickWallShield,
+    Scissors,
+    UserCog,
+    Building
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { NavItem } from "@/config/admin-navigation";
 
-const menuItems = [
-    { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
-    { href: "/admin/products", label: "Products", icon: Package },
-    { href: "/admin/categories", label: "Categories", icon: LayoutList },
-    { href: "/admin/banners", label: "Banners", icon: Megaphone },
-    { href: "/admin/sliders", label: "Sliders", icon: Images },
-    { href: "/admin/orders", label: "Orders", icon: ShoppingCart },
-    { href: "/admin/coupons", label: "Coupons", icon: Ticket },
-    { href: "/admin/users", label: "Users", icon: Users },
-    { href: "/admin/roles", label: "Roles", icon: BrickWallShield },
-];
+const ICON_MAP: Record<string, any> = {
+    LayoutDashboard,
+    Package,
+    ShoppingCart,
+    Users,
+    Ticket,
+    LayoutList,
+    Megaphone,
+    Images,
+    BrickWallShield,
+    Scissors,
+    UserCog,
+    Building
+};
 
-export default function AdminSidebar() {
+interface AdminSidebarProps {
+    items: NavItem[];
+}
+
+export default function AdminSidebar({ items }: AdminSidebarProps) {
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const pathname = usePathname();
 
@@ -61,7 +72,8 @@ export default function AdminSidebar() {
             {/* Scrollable menu */}
             <ScrollArea className="flex-1">
                 <nav className="p-2 flex flex-col gap-1">
-                    {menuItems.map(({ href, label, icon: Icon, exact }) => {
+                    {items.map(({ href, label, icon: iconName, exact }) => {
+                        const Icon = ICON_MAP[iconName] || LayoutDashboard;
                         const isActive = exact
                             ? pathname === href
                             : pathname.startsWith(href);
@@ -98,3 +110,5 @@ export default function AdminSidebar() {
         </aside>
     );
 }
+
+

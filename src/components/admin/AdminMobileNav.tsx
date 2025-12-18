@@ -4,6 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { NavItem } from "@/config/admin-navigation";
 import {
     LayoutDashboard,
     Package,
@@ -14,28 +15,39 @@ import {
     Megaphone,
     Images,
     BrickWallShield,
+    Scissors,
+    UserCog,
+    Building
 } from "lucide-react";
 
-const menuItems = [
-    { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
-    { href: "/admin/products", label: "Products", icon: Package },
-    { href: "/admin/categories", label: "Categories", icon: LayoutList },
-    { href: "/admin/banners", label: "Banners", icon: Megaphone },
-    { href: "/admin/sliders", label: "Sliders", icon: Images },
-    { href: "/admin/orders", label: "Orders", icon: ShoppingCart },
-    { href: "/admin/coupons", label: "Coupons", icon: Ticket },
-    { href: "/admin/users", label: "Users", icon: Users },
-    { href: "/admin/roles", label: "Roles", icon: BrickWallShield },
-];
+const ICON_MAP: Record<string, any> = {
+    LayoutDashboard,
+    Package,
+    ShoppingCart,
+    Users,
+    Ticket,
+    LayoutList,
+    Megaphone,
+    Images,
+    BrickWallShield,
+    Scissors,
+    UserCog,
+    Building
+};
 
-export default function AdminMobileNav() {
+interface AdminMobileNavProps {
+    items: NavItem[];
+}
+
+export default function AdminMobileNav({ items }: AdminMobileNavProps) {
     const pathname = usePathname();
 
     return (
         <nav className="fixed bottom-0 left-0 right-0 md:hidden border-t bg-background/80 backdrop-blur-md shadow-md z-50 pb-[env(safe-area-inset-bottom)]">
             <ScrollArea className="w-full whitespace-nowrap">
                 <div className="flex w-max space-x-4 p-2 px-4">
-                    {menuItems.map(({ href, label, icon: Icon, exact }) => {
+                    {items.map(({ href, label, icon: iconName, exact }) => {
+                        const Icon = ICON_MAP[iconName] || LayoutDashboard;
                         const isActive = exact
                             ? pathname === href
                             : pathname.startsWith(href);
@@ -58,3 +70,5 @@ export default function AdminMobileNav() {
         </nav>
     );
 }
+
+

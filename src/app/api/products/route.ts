@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getProxyHeaders } from "@/lib/proxy";
 
 const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4001/api";
 
@@ -15,11 +16,7 @@ export async function GET(req: NextRequest) {
 
     const response = await fetch(backendUrl, {
       method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        // Forward cookies for authentication
-        ...(req.headers.get("cookie") && { Cookie: req.headers.get("cookie")! }),
-      },
+      headers: getProxyHeaders(req),
       cache: "no-store",
     });
 

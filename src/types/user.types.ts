@@ -15,6 +15,11 @@ export interface User {
     twitterId?: string;
     createdAt?: Date;
     updatedAt?: Date;
+    tenant?: {
+        id: string;
+        name: string;
+        slug: string;
+    };
 }
 
 export interface CreateUserDTO {
