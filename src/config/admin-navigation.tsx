@@ -22,6 +22,7 @@ export const BOOKING_ADMIN_NAV: NavItem[] = [
     { href: "/admin", label: "Dashboard", icon: "LayoutDashboard", exact: true },
     { href: "/admin/appointments", label: "Appointments", icon: "CalendarDays" },
     { href: "/admin/services", label: "Services", icon: "Scissors" },
+    { href: "/admin/categories", label: "Categories", icon: "LayoutList" },
     { href: "/admin/staff", label: "Staff", icon: "UserCog" },
     { href: "/admin/users", label: "Users", icon: "Users" },
     { href: "/admin/roles", label: "Roles", icon: "BrickWallShield" },

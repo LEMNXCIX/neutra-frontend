@@ -10,8 +10,13 @@ export const categoriesService = {
      * Get all categories (with optional pagination)
      * Note: Pagination info is lost when not using pagination params
      */
-    getAll: async (page?: number, limit?: number): Promise<Category[]> => {
-        const url = page && limit ? `/categories?page=${page}&limit=${limit}` : '/categories';
+    getAll: async (page?: number, limit?: number, type?: 'PRODUCT' | 'SERVICE'): Promise<Category[]> => {
+        const params = new URLSearchParams();
+        if (page) params.append('page', page.toString());
+        if (limit) params.append('limit', limit.toString());
+        if (type) params.append('type', type);
+
+        const url = params.toString() ? `/categories?${params.toString()}` : '/categories';
         return api.get<Category[]>(url);
     },
 

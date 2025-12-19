@@ -18,7 +18,7 @@ export function getProxyHeaders(req: NextRequest): HeadersInit {
 
     if (tenantIdHeader) {
         headers['x-tenant-id'] = tenantIdHeader;
-    } else {
+    } else if (!tenantSlugHeader) {
         const tenantIdCookie = req.cookies.get('tenant-id');
         if (tenantIdCookie) {
             headers['x-tenant-id'] = tenantIdCookie.value;

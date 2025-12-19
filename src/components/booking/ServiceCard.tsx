@@ -15,7 +15,7 @@ export default function ServiceCard({ service, onBook }: ServiceCardProps) {
                     <h3 className="text-lg font-semibold text-gray-900">{service.name}</h3>
                     {service.category && (
                         <span className="inline-block mt-1 px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded">
-                            {service.category}
+                            {service.category.name}
                         </span>
                     )}
                 </div>

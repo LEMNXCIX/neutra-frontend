@@ -235,40 +235,63 @@ export default function BookPage() {
 
                 {/* Step 1: Select Service */}
                 {step === 1 && (
-                    <div className="space-y-4">
-                        <h2 className="text-2xl font-semibold mb-4">Select a Service</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {services.map((service) => (
-                                <Card
-                                    key={service.id}
-                                    className={`cursor-pointer transition-all hover:shadow-lg ${selectedService?.id === service.id
-                                        ? 'border-primary shadow-md'
-                                        : ''
-                                        }`}
-                                    onClick={() => {
-                                        setSelectedService(service);
-                                        setStep(2);
-                                    }}
-                                >
-                                    <CardHeader>
-                                        <div className="flex items-start justify-between mb-2">
-                                            <Badge variant="secondary">{service.category}</Badge>
-                                            <Badge variant="outline" className="bg-background">
-                                                ${service.price}
-                                            </Badge>
-                                        </div>
-                                        <CardTitle>{service.name}</CardTitle>
-                                        <CardDescription>{service.description}</CardDescription>
-                                    </CardHeader>
-                                    <CardFooter>
-                                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                            <Clock className="h-4 w-4" />
-                                            <span>{service.duration} minutes</span>
-                                        </div>
-                                    </CardFooter>
-                                </Card>
-                            ))}
+                    <div className="space-y-8">
+                        <div>
+                            <h2 className="text-2xl font-semibold mb-2">Select a Service</h2>
+                            <p className="text-muted-foreground">Choose the service you would like to book</p>
                         </div>
+
+                        {Object.entries(services.reduce((acc, service) => {
+                            const categoryName = service.category?.name || 'Uncategorized';
+                            if (!acc[categoryName]) acc[categoryName] = [];
+                            acc[categoryName].push(service);
+                            return acc;
+                        }, {} as Record<string, Service[]>)).map(([categoryName, categoryServices]) => (
+                            <div key={categoryName} className="space-y-4">
+                                <div className="flex items-center gap-2">
+                                    <h3 className="text-lg font-medium px-1 border-l-4 border-primary">{categoryName}</h3>
+                                    <Badge variant="outline" className="text-[10px] h-5">{categoryServices.length}</Badge>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {categoryServices.map((service) => (
+                                        <Card
+                                            key={service.id}
+                                            className={`cursor-pointer transition-all hover:shadow-lg hover:border-primary/50 ${selectedService?.id === service.id
+                                                ? 'border-primary shadow-md ring-1 ring-primary/20'
+                                                : ''
+                                                }`}
+                                            onClick={() => {
+                                                setSelectedService(service);
+                                                setStep(2);
+                                            }}
+                                        >
+                                            <CardHeader className="pb-3">
+                                                <div className="flex items-start justify-between mb-1">
+                                                    <Badge variant="outline" className="bg-background text-primary border-primary/20 font-bold">
+                                                        ${service.price}
+                                                    </Badge>
+                                                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded-full">
+                                                        <Clock className="h-3 w-3" />
+                                                        <span>{service.duration} min</span>
+                                                    </div>
+                                                </div>
+                                                <CardTitle className="text-xl">{service.name}</CardTitle>
+                                                {service.description && (
+                                                    <CardDescription className="line-clamp-2">{service.description}</CardDescription>
+                                                )}
+                                            </CardHeader>
+                                        </Card>
+                                    ))}
+                                </div>
+                            </div>
+                        ))}
+
+                        {services.length === 0 && (
+                            <div className="text-center py-12 bg-muted/30 rounded-lg border-2 border-dashed">
+                                <Info className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+                                <p className="text-muted-foreground">No services available for booking at the moment.</p>
+                            </div>
+                        )}
                     </div>
                 )}
 

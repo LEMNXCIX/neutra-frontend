@@ -10,9 +10,13 @@ export async function GET(req: NextRequest) {
   try {
     const token = extractTokenFromRequest(req);
 
+    // Forward query parameters
+    const { searchParams } = new URL(req.url);
+    const queryString = searchParams.toString() ? `?${searchParams.toString()}` : '';
+
     // Fetch categories and stats in parallel, handling errors gracefully
     const [categoriesResult, statsResult] = await Promise.all([
-      backendGet('/categories', token).catch(err => ({ success: false, error: err.message, data: [] })),
+      backendGet(`/categories${queryString}`, token).catch(err => ({ success: false, error: err.message, data: [] })),
       backendGet('/categories/stats', token).catch(err => ({ success: false, error: err.message }))
     ]);
 

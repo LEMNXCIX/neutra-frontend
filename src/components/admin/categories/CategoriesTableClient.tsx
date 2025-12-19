@@ -21,6 +21,13 @@ import {
     DialogTitle,
     DialogFooter,
 } from "@/components/ui/dialog";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import {
     Edit,
@@ -75,7 +82,7 @@ export default function CategoriesTableClient({ categories, stats, pagination }:
     const [createOpen, setCreateOpen] = useState(false);
     const [editOpen, setEditOpen] = useState(false);
     const [editing, setEditing] = useState<CategoryWithCount | null>(null);
-    const [form, setForm] = useState({ name: "", description: "" });
+    const [form, setForm] = useState({ name: "", description: "", type: "PRODUCT" });
     const [isCreating, setIsCreating] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [isDeleting, setIsDeleting] = useState<string | null>(null);
@@ -119,7 +126,7 @@ export default function CategoriesTableClient({ categories, stats, pagination }:
             }
             toast.success("Category created");
             setCreateOpen(false);
-            setForm({ name: "", description: "" });
+            setForm({ name: "", description: "", type: "PRODUCT" });
             router.refresh();
         } catch {
             toast.error("Network error");
@@ -159,6 +166,7 @@ export default function CategoriesTableClient({ categories, stats, pagination }:
         setForm({
             name: c.name,
             description: c.description || "",
+            type: c.type || "PRODUCT",
         });
         setEditOpen(true);
     };
@@ -180,7 +188,7 @@ export default function CategoriesTableClient({ categories, stats, pagination }:
             toast.success("Category updated");
             setEditOpen(false);
             setEditing(null);
-            setForm({ name: "", description: "" });
+            setForm({ name: "", description: "", type: "PRODUCT" });
             router.refresh();
         } catch {
             toast.error("Network error");
@@ -272,6 +280,7 @@ export default function CategoriesTableClient({ categories, stats, pagination }:
                                 <TableHead className="w-[120px]">ID</TableHead>
                                 <TableHead className="w-[200px]">Name</TableHead>
                                 <TableHead className="w-[300px]">Description</TableHead>
+                                <TableHead className="w-[100px]">Type</TableHead>
                                 <TableHead className="w-[100px]">Products</TableHead>
                                 <TableHead className="w-[150px]">Actions</TableHead>
                             </TableRow>
@@ -290,6 +299,11 @@ export default function CategoriesTableClient({ categories, stats, pagination }:
                                         <TableCell className="font-medium">{c.name}</TableCell>
                                         <TableCell className="text-sm text-muted-foreground">
                                             {c.description || "—"}
+                                        </TableCell>
+                                        <TableCell>
+                                            <Badge variant={c.type === 'SERVICE' ? 'default' : 'secondary'}>
+                                                {c.type}
+                                            </Badge>
                                         </TableCell>
                                         <TableCell>
                                             <Badge variant="secondary">
@@ -429,6 +443,21 @@ export default function CategoriesTableClient({ categories, stats, pagination }:
                                 placeholder="Optional description"
                             />
                         </div>
+                        <div>
+                            <label className="text-sm font-medium">Type</label>
+                            <Select
+                                value={form.type}
+                                onValueChange={(value) => setForm({ ...form, type: value })}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select type" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="PRODUCT">Product</SelectItem>
+                                    <SelectItem value="SERVICE">Service</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
                     </div>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setCreateOpen(false)}>Cancel</Button>
@@ -461,6 +490,21 @@ export default function CategoriesTableClient({ categories, stats, pagination }:
                                 onChange={(e) => setForm({ ...form, description: e.target.value })}
                                 placeholder="Optional description"
                             />
+                        </div>
+                        <div>
+                            <label className="text-sm font-medium">Type</label>
+                            <Select
+                                value={form.type}
+                                onValueChange={(value) => setForm({ ...form, type: value })}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select type" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="PRODUCT">Product</SelectItem>
+                                    <SelectItem value="SERVICE">Service</SelectItem>
+                                </SelectContent>
+                            </Select>
                         </div>
                     </div>
                     <DialogFooter>

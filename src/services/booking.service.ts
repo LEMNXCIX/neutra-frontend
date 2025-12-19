@@ -9,7 +9,11 @@ export interface Service {
     description?: string;
     duration: number;
     price: number;
-    category?: string;
+    categoryId?: string;
+    category?: {
+        id: string;
+        name: string;
+    };
     active: boolean;
     tenantId: string;
     createdAt: string;
@@ -176,6 +180,20 @@ class BookingService {
         if (!data.success) {
             throw new Error(data.message || 'Failed to cancel appointment');
         }
+    }
+
+    /**
+     * Get a single appointment by ID
+     */
+    async getAppointmentById(id: string): Promise<Appointment> {
+        const response = await fetch(`${this.baseUrl}/appointments/${id}`);
+        const data = await response.json();
+
+        if (!data.success) {
+            throw new Error(data.message || 'Failed to fetch appointment details');
+        }
+
+        return data.data;
     }
 }
 

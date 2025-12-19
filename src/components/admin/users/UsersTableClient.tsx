@@ -3,7 +3,8 @@
 import React, { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
-import { usersService } from "@/services";
+import { usersService, tenantService } from "@/services";
+import { Tenant } from "@/types/tenant";
 import { ApiError } from "@/lib/api-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -80,10 +81,30 @@ export default function UsersTableClient({ users, stats, pagination, showTenant 
     // Dialog states
     const [editOpen, setEditOpen] = useState(false);
     const [editing, setEditing] = useState<User | null>(null);
-    const [form, setForm] = useState({ name: "", email: "" });
+    const [form, setForm] = useState({ name: "", email: "", tenantId: "" });
     const [roleDialogOpen, setRoleDialogOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
     const [isSaving, setIsSaving] = useState(false);
+    const [tenants, setTenants] = useState<Tenant[]>([]);
+    const [isLoadingTenants, setIsLoadingTenants] = useState(false);
+
+    // Fetch tenants for super admin
+    React.useEffect(() => {
+        if (showTenant) {
+            const fetchTenants = async () => {
+                setIsLoadingTenants(true);
+                try {
+                    const data = await tenantService.getAll();
+                    setTenants(data);
+                } catch (err) {
+                    console.error("Failed to fetch tenants:", err);
+                } finally {
+                    setIsLoadingTenants(false);
+                }
+            };
+            fetchTenants();
+        }
+    }, [showTenant]);
 
     // URL State
     const searchQuery = searchParams.get("search") || "";
@@ -126,6 +147,7 @@ export default function UsersTableClient({ users, stats, pagination, showTenant 
         setForm({
             name: u.name,
             email: u.email,
+            tenantId: u.tenantId,
         });
         setEditOpen(true);
     };
@@ -137,11 +159,12 @@ export default function UsersTableClient({ users, stats, pagination, showTenant 
             await usersService.update(editing.id, {
                 name: form.name,
                 email: form.email,
+                tenantId: showTenant ? form.tenantId : undefined,
             });
             toast.success("User updated");
             setEditOpen(false);
             setEditing(null);
-            setForm({ name: "", email: "" });
+            setForm({ name: "", email: "", tenantId: "" });
             router.refresh();
         } catch (err) {
             const message = err instanceof ApiError ? err.message : "Failed to update user";
@@ -483,6 +506,28 @@ export default function UsersTableClient({ users, stats, pagination, showTenant 
                                 placeholder="user@example.com"
                             />
                         </div>
+
+                        {showTenant && (
+                            <div>
+                                <label className="text-sm font-medium">Tenant</label>
+                                <Select
+                                    value={form.tenantId}
+                                    onValueChange={(val) => setForm({ ...form, tenantId: val })}
+                                    disabled={isLoadingTenants}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select Tenant" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {tenants.map((t) => (
+                                            <SelectItem key={t.id} value={t.id}>
+                                                {t.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        )}
 
                     </div>
                     <DialogFooter>

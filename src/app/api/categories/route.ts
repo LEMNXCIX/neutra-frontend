@@ -8,7 +8,8 @@ const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:400
  */
 export async function GET(req: NextRequest) {
   try {
-    const backendUrl = `${BACKEND_API_URL}/categories`;
+    const { searchParams } = new URL(req.url);
+    const backendUrl = `${BACKEND_API_URL}/categories?${searchParams.toString()}`;
 
     const response = await fetch(backendUrl, {
       method: "GET",

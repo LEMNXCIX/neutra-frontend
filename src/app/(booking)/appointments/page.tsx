@@ -128,15 +128,18 @@ export default function AppointmentsPage() {
                             >
                                 <CardHeader>
                                     <div className="flex justify-between items-start">
-                                        <div className="space-y-1">
-                                            <CardTitle className="text-xl">
+                                        <Link
+                                            href={`/appointments/${appointment.id}`}
+                                            className="space-y-1 group flex-1"
+                                        >
+                                            <CardTitle className="text-xl group-hover:text-primary transition-colors">
                                                 {appointment.service?.name || 'Service'}
                                             </CardTitle>
-                                            <CardDescription className="flex items-center gap-2">
+                                            <CardDescription className="flex items-center gap-2 group-hover:text-foreground transition-colors">
                                                 <User className="h-4 w-4" />
                                                 with {appointment.staff?.name || 'Staff Member'}
                                             </CardDescription>
-                                        </div>
+                                        </Link>
                                         <Badge variant={getStatusVariant(appointment.status)}>
                                             {appointment.status.replace('_', ' ')}
                                         </Badge>
