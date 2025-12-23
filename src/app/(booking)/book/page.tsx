@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
-import { Loader2, Clock, DollarSign, User, Calendar as CalendarIcon, ChevronLeft, Check, AlertCircle } from 'lucide-react';
+import { Loader2, Clock, DollarSign, User, Calendar as CalendarIcon, ChevronLeft, Check, AlertCircle, Info } from 'lucide-react';
 
 export default function BookPage() {
     const router = useRouter();
@@ -181,7 +181,7 @@ export default function BookPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-background via-muted/20 to-background">
+        <div className="min-h-screen bg-background">
             <div className="container mx-auto px-4 py-12 max-w-4xl">
                 <div className="mb-8">
                     <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-2">

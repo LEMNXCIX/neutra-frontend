@@ -17,7 +17,7 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import {
     Table,
     TableHeader,
@@ -190,7 +190,68 @@ export default function ServicesTableClient() {
                 </Button>
             </div>
 
-            <Card>
+            {/* Mobile View (Cards) */}
+            <div className="grid grid-cols-1 gap-4 md:hidden">
+                {services.length === 0 ? (
+                    <Card>
+                        <CardContent className="p-8 text-center text-muted-foreground">
+                            No services found. Create your first service to get started.
+                        </CardContent>
+                    </Card>
+                ) : (
+                    services.map((service) => (
+                        <Card key={service.id}>
+                            <CardHeader className="pb-2">
+                                <div className="flex justify-between items-start">
+                                    <div>
+                                        <CardTitle className="text-lg font-bold">
+                                            {service.name}
+                                        </CardTitle>
+                                        <div className="flex items-center gap-2 mt-1">
+                                            {service.category ? (
+                                                <Badge variant="outline" className="font-normal capitalize text-xs">
+                                                    <Tag className="h-3 w-3 mr-1 opacity-70" />
+                                                    {service.category.name}
+                                                </Badge>
+                                            ) : (
+                                                <Badge variant="outline" className="font-normal text-xs text-muted-foreground">Uncategorized</Badge>
+                                            )}
+                                            <Badge variant={service.active ? "default" : "secondary"} className="text-xs">
+                                                {service.active ? 'Active' : 'Inactive'}
+                                            </Badge>
+                                        </div>
+                                    </div>
+                                    <div className="font-bold text-primary text-lg">
+                                        ${service.price.toFixed(2)}
+                                    </div>
+                                </div>
+                            </CardHeader>
+                            <CardContent className="pb-2 text-sm space-y-2">
+                                {service.description && (
+                                    <p className="text-muted-foreground line-clamp-2 italic">
+                                        "{service.description}"
+                                    </p>
+                                )}
+                                <div className="flex items-center text-muted-foreground pt-1">
+                                    <Clock className="h-4 w-4 mr-2" />
+                                    {service.duration} min
+                                </div>
+                            </CardContent>
+                            <div className="p-4 pt-0 grid grid-cols-2 gap-2 mt-2">
+                                <Button size="sm" variant="outline" className="w-full" onClick={() => openEdit(service)}>
+                                    <Edit className="h-4 w-4 mr-2" /> Edit
+                                </Button>
+                                <Button size="sm" variant="outline" className="w-full text-destructive border-destructive/20 hover:bg-destructive/10" onClick={() => handleDelete(service.id)}>
+                                    <Trash2 className="h-4 w-4 mr-2" /> Delete
+                                </Button>
+                            </div>
+                        </Card>
+                    ))
+                )}
+            </div>
+
+            {/* Desktop View (Table) */}
+            <Card className="hidden md:block">
                 <CardContent className="p-0">
                     <Table>
                         <TableHeader>

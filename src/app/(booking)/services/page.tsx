@@ -66,7 +66,7 @@ export default function ServicesPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-background via-muted/20 to-background">
+        <div className="min-h-screen bg-background">
             <div className="container mx-auto px-4 py-12 max-w-7xl">
                 {/* Header */}
                 <div className="mb-12 text-center">

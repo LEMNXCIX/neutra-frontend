@@ -18,6 +18,7 @@ import {
     CreditCard
 } from 'lucide-react';
 import Link from 'next/link';
+import { CancelAppointmentDialog } from '@/components/booking/cancel-appointment-dialog';
 
 interface PageProps {
     params: Promise<{ id: string }>;
@@ -87,7 +88,7 @@ export default function AppointmentDetailPage({ params }: PageProps) {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-background via-muted/20 to-background">
+        <div className="min-h-screen bg-background">
             <div className="container mx-auto px-4 py-12 max-w-3xl">
                 {/* Navigation */}
                 <Link href="/appointments" className="flex items-center gap-2 text-primary hover:underline mb-8">
@@ -231,9 +232,20 @@ export default function AppointmentDetailPage({ params }: PageProps) {
                                         <Link href="/contact">View Location Map</Link>
                                     </Button>
                                     {appointment.status === 'PENDING' && (
-                                        <p className="text-[10px] text-center mt-2 text-muted-foreground italic">
-                                            Need to reschedule? Please contact us directly.
-                                        </p>
+                                        <div className="mt-4 pt-2 border-t">
+                                            <p className="text-[10px] text-center mb-3 text-muted-foreground italic">
+                                                Need to reschedule? Please contact us directly.
+                                            </p>
+                                            <CancelAppointmentDialog
+                                                appointmentId={appointment.id}
+                                                onAppointmentCancelled={loadAppointment}
+                                                trigger={
+                                                    <Button variant="destructive" className="w-full">
+                                                        Cancel Appointment
+                                                    </Button>
+                                                }
+                                            />
+                                        </div>
                                     )}
                                 </div>
                             </CardContent>

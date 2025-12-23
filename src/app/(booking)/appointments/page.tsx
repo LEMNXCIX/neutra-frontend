@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Calendar, Clock, User, FileText, AlertCircle, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
+import { CancelAppointmentDialog } from '@/components/booking/cancel-appointment-dialog';
 
 export default function AppointmentsPage() {
     const searchParams = useSearchParams();
@@ -35,17 +36,7 @@ export default function AppointmentsPage() {
         }
     };
 
-    const handleCancel = async (id: string) => {
-        if (!confirm('Are you sure you want to cancel this appointment?')) return;
 
-        try {
-            const reason = prompt('Reason for cancellation (optional):');
-            await bookingService.cancelAppointment(id, reason || undefined);
-            await loadAppointments();
-        } catch (err: any) {
-            alert('Failed to cancel appointment: ' + err.message);
-        }
-    };
 
     const getStatusVariant = (status: string): "default" | "secondary" | "destructive" | "outline" => {
         const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
@@ -71,7 +62,7 @@ export default function AppointmentsPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-background via-muted/20 to-background">
+        <div className="min-h-screen bg-background">
             <div className="container mx-auto px-4 py-12 max-w-4xl">
                 {/* Header */}
                 <div className="mb-8">
@@ -187,13 +178,15 @@ export default function AppointmentsPage() {
 
                                     {appointment.status === 'PENDING' && (
                                         <div className="mt-4 pt-4 border-t">
-                                            <Button
-                                                onClick={() => handleCancel(appointment.id)}
-                                                variant="destructive"
-                                                size="sm"
-                                            >
-                                                Cancel Appointment
-                                            </Button>
+                                            <CancelAppointmentDialog
+                                                appointmentId={appointment.id}
+                                                onAppointmentCancelled={loadAppointments}
+                                                trigger={
+                                                    <Button variant="destructive" size="sm">
+                                                        Cancel Appointment
+                                                    </Button>
+                                                }
+                                            />
                                         </div>
                                     )}
                                 </CardContent>

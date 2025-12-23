@@ -20,6 +20,8 @@ import {
   LayoutDashboard,
   X,
   Loader2,
+  Calendar,
+  User,
 } from "lucide-react";
 import Link from "@/components/ui/link";
 import { useRouter } from "next/navigation";
@@ -38,6 +40,14 @@ import { ScrollArea } from "./ui/scroll-area";
 import { Card } from "./ui/card";
 import { categoriesService } from '@/services/categories.service';
 import { Category } from '@/types/category.types';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+
 
 type Product = { id: string; name: string; price: number; image?: string; stock: number };
 
@@ -398,41 +408,36 @@ export function Navigation() {
 
           {/* Mobile: hamburger menu */}
           <div className="flex lg:hidden items-center">
-            <Button
-              variant="ghost"
-              size="icon-lg"
-              aria-label="Open menu"
-              onClick={() => setIsOpen(true)}
-              className="hover-scale click-pulse">
-              <Menu />
-            </Button>
-
-            {/* Overlay */}
-            {isOpen && (
-              <div
-                className="fixed inset-0 z-40 bg-black/40"
-                onClick={() => setIsOpen(false)}
-                aria-hidden
-              />
-            )}
-
-            {/* Sidebar drawer */}
-            <aside
-              className={`fixed top-0 left-0 z-50 h-svh w-72 backdrop-blur-lg bg-white/90 dark:bg-black/90 border border-white/10 rounded-r-2xl shadow-lg transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
-              aria-hidden={!isOpen}
-            >
-              <div className="flex items-center justify-between px-4 py-3 border-b">
-                <div className="flex items-center">
-                  <span className="ml-2 font-medium">Menu</span>
-                </div>
-                <Button variant="ghost" onClick={() => setIsOpen(false)} aria-label="Close">
-                  <X />
+            <Sheet open={isOpen} onOpenChange={setIsOpen}>
+              <SheetTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon-lg"
+                  aria-label="Open menu"
+                  className="hover-scale click-pulse"
+                >
+                  <Menu />
                 </Button>
-              </div>
-              <nav className="p-4">
-                <ul className="flex flex-col gap-4">
-                  {/* Mobile Search */}
-                  <li className="pb-4 border-b">
+              </SheetTrigger>
+              <SheetContent side="left" className="w-[300px] p-0 flex flex-col">
+                <SheetHeader className="p-6 border-b text-left">
+                  <div className="flex items-center gap-2">
+                    <div className="size-8 text-primary">
+                      <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+                        <path d="M 20 48.5 C 20 28.5 47 30.5 44 15.5" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
+                        <circle cx="24" cy="26.5" r="5" fill="currentColor" />
+                      </svg>
+                    </div>
+                    <div>
+                      <SheetTitle className="text-xl font-bold tracking-tight">Neutra</SheetTitle>
+                      <p className="text-xs text-muted-foreground -mt-1">Minimal Interiors</p>
+                    </div>
+                  </div>
+                </SheetHeader>
+
+                <div className="flex-1 overflow-y-auto p-6 space-y-8">
+                  <nav className="flex flex-col space-y-1">
+                    <span className="text-xs font-bold text-muted-foreground mb-3 px-4 uppercase">Search</span>
                     <form
                       onSubmit={(e) => {
                         e.preventDefault();
@@ -441,50 +446,133 @@ export function Navigation() {
                         router.push(url);
                         setIsOpen(false);
                       }}
-                      className="flex gap-2"
+                      className="px-4 mb-4"
                     >
-                      <input
-                        type="text"
-                        placeholder="Search..."
-                        value={query}
-                        onChange={(e) => setQuery(e.target.value)}
-                        className="flex-1 min-w-0 px-3 py-2 rounded-md border bg-background text-sm"
-                      />
-                      <Button type="submit" size="sm" className="flex-shrink-0 px-3">
-                        <Search className="h-4 w-4" />
-                      </Button>
+                      <InputGroup>
+                        <InputGroupInput
+                          placeholder="Search..."
+                          value={query}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuery(e.target.value)}
+                        />
+                        <InputGroupAddon>
+                          <button type="submit">
+                            <Search className="h-4 w-4" />
+                          </button>
+                        </InputGroupAddon>
+                      </InputGroup>
                     </form>
-                  </li>
-                  <li>
-                    <Link href="/products" onClick={() => setIsOpen(false)} className="text-base font-medium">Products</Link>
-                  </li>
-                  <li>
-                    <div className="text-sm font-medium mb-2">Categories</div>
-                    <div className="flex flex-col gap-2 pl-2">
-                      {categories.map((c) => (
-                        <Link key={c.id} href={`/products?category=${encodeURIComponent(c.id)}`} onClick={() => setIsOpen(false)} className="text-sm text-muted-foreground">{c.name}</Link>
-                      ))}
+
+                    <span className="text-xs font-bold text-muted-foreground mb-3 px-4 uppercase">Navigation</span>
+                    <Link
+                      href="/products"
+                      onClick={() => setIsOpen(false)}
+                      className="flex items-center gap-3 px-4 py-4 text-base font-semibold transition-all duration-200 rounded-2xl hover:bg-primary/5 hover:text-primary active:scale-[0.98]"
+                    >
+                      <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+                      All Products
+                    </Link>
+
+                    <div className="space-y-4 pt-4">
+                      <span className="text-xs font-bold text-muted-foreground px-4 uppercase">Categories</span>
+                      <div className="grid gap-1">
+                        {categories.map((c) => (
+                          <Link
+                            key={c.id}
+                            href={`/products?category=${encodeURIComponent(c.id)}`}
+                            onClick={() => setIsOpen(false)}
+                            className="flex items-center gap-3 px-4 py-3 text-sm font-medium transition-all duration-200 rounded-xl hover:bg-muted text-muted-foreground hover:text-foreground"
+                          >
+                            {c.name}
+                          </Link>
+                        ))}
+                      </div>
                     </div>
-                  </li>
-                  <li>
-                    <Link href="/cart" onClick={() => setIsOpen(false)} className="text-base font-medium">Cart</Link>
-                  </li>
-                  <li className="pt-4 border-t">
+                  </nav>
+
+                  <div className="space-y-6">
+                    <span className="text-xs font-bold text-muted-foreground px-4 uppercase">Account</span>
                     {user ? (
-                      <div className="flex flex-col gap-2">
-                        <Link href="/profile" onClick={() => setIsOpen(false)} className="text-sm">My Profile</Link>
-                        {user.isAdmin && (
-                          <Link href="/admin" onClick={() => setIsOpen(false)} className="text-sm">Admin Dashboard</Link>
-                        )}
-                        <button onClick={async () => { await logout(); setIsOpen(false); router.push('/'); }} className="text-sm text-left">Sign Out</button>
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-4 p-4 rounded-3xl bg-muted/50 border border-border">
+                          <Avatar className="h-12 w-12 ring-2 ring-primary/20 ring-offset-2 ring-offset-background">
+                            <AvatarImage src={user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}`} />
+                            <AvatarFallback className="bg-primary/10 text-primary font-bold">
+                              {user.name.slice(0, 2).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="overflow-hidden">
+                            <p className="font-bold truncate text-foreground">{user.name}</p>
+                            <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                          </div>
+                        </div>
+
+                        <div className="grid gap-2">
+                          <Button
+                            variant="outline"
+                            className="w-full justify-start h-12 rounded-2xl px-4 font-semibold text-foreground/80"
+                            onClick={() => {
+                              setIsOpen(false);
+                              router.push('/profile');
+                            }}
+                          >
+                            <User className="mr-3 h-5 w-5 text-primary" />
+                            My Profile
+                          </Button>
+                          {user.isAdmin && (
+                            <Button
+                              variant="outline"
+                              className="w-full justify-start h-12 rounded-2xl px-4 font-semibold text-foreground/80"
+                              onClick={() => {
+                                setIsOpen(false);
+                                router.push('/admin');
+                              }}
+                            >
+                              <LayoutDashboard className="mr-3 h-5 w-5 text-primary" />
+                              Admin Dashboard
+                            </Button>
+                          )}
+                          <div className="pt-4 mt-4 border-t border-border">
+                            <Button
+                              variant="ghost"
+                              className="w-full justify-center h-12 rounded-2xl font-bold text-destructive hover:bg-destructive/10 hover:text-destructive"
+                              onClick={async () => {
+                                await logout();
+                                setIsOpen(false);
+                                router.push('/');
+                              }}
+                            >
+                              Sign Out
+                            </Button>
+                          </div>
+                        </div>
                       </div>
                     ) : (
-                      <Link href="/login" onClick={() => setIsOpen(false)} className="text-base font-medium">Sign In</Link>
+                      <div className="grid gap-3 pt-2">
+                        <Button
+                          variant="outline"
+                          className="h-14 rounded-2xl border-2 font-bold"
+                          onClick={() => { setIsOpen(false); router.push('/login'); }}
+                        >
+                          Sign In
+                        </Button>
+                        <Button
+                          className="h-14 rounded-2xl shadow-xl shadow-primary/20 font-bold text-base"
+                          onClick={() => { setIsOpen(false); router.push('/products'); }}
+                        >
+                          Shop Now
+                        </Button>
+                      </div>
                     )}
-                  </li>
-                </ul>
-              </nav>
-            </aside>
+                  </div>
+                </div>
+
+                <div className="p-8 border-t bg-muted/20">
+                  <p className="text-[10px] text-muted-foreground text-center font-medium uppercase tracking-widest">
+                    &copy; {new Date().getFullYear()} Neutra Platforms
+                  </p>
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </NavigationMenuList>
       </div>

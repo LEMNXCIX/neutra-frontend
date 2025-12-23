@@ -22,6 +22,13 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Menu, X, Calendar, Clock, User } from "lucide-react";
+import {
+    Sheet,
+    SheetContent,
+    SheetHeader,
+    SheetTitle,
+    SheetTrigger,
+} from "@/components/ui/sheet";
 
 export function BookingNavbar() {
     const [isOpen, setIsOpen] = useState(false);
@@ -41,12 +48,15 @@ export function BookingNavbar() {
 
     if (user) {
         navItems.push({ label: "My Appointments", href: "/appointments" });
+        if (user.isAdmin) {
+            navItems.push({ label: "Admin", href: "/admin" });
+        }
     }
 
     return (
         <NavigationMenu
             viewport={false}
-            className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
+            className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur"
         >
             <div className="container flex h-16 items-center justify-between px-4">
                 {/* Logo */}
@@ -77,11 +87,11 @@ export function BookingNavbar() {
                     <NavigationMenuList>
                         {navItems.map((item) => (
                             <NavigationMenuItem key={item.href}>
-                                <Link href={item.href} legacyBehavior passHref>
-                                    <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                                <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
+                                    <Link href={item.href}>
                                         {item.label}
-                                    </NavigationMenuLink>
-                                </Link>
+                                    </Link>
+                                </NavigationMenuLink>
                             </NavigationMenuItem>
                         ))}
                     </NavigationMenuList>
@@ -137,100 +147,123 @@ export function BookingNavbar() {
 
                 {/* Mobile Menu Toggle */}
                 <div className="flex md:hidden">
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => setIsOpen(true)}
-                        aria-label="Open Menu"
-                    >
-                        <Menu className="h-6 w-6" />
-                    </Button>
+                    <Sheet open={isOpen} onOpenChange={setIsOpen}>
+                        <SheetTrigger asChild>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                aria-label="Open Menu"
+                            >
+                                <Menu className="h-6 w-6" />
+                            </Button>
+                        </SheetTrigger>
+                        <SheetContent side="right" className="w-[300px] p-0 flex flex-col">
+                            <SheetHeader className="p-6 border-b text-left">
+                                <SheetTitle className="text-xl font-bold">Booking Menu</SheetTitle>
+                                <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Navigation</span>
+                            </SheetHeader>
+
+                            <div className="flex-1 overflow-y-auto p-6 space-y-8">
+                                <nav className="flex flex-col space-y-1">
+                                    <span className="text-xs font-bold text-muted-foreground mb-3 px-4 uppercase">Main Menu</span>
+                                    {navItems.map((item) => (
+                                        <Link
+                                            key={item.href}
+                                            href={item.href}
+                                            onClick={() => setIsOpen(false)}
+                                            className="flex items-center gap-3 px-4 py-4 text-base font-semibold transition-all duration-200 rounded-2xl hover:bg-primary/5 hover:text-primary active:scale-[0.98]"
+                                        >
+                                            <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+                                            {item.label}
+                                        </Link>
+                                    ))}
+                                </nav>
+
+                                <div className="space-y-6">
+                                    <span className="text-xs font-bold text-muted-foreground px-4 uppercase">Account</span>
+                                    {user ? (
+                                        <div className="space-y-4">
+                                            <div className="flex items-center gap-4 p-4 rounded-3xl bg-muted/50 border border-border">
+                                                <Avatar className="h-12 w-12 ring-2 ring-primary/20 ring-offset-2 ring-offset-background">
+                                                    <AvatarImage src={user.avatar} />
+                                                    <AvatarFallback className="bg-primary/10 text-primary font-bold">
+                                                        {user.name.slice(0, 2).toUpperCase()}
+                                                    </AvatarFallback>
+                                                </Avatar>
+                                                <div className="overflow-hidden">
+                                                    <p className="font-bold truncate text-foreground">{user.name}</p>
+                                                    <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                                                </div>
+                                            </div>
+
+                                            <div className="grid gap-2">
+                                                <Button
+                                                    variant="outline"
+                                                    className="w-full justify-start h-12 rounded-2xl px-4 font-semibold text-foreground/80"
+                                                    onClick={() => {
+                                                        setIsOpen(false);
+                                                        router.push('/appointments');
+                                                    }}
+                                                >
+                                                    <Calendar className="mr-3 h-5 w-5 text-primary" />
+                                                    My Appointments
+                                                </Button>
+                                                <Button
+                                                    variant="outline"
+                                                    className="w-full justify-start h-12 rounded-2xl px-4 font-semibold text-foreground/80"
+                                                    onClick={() => {
+                                                        setIsOpen(false);
+                                                        router.push('/profile');
+                                                    }}
+                                                >
+                                                    <User className="mr-3 h-5 w-5 text-primary" />
+                                                    My Profile
+                                                </Button>
+                                                <div className="pt-4 mt-4 border-t border-border">
+                                                    <Button
+                                                        variant="ghost"
+                                                        className="w-full justify-center h-12 rounded-2xl font-bold text-destructive hover:bg-destructive/10 hover:text-destructive"
+                                                        onClick={async () => {
+                                                            await logout();
+                                                            setIsOpen(false);
+                                                            router.push('/');
+                                                        }}
+                                                    >
+                                                        Sign Out
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="grid gap-3 pt-2">
+                                            <Button
+                                                variant="outline"
+                                                className="h-14 rounded-2xl border-2 font-bold"
+                                                onClick={() => { setIsOpen(false); router.push('/login'); }}
+                                            >
+                                                Sign In
+                                            </Button>
+                                            <Button
+                                                className="h-14 rounded-2xl shadow-xl shadow-primary/20 font-bold text-base"
+                                                onClick={() => { setIsOpen(false); router.push('/book'); }}
+                                            >
+                                                Start Booking
+                                            </Button>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            <div className="p-8 border-t bg-muted/20">
+                                <p className="text-[10px] text-muted-foreground text-center font-medium uppercase tracking-widest">
+                                    &copy; {new Date().getFullYear()} Neutra Platforms
+                                </p>
+                            </div>
+                        </SheetContent>
+                    </Sheet>
                 </div>
             </div>
 
-            {/* Mobile Drawer */}
-            {isOpen && (
-                <div className="fixed inset-0 z-50 flex justify-end">
-                    {/* Overlay */}
-                    <div
-                        className="fixed inset-0 bg-background/80 backdrop-blur-sm"
-                        onClick={() => setIsOpen(false)}
-                    />
-
-                    {/* Sidebar */}
-                    <div className="relative h-full w-[300px] border-l bg-background p-6 shadow-xl animate-in slide-in-from-right">
-                        <div className="flex items-center justify-between mb-8">
-                            <span className="text-lg font-bold">Menu</span>
-                            <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)}>
-                                <X className="h-6 w-6" />
-                            </Button>
-                        </div>
-
-                        <div className="space-y-6">
-                            <nav className="flex flex-col space-y-4">
-                                {navItems.map((item) => (
-                                    <Link
-                                        key={item.href}
-                                        href={item.href}
-                                        onClick={() => setIsOpen(false)}
-                                        className="text-lg font-medium hover:text-primary transition-colors block py-2"
-                                    >
-                                        {item.label}
-                                    </Link>
-                                ))}
-                            </nav>
-
-                            <div className="border-t pt-6">
-                                {user ? (
-                                    <div className="space-y-4">
-                                        <div className="flex items-center gap-3 mb-4">
-                                            <Avatar>
-                                                <AvatarImage src={user.avatar} />
-                                                <AvatarFallback>{user.name.slice(0, 2).toUpperCase()}</AvatarFallback>
-                                            </Avatar>
-                                            <div>
-                                                <p className="font-medium">{user.name}</p>
-                                                <p className="text-xs text-muted-foreground">{user.email}</p>
-                                            </div>
-                                        </div>
-                                        <Button
-                                            variant="outline"
-                                            className="w-full justify-start"
-                                            onClick={() => {
-                                                setIsOpen(false);
-                                                router.push('/appointments');
-                                            }}
-                                        >
-                                            <Calendar className="mr-2 h-4 w-4" />
-                                            My Appointments
-                                        </Button>
-                                        <Button
-                                            variant="destructive"
-                                            className="w-full"
-                                            onClick={async () => {
-                                                await logout();
-                                                setIsOpen(false);
-                                                router.push('/');
-                                            }}
-                                        >
-                                            Sign Out
-                                        </Button>
-                                    </div>
-                                ) : (
-                                    <div className="grid gap-2">
-                                        <Button variant="outline" onClick={() => { setIsOpen(false); router.push('/login'); }}>
-                                            Sign In
-                                        </Button>
-                                        <Button onClick={() => { setIsOpen(false); router.push('/book'); }}>
-                                            Book Now
-                                        </Button>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
         </NavigationMenu>
     );
 }

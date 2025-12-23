@@ -8,6 +8,7 @@ import {
     CardHeader,
     CardTitle,
     CardContent,
+    CardDescription,
 } from "@/components/ui/card";
 import {
     Table,
@@ -262,8 +263,73 @@ export default function AppointmentsTableClient({ appointments, stats, paginatio
                 </CardContent>
             </Card>
 
-            {/* Table */}
-            <Card className="border-none shadow-sm overflow-hidden">
+            {/* Mobile View (Cards) */}
+            <div className="grid grid-cols-1 gap-4 md:hidden">
+                {appointments.length === 0 ? (
+                    <Card>
+                        <CardContent className="p-8 text-center text-muted-foreground">
+                            No appointments found
+                        </CardContent>
+                    </Card>
+                ) : (
+                    appointments.map((appointment) => (
+                        <Card key={appointment.id} className="overflow-hidden">
+                            <CardHeader className="pb-2">
+                                <div className="flex justify-between items-start">
+                                    <div>
+                                        <CardTitle className="text-base font-bold flex items-center gap-2">
+                                            {appointment.user?.name || "Guest Client"}
+                                        </CardTitle>
+                                        <CardDescription className="text-xs mt-1">
+                                            {format(new Date(appointment.startTime), "MMM dd, yyyy")} • {format(new Date(appointment.startTime), "HH:mm")}
+                                        </CardDescription>
+                                    </div>
+                                    {getStatusBadge(appointment.status)}
+                                </div>
+                            </CardHeader>
+                            <CardContent className="pb-2 space-y-2 text-sm">
+                                <div className="flex justify-between border-b pb-2">
+                                    <span className="text-muted-foreground flex items-center gap-1"><Scissors className="w-3 h-3" /> Service</span>
+                                    <span className="font-medium">{appointment.service?.name}</span>
+                                </div>
+                                <div className="flex justify-between border-b pb-2">
+                                    <span className="text-muted-foreground flex items-center gap-1"><User className="w-3 h-3" /> Staff</span>
+                                    <span className="font-medium">{appointment.staff?.name}</span>
+                                </div>
+                            </CardContent>
+                            <div className="p-4 pt-0 grid grid-cols-2 gap-2 mt-2">
+                                <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="w-full"
+                                    onClick={() => {
+                                        setSelectedAppointment(appointment);
+                                        setDetailsOpen(true);
+                                    }}
+                                >
+                                    <Eye className="h-4 w-4 mr-2" /> Details
+                                </Button>
+                                {appointment.status !== 'CANCELLED' && appointment.status !== 'COMPLETED' ? (
+                                    <Button
+                                        size="sm"
+                                        variant="outline"
+                                        className="w-full text-red-500 border-red-200 hover:bg-red-50"
+                                        disabled={isCancelling === appointment.id}
+                                        onClick={() => handleCancel(appointment.id)}
+                                    >
+                                        {isCancelling === appointment.id ? <Spinner size="sm" /> : <><XCircle className="h-4 w-4 mr-2" /> Cancel</>}
+                                    </Button>
+                                ) : (
+                                    <div />
+                                )}
+                            </div>
+                        </Card>
+                    ))
+                )}
+            </div>
+
+            {/* Desktop View (Table) */}
+            <Card className="border-none shadow-sm overflow-hidden hidden md:block">
                 <div className="overflow-x-auto">
                     <Table>
                         <TableHeader className="bg-muted/50">
@@ -351,14 +417,16 @@ export default function AppointmentsTableClient({ appointments, stats, paginatio
                         </TableBody>
                     </Table>
                 </div>
+            </Card>
 
-                {/* Pagination */}
-                {pagination.totalItems > 0 && (
-                    <div className="p-4 border-t flex flex-col sm:flex-row justify-between items-center gap-4 bg-muted/20">
-                        <p className="text-sm text-muted-foreground">
-                            Showing <span className="font-medium font-foreground text-foreground underline underline-offset-4 decoration-current decoration-dashed">{((pagination.currentPage - 1) * pagination.itemsPerPage) + 1}</span> to <span className="font-medium font-foreground text-foreground underline underline-offset-4 decoration-current decoration-dashed">{Math.min(pagination.currentPage * pagination.itemsPerPage, pagination.totalItems)}</span> of <span className="font-medium font-foreground text-foreground underline underline-offset-4 decoration-current decoration-dashed">{pagination.totalItems}</span> appointments
+            {/* Pagination (Shared) */}
+            {pagination.totalItems > 0 && (
+                <Card className="border-none shadow-sm">
+                    <div className="p-4 flex flex-col sm:flex-row justify-between items-center gap-4 bg-muted/20 rounded-lg">
+                        <p className="text-sm text-muted-foreground order-2 sm:order-1">
+                            Showing <span className="font-medium text-foreground">{((pagination.currentPage - 1) * pagination.itemsPerPage) + 1}</span> to <span className="font-medium text-foreground">{Math.min(pagination.currentPage * pagination.itemsPerPage, pagination.totalItems)}</span> of <span className="font-medium text-foreground">{pagination.totalItems}</span> appointments
                         </p>
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 order-1 sm:order-2">
                             <Button
                                 variant="outline"
                                 size="sm"
@@ -370,6 +438,7 @@ export default function AppointmentsTableClient({ appointments, stats, paginatio
                             </Button>
                             <div className="flex items-center gap-1">
                                 {Array.from({ length: Math.min(pagination.totalPages, 5) }, (_, i) => {
+                                    // Simple pagination logic, ideally should handle ellipsis
                                     const pageNum = i + 1;
                                     return (
                                         <Button
@@ -395,8 +464,9 @@ export default function AppointmentsTableClient({ appointments, stats, paginatio
                             </Button>
                         </div>
                     </div>
-                )}
-            </Card>
+                </Card>
+            )
+            }
 
             {/* Appointment Details Dialog */}
             <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>

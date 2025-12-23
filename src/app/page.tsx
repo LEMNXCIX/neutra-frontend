@@ -1,8 +1,18 @@
 'use client';
 
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import { getTenantUrl } from '@/lib/tenant';
 
 export default function LandingPage() {
+  const [storeUrl, setStoreUrl] = useState('#');
+  const [bookingUrl, setBookingUrl] = useState('#');
+
+  useEffect(() => {
+    setStoreUrl(getTenantUrl('default'));
+    setBookingUrl(getTenantUrl('booking1'));
+  }, []);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
       {/* Navigation */}
@@ -40,7 +50,7 @@ export default function LandingPage() {
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
             <a
-              href="http://localhost:3001"
+              href={storeUrl}
               className="group relative px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-semibold text-lg shadow-2xl hover:shadow-blue-500/50 transition-all duration-300 hover:scale-105 w-full sm:w-auto"
             >
               <span className="flex items-center justify-center gap-2">
@@ -52,7 +62,7 @@ export default function LandingPage() {
             </a>
 
             <a
-              href="http://localhost:3002"
+              href={bookingUrl}
               className="group relative px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold text-lg shadow-2xl hover:shadow-purple-500/50 transition-all duration-300 hover:scale-105 w-full sm:w-auto"
             >
               <span className="flex items-center justify-center gap-2">
@@ -65,9 +75,14 @@ export default function LandingPage() {
           </div>
 
           {/* Local Dev Note */}
-          <p className="mt-8 text-sm text-gray-400">
-            For local development: Use port 3001 for Store, 3002 for Booking
-          </p>
+          <div className="mt-8 space-y-2">
+            <p className="text-sm text-gray-400">
+              Recommended for development: Use subdomains on port 3000.
+            </p>
+            <p className="text-xs text-gray-500">
+              Legacy access: Port 3001 for Store, 3002 for Booking.
+            </p>
+          </div>
         </div>
       </section>
 

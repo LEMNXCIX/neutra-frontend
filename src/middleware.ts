@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
     const hostname = request.headers.get('host') || 'localhost';
     const url = request.nextUrl;
 
@@ -17,44 +17,87 @@ export function middleware(request: NextRequest) {
     let shouldRewrite = false;
     let rewritePath = '';
 
-    // Port-based routing for localhost development
-    if (hostname.includes('localhost') || hostname.includes('127.0.0.1')) {
-        if (port === '3000') {
-            // port 3000 is for Super Admin global view
-            tenantSlug = ''; // No slug = global
-            moduleType = 'root';
-        } else if (port === '3001') {
-            tenantSlug = 'default'; // Store tenant slug
-            moduleType = 'store';
-            if (url.pathname === '/') {
-                shouldRewrite = true;
-                rewritePath = '/store';
-            }
-        } else if (port === '3002') {
-            tenantSlug = 'booking1'; // Booking tenant slug
-            moduleType = 'booking';
-            if (url.pathname === '/') {
-                shouldRewrite = true;
-                rewritePath = '/services';
-            }
-        }
-    }
-    // Subdomain-based routing
-    else if (domain !== 'localhost' && domain.includes('.')) {
-        const parts = domain.split('.');
-        if (parts.length > 1) {
-            const resolvedSlug = parts[0];
-            if (resolvedSlug && resolvedSlug !== 'www' && resolvedSlug !== 'api') {
-                tenantSlug = resolvedSlug;
+    // 1. Subdomain-based routing (Works for both custom domains and subdomain.localhost)
+    const hostParts = domain.split('.');
 
-                // Simple heuristic for module type
-                if (tenantSlug.includes('booking') || tenantSlug.includes('book')) {
-                    moduleType = 'booking';
-                } else {
-                    moduleType = 'store';
+    // Check if we have a subdomain (e.g., booking1.localhost or tenant.neunetra.com)
+    // For localhost, parts will be ['subdomain', 'localhost'] -> length 2
+    // For production, parts will be ['subdomain', 'domain', 'com'] -> length 3
+    const isLocalhost = domain === 'localhost' || domain === '127.0.0.1' || domain.endsWith('.localhost');
+    const isIP = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(domain);
+    const isNipIo = domain.endsWith('.nip.io');
+
+    // Base parts: 1 for localhost/IP, 2 for domain.com, 6 for ip.nip.io
+    const basePartsCount = isNipIo ? 6 : (isLocalhost || isIP ? 1 : 2);
+
+    if (!isIP && hostParts.length > basePartsCount) {
+        const resolvedSlug = hostParts[0];
+        if (resolvedSlug && resolvedSlug !== 'www' && resolvedSlug !== 'api' && resolvedSlug !== 'localhost' && !/^\d+$/.test(resolvedSlug)) {
+            tenantSlug = resolvedSlug;
+
+            // Try to get module type from cookie cache first
+            const cachedModuleType = request.cookies.get(`${tenantSlug}-module-type`)?.value;
+
+            if (cachedModuleType) {
+                moduleType = cachedModuleType;
+            } else {
+                // Fetch from backend API
+                try {
+                    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001/api';
+                    const response = await fetch(`${apiUrl}/tenants/config/${tenantSlug}`, {
+                        next: { revalidate: 3600 } // Cache for 1 hour if supported
+                    });
+
+                    if (response.ok) {
+                        const result = await response.json();
+                        if (result.success && result.data) {
+                            moduleType = result.data.type?.toLowerCase() || 'store';
+                        }
+                    } else {
+                        // Simple heuristic fallback if API is down or tenant not found
+                        if (tenantSlug.includes('booking') || tenantSlug.includes('book')) {
+                            moduleType = 'booking';
+                        } else {
+                            moduleType = 'store';
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error fetching tenant config in middleware:', error);
+                    // Heuristic fallback
+                    if (tenantSlug.includes('booking') || tenantSlug.includes('book')) {
+                        moduleType = 'booking';
+                    } else {
+                        moduleType = 'store';
+                    }
                 }
             }
         }
+    }
+
+    // 2. Port-based routing for localhost development (Legacy fallback)
+    if (tenantSlug === 'default' || tenantSlug === '') {
+        if (isLocalhost) {
+            if (port === '3001') {
+                tenantSlug = 'default';
+                moduleType = 'store';
+            } else if (port === '3002') {
+                tenantSlug = 'booking1';
+                moduleType = 'booking';
+            } else if (port === '3000' && !domain.includes('.')) {
+                // Only root if no subdomain
+                tenantSlug = '';
+                moduleType = 'root';
+            }
+        }
+    }
+
+    // Default path rewrites for better UX
+    if (moduleType === 'store' && url.pathname === '/') {
+        shouldRewrite = true;
+        rewritePath = '/store';
+    } else if (moduleType === 'booking' && url.pathname === '/') {
+        shouldRewrite = true;
+        rewritePath = '/services';
     }
 
     // Clone the request headers
@@ -81,6 +124,7 @@ export function middleware(request: NextRequest) {
         });
         response.cookies.set('tenant-slug', tenantSlug);
         response.cookies.set('module-type', moduleType);
+        response.cookies.set(`${tenantSlug}-module-type`, moduleType, { maxAge: 3600 }); // Cache for 1 hour
         return response;
     }
 
@@ -95,6 +139,7 @@ export function middleware(request: NextRequest) {
         // Set cookie for client-side access
         response.cookies.set('tenant-slug', tenantSlug);
         response.cookies.set('module-type', moduleType);
+        response.cookies.set(`${tenantSlug}-module-type`, moduleType, { maxAge: 3600 }); // Cache for 1 hour
         return response;
     }
 
@@ -107,6 +152,9 @@ export function middleware(request: NextRequest) {
     // Set cookie for client-side access
     response.cookies.set('tenant-slug', tenantSlug);
     response.cookies.set('module-type', moduleType);
+    if (tenantSlug) {
+        response.cookies.set(`${tenantSlug}-module-type`, moduleType, { maxAge: 3600 }); // Cache for 1 hour
+    }
 
     return response;
 }

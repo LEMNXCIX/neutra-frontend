@@ -3,6 +3,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { cartService, productsService, couponsService } from '@/services';
 import { useAuthStore } from '@/store/auth-store';
 import { useRouter } from 'next/navigation';
+import { useTenant } from "./tenant-context";
 import { toast } from "sonner";
 import { ApiError } from '@/lib/api-client';
 import { Product } from '@/types/product.types';
@@ -54,9 +55,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const user = useAuthStore((state) => state.user);
   const router = useRouter();
+  const { moduleType } = useTenant();
 
   const fetchCart = React.useCallback(async () => {
-    if (!user) {
+    if (!user || moduleType?.toUpperCase() !== 'STORE') {
       setItems([]);
       return;
     }
@@ -87,7 +89,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, [user, moduleType]);
 
   useEffect(() => {
     fetchCart();
@@ -96,6 +98,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Load product prices for accurate calculations
   useEffect(() => {
     let mounted = true;
+    if (moduleType?.toUpperCase() !== 'STORE') return;
+
     (async () => {
       try {
         const products = await productsService.getAll();
