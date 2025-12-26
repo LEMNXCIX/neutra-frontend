@@ -96,7 +96,7 @@ export function TenantDialog({ open, onOpenChange, tenant, onSuccess }: TenantDi
                             onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
                             placeholder="my-store"
                         />
-                        <p className="text-xs text-muted-foreground">Will be accessed at {formData.slug}.neutra.ec</p>
+                        <p className="text-xs text-muted-foreground">Will be accessed at {formData.slug}.xcix.ec</p>
                     </div>
                     <div className="space-y-2">
                         <Label>Type</Label>

@@ -115,10 +115,15 @@ export default function ServicesTableClient() {
             const url = editingService ? `/api/services/${editingService.id}` : '/api/services';
             const method = editingService ? 'PUT' : 'POST';
 
+            const payload = {
+                ...formData,
+                categoryId: formData.categoryId === "" ? null : formData.categoryId
+            };
+
             const response = await fetch(url, {
                 method,
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData),
+                body: JSON.stringify(payload),
             });
 
             if (response.ok) {

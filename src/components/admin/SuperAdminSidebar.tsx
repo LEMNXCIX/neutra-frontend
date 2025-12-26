@@ -23,7 +23,6 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { NavItem } from "@/config/admin-navigation";
-import { useFeatures } from "@/hooks/useFeatures";
 
 const ICON_MAP: Record<string, any> = {
     LayoutDashboard,
@@ -40,46 +39,31 @@ const ICON_MAP: Record<string, any> = {
     Building
 };
 
-interface AdminSidebarProps {
+interface SuperAdminSidebarProps {
     items: NavItem[];
 }
 
-export default function AdminSidebar({ items }: AdminSidebarProps) {
+export default function SuperAdminSidebar({ items }: SuperAdminSidebarProps) {
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const pathname = usePathname();
-    const { isFeatureEnabled } = useFeatures();
-
-    // Filter items based on features
-    const filteredItems = items.filter(item => {
-        if (item.label === "Coupons") {
-            return isFeatureEnabled("coupons");
-        }
-        if (item.label === "Banners") {
-            return isFeatureEnabled("banners");
-        }
-        if (item.label === "Orders") {
-            return isFeatureEnabled("orders");
-        }
-        return true;
-    });
 
     return (
         <aside
-            className={`hidden md:flex flex-col border-r bg-muted/70 backdrop-blur-md transition-all duration-300 ease-in-out ${sidebarOpen ? "w-64" : "w-16"
+            className={`hidden md:flex flex-col border-r-4 border-foreground bg-background transition-all duration-300 ease-in-out ${sidebarOpen ? "w-64" : "w-16"
                 }`}
         >
             {/* Header */}
-            <div className="flex items-center justify-between px-3 py-3 border-b">
+            <div className="flex items-center justify-between px-3 py-3 border-b-2 border-foreground">
                 {sidebarOpen ? (
-                    <h2 className="text-lg font-semibold">Admin</h2>
+                    <h2 className="text-lg font-black uppercase tracking-tight text-foreground">Admin</h2>
                 ) : (
-                    <span className="text-sm font-semibold">A</span>
+                    <span className="text-sm font-black text-foreground">A</span>
                 )}
                 <Button
                     size="icon"
                     variant="ghost"
                     onClick={() => setSidebarOpen(!sidebarOpen)}
-                    className="h-8 w-8"
+                    className="h-8 w-8 hover:bg-foreground hover:text-background transition-colors"
                 >
                     {sidebarOpen ? <X size={18} /> : <Menu size={18} />}
                 </Button>
@@ -88,7 +72,7 @@ export default function AdminSidebar({ items }: AdminSidebarProps) {
             {/* Scrollable menu */}
             <ScrollArea className="flex-1">
                 <nav className="p-2 flex flex-col gap-1">
-                    {filteredItems.map(({ href, label, icon: iconName, exact }) => {
+                    {items.map(({ href, label, icon: iconName, exact }) => {
                         const Icon = ICON_MAP[iconName] || LayoutDashboard;
                         const isActive = exact
                             ? pathname === href
@@ -97,10 +81,10 @@ export default function AdminSidebar({ items }: AdminSidebarProps) {
                         return (
                             <Link key={href} href={href} passHref>
                                 <Button
-                                    variant={isActive ? "secondary" : "ghost"}
-                                    className={`w-full justify-start gap-2 ${isActive
-                                        ? "bg-primary/10 text-primary font-medium"
-                                        : "text-foreground hover:bg-accent/60"
+                                    variant="ghost"
+                                    className={`w-full justify-start gap-2 rounded-none border-2 transition-colors font-bold uppercase text-xs tracking-wide ${isActive
+                                        ? "bg-foreground text-background border-foreground"
+                                        : "bg-background text-foreground border-foreground hover:bg-foreground hover:text-background"
                                         }`}
                                 >
                                     <Icon className="w-4 h-4" />
@@ -112,19 +96,17 @@ export default function AdminSidebar({ items }: AdminSidebarProps) {
                 </nav>
             </ScrollArea>
 
-            <Separator />
+            <Separator className="bg-foreground h-[2px]" />
 
             {/* Footer */}
             <div className="p-4 text-sm">
                 <Link
                     href="/"
-                    className="hover:underline text-muted-foreground flex items-center gap-2"
+                    className="hover:underline text-foreground font-bold flex items-center gap-2 uppercase text-xs tracking-wide"
                 >
-                    ← {sidebarOpen && "Back to shop"}
+                    ← {sidebarOpen && "Back to Home"}
                 </Link>
             </div>
         </aside>
     );
 }
-
-

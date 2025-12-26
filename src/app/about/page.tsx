@@ -6,7 +6,7 @@ export default function AboutPage() {
             <h1 className="text-3xl font-bold mb-8">About Us</h1>
             <div className="prose dark:prose-invert max-w-none space-y-6">
                 <p className="text-lg text-muted-foreground">
-                    Neutra is a curated collection of minimalist furniture and home accessories.
+                    XCIX is a curated collection of minimalist furniture and home accessories.
                     We believe in mindful design that enhances your living space without cluttering it.
                 </p>
                 <p>

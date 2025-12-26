@@ -18,12 +18,18 @@ async function validateAdminAccess() {
             return { isValid: false, user: null };
         }
 
+        // Serialize all cookies to forward to backend
+        const allCookies = cookieStore.getAll();
+        const cookieHeader = allCookies
+            .map(cookie => `${cookie.name}=${cookie.value}`)
+            .join('; ');
+
         // Validate session with backend
         const response = await fetch(`${BACKEND_API_URL}/auth/validate`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                'Cookie': `token=${tokenCookie.value}`,
+                'Cookie': cookieHeader,
             },
             cache: 'no-store',
         });
@@ -60,9 +66,9 @@ export default async function AdminPage() {
 
     return (
         <div className="space-y-6">
-            <h2 className="text-2xl font-semibold capitalize">Super Admin Dashboard</h2>
-            <div className="p-4 border border-dashed rounded-lg bg-muted/50">
-                <p className="text-muted-foreground">Select a module from the sidebar to manage tenants and global settings.</p>
+            <h2 className="text-4xl font-black uppercase tracking-tighter text-foreground">Super Admin Dashboard</h2>
+            <div className="p-8 border-4 border-foreground bg-card rounded-none">
+                <p className="text-muted-foreground font-bold">Select a module from the sidebar to manage tenants and global settings.</p>
             </div>
             {/* <AnalyticsOverview /> */}
             {/* <AnalyticsCharts /> */}

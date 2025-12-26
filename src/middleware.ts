@@ -14,6 +14,7 @@ export async function middleware(request: NextRequest) {
     // Initialize tenant defaults
     let tenantSlug = 'default';
     let moduleType = 'root'; // root, store, booking
+    let tenantId = ''; // Initialize tenantId
     let shouldRewrite = false;
     let rewritePath = '';
 
@@ -37,23 +38,31 @@ export async function middleware(request: NextRequest) {
 
             // Try to get module type from cookie cache first
             const cachedModuleType = request.cookies.get(`${tenantSlug}-module-type`)?.value;
+            const cachedTenantId = request.cookies.get(`${tenantSlug}-tenant-id`)?.value;
 
-            if (cachedModuleType) {
+            if (cachedModuleType && cachedTenantId) {
                 moduleType = cachedModuleType;
+                tenantId = cachedTenantId;
             } else {
                 // Fetch from backend API
                 try {
-                    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001/api';
+                    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
+                    const apiUrl = baseUrl.endsWith('/api') ? baseUrl : `${baseUrl}/api`;
+                    console.log(`[Middleware] Fetching config for ${tenantSlug} from ${apiUrl}/tenants/config/${tenantSlug}`);
+
                     const response = await fetch(`${apiUrl}/tenants/config/${tenantSlug}`, {
                         next: { revalidate: 3600 } // Cache for 1 hour if supported
                     });
 
                     if (response.ok) {
                         const result = await response.json();
+                        console.log(`[Middleware] Config result for ${tenantSlug}:`, result);
                         if (result.success && result.data) {
                             moduleType = result.data.type?.toLowerCase() || 'store';
+                            tenantId = result.data.id || '';
                         }
                     } else {
+                        console.error(`[Middleware] Failed to fetch config for ${tenantSlug}: ${response.status} ${response.statusText}`);
                         // Simple heuristic fallback if API is down or tenant not found
                         if (tenantSlug.includes('booking') || tenantSlug.includes('book')) {
                             moduleType = 'booking';
@@ -104,6 +113,7 @@ export async function middleware(request: NextRequest) {
     const requestHeaders = new Headers(request.headers);
     requestHeaders.set('x-tenant-slug', tenantSlug);
     requestHeaders.set('x-module-type', moduleType);
+    if (tenantId) requestHeaders.set('x-tenant-id', tenantId);
 
     // Handle Admin Rewrites
     if (url.pathname.startsWith('/admin')) {
@@ -124,7 +134,9 @@ export async function middleware(request: NextRequest) {
         });
         response.cookies.set('tenant-slug', tenantSlug);
         response.cookies.set('module-type', moduleType);
-        response.cookies.set(`${tenantSlug}-module-type`, moduleType, { maxAge: 3600 }); // Cache for 1 hour
+        if (tenantId) response.cookies.set('tenant-id', tenantId);
+        response.cookies.set(`${tenantSlug}-module-type`, moduleType, { maxAge: 3600 });
+        if (tenantId) response.cookies.set(`${tenantSlug}-tenant-id`, tenantId, { maxAge: 3600 });
         return response;
     }
 
@@ -139,7 +151,9 @@ export async function middleware(request: NextRequest) {
         // Set cookie for client-side access
         response.cookies.set('tenant-slug', tenantSlug);
         response.cookies.set('module-type', moduleType);
-        response.cookies.set(`${tenantSlug}-module-type`, moduleType, { maxAge: 3600 }); // Cache for 1 hour
+        if (tenantId) response.cookies.set('tenant-id', tenantId);
+        response.cookies.set(`${tenantSlug}-module-type`, moduleType, { maxAge: 3600 });
+        if (tenantId) response.cookies.set(`${tenantSlug}-tenant-id`, tenantId, { maxAge: 3600 });
         return response;
     }
 
@@ -152,8 +166,11 @@ export async function middleware(request: NextRequest) {
     // Set cookie for client-side access
     response.cookies.set('tenant-slug', tenantSlug);
     response.cookies.set('module-type', moduleType);
+    if (tenantId) response.cookies.set('tenant-id', tenantId);
+
     if (tenantSlug) {
-        response.cookies.set(`${tenantSlug}-module-type`, moduleType, { maxAge: 3600 }); // Cache for 1 hour
+        response.cookies.set(`${tenantSlug}-module-type`, moduleType, { maxAge: 3600 });
+        if (tenantId) response.cookies.set(`${tenantSlug}-tenant-id`, tenantId, { maxAge: 3600 });
     }
 
     return response;

@@ -28,12 +28,13 @@ export const couponsService = {
     /**
      * Validate coupon
      */
-    validate: async (code: string, orderTotal: number, productIds?: string[], categoryIds?: string[]): Promise<CouponValidationResult> => {
+    validate: async (code: string, orderTotal: number, productIds?: string[], categoryIds?: string[], serviceIds?: string[]): Promise<CouponValidationResult> => {
         return api.post<CouponValidationResult>('/coupons/validate', {
             code,
             orderTotal,
             productIds,
-            categoryIds
+            categoryIds,
+            serviceIds
         });
     },
 

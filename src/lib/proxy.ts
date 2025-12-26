@@ -16,6 +16,10 @@ export function getProxyHeaders(req: NextRequest): HeadersInit {
     const tenantIdHeader = req.headers.get('x-tenant-id');
     const tenantSlugHeader = req.headers.get('x-tenant-slug');
 
+    // Debug logging
+    console.log('[getProxyHeaders] tenantSlugHeader:', tenantSlugHeader);
+    console.log('[getProxyHeaders] tenant-slug cookie:', req.cookies.get('tenant-slug')?.value);
+
     if (tenantIdHeader) {
         headers['x-tenant-id'] = tenantIdHeader;
     } else if (!tenantSlugHeader) {
@@ -33,6 +37,8 @@ export function getProxyHeaders(req: NextRequest): HeadersInit {
             headers['x-tenant-slug'] = tenantSlugCookie.value;
         }
     }
+
+    console.log('[getProxyHeaders] Final headers:', headers);
 
     return headers;
 }

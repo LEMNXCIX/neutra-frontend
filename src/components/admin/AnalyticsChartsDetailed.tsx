@@ -211,7 +211,7 @@ export default function AnalyticsChartsDetailed() {
       {/* New Summary: Orders by Status & Avg Value */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Status Breakdown */}
-        <Card className="md:col-span-2 border-none shadow-md rounded-2xl bg-white dark:bg-zinc-900">
+        <Card className="md:col-span-2 border-none shadow-md rounded-2xl bg-card">
           <CardHeader>
             <CardTitle className="text-sm text-muted-foreground">Orders by Status</CardTitle>
           </CardHeader>

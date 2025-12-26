@@ -49,6 +49,7 @@ import { useConfirm } from "@/hooks/use-confirm";
 
 import { Category } from "@/types/category.types";
 import { Spinner } from "@/components/ui/spinner";
+import { api } from "@/lib/api-client";
 
 type CategoryWithCount = Category & {
     productCount?: number;
@@ -114,22 +115,13 @@ export default function CategoriesTableClient({ categories, stats, pagination }:
         }
         setIsCreating(true);
         try {
-            const res = await fetch("/api/admin/categories", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(form),
-            });
-            if (!res.ok) {
-                const data = await res.json();
-                toast.error(data?.error || "Failed to create category");
-                return;
-            }
+            await api.post("/admin/categories", form);
             toast.success("Category created");
             setCreateOpen(false);
             setForm({ name: "", description: "", type: "PRODUCT" });
             router.refresh();
-        } catch {
-            toast.error("Network error");
+        } catch (error: any) {
+            toast.error(error.message || "Failed to create category");
         } finally {
             setIsCreating(false);
         }
@@ -145,17 +137,11 @@ export default function CategoriesTableClient({ categories, stats, pagination }:
         if (!confirmed) return;
         setIsDeleting(id);
         try {
-            const res = await fetch(`/api/admin/categories/${id}`, {
-                method: "DELETE",
-            });
-            if (!res.ok) {
-                toast.error("Failed to delete");
-                return;
-            }
+            await api.delete(`/admin/categories/${id}`);
             toast.success("Category deleted");
             router.refresh();
-        } catch {
-            toast.error("Network error");
+        } catch (error: any) {
+            toast.error(error.message || "Failed to delete");
         } finally {
             setIsDeleting(null);
         }
@@ -175,23 +161,14 @@ export default function CategoriesTableClient({ categories, stats, pagination }:
         if (!editing) return;
         setIsEditing(true);
         try {
-            const res = await fetch(`/api/admin/categories/${editing.id}`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(form),
-            });
-            if (!res.ok) {
-                const data = await res.json();
-                toast.error(data?.error || "Failed to update");
-                return;
-            }
+            await api.put(`/admin/categories/${editing.id}`, form);
             toast.success("Category updated");
             setEditOpen(false);
             setEditing(null);
             setForm({ name: "", description: "", type: "PRODUCT" });
             router.refresh();
-        } catch {
-            toast.error("Network error");
+        } catch (error: any) {
+            toast.error(error.message || "Failed to update");
         } finally {
             setIsEditing(false);
         }

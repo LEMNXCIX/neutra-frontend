@@ -5,7 +5,7 @@ import Link from 'next/link';
 export default function CareersPage() {
     return (
         <div className="max-w-4xl mx-auto px-4 py-16">
-            <h1 className="text-3xl font-bold mb-8">Careers at Neutra</h1>
+            <h1 className="text-3xl font-bold mb-8">Careers at XCIX</h1>
             <div className="space-y-8">
                 <section className="prose dark:prose-invert max-w-none">
                     <p className="text-lg text-muted-foreground">
@@ -44,7 +44,7 @@ export default function CareersPage() {
                     </div>
 
                     <div className="mt-8 text-center text-muted-foreground text-sm">
-                        Don't see a role that fits? Email us at <a href="mailto:careers@neutra.com" className="underline hover:text-primary">careers@neutra.com</a> with your portfolio.
+                        Don't see a role that fits? Email us at <a href="mailto:careers@xcix.com" className="underline hover:text-primary">careers@xcix.com</a> with your portfolio.
                     </div>
                 </section>
             </div>

@@ -1,6 +1,6 @@
 
 import { api } from "@/lib/api-client";
-import { Tenant, CreateTenantData, UpdateTenantData } from "@/types/tenant";
+import { Tenant, CreateTenantData, UpdateTenantData, TenantFeatures } from "@/types/tenant";
 
 export const tenantService = {
     getAll: async () => {
@@ -13,6 +13,14 @@ export const tenantService = {
 
     update: async (id: string, payload: UpdateTenantData) => {
         return api.put<Tenant>(`/tenants/${id}`, payload);
+    },
+
+    getFeatures: async (id: string) => {
+        return api.get<any>(`/tenants/${id}/features`);
+    },
+
+    updateFeatures: async (id: string, features: any) => {
+        return api.put<any>(`/tenants/${id}/features`, features);
     }
 };
 

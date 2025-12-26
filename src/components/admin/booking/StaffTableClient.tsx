@@ -2,9 +2,10 @@
 
 import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { Plus, Edit, Trash2, Mail, Phone, Info, User as UserIcon } from "lucide-react";
-import { bookingService, Staff } from "@/services/booking.service";
+import { Plus, Edit, Trash2, Mail, Phone, Info, User as UserIcon, Scissors, Check } from "lucide-react";
+import { bookingService, Staff, Service } from "@/services/booking.service";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
@@ -39,9 +40,24 @@ export default function StaffTableClient() {
         active: true
     });
 
+    const [allServices, setAllServices] = useState<Service[]>([]);
+    const [serviceDialogOpen, setServiceDialogOpen] = useState(false);
+    const [selectedServiceIds, setSelectedServiceIds] = useState<string[]>([]);
+    const [isSavingServices, setIsSavingServices] = useState(false);
+
     useEffect(() => {
         loadStaff();
+        loadServices();
     }, []);
+
+    const loadServices = async () => {
+        try {
+            const data = await bookingService.getServices(false);
+            setAllServices(data);
+        } catch (err) {
+            console.error('Error loading services:', err);
+        }
+    };
 
     const loadStaff = async () => {
         try {
@@ -72,6 +88,37 @@ export default function StaffTableClient() {
             active: member.active
         });
         setDialogOpen(true);
+    };
+
+    const openServiceAssignment = (member: Staff) => {
+        setEditingStaff(member);
+        setSelectedServiceIds(member.serviceIds || []);
+        setServiceDialogOpen(true);
+    };
+
+    const handleServiceToggle = (serviceId: string) => {
+        setSelectedServiceIds(prev =>
+            prev.includes(serviceId)
+                ? prev.filter(id => id !== serviceId)
+                : [...prev, serviceId]
+        );
+    };
+
+    const handleSaveServices = async () => {
+        if (!editingStaff) return;
+        setIsSavingServices(true);
+
+        try {
+            await bookingService.syncStaffServices(editingStaff.id, selectedServiceIds);
+            toast.success("Services assigned successfully");
+            setServiceDialogOpen(false);
+            await loadStaff(); // Reload to get updated serviceIds
+        } catch (err) {
+            console.error('Error saving staff services:', err);
+            toast.error("Failed to assign services");
+        } finally {
+            setIsSavingServices(false);
+        }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -213,11 +260,17 @@ export default function StaffTableClient() {
                                     )}
                                 </div>
                             </CardContent>
-                            <CardFooter className="bg-muted/30 pt-4 flex justify-between">
-                                <Button variant="ghost" size="sm" className="hover:bg-background" onClick={() => openEdit(member)}>
-                                    <Edit className="h-4 w-4 mr-2" />
-                                    Edit Profile
-                                </Button>
+                            <CardFooter className="bg-muted/30 pt-4 flex justify-between gap-2">
+                                <div className="flex gap-2">
+                                    <Button variant="ghost" size="sm" className="hover:bg-background" onClick={() => openEdit(member)}>
+                                        <Edit className="h-4 w-4 mr-2" />
+                                        Profile
+                                    </Button>
+                                    <Button variant="ghost" size="sm" className="hover:bg-background" onClick={() => openServiceAssignment(member)}>
+                                        <Scissors className="h-4 w-4 mr-2" />
+                                        Services ({member.serviceIds?.length || 0})
+                                    </Button>
+                                </div>
                                 <Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10 hover:text-destructive" onClick={() => handleDelete(member.id)}>
                                     <Trash2 className="h-4 w-4" />
                                 </Button>
@@ -302,6 +355,59 @@ export default function StaffTableClient() {
                             </Button>
                         </DialogFooter>
                     </form>
+                </DialogContent>
+            </Dialog>
+
+            {/* Service Assignment Dialog */}
+            <Dialog open={serviceDialogOpen} onOpenChange={(open) => {
+                if (!isSavingServices) setServiceDialogOpen(open);
+            }}>
+                <DialogContent className="sm:max-w-[500px]">
+                    <DialogHeader>
+                        <DialogTitle>Assign Services to {editingStaff?.name}</DialogTitle>
+                        <DialogDescription>
+                            Select the services this staff member is qualified to perform.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="py-4 h-[400px] overflow-y-auto">
+                        {allServices.length === 0 ? (
+                            <div className="text-center py-8">
+                                <p className="text-muted-foreground">No services found. Create some services first.</p>
+                            </div>
+                        ) : (
+                            <div className="grid gap-3">
+                                {allServices.map((service) => (
+                                    <div
+                                        key={service.id}
+                                        className={`flex items-center justify-between p-3 border rounded-lg transition-colors cursor-pointer hover:bg-accent/50 ${selectedServiceIds.includes(service.id) ? 'bg-primary/5 border-primary/30' : ''}`}
+                                        onClick={() => handleServiceToggle(service.id)}
+                                    >
+                                        <div className="flex flex-col gap-0.5">
+                                            <span className="font-medium text-sm">{service.name}</span>
+                                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                                <span>{service.duration} min</span>
+                                                <span>•</span>
+                                                <span>${service.price}</span>
+                                            </div>
+                                        </div>
+                                        <div className={`h-6 w-6 rounded-full border-2 flex items-center justify-center transition-all ${selectedServiceIds.includes(service.id) ? 'bg-primary border-primary text-primary-foreground' : 'border-muted-foreground/30'}`}>
+                                            {selectedServiceIds.includes(service.id) && <Check className="h-3.5 w-3.5" />}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    <DialogFooter className="pt-2">
+                        <Button type="button" variant="outline" onClick={() => setServiceDialogOpen(false)} disabled={isSavingServices}>
+                            Cancel
+                        </Button>
+                        <Button type="button" onClick={handleSaveServices} disabled={isSavingServices}>
+                            {isSavingServices ? "Saving..." : "Save Assignments"}
+                        </Button>
+                    </DialogFooter>
                 </DialogContent>
             </Dialog>
         </div>

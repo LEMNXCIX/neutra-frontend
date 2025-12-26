@@ -10,7 +10,7 @@ export default function TermsPage() {
                 <section>
                     <h2 className="text-xl font-semibold mb-3">1. Agreement to Terms</h2>
                     <p>
-                        By accessing or using the Neutra website, you agree to be bound by these Terms of Service.
+                        By accessing or using the XCIX website, you agree to be bound by these Terms of Service.
                         If you do not agree, please do not use our services.
                     </p>
                 </section>
@@ -36,7 +36,7 @@ export default function TermsPage() {
                 <section>
                     <h2 className="text-xl font-semibold mb-3">4. Limitation of Liability</h2>
                     <p>
-                        Neutra shall not be liable for any direct, indirect, incidental, special, or consequential
+                        XCIX shall not be liable for any direct, indirect, incidental, special, or consequential
                         damages resulting from the use or inability to use our products or services.
                     </p>
                 </section>

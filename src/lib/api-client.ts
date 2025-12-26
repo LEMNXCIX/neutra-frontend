@@ -1,5 +1,6 @@
 import { StandardResponse } from '@/types/frontend-api';
 import { toast } from 'sonner';
+import Cookies from 'js-cookie';
 
 // Note: API_BASE_URL not used - requests go through Next.js API routes
 
@@ -36,6 +37,7 @@ export class ApiError extends Error {
  * 
  * Features:
  * - Automatic credentials inclusion (for HttpOnly cookies)
+ * - Automatic tenant-slug header inclusion from cookies
  * - Handles StandardResponse format
  * - 401 unauthorized handling with event dispatch
  * - Error extraction and formatting
@@ -48,12 +50,18 @@ export async function apiClient<T = unknown>(
     endpoint: string,
     options: RequestInit = {}
 ): Promise<T> {
+    // Read tenant context from cookies (set by middleware)
+    const tenantSlug = Cookies.get('tenant-slug');
+    const tenantId = Cookies.get('tenant-id');
+
     // Ensure credentials are included for cookie-based auth
     const config: RequestInit = {
         ...options,
         credentials: 'include',
         headers: {
             'Content-Type': 'application/json',
+            ...(tenantSlug && { 'x-tenant-slug': tenantSlug }),
+            ...(tenantId && { 'x-tenant-id': tenantId }),
             ...options.headers,
         },
     };

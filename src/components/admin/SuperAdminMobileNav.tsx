@@ -5,7 +5,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { NavItem } from "@/config/admin-navigation";
-import { useFeatures } from "@/hooks/useFeatures";
 import {
     LayoutDashboard,
     Package,
@@ -36,32 +35,18 @@ const ICON_MAP: Record<string, any> = {
     Building
 };
 
-interface AdminMobileNavProps {
+interface SuperAdminMobileNavProps {
     items: NavItem[];
 }
 
-export default function AdminMobileNav({ items }: AdminMobileNavProps) {
+export default function SuperAdminMobileNav({ items }: SuperAdminMobileNavProps) {
     const pathname = usePathname();
-    const { isFeatureEnabled } = useFeatures();
-
-    const filteredItems = items.filter(item => {
-        if (item.label === "Coupons") {
-            return isFeatureEnabled("coupons");
-        }
-        if (item.label === "Banners") {
-            return isFeatureEnabled("banners");
-        }
-        if (item.label === "Orders") {
-            return isFeatureEnabled("orders");
-        }
-        return true;
-    });
 
     return (
-        <nav className="fixed bottom-0 left-0 right-0 md:hidden border-t bg-background/80 backdrop-blur-md shadow-md z-50 pb-[env(safe-area-inset-bottom)]">
+        <nav className="fixed bottom-0 left-0 right-0 md:hidden border-t-4 border-foreground bg-background z-50 pb-[env(safe-area-inset-bottom)] transition-colors duration-300">
             <ScrollArea className="w-full whitespace-nowrap">
                 <div className="flex w-max space-x-4 p-2 px-4">
-                    {filteredItems.map(({ href, label, icon: iconName, exact }) => {
+                    {items.map(({ href, label, icon: iconName, exact }) => {
                         const Icon = ICON_MAP[iconName] || LayoutDashboard;
                         const isActive = exact
                             ? pathname === href
@@ -71,7 +56,7 @@ export default function AdminMobileNav({ items }: AdminMobileNavProps) {
                             <Link
                                 key={href}
                                 href={href}
-                                className={`flex flex-col items-center text-xs min-w-[60px] ${isActive ? "text-primary" : "text-muted-foreground"
+                                className={`flex flex-col items-center text-xs min-w-[60px] uppercase tracking-wide ${isActive ? "text-foreground font-black" : "text-muted-foreground font-bold"
                                     }`}
                             >
                                 <Icon className="w-5 h-5 mb-1" />
@@ -85,5 +70,3 @@ export default function AdminMobileNav({ items }: AdminMobileNavProps) {
         </nav>
     );
 }
-
-

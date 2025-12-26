@@ -18,12 +18,18 @@ async function validateAdminAccess() {
             return { isValid: false, user: null };
         }
 
+        // Serialize all cookies to forward to backend
+        const allCookies = cookieStore.getAll();
+        const cookieHeader = allCookies
+            .map(cookie => `${cookie.name}=${cookie.value}`)
+            .join('; ');
+
         // Validate session with backend
         const response = await fetch(`${BACKEND_API_URL}/auth/validate`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                'Cookie': `token=${tokenCookie.value}`,
+                'Cookie': cookieHeader,
             },
             cache: 'no-store',
         });

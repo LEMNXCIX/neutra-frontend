@@ -3,156 +3,156 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { getTenantUrl } from '@/lib/tenant';
+import { useAuthStore } from '@/store/auth-store';
+import { tenantService } from '@/services/tenant.service';
+import { Tenant } from '@/types/tenant';
+import { Button } from '@/components/ui/button';
+import { LayoutDashboard, LogIn, UserPlus, Menu, X } from 'lucide-react';
+import { NeutralNavigation } from '@/components/neutral-navigation';
+import Logo from '@/components/logo';
 
 export default function LandingPage() {
   const [storeUrl, setStoreUrl] = useState('#');
   const [bookingUrl, setBookingUrl] = useState('#');
+  const [tenants, setTenants] = useState<Tenant[]>([]);
+  const user = useAuthStore((state) => state.user);
+  const isAdmin = user?.isAdmin;
 
   useEffect(() => {
     setStoreUrl(getTenantUrl('default'));
-    setBookingUrl(getTenantUrl('booking1'));
-  }, []);
+    setBookingUrl(getTenantUrl('booking'));
+
+    if (isAdmin) {
+      const fetchTenants = async () => {
+        try {
+          const data = await tenantService.getAll();
+          setTenants(data || []);
+        } catch (error) {
+          console.error('Error fetching tenants:', error);
+        }
+      };
+      fetchTenants();
+    }
+  }, [isAdmin]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      {/* Navigation */}
-      <nav className="container mx-auto px-4 py-6">
-        <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-white">Neutra</h1>
-          <div className="space-x-4">
-            <Link href="/login" className="text-white hover:text-purple-300 transition">
-              Login
-            </Link>
-            <Link
-              href="/register"
-              className="px-4 py-2 bg-white text-purple-900 rounded-lg hover:bg-purple-100 transition font-semibold"
-            >
-              Get Started
-            </Link>
-          </div>
-        </div>
-      </nav>
+    <div className="min-h-screen bg-background text-foreground font-sans transition-colors duration-300">
+      <NeutralNavigation />
 
       {/* Hero Section */}
-      <section className="container mx-auto px-4 py-20 md:py-32">
-        <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
-            Your All-in-One
-            <span className="block bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-              Business Platform
-            </span>
+      <section className="container mx-auto px-4 py-24 md:py-40 text-center">
+        <div className="max-w-4xl mx-auto">
+          <h1 className="text-6xl md:text-8xl font-black mb-8 leading-[0.9] tracking-tighter uppercase text-foreground">
+            Your All-in-One<br />
+            Business Platform
           </h1>
 
-          <p className="text-xl md:text-2xl text-gray-300 mb-12 max-w-2xl mx-auto">
+          <p className="text-xl md:text-2xl text-muted-foreground mb-16 max-w-2xl mx-auto font-medium">
             Sell products online or manage appointments seamlessly. Everything you need to run your business in one powerful platform.
           </p>
 
-          {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
-            <a
-              href={storeUrl}
-              className="group relative px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-semibold text-lg shadow-2xl hover:shadow-blue-500/50 transition-all duration-300 hover:scale-105 w-full sm:w-auto"
-            >
-              <span className="flex items-center justify-center gap-2">
-                🛍️ E-Commerce Store
-                <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                </svg>
-              </span>
-            </a>
-
-            <a
-              href={bookingUrl}
-              className="group relative px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold text-lg shadow-2xl hover:shadow-purple-500/50 transition-all duration-300 hover:scale-105 w-full sm:w-auto"
-            >
-              <span className="flex items-center justify-center gap-2">
-                📅 Booking System
-                <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                </svg>
-              </span>
-            </a>
-          </div>
-
-          {/* Local Dev Note */}
-          <div className="mt-8 space-y-2">
-            <p className="text-sm text-gray-400">
-              Recommended for development: Use subdomains on port 3000.
-            </p>
-            <p className="text-xs text-gray-500">
-              Legacy access: Port 3001 for Store, 3002 for Booking.
-            </p>
-          </div>
+          {user?.isAdmin && (
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              {tenants.map(tenant => (
+                <a
+                  key={tenant.id}
+                  href={getTenantUrl(tenant.slug)}
+                  className={`flex items-center justify-center gap-4 px-10 py-5 font-black text-xl transition-all w-full sm:w-auto uppercase tracking-tight ${tenant.type === 'STORE'
+                    ? 'bg-foreground text-background hover:bg-muted-foreground'
+                    : 'bg-background text-foreground border-4 border-foreground hover:bg-muted font-black'
+                    }`}
+                >
+                  {tenant.type === 'STORE' ? (
+                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                    </svg>
+                  ) : (
+                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  )}
+                  <span>{tenant.name}</span>
+                </a>
+              ))}
+            </div>
+          )}
         </div>
-      </section>
+      </section >
 
       {/* Features Section */}
-      <section className="container mx-auto px-4 py-20">
-        <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
-          {/* E-Commerce Card */}
-          <div className="bg-white/10 backdrop-blur-lg p-8 rounded-2xl border border-white/20 hover:bg-white/20 transition-all duration-300">
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mb-6">
-              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-              </svg>
+      <section className="bg-muted/30 border-y border-border relative" >
+        <div className="container mx-auto px-4 py-24">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-6xl mx-auto">
+            {/* E-Commerce Card */}
+            <div className="bg-card p-10 border-2 border-border shadow-sm">
+              <div className="w-16 h-16 bg-primary flex items-center justify-center mb-8">
+                <svg className="w-8 h-8 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                </svg>
+              </div>
+              <h3 className="text-3xl font-black text-card-foreground mb-6 uppercase tracking-tight">E-Commerce Store</h3>
+              <ul className="space-y-4 text-muted-foreground font-bold">
+                <li className="flex items-center gap-3">
+                  <div className="size-2 bg-primary" />
+                  <span>Product catalog & inventory</span>
+                </li>
+                <li className="flex items-center gap-3">
+                  <div className="size-2 bg-primary" />
+                  <span>Shopping cart & checkout</span>
+                </li>
+                <li className="flex items-center gap-3">
+                  <div className="size-2 bg-primary" />
+                  <span>Order tracking & management</span>
+                </li>
+                <li className="flex items-center gap-3">
+                  <div className="size-2 bg-primary" />
+                  <span>Multi-tenant support</span>
+                </li>
+              </ul>
             </div>
-            <h3 className="text-2xl font-bold text-white mb-4">E-Commerce Platform</h3>
-            <ul className="space-y-3 text-gray-300">
-              <li className="flex items-start gap-2">
-                <span className="text-blue-400 mt-1">✓</span>
-                <span>Complete product catalog management</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-blue-400 mt-1">✓</span>
-                <span>Shopping cart & checkout system</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-blue-400 mt-1">✓</span>
-                <span>Order tracking & management</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-blue-400 mt-1">✓</span>
-                <span>Multi-tenant support</span>
-              </li>
-            </ul>
-          </div>
 
-          {/* Booking Card */}
-          <div className="bg-white/10 backdrop-blur-lg p-8 rounded-2xl border border-white/20 hover:bg-white/20 transition-all duration-300">
-            <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center mb-6">
-              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
+            {/* Booking Card */}
+            <div className="bg-primary p-10 border-2 border-primary shadow-xl">
+              <div className="w-16 h-16 bg-primary-foreground flex items-center justify-center mb-8">
+                <svg className="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <h3 className="text-3xl font-black text-primary-foreground mb-6 uppercase tracking-tight">Appointment Booking</h3>
+              <ul className="space-y-4 text-primary-foreground/70 font-bold">
+                <li className="flex items-center gap-3">
+                  <div className="size-2 bg-primary-foreground" />
+                  <span>Service catalog & pricing</span>
+                </li>
+                <li className="flex items-center gap-3">
+                  <div className="size-2 bg-primary-foreground" />
+                  <span>Staff scheduling & availability</span>
+                </li>
+                <li className="flex items-center gap-3">
+                  <div className="size-2 bg-primary-foreground" />
+                  <span>Email confirmations</span>
+                </li>
+                <li className="flex items-center gap-3">
+                  <div className="size-2 bg-primary-foreground" />
+                  <span>Customer dashboard</span>
+                </li>
+              </ul>
             </div>
-            <h3 className="text-2xl font-bold text-white mb-4">Appointment Booking</h3>
-            <ul className="space-y-3 text-gray-300">
-              <li className="flex items-start gap-2">
-                <span className="text-purple-400 mt-1">✓</span>
-                <span>Service catalog & pricing</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-purple-400 mt-1">✓</span>
-                <span>Staff scheduling & availability</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-purple-400 mt-1">✓</span>
-                <span>Automated email confirmations</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-purple-400 mt-1">✓</span>
-                <span>Customer appointment dashboard</span>
-              </li>
-            </ul>
           </div>
         </div>
-      </section>
+      </section >
 
       {/* Footer */}
-      <footer className="container mx-auto px-4 py-12 border-t border-white/10">
-        <div className="text-center text-gray-400">
-          <p>© 2025 Neutra. Built with Next.js & Clean Architecture.</p>
+      <footer className="container mx-auto px-4 py-16" >
+        <div className="flex flex-col md:flex-row justify-between items-center gap-8 text-muted-foreground font-bold text-sm uppercase tracking-widest">
+          <p>© 2025 XCIX Platforms</p>
+          <div className="flex gap-8">
+            <a href="#" className="hover:text-foreground transition-colors">Twitter</a>
+            <a href="#" className="hover:text-foreground transition-colors">Github</a>
+            <a href="#" className="hover:text-foreground transition-colors">Privacy</a>
+          </div>
         </div>
       </footer>
-    </div>
+    </div >
   );
 }

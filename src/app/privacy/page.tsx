@@ -10,7 +10,7 @@ export default function PrivacyPage() {
                 <section>
                     <h2 className="text-xl font-semibold mb-3">1. Introduction</h2>
                     <p>
-                        At Neutra, we simplify your life, and that includes respecting your privacy.
+                        At XCIX, we simplify your life, and that includes respecting your privacy.
                         This Privacy Policy explains how we collect, use, and protect your personal information
                         when you visit our website or make a purchase.
                     </p>

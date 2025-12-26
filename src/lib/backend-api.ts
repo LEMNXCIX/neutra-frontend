@@ -98,6 +98,27 @@ async function request<T = unknown>(
         requestHeaders['Cookie'] = `${TOKEN_COOKIE_NAME}=${token}`;
     }
 
+    // Forward Tenant Headers from Server Context
+    // Only works in Server components/Server actions/API routes
+    if (typeof window === 'undefined') {
+        try {
+            const { headers: nextHeaders } = require('next/headers');
+
+            // In Next.js 15, headers() returns a Promise. 
+            // We must await it before calling .get()
+            const h = await nextHeaders();
+
+            if (h) {
+                const tenantId = h.get('x-tenant-id');
+                const tenantSlug = h.get('x-tenant-slug');
+                if (tenantId) requestHeaders['x-tenant-id'] = tenantId;
+                if (tenantSlug) requestHeaders['x-tenant-slug'] = tenantSlug;
+            }
+        } catch (e) {
+            // next/headers might not be available in all contexts (e.g. static gen)
+        }
+    }
+
     // Build fetch options
     const fetchOptions: RequestInit = {
         method,

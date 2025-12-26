@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import Link from "@/components/ui/link";
 import { useRouter } from "next/navigation";
+import Logo from "@/components/logo";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "./ui/input-group";
 import { Button } from "./ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
@@ -49,9 +50,13 @@ import {
 } from "@/components/ui/sheet";
 
 
+import { tenantService } from "@/services/tenant.service";
+import { Tenant } from "@/types/tenant";
+import { getTenantUrl } from "@/lib/tenant";
+
 type Product = { id: string; name: string; price: number; image?: string; stock: number };
 
-export function Navigation() {
+export function Navigation({ minimal = false }: { minimal?: boolean }) {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [searchResults, setSearchResults] = useState<Product[]>([]);
@@ -79,6 +84,7 @@ export function Navigation() {
     };
     fetchCategories();
   }, []);
+
 
   const handleThemeToggle = () => {
     setTheme(theme === 'dark' ? 'light' : 'dark');
@@ -154,11 +160,11 @@ export function Navigation() {
   //   return () => window.removeEventListener('keydown', handleKeyDown);
   // }, []);
 
-  // Secret sequence 'neutra' easter egg
+  // Secret sequence 'xcix' easter egg
   useEffect(() => {
-    console.log(`\n¡Has encontrado un huevo de pascua!\n🥚 Neutra tiene secretos ocultos...\nIntenta presionar estas teclas: ↑↑↓↓←→←→BA\n`);
+    console.log(`\n¡Has encontrado un huevo de pascua!\n🥚 XCIX tiene secretos ocultos...\nIntenta presionar estas teclas: ↑↑↓↓←→←→BA\n`);
 
-    const seq = ['n', 'e', 'u', 't', 'r', 'a'];
+    const seq = ['x', 'c', 'i', 'x'];
     let buffer: string[] = [];
 
     const onKey = (e: KeyboardEvent) => {
@@ -170,7 +176,7 @@ export function Navigation() {
         if (el) {
           el.classList.add('rainbow-text');
           setTimeout(() => el.classList.remove('rainbow-text'), 3000);
-          toast('Easter egg: Neutra unlocked!');
+          toast('Easter egg: XCIX unlocked!');
         }
         buffer = [];
       }
@@ -198,9 +204,9 @@ export function Navigation() {
   return (
     <NavigationMenu
       viewport={false}
-      className="fixed inset-x-0 top-0 z-50 backdrop-blur bg-white/60 dark:bg-black/40 border-b border-transparent/10"
+      className={`fixed inset-x-0 top-0 z-50 bg-white dark:bg-black border-b border-zinc-200 dark:border-zinc-800 transition-all duration-300 ${minimal ? 'h-24 flex items-center' : ''}`}
     >
-      <div className="mx-auto flex justify-between items-center px-5 py-3 max-w-7xl w-full">
+      <div className={`mx-auto flex justify-between items-center px-5 py-3 w-full ${minimal ? 'max-w-7xl' : 'max-w-7xl'}`}>
         {/* Left: logo + menu items */}
         <NavigationMenuList className="flex items-center gap-8">
           <NavigationMenuItem>
@@ -219,141 +225,131 @@ export function Navigation() {
                   }
                 }}
               >
-                <svg
-                  id="logo-svg"
-                  className="size-12"
-                  width="36"
-                  height="36"
-                  viewBox="0 0 64 64"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  aria-hidden
-                >
-                  <rect x="4" y="4" width="56" height="56" rx="12" fill="currentColor" opacity="0" />
-                  <path d="M 20 48.5 C 20 28.5 47 30.5 44 15.5" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
-                  <circle cx="24" cy="26.5" r="5" fill="currentColor" />
-                </svg>
+                <Logo size={minimal ? 48 : 36} />
               </div>
               <Link href="/">
                 <div className="flex flex-col leading-none -right-5">
-                  <span id="brand-name" className="text-lg font-extrabold tracking-tight text-zinc-900 dark:text-zinc-100">Neutra</span>
-                  <span className="text-xs text-muted-foreground -mt-0.5">Minimal Interiors</span>
+                  <span id="brand-name" className={`${minimal ? 'text-3xl font-black' : 'text-lg font-extrabold'} tracking-tighter text-zinc-900 dark:text-zinc-100 uppercase`}>XCIX</span>
+                  {!minimal && <span className="text-xs text-muted-foreground -mt-0.5">Minimal Interiors</span>}
                 </div>
               </Link>
             </div>
           </NavigationMenuItem>
 
           {/* Desktop Menu Items - Left aligned */}
-          <div className="hidden lg:flex items-center gap-1">
-            <NavigationMenuItem>
-              <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
-                <Link href="/products" className="hover-slide-up inline-block">Products</Link>
-              </NavigationMenuLink>
-            </NavigationMenuItem>
+          {!minimal && (
+            <div className="hidden lg:flex items-center gap-1">
+              <NavigationMenuItem>
+                <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
+                  <Link href="/products" className="hover-slide-up inline-block">Products</Link>
+                </NavigationMenuLink>
+              </NavigationMenuItem>
 
-            <NavigationMenuItem>
-              <NavigationMenuTrigger>Categories</NavigationMenuTrigger>
-              <NavigationMenuContent>
-                <ul className="grid w-[400px] gap-2 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
-                  {categories.map((c) => {
-                    // const active = c.id === category;
-                    const href = `/products?category=${encodeURIComponent(c.id)}`;
-                    return (
-                      <ListItem
-                        key={c.id}
-                        title={c.name}
-                        href={href}
-                      >
-                        {c.description}
-                      </ListItem>
-                    );
-                  })}
-                </ul>
-              </NavigationMenuContent>
-            </NavigationMenuItem>
-          </div>
+              <NavigationMenuItem>
+                <NavigationMenuTrigger>Categories</NavigationMenuTrigger>
+                <NavigationMenuContent>
+                  <ul className="grid w-[400px] gap-2 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
+                    {categories.map((c) => {
+                      const href = `/products?category=${encodeURIComponent(c.id)}`;
+                      return (
+                        <ListItem
+                          key={c.id}
+                          title={c.name}
+                          href={href}
+                        >
+                          {c.description}
+                        </ListItem>
+                      );
+                    })}
+                  </ul>
+                </NavigationMenuContent>
+              </NavigationMenuItem>
+            </div>
+          )}
         </NavigationMenuList>
 
         {/* Right: actions */}
         <NavigationMenuList className="ml-auto mr-0 flex items-center gap-3">
           {/* Search with dropdown results */}
-          <div className="hidden lg:flex items-center gap-3 relative" ref={searchRef}>
-            <NavigationMenuItem>
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  const trimmed = query.trim();
-                  const url = trimmed ? `/products?search=${encodeURIComponent(trimmed)}` : '/products';
-                  router.push(url);
-                  setShowResults(false);
-                  setQuery('');
-                }}
-              >
-                <InputGroup>
-                  <InputGroupInput
-                    placeholder="Search products..."
-                    value={query}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuery(e.target.value)}
-                    onFocus={() => query.length >= 2 && setShowResults(true)}
-                  />
-                  <InputGroupAddon>
-                    <button type="submit" aria-label="Search">
-                      {isSearching ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search />}
-                    </button>
-                  </InputGroupAddon>
-                </InputGroup>
-              </form>
+          {!minimal && (
+            <div className="hidden lg:flex items-center gap-3 relative" ref={searchRef}>
+              <NavigationMenuItem>
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    const trimmed = query.trim();
+                    const url = trimmed ? `/products?search=${encodeURIComponent(trimmed)}` : '/products';
+                    router.push(url);
+                    setShowResults(false);
+                    setQuery('');
+                  }}
+                >
+                  <InputGroup>
+                    <InputGroupInput
+                      placeholder="Search products..."
+                      value={query}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuery(e.target.value)}
+                      onFocus={() => query.length >= 2 && setShowResults(true)}
+                    />
+                    <InputGroupAddon>
+                      <button type="submit" aria-label="Search">
+                        {isSearching ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search />}
+                      </button>
+                    </InputGroupAddon>
+                  </InputGroup>
+                </form>
 
-              {/* Search Results Dropdown */}
-              {showResults && searchResults.length > 0 && (
-                <Card className="absolute top-full mt-2 w-96 max-h-96 overflow-hidden shadow-xl z-50">
-                  <ScrollArea className="max-h-96">
-                    <div className="p-2">
-                      {searchResults.map((product) => (
-                        <Link
-                          key={product.id}
-                          href={`/products/${product.id}`}
-                          className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors"
-                          onClick={() => {
-                            setShowResults(false);
-                            setQuery('');
-                          }}
-                        >
-                          <div className="w-12 h-12 bg-muted rounded flex items-center justify-center overflow-hidden">
-                            {product.image ? (
-                              /* eslint-disable-next-line @next/next/no-img-element */
-                              <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
-                            ) : (
-                              <ShoppingBagIcon className="h-6 w-6 text-muted-foreground" />
+                {/* Search Results Dropdown */}
+                {showResults && searchResults.length > 0 && (
+                  <Card className="absolute top-full mt-2 w-96 max-h-96 overflow-hidden shadow-xl z-50">
+                    <ScrollArea className="max-h-96">
+                      <div className="p-2">
+                        {searchResults.map((product) => (
+                          <Link
+                            key={product.id}
+                            href={`/products/${product.id}`}
+                            className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors"
+                            onClick={() => {
+                              setShowResults(false);
+                              setQuery('');
+                            }}
+                          >
+                            <div className="w-12 h-12 bg-muted rounded flex items-center justify-center overflow-hidden">
+                              {product.image ? (
+                                /* eslint-disable-next-line @next/next/no-img-element */
+                                <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+                              ) : (
+                                <ShoppingBagIcon className="h-6 w-6 text-muted-foreground" />
+                              )}
+                            </div>
+                            <div className="flex-1">
+                              <p className="font-medium line-clamp-1">{product.name}</p>
+                              <p className="text-sm text-muted-foreground">${product.price.toFixed(2)}</p>
+                            </div>
+                            {product.stock <= 0 && (
+                              <span className="text-xs text-red-500">Out of stock</span>
                             )}
-                          </div>
-                          <div className="flex-1">
-                            <p className="font-medium line-clamp-1">{product.name}</p>
-                            <p className="text-sm text-muted-foreground">${product.price.toFixed(2)}</p>
-                          </div>
-                          {product.stock <= 0 && (
-                            <span className="text-xs text-red-500">Out of stock</span>
-                          )}
-                        </Link>
-                      ))}
-                      <div className="border-t pt-2 mt-2">
-                        <button
-                          onClick={() => {
-                            router.push(`/products?search=${encodeURIComponent(query)}`);
-                            setShowResults(false);
-                            setQuery('');
-                          }}
-                          className="w-full text-sm text-center p-2 hover:bg-muted rounded transition-colors text-primary font-medium"
-                        >
-                          View all results
-                        </button>
+                          </Link>
+                        ))}
+                        <div className="border-t pt-2 mt-2">
+                          <button
+                            onClick={() => {
+                              router.push(`/products?search=${encodeURIComponent(query)}`);
+                              setShowResults(false);
+                              setQuery('');
+                            }}
+                            className="w-full text-sm text-center p-2 hover:bg-muted rounded transition-colors text-primary font-medium"
+                          >
+                            View all results
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  </ScrollArea>
-                </Card>
-              )}
-            </NavigationMenuItem>
-          </div>
+                    </ScrollArea>
+                  </Card>
+                )}
+              </NavigationMenuItem>
+            </div>
+          )}
 
           {/* Admin Dashboard Link */}
           {user?.isAdmin && (
@@ -365,16 +361,18 @@ export function Navigation() {
           )}
 
           {/* Cart */}
-          <NavigationMenuItem>
-            <Link href='/cart' className="relative flex items-center">
-              <ShoppingBagIcon className="hover-scale click-pulse" />
-              {count > 0 && (
-                <span className="absolute -top-1 -right-1 inline-flex items-center justify-center rounded-full bg-rose-600 text-white text-xs w-5 h-5">
-                  {count}
-                </span>
-              )}
-            </Link>
-          </NavigationMenuItem>
+          {!minimal && (
+            <NavigationMenuItem>
+              <Link href='/cart' className="relative flex items-center">
+                <ShoppingBagIcon className="hover-scale click-pulse" />
+                {count > 0 && (
+                  <span className="absolute -top-1 -right-1 inline-flex items-center justify-center rounded-full bg-rose-600 text-white text-xs w-5 h-5">
+                    {count}
+                  </span>
+                )}
+              </Link>
+            </NavigationMenuItem>
+          )}
 
           {/* User Menu */}
           {user ? (
@@ -422,71 +420,70 @@ export function Navigation() {
               <SheetContent side="left" className="w-[300px] p-0 flex flex-col">
                 <SheetHeader className="p-6 border-b text-left">
                   <div className="flex items-center gap-2">
-                    <div className="size-8 text-primary">
-                      <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-                        <path d="M 20 48.5 C 20 28.5 47 30.5 44 15.5" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
-                        <circle cx="24" cy="26.5" r="5" fill="currentColor" />
-                      </svg>
-                    </div>
+                    <Logo size={32} />
                     <div>
-                      <SheetTitle className="text-xl font-bold tracking-tight">Neutra</SheetTitle>
-                      <p className="text-xs text-muted-foreground -mt-1">Minimal Interiors</p>
+                      <SheetTitle className="text-xl font-bold tracking-tight uppercase">XCIX</SheetTitle>
+                      {!minimal && <p className="text-xs text-muted-foreground -mt-1 font-medium">Minimal Interiors</p>}
                     </div>
                   </div>
                 </SheetHeader>
 
                 <div className="flex-1 overflow-y-auto p-6 space-y-8">
                   <nav className="flex flex-col space-y-1">
-                    <span className="text-xs font-bold text-muted-foreground mb-3 px-4 uppercase">Search</span>
-                    <form
-                      onSubmit={(e) => {
-                        e.preventDefault();
-                        const trimmed = query.trim();
-                        const url = trimmed ? `/products?search=${encodeURIComponent(trimmed)}` : '/products';
-                        router.push(url);
-                        setIsOpen(false);
-                      }}
-                      className="px-4 mb-4"
-                    >
-                      <InputGroup>
-                        <InputGroupInput
-                          placeholder="Search..."
-                          value={query}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuery(e.target.value)}
-                        />
-                        <InputGroupAddon>
-                          <button type="submit">
-                            <Search className="h-4 w-4" />
-                          </button>
-                        </InputGroupAddon>
-                      </InputGroup>
-                    </form>
+                    {!minimal && (
+                      <>
+                        <span className="text-xs font-bold text-muted-foreground mb-3 px-4 uppercase">Search</span>
+                        <form
+                          onSubmit={(e) => {
+                            e.preventDefault();
+                            const trimmed = query.trim();
+                            const url = trimmed ? `/products?search=${encodeURIComponent(trimmed)}` : '/products';
+                            router.push(url);
+                            setIsOpen(false);
+                          }}
+                          className="px-4 mb-4"
+                        >
+                          <InputGroup>
+                            <InputGroupInput
+                              placeholder="Search..."
+                              value={query}
+                              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuery(e.target.value)}
+                            />
+                            <InputGroupAddon>
+                              <button type="submit">
+                                <Search className="h-4 w-4" />
+                              </button>
+                            </InputGroupAddon>
+                          </InputGroup>
+                        </form>
 
-                    <span className="text-xs font-bold text-muted-foreground mb-3 px-4 uppercase">Navigation</span>
-                    <Link
-                      href="/products"
-                      onClick={() => setIsOpen(false)}
-                      className="flex items-center gap-3 px-4 py-4 text-base font-semibold transition-all duration-200 rounded-2xl hover:bg-primary/5 hover:text-primary active:scale-[0.98]"
-                    >
-                      <div className="w-1.5 h-1.5 rounded-full bg-primary" />
-                      All Products
-                    </Link>
+                        <span className="text-xs font-bold text-muted-foreground mb-3 px-4 uppercase">Navigation</span>
+                        <Link
+                          href="/products"
+                          onClick={() => setIsOpen(false)}
+                          className="flex items-center gap-3 px-4 py-4 text-base font-semibold transition-all duration-200 rounded-2xl hover:bg-primary/5 hover:text-primary active:scale-[0.98]"
+                        >
+                          <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+                          All Products
+                        </Link>
 
-                    <div className="space-y-4 pt-4">
-                      <span className="text-xs font-bold text-muted-foreground px-4 uppercase">Categories</span>
-                      <div className="grid gap-1">
-                        {categories.map((c) => (
-                          <Link
-                            key={c.id}
-                            href={`/products?category=${encodeURIComponent(c.id)}`}
-                            onClick={() => setIsOpen(false)}
-                            className="flex items-center gap-3 px-4 py-3 text-sm font-medium transition-all duration-200 rounded-xl hover:bg-muted text-muted-foreground hover:text-foreground"
-                          >
-                            {c.name}
-                          </Link>
-                        ))}
-                      </div>
-                    </div>
+                        <div className="space-y-4 pt-4">
+                          <span className="text-xs font-bold text-muted-foreground px-4 uppercase">Categories</span>
+                          <div className="grid gap-1">
+                            {categories.map((c) => (
+                              <Link
+                                key={c.id}
+                                href={`/products?category=${encodeURIComponent(c.id)}`}
+                                onClick={() => setIsOpen(false)}
+                                className="flex items-center gap-3 px-4 py-3 text-sm font-medium transition-all duration-200 rounded-xl hover:bg-muted text-muted-foreground hover:text-foreground"
+                              >
+                                {c.name}
+                              </Link>
+                            ))}
+                          </div>
+                        </div>
+                      </>
+                    )}
                   </nav>
 
                   <div className="space-y-6">
@@ -550,17 +547,19 @@ export function Navigation() {
                       <div className="grid gap-3 pt-2">
                         <Button
                           variant="outline"
-                          className="h-14 rounded-2xl border-2 font-bold"
+                          className={`h-14 rounded-2xl border-2 font-bold ${minimal ? 'col-span-2' : ''}`}
                           onClick={() => { setIsOpen(false); router.push('/login'); }}
                         >
                           Sign In
                         </Button>
-                        <Button
-                          className="h-14 rounded-2xl shadow-xl shadow-primary/20 font-bold text-base"
-                          onClick={() => { setIsOpen(false); router.push('/products'); }}
-                        >
-                          Shop Now
-                        </Button>
+                        {!minimal && (
+                          <Button
+                            className="h-14 rounded-2xl shadow-xl shadow-primary/20 font-bold text-base"
+                            onClick={() => { setIsOpen(false); router.push('/products'); }}
+                          >
+                            Shop Now
+                          </Button>
+                        )}
                       </div>
                     )}
                   </div>
@@ -568,7 +567,7 @@ export function Navigation() {
 
                 <div className="p-8 border-t bg-muted/20">
                   <p className="text-[10px] text-muted-foreground text-center font-medium uppercase tracking-widest">
-                    &copy; {new Date().getFullYear()} Neutra Platforms
+                    &copy; {new Date().getFullYear()} XCIX Platforms
                   </p>
                 </div>
               </SheetContent>

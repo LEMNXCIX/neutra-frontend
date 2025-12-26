@@ -15,6 +15,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { useApiQuery } from "@/hooks/use-api";
+import { useFeatures } from "@/hooks/useFeatures";
 
 type Stats = {
   users: { total: number; admins: number; regular: number };
@@ -27,6 +28,7 @@ type Stats = {
 };
 
 export default function AnalyticsOverview() {
+  const { isFeatureEnabled } = useFeatures();
 
   const { data: stats, isLoading: loading } = useApiQuery<Stats>(
     ['admin', 'stats', 'overview'],
@@ -177,22 +179,26 @@ export default function AnalyticsOverview() {
       <div>
         <h3 className="text-lg font-semibold mb-4 text-muted-foreground">Primary Metrics</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard
-            icon={ShoppingCart}
-            title="Total Orders"
-            value={stats.orders.total}
-            subtitle={`$${stats.orders.revenue.toFixed(2)} revenue`}
-            color="bg-blue-500"
-            trend="up"
-          />
-          <StatCard
-            icon={DollarSign}
-            title="Total Revenue"
-            value={`$${stats.orders.revenue.toFixed(2)}`}
-            subtitle={`Avg: $${stats.orders.avgOrderValue.toFixed(2)}/order`}
-            color="bg-green-500"
-            trend="up"
-          />
+          {isFeatureEnabled("orders") && (
+            <>
+              <StatCard
+                icon={ShoppingCart}
+                title="Total Orders"
+                value={stats.orders.total}
+                subtitle={`$${stats.orders.revenue.toFixed(2)} revenue`}
+                color="bg-blue-500"
+                trend="up"
+              />
+              <StatCard
+                icon={DollarSign}
+                title="Total Revenue"
+                value={`$${stats.orders.revenue.toFixed(2)}`}
+                subtitle={`Avg: $${stats.orders.avgOrderValue.toFixed(2)}/order`}
+                color="bg-green-500"
+                trend="up"
+              />
+            </>
+          )}
           <StatCard
             icon={Users}
             title="Total Users"
@@ -242,20 +248,24 @@ export default function AnalyticsOverview() {
       <div>
         <h3 className="text-lg font-semibold mb-4 text-muted-foreground">Marketing & Promotions</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard
-            icon={Ticket}
-            title="Coupons"
-            value={stats.coupons.total}
-            subtitle={`${stats.coupons.active} active, ${stats.coupons.used} used`}
-            color="bg-pink-500"
-          />
-          <StatCard
-            icon={Ticket}
-            title="Active Coupons"
-            value={stats.coupons.active}
-            subtitle="Available for use"
-            color="bg-green-500"
-          />
+          {isFeatureEnabled("coupons") && (
+            <>
+              <StatCard
+                icon={Ticket}
+                title="Coupons"
+                value={stats.coupons.total}
+                subtitle={`${stats.coupons.active} active, ${stats.coupons.used} used`}
+                color="bg-pink-500"
+              />
+              <StatCard
+                icon={Ticket}
+                title="Active Coupons"
+                value={stats.coupons.active}
+                subtitle="Available for use"
+                color="bg-green-500"
+              />
+            </>
+          )}
           <StatCard
             icon={ImageIcon}
             title="Sliders"
@@ -263,13 +273,15 @@ export default function AnalyticsOverview() {
             subtitle={`${stats.sliders.active} active, ${stats.sliders.withImages} with images`}
             color="bg-cyan-500"
           />
-          <StatCard
-            icon={Ticket}
-            title="Banners"
-            value={stats.banners.total}
-            subtitle={`${stats.banners.active} active`}
-            color="bg-teal-500"
-          />
+          {isFeatureEnabled("banners") && (
+            <StatCard
+              icon={Ticket}
+              title="Banners"
+              value={stats.banners.total}
+              subtitle={`${stats.banners.active} active`}
+              color="bg-teal-500"
+            />
+          )}
         </div>
       </div>
 

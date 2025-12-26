@@ -55,7 +55,10 @@ import {
 } from "lucide-react";
 import { useConfirm } from "@/hooks/use-confirm";
 import { Coupon, CouponType, CreateCouponDTO, UpdateCouponDTO } from "@/types/coupon.types";
+import { bookingService, Service } from "@/services/booking.service";
 import { Spinner } from "@/components/ui/spinner";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 type Stats = {
     totalCoupons: number;
@@ -92,6 +95,10 @@ export default function CouponsTableClient({ coupons, stats, pagination }: Props
     const [isCreating, setIsCreating] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [isDeleting, setIsDeleting] = useState<string | null>(null);
+    const [services, setServices] = useState<Service[]>([]);
+    const [loadingServices, setLoadingServices] = useState(false);
+    const [appliesToAll, setAppliesToAll] = useState(true);
+
     const [form, setForm] = useState<{
         code: string;
         type: CouponType;
@@ -102,6 +109,7 @@ export default function CouponsTableClient({ coupons, stats, pagination }: Props
         usageLimit: string;
         active: boolean;
         expiresAt: string;
+        applicableServices: string[];
     }>({
         code: "",
         type: CouponType.FIXED,
@@ -112,7 +120,25 @@ export default function CouponsTableClient({ coupons, stats, pagination }: Props
         usageLimit: "",
         active: true,
         expiresAt: "",
+        applicableServices: [],
     });
+
+    React.useEffect(() => {
+        loadServices();
+    }, []);
+
+    const loadServices = async () => {
+        try {
+            setLoadingServices(true);
+            const data = await bookingService.getServices();
+            setServices(data);
+        } catch (error) {
+            console.error("Failed to load services", error);
+            toast.error("Failed to load services");
+        } finally {
+            setLoadingServices(false);
+        }
+    };
 
     // URL State
     const searchQuery = searchParams.get("search") || "";
@@ -169,7 +195,9 @@ export default function CouponsTableClient({ coupons, stats, pagination }: Props
             usageLimit: "",
             active: true,
             expiresAt: "",
+            applicableServices: [],
         });
+        setAppliesToAll(true);
     };
 
     const createCoupon = async () => {
@@ -189,6 +217,7 @@ export default function CouponsTableClient({ coupons, stats, pagination }: Props
                 usageLimit: form.usageLimit ? Number(form.usageLimit) : undefined,
                 active: form.active,
                 expiresAt: form.expiresAt ? new Date(form.expiresAt) : new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
+                applicableServices: appliesToAll ? [] : form.applicableServices,
             };
             await couponsService.create(body);
             toast.success("Coupon created");
@@ -249,7 +278,9 @@ export default function CouponsTableClient({ coupons, stats, pagination }: Props
             usageLimit: c.usageLimit ? String(c.usageLimit) : "",
             active: c.active,
             expiresAt: formattedDate,
+            applicableServices: c.applicableServices || [],
         });
+        setAppliesToAll(!c.applicableServices || c.applicableServices.length === 0);
         setEditOpen(true);
     };
 
@@ -272,6 +303,7 @@ export default function CouponsTableClient({ coupons, stats, pagination }: Props
                 usageLimit: form.usageLimit ? Number(form.usageLimit) : undefined,
                 active: form.active,
                 expiresAt: form.expiresAt ? new Date(form.expiresAt) : undefined,
+                applicableServices: appliesToAll ? [] : form.applicableServices,
             };
             await couponsService.update(editing.id, body);
             toast.success("Coupon updated");
@@ -800,14 +832,33 @@ export default function CouponsTableClient({ coupons, stats, pagination }: Props
                                     {formatDate(viewing.updatedAt)}
                                 </div>
                             </div>
+
+                            <div className="pt-2 border-t">
+                                <label className="text-sm font-medium text-muted-foreground mb-1 block">Applicable Services</label>
+                                {viewing.applicableServices && viewing.applicableServices.length > 0 ? (
+                                    <div className="flex flex-wrap gap-1">
+                                        {viewing.applicableServices.map(serviceId => {
+                                            const service = services.find(s => s.id === serviceId);
+                                            return (
+                                                <Badge key={serviceId} variant="outline" className="text-xs">
+                                                    {service ? service.name : serviceId}
+                                                </Badge>
+                                            );
+                                        })}
+                                    </div>
+                                ) : (
+                                    <p className="text-sm">All Services</p>
+                                )}
+                            </div>
                         </div>
-                    )}
+                    )
+                    }
                     <DialogFooter>
                         <Button onClick={() => setViewOpen(false)}>Close</Button>
                     </DialogFooter>
-                </DialogContent>
-            </Dialog>
+                </DialogContent >
+            </Dialog >
             <ConfirmDialog />
-        </div>
+        </div >
     );
 }

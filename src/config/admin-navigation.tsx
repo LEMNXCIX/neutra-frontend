@@ -15,7 +15,6 @@ export const STORE_ADMIN_NAV: NavItem[] = [
     { href: "/admin/orders", label: "Orders", icon: "ShoppingCart" },
     { href: "/admin/coupons", label: "Coupons", icon: "Ticket" },
     { href: "/admin/users", label: "Users", icon: "Users" },
-    { href: "/admin/roles", label: "Roles", icon: "BrickWallShield" },
 ];
 
 export const BOOKING_ADMIN_NAV: NavItem[] = [
@@ -24,13 +23,14 @@ export const BOOKING_ADMIN_NAV: NavItem[] = [
     { href: "/admin/services", label: "Services", icon: "Scissors" },
     { href: "/admin/categories", label: "Categories", icon: "LayoutList" },
     { href: "/admin/staff", label: "Staff", icon: "UserCog" },
+    { href: "/admin/coupons", label: "Coupons", icon: "Ticket" },
     { href: "/admin/users", label: "Users", icon: "Users" },
-    { href: "/admin/roles", label: "Roles", icon: "BrickWallShield" },
 ];
 
 export const SUPER_ADMIN_NAV: NavItem[] = [
     { href: "/admin", label: "Dashboard", icon: "LayoutDashboard", exact: true },
     { href: "/admin/tenants", label: "Tenants", icon: "Building" },
+    { href: "/admin/features", label: "Features", icon: "Settings" },
     { href: "/admin/users", label: "All Users", icon: "Users" },
     { href: "/admin/roles", label: "Roles", icon: "BrickWallShield" },
 ];

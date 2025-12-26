@@ -3,7 +3,10 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { bookingService, Service, Staff, CreateAppointmentData } from '@/services/booking.service';
+import { couponsService } from '@/services/coupons.service';
+import { CouponValidationResult } from '@/types/coupon.types';
 import { useAuthStore } from '@/store/auth-store';
+import { useFeatures } from '@/hooks/useFeatures';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -11,7 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
-import { Loader2, Clock, DollarSign, User, Calendar as CalendarIcon, ChevronLeft, Check, AlertCircle, Info } from 'lucide-react';
+import { Loader2, Clock, DollarSign, User, Calendar as CalendarIcon, ChevronLeft, Check, AlertCircle, Info, Tag } from 'lucide-react';
 
 export default function BookPage() {
     const router = useRouter();
@@ -36,6 +39,19 @@ export default function BookPage() {
     // Availability state
     const [availableSlots, setAvailableSlots] = useState<string[]>([]);
     const [loadingAvailability, setLoadingAvailability] = useState(false);
+
+    // Coupon state
+    const { isFeatureEnabled, features } = useFeatures();
+    console.log('BookPage Features Debug:', {
+        allFeatures: features,
+        couponsEnabled: isFeatureEnabled ? isFeatureEnabled('coupons') : 'N/A',
+        apptCouponsEnabled: isFeatureEnabled ? isFeatureEnabled('appointmentCoupons') : 'N/A'
+    });
+    const [couponCode, setCouponCode] = useState('');
+    const [couponResult, setCouponResult] = useState<CouponValidationResult | null>(null);
+    const [validatingCoupon, setValidatingCoupon] = useState(false);
+    const [couponError, setCouponError] = useState<string | null>(null);
+
 
     useEffect(() => {
         loadData();
@@ -136,6 +152,7 @@ export default function BookPage() {
                 staffId: selectedStaff.id,
                 startTime: startTime.toISOString(),
                 notes,
+                couponCode: couponResult?.valid && couponResult.coupon ? couponResult.coupon.code : undefined
             };
 
             await bookingService.createAppointment(appointmentData);
@@ -147,6 +164,42 @@ export default function BookPage() {
         } finally {
             setSubmitting(false);
         }
+    };
+
+    const validateCoupon = async () => {
+        if (!couponCode.trim() || !selectedService) return;
+
+        try {
+            setValidatingCoupon(true);
+            setCouponError(null);
+            setCouponResult(null);
+
+            const result = await couponsService.validate(
+                couponCode,
+                selectedService.price,
+                undefined, // productIds
+                undefined, // categoryIds
+                [selectedService.id] // serviceIds
+            );
+
+            if (result.valid) {
+                setCouponResult(result);
+            } else {
+                setCouponError(result.message || 'Invalid coupon code');
+                setCouponResult(null);
+            }
+        } catch (err: any) {
+            setCouponError(err.message || 'Failed to validate coupon');
+            setCouponResult(null);
+        } finally {
+            setValidatingCoupon(false);
+        }
+    };
+
+    const removeCoupon = () => {
+        setCouponCode('');
+        setCouponResult(null);
+        setCouponError(null);
     };
 
     // Generate time slots (9 AM - 5 PM, 30-min intervals)
@@ -377,23 +430,31 @@ export default function BookPage() {
                                     </CardDescription>
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="grid grid-cols-4 gap-2">
-                                        {generateTimeSlots().map((time) => {
-                                            const isAvailable = availableSlots.includes(time);
-                                            return (
-                                                <Button
-                                                    key={time}
-                                                    onClick={() => isAvailable && setSelectedTime(time)}
-                                                    variant={selectedTime === time ? 'default' : !isAvailable ? 'ghost' : 'outline'}
-                                                    disabled={!isAvailable}
-                                                    size="sm"
-                                                    className={!isAvailable ? 'opacity-50 cursor-not-allowed bg-muted line-through decoration-destructive' : ''}
-                                                >
-                                                    {time}
-                                                </Button>
-                                            );
-                                        })}
-                                    </div>
+                                    {!loadingAvailability && availableSlots.length === 0 ? (
+                                        <div className="text-center py-8 space-y-2">
+                                            <p className="text-muted-foreground">No hay horarios disponibles para esta fecha.</p>
+                                            <p className="text-xs text-muted-foreground">Por favor, intenta con otra fecha o profesional.</p>
+                                        </div>
+                                    ) : (
+                                        <div className="grid grid-cols-4 gap-2">
+                                            {generateTimeSlots().map((time) => {
+                                                const isAvailable = availableSlots.includes(time);
+                                                if (!isAvailable) return null;
+
+                                                return (
+                                                    <Button
+                                                        key={time}
+                                                        onClick={() => setSelectedTime(time)}
+                                                        variant={selectedTime === time ? 'default' : 'outline'}
+                                                        size="sm"
+                                                        className="h-10 text-sm font-medium transition-all"
+                                                    >
+                                                        {time}
+                                                    </Button>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
                                 </CardContent>
                             </Card>
                         )}
@@ -457,6 +518,69 @@ export default function BookPage() {
                                 </div>
 
                                 <Separator />
+
+                                {/* Coupon Section */}
+                                {isFeatureEnabled ? isFeatureEnabled('appointmentCoupons') && (
+                                    <div className="pt-4 border-t">
+                                        <label className="text-sm font-medium mb-2 block">
+                                            Have a Coupon?
+                                        </label>
+                                        <div className="flex gap-2">
+                                            <Input
+                                                placeholder="Enter coupon code"
+                                                value={couponCode}
+                                                onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                                                disabled={!!couponResult || validatingCoupon}
+                                                className="max-w-[200px]"
+                                            />
+                                            {!couponResult ? (
+                                                <Button
+                                                    variant="outline"
+                                                    onClick={validateCoupon}
+                                                    disabled={!couponCode || validatingCoupon}
+                                                >
+                                                    {validatingCoupon ? <Loader2 className="h-4 w-4 animate-spin" /> : "Apply"}
+                                                </Button>
+                                            ) : (
+                                                <Button variant="ghost" onClick={removeCoupon} className="text-destructive hover:text-destructive">
+                                                    Remove
+                                                </Button>
+                                            )}
+                                        </div>
+
+                                        {couponError && (
+                                            <p className="text-sm text-destructive mt-2 flex items-center">
+                                                <AlertCircle className="h-3 w-3 mr-1" />
+                                                {couponError}
+                                            </p>
+                                        )}
+
+                                        {couponResult && couponResult.valid && (
+                                            <div className="mt-2 text-sm text-green-600 flex items-center bg-green-50 p-2 rounded border border-green-100">
+                                                <Tag className="h-3 w-3 mr-2" />
+                                                <span>Coupon applied: {couponResult.discountAmount ? `$${couponResult.discountAmount} off` : 'Discount applied'}</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                ) : null}
+
+                                {/* Price Summary */}
+                                <div className="pt-4 border-t bg-muted/20 p-4 rounded-lg">
+                                    <div className="flex justify-between items-center mb-2">
+                                        <span className="text-muted-foreground">Subtotal</span>
+                                        <span>${selectedService?.price}</span>
+                                    </div>
+                                    {couponResult && couponResult.valid && couponResult.discountAmount && (
+                                        <div className="flex justify-between items-center mb-2 text-green-600">
+                                            <span>Discount ({couponResult.coupon?.code})</span>
+                                            <span>-${couponResult.discountAmount}</span>
+                                        </div>
+                                    )}
+                                    <div className="flex justify-between items-center text-lg font-bold">
+                                        <span>Total</span>
+                                        <span>${Math.max(0, (selectedService?.price || 0) - (couponResult?.discountAmount || 0))}</span>
+                                    </div>
+                                </div>
 
                                 <div>
                                     <label className="text-sm font-medium mb-2 block">

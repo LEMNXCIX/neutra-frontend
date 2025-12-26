@@ -7,6 +7,8 @@ import { AuthInitializer } from '@/components/auth-initializer';
 import { Toaster } from "@/components/ui/sonner";
 import { QueryProvider } from '@/providers/query-provider';
 import { TenantProvider } from '@/context/tenant-context';
+import { FeatureProvider } from '@/providers/feature-provider';
+import { SWRegistration } from '@/components/sw-registration';
 
 
 const geist = Geist({
@@ -14,8 +16,29 @@ const geist = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "Neutra - Your Business Platform",
+  title: "XCIX - Your Business Platform",
   description: "E-Commerce and Booking solutions in one platform",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "XCIX",
+  },
+  formatDetection: {
+    telephone: false,
+  },
+  icons: {
+    icon: "/icon.svg",
+    apple: "/icon.svg",
+  },
+};
+
+export const viewport = {
+  themeColor: "#000000",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
@@ -33,13 +56,16 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <TenantProvider>
-            <AuthInitializer />
-            <QueryProvider>
-              <CartProvider>
-                {children}
-                <Toaster richColors />
-              </CartProvider>
-            </QueryProvider>
+            <FeatureProvider>
+              <SWRegistration />
+              <AuthInitializer />
+              <QueryProvider>
+                <CartProvider>
+                  {children}
+                  <Toaster richColors />
+                </CartProvider>
+              </QueryProvider>
+            </FeatureProvider>
           </TenantProvider>
         </ThemeProvider>
       </body>

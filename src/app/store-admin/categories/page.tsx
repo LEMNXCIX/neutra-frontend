@@ -2,6 +2,7 @@ import React from "react";
 import CategoriesTableClient from "@/components/admin/categories/CategoriesTableClient";
 import { extractTokenFromCookies, getCookieString } from "@/lib/server-auth";
 import { getBackendUrl } from "@/lib/backend-api";
+import { cookies } from "next/headers";
 
 export const dynamic = 'force-dynamic';
 
@@ -9,13 +10,18 @@ async function getCategories() {
     try {
         const token = await extractTokenFromCookies();
         const cookieString = await getCookieString();
+        const cookieStore = await cookies();
+        const tenantSlug = cookieStore.get('tenant-slug')?.value;
+        const tenantId = cookieStore.get('tenant-id')?.value;
 
-        // Fetch from backend with cookies
+        // Fetch from backend with cookies and tenant context
         const response = await fetch(`${getBackendUrl()}/categories`, {
             headers: {
                 'Content-Type': 'application/json',
                 'Cookie': cookieString,
                 ...(token && { 'Authorization': `Bearer ${token}` }),
+                ...(tenantSlug && { 'x-tenant-slug': tenantSlug }),
+                ...(tenantId && { 'x-tenant-id': tenantId }),
             },
             cache: 'no-store',
         });

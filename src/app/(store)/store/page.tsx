@@ -17,10 +17,14 @@ import {
     Zap,
 } from "lucide-react";
 
+import { useFeatures } from "@/hooks/useFeatures";
+
 export default function Home() {
+    const { isFeatureEnabled } = useFeatures();
+
     return (
         <div className="min-h-screen bg-gradient-to-b from-background via-muted/20 to-background">
-            <BannerBar />
+            {isFeatureEnabled("banners") && <BannerBar />}
 
             {/* HERO */}
             {/* HERO – 3 columnas en desktop, slider ocupa 2/3 */}
@@ -108,9 +112,9 @@ export default function Home() {
                 <div className="max-w-7xl mx-auto px-4">
                     <div className="text-center mb-16">
                         <Badge variant="outline" className="px-4 py-2 text-sm">
-                            Why Choose Neutra
+                            Why Choose XCIX
                         </Badge>
-                        <h2 className="text-4xl font-black mt-4">The Neutra Experience</h2>
+                        <h2 className="text-4xl font-black mt-4">The XCIX Experience</h2>
                         <p className="text-muted-foreground mt-4 max-w-2xl mx-auto">
                             Premium materials, modern design, and exceptional shopping
                             experience.

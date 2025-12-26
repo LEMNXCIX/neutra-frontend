@@ -2,6 +2,7 @@
 
 import { useEffect, useState, use } from 'react';
 import { bookingService, Appointment } from '@/services/booking.service';
+import { useAuthStore } from '@/store/auth-store';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -29,10 +30,18 @@ export default function AppointmentDetailPage({ params }: PageProps) {
     const [appointment, setAppointment] = useState<Appointment | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const user = useAuthStore((state) => state.user);
 
     useEffect(() => {
         loadAppointment();
     }, [id]);
+
+    useEffect(() => {
+        if (appointment && user && appointment.userId !== user.id) {
+            setError("You do not have permission to view this appointment");
+            setAppointment(null);
+        }
+    }, [appointment, user]);
 
     const loadAppointment = async () => {
         try {

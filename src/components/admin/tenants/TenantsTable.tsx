@@ -81,7 +81,8 @@ export function TenantsTable() {
                         </Button>
                     </div>
 
-                    <div className="rounded-md border">
+                    {/* Desktop Table View */}
+                    <div className="hidden md:block rounded-md border overflow-x-auto">
                         <Table>
                             <TableHeader>
                                 <TableRow>
@@ -129,6 +130,43 @@ export function TenantsTable() {
                                 )}
                             </TableBody>
                         </Table>
+                    </div>
+
+                    {/* Mobile Card View */}
+                    <div className="md:hidden space-y-4">
+                        {loading && tenants.length === 0 ? (
+                            <div className="text-center py-8">Loading...</div>
+                        ) : filteredTenants.length === 0 ? (
+                            <div className="text-center py-8 text-muted-foreground">No tenants found</div>
+                        ) : (
+                            filteredTenants.map((tenant) => (
+                                <Card key={tenant.id} className="border-2">
+                                    <CardContent className="p-4 space-y-3">
+                                        <div className="flex justify-between items-start">
+                                            <div className="space-y-1">
+                                                <h3 className="font-bold text-lg">{tenant.name}</h3>
+                                                <Badge variant="outline" className="text-xs">{tenant.slug}</Badge>
+                                            </div>
+                                            <Button variant="ghost" size="icon" onClick={() => openEdit(tenant)}>
+                                                <Edit className="h-4 w-4" />
+                                            </Button>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-sm text-muted-foreground">Type:</span>
+                                            <Badge className={
+                                                tenant.type === 'STORE' ? 'bg-blue-500' :
+                                                    tenant.type === 'BOOKING' ? 'bg-purple-500' : 'bg-green-500'
+                                            }>
+                                                {tenant.type}
+                                            </Badge>
+                                        </div>
+                                        <div className="text-sm text-muted-foreground">
+                                            Created: {format(new Date(tenant.createdAt), 'PP')}
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            ))
+                        )}
                     </div>
                 </CardContent>
             </Card>

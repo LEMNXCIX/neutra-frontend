@@ -44,7 +44,8 @@ import {
     CheckCircle2,
     Clock,
     User,
-    Scissors
+    Scissors,
+    Tag
 } from "lucide-react";
 import { Appointment } from "@/services/booking.service";
 import { Spinner } from "@/components/ui/spinner";
@@ -338,6 +339,7 @@ export default function AppointmentsTableClient({ appointments, stats, paginatio
                                 <TableHead>Client</TableHead>
                                 <TableHead>Service</TableHead>
                                 <TableHead>Staff</TableHead>
+                                <TableHead>Price</TableHead>
                                 <TableHead>Status</TableHead>
                                 <TableHead className="text-right">Actions</TableHead>
                             </TableRow>
@@ -377,6 +379,17 @@ export default function AppointmentsTableClient({ appointments, stats, paginatio
                                         </TableCell>
                                         <TableCell>
                                             <span className="font-medium">{appointment.staff?.name || "Assigned"}</span>
+                                        </TableCell>
+                                        <TableCell>
+                                            <div className="flex flex-col">
+                                                <span className="font-medium">${appointment.total > 0 ? appointment.total : appointment.service?.price}</span>
+                                                {appointment.discountAmount > 0 && (
+                                                    <span className="text-xs text-green-600 flex items-center gap-1">
+                                                        <Tag className="w-3 h-3" />
+                                                        -${appointment.discountAmount}
+                                                    </span>
+                                                )}
+                                            </div>
                                         </TableCell>
                                         <TableCell>
                                             {getStatusBadge(appointment.status)}
@@ -506,6 +519,23 @@ export default function AppointmentsTableClient({ appointments, stats, paginatio
                                         {selectedAppointment.service?.name}
                                     </p>
                                     <p className="text-xs text-muted-foreground">{selectedAppointment.service?.duration} minutes - ${selectedAppointment.service?.price}</p>
+                                    {selectedAppointment.discountAmount > 0 && (
+                                        <div className="mt-2 p-2 bg-green-50 rounded border border-green-100 dark:bg-green-900/20 dark:border-green-800">
+                                            <div className="flex justify-between items-center text-sm">
+                                                <span className="text-muted-foreground">Subtotal:</span>
+                                                <span>${selectedAppointment.subtotal > 0 ? selectedAppointment.subtotal : selectedAppointment.service?.price}</span>
+                                            </div>
+                                            <div className="flex justify-between items-center text-sm text-green-600 dark:text-green-400 font-medium">
+                                                <span className="flex items-center gap-1"><Tag className="w-3 h-3" /> Discount {selectedAppointment.coupon ? `(${selectedAppointment.coupon.code})` : ''}:</span>
+                                                <span>-${selectedAppointment.discountAmount}</span>
+                                            </div>
+                                            <div className="border-t border-green-200 dark:border-green-800 my-1"></div>
+                                            <div className="flex justify-between items-center font-bold">
+                                                <span>Total:</span>
+                                                <span>${selectedAppointment.total}</span>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="space-y-1">
                                     <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Staff Member</p>

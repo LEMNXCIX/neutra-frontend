@@ -45,6 +45,14 @@ export interface Appointment {
     status: 'PENDING' | 'CONFIRMED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED' | 'NO_SHOW';
     notes?: string;
     cancellationReason?: string;
+
+    // Coupon Info
+    couponId?: string;
+    discountAmount: number;
+    subtotal: number;
+    total: number;
+    coupon?: any; // Replace with proper Coupon type when available
+
     confirmationSent: boolean;
     reminderSent: boolean;
     tenantId: string;
@@ -61,6 +69,7 @@ export interface CreateAppointmentData {
     staffId: string;
     startTime: Date | string;
     notes?: string;
+    couponCode?: string;
 }
 
 class BookingService {
@@ -179,6 +188,25 @@ class BookingService {
 
         if (!data.success) {
             throw new Error(data.message || 'Failed to cancel appointment');
+        }
+    }
+
+    /**
+     * Sync all services for a staff member
+     */
+    async syncStaffServices(staffId: string, serviceIds: string[]): Promise<void> {
+        const response = await fetch(`${this.baseUrl}/staff/${staffId}/services`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ serviceIds }),
+        });
+
+        const data = await response.json();
+
+        if (!data.success) {
+            throw new Error(data.message || 'Failed to sync staff services');
         }
     }
 

@@ -9,6 +9,7 @@ type User = {
     name: string;
     email?: string;
     isAdmin: boolean;
+    roleName?: string;
     avatar?: string;
     roleId?: string;
 } | null;
@@ -33,7 +34,8 @@ function mapAPIUserToStoreUser(apiUser: APIUser): User {
         id: apiUser.id,
         name: apiUser.name,
         email: apiUser.email,
-        isAdmin: apiUser.role?.name === 'SUPER_ADMIN' || apiUser.role?.name === 'ADMIN' || false, // Check role name
+        isAdmin: apiUser.role?.name === 'SUPER_ADMIN' || apiUser.role?.name === 'ADMIN' || false,
+        roleName: apiUser.role?.name,
         avatar: apiUser.profilePic || undefined,
         roleId: apiUser.roleId,
     };

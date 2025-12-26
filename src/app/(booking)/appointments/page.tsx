@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { bookingService, Appointment } from '@/services/booking.service';
+import { useAuthStore } from '@/store/auth-store';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -14,19 +15,25 @@ import { CancelAppointmentDialog } from '@/components/booking/cancel-appointment
 export default function AppointmentsPage() {
     const searchParams = useSearchParams();
     const success = searchParams.get('success');
+    const user = useAuthStore((state) => state.user);
 
     const [appointments, setAppointments] = useState<Appointment[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        loadAppointments();
-    }, []);
+        if (user) {
+            loadAppointments();
+        } else if (!useAuthStore.getState().loading) {
+            setLoading(false);
+        }
+    }, [user]);
 
     const loadAppointments = async () => {
+        if (!user?.id) return;
         try {
             setLoading(true);
-            const data = await bookingService.getAppointments();
+            const data = await bookingService.getAppointments({ userId: user.id });
             setAppointments(data);
             setError(null);
         } catch (err: any) {

@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/context/cart-context";
+import { useFeatures } from "@/hooks/useFeatures";
 import { apiFetch } from "@/lib/api-fetch";
 import { Button } from "@/components/ui/button";
 import {
@@ -46,6 +47,7 @@ export default function CartClient() {
     discount,
     subtotal,
   } = useCart();
+  const { isFeatureEnabled } = useFeatures();
 
   const [address, setAddress] = useState("");
   const [placing, setPlacing] = useState(false);
@@ -264,62 +266,64 @@ export default function CartClient() {
           <div className="lg:col-span-1">
             <div className="sticky top-4 space-y-4">
               {/* Coupon Card */}
-              <Card className="border-none shadow-lg">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-base">
-                    <Tag className="h-5 w-5" />
-                    Promo Code
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex gap-2">
-                    <Input
-                      value={code}
-                      onChange={(e) => setCode(e.target.value.toUpperCase())}
-                      placeholder="ENTER CODE"
-                      className="flex-1"
-                      disabled={!!coupon}
-                    />
-                    {!coupon ? (
-                      <Button
-                        onClick={handleApplyCoupon}
-                        disabled={applyingCoupon || !code.trim()}
-                      >
-                        {applyingCoupon ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          "Apply"
-                        )}
-                      </Button>
-                    ) : (
-                      <Button variant="outline" onClick={handleRemoveCoupon}>
-                        Remove
-                      </Button>
-                    )}
-                  </div>
-                  {coupon && (
-                    <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/20">
-                      <div className="flex items-start gap-2">
-                        {coupon.type === "percent" ? (
-                          <Percent className="h-4 w-4 text-green-600 mt-0.5" />
-                        ) : (
-                          <DollarSign className="h-4 w-4 text-green-600 mt-0.5" />
-                        )}
-                        <div className="flex-1">
-                          <p className="font-semibold text-sm text-green-700">
-                            {coupon.code}
-                          </p>
-                          <p className="text-xs text-green-600">
-                            {coupon.type === "percent"
-                              ? `${coupon.value}% discount`
-                              : `$${coupon.value.toFixed(2)} off`}
-                          </p>
+              {isFeatureEnabled("coupons") && (
+                <Card className="border-none shadow-lg">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-base">
+                      <Tag className="h-5 w-5" />
+                      Promo Code
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex gap-2">
+                      <Input
+                        value={code}
+                        onChange={(e) => setCode(e.target.value.toUpperCase())}
+                        placeholder="ENTER CODE"
+                        className="flex-1"
+                        disabled={!!coupon}
+                      />
+                      {!coupon ? (
+                        <Button
+                          onClick={handleApplyCoupon}
+                          disabled={applyingCoupon || !code.trim()}
+                        >
+                          {applyingCoupon ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            "Apply"
+                          )}
+                        </Button>
+                      ) : (
+                        <Button variant="outline" onClick={handleRemoveCoupon}>
+                          Remove
+                        </Button>
+                      )}
+                    </div>
+                    {coupon && (
+                      <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/20">
+                        <div className="flex items-start gap-2">
+                          {coupon.type === "percent" ? (
+                            <Percent className="h-4 w-4 text-green-600 mt-0.5" />
+                          ) : (
+                            <DollarSign className="h-4 w-4 text-green-600 mt-0.5" />
+                          )}
+                          <div className="flex-1">
+                            <p className="font-semibold text-sm text-green-700">
+                              {coupon.code}
+                            </p>
+                            <p className="text-xs text-green-600">
+                              {coupon.type === "percent"
+                                ? `${coupon.value}% discount`
+                                : `$${coupon.value.toFixed(2)} off`}
+                            </p>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
 
               {/* Address Card */}
               <Card className="border-none shadow-lg">
