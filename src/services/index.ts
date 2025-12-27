@@ -22,3 +22,6 @@ export { couponsService } from './coupons.service';
 export { rolesService } from './roles.service';
 export { permissionsService } from './permissions.service';
 export { tenantService } from './tenant.service';
+export { featuresService } from './features.service';
+export { bookingService } from './booking.service';
+export type { Appointment, Staff, Service, CreateAppointmentData } from './booking.service';

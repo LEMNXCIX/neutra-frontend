@@ -1,91 +1,77 @@
-/**
- * Server-side Authentication Utilities
- * Handles token extraction and auth header construction for server-side requests
- */
 
 import { cookies } from 'next/headers';
-import { NextRequest } from 'next/server';
 
-const TOKEN_COOKIE_NAME = 'token'; // Changed from 'neutra_jwt' to match backend
+const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001/api';
 
-/**
- * Extract JWT token from Next.js request cookies
- * Use this in API routes (app/api/*)
- * @param req - NextRequest object
- * @returns JWT token or undefined
- */
-export function extractTokenFromRequest(req: NextRequest): string | undefined {
-    const cookieHeader = req.headers.get('cookie') || '';
+export async function validateAdminAccess() {
+    try {
+        const cookieStore = await cookies();
+        const tokenCookie = cookieStore.get('token');
 
-    // Split cookies and find neutra_jwt
-    const cookies = cookieHeader.split(';').map(c => c.trim());
+        if (!tokenCookie) {
+            return { isValid: false, user: null };
+        }
 
-    const neutraJwtCookie = cookies.find((c) => c.startsWith(`${TOKEN_COOKIE_NAME}=`));
+        const allCookies = cookieStore.getAll();
+        const cookieHeader = allCookies
+            .map(cookie => `${cookie.name}=${cookie.value}`)
+            .join('; ');
 
-    if (!neutraJwtCookie) {
-        return undefined;
+        const response = await fetch(`${BACKEND_API_URL}/auth/validate`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Cookie': cookieHeader,
+            },
+            cache: 'no-store',
+        });
+
+        if (!response.ok) return { isValid: false, user: null };
+
+        const data = await response.json();
+        if (!data.success || !data.data?.user) return { isValid: false, user: null };
+
+        const user = data.data.user;
+
+        // We consider an admin anyone who has SUPER_ADMIN role
+        const isAdmin = user.role?.name === 'SUPER_ADMIN';
+
+        return { isValid: isAdmin, user, cookieHeader };
+    } catch (error) {
+        console.error('Admin validation error:', error);
+        return { isValid: false, user: null };
     }
-
-    // Extract token value (everything after "neutra_jwt=")
-    const token = neutraJwtCookie.substring(`${TOKEN_COOKIE_NAME}=`.length);
-
-    // Decode if URL encoded
-    const decodedToken = decodeURIComponent(token);
-
-    return decodedToken;
 }
 
-/**
- * Extract JWT token from Next.js cookies() function
- * Use this in server components (app/admin/*)
- * @returns JWT token or undefined
- */
-export async function extractTokenFromCookies(): Promise<string | undefined> {
+export async function extractTokenFromCookies() {
     const cookieStore = await cookies();
-    const token = cookieStore.get(TOKEN_COOKIE_NAME)?.value;
-    return token;
+    return cookieStore.get('token')?.value || null;
 }
 
-/**
- * Get full cookie string from Next.js cookies() function
- * @returns Cookie string for forwarding
- */
-export async function getCookieString(): Promise<string> {
+export async function getCookieString() {
     const cookieStore = await cookies();
-    return cookieStore.getAll().map((c) => `${c.name}=${c.value}`).join('; ');
+    const allCookies = cookieStore.getAll();
+    return allCookies.map(cookie => `${cookie.name}=${cookie.value}`).join('; ');
 }
 
-/**
- * Build authorization headers from token
- * @param token - JWT token
- * @returns Headers object with Authorization if token exists
- */
-export function buildAuthHeaders(token?: string): Record<string, string> {
-    if (!token) {
-        return {};
-    }
-    return {
-        Authorization: `Bearer ${token}`,
-    };
-}
+export function extractTokenFromRequest(req: Request | any): string | null {
+    // Check Authorization header first
+    try {
+        const auth = req.headers.get('authorization') || req.headers.get('Authorization');
+        if (auth && typeof auth === 'string' && auth.toLowerCase().startsWith('bearer ')) {
+            return auth.slice(7).trim();
+        }
+    } catch { }
 
-/**
- * Extract token from request and build auth headers
- * Convenience function for API routes
- * @param req - NextRequest object
- * @returns Headers object with Authorization if token exists
- */
-export function getAuthHeadersFromRequest(req: NextRequest): Record<string, string> {
-    const token = extractTokenFromRequest(req);
-    return buildAuthHeaders(token);
-}
+    // Fallback to cookie
+    try {
+        const cookieHeader = req.headers.get('cookie') || '';
+        const pairs = cookieHeader.split(';').map((s: string) => s.trim()).filter(Boolean);
+        for (const p of pairs) {
+            const [k, ...v] = p.split('=');
+            if (k === 'token') return decodeURIComponent(v.join('='));
+        }
+    } catch { }
 
-/**
- * Extract token from cookies and build auth headers
- * Convenience function for server components
- * @returns Headers object with Authorization if token exists
- */
-export async function getAuthHeadersFromCookies(): Promise<Record<string, string>> {
-    const token = await extractTokenFromCookies();
-    return buildAuthHeaders(token);
+    return null;
 }

@@ -77,17 +77,14 @@ export default function TenantFeaturesClient() {
     };
 
     const loadFeatures = async (id: string) => {
-        console.log(`Loading features for tenant: ${id}`);
         try {
             setLoadingFeatures(true);
             const data = await tenantService.getFeatures(id);
-            console.log('Features loaded:', data);
             setFeatures({
                 coupons: data.coupons ?? false,
                 appointmentCoupons: data.appointmentCoupons ?? false,
             });
         } catch (error: any) {
-            console.error("Failed to load features", error);
             const msg = error?.message || "Unknown error";
             toast.error(`Failed to load features: ${msg}`);
         } finally {

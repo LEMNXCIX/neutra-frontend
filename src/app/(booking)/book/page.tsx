@@ -42,11 +42,6 @@ export default function BookPage() {
 
     // Coupon state
     const { isFeatureEnabled, features } = useFeatures();
-    console.log('BookPage Features Debug:', {
-        allFeatures: features,
-        couponsEnabled: isFeatureEnabled ? isFeatureEnabled('coupons') : 'N/A',
-        apptCouponsEnabled: isFeatureEnabled ? isFeatureEnabled('appointmentCoupons') : 'N/A'
-    });
     const [couponCode, setCouponCode] = useState('');
     const [couponResult, setCouponResult] = useState<CouponValidationResult | null>(null);
     const [validatingCoupon, setValidatingCoupon] = useState(false);

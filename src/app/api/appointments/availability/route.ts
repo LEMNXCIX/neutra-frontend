@@ -10,7 +10,6 @@ export async function GET(request: NextRequest) {
 
     try {
         const headers = getProxyHeaders(request);
-        console.log(`[Proxy] Fetching availability from ${url}`);
 
         const response = await fetch(url, {
             method: 'GET',
@@ -18,11 +17,8 @@ export async function GET(request: NextRequest) {
             cache: 'no-store',
         });
 
-        console.log(`[Proxy] Backend response status: ${response.status}`);
-
         if (!response.ok) {
             const text = await response.text();
-            console.error(`[Proxy] Backend error: ${response.status} ${text}`);
             return NextResponse.json(
                 { success: false, message: `Backend error: ${response.status}` },
                 { status: response.status }

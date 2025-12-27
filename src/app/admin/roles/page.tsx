@@ -5,7 +5,8 @@ import { Permission } from "@/types/permission.types";
 
 export const dynamic = 'force-dynamic';
 
-const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001/api';
+const BASE_API_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:4001/api').replace(/\/$/, '');
+const SERVER_API_URL = BASE_API_URL.replace('localhost', '127.0.0.1');
 
 async function getRolesAndPermissions(rolePage: number, permissionPage: number, roleSearch?: string, permissionSearch?: string) {
     try {
@@ -13,10 +14,12 @@ async function getRolesAndPermissions(rolePage: number, permissionPage: number, 
         const cookieString = cookieStore.toString();
 
         // Fetch roles (paginated)
-        const roleUrl = new URL(`${BACKEND_API_URL}/roles`);
+        const roleUrl = new URL(`${SERVER_API_URL}/roles`);
         roleUrl.searchParams.set('page', rolePage.toString());
         roleUrl.searchParams.set('limit', '10');
         if (roleSearch) roleUrl.searchParams.set('search', roleSearch);
+
+        console.log(`[RolesPage] Fetching roles from: ${roleUrl.toString()}`);
 
         const rolesResponse = await fetch(roleUrl.toString(), {
             headers: {
@@ -27,7 +30,7 @@ async function getRolesAndPermissions(rolePage: number, permissionPage: number, 
         });
 
         // Fetch permissions (paginated)
-        const permUrl = new URL(`${BACKEND_API_URL}/permissions`);
+        const permUrl = new URL(`${SERVER_API_URL}/permissions`);
         permUrl.searchParams.set('page', permissionPage.toString());
         permUrl.searchParams.set('limit', '10');
         if (permissionSearch) permUrl.searchParams.set('search', permissionSearch);
@@ -63,7 +66,7 @@ async function getRolesAndPermissions(rolePage: number, permissionPage: number, 
         // Fetch all permissions for selection in forms (non-paginated)
         let allPermissions: Permission[] = [];
         try {
-            const allPermsResponse = await fetch(`${BACKEND_API_URL}/permissions`, {
+            const allPermsResponse = await fetch(`${SERVER_API_URL}/permissions`, {
                 headers: {
                     'Content-Type': 'application/json',
                     'Cookie': cookieString,

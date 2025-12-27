@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { NavItem } from "@/config/admin-navigation";
 import { useFeatures } from "@/hooks/useFeatures";
+import { useAuthStore } from "@/store/auth-store";
 import {
     LayoutDashboard,
     Package,
@@ -43,8 +44,15 @@ interface AdminMobileNavProps {
 export default function AdminMobileNav({ items }: AdminMobileNavProps) {
     const pathname = usePathname();
     const { isFeatureEnabled } = useFeatures();
+    const { user } = useAuthStore();
 
     const filteredItems = items.filter(item => {
+        // Role check
+        if (item.adminOnly && !user?.isAdmin) {
+            return false;
+        }
+
+        // Feature checks
         if (item.label === "Coupons") {
             return isFeatureEnabled("coupons");
         }

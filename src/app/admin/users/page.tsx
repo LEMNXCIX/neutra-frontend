@@ -58,26 +58,32 @@ async function getUsers(search: string, role: string, page: number, limit: numbe
         // Map backend users to frontend format
         let users: User[] = [];
         if (data.success && data.data) {
-            users = (Array.isArray(data.data) ? data.data : []).map((u: BackendUser) => ({
-                id: u.id,
-                name: u.name,
-                email: u.email,
-                roleId: u.roleId || u.role?.id || '',
-                active: u.active !== undefined ? u.active : true,
-                profilePic: u.profilePic || undefined,
-                role: u.role ? {
-                    id: u.role.id,
-                    name: u.role.name,
-                    permissions: u.role.permissions || []
-                } : undefined,
-                createdAt: u.createdAt ? new Date(u.createdAt) : undefined,
-                updatedAt: u.updatedAt ? new Date(u.updatedAt) : undefined,
-                tenant: u.tenant ? {
-                    id: u.tenant.id,
-                    name: u.tenant.name,
-                    slug: u.tenant.slug
-                } : undefined
-            }));
+            users = (Array.isArray(data.data) ? data.data : []).map((u: any, index: number) => {
+                // Find role in tenants if not at top level
+                const tenantRole = u.role || u.tenants?.[0]?.role;
+                const tenantInfo = u.tenant || u.tenants?.[0]?.tenant;
+
+                return {
+                    id: u.id,
+                    name: u.name,
+                    email: u.email,
+                    roleId: u.roleId || tenantRole?.id || '',
+                    active: u.active !== undefined ? u.active : true,
+                    profilePic: u.profilePic || undefined,
+                    role: tenantRole ? {
+                        id: tenantRole.id,
+                        name: tenantRole.name,
+                        permissions: tenantRole.permissions || []
+                    } : (u.roleId ? { id: u.roleId, name: 'USER', permissions: [] } : undefined),
+                    createdAt: u.createdAt ? new Date(u.createdAt) : undefined,
+                    updatedAt: u.updatedAt ? new Date(u.updatedAt) : undefined,
+                    tenant: tenantInfo ? {
+                        id: tenantInfo.id,
+                        name: tenantInfo.name,
+                        slug: tenantInfo.slug
+                    } : undefined
+                };
+            });
         }
 
         // Apply filters

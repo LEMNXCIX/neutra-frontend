@@ -39,7 +39,6 @@ export default async function OrderPage(props: { params: Promise<{ id: string }>
   try {
     const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001/api';
     const url = `${baseUrl}/order/${params.id}`;
-    console.log(`Fetching order from: ${url}`);
 
     const cookieStore = await cookies();
     const cookieHeader = cookieStore.toString();
@@ -51,8 +50,6 @@ export default async function OrderPage(props: { params: Promise<{ id: string }>
         'Cookie': cookieHeader
       }
     });
-
-    console.log(`Response status: ${res.status}`);
 
     if (res.status === 401) {
       redirect('/auth/login?returnUrl=/orders/' + params.id);

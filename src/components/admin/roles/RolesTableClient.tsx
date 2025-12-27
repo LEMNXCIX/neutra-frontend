@@ -241,7 +241,6 @@ export default function RolesTableClient({ roles, permissions, allPermissions = 
 
         setIsDeletingRole(id);
         try {
-            console.log("id", id);
             await rolesService.delete(id);
             toast.success("Role deleted successfully");
             router.refresh();

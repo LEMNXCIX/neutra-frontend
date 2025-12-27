@@ -32,15 +32,18 @@ export async function GET(req: NextRequest) {
     };
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mappedUsers = users.map((u: any) => ({
-      id: u.id,
-      name: u.name,
-      email: u.email,
-      role: u.role, // Pass full role object
-      isAdmin: u.role?.name === 'ADMIN' || u.role?.name === 'SUPER_ADMIN', // Updated check
-      profilePic: u.profilePic, // Updated field name to match frontend expectation if needed, or keep avatar
-      avatar: u.profilePic
-    }));
+    const mappedUsers = users.map((u: any) => {
+      const role = u.role || u.tenants?.[0]?.role;
+      return {
+        id: u.id,
+        name: u.name,
+        email: u.email,
+        role: role, // Pass full role object
+        isAdmin: role?.name === 'ADMIN' || role?.name === 'SUPER_ADMIN', // Updated check
+        profilePic: u.profilePic,
+        avatar: u.profilePic
+      };
+    });
 
     return NextResponse.json({
       users: mappedUsers,

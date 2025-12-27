@@ -1,7 +1,4 @@
-/**
- * Booking Service
- * Handles all booking-related API calls
- */
+import { apiClient as api } from '@/lib/api-client';
 
 export interface Service {
     id: string;
@@ -22,6 +19,7 @@ export interface Service {
 
 export interface Staff {
     id: string;
+    userId?: string;
     name: string;
     email?: string;
     phone?: string;
@@ -51,7 +49,7 @@ export interface Appointment {
     discountAmount: number;
     subtotal: number;
     total: number;
-    coupon?: any; // Replace with proper Coupon type when available
+    coupon?: any;
 
     confirmationSent: boolean;
     reminderSent: boolean;
@@ -73,8 +71,6 @@ export interface CreateAppointmentData {
 }
 
 class BookingService {
-    private baseUrl = '/api';
-
     /**
      * Get all services
      */
@@ -83,14 +79,7 @@ class BookingService {
         params.append('activeOnly', activeOnly.toString());
         if (tenantId) params.append('tenantId', tenantId);
 
-        const response = await fetch(`${this.baseUrl}/services?${params.toString()}`);
-        const data = await response.json();
-
-        if (!data.success) {
-            throw new Error(data.message || 'Failed to fetch services');
-        }
-
-        return data.data || [];
+        return api<Service[]>(`/services?${params.toString()}`);
     }
 
     /**
@@ -101,14 +90,14 @@ class BookingService {
         params.append('activeOnly', activeOnly.toString());
         if (tenantId) params.append('tenantId', tenantId);
 
-        const response = await fetch(`${this.baseUrl}/staff?${params.toString()}`);
-        const data = await response.json();
+        return api<Staff[]>(`/staff?${params.toString()}`);
+    }
 
-        if (!data.success) {
-            throw new Error(data.message || 'Failed to fetch staff');
-        }
-
-        return data.data || [];
+    /**
+     * Get current user's staff profile
+     */
+    async getMeStaff(): Promise<Staff> {
+        return api<Staff>('/staff/me');
     }
 
     /**
@@ -129,14 +118,7 @@ class BookingService {
             });
         }
 
-        const response = await fetch(`${this.baseUrl}/appointments?${params.toString()}`);
-        const data = await response.json();
-
-        if (!data.success) {
-            throw new Error(data.message || 'Failed to fetch appointments');
-        }
-
-        return data.data || [];
+        return api<Appointment[]>(`/appointments?${params.toString()}`);
     }
 
     async checkAvailability(staffId: string, serviceId: string, date: string): Promise<string[]> {
@@ -148,88 +130,54 @@ class BookingService {
             timezoneOffset: timezoneOffset.toString()
         });
 
-        const response = await fetch(`${this.baseUrl}/appointments/availability?${params.toString()}`);
-
-        if (!response.ok) {
-            console.error('Availability check failed', response.status, await response.text());
-            throw new Error('Failed to check availability');
-        }
-
-        const data = await response.json();
-        return data.data || [];
+        return api<string[]>(`/appointments/availability?${params.toString()}`);
     }
 
     /**
      * Create a new appointment
      */
     async createAppointment(appointmentData: CreateAppointmentData): Promise<Appointment> {
-        const response = await fetch(`${this.baseUrl}/appointments`, {
+        return api<Appointment>('/appointments', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
             body: JSON.stringify(appointmentData),
         });
-
-        const data = await response.json();
-
-        if (!data.success) {
-            throw new Error(data.message || 'Failed to create appointment');
-        }
-
-        return data.data;
     }
 
     /**
      * Cancel an appointment
      */
     async cancelAppointment(appointmentId: string, reason?: string): Promise<void> {
-        const response = await fetch(`${this.baseUrl}/appointments/${appointmentId}/cancel`, {
+        return api<void>(`/appointments/${appointmentId}/cancel`, {
             method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
             body: JSON.stringify({ reason }),
         });
-
-        const data = await response.json();
-
-        if (!data.success) {
-            throw new Error(data.message || 'Failed to cancel appointment');
-        }
     }
 
     /**
      * Sync all services for a staff member
      */
     async syncStaffServices(staffId: string, serviceIds: string[]): Promise<void> {
-        const response = await fetch(`${this.baseUrl}/staff/${staffId}/services`, {
+        return api<void>(`/staff/${staffId}/services`, {
             method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
             body: JSON.stringify({ serviceIds }),
         });
-
-        const data = await response.json();
-
-        if (!data.success) {
-            throw new Error(data.message || 'Failed to sync staff services');
-        }
     }
 
     /**
      * Get a single appointment by ID
      */
     async getAppointmentById(id: string): Promise<Appointment> {
-        const response = await fetch(`${this.baseUrl}/appointments/${id}`);
-        const data = await response.json();
+        return api<Appointment>(`/appointments/${id}`);
+    }
 
-        if (!data.success) {
-            throw new Error(data.message || 'Failed to fetch appointment details');
-        }
-
-        return data.data;
+    /**
+     * Update appointment status
+     */
+    async updateAppointmentStatus(id: string, status: Appointment['status']): Promise<Appointment> {
+        return api<Appointment>(`/appointments/${id}/status`, {
+            method: 'PUT',
+            body: JSON.stringify({ status }),
+        });
     }
 }
 

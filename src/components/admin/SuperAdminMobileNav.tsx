@@ -17,7 +17,9 @@ import {
     BrickWallShield,
     Scissors,
     UserCog,
-    Building
+    Building,
+    CalendarDays,
+    Zap
 } from "lucide-react";
 
 const ICON_MAP: Record<string, any> = {
@@ -32,7 +34,9 @@ const ICON_MAP: Record<string, any> = {
     BrickWallShield,
     Scissors,
     UserCog,
-    Building
+    Building,
+    CalendarDays,
+    Zap
 };
 
 interface SuperAdminMobileNavProps {

@@ -4,6 +4,7 @@ export interface NavItem {
     label: string;
     icon: string; // Changed to string
     exact?: boolean;
+    adminOnly?: boolean;
 }
 
 export const STORE_ADMIN_NAV: NavItem[] = [
@@ -15,6 +16,7 @@ export const STORE_ADMIN_NAV: NavItem[] = [
     { href: "/admin/orders", label: "Orders", icon: "ShoppingCart" },
     { href: "/admin/coupons", label: "Coupons", icon: "Ticket" },
     { href: "/admin/users", label: "Users", icon: "Users" },
+    { href: "/admin/roles", label: "Roles", icon: "BrickWallShield", adminOnly: true },
 ];
 
 export const BOOKING_ADMIN_NAV: NavItem[] = [
@@ -25,12 +27,13 @@ export const BOOKING_ADMIN_NAV: NavItem[] = [
     { href: "/admin/staff", label: "Staff", icon: "UserCog" },
     { href: "/admin/coupons", label: "Coupons", icon: "Ticket" },
     { href: "/admin/users", label: "Users", icon: "Users" },
+    { href: "/admin/roles", label: "Roles", icon: "BrickWallShield", adminOnly: true },
 ];
 
 export const SUPER_ADMIN_NAV: NavItem[] = [
     { href: "/admin", label: "Dashboard", icon: "LayoutDashboard", exact: true },
     { href: "/admin/tenants", label: "Tenants", icon: "Building" },
-    { href: "/admin/features", label: "Features", icon: "Columns3Cog" },
+    { href: "/admin/features", label: "Features", icon: "Zap" },
     { href: "/admin/appointments", label: "Appointments", icon: "CalendarDays" },
     { href: "/admin/services", label: "Services", icon: "Scissors" },
     { href: "/admin/staff", label: "Staff", icon: "UserCog" },

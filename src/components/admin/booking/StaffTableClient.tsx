@@ -5,6 +5,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { Plus, Edit, Trash2, Mail, Phone, Info, User as UserIcon, Scissors, Check } from "lucide-react";
 import { bookingService, Staff, Service } from "@/services/booking.service";
+import { usersService } from "@/services/users.service";
+import { User } from "@/types/user.types";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -43,14 +45,18 @@ export default function StaffTableClient({
 }: Props) {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const [staff, setStaff] = useState<Staff[]>(initialStaff);
+    const [staff, setStaff] = useState<Staff[]>(initialStaff || []);
     const [loading, setLoading] = useState(false);
     const [dialogOpen, setDialogOpen] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [editingStaff, setEditingStaff] = useState<Staff | null>(null);
     const { confirm, ConfirmDialog } = useConfirm();
 
+    const [allUsers, setAllUsers] = useState<User[]>([]);
+    const [isLoadingUsers, setIsLoadingUsers] = useState(false);
+
     const [formData, setFormData] = useState({
+        userId: '',
         name: '',
         email: '',
         phone: '',
@@ -66,12 +72,29 @@ export default function StaffTableClient({
     const tenantFilter = searchParams.get('tenantId') || 'all';
 
     useEffect(() => {
-        setStaff(initialStaff);
+        setStaff(initialStaff || []);
     }, [initialStaff]);
 
     useEffect(() => {
         loadServices();
+        loadUsers();
+        // Fallback: if no staff provided from parent, load them client-side
+        if (!initialStaff || initialStaff.length === 0) {
+            loadStaff();
+        }
     }, []);
+
+    const loadUsers = async () => {
+        try {
+            setIsLoadingUsers(true);
+            const data = await usersService.getAll();
+            setAllUsers(data);
+        } catch (err) {
+            console.error('Error loading users:', err);
+        } finally {
+            setIsLoadingUsers(false);
+        }
+    };
 
     const handleTenantFilterChange = (value: string) => {
         const params = new URLSearchParams(searchParams);
@@ -107,13 +130,14 @@ export default function StaffTableClient({
 
     const openCreate = () => {
         setEditingStaff(null);
-        setFormData({ name: '', email: '', phone: '', bio: '', active: true });
+        setFormData({ userId: '', name: '', email: '', phone: '', bio: '', active: true });
         setDialogOpen(true);
     };
 
     const openEdit = (member: Staff) => {
         setEditingStaff(member);
         setFormData({
+            userId: member.userId || '',
             name: member.name,
             email: member.email || '',
             phone: member.phone || '',
@@ -162,10 +186,15 @@ export default function StaffTableClient({
             const url = editingStaff ? `/api/staff/${editingStaff.id}` : '/api/staff';
             const method = editingStaff ? 'PUT' : 'POST';
 
+            const payload = {
+                ...formData,
+                userId: formData.userId === 'none' ? undefined : formData.userId
+            };
+
             const response = await fetch(url, {
                 method,
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData),
+                body: JSON.stringify(payload),
             });
 
             if (response.ok) {
@@ -338,6 +367,33 @@ export default function StaffTableClient({
                         </DialogDescription>
                     </DialogHeader>
                     <form onSubmit={handleSubmit} className="space-y-5 pt-4">
+                        <div className="grid gap-2">
+                            <Label htmlFor="user">Link Registered User (Optional)</Label>
+                            <Select
+                                value={formData.userId}
+                                onValueChange={(value) => {
+                                    const user = allUsers.find(u => u.id === value);
+                                    setFormData({
+                                        ...formData,
+                                        userId: value,
+                                        name: user?.name || formData.name,
+                                        email: user?.email || formData.email
+                                    });
+                                }}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select a user to link..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="none">None (Individual Staff)</SelectItem>
+                                    {allUsers.map((user) => (
+                                        <SelectItem key={user.id} value={user.id}>
+                                            {user.name} ({user.email})
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
                         <div className="grid gap-2">
                             <Label htmlFor="name">Full Name *</Label>
                             <Input

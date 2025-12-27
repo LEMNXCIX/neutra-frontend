@@ -8,7 +8,8 @@ import { tenantService } from '@/services/tenant.service';
 import { getTenantUrl } from '@/lib/tenant';
 import { Tenant } from '@/types/tenant';
 import { Button } from '@/components/ui/button';
-import { LayoutDashboard, LogIn, UserPlus, Menu } from 'lucide-react';
+import { LayoutDashboard, LogIn, UserPlus, Menu, Building2 } from 'lucide-react';
+import { useTenant } from '@/context/tenant-context';
 import {
     Sheet,
     SheetContent,
@@ -24,6 +25,8 @@ export function NeutralNavigation() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const user = useAuthStore((state) => state.user);
     const isAdmin = user?.isAdmin;
+    const { tenantSlug } = useTenant();
+    const isSuperAdminContext = tenantSlug === 'superadmin';
 
     const handleThemeToggle = () => {
         setTheme(theme === "dark" ? "light" : "dark");
@@ -59,13 +62,13 @@ export function NeutralNavigation() {
 
                     {isAdmin && (
                         <div className="hidden md:flex items-center gap-4">
-                            <Link
-                                href="/admin"
+                            <a
+                                href="http://superadmin.localhost:3000/admin"
                                 className="flex items-center gap-2 text-sm font-bold hover:underline decoration-2 underline-offset-4 text-foreground"
                             >
                                 <LayoutDashboard size={16} />
                                 ADMINISTRACIÓN
-                            </Link>
+                            </a>
                             <div className="h-4 w-px bg-border" />
                             <div className="flex items-center gap-2">
                                 <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Tenants:</span>
@@ -79,6 +82,18 @@ export function NeutralNavigation() {
                                     </a>
                                 ))}
                             </div>
+                        </div>
+                    )}
+
+                    {!isAdmin && user && isSuperAdminContext && (
+                        <div className="hidden md:flex items-center gap-4">
+                            <Link
+                                href="/onboarding/tenant"
+                                className="flex items-center gap-2 text-sm font-bold hover:underline decoration-2 underline-offset-4 text-foreground text-primary"
+                            >
+                                <Building2 size={16} />
+                                CREATE YOUR STORE
+                            </Link>
                         </div>
                     )}
                 </div>
@@ -131,14 +146,14 @@ export function NeutralNavigation() {
                                             <div className="space-y-4">
                                                 <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest px-1">Administración</span>
                                                 <nav className="flex flex-col gap-2">
-                                                    <Link
-                                                        href="/admin"
+                                                    <a
+                                                        href="http://superadmin.localhost:3000/admin"
                                                         onClick={() => setIsMobileMenuOpen(false)}
                                                         className="flex items-center gap-3 py-3 text-lg font-black uppercase tracking-tight hover:underline text-foreground"
                                                     >
                                                         <LayoutDashboard size={20} />
                                                         Dashboard
-                                                    </Link>
+                                                    </a>
                                                 </nav>
                                                 <div className="pt-4 space-y-3">
                                                     <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest px-1">Tus Sitios</span>

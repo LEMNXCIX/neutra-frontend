@@ -6,11 +6,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { Edit, Trash2, Plus, Building, Search, RefreshCw } from "lucide-react";
+import { Edit, Trash2, Plus, Building, Search, RefreshCw, Settings } from "lucide-react";
 import { TenantDialog } from "./TenantDialog";
+import { TenantFeaturesDialog } from "./TenantFeaturesDialog";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
+import { useConfirm } from "@/hooks/use-confirm";
 
 export function TenantsTable() {
     const [tenants, setTenants] = useState<Tenant[]>([]);
@@ -18,6 +20,9 @@ export function TenantsTable() {
     const [search, setSearch] = useState("");
     const [dialogOpen, setDialogOpen] = useState(false);
     const [editingTenant, setEditingTenant] = useState<Tenant | null>(null);
+    const [featuresDialogOpen, setFeaturesDialogOpen] = useState(false);
+    const [managingFeaturesTenant, setManagingFeaturesTenant] = useState<Tenant | null>(null);
+    const { confirm, ConfirmDialog } = useConfirm();
 
     const loadTenants = async () => {
         setLoading(true);
@@ -49,6 +54,31 @@ export function TenantsTable() {
     const openEdit = (tenant: Tenant) => {
         setEditingTenant(tenant);
         setDialogOpen(true);
+    };
+
+    const openFeatures = (tenant: Tenant) => {
+        setManagingFeaturesTenant(tenant);
+        setFeaturesDialogOpen(true);
+    };
+
+    const handleDelete = async (tenant: Tenant) => {
+        const confirmed = await confirm({
+            title: "Delete Tenant",
+            description: `Are you sure you want to delete "${tenant.name}"? This action cannot be undone and will remove all data associated with this tenant.`,
+            confirmText: "Delete",
+            cancelText: "Cancel"
+        });
+
+        if (!confirmed) return;
+
+        try {
+            await tenantService.delete(tenant.id);
+            toast.success(`Tenant "${tenant.name}" deleted successfully`);
+            loadTenants();
+        } catch (error) {
+            console.error(error);
+            toast.error("Failed to delete tenant");
+        }
     };
 
     return (
@@ -121,9 +151,27 @@ export function TenantsTable() {
                                                 {format(new Date(tenant.createdAt), 'PP')}
                                             </TableCell>
                                             <TableCell className="text-right">
-                                                <Button variant="ghost" size="icon" onClick={() => openEdit(tenant)}>
-                                                    <Edit className="h-4 w-4" />
-                                                </Button>
+                                                <div className="flex justify-end gap-2">
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        onClick={() => openFeatures(tenant)}
+                                                        title="Manage Features"
+                                                    >
+                                                        <Settings className="h-4 w-4" />
+                                                    </Button>
+                                                    <Button variant="ghost" size="icon" onClick={() => openEdit(tenant)}>
+                                                        <Edit className="h-4 w-4" />
+                                                    </Button>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        onClick={() => handleDelete(tenant)}
+                                                        className="text-destructive hover:text-destructive"
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
                                             </TableCell>
                                         </TableRow>
                                     ))
@@ -147,9 +195,19 @@ export function TenantsTable() {
                                                 <h3 className="font-bold text-lg">{tenant.name}</h3>
                                                 <Badge variant="outline" className="text-xs">{tenant.slug}</Badge>
                                             </div>
-                                            <Button variant="ghost" size="icon" onClick={() => openEdit(tenant)}>
-                                                <Edit className="h-4 w-4" />
-                                            </Button>
+                                            <div className="flex gap-2">
+                                                <Button variant="ghost" size="icon" onClick={() => openEdit(tenant)}>
+                                                    <Edit className="h-4 w-4" />
+                                                </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    onClick={() => handleDelete(tenant)}
+                                                    className="text-destructive hover:text-destructive"
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            </div>
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <span className="text-sm text-muted-foreground">Type:</span>
@@ -177,6 +235,7 @@ export function TenantsTable() {
                 tenant={editingTenant}
                 onSuccess={loadTenants}
             />
+            <ConfirmDialog />
         </div>
     );
 }

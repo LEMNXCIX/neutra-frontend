@@ -16,10 +16,6 @@ export function getProxyHeaders(req: NextRequest): HeadersInit {
     const tenantIdHeader = req.headers.get('x-tenant-id');
     const tenantSlugHeader = req.headers.get('x-tenant-slug');
 
-    // Debug logging
-    console.log('[getProxyHeaders] tenantSlugHeader:', tenantSlugHeader);
-    console.log('[getProxyHeaders] tenant-slug cookie:', req.cookies.get('tenant-slug')?.value);
-
     if (tenantIdHeader) {
         headers['x-tenant-id'] = tenantIdHeader;
     } else if (!tenantSlugHeader) {
@@ -41,16 +37,22 @@ export function getProxyHeaders(req: NextRequest): HeadersInit {
     // Forward Origin/Host for correct link generation in backend
     const origin = req.headers.get('origin');
     const host = req.headers.get('host');
+    const referer = req.headers.get('referer');
     const forwardedProto = req.headers.get('x-forwarded-proto') || 'http';
 
-    if (origin) {
+    if (origin && origin !== 'null') {
         headers['x-original-origin'] = origin;
+    } else if (referer) {
+        try {
+            headers['x-original-origin'] = new URL(referer).origin;
+        } catch (e) {
+            if (host) {
+                headers['x-original-origin'] = `${forwardedProto}://${host}`;
+            }
+        }
     } else if (host) {
-        // Fallback for non-CORS requests or when origin is missing
         headers['x-original-origin'] = `${forwardedProto}://${host}`;
     }
-
-    console.log('[getProxyHeaders] Final headers:', headers);
 
     return headers;
 }

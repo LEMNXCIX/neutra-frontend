@@ -1,21 +1,63 @@
-import { authOptions } from "@/lib/auth";
-import { getServerSession } from "next-auth";
-import { redirect } from "next/navigation";
+
+import React from 'react';
+import { redirect } from 'next/navigation';
 import AppointmentsTableClient from "@/components/admin/appointments/AppointmentsTableClient";
+import { validateAdminAccess } from "@/lib/server-auth";
 
-export default async function AdminAppointmentsPage() {
-    const session = await getServerSession(authOptions);
+export const dynamic = 'force-dynamic';
 
-    if (!session || session.user.role !== "SUPER_ADMIN") {
-        redirect("/login");
-    }
+const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001/api';
+
+
+export default async function GlobalAppointmentsPage({ searchParams }: { searchParams: any }) {
+    const { isValid, cookieHeader } = await validateAdminAccess();
+    if (!isValid) redirect('/login');
+
+    const params = await searchParams;
+    const query = new URLSearchParams(params);
+    query.set('tenantId', query.get('tenantId') || 'all');
+
+    const response = await fetch(`${BACKEND_API_URL}/appointments?${query.toString()}`, {
+        headers: {
+            'Cookie': cookieHeader!,
+        },
+        cache: 'no-store',
+    });
+
+    const data = await response.json();
+
+    // Backend returns appointments directly in 'data' array
+    const appointments = data.data || [];
+
+    // Calculate stats from the appointments matching the Stats type
+    const statusCounts: Record<string, number> = {};
+    appointments.forEach((a: any) => {
+        statusCounts[a.status] = (statusCounts[a.status] || 0) + 1;
+    });
+
+    const stats = {
+        totalAppointments: appointments.length,
+        pendingAppointments: appointments.filter((a: any) => a.status === 'PENDING').length,
+        confirmedAppointments: appointments.filter((a: any) => a.status === 'CONFIRMED').length,
+        statusCounts,
+    };
+
+    const pagination = {
+        currentPage: 1,
+        totalPages: 1,
+        totalItems: appointments.length,
+        totalItemsPerPage: appointments.length,
+    };
 
     return (
-        <div className="flex-1 space-y-4 p-8 pt-6">
-            <div className="flex items-center justify-between space-y-2">
-                <h2 className="text-3xl font-bold tracking-tight">Global Appointments</h2>
-            </div>
-            <AppointmentsTableClient isSuperAdmin={true} />
+        <div className="space-y-6">
+            <h2 className="text-4xl font-black uppercase tracking-tighter text-foreground">Global Appointments</h2>
+            <AppointmentsTableClient
+                appointments={appointments}
+                stats={stats}
+                pagination={pagination}
+                isSuperAdmin={true}
+            />
         </div>
     );
 }

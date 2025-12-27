@@ -53,14 +53,14 @@ export default function ServicesTableClient({
 }: Props) {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const [services, setServices] = useState<Service[]>(initialServices);
+    const [services, setServices] = useState<Service[]>(initialServices || []);
     const [loading, setLoading] = useState(false);
     const [dialogOpen, setDialogOpen] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [editingService, setEditingService] = useState<Service | null>(null);
     const { confirm, ConfirmDialog } = useConfirm();
 
-    const [categories, setCategories] = useState<Category[]>(initialCategories);
+    const [categories, setCategories] = useState<Category[]>(initialCategories || []);
     const [loadingCategories, setLoadingCategories] = useState(false);
     const [formData, setFormData] = useState({
         name: '',
@@ -74,12 +74,29 @@ export default function ServicesTableClient({
     const tenantFilter = searchParams.get('tenantId') || 'all';
 
     useEffect(() => {
-        setServices(initialServices);
+        setServices(initialServices || []);
     }, [initialServices]);
 
     useEffect(() => {
-        setCategories(initialCategories);
+        setCategories(initialCategories || []);
     }, [initialCategories]);
+
+    useEffect(() => {
+        // Only load categories on mount, services come from props
+        loadCategories();
+    }, []);
+
+    const loadCategories = async () => {
+        try {
+            setLoadingCategories(true);
+            const data = await categoriesService.getAll();
+            setCategories(data);
+        } catch (err) {
+            console.error('Error loading categories:', err);
+        } finally {
+            setLoadingCategories(false);
+        }
+    };
 
     const handleTenantFilterChange = (value: string) => {
         const params = new URLSearchParams(searchParams);

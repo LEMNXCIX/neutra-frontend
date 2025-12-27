@@ -265,28 +265,28 @@ export default function AppointmentsTableClient({ appointments, stats, paginatio
                 <StatCard
                     icon={CalendarDays}
                     title="Total Appointments"
-                    value={stats.totalAppointments}
+                    value={stats?.totalAppointments || 0}
                     color="bg-blue-500"
                     description="Across all statuses"
                 />
                 <StatCard
                     icon={Clock}
                     title="Pending"
-                    value={stats.pendingAppointments}
+                    value={stats?.pendingAppointments || 0}
                     color="bg-yellow-500"
                     description="Awaiting confirmation"
                 />
                 <StatCard
                     icon={CalendarCheck}
                     title="Confirmed"
-                    value={stats.confirmedAppointments}
+                    value={stats?.confirmedAppointments || 0}
                     color="bg-green-500"
                     description="Upcoming bookings"
                 />
                 <StatCard
                     icon={CalendarX}
                     title="Cancelled/No-Show"
-                    value={(stats.statusCounts['CANCELLED'] || 0) + (stats.statusCounts['NO_SHOW'] || 0)}
+                    value={(stats?.statusCounts?.['CANCELLED'] || 0) + (stats?.statusCounts?.['NO_SHOW'] || 0)}
                     color="bg-red-500"
                     description="Non-completed visits"
                 />
@@ -539,7 +539,7 @@ export default function AppointmentsTableClient({ appointments, stats, paginatio
                 <Card className="border-none shadow-sm">
                     <div className="p-4 flex flex-col sm:flex-row justify-between items-center gap-4 bg-muted/20 rounded-lg">
                         <p className="text-sm text-muted-foreground order-2 sm:order-1">
-                            Showing <span className="font-medium text-foreground">{((pagination.currentPage - 1) * pagination.itemsPerPage) + 1}</span> to <span className="font-medium text-foreground">{Math.min(pagination.currentPage * pagination.itemsPerPage, pagination.totalItems)}</span> of <span className="font-medium text-foreground">{pagination.totalItems}</span> appointments
+                            Showing <span className="font-medium text-foreground">{((pagination.currentPage - 1) * pagination.totalItemsPerPage) + 1}</span> to <span className="font-medium text-foreground">{Math.min(pagination.currentPage * pagination.totalItemsPerPage, pagination.totalItems)}</span> of <span className="font-medium text-foreground">{pagination.totalItems}</span> appointments
                         </p>
                         <div className="flex gap-2 order-1 sm:order-2">
                             <Button

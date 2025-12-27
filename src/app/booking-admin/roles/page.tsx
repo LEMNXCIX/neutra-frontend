@@ -12,6 +12,8 @@ async function getRolesAndPermissions(rolePage: number, permissionPage: number, 
         const cookieStore = await cookies();
         const cookieString = cookieStore.toString();
 
+        const tenantSlug = cookieStore.get('tenant-slug')?.value || '';
+
         // Fetch roles (paginated)
         const roleUrl = new URL(`${BACKEND_API_URL}/roles`);
         roleUrl.searchParams.set('page', rolePage.toString());
@@ -22,6 +24,7 @@ async function getRolesAndPermissions(rolePage: number, permissionPage: number, 
             headers: {
                 'Content-Type': 'application/json',
                 'Cookie': cookieString,
+                'x-tenant-slug': tenantSlug,
             },
             cache: 'no-store',
         });
@@ -36,12 +39,18 @@ async function getRolesAndPermissions(rolePage: number, permissionPage: number, 
             headers: {
                 'Content-Type': 'application/json',
                 'Cookie': cookieString,
+                'x-tenant-slug': tenantSlug,
             },
             cache: 'no-store',
         });
 
         if (!rolesResponse.ok || !permissionsResponse.ok) {
-            console.error('Failed to fetch roles or permissions');
+            console.error('Failed to fetch roles or permissions:', {
+                rolesStatus: rolesResponse.status,
+                permsStatus: permissionsResponse.status,
+                apiUrl: BACKEND_API_URL,
+                tenantSlug
+            });
             return {
                 roles: [],
                 permissions: [],
@@ -67,6 +76,7 @@ async function getRolesAndPermissions(rolePage: number, permissionPage: number, 
                 headers: {
                     'Content-Type': 'application/json',
                     'Cookie': cookieString,
+                    'x-tenant-slug': tenantSlug,
                 },
                 cache: 'no-store',
             });

@@ -7,7 +7,7 @@ import { useAuthStore } from '@/store/auth-store';
 import { tenantService } from '@/services/tenant.service';
 import { Tenant } from '@/types/tenant';
 import { Button } from '@/components/ui/button';
-import { LayoutDashboard, LogIn, UserPlus, Menu, X } from 'lucide-react';
+import { LayoutDashboard, LogIn, UserPlus, Menu, X, PlusCircle } from 'lucide-react';
 import { NeutralNavigation } from '@/components/neutral-navigation';
 import Logo from '@/components/logo';
 
@@ -51,9 +51,9 @@ export default function LandingPage() {
             Sell products online or manage appointments seamlessly. Everything you need to run your business in one powerful platform.
           </p>
 
-          {user?.isAdmin && (
+          {user && (
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              {tenants.map(tenant => (
+              {isAdmin && tenants.length > 0 && tenants.map(tenant => (
                 <a
                   key={tenant.id}
                   href={getTenantUrl(tenant.slug)}
@@ -74,6 +74,13 @@ export default function LandingPage() {
                   <span>{tenant.name}</span>
                 </a>
               ))}
+              <Link
+                href="/onboarding/tenant"
+                className="flex items-center justify-center gap-4 px-10 py-5 font-black text-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-all w-full sm:w-auto uppercase tracking-tight shadow-xl"
+              >
+                <PlusCircle className="w-8 h-8" />
+                <span>Create your Store</span>
+              </Link>
             </div>
           )}
         </div>

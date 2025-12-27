@@ -12,7 +12,7 @@ export async function middleware(request: NextRequest) {
     const domain = hostname.split(':')[0];
 
     // Initialize tenant defaults
-    let tenantSlug = 'default';
+    let tenantSlug = 'superadmin';
     let moduleType = 'root'; // root, store, booking
     let tenantId = ''; // Initialize tenantId
     let shouldRewrite = false;
@@ -48,21 +48,17 @@ export async function middleware(request: NextRequest) {
                 try {
                     const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
                     const apiUrl = baseUrl.endsWith('/api') ? baseUrl : `${baseUrl}/api`;
-                    console.log(`[Middleware] Fetching config for ${tenantSlug} from ${apiUrl}/tenants/config/${tenantSlug}`);
-
                     const response = await fetch(`${apiUrl}/tenants/config/${tenantSlug}`, {
                         next: { revalidate: 3600 } // Cache for 1 hour if supported
                     });
 
                     if (response.ok) {
                         const result = await response.json();
-                        console.log(`[Middleware] Config result for ${tenantSlug}:`, result);
                         if (result.success && result.data) {
                             moduleType = result.data.type?.toLowerCase() || 'store';
                             tenantId = result.data.id || '';
                         }
                     } else {
-                        console.error(`[Middleware] Failed to fetch config for ${tenantSlug}: ${response.status} ${response.statusText}`);
                         // Simple heuristic fallback if API is down or tenant not found
                         if (tenantSlug.includes('booking') || tenantSlug.includes('book')) {
                             moduleType = 'booking';
@@ -71,7 +67,6 @@ export async function middleware(request: NextRequest) {
                         }
                     }
                 } catch (error) {
-                    console.error('Error fetching tenant config in middleware:', error);
                     // Heuristic fallback
                     if (tenantSlug.includes('booking') || tenantSlug.includes('book')) {
                         moduleType = 'booking';
@@ -94,7 +89,7 @@ export async function middleware(request: NextRequest) {
                 moduleType = 'booking';
             } else if (port === '3000' && !domain.includes('.')) {
                 // Only root if no subdomain
-                tenantSlug = '';
+                tenantSlug = 'superadmin';
                 moduleType = 'root';
             }
         }
@@ -123,7 +118,8 @@ export async function middleware(request: NextRequest) {
         } else if (moduleType === 'booking') {
             adminPath = url.pathname.replace(/^\/admin/, '/booking-admin');
         } else {
-            adminPath = url.pathname.replace(/^\/admin/, '/super-admin');
+            // For superadmin tenant, keep /admin as is
+            adminPath = url.pathname;
         }
 
         url.pathname = adminPath;

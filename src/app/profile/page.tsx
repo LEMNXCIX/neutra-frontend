@@ -48,7 +48,8 @@ import {
   Download,
   Clock,
   FileText,
-  AlertCircle
+  AlertCircle,
+  LogOut
 } from "lucide-react";
 
 import { useTenant } from "@/context/tenant-context";
@@ -63,6 +64,7 @@ export default function ProfilePage() {
   const isNeutral = moduleType === 'root' || (!moduleType && (tenantSlug === 'default' || tenantSlug === ''));
   const user = useAuthStore((state) => state.user);
   const loading = useAuthStore((state) => state.loading);
+  const logout = useAuthStore((state) => state.logout);
   const updateUser = useAuthStore((state) => state.updateUser);
   const router = useRouter();
 
@@ -343,14 +345,28 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-              <Button
-                onClick={openEditProfile}
-                size="lg"
-                className={`w-full sm:w-auto ${isNeutral ? "bg-black text-white hover:bg-zinc-800 rounded-none h-14 font-black uppercase tracking-widest px-10" : ""}`}
-              >
-                <Edit className="h-4 w-4 mr-2" />
-                Edit Profile
-              </Button>
+              <div className="flex flex-col gap-2 w-full sm:w-auto">
+                <Button
+                  onClick={openEditProfile}
+                  size="lg"
+                  className={`${isNeutral ? "bg-black text-white hover:bg-zinc-800 rounded-none h-14 font-black uppercase tracking-widest px-10" : ""}`}
+                >
+                  <Edit className="h-4 w-4 mr-2" />
+                  Edit Profile
+                </Button>
+                <Button
+                  variant="outline"
+                  size="lg"
+                  onClick={async () => {
+                    await logout();
+                    router.push("/login");
+                  }}
+                  className={`${isNeutral ? "border-4 border-black text-black hover:bg-black hover:text-white rounded-none h-14 font-black uppercase tracking-widest px-10" : "border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"}`}
+                >
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Logout
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>

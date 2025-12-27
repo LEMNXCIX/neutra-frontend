@@ -24,6 +24,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { NavItem } from "@/config/admin-navigation";
 import { useFeatures } from "@/hooks/useFeatures";
+import { useAuthStore } from "@/store/auth-store";
 
 const ICON_MAP: Record<string, any> = {
     LayoutDashboard,
@@ -48,9 +49,16 @@ export default function AdminSidebar({ items }: AdminSidebarProps) {
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const pathname = usePathname();
     const { isFeatureEnabled } = useFeatures();
+    const { user } = useAuthStore();
 
-    // Filter items based on features
+    // Filter items based on features and roles
     const filteredItems = items.filter(item => {
+        // Role check
+        if (item.adminOnly && !user?.isAdmin) {
+            return false;
+        }
+
+        // Feature checks
         if (item.label === "Coupons") {
             return isFeatureEnabled("coupons");
         }

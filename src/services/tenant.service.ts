@@ -21,6 +21,10 @@ export const tenantService = {
 
     updateFeatures: async (id: string, features: any) => {
         return api.put<any>(`/tenants/${id}/features`, features);
+    },
+
+    delete: async (id: string) => {
+        return api.delete(`/tenants/${id}`);
     }
 };
 
