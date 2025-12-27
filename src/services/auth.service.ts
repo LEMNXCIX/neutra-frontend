@@ -53,4 +53,18 @@ export const authService = {
         const apiUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:4001/api';
         window.location.href = `${apiUrl}/auth/google`;
     },
+
+    /**
+     * Request password reset link
+     */
+    forgotPassword: async (email: string): Promise<any> => {
+        return api.post('/auth/forgot-password', { email });
+    },
+
+    /**
+     * Reset password using token
+     */
+    resetPassword: async (data: any): Promise<any> => {
+        return api.post('/auth/reset-password', data);
+    },
 };

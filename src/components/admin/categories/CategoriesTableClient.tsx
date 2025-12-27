@@ -72,9 +72,10 @@ type Props = {
     categories: CategoryWithCount[];
     stats: Stats;
     pagination: PaginationProps;
+    isSuperAdmin?: boolean;
 };
 
-export default function CategoriesTableClient({ categories, stats, pagination }: Props) {
+export default function CategoriesTableClient({ categories, stats, pagination, isSuperAdmin = false }: Props) {
     const router = useRouter();
     const searchParams = useSearchParams();
     const { confirm, ConfirmDialog } = useConfirm();
@@ -90,6 +91,7 @@ export default function CategoriesTableClient({ categories, stats, pagination }:
 
     // URL State
     const searchQuery = searchParams.get("search") || "";
+    const tenantFilter = searchParams.get("tenantId") || "all";
 
     const handleSearch = (term: string) => {
         const params = new URLSearchParams(searchParams);
@@ -97,6 +99,17 @@ export default function CategoriesTableClient({ categories, stats, pagination }:
             params.set("search", term);
         } else {
             params.delete("search");
+        }
+        params.set("page", "1");
+        router.push(`?${params.toString()}`);
+    };
+
+    const handleTenantFilterChange = (newTenant: string) => {
+        const params = new URLSearchParams(searchParams);
+        if (newTenant && newTenant !== "all") {
+            params.set("tenantId", newTenant);
+        } else {
+            params.delete("tenantId");
         }
         params.set("page", "1");
         router.push(`?${params.toString()}`);
@@ -244,6 +257,19 @@ export default function CategoriesTableClient({ categories, stats, pagination }:
                             const input = document.querySelector('input[placeholder="Search by name, ID, or description..."]') as HTMLInputElement;
                             handleSearch(input?.value || "");
                         }}>Search</Button>
+
+                        {isSuperAdmin && (
+                            <div className="w-[180px]">
+                                <Select value={tenantFilter} onValueChange={handleTenantFilterChange}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="All Tenants" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">All Tenants</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        )}
                     </div>
                 </CardContent>
             </Card>
@@ -258,6 +284,7 @@ export default function CategoriesTableClient({ categories, stats, pagination }:
                                 <TableHead className="w-[200px]">Name</TableHead>
                                 <TableHead className="w-[300px]">Description</TableHead>
                                 <TableHead className="w-[100px]">Type</TableHead>
+                                {isSuperAdmin && <TableHead className="w-[100px]">Tenant</TableHead>}
                                 <TableHead className="w-[100px]">Products</TableHead>
                                 <TableHead className="w-[150px]">Actions</TableHead>
                             </TableRow>
@@ -282,6 +309,13 @@ export default function CategoriesTableClient({ categories, stats, pagination }:
                                                 {c.type}
                                             </Badge>
                                         </TableCell>
+                                        {isSuperAdmin && (
+                                            <TableCell>
+                                                <Badge variant="outline" className="font-mono text-[10px]">
+                                                    {c.tenantId}
+                                                </Badge>
+                                            </TableCell>
+                                        )}
                                         <TableCell>
                                             <Badge variant="secondary">
                                                 {c.productCount || 0}

@@ -38,6 +38,18 @@ export function getProxyHeaders(req: NextRequest): HeadersInit {
         }
     }
 
+    // Forward Origin/Host for correct link generation in backend
+    const origin = req.headers.get('origin');
+    const host = req.headers.get('host');
+    const forwardedProto = req.headers.get('x-forwarded-proto') || 'http';
+
+    if (origin) {
+        headers['x-original-origin'] = origin;
+    } else if (host) {
+        // Fallback for non-CORS requests or when origin is missing
+        headers['x-original-origin'] = `${forwardedProto}://${host}`;
+    }
+
     console.log('[getProxyHeaders] Final headers:', headers);
 
     return headers;

@@ -70,9 +70,10 @@ type Props = {
     stats: Stats;
     pagination: PaginationProps;
     categories: Array<{ id: string; name: string }>;
+    isSuperAdmin?: boolean;
 };
 
-export default function ProductsTableClient({ products, stats, pagination, categories }: Props) {
+export default function ProductsTableClient({ products, stats, pagination, categories, isSuperAdmin = false }: Props) {
     const router = useRouter();
     const searchParams = useSearchParams();
     const { confirm, ConfirmDialog } = useConfirm();
@@ -90,6 +91,7 @@ export default function ProductsTableClient({ products, stats, pagination, categ
     // URL State
     const searchQuery = searchParams.get("search") || "";
     const categoryFilter = searchParams.get("category") || "all";
+    const tenantFilter = searchParams.get("tenantId") || "all";
 
     const handleSearch = (term: string) => {
         const params = new URLSearchParams(searchParams);
@@ -108,6 +110,17 @@ export default function ProductsTableClient({ products, stats, pagination, categ
             params.set("category", newFilter);
         } else {
             params.delete("category");
+        }
+        params.set("page", "1");
+        router.push(`?${params.toString()}`);
+    };
+
+    const handleTenantFilterChange = (newTenant: string) => {
+        const params = new URLSearchParams(searchParams);
+        if (newTenant && newTenant !== "all") {
+            params.set("tenantId", newTenant);
+        } else {
+            params.delete("tenantId");
         }
         params.set("page", "1");
         router.push(`?${params.toString()}`);
@@ -329,6 +342,19 @@ export default function ProductsTableClient({ products, stats, pagination, categ
                             </SelectContent>
                         </Select>
 
+                        {isSuperAdmin && (
+                            <div className="w-[180px]">
+                                <Select value={tenantFilter} onValueChange={handleTenantFilterChange}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="All Tenants" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">All Tenants</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        )}
+
                         <div className="flex gap-2 flex-1">
                             <Input
                                 placeholder="Search by product name or ID..."
@@ -359,6 +385,7 @@ export default function ProductsTableClient({ products, stats, pagination, categ
                                 <TableHead className="w-[120px]">ID</TableHead>
                                 <TableHead className="w-[200px]">Name</TableHead>
                                 <TableHead className="w-[120px]">Category</TableHead>
+                                {isSuperAdmin && <TableHead className="w-[100px]">Tenant</TableHead>}
                                 <TableHead className="w-[100px]">Price</TableHead>
                                 <TableHead className="w-[80px]">Stock</TableHead>
                                 <TableHead className="w-[120px]">Status</TableHead>
@@ -395,6 +422,13 @@ export default function ProductsTableClient({ products, stats, pagination, categ
                                         <TableCell className="text-sm text-muted-foreground">
                                             {p.categories?.map(c => c.name).join(", ") || "—"}
                                         </TableCell>
+                                        {isSuperAdmin && (
+                                            <TableCell>
+                                                <Badge variant="outline" className="font-mono text-[10px]">
+                                                    {p.tenantId}
+                                                </Badge>
+                                            </TableCell>
+                                        )}
                                         <TableCell className="font-semibold">${p.price.toFixed(2)}</TableCell>
                                         <TableCell>{p.stock || 0}</TableCell>
                                         <TableCell>{getStockBadge(p.stock || 0)}</TableCell>

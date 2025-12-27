@@ -17,7 +17,9 @@ import {
     BrickWallShield,
     Scissors,
     UserCog,
-    Building
+    Building,
+    CalendarDays,
+    Columns3Cog
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -36,7 +38,9 @@ const ICON_MAP: Record<string, any> = {
     BrickWallShield,
     Scissors,
     UserCog,
-    Building
+    Building,
+    CalendarDays,
+    Columns3Cog
 };
 
 interface SuperAdminSidebarProps {

@@ -14,8 +14,9 @@ export const couponsService = {
     /**
      * Get all coupons
      */
-    getAll: async (): Promise<Coupon[]> => {
-        return api.get<Coupon[]>('/admin/coupons');
+    getAll: async (tenantId?: string): Promise<Coupon[]> => {
+        const url = tenantId ? `/admin/coupons?tenantId=${tenantId}` : '/admin/coupons';
+        return api.get<Coupon[]>(url);
     },
 
     /**

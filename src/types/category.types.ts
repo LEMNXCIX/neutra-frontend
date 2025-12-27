@@ -6,6 +6,7 @@ export interface Category {
     description?: string | null;
     type: CategoryType;
     active: boolean;
+    tenantId: string;
     createdAt: string;
     updatedAt: string;
 }

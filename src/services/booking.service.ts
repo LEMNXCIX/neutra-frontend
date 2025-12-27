@@ -78,8 +78,12 @@ class BookingService {
     /**
      * Get all services
      */
-    async getServices(activeOnly: boolean = true): Promise<Service[]> {
-        const response = await fetch(`${this.baseUrl}/services?activeOnly=${activeOnly}`);
+    async getServices(activeOnly: boolean = true, tenantId?: string): Promise<Service[]> {
+        const params = new URLSearchParams();
+        params.append('activeOnly', activeOnly.toString());
+        if (tenantId) params.append('tenantId', tenantId);
+
+        const response = await fetch(`${this.baseUrl}/services?${params.toString()}`);
         const data = await response.json();
 
         if (!data.success) {
@@ -92,8 +96,12 @@ class BookingService {
     /**
      * Get all staff members
      */
-    async getStaff(activeOnly: boolean = true): Promise<Staff[]> {
-        const response = await fetch(`${this.baseUrl}/staff?activeOnly=${activeOnly}`);
+    async getStaff(activeOnly: boolean = true, tenantId?: string): Promise<Staff[]> {
+        const params = new URLSearchParams();
+        params.append('activeOnly', activeOnly.toString());
+        if (tenantId) params.append('tenantId', tenantId);
+
+        const response = await fetch(`${this.baseUrl}/staff?${params.toString()}`);
         const data = await response.json();
 
         if (!data.success) {

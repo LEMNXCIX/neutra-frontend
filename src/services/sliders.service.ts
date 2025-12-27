@@ -9,8 +9,9 @@ export const slidersService = {
     /**
      * Get all sliders
      */
-    getAll: async (): Promise<Slideshow[]> => {
-        return api.get<Slideshow[]>('/slide');
+    getAll: async (tenantId?: string): Promise<Slideshow[]> => {
+        const url = tenantId ? `/slide?tenantId=${tenantId}` : '/slide';
+        return api.get<Slideshow[]>(url);
     },
 
     /**

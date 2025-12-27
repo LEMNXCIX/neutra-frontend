@@ -12,6 +12,7 @@ export interface Product {
     createdAt?: Date;
     updatedAt?: Date;
     categories?: Category[];
+    tenantId: string;
 }
 
 export interface CreateProductDTO {

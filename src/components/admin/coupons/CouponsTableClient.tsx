@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { couponsService } from "@/services";
@@ -79,12 +79,46 @@ type Props = {
     coupons: Coupon[];
     stats: Stats;
     pagination: PaginationProps;
+    isSuperAdmin?: boolean;
 };
 
-export default function CouponsTableClient({ coupons, stats, pagination }: Props) {
+export default function CouponsTableClient({ coupons: initialCoupons, stats, pagination, isSuperAdmin = false }: Props) {
     const router = useRouter();
     const searchParams = useSearchParams();
     const { confirm, ConfirmDialog } = useConfirm();
+
+    const [coupons, setCoupons] = useState<Coupon[]>(initialCoupons);
+    const [loading, setLoading] = useState(false);
+
+    const tenantFilter = searchParams.get('tenantId') || 'all';
+
+    useEffect(() => {
+        setCoupons(initialCoupons);
+    }, [initialCoupons]);
+
+    const handleTenantFilterChange = (value: string) => {
+        const params = new URLSearchParams(searchParams);
+        if (value === 'all') {
+            params.delete('tenantId');
+        } else {
+            params.set('tenantId', value);
+        }
+        params.set('page', '1');
+        router.push(`?${params.toString()}`);
+    };
+
+    const loadCoupons = async () => {
+        try {
+            setLoading(true);
+            const data = await couponsService.getAll(tenantFilter === 'all' ? undefined : tenantFilter);
+            setCoupons(data);
+        } catch (err) {
+            console.error('Error loading coupons:', err);
+            toast.error("Failed to load coupons");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     // Dialog states
     const [createOpen, setCreateOpen] = useState(false);
@@ -467,13 +501,25 @@ export default function CouponsTableClient({ coupons, stats, pagination }: Props
         <div className="w-full space-y-6">
             <div className="flex justify-between items-center">
                 <h2 className="text-xl font-medium">Coupons Management</h2>
-                <Button onClick={() => {
-                    resetForm();
-                    setCreateOpen(true);
-                }}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Coupon
-                </Button>
+                <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                    {isSuperAdmin && (
+                        <Select value={tenantFilter} onValueChange={handleTenantFilterChange}>
+                            <SelectTrigger className="w-full sm:w-[150px]">
+                                <SelectValue placeholder="All Tenants" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All Tenants</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    )}
+                    <Button onClick={() => {
+                        resetForm();
+                        setCreateOpen(true);
+                    }}>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Coupon
+                    </Button>
+                </div>
             </div>
 
             {/* Statistics */}
@@ -562,6 +608,7 @@ export default function CouponsTableClient({ coupons, stats, pagination }: Props
                             <TableRow>
                                 <TableHead className="w-[150px]">Code</TableHead>
                                 <TableHead className="w-[120px]">Type</TableHead>
+                                {isSuperAdmin && <TableHead className="w-[120px]">Tenant</TableHead>}
                                 <TableHead className="w-[120px]">Value</TableHead>
                                 <TableHead className="w-[120px]">Status</TableHead>
                                 <TableHead className="w-[150px]">Expires</TableHead>
@@ -591,6 +638,13 @@ export default function CouponsTableClient({ coupons, stats, pagination }: Props
                                                     <span className="capitalize">{c.type === CouponType.PERCENT ? 'Percent' : 'Fixed'}</span>
                                                 </div>
                                             </TableCell>
+                                            {isSuperAdmin && (
+                                                <TableCell>
+                                                    <Badge variant="outline" className="font-mono text-[10px] uppercase">
+                                                        {c.tenantId}
+                                                    </Badge>
+                                                </TableCell>
+                                            )}
                                             <TableCell className="font-medium">
                                                 {c.type === CouponType.PERCENT ? `${c.value}%` : `$${c.value}`}
                                             </TableCell>

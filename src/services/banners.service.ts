@@ -9,8 +9,9 @@ export const bannersService = {
     /**
      * Get all banners
      */
-    getAll: async (): Promise<Banner[]> => {
-        return api.get<Banner[]>('/banners');
+    getAll: async (tenantId?: string): Promise<Banner[]> => {
+        const url = tenantId ? `/banners?tenantId=${tenantId}` : '/banners';
+        return api.get<Banner[]>(url);
     },
 
     /**

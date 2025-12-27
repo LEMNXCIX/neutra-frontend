@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -50,6 +50,7 @@ import { useConfirm } from "@/hooks/use-confirm";
 
 import { Banner } from "@/types/banner.types";
 import { Spinner } from "@/components/ui/spinner";
+import { bannersService } from "@/services/banners.service";
 
 type Stats = {
     totalBanners: number;
@@ -68,12 +69,46 @@ type Props = {
     banners: Banner[];
     stats: Stats;
     pagination: PaginationProps;
+    isSuperAdmin?: boolean;
 };
 
-export default function BannersTableClient({ banners, stats, pagination }: Props) {
+export default function BannersTableClient({ banners: initialBanners, stats, pagination, isSuperAdmin = false }: Props) {
     const router = useRouter();
     const searchParams = useSearchParams();
     const { confirm, ConfirmDialog } = useConfirm();
+
+    const [banners, setBanners] = useState<Banner[]>(initialBanners);
+    const [loading, setLoading] = useState(false);
+
+    const tenantFilter = searchParams.get('tenantId') || 'all';
+
+    useEffect(() => {
+        setBanners(initialBanners);
+    }, [initialBanners]);
+
+    const handleTenantFilterChange = (value: string) => {
+        const params = new URLSearchParams(searchParams);
+        if (value === 'all') {
+            params.delete('tenantId');
+        } else {
+            params.set('tenantId', value);
+        }
+        params.set('page', '1');
+        router.push(`?${params.toString()}`);
+    };
+
+    const loadBanners = async () => {
+        try {
+            setLoading(true);
+            const data = await bannersService.getAll(tenantFilter === 'all' ? undefined : tenantFilter);
+            setBanners(data);
+        } catch (err) {
+            console.error('Error loading banners:', err);
+            toast.error("Failed to load banners");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     // Dialog states
     const [createOpen, setCreateOpen] = useState(false);
@@ -247,10 +282,22 @@ export default function BannersTableClient({ banners, stats, pagination }: Props
         <div className="w-full space-y-6">
             <div className="flex justify-between items-center">
                 <h2 className="text-xl font-medium">Banners Management</h2>
-                <Button onClick={() => setCreateOpen(true)}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Banner
-                </Button>
+                <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                    {isSuperAdmin && (
+                        <Select value={tenantFilter} onValueChange={handleTenantFilterChange}>
+                            <SelectTrigger className="w-full sm:w-[150px]">
+                                <SelectValue placeholder="All Tenants" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All Tenants</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    )}
+                    <Button onClick={() => setCreateOpen(true)}>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Banner
+                    </Button>
+                </div>
             </div>
 
             {/* Statistics - Desktop */}
@@ -322,6 +369,7 @@ export default function BannersTableClient({ banners, stats, pagination }: Props
                             <TableRow>
                                 <TableHead className="w-[120px]">ID</TableHead>
                                 <TableHead className="w-[200px]">Title</TableHead>
+                                {isSuperAdmin && <TableHead className="w-[120px]">Tenant</TableHead>}
                                 <TableHead className="w-[100px]">Active</TableHead>
                                 <TableHead className="w-[250px]">Period</TableHead>
                                 <TableHead className="w-[150px]">CTA</TableHead>
@@ -347,6 +395,13 @@ export default function BannersTableClient({ banners, stats, pagination }: Props
                                                 )}
                                             </div>
                                         </TableCell>
+                                        {isSuperAdmin && (
+                                            <TableCell>
+                                                <Badge variant="outline" className="font-mono text-[10px] uppercase">
+                                                    {b.tenantId}
+                                                </Badge>
+                                            </TableCell>
+                                        )}
                                         <TableCell>
                                             {b.active ? (
                                                 <Badge className="bg-green-500">Active</Badge>

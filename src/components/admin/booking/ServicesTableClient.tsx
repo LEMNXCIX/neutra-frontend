@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { Plus, Edit, Trash2, Clock, DollarSign, Tag, Info } from "lucide-react";
 import { bookingService, Service } from "@/services/booking.service";
@@ -39,15 +40,27 @@ import { Spinner } from "@/components/ui/spinner";
 import { Label } from "@/components/ui/label";
 import { useConfirm } from "@/hooks/use-confirm";
 
-export default function ServicesTableClient() {
-    const [services, setServices] = useState<Service[]>([]);
-    const [loading, setLoading] = useState(true);
+interface Props {
+    services: Service[];
+    categories: Category[];
+    isSuperAdmin?: boolean;
+}
+
+export default function ServicesTableClient({
+    services: initialServices,
+    categories: initialCategories,
+    isSuperAdmin = false
+}: Props) {
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const [services, setServices] = useState<Service[]>(initialServices);
+    const [loading, setLoading] = useState(false);
     const [dialogOpen, setDialogOpen] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [editingService, setEditingService] = useState<Service | null>(null);
     const { confirm, ConfirmDialog } = useConfirm();
 
-    const [categories, setCategories] = useState<Category[]>([]);
+    const [categories, setCategories] = useState<Category[]>(initialCategories);
     const [loadingCategories, setLoadingCategories] = useState(false);
     const [formData, setFormData] = useState({
         name: '',
@@ -58,27 +71,30 @@ export default function ServicesTableClient() {
         active: true
     });
 
-    useEffect(() => {
-        loadServices();
-        loadCategories();
-    }, []);
+    const tenantFilter = searchParams.get('tenantId') || 'all';
 
-    const loadCategories = async () => {
-        try {
-            setLoadingCategories(true);
-            const data = await categoriesService.getAll(undefined, undefined, 'SERVICE');
-            setCategories(data);
-        } catch (err) {
-            console.error('Error loading categories:', err);
-        } finally {
-            setLoadingCategories(false);
+    useEffect(() => {
+        setServices(initialServices);
+    }, [initialServices]);
+
+    useEffect(() => {
+        setCategories(initialCategories);
+    }, [initialCategories]);
+
+    const handleTenantFilterChange = (value: string) => {
+        const params = new URLSearchParams(searchParams);
+        if (value === 'all') {
+            params.delete('tenantId');
+        } else {
+            params.set('tenantId', value);
         }
+        router.push(`?${params.toString()}`);
     };
 
     const loadServices = async () => {
         try {
             setLoading(true);
-            const data = await bookingService.getServices(false);
+            const data = await bookingService.getServices(false, tenantFilter === 'all' ? undefined : tenantFilter);
             setServices(data);
         } catch (err) {
             console.error('Error loading services:', err);
@@ -189,10 +205,22 @@ export default function ServicesTableClient() {
                         Manage the services offered by your booking system.
                     </p>
                 </div>
-                <Button onClick={openCreate}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Service
-                </Button>
+                <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                    {isSuperAdmin && (
+                        <Select value={tenantFilter} onValueChange={handleTenantFilterChange}>
+                            <SelectTrigger className="w-full sm:w-[180px]">
+                                <SelectValue placeholder="All Tenants" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All Tenants</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    )}
+                    <Button onClick={openCreate} className="w-full sm:w-auto">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Service
+                    </Button>
+                </div>
             </div>
 
             {/* Mobile View (Cards) */}
@@ -263,6 +291,7 @@ export default function ServicesTableClient() {
                             <TableRow className="bg-muted/50 hover:bg-muted/50">
                                 <TableHead className="font-semibold">Service Details</TableHead>
                                 <TableHead className="font-semibold">Category</TableHead>
+                                {isSuperAdmin && <TableHead className="font-semibold">Tenant</TableHead>}
                                 <TableHead className="font-semibold">Duration</TableHead>
                                 <TableHead className="font-semibold">Price</TableHead>
                                 <TableHead className="font-semibold">Status</TableHead>
@@ -299,6 +328,13 @@ export default function ServicesTableClient() {
                                                 <span className="text-muted-foreground italic text-xs">Uncategorized</span>
                                             )}
                                         </TableCell>
+                                        {isSuperAdmin && (
+                                            <TableCell>
+                                                <Badge variant="outline" className="font-mono text-[10px] uppercase">
+                                                    {service.tenantId}
+                                                </Badge>
+                                            </TableCell>
+                                        )}
                                         <TableCell>
                                             <div className="flex items-center text-sm text-muted-foreground">
                                                 <Clock className="h-3.5 w-3.5 mr-1.5 opacity-70" />

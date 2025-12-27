@@ -1,5 +1,6 @@
 export interface Banner {
     id: string;
+    tenantId: string;
     title: string;
     subtitle?: string;
     description?: string;

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { Plus, Edit, Trash2, Mail, Phone, Info, User as UserIcon, Scissors, Check } from "lucide-react";
 import { bookingService, Staff, Service } from "@/services/booking.service";
@@ -23,10 +24,27 @@ import { Spinner } from "@/components/ui/spinner";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useConfirm } from "@/hooks/use-confirm";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 
-export default function StaffTableClient() {
-    const [staff, setStaff] = useState<Staff[]>([]);
-    const [loading, setLoading] = useState(true);
+interface Props {
+    staff: Staff[];
+    isSuperAdmin?: boolean;
+}
+
+export default function StaffTableClient({
+    staff: initialStaff,
+    isSuperAdmin = false
+}: Props) {
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const [staff, setStaff] = useState<Staff[]>(initialStaff);
+    const [loading, setLoading] = useState(false);
     const [dialogOpen, setDialogOpen] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [editingStaff, setEditingStaff] = useState<Staff | null>(null);
@@ -45,10 +63,25 @@ export default function StaffTableClient() {
     const [selectedServiceIds, setSelectedServiceIds] = useState<string[]>([]);
     const [isSavingServices, setIsSavingServices] = useState(false);
 
+    const tenantFilter = searchParams.get('tenantId') || 'all';
+
     useEffect(() => {
-        loadStaff();
+        setStaff(initialStaff);
+    }, [initialStaff]);
+
+    useEffect(() => {
         loadServices();
     }, []);
+
+    const handleTenantFilterChange = (value: string) => {
+        const params = new URLSearchParams(searchParams);
+        if (value === 'all') {
+            params.delete('tenantId');
+        } else {
+            params.set('tenantId', value);
+        }
+        router.push(`?${params.toString()}`);
+    };
 
     const loadServices = async () => {
         try {
@@ -62,7 +95,7 @@ export default function StaffTableClient() {
     const loadStaff = async () => {
         try {
             setLoading(true);
-            const data = await bookingService.getStaff(false);
+            const data = await bookingService.getStaff(false, tenantFilter === 'all' ? undefined : tenantFilter);
             setStaff(data);
         } catch (err) {
             console.error('Error loading staff:', err);
@@ -198,10 +231,22 @@ export default function StaffTableClient() {
                         Professional staff members available for bookings.
                     </p>
                 </div>
-                <Button onClick={openCreate}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Staff Member
-                </Button>
+                <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                    {isSuperAdmin && (
+                        <Select value={tenantFilter} onValueChange={handleTenantFilterChange}>
+                            <SelectTrigger className="w-full sm:w-[180px]">
+                                <SelectValue placeholder="All Tenants" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All Tenants</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    )}
+                    <Button onClick={openCreate} className="w-full sm:w-auto">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Staff Member
+                    </Button>
+                </div>
             </div>
 
             {staff.length === 0 ? (
@@ -236,7 +281,9 @@ export default function StaffTableClient() {
                                             {member.active ? 'Active' : 'Inactive'}
                                         </Badge>
                                     </div>
-                                    <CardDescription className="line-clamp-1">Staff Member</CardDescription>
+                                    <CardDescription className="line-clamp-1">
+                                        Staff Member {isSuperAdmin && <span className="text-[10px] font-mono opacity-50 ml-1">({member.tenantId})</span>}
+                                    </CardDescription>
                                 </div>
                             </CardHeader>
                             <CardContent className="space-y-4">

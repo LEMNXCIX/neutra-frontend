@@ -45,11 +45,13 @@ import {
     Clock,
     User,
     Scissors,
-    Tag
+    Tag,
+    Trash2
 } from "lucide-react";
 import { Appointment } from "@/services/booking.service";
 import { Spinner } from "@/components/ui/spinner";
 import { format } from "date-fns";
+import { useConfirm } from "@/hooks/use-confirm";
 
 type Stats = {
     totalAppointments: number;
@@ -65,22 +67,26 @@ type Props = {
         currentPage: number;
         totalPages: number;
         totalItems: number;
-        itemsPerPage: number;
+        totalItemsPerPage: number;
     };
+    isSuperAdmin?: boolean;
 };
 
-export default function AppointmentsTableClient({ appointments, stats, pagination }: Props) {
+export default function AppointmentsTableClient({ appointments, stats, pagination, isSuperAdmin = false }: Props) {
     const router = useRouter();
     const searchParams = useSearchParams();
 
     const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
     const [detailsOpen, setDetailsOpen] = useState(false);
+    const { confirm, ConfirmDialog } = useConfirm();
     const [isCancelling, setIsCancelling] = useState<string | null>(null);
     const [isConfirming, setIsConfirming] = useState<string | null>(null);
+    const [isDeleting, setIsDeleting] = useState<string | null>(null);
 
     // URL State
     const searchQuery = searchParams.get("search") || "";
     const statusFilter = searchParams.get("status") || "all";
+    const tenantFilter = searchParams.get("tenantId") || "all";
 
     const handleSearch = (term: string) => {
         const params = new URLSearchParams(searchParams);
@@ -104,6 +110,17 @@ export default function AppointmentsTableClient({ appointments, stats, paginatio
         router.push(`?${params.toString()}`);
     };
 
+    const handleTenantFilterChange = (newTenant: string) => {
+        const params = new URLSearchParams(searchParams);
+        if (newTenant && newTenant !== "all") {
+            params.set("tenantId", newTenant);
+        } else {
+            params.delete("tenantId");
+        }
+        params.set("page", "1");
+        router.push(`?${params.toString()}`);
+    };
+
     const handlePageChange = (newPage: number) => {
         const params = new URLSearchParams(searchParams);
         params.set("page", newPage.toString());
@@ -111,7 +128,15 @@ export default function AppointmentsTableClient({ appointments, stats, paginatio
     };
 
     const handleCancel = async (id: string) => {
-        if (!confirm("Are you sure you want to cancel this appointment?")) return;
+        const confirmed = await confirm({
+            title: "Cancel Appointment",
+            description: "Are you sure you want to cancel this appointment? This action cannot be undone.",
+            confirmText: "Yes, Cancel Appointment",
+            cancelText: "No, Keep It",
+            variant: "destructive",
+        });
+
+        if (!confirmed) return;
 
         setIsCancelling(id);
         try {
@@ -157,6 +182,39 @@ export default function AppointmentsTableClient({ appointments, stats, paginatio
             toast.error("An error occurred while confirming the appointment");
         } finally {
             setIsConfirming(null);
+        }
+    };
+
+    const handleDelete = async (id: string) => {
+        const confirmed = await confirm({
+            title: "Delete Appointment",
+            description: "Are you sure you want to PERMANENTLY delete this appointment? This action cannot be undone.",
+            confirmText: "Yes, Delete Permanently",
+            cancelText: "Cancel",
+            variant: "destructive",
+        });
+
+        if (!confirmed) return;
+
+        setIsDeleting(id);
+        try {
+            const response = await fetch(`/api/appointments/${id}`, {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" },
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                toast.success("Appointment deleted successfully");
+                router.refresh();
+                setDetailsOpen(false);
+            } else {
+                toast.error(data.message || "Failed to delete appointment");
+            }
+        } catch (error) {
+            toast.error("An error occurred while deleting the appointment");
+        } finally {
+            setIsDeleting(null);
         }
     };
 
@@ -261,6 +319,20 @@ export default function AppointmentsTableClient({ appointments, stats, paginatio
                             </SelectContent>
                         </Select>
                     </div>
+                    {isSuperAdmin && (
+                        <div className="w-full md:w-[200px]">
+                            <Select value={tenantFilter} onValueChange={handleTenantFilterChange}>
+                                <SelectTrigger className="bg-background border-muted-foreground/20 text-foreground">
+                                    <SelectValue placeholder="All Tenants" />
+                                </SelectTrigger>
+                                <SelectContent className="bg-background border-muted">
+                                    <SelectItem value="all">All Tenants</SelectItem>
+                                    {/* These should ideally be fetched from an API, but for now we list placeholders or just allow 'all' */}
+                                    {/* For a complete implementation, we'd fetch the list of tenants */}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    )}
                 </CardContent>
             </Card>
 
@@ -321,7 +393,15 @@ export default function AppointmentsTableClient({ appointments, stats, paginatio
                                         {isCancelling === appointment.id ? <Spinner size="sm" /> : <><XCircle className="h-4 w-4 mr-2" /> Cancel</>}
                                     </Button>
                                 ) : (
-                                    <div />
+                                    <Button
+                                        size="sm"
+                                        variant="outline"
+                                        className="w-full text-red-600 border-red-200 hover:bg-red-100"
+                                        disabled={isDeleting === appointment.id}
+                                        onClick={() => handleDelete(appointment.id)}
+                                    >
+                                        {isDeleting === appointment.id ? <Spinner size="sm" /> : <><Trash2 className="h-4 w-4 mr-2" /> Delete</>}
+                                    </Button>
                                 )}
                             </div>
                         </Card>
@@ -339,6 +419,7 @@ export default function AppointmentsTableClient({ appointments, stats, paginatio
                                 <TableHead>Client</TableHead>
                                 <TableHead>Service</TableHead>
                                 <TableHead>Staff</TableHead>
+                                {isSuperAdmin && <TableHead>Tenant</TableHead>}
                                 <TableHead>Price</TableHead>
                                 <TableHead>Status</TableHead>
                                 <TableHead className="text-right">Actions</TableHead>
@@ -380,6 +461,13 @@ export default function AppointmentsTableClient({ appointments, stats, paginatio
                                         <TableCell>
                                             <span className="font-medium">{appointment.staff?.name || "Assigned"}</span>
                                         </TableCell>
+                                        {isSuperAdmin && (
+                                            <TableCell>
+                                                <Badge variant="outline" className="font-mono text-[10px]">
+                                                    {appointment.tenantId}
+                                                </Badge>
+                                            </TableCell>
+                                        )}
                                         <TableCell>
                                             <div className="flex flex-col">
                                                 <span className="font-medium">${appointment.total > 0 ? appointment.total : appointment.service?.price}</span>
@@ -407,7 +495,7 @@ export default function AppointmentsTableClient({ appointments, stats, paginatio
                                                 >
                                                     <Eye className="h-4 w-4" />
                                                 </Button>
-                                                {appointment.status !== 'CANCELLED' && appointment.status !== 'COMPLETED' && (
+                                                {appointment.status !== 'CANCELLED' && appointment.status !== 'COMPLETED' ? (
                                                     <Button
                                                         size="sm"
                                                         variant="ghost"
@@ -419,6 +507,20 @@ export default function AppointmentsTableClient({ appointments, stats, paginatio
                                                             <Spinner size="sm" className="text-red-500" />
                                                         ) : (
                                                             <XCircle className="h-4 w-4" />
+                                                        )}
+                                                    </Button>
+                                                ) : (
+                                                    <Button
+                                                        size="sm"
+                                                        variant="ghost"
+                                                        className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-100"
+                                                        disabled={isDeleting === appointment.id}
+                                                        onClick={() => handleDelete(appointment.id)}
+                                                    >
+                                                        {isDeleting === appointment.id ? (
+                                                            <Spinner size="sm" className="text-red-600" />
+                                                        ) : (
+                                                            <Trash2 className="h-4 w-4" />
                                                         )}
                                                     </Button>
                                                 )}
@@ -579,9 +681,20 @@ export default function AppointmentsTableClient({ appointments, stats, paginatio
                                 )}
                             </Button>
                         )}
+
+                        <Button
+                            variant="destructive"
+                            onClick={() => selectedAppointment && handleDelete(selectedAppointment.id)}
+                            disabled={isDeleting === selectedAppointment?.id}
+                            className="bg-red-600 hover:bg-red-700"
+                        >
+                            {isDeleting === selectedAppointment?.id ? <Spinner className="mr-2" /> : <Trash2 className="w-4 h-4 mr-2" />}
+                            Delete
+                        </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
+            <ConfirmDialog />
         </div>
     );
 }

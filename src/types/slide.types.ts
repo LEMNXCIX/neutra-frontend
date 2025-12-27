@@ -5,6 +5,7 @@
 
 export interface Slideshow {
     id: string;
+    tenantId: string;
     title: string;
     img: string;
     desc?: string | null;

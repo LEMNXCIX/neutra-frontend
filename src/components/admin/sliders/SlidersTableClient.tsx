@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
+import { slidersService } from "@/services/sliders.service";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -70,12 +71,46 @@ type Props = {
     sliders: Slideshow[];
     stats: Stats;
     pagination: PaginationProps;
+    isSuperAdmin?: boolean;
 };
 
-export default function SlidersTableClient({ sliders, stats, pagination }: Props) {
+export default function SlidersTableClient({ sliders: initialSliders, stats, pagination, isSuperAdmin = false }: Props) {
     const router = useRouter();
     const searchParams = useSearchParams();
     const { confirm, ConfirmDialog } = useConfirm();
+
+    const [sliders, setSliders] = useState<Slideshow[]>(initialSliders);
+    const [loading, setLoading] = useState(false);
+
+    const tenantFilter = searchParams.get('tenantId') || 'all';
+
+    useEffect(() => {
+        setSliders(initialSliders);
+    }, [initialSliders]);
+
+    const handleTenantFilterChange = (value: string) => {
+        const params = new URLSearchParams(searchParams);
+        if (value === 'all') {
+            params.delete('tenantId');
+        } else {
+            params.set('tenantId', value);
+        }
+        params.set('page', '1');
+        router.push(`?${params.toString()}`);
+    };
+
+    const loadSliders = async () => {
+        try {
+            setLoading(true);
+            const data = await slidersService.getAll(tenantFilter === 'all' ? undefined : tenantFilter);
+            setSliders(data);
+        } catch (err) {
+            console.error('Error loading sliders:', err);
+            toast.error("Failed to load sliders");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     // Dialog states
     const [createOpen, setCreateOpen] = useState(false);
@@ -273,10 +308,22 @@ export default function SlidersTableClient({ sliders, stats, pagination }: Props
         <div className="w-full space-y-6">
             <div className="flex justify-between items-center">
                 <h2 className="text-xl font-medium">Sliders Management</h2>
-                <Button onClick={() => setCreateOpen(true)}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Slider
-                </Button>
+                <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                    {isSuperAdmin && (
+                        <Select value={tenantFilter} onValueChange={handleTenantFilterChange}>
+                            <SelectTrigger className="w-full sm:w-[150px]">
+                                <SelectValue placeholder="All Tenants" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All Tenants</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    )}
+                    <Button onClick={() => setCreateOpen(true)}>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Slider
+                    </Button>
+                </div>
             </div>
 
             {/* Statistics - Desktop */}
@@ -350,6 +397,7 @@ export default function SlidersTableClient({ sliders, stats, pagination }: Props
                             <TableRow>
                                 <TableHead className="w-[120px]">ID</TableHead>
                                 <TableHead className="w-[120px]">Image</TableHead>
+                                {isSuperAdmin && <TableHead className="w-[120px]">Tenant</TableHead>}
                                 <TableHead className="w-[220px]">Title</TableHead>
                                 <TableHead className="w-[100px]">Active</TableHead>
                                 <TableHead className="w-[150px]">Actions</TableHead>
@@ -381,6 +429,13 @@ export default function SlidersTableClient({ sliders, stats, pagination }: Props
                                                 </div>
                                             )}
                                         </TableCell>
+                                        {isSuperAdmin && (
+                                            <TableCell>
+                                                <Badge variant="outline" className="font-mono text-[10px] uppercase">
+                                                    {s.tenantId}
+                                                </Badge>
+                                            </TableCell>
+                                        )}
                                         <TableCell>
                                             <div>
                                                 <div className="font-medium">{s.title}</div>

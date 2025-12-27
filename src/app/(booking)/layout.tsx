@@ -8,7 +8,7 @@ export default function BookingLayout({
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col">
             <BookingNavbar />
-            <main className="flex-1">
+            <main className="flex-1 pt-16">
                 {children}
             </main>
         </div>
