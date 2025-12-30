@@ -25,7 +25,7 @@ export default function AppointmentsPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    const isStaff = user?.roleName === 'STAFF' || user?.roleName === 'ADMIN' || user?.roleName === 'SUPER_ADMIN' || user?.isAdmin;
+    const isStaff = user?.roleName === 'STAFF';
 
     useEffect(() => {
         if (user) {

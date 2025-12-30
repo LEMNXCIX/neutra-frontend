@@ -19,7 +19,6 @@ async function getRolesAndPermissions(rolePage: number, permissionPage: number, 
         roleUrl.searchParams.set('limit', '10');
         if (roleSearch) roleUrl.searchParams.set('search', roleSearch);
 
-        console.log(`[RolesPage] Fetching roles from: ${roleUrl.toString()}`);
 
         const rolesResponse = await fetch(roleUrl.toString(), {
             headers: {

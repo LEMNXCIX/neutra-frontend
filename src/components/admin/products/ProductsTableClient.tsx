@@ -166,7 +166,7 @@ export default function ProductsTableClient({ products, stats, pagination, categ
                 image: form.imageBase64 || undefined,
                 ownerId: "admin",
             };
-            const res = await fetch("/api/admin/products", {
+            const res = await fetch("/api/products", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(body),
@@ -198,7 +198,7 @@ export default function ProductsTableClient({ products, stats, pagination, categ
         if (!confirmed) return;
         setIsDeleting(id);
         try {
-            const res = await fetch(`/api/admin/products/${id}`, {
+            const res = await fetch(`/api/products/${id}`, {
                 method: "DELETE",
             });
             if (!res.ok) {
@@ -245,7 +245,7 @@ export default function ProductsTableClient({ products, stats, pagination, categ
             };
             if (form.imageBase64) body.image = form.imageBase64;
 
-            const res = await fetch(`/api/admin/products/${editing.id}`, {
+            const res = await fetch(`/api/products/${editing.id}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(body),

@@ -24,7 +24,7 @@ export default function Home() {
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-background via-muted/20 to-background">
-            {isFeatureEnabled("banners") && <BannerBar />}
+            {isFeatureEnabled("BANNERS") && <BannerBar />}
 
             {/* HERO */}
             {/* HERO – 3 columnas en desktop, slider ocupa 2/3 */}
@@ -66,7 +66,7 @@ export default function Home() {
                                 <div className="hidden lg:block absolute inset-0 -m-6 bg-muted/20 rounded-3xl blur-3xl -z-10" />
 
                                 <div className="relative bg-background rounded-3xl overflow-hidden shadow-xl">
-                                    <PromoSlider />
+                                    {isFeatureEnabled("BANNERS") && <PromoSlider />}
                                 </div>
 
                                 {/* Detalles decorativos sutiles */}

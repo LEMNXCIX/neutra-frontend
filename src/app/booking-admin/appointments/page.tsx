@@ -35,7 +35,7 @@ async function getAppointments(search: string, status: string, page: number, lim
             return {
                 appointments: [],
                 stats: { totalAppointments: 0, pendingAppointments: 0, confirmedAppointments: 0, statusCounts: {} },
-                pagination: { currentPage: 1, totalPages: 0, totalItems: 0, itemsPerPage: limit },
+                pagination: { currentPage: 1, totalPages: 0, totalItems: 0, totalItemsPerPage: limit },
             };
         }
 
@@ -56,11 +56,14 @@ async function getAppointments(search: string, status: string, page: number, lim
         };
 
         // If backend provides pagination info, use it
-        const pagination = data.pagination || {
+        const pagination = data.pagination ? {
+            ...data.pagination,
+            totalItemsPerPage: data.pagination.itemsPerPage || data.pagination.limit || limit
+        } : {
             currentPage: page,
             totalPages: Math.ceil(appointments.length / limit),
             totalItems: appointments.length,
-            itemsPerPage: limit,
+            totalItemsPerPage: limit,
         };
 
         return {
@@ -73,7 +76,7 @@ async function getAppointments(search: string, status: string, page: number, lim
         return {
             appointments: [],
             stats: { totalAppointments: 0, pendingAppointments: 0, confirmedAppointments: 0, statusCounts: {} },
-            pagination: { currentPage: 1, totalPages: 0, totalItems: 0, itemsPerPage: limit },
+            pagination: { currentPage: 1, totalPages: 0, totalItems: 0, totalItemsPerPage: limit },
         };
     }
 }

@@ -515,7 +515,7 @@ export default function BookPage() {
                                 <Separator />
 
                                 {/* Coupon Section */}
-                                {isFeatureEnabled ? isFeatureEnabled('appointmentCoupons') && (
+                                {isFeatureEnabled('COUPONS') && (
                                     <div className="pt-4 border-t">
                                         <label className="text-sm font-medium mb-2 block">
                                             Have a Coupon?
@@ -557,7 +557,7 @@ export default function BookPage() {
                                             </div>
                                         )}
                                     </div>
-                                ) : null}
+                                )}
 
                                 {/* Price Summary */}
                                 <div className="pt-4 border-t bg-muted/20 p-4 rounded-lg">

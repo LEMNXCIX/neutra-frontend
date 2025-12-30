@@ -25,46 +25,60 @@ import { tenantService } from "@/services";
 import { TenantFeatures, Tenant } from "@/types/tenant";
 import { useTenant } from "@/context/tenant-context";
 
-export default function TenantFeaturesClient() {
+interface TenantFeaturesClientProps {
+    activeTenantId?: string;
+}
+
+export default function TenantFeaturesClient({ activeTenantId }: TenantFeaturesClientProps) {
     const { tenantId: contextTenantId } = useTenant();
-    const [selectedTenantId, setSelectedTenantId] = useState<string | null>(contextTenantId);
+    // Use prop if provided, otherwise context, otherwise null
+    const [selectedTenantId, setSelectedTenantId] = useState<string | null>(activeTenantId || contextTenantId);
     const [tenants, setTenants] = useState<Tenant[]>([]);
 
     const [loadingFeatures, setLoadingFeatures] = useState(false);
     const [loadingTenants, setLoadingTenants] = useState(false);
     const [saving, setSaving] = useState(false);
 
-    const [features, setFeatures] = useState<TenantFeatures>({
-        coupons: false,
-        appointmentCoupons: false,
-    });
+    // Dynamic features list from backend
+    const [availableFeatures, setAvailableFeatures] = useState<any[]>([]);
 
-    // Load tenants if no context tenant ID (Super Admin view)
+    // Feature toggle state (key -> boolean)
+    const [featureState, setFeatureState] = useState<Record<string, boolean>>({});
+
+    // Load available features details on mount
     useEffect(() => {
-        if (!contextTenantId) {
+        loadAvailableFeatures();
+    }, []);
+
+    // Load tenants if no context tenant ID AND no active prop (Super Admin view)
+    useEffect(() => {
+        if (!contextTenantId && !activeTenantId) {
             loadTenants();
         } else {
-            setSelectedTenantId(contextTenantId);
+            setSelectedTenantId(activeTenantId || contextTenantId);
         }
-    }, [contextTenantId]);
+    }, [contextTenantId, activeTenantId]);
 
     // Load features when selected tenant changes
     useEffect(() => {
         if (selectedTenantId) {
-            loadFeatures(selectedTenantId);
+            loadTenantFeatures(selectedTenantId);
         }
     }, [selectedTenantId]);
+
+    const loadAvailableFeatures = async () => {
+        try {
+            const features = await tenantService.getAvailableFeatures();
+            setAvailableFeatures(features);
+        } catch (error) {
+            console.error("Failed to load available features definitions", error);
+        }
+    };
 
     const loadTenants = async () => {
         try {
             setLoadingTenants(true);
             const response = await tenantService.getAll();
-            // API response might be array or { data: array } depending on implementation
-            // Checking service implementation: return api.get<Tenant[]>('/tenants'); 
-            // Usually returns data directly if interceptor handles it, or AxiosResponse.
-            // Assuming the service returns the data directly based on other usage.
-            // However, standard API wrapper usually returns { data: ... } or just data.
-            // Let's assume it returns data or check if it needs .data
             const data = response as any;
             const tenantsList = Array.isArray(data) ? data : (data.data || []);
             setTenants(tenantsList);
@@ -76,14 +90,12 @@ export default function TenantFeaturesClient() {
         }
     };
 
-    const loadFeatures = async (id: string) => {
+    const loadTenantFeatures = async (id: string) => {
         try {
             setLoadingFeatures(true);
             const data = await tenantService.getFeatures(id);
-            setFeatures({
-                coupons: data.coupons ?? false,
-                appointmentCoupons: data.appointmentCoupons ?? false,
-            });
+            // Data is object { featureKey: boolean, ... }
+            setFeatureState(data || {});
         } catch (error: any) {
             const msg = error?.message || "Unknown error";
             toast.error(`Failed to load features: ${msg}`);
@@ -92,8 +104,8 @@ export default function TenantFeaturesClient() {
         }
     };
 
-    const handleToggle = (key: keyof TenantFeatures) => {
-        setFeatures(prev => ({
+    const handleToggle = (key: string) => {
+        setFeatureState(prev => ({
             ...prev,
             [key]: !prev[key]
         }));
@@ -103,7 +115,7 @@ export default function TenantFeaturesClient() {
         if (!selectedTenantId) return;
         try {
             setSaving(true);
-            await tenantService.updateFeatures(selectedTenantId, features);
+            await tenantService.updateFeatures(selectedTenantId, featureState);
             toast.success("Features configuration saved");
         } catch (error) {
             console.error("Failed to save features", error);
@@ -121,6 +133,9 @@ export default function TenantFeaturesClient() {
         );
     }
 
+    // Group features by category (optional, for better UI if categories exist)
+    // fallback to a single list if no category
+
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center">
@@ -136,7 +151,7 @@ export default function TenantFeaturesClient() {
             </div>
 
             {/* Tenant Selector for Super Admin */}
-            {!contextTenantId && (
+            {!contextTenantId && !activeTenantId && (
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
@@ -173,89 +188,56 @@ export default function TenantFeaturesClient() {
                         <Spinner className="h-8 w-8" />
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="flex items-center gap-2">
-                                    <Settings className="h-5 w-5" />
-                                    General Features
-                                </CardTitle>
-                                <CardDescription>
-                                    Configure core platform features
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-6">
-                                <div className="flex items-center justify-between space-x-2">
-                                    <div className="space-y-0.5">
-                                        <Label className="text-base">Banners</Label>
-                                        <p className="text-sm text-muted-foreground">
-                                            Enable banner management for promotions
-                                        </p>
-                                    </div>
-                                    <Switch
-                                        checked={features.banners}
-                                        onCheckedChange={() => handleToggle('banners')}
-                                    />
-                                </div>
-
-                                <div className="flex items-center justify-between space-x-2">
-                                    <div className="space-y-0.5">
-                                        <Label className="text-base">Orders System</Label>
-                                        <p className="text-sm text-muted-foreground">
-                                            Enable order processing and management
-                                        </p>
-                                    </div>
-                                    <Switch
-                                        checked={features.orders}
-                                        onCheckedChange={() => handleToggle('orders')}
-                                    />
-                                </div>
-                            </CardContent>
-                        </Card>
-
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="flex items-center gap-2">
-                                    <Settings className="h-5 w-5" />
-                                    Marketing & Coupons
-                                </CardTitle>
-                                <CardDescription>
-                                    Configure marketing and loyalty features
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-6">
-                                <div className="flex items-center justify-between space-x-2">
-                                    <div className="space-y-0.5">
-                                        <Label className="text-base">Coupons System</Label>
-                                        <p className="text-sm text-muted-foreground">
-                                            Enable the core coupons functionality
-                                        </p>
-                                    </div>
-                                    <Switch
-                                        checked={features.coupons}
-                                        onCheckedChange={() => handleToggle('coupons')}
-                                    />
-                                </div>
-
-                                <div className="flex items-center justify-between space-x-2">
-                                    <div className="space-y-0.5">
-                                        <Label className="text-base">Appointment Coupons</Label>
-                                        <p className="text-sm text-muted-foreground">
-                                            Allow customers to apply coupons during appointment booking
-                                        </p>
-                                    </div>
-                                    <Switch
-                                        checked={features.appointmentCoupons}
-                                        onCheckedChange={() => handleToggle('appointmentCoupons')}
-                                        disabled={!features.coupons}
-                                    />
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </div>
+                    availableFeatures.length === 0 ? (
+                        <div className="text-center text-muted-foreground py-8">
+                            No features definition found.
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 gap-6">
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle className="flex items-center gap-2">
+                                        <Settings className="h-5 w-5" />
+                                        Available Features
+                                    </CardTitle>
+                                    <CardDescription>
+                                        Enable or disable platform capabilities
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent className="space-y-6">
+                                    {availableFeatures.map((feature: any) => (
+                                        <div key={feature.key || feature.id} className="flex items-center justify-between space-x-2 border-b last:border-0 pb-4 last:pb-0">
+                                            <div className="space-y-0.5">
+                                                <div className="flex items-center gap-2">
+                                                    <Label className="text-base">{feature.name}</Label>
+                                                    {feature.price > 0 && (
+                                                        <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full font-medium">
+                                                            ${feature.price}
+                                                        </span>
+                                                    )}
+                                                    {feature.price === 0 && (
+                                                        <span className="text-xs bg-gray-100 text-gray-800 px-2 py-0.5 rounded-full font-medium">
+                                                            Free
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <p className="text-sm text-muted-foreground">
+                                                    {feature.description || "No description available"}
+                                                </p>
+                                            </div>
+                                            <Switch
+                                                checked={featureState[feature.key] ?? false}
+                                                onCheckedChange={() => handleToggle(feature.key)}
+                                            />
+                                        </div>
+                                    ))}
+                                </CardContent>
+                            </Card>
+                        </div>
+                    )
                 )
             ) : (
-                !contextTenantId && (
+                !contextTenantId && !activeTenantId && (
                     <div className="flex justify-center items-center h-40 border-2 border-dashed rounded-lg text-muted-foreground">
                         Please select a tenant to configure features
                     </div>

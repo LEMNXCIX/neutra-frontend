@@ -12,6 +12,17 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'picsum.photos' },
     ],
   },
+  async rewrites() {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
+    const baseUrl = apiUrl.endsWith('/api') ? apiUrl : `${apiUrl}/api`;
+
+    return [
+      {
+        source: '/api/:path*',
+        destination: `${baseUrl}/:path*`,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

@@ -1,10 +1,15 @@
-
 import { api } from "@/lib/api-client";
 import { Tenant, CreateTenantData, UpdateTenantData, TenantFeatures } from "@/types/tenant";
 
 export const tenantService = {
     getAll: async () => {
         return api.get<Tenant[]>('/tenants');
+    },
+
+    getAvailableFeatures: async (): Promise<any[]> => {
+        const response: any = await api.get('/features');
+        // Ensure we return an array
+        return Array.isArray(response) ? response : (response.data || []);
     },
 
     create: async (payload: CreateTenantData) => {

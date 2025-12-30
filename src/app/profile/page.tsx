@@ -58,6 +58,7 @@ import { bookingService, Appointment } from "@/services/booking.service";
 import { Order, OrderStatus } from "@/types/order.types";
 import Link from "next/link";
 import { CancelAppointmentDialog } from '@/components/booking/cancel-appointment-dialog';
+import TenantFeaturesClient from "@/components/admin/tenant/TenantFeaturesClient";
 
 export default function ProfilePage() {
   const { moduleType, tenantSlug } = useTenant();
@@ -480,6 +481,16 @@ export default function ProfilePage() {
               </>
             )}
           </div>
+        )}
+
+
+        {/* Feature Configuration (Admins Only - Superadmin Restriction) */}
+        {user.isAdmin && tenantSlug === 'superadmin' && (
+          <Card className="border-none shadow-lg mb-8">
+            <CardContent className="p-6">
+              <TenantFeaturesClient />
+            </CardContent>
+          </Card>
         )}
 
         {/* Content Section */}

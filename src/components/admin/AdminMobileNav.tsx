@@ -54,13 +54,13 @@ export default function AdminMobileNav({ items }: AdminMobileNavProps) {
 
         // Feature checks
         if (item.label === "Coupons") {
-            return isFeatureEnabled("coupons");
+            return isFeatureEnabled("COUPONS");
         }
         if (item.label === "Banners") {
-            return isFeatureEnabled("banners");
+            return isFeatureEnabled("BANNERS");
         }
         if (item.label === "Orders") {
-            return isFeatureEnabled("orders");
+            return isFeatureEnabled("ORDERS");
         }
         return true;
     });

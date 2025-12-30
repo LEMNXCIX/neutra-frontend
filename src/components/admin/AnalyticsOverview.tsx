@@ -179,7 +179,7 @@ export default function AnalyticsOverview() {
       <div>
         <h3 className="text-lg font-semibold mb-4 text-muted-foreground">Primary Metrics</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {isFeatureEnabled("orders") && (
+          {isFeatureEnabled("ORDERS") && (
             <>
               <StatCard
                 icon={ShoppingCart}
@@ -248,7 +248,7 @@ export default function AnalyticsOverview() {
       <div>
         <h3 className="text-lg font-semibold mb-4 text-muted-foreground">Marketing & Promotions</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {isFeatureEnabled("coupons") && (
+          {isFeatureEnabled("COUPONS") && (
             <>
               <StatCard
                 icon={Ticket}
@@ -273,7 +273,7 @@ export default function AnalyticsOverview() {
             subtitle={`${stats.sliders.active} active, ${stats.sliders.withImages} with images`}
             color="bg-cyan-500"
           />
-          {isFeatureEnabled("banners") && (
+          {isFeatureEnabled("BANNERS") && (
             <StatCard
               icon={Ticket}
               title="Banners"

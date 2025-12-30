@@ -196,6 +196,14 @@ export function TenantsTable() {
                                                 <Badge variant="outline" className="text-xs">{tenant.slug}</Badge>
                                             </div>
                                             <div className="flex gap-2">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    onClick={() => openFeatures(tenant)}
+                                                    title="Manage Features"
+                                                >
+                                                    <Settings className="h-4 w-4" />
+                                                </Button>
                                                 <Button variant="ghost" size="icon" onClick={() => openEdit(tenant)}>
                                                     <Edit className="h-4 w-4" />
                                                 </Button>
@@ -235,6 +243,16 @@ export function TenantsTable() {
                 tenant={editingTenant}
                 onSuccess={loadTenants}
             />
+
+            {managingFeaturesTenant && (
+                <TenantFeaturesDialog
+                    open={featuresDialogOpen}
+                    onOpenChange={setFeaturesDialogOpen}
+                    tenantId={managingFeaturesTenant.id}
+                    tenantName={managingFeaturesTenant.name}
+                />
+            )}
+
             <ConfirmDialog />
         </div>
     );

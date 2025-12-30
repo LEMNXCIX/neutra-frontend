@@ -15,9 +15,9 @@ import {
     Megaphone,
     Images,
     BrickWallShield,
-    Scissors,
     UserCog,
-    Building
+    Building,
+    MessageSquare
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -36,9 +36,9 @@ const ICON_MAP: Record<string, any> = {
     Megaphone,
     Images,
     BrickWallShield,
-    Scissors,
     UserCog,
-    Building
+    Building,
+    MessageSquare
 };
 
 interface AdminSidebarProps {
@@ -51,6 +51,9 @@ export default function AdminSidebar({ items }: AdminSidebarProps) {
     const { isFeatureEnabled } = useFeatures();
     const { user } = useAuthStore();
 
+    // Navigation items with requiredFeature
+
+
     // Filter items based on features and roles
     const filteredItems = items.filter(item => {
         // Role check
@@ -58,16 +61,16 @@ export default function AdminSidebar({ items }: AdminSidebarProps) {
             return false;
         }
 
-        // Feature checks
-        if (item.label === "Coupons") {
-            return isFeatureEnabled("coupons");
+        // Feature checks (dynamic)
+        if (item.requiredFeature) {
+            const key = item.requiredFeature;
+            console.log(key)
+            console.log(isFeatureEnabled(key))
+            return isFeatureEnabled(key) || isFeatureEnabled(key.toLowerCase());
         }
-        if (item.label === "Banners") {
-            return isFeatureEnabled("banners");
-        }
-        if (item.label === "Orders") {
-            return isFeatureEnabled("orders");
-        }
+
+
+
         return true;
     });
 

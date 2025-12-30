@@ -266,7 +266,7 @@ export default function CartClient() {
           <div className="lg:col-span-1">
             <div className="sticky top-4 space-y-4">
               {/* Coupon Card */}
-              {isFeatureEnabled("coupons") && (
+              {isFeatureEnabled("COUPONS") && (
                 <Card className="border-none shadow-lg">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-base">
