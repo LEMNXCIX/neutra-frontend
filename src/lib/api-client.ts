@@ -51,8 +51,13 @@ export async function apiClient<T = unknown>(
     options: RequestInit = {}
 ): Promise<T> {
     // Read tenant context from cookies (set by middleware)
-    const tenantSlug = Cookies.get('tenant-slug');
-    const tenantId = Cookies.get('tenant-id');
+    let tenantSlug, tenantId;
+    try {
+        tenantSlug = Cookies.get('tenant-slug');
+        tenantId = Cookies.get('tenant-id');
+    } catch (e) {
+        console.warn('[ApiClient] Failed to read cookies:', e);
+    }
 
     // Ensure credentials are included for cookie-based auth
     const config: RequestInit = {
@@ -66,6 +71,8 @@ export async function apiClient<T = unknown>(
         },
     };
 
+    console.log(`[ApiClient] Requesting: ${endpoint}`);
+
     // Use Next.js API routes (/api/...) which proxy to the backend
     // This ensures proper cookie handling and avoids CORS issues
     const url = endpoint.startsWith('http') ? endpoint : `/api${endpoint}`;
@@ -75,12 +82,17 @@ export async function apiClient<T = unknown>(
 
         // Handle 401 Unauthorized
         if (res.status === 401) {
-            // Dispatch global event for unauthorized access
-            if (typeof window !== 'undefined') {
+            // Check if we should suppress the unauthorized event
+            const suppressUnauthorized = options.headers &&
+                (options.headers as Record<string, string>)['x-suppress-unauthorized'] === 'true';
+
+            // Dispatch global event for unauthorized access ONLY if not suppressed
+            if (!suppressUnauthorized && typeof window !== 'undefined') {
                 window.dispatchEvent(new CustomEvent('unauthorized'));
             }
-            toast.error('Ups, parece que no tienes permiso para acceder a esta página');
-            throw new ApiError('Unauthorized', 401);
+            // toast.error('Ups, parece que no tienes permiso para acceder a esta página');
+            // throw new ApiError('Unauthorized', 401);
+            return null as unknown as T;
         }
 
         // Handle 204 No Content

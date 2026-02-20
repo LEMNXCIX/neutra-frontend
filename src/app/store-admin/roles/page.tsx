@@ -1,47 +1,36 @@
 import React from "react";
-import { cookies } from 'next/headers';
 import RolesTableClient from "@/components/admin/roles/RolesTableClient";
 import { Permission } from "@/types/permission.types";
+import { Role } from "@/types/role.types";
+import { get as backendGet } from "../../../lib/backend-api";
+import { extractTokenFromCookies, validateAdminAccess } from "@/lib/server-auth";
 
 export const dynamic = 'force-dynamic';
 
-const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001/api';
-
 async function getRolesAndPermissions(rolePage: number, permissionPage: number, roleSearch?: string, permissionSearch?: string) {
     try {
-        const cookieStore = await cookies();
-        const cookieString = cookieStore.toString();
+        const token = await extractTokenFromCookies();
 
-        // Fetch roles (paginated)
-        const roleUrl = new URL(`${BACKEND_API_URL}/roles`);
-        roleUrl.searchParams.set('page', rolePage.toString());
-        roleUrl.searchParams.set('limit', '10');
-        if (roleSearch) roleUrl.searchParams.set('search', roleSearch);
+        // Build query parameters for roles
+        const roleQueryParams = new URLSearchParams();
+        roleQueryParams.set('page', rolePage.toString());
+        roleQueryParams.set('limit', '10');
+        if (roleSearch) roleQueryParams.set('search', roleSearch);
 
-        const rolesResponse = await fetch(roleUrl.toString(), {
-            headers: {
-                'Content-Type': 'application/json',
-                'Cookie': cookieString,
-            },
-            cache: 'no-store',
-        });
+        // Build query parameters for permissions
+        const permQueryParams = new URLSearchParams();
+        permQueryParams.set('page', permissionPage.toString());
+        permQueryParams.set('limit', '10');
+        if (permissionSearch) permQueryParams.set('search', permissionSearch);
 
-        // Fetch permissions (paginated)
-        const permUrl = new URL(`${BACKEND_API_URL}/permissions`);
-        permUrl.searchParams.set('page', permissionPage.toString());
-        permUrl.searchParams.set('limit', '10');
-        if (permissionSearch) permUrl.searchParams.set('search', permissionSearch);
+        // Fetch roles and permissions in parallel
+        const [rolesResult, permissionsResult] = await Promise.all([
+            backendGet(`/roles?${roleQueryParams.toString()}`, token),
+            backendGet(`/permissions?${permQueryParams.toString()}`, token)
+        ]);
 
-        const permissionsResponse = await fetch(permUrl.toString(), {
-            headers: {
-                'Content-Type': 'application/json',
-                'Cookie': cookieString,
-            },
-            cache: 'no-store',
-        });
-
-        if (!rolesResponse.ok || !permissionsResponse.ok) {
-            console.error('Failed to fetch roles or permissions');
+        if (!rolesResult.success || !permissionsResult.success) {
+            console.error('Failed to fetch roles or permissions:', rolesResult.error || permissionsResult.error);
             return {
                 roles: [],
                 permissions: [],
@@ -52,27 +41,18 @@ async function getRolesAndPermissions(rolePage: number, permissionPage: number, 
             };
         }
 
-        const rolesData = await rolesResponse.json();
-        const permissionsData = await permissionsResponse.json();
-
-
-
-        const roles = rolesData.success && rolesData.data ? rolesData.data : [];
-        const permissions = permissionsData.success && permissionsData.data ? permissionsData.data : [];
+        const roles = (Array.isArray(rolesResult.data) ? rolesResult.data : []).map((r: any) => ({
+            ...r,
+            tenantId: r.tenantId || '' // Ensure tenantId is present
+        })) as Role[];
+        const permissions = Array.isArray(permissionsResult.data) ? permissionsResult.data : [];
 
         // Fetch all permissions for selection in forms (non-paginated)
         let allPermissions: Permission[] = [];
         try {
-            const allPermsResponse = await fetch(`${BACKEND_API_URL}/permissions`, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Cookie': cookieString,
-                },
-                cache: 'no-store',
-            });
-            if (allPermsResponse.ok) {
-                const allPermsData = await allPermsResponse.json();
-                allPermissions = allPermsData.success && allPermsData.data ? allPermsData.data : [];
+            const allPermsResult = await backendGet('/permissions', token);
+            if (allPermsResult.success) {
+                allPermissions = Array.isArray(allPermsResult.data) ? allPermsResult.data : [];
             }
         } catch (error) {
             console.error("Failed to fetch all permissions:", error);
@@ -83,25 +63,25 @@ async function getRolesAndPermissions(rolePage: number, permissionPage: number, 
             permissions,
             allPermissions,
             stats: {
-                totalRoles: rolesData.pagination?.total || roles.length,
-                totalPermissions: permissionsData.pagination?.total || permissions.length,
+                totalRoles: (rolesResult as any).pagination?.total || roles.length,
+                totalPermissions: (permissionsResult as any).pagination?.total || permissions.length,
             },
-            rolePagination: rolesData.pagination ? {
-                currentPage: rolesData.pagination.page,
-                totalPages: rolesData.pagination.totalPages,
-                totalItems: rolesData.pagination.total,
-                itemsPerPage: rolesData.pagination.limit
+            rolePagination: (rolesResult as any).pagination ? {
+                currentPage: (rolesResult as any).pagination.page,
+                totalPages: (rolesResult as any).pagination.totalPages,
+                totalItems: (rolesResult as any).pagination.total,
+                itemsPerPage: (rolesResult as any).pagination.limit
             } : {
                 currentPage: rolePage,
                 totalPages: 1,
                 totalItems: roles.length,
                 itemsPerPage: 10
             },
-            permissionPagination: permissionsData.pagination ? {
-                currentPage: permissionsData.pagination.page,
-                totalPages: permissionsData.pagination.totalPages,
-                totalItems: permissionsData.pagination.total,
-                itemsPerPage: permissionsData.pagination.limit
+            permissionPagination: (permissionsResult as any).pagination ? {
+                currentPage: (permissionsResult as any).pagination.page,
+                totalPages: (permissionsResult as any).pagination.totalPages,
+                totalItems: (permissionsResult as any).pagination.total,
+                itemsPerPage: (permissionsResult as any).pagination.limit
             } : {
                 currentPage: permissionPage,
                 totalPages: 1,

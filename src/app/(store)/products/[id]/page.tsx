@@ -14,16 +14,40 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Image from "@/components/ui/image";
 
+import { headers } from "next/headers";
+
 async function fetchProduct(id: string) {
+  const headersList = await headers();
+  const host = headersList.get('host');
+  const tenantId = headersList.get('x-tenant-id');
+  const tenantSlug = headersList.get('x-tenant-slug');
+
   const base =
     process.env.NEXT_PUBLIC_API_URL ||
     "http://localhost:4001/api";
   const url = new URL(`/api/products/${id}`, base).toString();
-  const res = await fetch(url, { cache: "no-store" });
+  const res = await fetch(url, {
+    cache: "no-store",
+    headers: {
+      ...(host && { 'host': host }),
+      ...(tenantId && { 'x-tenant-id': tenantId }),
+      ...(tenantSlug && { 'x-tenant-slug': tenantSlug }),
+    }
+  });
   if (!res.ok) return null;
   const data = await res.json();
-  // Handle both StandardResponse (data.data) and direct response (data.product)
-  return data.data || data.product;
+  // Handle StandardResponse (data.data)
+  const p = data.data || data.product || data;
+  if (!p) return null;
+
+  // Map backend Product to frontend Product expected by this page
+  return {
+    ...p,
+    title: p.name,
+    category: p.categories?.[0]?.name || p.category,
+    stock: p.stock ?? 0,
+    price: p.price ?? 0
+  };
 }
 
 export default async function Page(props: { params: Promise<{ id: string }> }) {

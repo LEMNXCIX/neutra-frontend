@@ -10,6 +10,13 @@ export async function GET(req: NextRequest) {
     try {
         const token = extractTokenFromRequest(req);
 
+        if (!token) {
+            return NextResponse.json(
+                { success: false, message: "No session token found" },
+                { status: 401 }
+            );
+        }
+
         // We assume the backend has an endpoint /auth/me or similar to validate
         // Based on auth.service.ts calling /auth/validate, we try that first
 
@@ -35,11 +42,12 @@ export async function GET(req: NextRequest) {
         }
 
         return NextResponse.json(result.data);
-    } catch (error) {
+    } catch (error: any) {
         console.error("Error validating session:", error);
+        const status = error.statusCode || error.status || 500;
         return NextResponse.json(
-            { error: "Failed to validate session" },
-            { status: 500 }
+            { error: error.message || "Failed to validate session" },
+            { status }
         );
     }
 }

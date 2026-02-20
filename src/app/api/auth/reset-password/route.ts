@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getProxyHeaders } from "@/lib/proxy";
 
-const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4001/api";
+const getBackendUrl = () => {
+    const url = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4001/api";
+    return url.endsWith('/api') ? url : `${url}/api`;
+};
+
+const BACKEND_API_URL = getBackendUrl();
 
 /**
  * POST /api/auth/reset-password

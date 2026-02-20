@@ -1,12 +1,15 @@
 import React from "react";
-import { cookies } from 'next/headers';
 import OrdersTableClient from "@/components/admin/orders/OrdersTableClient";
+import { extractTokenFromCookies, validateAdminAccess } from "@/lib/server-auth";
+import { get as backendGet } from "../../../lib/backend-api";
 
 export const dynamic = 'force-dynamic';
 
 async function getOrders(search: string, status: string, page: number, limit: number) {
     try {
-        // Build query string
+        const token = await extractTokenFromCookies();
+
+        // Build query string for backend
         const queryParams = new URLSearchParams();
         if (search) queryParams.set('search', search);
         if (status && status !== 'all') queryParams.set('status', status);
@@ -14,25 +17,16 @@ async function getOrders(search: string, status: string, page: number, limit: nu
         queryParams.set('limit', limit.toString());
 
         const queryString = queryParams.toString();
+        const ordersUrl = queryString ? `/order?${queryString}` : '/order';
 
-        // Server Components need absolute URLs for fetch
-        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-        const url = `${baseUrl}/api/admin/orders${queryString ? `?${queryString}` : ''}`;
+        // Fetch orders and stats in parallel from backend
+        const [ordersResult, statsResult] = await Promise.all([
+            backendGet(ordersUrl, token).catch(err => ({ success: false, error: err.message, data: [] })),
+            backendGet('/order/stats', token).catch(err => ({ success: false, error: err.message }))
+        ]);
 
-        // Get cookies to pass to BFF route
-        const cookieStore = await cookies();
-        const cookieHeader = cookieStore.toString();
-
-        // Fetch from BFF route with cookies
-        const response = await fetch(url, {
-            cache: 'no-store',
-            headers: {
-                'Cookie': cookieHeader
-            }
-        });
-
-        if (!response.ok) {
-            console.error('Failed to fetch orders:', response.status);
+        if (!ordersResult.success) {
+            console.error('Failed to fetch orders from backend:', ordersResult.error);
             return {
                 orders: [],
                 stats: { totalOrders: 0, totalRevenue: 0, statusCounts: {} },
@@ -40,21 +34,28 @@ async function getOrders(search: string, status: string, page: number, limit: nu
             };
         }
 
-        const data = await response.json();
+        const orders = Array.isArray(ordersResult.data) ? ordersResult.data : [];
+        const pagination = (ordersResult as any).pagination || {
+            currentPage: 1,
+            totalPages: 0,
+            totalItems: 0,
+            itemsPerPage: limit
+        };
+
+        const stats = statsResult.success && (statsResult as any).data ? (statsResult as any).data : {
+            totalOrders: orders.length,
+            totalRevenue: 0,
+            statusCounts: {}
+        };
 
         return {
-            orders: data.data || [],
-            stats: data.stats || { totalOrders: 0, totalRevenue: 0, statusCounts: {} },
-            pagination: data.pagination ? {
-                currentPage: data.pagination.page,
-                totalPages: data.pagination.totalPages,
-                totalItems: data.pagination.total,
-                itemsPerPage: data.pagination.limit
-            } : {
-                currentPage: 1,
-                totalPages: 0,
-                totalItems: 0,
-                itemsPerPage: limit
+            orders,
+            stats,
+            pagination: {
+                currentPage: pagination.page || page,
+                totalPages: pagination.totalPages || 0,
+                totalItems: pagination.total || 0,
+                itemsPerPage: pagination.limit || limit
             },
         };
     } catch (err) {

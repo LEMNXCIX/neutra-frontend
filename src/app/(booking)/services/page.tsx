@@ -80,7 +80,7 @@ export default function ServicesPage() {
                 </div>
 
                 {/* Services Grid grouped by Category */}
-                {services.length === 0 ? (
+                {!services || services.length === 0 ? (
                     <Card className="text-center py-12">
                         <CardContent className="pt-6">
                             <p className="text-muted-foreground text-lg">No services available at the moment.</p>

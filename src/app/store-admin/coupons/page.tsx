@@ -1,12 +1,24 @@
 import React from "react";
-import { cookies } from 'next/headers';
 import CouponsTableClient from "@/components/admin/coupons/CouponsTableClient";
+import { extractTokenFromCookies, validateAdminAccess } from "@/lib/server-auth";
+import { get as backendGet } from "../../../lib/backend-api";
 
 export const dynamic = 'force-dynamic';
 
 async function getCoupons(search: string, type: string, status: string, page: number, limit: number) {
     try {
-        // Build query string
+        const token = await extractTokenFromCookies();
+        if (!token) {
+            // Handle case where token is not available, e.g., redirect to login or return empty data
+            console.error("Authentication token not found.");
+            return {
+                coupons: [],
+                stats: { totalCoupons: 0, usedCoupons: 0, unusedCoupons: 0, expiredCoupons: 0, activeCoupons: 0 },
+                pagination: { currentPage: 1, totalPages: 0, totalItems: 0, itemsPerPage: limit },
+            };
+        }
+
+        // Build query string for backend
         const queryParams = new URLSearchParams();
         if (search) queryParams.set('search', search);
         if (type && type !== 'all') queryParams.set('type', type);
@@ -15,63 +27,47 @@ async function getCoupons(search: string, type: string, status: string, page: nu
         queryParams.set('limit', limit.toString());
 
         const queryString = queryParams.toString();
+        const couponsUrl = queryString ? `/coupons?${queryString}` : '/coupons';
 
-        // Server Components need absolute URLs for fetch
-        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-        const url = `${baseUrl}/api/admin/coupons${queryString ? `?${queryString}` : ''}`;
+        // Fetch coupons and stats in parallel from backend
+        const [couponsResult, statsResult] = await Promise.all([
+            backendGet(couponsUrl, token).catch(err => ({ success: false, error: err.message, data: [] })),
+            backendGet('/coupons/stats', token).catch(err => ({ success: false, error: err.message }))
+        ]);
 
-        // Get cookies to pass to BFF route
-        const cookieStore = await cookies();
-        const cookieHeader = cookieStore.toString();
-
-        // Fetch from BFF route with cookies
-        const response = await fetch(url, {
-            cache: 'no-store',
-            headers: {
-                'Cookie': cookieHeader
-            }
-        });
-
-        if (!response.ok) {
+        if (!couponsResult.success) {
+            console.error('Failed to fetch coupons from backend:', couponsResult.error);
             return {
                 coupons: [],
-                stats: {
-                    totalCoupons: 0,
-                    usedCoupons: 0,
-                    unusedCoupons: 0,
-                    expiredCoupons: 0,
-                    activeCoupons: 0,
-                },
-                pagination: {
-                    currentPage: 1,
-                    totalPages: 0,
-                    totalItems: 0,
-                    itemsPerPage: limit,
-                },
+                stats: { totalCoupons: 0, usedCoupons: 0, unusedCoupons: 0, expiredCoupons: 0, activeCoupons: 0 },
+                pagination: { currentPage: 1, totalPages: 0, totalItems: 0, itemsPerPage: limit },
             };
         }
 
-        const data = await response.json();
+        const coupons = Array.isArray(couponsResult.data) ? couponsResult.data : [];
+        const pagination = (couponsResult as any).pagination || {
+            currentPage: 1,
+            totalPages: 0,
+            totalItems: 0,
+            itemsPerPage: limit
+        };
+
+        const stats = statsResult.success && (statsResult as any).data ? (statsResult as any).data : {
+            totalCoupons: coupons.length,
+            activeCoupons: 0,
+            usedCoupons: 0,
+            unusedCoupons: coupons.length,
+            expiredCoupons: 0
+        };
 
         return {
-            coupons: data.data || [],
-            stats: data.stats || {
-                totalCoupons: 0,
-                usedCoupons: 0,
-                unusedCoupons: 0,
-                expiredCoupons: 0,
-                activeCoupons: 0,
-            },
-            pagination: data.pagination ? {
-                currentPage: data.pagination.page,
-                totalPages: data.pagination.totalPages,
-                totalItems: data.pagination.total,
-                itemsPerPage: data.pagination.limit,
-            } : {
-                currentPage: page,
-                totalPages: 0,
-                totalItems: 0,
-                itemsPerPage: limit,
+            coupons,
+            stats,
+            pagination: {
+                currentPage: pagination.page || page,
+                totalPages: pagination.totalPages || 0,
+                totalItems: pagination.total || 0,
+                itemsPerPage: pagination.limit || limit
             },
         };
     } catch (err) {

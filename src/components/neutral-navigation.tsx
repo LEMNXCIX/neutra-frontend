@@ -56,14 +56,14 @@ export function NeutralNavigation() {
                     >
                         <Logo size={40} className="text-foreground" />
                         <Link href="/">
-                            <h1 className="text-2xl font-black tracking-tighter text-foreground uppercase italic">XCIX</h1>
+                            <h1 className="text-2xl font-black tracking-tighter text-foreground uppercase">XCIX</h1>
                         </Link>
                     </div>
 
                     {isAdmin && (
                         <div className="hidden md:flex items-center gap-4">
                             <a
-                                href="http://superadmin.localhost:3000/admin"
+                                href={`${getTenantUrl('superadmin')}/admin`}
                                 className="flex items-center gap-2 text-sm font-bold hover:underline decoration-2 underline-offset-4 text-foreground"
                             >
                                 <LayoutDashboard size={16} />
@@ -147,7 +147,7 @@ export function NeutralNavigation() {
                                                 <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest px-1">Administración</span>
                                                 <nav className="flex flex-col gap-2">
                                                     <a
-                                                        href="http://superadmin.localhost:3000/admin"
+                                                        href={`${getTenantUrl('superadmin')}/admin`}
                                                         onClick={() => setIsMobileMenuOpen(false)}
                                                         className="flex items-center gap-3 py-3 text-lg font-black uppercase tracking-tight hover:underline text-foreground"
                                                     >

@@ -1,67 +1,72 @@
 import React from "react";
 import CategoriesTableClient from "@/components/admin/categories/CategoriesTableClient";
-import { extractTokenFromCookies, getCookieString } from "@/lib/server-auth";
-import { getBackendUrl } from "@/lib/backend-api";
-import { cookies } from "next/headers";
+import { extractTokenFromCookies, validateAdminAccess } from "@/lib/server-auth";
+import { get as backendGet } from "../../../lib/backend-api";
 
 export const dynamic = 'force-dynamic';
 
 async function getCategories() {
     try {
         const token = await extractTokenFromCookies();
-        const cookieString = await getCookieString();
-        const cookieStore = await cookies();
-        const tenantSlug = cookieStore.get('tenant-slug')?.value;
-        const tenantId = cookieStore.get('tenant-id')?.value;
 
-        // Fetch from backend with cookies and tenant context
-        const response = await fetch(`${getBackendUrl()}/categories`, {
-            headers: {
-                'Content-Type': 'application/json',
-                'Cookie': cookieString,
-                ...(token && { 'Authorization': `Bearer ${token}` }),
-                ...(tenantSlug && { 'x-tenant-slug': tenantSlug }),
-                ...(tenantId && { 'x-tenant-id': tenantId }),
-            },
-            cache: 'no-store',
-        });
+        // Fetch from backend
+        const result = await backendGet('/categories', token as string | undefined);
 
-        if (!response.ok) {
-            console.error('Failed to fetch categories:', response.status);
+        if (!result.success) {
+            console.error('Failed to fetch categories from backend:', result.error);
             return {
                 categories: [],
                 stats: {
                     totalCategories: 0,
+                    activeCategories: 0,
+                    inactiveCategories: 0,
+                    withImages: 0,
                     totalProducts: 0,
                     averageProductsPerCategory: 0,
                     withProducts: 0,
                 },
+                pagination: {
+                    currentPage: 1,
+                    totalPages: 0,
+                    totalItems: 0,
+                    itemsPerPage: 10,
+                },
             };
         }
 
-        const data = await response.json();
-        const categories = data.success && data.data ? data.data : [];
+        const data = result as any;
+        const categories = data.data?.categories || data.categories || (Array.isArray(data) ? data : []);
 
-        // Calculate stats using productCount from backend
+        // Calculate stats
+        const backendStats = data.data?.stats || data.stats;
         const totalCategories = categories.length;
-        const totalProducts = categories.reduce((sum: number, c: { productCount?: number; _count?: { products?: number } }) => {
-            return sum + (c.productCount || c._count?.products || 0);
-        }, 0);
-        const averageProductsPerCategory = totalCategories > 0
-            ? Math.round(totalProducts / totalCategories)
-            : 0;
-        const withProducts = categories.filter((c: { productCount?: number; _count?: { products?: number } }) =>
-            (c.productCount || c._count?.products || 0) > 0
-        ).length;
+        const activeCategories = categories.filter((c: any) => c.active).length;
+        const withImages = categories.filter((c: any) => c.image || c.img).length;
+
+        // Use backend stats if available, otherwise calculate
+        const totalProducts = backendStats?.totalProducts ?? categories.reduce((sum: number, c: any) => sum + (c.productCount || c._count?.products || 0), 0);
+        const averageProductsPerCategory = backendStats?.avgProductsPerCategory ?? (totalCategories > 0 ? Math.round(totalProducts / totalCategories) : 0);
+        const withProducts = categories.filter((c: any) => (c.productCount || c._count?.products || 0) > 0).length;
+
+        const pagination = data.data?.pagination || data.pagination || {
+            currentPage: 1,
+            totalPages: 1,
+            totalItems: totalCategories,
+            itemsPerPage: totalCategories > 0 ? totalCategories : 10,
+        };
 
         return {
             categories,
             stats: {
                 totalCategories,
+                activeCategories,
+                inactiveCategories: totalCategories - activeCategories,
+                withImages,
                 totalProducts,
                 averageProductsPerCategory,
                 withProducts,
             },
+            pagination,
         };
     } catch (err) {
         console.error("Error fetching categories:", err);
@@ -69,9 +74,18 @@ async function getCategories() {
             categories: [],
             stats: {
                 totalCategories: 0,
+                activeCategories: 0,
+                inactiveCategories: 0,
+                withImages: 0,
                 totalProducts: 0,
                 averageProductsPerCategory: 0,
                 withProducts: 0,
+            },
+            pagination: {
+                currentPage: 1,
+                totalPages: 0,
+                totalItems: 0,
+                itemsPerPage: 10,
             },
         };
     }

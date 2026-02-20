@@ -34,7 +34,7 @@ export default function AnalyticsCharts() {
   const load = async () => {
     try {
       const [ordersRes] = await Promise.all([
-        fetch('/api/admin/orders', { credentials: 'same-origin' }),
+        fetch('/api/order', { credentials: 'same-origin' }),
         // fetch('/api/admin/products', { credentials: 'same-origin' }),
       ]);
 

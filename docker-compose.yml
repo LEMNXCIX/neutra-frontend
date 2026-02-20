@@ -1,0 +1,25 @@
+version: "3.9"
+
+services:
+  neutra-frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: neutra-frontend
+    working_dir: /app
+    volumes:
+      - .:/app
+      - /app/node_modules
+    ports:
+      - "3001:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://api-neutra-v2-app-1:4001/api
+      - HOST=0.0.0.0
+    command: npm run dev
+    networks:
+      - neutra-net
+
+networks:
+  neutra-net:
+    external: true
+    name: api-neutra-v2_default

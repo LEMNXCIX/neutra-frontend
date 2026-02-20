@@ -1,6 +1,6 @@
 import ProductsPage from "./products-client";
-
 import type { Product as BackendProduct } from "@/types/frontend-api";
+import { headers } from "next/headers";
 
 // Frontend expects 'title' but backend uses 'name'
 type FrontendProduct = {
@@ -15,12 +15,20 @@ type FrontendProduct = {
 
 async function fetchProducts(search?: string, category?: string): Promise<FrontendProduct[]> {
   try {
+    const headersList = await headers();
+    const host = headersList.get('host');
+    const tenantId = headersList.get('x-tenant-id');
+    const tenantSlug = headersList.get('x-tenant-slug');
+
     // Server-side fetch to our own API route
     const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001/api';
     const res = await fetch(`${baseUrl}/products`, {
       cache: 'no-store',
       headers: {
         'Content-Type': 'application/json',
+        ...(host && { 'host': host }),
+        ...(tenantId && { 'x-tenant-id': tenantId }),
+        ...(tenantSlug && { 'x-tenant-slug': tenantSlug }),
       }
     });
 
@@ -30,8 +38,8 @@ async function fetchProducts(search?: string, category?: string): Promise<Fronte
     }
 
     const data = await res.json();
-    // Handle StandardResponse format
-    const allProducts = (data.data || data.products || []) as BackendProduct[];
+    // Handle StandardResponse format (data.data.products)
+    const allProducts = (data.data?.products || data.data || data.products || []) as BackendProduct[];
 
     let filtered = allProducts;
 

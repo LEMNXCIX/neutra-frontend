@@ -40,7 +40,7 @@ export default function ProductGrid({
   if (viewMode === 'list') {
     return (
       <div className="space-y-4">
-        {products.map((p) => {
+        {products && products.length > 0 && products.map((p) => {
           const inStock = (p.stock ?? 0) > 0;
           const lowStock = (p.stock ?? 0) > 0 && (p.stock ?? 0) <= 5;
 

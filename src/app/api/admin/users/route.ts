@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { backendGet } from "@/lib/backend-api";
 import { extractTokenFromRequest } from "@/lib/server-auth";
+import { getProxyHeaders } from "@/lib/proxy";
 
 const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4001/api";
 
@@ -89,8 +90,8 @@ export async function PUT(req: NextRequest) {
     const response = await fetch(backendUrl, {
       method: "PUT",
       headers: {
+        ...getProxyHeaders(req),
         "Content-Type": "application/json",
-        ...(req.headers.get("cookie") && { Cookie: req.headers.get("cookie")! }),
       },
       body: JSON.stringify(body),
       cache: "no-store",

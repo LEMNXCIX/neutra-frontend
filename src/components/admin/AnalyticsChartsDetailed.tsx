@@ -38,7 +38,7 @@ export default function AnalyticsChartsDetailed() {
           limit: '1000' // Fetch enough orders for client-side timeline if needed, or rely on stats
         });
 
-        const res = await fetch(`/api/admin/orders?${query.toString()}`, { credentials: 'same-origin' });
+        const res = await fetch(`/api/order?${query.toString()}`, { credentials: 'same-origin' });
         const json = await res.json().catch(() => ({}));
 
         if (json.success) {

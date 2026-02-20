@@ -31,7 +31,9 @@ export const authService = {
      * Validate current session and get user data
      */
     validate: async (): Promise<{ user: User }> => {
-        return api.get<{ user: User }>('/auth/validate');
+        return api.get<{ user: User }>('/auth/validate', {
+            headers: { 'x-suppress-unauthorized': 'true' }
+        });
     },
 
     /**

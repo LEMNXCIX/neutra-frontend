@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getProxyHeaders } from "@/lib/proxy";
 
-const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4001/api";
+const getBackendUrl = () => {
+  const url = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4001/api";
+  return url.endsWith('/api') ? url : `${url}/api`;
+};
+
+const BACKEND_API_URL = getBackendUrl();
 
 /**
  * POST /api/auth/login
@@ -11,6 +16,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const backendUrl = `${BACKEND_API_URL}/auth/login`;
+    console.log(backendUrl);
     const response = await fetch(backendUrl, {
       method: "POST",
       headers: {

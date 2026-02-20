@@ -1,27 +1,24 @@
 import React from "react";
 import SlidersTableClient from "@/components/admin/sliders/SlidersTableClient";
-import { extractTokenFromCookies, getCookieString } from "@/lib/server-auth";
-import { getBackendUrl } from "@/lib/backend-api";
+import { get as backendGet } from "../../../lib/backend-api";
+import { extractTokenFromCookies, validateAdminAccess } from "@/lib/server-auth";
 
 export const dynamic = 'force-dynamic';
 
 async function getSliders(search: string, status: string, page: number, limit: number) {
     try {
-        const token = await extractTokenFromCookies();
-        const cookieString = await getCookieString();
+        const token = (await extractTokenFromCookies()) || undefined;
 
-        // Fetch from backend with cookies
-        const response = await fetch(`${getBackendUrl()}/slide`, {
-            headers: {
-                'Content-Type': 'application/json',
-                'Cookie': cookieString,
-                ...(token && { 'Authorization': `Bearer ${token}` }),
-            },
-            cache: 'no-store',
-        });
+        // Check if user is super admin to allow global view
+        const adminCheck = await validateAdminAccess();
+        const isSuperAdmin = adminCheck.isValid && adminCheck.user?.role?.name === 'SUPER_ADMIN';
 
-        if (!response.ok) {
-            console.error('Failed to fetch sliders:', response.status);
+        // Fetch from backend
+        const endpoint = isSuperAdmin ? '/slide?tenantId=all' : '/slide';
+        const result = await backendGet(endpoint, token);
+
+        if (!result.success) {
+            console.error('Failed to fetch sliders:', result.error);
             return {
                 sliders: [],
                 stats: {
@@ -39,8 +36,7 @@ async function getSliders(search: string, status: string, page: number, limit: n
             };
         }
 
-        const data = await response.json();
-        let sliders = data.success && data.data ? data.data : [];
+        let sliders = Array.isArray(result.data) ? result.data : [];
 
         type Slider = {
             title?: string;

@@ -29,3 +29,33 @@ export async function GET(req: NextRequest) {
     );
   }
 }
+
+/**
+ * POST /api/categories
+ * Proxy to backend API for category creation
+ */
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.json();
+    const backendUrl = `${BACKEND_API_URL}/categories`;
+
+    const response = await fetch(backendUrl, {
+      method: "POST",
+      headers: {
+        ...getProxyHeaders(req),
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+      cache: "no-store",
+    });
+
+    const data = await response.json();
+    return NextResponse.json(data, { status: response.status });
+  } catch (error) {
+    console.error("Error creating category in backend:", error);
+    return NextResponse.json(
+      { error: "Failed to create category" },
+      { status: 500 }
+    );
+  }
+}

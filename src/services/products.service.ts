@@ -10,7 +10,8 @@ export const productsService = {
      * Get all products
      */
     getAll: async (): Promise<Product[]> => {
-        return api.get<Product[]>('/products');
+        const res = await api.get<any>('/products');
+        return Array.isArray(res) ? res : (res?.products || []);
     },
 
     /**

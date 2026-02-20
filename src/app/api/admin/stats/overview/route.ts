@@ -1,17 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getCookieString } from "@/lib/server-auth";
 import { getBackendUrl } from "@/lib/backend-api";
+import { getProxyHeaders } from "@/lib/proxy";
 
 export const dynamic = 'force-dynamic';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export async function GET(_req: NextRequest) {
+export async function GET(req: NextRequest) {
     try {
-        const cookieString = await getCookieString();
-        const headers = {
-            'Content-Type': 'application/json',
-            'Cookie': cookieString,
-        };
+        const headers = getProxyHeaders(req);
 
         // Parallel fetch for all stats
         const [

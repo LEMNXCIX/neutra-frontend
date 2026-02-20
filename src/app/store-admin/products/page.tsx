@@ -1,36 +1,17 @@
 import React from "react";
 import ProductsTableClient from "@/components/admin/products/ProductsTableClient";
-import { extractTokenFromCookies, getCookieString } from "@/lib/server-auth";
-import { getBackendUrl } from "@/lib/backend-api";
+import { extractTokenFromCookies } from "@/lib/server-auth";
+import { get as backendGet } from "../../../lib/backend-api";
 import { Product } from '@/types/product.types';
 
 export const dynamic = 'force-dynamic';
 
 async function getProducts(search: string, category: string, page: number, limit: number) {
     try {
-        const token = await extractTokenFromCookies();
-        const cookieString = await getCookieString();
+        const token = (await extractTokenFromCookies()) || undefined;
 
-        // Fetch products from backend with cookies
-        const productsResponse = await fetch(`${getBackendUrl()}/products`, {
-            headers: {
-                'Content-Type': 'application/json',
-                'Cookie': cookieString,
-                ...(token && { 'Authorization': `Bearer ${token}` }),
-            },
-            cache: 'no-store',
-        });
-
-        if (!productsResponse.ok) {
-            console.error('Failed to fetch products:', productsResponse.status);
-            return {
-                products: [],
-                stats: { totalProducts: 0, totalValue: 0, lowStockCount: 0 },
-                pagination: { currentPage: 1, totalPages: 0, totalItems: 0, itemsPerPage: limit },
-            };
-        }
-
-        const productsData = await productsResponse.json();
+        // Fetch products from backend
+        const result = await backendGet('/products', token);
 
         // Map backend Product to frontend Product
         let products: Product[] = [];
@@ -46,8 +27,10 @@ async function getProducts(search: string, category: string, page: number, limit
             createdAt?: string;
             updatedAt?: string;
         };
-        if (productsData.success && productsData.data) {
-            products = (Array.isArray(productsData.data) ? productsData.data : []).map((p: BackendProduct) => ({
+        if (result.success && result.data) {
+            const data = result.data as any;
+            const list = data.products || (Array.isArray(data) ? data : []);
+            products = list.map((p: BackendProduct) => ({
                 id: p.id,
                 name: p.name,
                 description: p.description || '',
@@ -124,24 +107,14 @@ async function getProducts(search: string, category: string, page: number, limit
 
 async function getCategories() {
     try {
-        const token = await extractTokenFromCookies();
-        const cookieString = await getCookieString();
+        const token = (await extractTokenFromCookies()) || undefined;
+        const result = await backendGet('/categories', token);
 
-        const response = await fetch(`${getBackendUrl()}/categories`, {
-            headers: {
-                'Content-Type': 'application/json',
-                'Cookie': cookieString,
-                ...(token && { 'Authorization': `Bearer ${token}` }),
-            },
-            cache: 'no-store',
-        });
-
-        if (!response.ok) {
+        if (!result.success) {
             return [];
         }
 
-        const data = await response.json();
-        return data.success && data.data ? data.data : [];
+        return result.data ? (result.data.categories || result.data) : [];
     } catch (error) {
         console.error("Error fetching categories:", error);
         return [];

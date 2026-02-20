@@ -108,7 +108,9 @@ export function Navigation({ minimal = false }: { minimal?: boolean }) {
       try {
         const res = await fetch(`/api/products?search=${encodeURIComponent(query)}&pageSize=5`);
         const data = await res.json();
-        setSearchResults(data.products || []);
+        // Handle new structured response data.data.products or old data.products
+        const list = data.data?.products || data.products || [];
+        setSearchResults(list);
         setShowResults(true);
       } catch (error) {
         console.error('Search error:', error);

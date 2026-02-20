@@ -23,7 +23,8 @@ export default function FeaturedProducts() {
       .then(r => r.json())
       .then(d => {
         // Handle both StandardResponse (d.data) and direct array/object (d.products)
-        const list = d.data || d.products;
+        const list = Array.isArray(d.data) ? d.data : (d.data?.products || d.products);
+        console.log("list", list);
         if (mounted && list && Array.isArray(list)) {
           setProducts(list.slice(0, 4));
         } else {

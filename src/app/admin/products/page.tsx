@@ -32,7 +32,7 @@ export default async function GlobalProductsPage({ searchParams }: { searchParam
                 products={productsData.data?.products || []}
                 stats={productsData.data?.stats || { totalProducts: 0, totalValue: 0, lowStockCount: 0 }}
                 pagination={productsData.data?.pagination || { currentPage: 1, totalPages: 1, totalItems: 0, itemsPerPage: 10 }}
-                categories={categoriesData.data || []}
+                categories={categoriesData.data?.categories || categoriesData.data || []}
                 isSuperAdmin={true}
             />
         </div>

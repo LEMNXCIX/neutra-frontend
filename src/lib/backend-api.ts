@@ -7,7 +7,12 @@
 // Configuration
 // ============================================================================
 
-const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001/api';
+const getBackendUrlConfig = () => {
+    const url = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001/api';
+    return url.endsWith('/api') ? url : `${url}/api`;
+};
+
+const BACKEND_API_URL = getBackendUrlConfig();
 const TOKEN_COOKIE_NAME = 'token';
 
 /**
@@ -87,6 +92,10 @@ async function request<T = unknown>(
     const normalizedEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
     const url = `${BASE_URL}${normalizedEndpoint}`;
 
+    if (typeof window === 'undefined') {
+        console.log(`[BackendApi] ${method} ${url}`);
+    }
+
     // Build headers
     const requestHeaders: Record<string, string> = {
         'Content-Type': 'application/json',
@@ -111,8 +120,17 @@ async function request<T = unknown>(
             if (h) {
                 const tenantId = h.get('x-tenant-id');
                 const tenantSlug = h.get('x-tenant-slug');
-                if (tenantId) requestHeaders['x-tenant-id'] = tenantId;
-                if (tenantSlug) requestHeaders['x-tenant-slug'] = tenantSlug;
+
+                // Prioritize slug for better resolution reliability
+                if (tenantSlug) {
+                    requestHeaders['x-tenant-slug'] = tenantSlug;
+                }
+
+                // Only forward x-tenant-id if it exists AND is not the known default ID that causes conflicts
+                const defaultTenantId = process.env.NEXT_PUBLIC_DEFAULT_TENANT || 'default-tenant-00000000-0000-0000-0000-000000000001';
+                if (tenantId && tenantId !== defaultTenantId) {
+                    requestHeaders['x-tenant-id'] = tenantId;
+                }
             }
         } catch (e) {
             // next/headers might not be available in all contexts (e.g. static gen)
@@ -126,6 +144,10 @@ async function request<T = unknown>(
         credentials: 'include',
         cache: 'no-store',
     };
+
+    if (typeof window === 'undefined') {
+        console.log(`[BackendApi] Headers:`, JSON.stringify(requestHeaders, null, 2));
+    }
 
     // Add body for mutation requests
     if (body && ['POST', 'PUT', 'PATCH'].includes(method)) {
@@ -163,12 +185,19 @@ async function request<T = unknown>(
             });
         }
 
+        if (typeof window === 'undefined') {
+            console.log(`[BackendApi] Response: ${response.status} ${response.statusText}`);
+        }
+
         return {
             success: true,
             statusCode: response.status,
             ...data,
         };
     } catch (error) {
+        if (typeof window === 'undefined') {
+            console.error(`[BackendApi] ERROR:`, error);
+        }
         clearTimeout(timeoutId);
 
         // Re-throw BackendApiError

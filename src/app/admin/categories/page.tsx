@@ -27,7 +27,7 @@ export default async function GlobalCategoriesPage({ searchParams }: { searchPar
         <div className="space-y-6">
             <h2 className="text-4xl font-black uppercase tracking-tighter text-foreground">Global Categories</h2>
             <CategoriesTableClient
-                categories={data.data || []}
+                categories={data.data?.categories || data.data || []}
                 stats={data.data?.stats || { totalCategories: 0, totalProducts: 0, averageProductsPerCategory: 0 }}
                 pagination={data.data?.pagination || { currentPage: 1, totalPages: 1, totalItems: 0, itemsPerPage: 10 }}
                 isSuperAdmin={true}

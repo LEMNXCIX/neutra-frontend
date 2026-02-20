@@ -74,7 +74,7 @@ export default function OrdersTableClient({ orders, stats, pagination }: Props) 
     React.useEffect(() => {
         const fetchStatuses = async () => {
             try {
-                const res = await fetch('/api/admin/orders/statuses');
+                const res = await fetch('/api/order/statuses');
                 if (res.ok) {
                     const data = await res.json();
                     if (data.success && Array.isArray(data.data)) {
@@ -111,7 +111,7 @@ export default function OrdersTableClient({ orders, stats, pagination }: Props) 
     const updateOrderStatus = async (orderId: string, newStatus: string) => {
         setIsUpdatingStatus(orderId);
         try {
-            const res = await fetch(`/api/admin/orders/${orderId}`, {
+            const res = await fetch(`/api/order/${orderId}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ status: newStatus }),
@@ -140,7 +140,7 @@ export default function OrdersTableClient({ orders, stats, pagination }: Props) 
     const updateOrderTracking = async (orderId: string, tracking: string) => {
         setIsUpdatingTracking(true);
         try {
-            const res = await fetch(`/api/admin/orders/${orderId}`, {
+            const res = await fetch(`/api/order/${orderId}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ trackingNumber: tracking }),

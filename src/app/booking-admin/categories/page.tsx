@@ -23,14 +23,15 @@ async function getCategories() {
         }
 
         const data = response as any;
-        const categories = data.data || [];
+        const categories = data.data?.categories || data.data || [];
 
         // Stats from backend if available, otherwise calculate
-        const stats = data.stats || {
+        const backendStats = data.data?.stats || data.stats;
+        const stats = backendStats || {
             totalCategories: categories.length,
-            totalProducts: categories.reduce((sum: number, c: any) => sum + (c.productCount || 0), 0),
+            totalProducts: categories.reduce((sum: number, c: any) => sum + (c.productCount || c._count?.products || 0), 0),
             averageProductsPerCategory: categories.length > 0
-                ? Math.round(categories.reduce((sum: number, c: any) => sum + (c.productCount || 0), 0) / categories.length)
+                ? Math.round(categories.reduce((sum: number, c: any) => sum + (c.productCount || c._count?.products || 0), 0) / categories.length)
                 : 0,
         };
 

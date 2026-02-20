@@ -1,14 +1,13 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { getProxyHeaders } from "@/lib/proxy";
 
 const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001/api';
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
     const res = await fetch(`${BACKEND_API_URL}/slide`, {
       cache: 'no-store',
-      headers: {
-        'Content-Type': 'application/json',
-      }
+      headers: getProxyHeaders(req)
     });
 
     if (!res.ok) {

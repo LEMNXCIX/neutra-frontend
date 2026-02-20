@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 
 export function getProxyHeaders(req: NextRequest): HeadersInit {
-    const headers: HeadersInit = {
+    const headers: Record<string, string> = {
         'Content-Type': 'application/json',
     };
 
@@ -15,16 +15,9 @@ export function getProxyHeaders(req: NextRequest): HeadersInit {
     // They might be injected by middleware into headers OR come from client cookies
     const tenantIdHeader = req.headers.get('x-tenant-id');
     const tenantSlugHeader = req.headers.get('x-tenant-slug');
+    const defaultTenantId = process.env.NEXT_PUBLIC_DEFAULT_TENANT || 'default-tenant-00000000-0000-0000-0000-000000000001';
 
-    if (tenantIdHeader) {
-        headers['x-tenant-id'] = tenantIdHeader;
-    } else if (!tenantSlugHeader) {
-        const tenantIdCookie = req.cookies.get('tenant-id');
-        if (tenantIdCookie) {
-            headers['x-tenant-id'] = tenantIdCookie.value;
-        }
-    }
-
+    // Priority 1: Tenant Slug (more reliable for resolution)
     if (tenantSlugHeader) {
         headers['x-tenant-slug'] = tenantSlugHeader;
     } else {
@@ -34,9 +27,19 @@ export function getProxyHeaders(req: NextRequest): HeadersInit {
         }
     }
 
+    // Priority 2: Tenant ID (Only if it's not the default/stale one)
+    if (tenantIdHeader && tenantIdHeader !== defaultTenantId) {
+        headers['x-tenant-id'] = tenantIdHeader;
+    } else if (!headers['x-tenant-slug']) {
+        // Only try cookie if we don't have a slug yet
+        const tenantIdCookie = req.cookies.get('tenant-id');
+        if (tenantIdCookie && tenantIdCookie.value !== defaultTenantId) {
+            headers['x-tenant-id'] = tenantIdCookie.value;
+        }
+    }
+
     // Forward Origin/Host for correct link generation in backend
     const origin = req.headers.get('origin');
-    const host = req.headers.get('host');
     const referer = req.headers.get('referer');
     const forwardedProto = req.headers.get('x-forwarded-proto') || 'http';
 
