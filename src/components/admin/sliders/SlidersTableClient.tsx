@@ -185,7 +185,7 @@ export default function SlidersTableClient({ sliders: initialSliders, stats, pag
         }
         setIsCreating(true);
         try {
-            const res = await fetch("/api/admin/sliders", {
+            const res = await fetch("/api/slide", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(form),
@@ -217,7 +217,7 @@ export default function SlidersTableClient({ sliders: initialSliders, stats, pag
         if (!confirmed) return;
         setIsDeleting(id);
         try {
-            const res = await fetch(`/api/admin/sliders/${id}`, {
+            const res = await fetch(`/api/slide/${id}`, {
                 method: "DELETE",
             });
             if (!res.ok) {
@@ -265,7 +265,7 @@ export default function SlidersTableClient({ sliders: initialSliders, stats, pag
             // In edit mode, handleImageUpload updates `editing.img` (via `setEditing`).
             // So `body` already has updated `img` from `...editing`.
 
-            const res = await fetch(`/api/admin/sliders/${editing.id}`, {
+            const res = await fetch(`/api/slide/${editing.id}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(body),
@@ -453,11 +453,11 @@ export default function SlidersTableClient({ sliders: initialSliders, stats, pag
                                         </TableCell>
                                         <TableCell>
                                             <div className="flex gap-2">
+                                                <Button size="sm" variant="ghost" onClick={() => openEdit(s)} disabled={isDeleting === s.id}>
+                                                    {isDeleting === s.id ? <Spinner className="h-4 w-4" /> : <Edit className="h-4 w-4" />}
+                                                </Button>
                                                 <Button size="sm" variant="destructive" onClick={() => deleteSlider(s.id)} disabled={isDeleting === s.id}>
                                                     {isDeleting === s.id ? <Spinner className="h-4 w-4" /> : <Trash2 className="h-4 w-4" />}
-                                                </Button>
-                                                <Button size="sm" variant="ghost" onClick={() => deleteSlider(s.id)} disabled={isDeleting === s.id}>
-                                                    {isDeleting === s.id ? <Spinner className="h-4 w-4" /> : <Trash2 className="h-4 w-4 text-red-500" />}
                                                 </Button>
                                             </div>
                                         </TableCell>

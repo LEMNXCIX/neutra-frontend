@@ -128,7 +128,7 @@ export default function CategoriesTableClient({ categories, stats, pagination, i
         }
         setIsCreating(true);
         try {
-            await api.post("/admin/categories", form);
+            await api.post("/categories", form);
             toast.success("Category created");
             setCreateOpen(false);
             setForm({ name: "", description: "", type: "PRODUCT" });
@@ -150,7 +150,7 @@ export default function CategoriesTableClient({ categories, stats, pagination, i
         if (!confirmed) return;
         setIsDeleting(id);
         try {
-            await api.delete(`/admin/categories/${id}`);
+            await api.delete(`/categories/${id}`);
             toast.success("Category deleted");
             router.refresh();
         } catch (error: any) {
@@ -174,7 +174,7 @@ export default function CategoriesTableClient({ categories, stats, pagination, i
         if (!editing) return;
         setIsEditing(true);
         try {
-            await api.put(`/admin/categories/${editing.id}`, form);
+            await api.put(`/categories/${editing.id}`, form);
             toast.success("Category updated");
             setEditOpen(false);
             setEditing(null);

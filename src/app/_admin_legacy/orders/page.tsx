@@ -17,7 +17,7 @@ async function getOrders(search: string, status: string, page: number, limit: nu
 
         // Server Components need absolute URLs for fetch
         const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-        const url = `${baseUrl}/api/admin/orders${queryString ? `?${queryString}` : ''}`;
+        const url = `${baseUrl}/api/order${queryString ? `?${queryString}` : ''}`;
 
         // Get cookies to pass to BFF route
         const cookieStore = await cookies();

@@ -166,22 +166,13 @@ export default function BannersTableClient({ banners: initialBanners, stats, pag
         }
         setIsCreating(true);
         try {
-            const res = await fetch("/api/admin/banners", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(form),
-            });
-            if (!res.ok) {
-                const data = await res.json();
-                toast.error(data?.error || "Failed to create banner");
-                return;
-            }
+            await bannersService.create(form as any);
             toast.success("Banner created");
             setCreateOpen(false);
             setForm({ title: "", subtitle: "", cta: "", ctaUrl: "", startsAt: "", endsAt: "", active: true });
             router.refresh();
-        } catch {
-            toast.error("Network error");
+        } catch (err: any) {
+            toast.error(err?.message || "Failed to create banner");
         } finally {
             setIsCreating(false);
         }
@@ -197,17 +188,11 @@ export default function BannersTableClient({ banners: initialBanners, stats, pag
         if (!confirmed) return;
         setIsDeleting(id);
         try {
-            const res = await fetch(`/api/admin/banners/${id}`, {
-                method: "DELETE",
-            });
-            if (!res.ok) {
-                toast.error("Failed to delete");
-                return;
-            }
+            await bannersService.delete(id);
             toast.success("Banner deleted");
             router.refresh();
-        } catch {
-            toast.error("Network error");
+        } catch (err: any) {
+            toast.error(err?.message || "Failed to delete");
         } finally {
             setIsDeleting(null);
         }
@@ -231,23 +216,14 @@ export default function BannersTableClient({ banners: initialBanners, stats, pag
         if (!editing) return;
         setIsEditing(true);
         try {
-            const res = await fetch(`/api/admin/banners/${editing.id}`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(form),
-            });
-            if (!res.ok) {
-                const data = await res.json();
-                toast.error(data?.error || "Failed to update");
-                return;
-            }
+            await bannersService.update(editing.id, form as any);
             toast.success("Banner updated");
             setEditOpen(false);
             setEditing(null);
             setForm({ title: "", subtitle: "", cta: "", ctaUrl: "", startsAt: "", endsAt: "", active: true });
             router.refresh();
-        } catch {
-            toast.error("Network error");
+        } catch (err: any) {
+            toast.error(err?.message || "Failed to update");
         } finally {
             setIsEditing(false);
         }
@@ -418,11 +394,11 @@ export default function BannersTableClient({ banners: initialBanners, stats, pag
                                         </TableCell>
                                         <TableCell>
                                             <div className="flex gap-2">
+                                                <Button size="sm" variant="ghost" onClick={() => openEdit(b)}>
+                                                    <Edit className="h-4 w-4" />
+                                                </Button>
                                                 <Button size="sm" variant="destructive" onClick={() => deleteBanner(b.id)} disabled={isDeleting === b.id}>
                                                     {isDeleting === b.id ? <Spinner className="h-4 w-4" /> : <Trash2 className="h-4 w-4" />}
-                                                </Button>
-                                                <Button size="sm" variant="ghost" onClick={() => deleteBanner(b.id)} disabled={isDeleting === b.id}>
-                                                    {isDeleting === b.id ? <Spinner className="h-4 w-4" /> : <Trash2 className="h-4 w-4 text-red-500" />}
                                                 </Button>
                                             </div>
                                         </TableCell>

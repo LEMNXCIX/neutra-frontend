@@ -22,7 +22,7 @@ async function getCoupons(search: string, type: string, status: string, page: nu
 
         // Server Components need absolute URLs for fetch
         const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-        const url = `${baseUrl}/api/admin/coupons${queryString ? `?${queryString}` : ''}`;
+        const url = `${baseUrl}/api/coupons${queryString ? `?${queryString}` : ''}`;
 
         // Get cookies to pass to BFF route
         const cookieStore = await cookies();
