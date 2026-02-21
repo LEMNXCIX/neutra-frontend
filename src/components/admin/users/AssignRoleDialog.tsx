@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { usersService, rolesService } from "@/services";
+import { usersService } from "@/services/users.service";
+import { rolesService } from "@/services/roles.service";
 import { ApiError } from "@/lib/api-client";
 import {
     Dialog,

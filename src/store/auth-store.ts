@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { authService } from '@/services';
+import { authService } from '@/services/auth.service';
 import { ApiError } from '@/lib/api-client';
 import { User as APIUser } from '@/types/frontend-api';
 

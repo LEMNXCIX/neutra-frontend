@@ -10,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Loader2, CheckCircle, XCircle } from "lucide-react";
 import React, { useState } from "react";
-import { bookingService } from '@/services';
+import { bookingService } from '@/services/booking.service';
 import { toast } from "sonner";
 import { Appointment } from "@/services/booking.service";
 

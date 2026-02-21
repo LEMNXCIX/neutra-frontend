@@ -13,47 +13,33 @@ import {
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Image from "@/components/ui/image";
-
-import { headers } from "next/headers";
+import { backendFetch } from "@/lib/backend-api";
 
 async function fetchProduct(id: string) {
-  const headersList = await headers();
-  const host = headersList.get('host');
-  const tenantId = headersList.get('x-tenant-id');
-  const tenantSlug = headersList.get('x-tenant-slug');
+  try {
+    const result = await backendFetch(`/products/${id}`, { cache: "no-store" });
+    if (!result.success) return null;
 
-  const base =
-    process.env.NEXT_PUBLIC_API_URL ||
-    "http://localhost:4001/api";
-  const url = new URL(`/api/products/${id}`, base).toString();
-  const res = await fetch(url, {
-    cache: "no-store",
-    headers: {
-      ...(host && { 'host': host }),
-      ...(tenantId && { 'x-tenant-id': tenantId }),
-      ...(tenantSlug && { 'x-tenant-slug': tenantSlug }),
-    }
-  });
-  if (!res.ok) return null;
-  const data = await res.json();
-  // Handle StandardResponse (data.data)
-  const p = data.data || data.product || data;
-  if (!p) return null;
+    const p = result.data as any;
+    if (!p) return null;
 
-  // Map backend Product to frontend Product expected by this page
-  return {
-    ...p,
-    title: p.name,
-    category: p.categories?.[0]?.name || p.category,
-    stock: p.stock ?? 0,
-    price: p.price ?? 0
-  };
+    // Map backend Product to frontend Product expected by this page
+    return {
+      ...p,
+      title: p.name,
+      category: p.categories?.[0]?.name || p.category,
+      stock: p.stock ?? 0,
+      price: p.price ?? 0
+    };
+  } catch (error) {
+    console.error(`Error fetching product ${id}:`, error);
+    return null;
+  }
 }
 
 export default async function Page(props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
-  const pid = params.id;
-  const product = await fetchProduct(pid);
+  const product = await fetchProduct(params.id);
 
   if (!product)
     return (
@@ -62,7 +48,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
           <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
             <Package className="h-10 w-10 text-muted-foreground" />
           </div>
-          <h2 className="text-2xl font-bold mb-2">Product not found</h2>
+          <h2 className="text-2xl font-bold mb-2 text-foreground">Product not found</h2>
           <p className="text-muted-foreground mb-6">
             The product you&apos;re looking for doesn&apos;t exist or has been removed
           </p>
@@ -113,27 +99,19 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
                   </div>
                 )}
 
-                {/* Stock Badge */}
                 {!inStock && (
-                  <Badge
-                    variant="destructive"
-                    className="absolute top-4 right-4 text-sm"
-                  >
+                  <Badge variant="destructive" className="absolute top-4 right-4 text-sm">
                     Out of Stock
                   </Badge>
                 )}
                 {lowStock && inStock && (
-                  <Badge
-                    variant="secondary"
-                    className="absolute top-4 right-4 text-sm bg-yellow-500/90 text-white hover:bg-yellow-500"
-                  >
+                  <Badge variant="secondary" className="absolute top-4 right-4 text-sm bg-yellow-500/90 text-white hover:bg-yellow-500">
                     Only {product.stock} left!
                   </Badge>
                 )}
               </div>
             </Card>
 
-            {/* Features Grid */}
             <div className="grid grid-cols-3 gap-3">
               <Card className="p-4 text-center border-none shadow-md hover:shadow-lg transition-shadow">
                 <Truck className="h-6 w-6 mx-auto mb-2 text-primary" />
@@ -153,7 +131,6 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
           {/* Product Details */}
           <div className="flex flex-col">
             <div className="space-y-6">
-              {/* Category Badge */}
               {product.category && (
                 <div>
                   <Badge variant="secondary" className="text-sm">
@@ -162,22 +139,17 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
                 </div>
               )}
 
-              {/* Title */}
               <div>
-                <h1 className="text-4xl font-bold mb-2 leading-tight">
+                <h1 className="text-4xl font-bold mb-2 leading-tight text-foreground">
                   {product.title}
                 </h1>
                 {product.stock !== undefined && (
                   <p className="text-sm text-muted-foreground">
-                    {inStock
-                      ? `${product.stock} units available`
-                      : 'Currently unavailable'
-                    }
+                    {inStock ? `${product.stock} units available` : 'Currently unavailable'}
                   </p>
                 )}
               </div>
 
-              {/* Price */}
               <div className="flex items-baseline gap-3">
                 <span className="text-5xl font-bold text-primary">
                   ${product.price}
@@ -187,7 +159,6 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 
               <Separator />
 
-              {/* Description */}
               {product.description && (
                 <div>
                   <h2 className="text-lg font-semibold mb-3">Description</h2>
@@ -199,13 +170,12 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 
               <Separator />
 
-              {/* Product Info */}
               <div className="space-y-3">
                 <h2 className="text-lg font-semibold">Product Information</h2>
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
                     <p className="text-muted-foreground mb-1">SKU</p>
-                    <p className="font-medium">{product.id}</p>
+                    <p className="font-medium text-foreground">{product.id}</p>
                   </div>
                   <div>
                     <p className="text-muted-foreground mb-1">Availability</p>
@@ -213,42 +183,21 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
                       {inStock ? "In Stock" : "Out of Stock"}
                     </Badge>
                   </div>
-                  {product.category && (
-                    <div>
-                      <p className="text-muted-foreground mb-1">Category</p>
-                      <p className="font-medium capitalize">{product.category}</p>
-                    </div>
-                  )}
-                  <div>
-                    <p className="text-muted-foreground mb-1">Price</p>
-                    <p className="font-medium">${product.price}</p>
-                  </div>
                 </div>
               </div>
 
               <Separator />
 
-              {/* Add to Cart Section */}
               <Card className="p-6 border-none shadow-lg bg-gradient-to-br from-primary/5 to-primary/10">
                 <ProductDetailClient product={product} />
               </Card>
 
-              {/* Additional Info */}
               <Card className="p-4 bg-muted/50 border-none">
                 <p className="text-xs text-muted-foreground text-center">
                   🔒 Secure checkout • 📦 Free shipping on orders over $50 • 🔄 30-day return policy
                 </p>
               </Card>
             </div>
-          </div>
-        </div>
-
-        {/* Related Products Section - Placeholder */}
-        <div className="mt-16">
-          <Separator className="mb-8" />
-          <h2 className="text-2xl font-bold mb-6">You may also like</h2>
-          <div className="text-center text-muted-foreground py-12 border rounded-lg bg-muted/20">
-            Related products will appear here
           </div>
         </div>
       </div>

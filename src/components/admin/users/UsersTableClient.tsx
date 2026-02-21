@@ -3,7 +3,8 @@
 import React, { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
-import { usersService, tenantService } from "@/services";
+import { usersService } from "@/services/users.service";
+import { tenantService } from "@/services/tenant.service";
 import { Tenant } from "@/types/tenant";
 import { ApiError } from "@/lib/api-client";
 import { Button } from "@/components/ui/button";

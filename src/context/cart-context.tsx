@@ -1,6 +1,8 @@
 "use client";
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { cartService, productsService, couponsService } from '@/services';
+import { cartService } from '@/services/cart.service';
+import { productsService } from '@/services/products.service';
+import { couponsService } from '@/services/coupons.service';
 import { useAuthStore } from '@/store/auth-store';
 import { useRouter } from 'next/navigation';
 import { useTenant } from "./tenant-context";

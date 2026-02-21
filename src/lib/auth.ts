@@ -1,7 +1,6 @@
-import { verifyJwt } from './jwt';
-import fs from 'fs';
-import path from 'path';
-import { getUserId as getUserIdFromSession } from './session';
+/**
+ * Auth Utilities - Simplified to work with external backend
+ */
 
 export function extractTokenFromRequest(req: Request) {
   // Check Authorization header first
@@ -18,87 +17,20 @@ export function extractTokenFromRequest(req: Request) {
     const pairs = cookieHeader.split(';').map(s => s.trim()).filter(Boolean);
     for (const p of pairs) {
       const [k, ...v] = p.split('=');
-      if (k === 'neutra_jwt') return decodeURIComponent(v.join('='));
+      if (k === 'token' || k === 'neutra_jwt') return decodeURIComponent(v.join('='));
     }
   } catch { }
 
   return null;
 }
 
+/**
+ * Note: JWT verification is now primarily handled by the backend.
+ * This client-side utility can be extended if local decoding is needed.
+ */
 export function verifyToken(token: string) {
-  try {
-    return verifyJwt(token);
-  } catch {
-    return null;
-  }
+  // If we need to decode the JWT locally without secret verification (just for UI metadata)
+  // we could implement a simple base64 decode here.
+  // For security critical checks, always use the backend validation route.
+  return !!token; 
 }
-
-export function requireAdminFromRequest(req: Request): { ok: true; userId: string } | { ok: false } {
-  // Try JWT
-  const token = extractTokenFromRequest(req);
-  if (token) {
-    const payload = verifyToken(token as string);
-    if (payload && payload.sub) {
-      const uid = String(payload.sub);
-      // check users.json
-      try {
-        const USERS_PATH = path.join(process.cwd(), 'src', 'data', 'users.json');
-        const raw = fs.readFileSync(USERS_PATH, 'utf-8');
-        type User = { id: string; name: string; email: string; password?: string; isAdmin?: boolean };
-        const users = JSON.parse(raw) as Array<User>;
-        const me = users.find((u: User) => u.id === uid);
-        if (me && me.isAdmin) return { ok: true, userId: uid };
-      } catch { }
-    }
-  }
-
-  // Fallback to session cookie
-  try {
-    const cookieHeader = req.headers.get('cookie') || '';
-    const pairs = cookieHeader.split(';').map(s => s.trim()).filter(Boolean);
-    let rawSid: string | undefined;
-    for (const p of pairs) {
-      const [k, ...v] = p.split('=');
-      if (k === '_neutra_sid') rawSid = decodeURIComponent(v.join('='));
-    }
-    const uid = getUserIdFromSession(rawSid || null);
-    if (!uid) return { ok: false };
-    const USERS_PATH = path.join(process.cwd(), 'src', 'data', 'users.json');
-    const raw = fs.readFileSync(USERS_PATH, 'utf-8');
-    type User = { id: string; name: string; email: string; password?: string; isAdmin?: boolean };
-    const users = JSON.parse(raw) as Array<User>;
-    const me = users.find((u: User) => u.id === uid);
-    if (me && me.isAdmin) return { ok: true, userId: uid };
-  } catch { }
-
-  return { ok: false };
-}
-
-export function getUserFromRequest(req: Request): { ok: true; user: { id: string } } | { ok: false } {
-  // Try JWT
-  const token = extractTokenFromRequest(req);
-  if (token) {
-    const payload = verifyToken(token as string);
-    if (payload && payload.sub) {
-      return { ok: true, user: { id: String(payload.sub) } };
-    }
-  }
-
-  // Fallback to session cookie
-  try {
-    const cookieHeader = req.headers.get('cookie') || '';
-    const pairs = cookieHeader.split(';').map(s => s.trim()).filter(Boolean);
-    let rawSid: string | undefined;
-    for (const p of pairs) {
-      const [k, ...v] = p.split('=');
-      if (k === '_neutra_sid') rawSid = decodeURIComponent(v.join('='));
-    }
-    const uid = getUserIdFromSession(rawSid || null);
-    if (uid) {
-      return { ok: true, user: { id: uid } };
-    }
-  } catch { }
-
-  return { ok: false };
-}
-

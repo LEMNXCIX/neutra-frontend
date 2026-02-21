@@ -21,7 +21,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { Save, Settings, Building } from "lucide-react";
-import { tenantService } from "@/services";
+import { tenantService } from "@/services/tenant.service";
 import { TenantFeatures, Tenant } from "@/types/tenant";
 import { useTenant } from "@/context/tenant-context";
 
