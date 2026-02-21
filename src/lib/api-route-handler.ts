@@ -158,7 +158,7 @@ export function createRouteHandler(config: RouteConfig) {
             const result: ApiResponse = await backendFetch(endpoint, {
                 method: config.method,
                 body,
-                token,
+                token: token || undefined,
             });
 
             const duration = Date.now() - startTime;
@@ -278,14 +278,14 @@ export function createListWithStatsHandler(
 
             // Fetch both in parallel
             const [listResult, statsResult] = await Promise.all([
-                backendFetch(resolvedListEndpoint, { method: 'GET', token }).catch(err => ({ success: false, error: err.message, data: [] })),
-                backendFetch(statsEndpoint, { method: 'GET', token }).catch(err => ({ success: false, error: err.message }))
+                backendFetch(resolvedListEndpoint, { method: 'GET', token: token || undefined }).catch(err => ({ success: false, error: err.message, data: [], statusCode: 500 })),
+                backendFetch(statsEndpoint, { method: 'GET', token: token || undefined }).catch(err => ({ success: false, error: err.message, data: null, statusCode: 500 }))
             ]);
 
             const duration = Date.now() - startTime;
 
             if (!listResult.success) {
-                return NextResponse.json(listResult, { status: listResult.statusCode || 500 });
+                return NextResponse.json(listResult, { status: (listResult as any).statusCode || 500 });
             }
 
             // Apply transform if provided
@@ -296,7 +296,7 @@ export function createListWithStatsHandler(
                 success: true,
                 data: finalData,
                 users: finalData, // Backward compatibility for some components
-                stats: statsResult.success ? statsResult.data : null,
+                stats: statsResult.success ? (statsResult as any).data : null,
                 pagination: (listResult as any).pagination || {
                     currentPage: 1,
                     totalPages: 1,

@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic';
 
 async function getRolesAndPermissions(rolePage: number, permissionPage: number, roleSearch?: string, permissionSearch?: string) {
     try {
-        const token = await extractTokenFromCookies();
+        const token = await extractTokenFromCookies() || undefined;
 
         // Build query parameters for roles
         const roleQueryParams = new URLSearchParams();

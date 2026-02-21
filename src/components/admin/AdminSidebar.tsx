@@ -17,10 +17,12 @@ import {
     BrickWallShield,
     UserCog,
     Building,
-    MessageSquare
+    MessageSquare,
+    ArrowLeft
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 import { NavItem } from "@/config/admin-navigation";
 import { useFeatures } from "@/hooks/useFeatures";
@@ -76,24 +78,23 @@ export default function AdminSidebar({ items }: AdminSidebarProps) {
 
     return (
         <aside
-            className={`hidden md:flex flex-col border-r border-border bg-background transition-all duration-300 ease-in-out ${sidebarOpen ? "w-64" : "w-16"
-                }`}
+            className={cn(
+                "hidden md:flex flex-col border-r border-border bg-background transition-all duration-300 ease-in-out",
+                sidebarOpen ? "w-64" : "w-20"
+            )}
         >
             {/* Header */}
-            <div className="flex items-center justify-between px-4 py-4 border-b border-border">
+            <div className="flex items-center justify-between px-4 py-4 border-b border-border h-16">
                 {sidebarOpen ? (
-                    <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Dashboard</h2>
+                    <div className="flex flex-col leading-none">
+                        <h2 className="text-sm font-bold uppercase tracking-widest text-foreground">Console</h2>
+                        <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mt-0.5">Control Center</span>
+                    </div>
                 ) : (
-                    <span className="text-xs font-bold">A</span>
+                    <div className="w-full flex justify-center">
+                        <span className="text-sm font-bold">X</span>
+                    </div>
                 )}
-                <Button
-                    size="icon"
-                    variant="ghost"
-                    onClick={() => setSidebarOpen(!sidebarOpen)}
-                    className="h-8 w-8 text-muted-foreground"
-                >
-                    {sidebarOpen ? <X size={16} /> : <Menu size={16} />}
-                </Button>
             </div>
 
             {/* Scrollable menu */}
@@ -108,14 +109,16 @@ export default function AdminSidebar({ items }: AdminSidebarProps) {
                         return (
                             <Link key={href} href={href} passHref>
                                 <Button
-                                    variant={isActive ? "secondary" : "ghost"}
-                                    className={`w-full justify-start gap-3 h-11 px-3 rounded-lg transition-all ${isActive
-                                        ? "bg-primary text-primary-foreground shadow-sm font-semibold"
-                                        : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
-                                        }`}
+                                    variant={isActive ? "default" : "ghost"}
+                                    className={cn(
+                                        "w-full justify-start gap-3 h-10 rounded-md transition-all font-medium text-xs tracking-tight",
+                                        isActive
+                                        ? "bg-primary text-primary-foreground shadow-sm"
+                                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                                    )}
                                 >
-                                    <Icon className={`w-4 h-4 ${isActive ? "text-current" : "opacity-70"}`} />
-                                    {sidebarOpen && <span className="text-sm">{label}</span>}
+                                    <Icon className={cn("w-4 h-4", isActive ? "opacity-100" : "opacity-70")} />
+                                    {sidebarOpen && <span className="truncate">{label}</span>}
                                 </Button>
                             </Link>
                         );
@@ -123,15 +126,13 @@ export default function AdminSidebar({ items }: AdminSidebarProps) {
                 </nav>
             </ScrollArea>
 
-            <Separator className="opacity-50" />
-
-            {/* Footer */}
-            <div className="p-4">
+            <div className="p-4 border-t border-border/50">
                 <Link
                     href="/"
-                    className="text-xs font-medium text-muted-foreground hover:text-primary transition-colors flex items-center gap-2 px-2"
+                    className="group flex items-center gap-3 px-3 py-2 text-xs font-medium text-muted-foreground hover:text-foreground transition-all"
                 >
-                    ← {sidebarOpen && "Back to Shop"}
+                    <ArrowLeft size={14} className="transition-transform group-hover:-translate-x-1" />
+                    {sidebarOpen && "Exit to Grid"}
                 </Link>
             </div>
         </aside>

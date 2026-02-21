@@ -76,6 +76,7 @@ type Props = {
 };
 
 export default function CategoriesTableClient({ categories, stats, pagination, isSuperAdmin = false }: Props) {
+    const [isMounted, setIsMounted] = useState(false);
     const router = useRouter();
     const searchParams = useSearchParams();
     const { confirm, ConfirmDialog } = useConfirm();
@@ -88,6 +89,10 @@ export default function CategoriesTableClient({ categories, stats, pagination, i
     const [isCreating, setIsCreating] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [isDeleting, setIsDeleting] = useState<string | null>(null);
+
+    React.useEffect(() => {
+        setIsMounted(true);
+    }, []);
 
     // URL State
     const searchQuery = searchParams.get("search") || "";
@@ -203,6 +208,8 @@ export default function CategoriesTableClient({ categories, stats, pagination, i
         </Card>
     );
 
+    if (!isMounted) return null;
+
     return (
         <div className="w-full space-y-6">
             <div className="flex justify-between items-center">
@@ -298,35 +305,42 @@ export default function CategoriesTableClient({ categories, stats, pagination, i
                                 </TableRow>
                             ) : (
                                 categories.map((c) => (
-                                    <TableRow key={c.id} className="hover:bg-muted/30">
-                                        <TableCell className="font-mono text-xs">{c.id}</TableCell>
-                                        <TableCell className="font-medium">{c.name}</TableCell>
-                                        <TableCell className="text-sm text-muted-foreground">
-                                            {c.description || "—"}
+                                    <TableRow key={c.id} className="group hover:bg-muted/50 transition-colors border-b border-border/50">
+                                        <TableCell className="font-mono text-[10px] text-muted-foreground tracking-tighter py-4">#{c.id.slice(0, 8)}</TableCell>
+                                        <TableCell>
+                                            <span className="font-semibold text-sm">{c.name}</span>
                                         </TableCell>
                                         <TableCell>
-                                            <Badge variant={c.type === 'SERVICE' ? 'default' : 'secondary'}>
+                                            <span className="text-sm text-muted-foreground font-medium line-clamp-1 max-w-[300px]">
+                                                {c.description || "—"}
+                                            </span>
+                                        </TableCell>
+                                        <TableCell>
+                                            <Badge variant={c.type === 'SERVICE' ? 'default' : 'secondary'} className="text-[10px] font-bold uppercase tracking-wider">
                                                 {c.type}
                                             </Badge>
                                         </TableCell>
                                         {isSuperAdmin && (
                                             <TableCell>
-                                                <Badge variant="outline" className="font-mono text-[10px]">
+                                                <Badge variant="secondary" className="text-[10px] font-bold uppercase tracking-wider">
                                                     {c.tenantId}
                                                 </Badge>
                                             </TableCell>
                                         )}
                                         <TableCell>
-                                            <Badge variant="secondary">
-                                                {c.productCount || 0}
-                                            </Badge>
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center border border-primary/20">
+                                                    <span className="text-xs font-bold">{c.productCount || 0}</span>
+                                                </div>
+                                                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Assets</span>
+                                            </div>
                                         </TableCell>
-                                        <TableCell>
-                                            <div className="flex gap-1">
-                                                <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10" onClick={() => openEdit(c)}>
+                                        <TableCell className="text-right">
+                                            <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <Button size="icon" variant="ghost" className="h-8 w-8 rounded-full hover:bg-primary/5 hover:text-primary" onClick={() => openEdit(c)}>
                                                     <Edit className="h-4 w-4" />
                                                 </Button>
-                                                <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10" onClick={() => deleteCategory(c.id)} disabled={isDeleting === c.id}>
+                                                <Button size="icon" variant="ghost" className="h-8 w-8 rounded-full hover:bg-destructive/5 hover:text-destructive" onClick={() => deleteCategory(c.id)} disabled={isDeleting === c.id}>
                                                     {isDeleting === c.id ? <Spinner className="h-4 w-4" /> : <Trash2 className="h-4 w-4" />}
                                                 </Button>
                                             </div>
@@ -373,31 +387,42 @@ export default function CategoriesTableClient({ categories, stats, pagination, i
                 )}
             </Card>
 
-            {/* Categories Cards - Mobile */}
-            <div className="space-y-3 md:hidden">
+            {/* Categories Cards - Mobile - Precision Grid */}
+            <div className="space-y-4 md:hidden">
                 {categories.map((c) => (
-                    <Card key={c.id} className="shadow-sm border-muted/50">
-                        <CardContent className="pt-4 space-y-3">
+                    <Card key={c.id} className="t-card overflow-hidden">
+                        <CardContent className="p-6 space-y-6">
                             <div className="flex justify-between items-start">
-                                <div className="flex-1">
-                                    <h3 className="font-semibold">{c.name}</h3>
-                                    <p className="text-xs text-muted-foreground font-mono mt-1">{c.id}</p>
+                                <div className="space-y-1 flex-1">
+                                    <h3 className="font-bold text-lg tracking-tight text-foreground">{c.name}</h3>
+                                    <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">ID: #{c.id.slice(0, 8)}</p>
                                 </div>
-                                <Badge variant="secondary">
-                                    {c.productCount || 0} products
+                                <Badge variant={c.type === 'SERVICE' ? 'default' : 'secondary'} className="text-[10px] font-bold uppercase tracking-wider">
+                                    {c.type}
                                 </Badge>
                             </div>
+                            
                             {c.description && (
-                                <p className="text-sm text-muted-foreground">{c.description}</p>
+                                <p className="text-sm font-medium text-muted-foreground leading-relaxed italic border-l-2 border-primary/30 pl-4">
+                                    {c.description}
+                                </p>
                             )}
-                            <div className="flex gap-2">
-                                <Button size="sm" className="flex-1" onClick={() => openEdit(c)}>
-                                    <Edit className="h-4 w-4 mr-1" />
-                                    Edit
-                                </Button>
-                                <Button size="sm" variant="destructive" onClick={() => deleteCategory(c.id)}>
-                                    <Trash2 className="h-4 w-4" />
-                                </Button>
+
+                            <div className="flex items-center justify-between pt-4 border-t border-border/50">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center border border-primary/20">
+                                        <span className="text-xs font-bold">{c.productCount || 0}</span>
+                                    </div>
+                                    <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Assets</span>
+                                </div>
+                                <div className="flex gap-2">
+                                    <Button size="icon" variant="outline" className="h-10 w-10 rounded-lg" onClick={() => openEdit(c)}>
+                                        <Edit className="h-4 w-4" />
+                                    </Button>
+                                    <Button size="icon" variant="outline" className="h-10 w-10 border-rose-200 text-rose-600 rounded-lg hover:bg-rose-50" onClick={() => deleteCategory(c.id)} disabled={isDeleting === c.id}>
+                                        {isDeleting === c.id ? <Spinner className="h-4 w-4" /> : <Trash2 className="h-4 w-4" />}
+                                    </Button>
+                                </div>
                             </div>
                         </CardContent>
                     </Card>

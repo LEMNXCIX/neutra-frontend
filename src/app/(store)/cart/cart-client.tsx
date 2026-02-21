@@ -151,142 +151,142 @@ export default function CartClient() {
     );
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 py-8 px-4">
+    <div className="min-h-screen bg-white dark:bg-black py-12 px-4 animate-slide-up">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2 flex items-center gap-3">
-            <ShoppingCart className="h-8 w-8" />
-            Shopping Cart
+        <div className="mb-12">
+          <h1 className="text-5xl font-black uppercase tracking-tighter italic mb-3 flex items-center gap-4 text-foreground">
+            <ShoppingCart className="h-10 w-10" strokeWidth={2.5} />
+            Your <span className="text-primary">Basket</span>
           </h1>
-          <p className="text-muted-foreground">
-            {items.length} {items.length === 1 ? 'item' : 'items'} in your cart
+          <p className="text-muted-foreground font-bold uppercase tracking-widest text-xs">
+            Review your {items.length === 1 ? 'selection' : `${items.length} selections`} before processing
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
           {/* Cart Items */}
-          <div className="lg:col-span-2 space-y-4">
-            <Card className="border-none shadow-lg">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Package className="h-5 w-5" />
-                  Cart Items
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
+          <div className="lg:col-span-2 space-y-6">
+            <div className="space-y-4">
                 {items.map((item) => {
                   const itemTotal = (item.price || 0) * item.amount;
                   return (
-                    <div
+                    <Card
                       key={item.id}
-                      className="flex gap-4 p-4 rounded-lg border bg-card hover:bg-muted/30 transition-colors"
+                      className="group relative overflow-hidden border-border bg-card transition-all duration-500 hover:shadow-2xl hover:shadow-primary/5 rounded-2xl"
                     >
-                      {/* Product Image */}
-                      <div className="flex-shrink-0 w-24 h-24 bg-muted rounded-lg overflow-hidden">
-                        {item.image ? (
-                          <Image
-                            src={item.image}
-                            alt={item.name}
-                            width={96}
-                            height={96}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center">
-                            <Package className="h-8 w-8 text-muted-foreground" />
+                      <CardContent className="p-6">
+                        <div className="flex flex-col sm:flex-row gap-6">
+                          {/* Product Image */}
+                          <div className="flex-shrink-0 w-full sm:w-32 h-32 bg-muted rounded-xl overflow-hidden border border-border/50 group-hover:scale-105 transition-transform duration-500">
+                            {item.image ? (
+                              <Image
+                                src={item.image}
+                                alt={item.name}
+                                width={128}
+                                height={128}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center">
+                                <Package className="h-8 w-8 text-muted-foreground/30" />
+                              </div>
+                            )}
                           </div>
-                        )}
-                      </div>
 
-                      {/* Product Details */}
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-lg mb-1 truncate">
-                          {item.name}
-                        </h3>
-                        <p className="text-sm text-muted-foreground mb-3">
-                          ${(item.price || 0).toFixed(2)} each
-                        </p>
-
-                        {/* Quantity Controls */}
-                        <div className="flex items-center gap-3">
-                          <div className="flex items-center border rounded-lg">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 rounded-r-none"
-                              onClick={() => handleQuantityChange(item.id, item.amount - 1)}
-                              disabled={loading || item.amount <= 1}
-                            >
-                              <Minus className="h-3 w-3" />
-                            </Button>
-                            <div className="w-12 text-center font-medium">
-                              {item.amount}
+                          {/* Product Details */}
+                          <div className="flex-1 min-w-0 flex flex-col justify-between">
+                            <div>
+                                <h3 className="font-bold text-xl mb-1 tracking-tight group-hover:text-primary transition-colors">
+                                {item.name}
+                                </h3>
+                                <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest">
+                                ${(item.price || 0).toFixed(2)} / unit
+                                </p>
                             </div>
+
+                            {/* Quantity Controls */}
+                            <div className="flex items-center justify-between mt-4">
+                              <div className="flex items-center bg-muted/50 rounded-full p-1 border border-border/50">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 rounded-full hover:bg-background shadow-sm"
+                                  onClick={() => handleQuantityChange(item.id, item.amount - 1)}
+                                  disabled={loading || item.amount <= 1}
+                                >
+                                  <Minus className="h-3 w-3" />
+                                </Button>
+                                <div className="w-10 text-center font-black text-sm">
+                                  {item.amount}
+                                </div>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 rounded-full hover:bg-background shadow-sm"
+                                  onClick={() => handleQuantityChange(item.id, item.amount + 1)}
+                                  disabled={loading}
+                                >
+                                  <Plus className="h-3 w-3" />
+                                </Button>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Subtotal</p>
+                                <p className="text-lg font-black italic tracking-tighter">${itemTotal.toFixed(2)}</p>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Remove Button */}
+                          <div className="absolute top-4 right-4">
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-8 w-8 rounded-l-none"
-                              onClick={() => handleQuantityChange(item.id, item.amount + 1)}
+                              onClick={() => removeItem(item.id)}
                               disabled={loading}
+                              className="h-8 w-8 rounded-full text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition-all"
                             >
-                              <Plus className="h-3 w-3" />
+                              {loading ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <Trash2 className="h-4 w-4" />
+                              )}
                             </Button>
                           </div>
-                          <span className="text-sm text-muted-foreground">
-                            Total: <strong className="text-foreground">${itemTotal.toFixed(2)}</strong>
-                          </span>
                         </div>
-                      </div>
-
-                      {/* Remove Button */}
-                      <div className="flex-shrink-0">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => removeItem(item.id)}
-                          disabled={loading}
-                          className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-                        >
-                          {loading ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <Trash2 className="h-4 w-4" />
-                          )}
-                        </Button>
-                      </div>
-                    </div>
+                      </CardContent>
+                    </Card>
                   );
                 })}
-              </CardContent>
-            </Card>
+            </div>
           </div>
 
           {/* Order Summary */}
           <div className="lg:col-span-1">
-            <div className="sticky top-4 space-y-4">
+            <div className="sticky top-24 space-y-6">
               {/* Coupon Card */}
               {isFeatureEnabled("COUPONS") && (
-                <Card className="border-none shadow-lg">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-base">
-                      <Tag className="h-5 w-5" />
-                      Promo Code
+                <Card className="border-border bg-card rounded-2xl shadow-sm">
+                  <CardHeader className="pb-4">
+                    <CardTitle className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-muted-foreground">
+                      <Tag className="h-4 w-4" />
+                      Promotion Code
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-3">
+                  <CardContent className="space-y-4">
                     <div className="flex gap-2">
                       <Input
                         value={code}
                         onChange={(e) => setCode(e.target.value.toUpperCase())}
                         placeholder="ENTER CODE"
-                        className="flex-1"
+                        className="flex-1 h-11 border-2 font-black uppercase tracking-widest text-xs rounded-xl"
                         disabled={!!coupon}
                       />
                       {!coupon ? (
                         <Button
                           onClick={handleApplyCoupon}
                           disabled={applyingCoupon || !code.trim()}
+                          className="h-11 px-6 rounded-xl font-black uppercase text-xs tracking-widest"
                         >
                           {applyingCoupon ? (
                             <Loader2 className="h-4 w-4 animate-spin" />
@@ -295,27 +295,25 @@ export default function CartClient() {
                           )}
                         </Button>
                       ) : (
-                        <Button variant="outline" onClick={handleRemoveCoupon}>
-                          Remove
+                        <Button variant="outline" onClick={handleRemoveCoupon} className="h-11 rounded-xl font-black uppercase text-xs border-2">
+                          Clear
                         </Button>
                       )}
                     </div>
                     {coupon && (
-                      <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/20">
-                        <div className="flex items-start gap-2">
-                          {coupon.type === "percent" ? (
-                            <Percent className="h-4 w-4 text-green-600 mt-0.5" />
-                          ) : (
-                            <DollarSign className="h-4 w-4 text-green-600 mt-0.5" />
-                          )}
-                          <div className="flex-1">
-                            <p className="font-semibold text-sm text-green-700">
-                              {coupon.code}
+                      <div className="p-4 rounded-xl bg-emerald-500/10 border-2 border-emerald-500/20 animate-in zoom-in-95">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-emerald-500 text-white rounded-lg">
+                            {coupon.type === "percent" ? <Percent size={14} strokeWidth={3} /> : <DollarSign size={14} strokeWidth={3} />}
+                          </div>
+                          <div>
+                            <p className="font-black text-xs text-emerald-700 uppercase tracking-widest">
+                              {coupon.code} Applied
                             </p>
-                            <p className="text-xs text-green-600">
+                            <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-tight">
                               {coupon.type === "percent"
-                                ? `${coupon.value}% discount`
-                                : `$${coupon.value.toFixed(2)} off`}
+                                ? `${coupon.value}% Discount Applied`
+                                : `$${coupon.value.toFixed(2)} Off Total`}
                             </p>
                           </div>
                         </div>
@@ -326,74 +324,78 @@ export default function CartClient() {
               )}
 
               {/* Address Card */}
-              <Card className="border-none shadow-lg">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-base">
-                    <MapPin className="h-5 w-5" />
-                    Delivery Address
+              <Card className="border-border bg-card rounded-2xl shadow-sm">
+                <CardHeader className="pb-4">
+                  <CardTitle className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-muted-foreground">
+                    <MapPin className="h-4 w-4" />
+                    Delivery Target
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <Input
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
-                    placeholder="Enter your delivery address"
-                    className="w-full"
+                    placeholder="FULL SHIPPING ADDRESS"
+                    className="w-full h-11 border-2 font-bold text-sm rounded-xl"
                   />
                 </CardContent>
               </Card>
 
               {/* Summary Card */}
-              <Card className="border-none shadow-lg bg-gradient-to-br from-primary/5 to-primary/10">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-base">
-                    <CreditCard className="h-5 w-5" />
-                    Order Summary
+              <Card className="border-none bg-foreground text-background rounded-2xl shadow-2xl overflow-hidden">
+                <div className="h-2 bg-primary w-full" />
+                <CardHeader className="pb-6">
+                  <CardTitle className="flex items-center gap-2 text-xs font-black uppercase tracking-widest opacity-60">
+                    <CreditCard className="h-4 w-4" />
+                    Final Summary
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Subtotal</span>
-                      <span className="font-medium">${subtotal.toFixed(2)}</span>
+                <CardContent className="space-y-6">
+                  <div className="space-y-3">
+                    <div className="flex justify-between text-xs font-bold uppercase tracking-widest opacity-70">
+                      <span>Subtotal</span>
+                      <span>${subtotal.toFixed(2)}</span>
                     </div>
                     {discount > 0 && (
-                      <div className="flex justify-between text-sm text-green-600">
+                      <div className="flex justify-between text-xs font-black uppercase tracking-widest text-emerald-400">
                         <span className="flex items-center gap-1">
                           <Tag className="h-3 w-3" />
-                          Discount
+                          Adjustment
                         </span>
-                        <span className="font-medium">-${discount.toFixed(2)}</span>
+                        <span>-${discount.toFixed(2)}</span>
                       </div>
                     )}
-                    <Separator />
-                    <div className="flex justify-between text-lg font-bold">
-                      <span>Total</span>
-                      <span>${total.toFixed(2)}</span>
+                    <div className="h-px bg-background/20" />
+                    <div className="flex justify-between items-end">
+                        <span className="text-xs font-black uppercase tracking-widest opacity-60 mb-1">Total Amount</span>
+                        <span className="text-4xl font-black italic tracking-tighter">${total.toFixed(2)}</span>
                     </div>
                     {savings > 0 && (
-                      <Badge variant="secondary" className="w-full justify-center bg-green-500/10 text-green-700 hover:bg-green-500/20">
-                        You save ${savings.toFixed(2)}!
-                      </Badge>
+                      <div className="pt-2">
+                        <div className="bg-white/10 rounded-lg px-3 py-2 text-center">
+                            <p className="text-[10px] font-black uppercase tracking-widest text-emerald-400">
+                                Total Saved: ${savings.toFixed(2)}
+                            </p>
+                        </div>
+                      </div>
                     )}
                   </div>
                 </CardContent>
-                <CardFooter>
+                <CardFooter className="pb-8">
                   <Button
-                    className="w-full h-12 text-lg font-semibold"
+                    className="w-full h-14 text-sm font-black uppercase tracking-[0.2em] bg-background text-foreground hover:bg-background/90 rounded-xl transition-all hover:scale-105 active:scale-95"
                     onClick={placeOrder}
                     disabled={placing || loading || !address.trim()}
                     size="lg"
                   >
                     {placing ? (
                       <>
-                        <Loader2 className="h-5 w-5 animate-spin mr-2" />
-                        Processing...
+                        <Loader2 className="h-5 w-5 animate-spin mr-3" />
+                        Processing
                       </>
                     ) : (
                       <>
-                        <CreditCard className="h-5 w-5 mr-2" />
-                        Place Order
+                        Process Order →
                       </>
                     )}
                   </Button>

@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 
 async function getOrders(search: string, status: string, page: number, limit: number) {
     try {
-        const token = await extractTokenFromCookies();
+        const token = await extractTokenFromCookies() || undefined;
 
         // Build query string for backend
         const queryParams = new URLSearchParams();

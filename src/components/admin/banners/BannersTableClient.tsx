@@ -51,6 +51,7 @@ import { useConfirm } from "@/hooks/use-confirm";
 import { Banner } from "@/types/banner.types";
 import { Spinner } from "@/components/ui/spinner";
 import { bannersService } from "@/services/banners.service";
+import { cn } from "@/lib/utils";
 
 type Stats = {
     totalBanners: number;
@@ -73,6 +74,7 @@ type Props = {
 };
 
 export default function BannersTableClient({ banners: initialBanners, stats, pagination, isSuperAdmin = false }: Props) {
+    const [isMounted, setIsMounted] = useState(false);
     const router = useRouter();
     const searchParams = useSearchParams();
     const { confirm, ConfirmDialog } = useConfirm();
@@ -83,6 +85,7 @@ export default function BannersTableClient({ banners: initialBanners, stats, pag
     const tenantFilter = searchParams.get('tenantId') || 'all';
 
     useEffect(() => {
+        setIsMounted(true);
         setBanners(initialBanners);
     }, [initialBanners]);
 
@@ -254,6 +257,8 @@ export default function BannersTableClient({ banners: initialBanners, stats, pag
         </Card>
     );
 
+    if (!isMounted) return null;
+
     return (
         <div className="w-full space-y-6">
             <div className="flex justify-between items-center">
@@ -361,43 +366,53 @@ export default function BannersTableClient({ banners: initialBanners, stats, pag
                                 </TableRow>
                             ) : (
                                 banners.map((b) => (
-                                    <TableRow key={b.id} className="hover:bg-muted/30">
-                                        <TableCell className="font-mono text-xs">{b.id}</TableCell>
+                                    <TableRow key={b.id} className="group hover:bg-muted/50 transition-colors border-b border-border/50">
+                                        <TableCell className="font-mono text-[10px] text-muted-foreground tracking-tighter py-4">#{b.id.slice(0, 8)}</TableCell>
                                         <TableCell>
-                                            <div>
-                                                <div className="font-medium">{b.title}</div>
+                                            <div className="flex flex-col gap-0.5">
+                                                <div className="font-semibold text-sm">{b.title}</div>
                                                 {b.subtitle && (
-                                                    <div className="text-xs text-muted-foreground">{b.subtitle}</div>
+                                                    <div className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest">{b.subtitle}</div>
                                                 )}
                                             </div>
                                         </TableCell>
                                         {isSuperAdmin && (
                                             <TableCell>
-                                                <Badge variant="outline" className="font-mono text-[10px] uppercase">
+                                                <Badge variant="secondary" className="text-[10px] font-bold uppercase tracking-wider">
                                                     {b.tenantId}
                                                 </Badge>
                                             </TableCell>
                                         )}
                                         <TableCell>
                                             {b.active ? (
-                                                <Badge className="bg-green-500">Active</Badge>
+                                                <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100 rounded-full font-bold text-[10px] uppercase tracking-wider">Active</Badge>
                                             ) : (
-                                                <Badge variant="secondary">Inactive</Badge>
+                                                <Badge variant="secondary" className="bg-zinc-100 text-zinc-700 hover:bg-zinc-100 rounded-full font-bold text-[10px] uppercase tracking-wider">Inactive</Badge>
                                             )}
                                         </TableCell>
-                                        <TableCell className="text-xs text-muted-foreground">
-                                            <div>{formatDateTime(b.startsAt)}</div>
-                                            <div>→ {formatDateTime(b.endsAt)}</div>
-                                        </TableCell>
-                                        <TableCell className="text-sm">
-                                            {b.cta || "—"}
+                                        <TableCell className="text-[10px] font-medium text-muted-foreground">
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-1 h-1 rounded-full bg-emerald-500" />
+                                                <span>{formatDateTime(b.startsAt)}</span>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-1 h-1 rounded-full bg-rose-500" />
+                                                <span>{formatDateTime(b.endsAt)}</span>
+                                            </div>
                                         </TableCell>
                                         <TableCell>
-                                            <div className="flex gap-1">
-                                                <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10" onClick={() => openEdit(b)}>
+                                            {b.cta ? (
+                                                <Badge variant="outline" className="font-bold text-[10px] bg-muted/30">
+                                                    {b.cta}
+                                                </Badge>
+                                            ) : <span className="text-muted-foreground italic text-xs">—</span>}
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                            <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <Button size="icon" variant="ghost" className="h-8 w-8 rounded-full hover:bg-primary/5 hover:text-primary" onClick={() => openEdit(b)}>
                                                     <Edit className="h-4 w-4" />
                                                 </Button>
-                                                <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10" onClick={() => deleteBanner(b.id)} disabled={isDeleting === b.id}>
+                                                <Button size="icon" variant="ghost" className="h-8 w-8 rounded-full hover:text-destructive hover:bg-destructive/10" onClick={() => deleteBanner(b.id)} disabled={isDeleting === b.id}>
                                                     {isDeleting === b.id ? <Spinner className="h-4 w-4" /> : <Trash2 className="h-4 w-4" />}
                                                 </Button>
                                             </div>

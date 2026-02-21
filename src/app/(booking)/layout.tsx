@@ -6,7 +6,7 @@ export default function BookingLayout({
     children: React.ReactNode;
 }) {
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col">
+        <div className="min-h-screen bg-background transition-colors duration-300 flex flex-col">
             <BookingNavbar />
             <main className="flex-1 pt-16">
                 {children}

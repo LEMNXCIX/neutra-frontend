@@ -52,6 +52,7 @@ import {
 import { useConfirm } from "@/hooks/use-confirm";
 import { Slideshow } from "@/types/slide.types";
 import { Spinner } from "@/components/ui/spinner";
+import { cn } from "@/lib/utils";
 
 type Stats = {
     totalSliders: number;
@@ -75,6 +76,7 @@ type Props = {
 };
 
 export default function SlidersTableClient({ sliders: initialSliders, stats, pagination, isSuperAdmin = false }: Props) {
+    const [isMounted, setIsMounted] = useState(false);
     const router = useRouter();
     const searchParams = useSearchParams();
     const { confirm, ConfirmDialog } = useConfirm();
@@ -85,6 +87,7 @@ export default function SlidersTableClient({ sliders: initialSliders, stats, pag
     const tenantFilter = searchParams.get('tenantId') || 'all';
 
     useEffect(() => {
+        setIsMounted(true);
         setSliders(initialSliders);
     }, [initialSliders]);
 
@@ -304,6 +307,8 @@ export default function SlidersTableClient({ sliders: initialSliders, stats, pag
         </Card>
     );
 
+    if (!isMounted) return null;
+
     return (
         <div className="w-full space-y-6">
             <div className="flex justify-between items-center">
@@ -412,51 +417,52 @@ export default function SlidersTableClient({ sliders: initialSliders, stats, pag
                                 </TableRow>
                             ) : (
                                 sliders.map((s) => (
-                                    <TableRow key={s.id} className="hover:bg-muted/30">
-                                        <TableCell className="font-mono text-xs">{s.id}</TableCell>
+                                    <TableRow key={s.id} className="group hover:bg-muted/50 transition-colors border-b border-border/50">
+                                        <TableCell className="font-mono text-[10px] text-muted-foreground tracking-tighter py-4">#{s.id.slice(0, 8)}</TableCell>
                                         <TableCell>
                                             {s.img ? (
-                                                <Image
-                                                    src={s.img}
-                                                    alt={s.title}
-                                                    width={100}
-                                                    height={60}
-                                                    className="object-cover rounded"
-                                                />
+                                                <div className="relative w-24 h-14 rounded-lg overflow-hidden shadow-sm border border-border group-hover:scale-105 transition-transform duration-500 bg-muted">
+                                                    <Image
+                                                        src={s.img}
+                                                        alt={s.title}
+                                                        fill
+                                                        className="object-cover"
+                                                    />
+                                                </div>
                                             ) : (
-                                                <div className="w-[100px] h-[60px] bg-muted rounded flex items-center justify-center">
-                                                    <ImageIcon className="h-6 w-6 text-muted-foreground" />
+                                                <div className="w-24 h-14 bg-muted rounded-lg flex items-center justify-center border border-border">
+                                                    <ImageIcon className="h-5 w-5 text-muted-foreground/40" />
                                                 </div>
                                             )}
                                         </TableCell>
                                         {isSuperAdmin && (
                                             <TableCell>
-                                                <Badge variant="outline" className="font-mono text-[10px] uppercase">
+                                                <Badge variant="secondary" className="text-[10px] font-bold uppercase tracking-wider">
                                                     {s.tenantId}
                                                 </Badge>
                                             </TableCell>
                                         )}
                                         <TableCell>
-                                            <div>
-                                                <div className="font-medium">{s.title}</div>
+                                            <div className="flex flex-col gap-0.5">
+                                                <div className="font-semibold text-sm">{s.title}</div>
                                                 {s.desc && (
-                                                    <div className="text-xs text-muted-foreground">{s.desc}</div>
+                                                    <div className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest">{s.desc}</div>
                                                 )}
                                             </div>
                                         </TableCell>
                                         <TableCell>
                                             {s.active ? (
-                                                <Badge className="bg-green-500">Active</Badge>
+                                                <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100 border-none shadow-none text-[10px] font-bold uppercase tracking-wider">Active</Badge>
                                             ) : (
-                                                <Badge variant="secondary">Inactive</Badge>
+                                                <Badge variant="secondary" className="bg-zinc-100 text-zinc-700 hover:bg-zinc-100 border-none shadow-none text-[10px] font-bold uppercase tracking-wider">Inactive</Badge>
                                             )}
                                         </TableCell>
-                                        <TableCell>
-                                            <div className="flex gap-1">
-                                                <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10" onClick={() => openEdit(s)} disabled={isDeleting === s.id}>
+                                        <TableCell className="text-right">
+                                            <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <Button size="icon" variant="ghost" className="h-8 w-8 rounded-full hover:bg-primary/5 hover:text-primary" onClick={() => openEdit(s)} disabled={isDeleting === s.id}>
                                                     {isDeleting === s.id ? <Spinner className="h-4 w-4" /> : <Edit className="h-4 w-4" />}
                                                 </Button>
-                                                <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10" onClick={() => deleteSlider(s.id)} disabled={isDeleting === s.id}>
+                                                <Button size="icon" variant="ghost" className="h-8 w-8 rounded-full hover:text-destructive hover:bg-destructive/10" onClick={() => deleteSlider(s.id)} disabled={isDeleting === s.id}>
                                                     {isDeleting === s.id ? <Spinner className="h-4 w-4" /> : <Trash2 className="h-4 w-4" />}
                                                 </Button>
                                             </div>
@@ -504,12 +510,12 @@ export default function SlidersTableClient({ sliders: initialSliders, stats, pag
             </Card>
 
             {/* Sliders Cards - Mobile/Tablet */}
-            <div className="space-y-3 lg:hidden">
+            <div className="space-y-4 lg:hidden">
                 {sliders.map((s) => (
-                    <Card key={s.id} className="shadow-sm border-muted/50">
-                        <CardContent className="pt-4 space-y-3">
-                            {s.img && (
-                                <div className="relative w-full h-40 rounded overflow-hidden">
+                    <Card key={s.id} className="t-card overflow-hidden">
+                        <CardContent className="p-0">
+                            {s.img ? (
+                                <div className="relative w-full h-40 bg-muted">
                                     <Image
                                         src={s.img}
                                         alt={s.title}
@@ -517,29 +523,36 @@ export default function SlidersTableClient({ sliders: initialSliders, stats, pag
                                         className="object-cover"
                                     />
                                 </div>
-                            )}
-                            <div className="flex justify-between items-start">
-                                <div className="flex-1">
-                                    <h3 className="font-semibold">{s.title}</h3>
-                                    {s.desc && (
-                                        <p className="text-sm text-muted-foreground mt-1">{s.desc}</p>
-                                    )}
-                                    <p className="text-xs text-muted-foreground font-mono mt-1">{s.id}</p>
+                            ) : (
+                                <div className="w-full h-40 bg-muted flex items-center justify-center">
+                                    <ImageIcon className="h-10 w-10 text-muted-foreground/30" />
                                 </div>
-                                {s.active ? (
-                                    <Badge className="bg-green-500">Active</Badge>
-                                ) : (
-                                    <Badge variant="secondary">Inactive</Badge>
-                                )}
-                            </div>
-                            <div className="flex gap-2">
-                                <Button size="sm" className="flex-1" onClick={() => openEdit(s)}>
-                                    <Edit className="h-4 w-4 mr-1" />
-                                    Edit
-                                </Button>
-                                <Button size="sm" variant="destructive" onClick={() => deleteSlider(s.id)}>
-                                    <Trash2 className="h-4 w-4" />
-                                </Button>
+                            )}
+                            <div className="p-6 space-y-4">
+                                <div className="flex justify-between items-start">
+                                    <div className="flex-1 space-y-1">
+                                        <h3 className="font-bold text-lg leading-tight">{s.title}</h3>
+                                        {s.desc && (
+                                            <p className="text-sm text-muted-foreground font-medium">{s.desc}</p>
+                                        )}
+                                        <p className="text-[10px] font-medium text-muted-foreground font-mono">ID: #{s.id.slice(0, 8)}</p>
+                                    </div>
+                                    {s.active ? (
+                                        <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100 rounded-full font-bold text-[10px] uppercase tracking-wider">Active</Badge>
+                                    ) : (
+                                        <Badge variant="secondary" className="bg-zinc-100 text-zinc-700 hover:bg-zinc-100 rounded-full font-bold text-[10px] uppercase tracking-wider">Inactive</Badge>
+                                    )}
+                                </div>
+                                <div className="flex gap-2 pt-2 border-t border-border/50">
+                                    <Button size="sm" variant="outline" className="flex-1 font-semibold h-10" onClick={() => openEdit(s)}>
+                                        <Edit className="h-4 w-4 mr-2" />
+                                        Edit
+                                    </Button>
+                                    <Button size="sm" variant="outline" className="flex-1 font-semibold h-10 text-rose-600 border-rose-100 hover:bg-rose-50" onClick={() => deleteSlider(s.id)}>
+                                        <Trash2 className="h-4 w-4 mr-2" />
+                                        Delete
+                                    </Button>
+                                </div>
                             </div>
                         </CardContent>
                     </Card>

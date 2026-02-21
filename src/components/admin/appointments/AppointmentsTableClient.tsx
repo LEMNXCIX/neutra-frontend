@@ -18,6 +18,11 @@ import {
     TableCell,
     TableBody,
 } from "@/components/ui/table";
+import {
+    Avatar,
+    AvatarImage,
+    AvatarFallback,
+} from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -52,6 +57,7 @@ import { Appointment } from "@/services/booking.service";
 import { Spinner } from "@/components/ui/spinner";
 import { format } from "date-fns";
 import { useConfirm } from "@/hooks/use-confirm";
+import { cn } from "@/lib/utils";
 
 type Stats = {
     totalAppointments: number;
@@ -73,6 +79,7 @@ type Props = {
 };
 
 export default function AppointmentsTableClient({ appointments, stats, pagination, isSuperAdmin = false }: Props) {
+    const [isMounted, setIsMounted] = useState(false);
     const router = useRouter();
     const searchParams = useSearchParams();
 
@@ -82,6 +89,10 @@ export default function AppointmentsTableClient({ appointments, stats, paginatio
     const [isCancelling, setIsCancelling] = useState<string | null>(null);
     const [isConfirming, setIsConfirming] = useState<string | null>(null);
     const [isDeleting, setIsDeleting] = useState<string | null>(null);
+
+    React.useEffect(() => {
+        setIsMounted(true);
+    }, []);
 
     // URL State
     const searchQuery = searchParams.get("search") || "";
@@ -221,17 +232,17 @@ export default function AppointmentsTableClient({ appointments, stats, paginatio
     const getStatusBadge = (status: Appointment['status']) => {
         switch (status) {
             case 'PENDING':
-                return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 border-yellow-200">Pending</Badge>;
+                return <Badge variant="secondary" className="bg-amber-100 text-amber-700 hover:bg-amber-100 border-none shadow-none">Pending</Badge>;
             case 'CONFIRMED':
-                return <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">Confirmed</Badge>;
+                return <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100 border-none shadow-none">Confirmed</Badge>;
             case 'IN_PROGRESS':
-                return <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200">In Progress</Badge>;
+                return <Badge variant="secondary" className="bg-blue-100 text-blue-700 hover:bg-blue-100 border-none shadow-none">In Progress</Badge>;
             case 'COMPLETED':
-                return <Badge variant="secondary" className="bg-purple-100 text-purple-800 border-purple-200">Completed</Badge>;
+                return <Badge variant="secondary" className="bg-purple-100 text-purple-700 hover:bg-purple-100 border-none shadow-none">Completed</Badge>;
             case 'CANCELLED':
-                return <Badge variant="destructive">Cancelled</Badge>;
+                return <Badge variant="destructive" className="bg-rose-100 text-rose-700 hover:bg-rose-100 border-none shadow-none">Cancelled</Badge>;
             case 'NO_SHOW':
-                return <Badge variant="secondary" className="bg-gray-100 text-gray-800 border-gray-200">No Show</Badge>;
+                return <Badge variant="secondary" className="bg-zinc-100 text-zinc-700 hover:bg-zinc-100 border-none shadow-none">No Show</Badge>;
             default:
                 return <Badge variant="outline">{status}</Badge>;
         }
@@ -253,6 +264,8 @@ export default function AppointmentsTableClient({ appointments, stats, paginatio
             </CardContent>
         </Card>
     );
+
+    if (!isMounted) return null;
 
     return (
         <div className="space-y-6">
@@ -336,71 +349,85 @@ export default function AppointmentsTableClient({ appointments, stats, paginatio
                 </CardContent>
             </Card>
 
-            {/* Mobile View (Cards) */}
+            {/* Mobile View (Cards) - Precision Grid */}
             <div className="grid grid-cols-1 gap-4 md:hidden">
                 {appointments.length === 0 ? (
-                    <Card>
-                        <CardContent className="p-8 text-center text-muted-foreground">
-                            No appointments found
+                    <Card className="border-dashed t-card">
+                        <CardContent className="p-12 text-center">
+                            <CalendarX className="h-12 w-12 mx-auto text-muted-foreground/30 mb-4" />
+                            <p className="text-sm font-medium text-muted-foreground">No appointments found</p>
                         </CardContent>
                     </Card>
                 ) : (
                     appointments.map((appointment) => (
-                        <Card key={appointment.id} className="overflow-hidden">
-                            <CardHeader className="pb-2">
+                        <Card key={appointment.id} className="t-card overflow-hidden">
+                            <CardHeader className="pb-4 bg-muted/10 border-b border-border/50">
                                 <div className="flex justify-between items-start">
-                                    <div>
-                                        <CardTitle className="text-base font-bold flex items-center gap-2">
-                                            {appointment.user?.name || "Guest Client"}
-                                        </CardTitle>
-                                        <CardDescription className="text-xs mt-1">
-                                            {format(new Date(appointment.startTime), "MMM dd, yyyy")} • {format(new Date(appointment.startTime), "HH:mm")}
-                                        </CardDescription>
+                                    <div className="space-y-1">
+                                        <div className="flex items-center gap-3">
+                                            <Avatar className="h-10 w-10 border border-border">
+                                                <AvatarImage src={appointment.user?.profilePic} />
+                                                <AvatarFallback className="bg-primary text-primary-foreground text-xs font-bold">
+                                                    {(appointment.user?.name || "G").slice(0, 2).toUpperCase()}
+                                                </AvatarFallback>
+                                            </Avatar>
+                                            <CardTitle className="text-base font-bold">
+                                                {appointment.user?.name || "Guest Client"}
+                                            </CardTitle>
+                                        </div>
+                                        <p className="text-xs font-medium text-muted-foreground pl-[52px]">
+                                            {format(new Date(appointment.startTime), "MMM dd, yyyy")} &bull; {format(new Date(appointment.startTime), "HH:mm")}
+                                        </p>
                                     </div>
                                     {getStatusBadge(appointment.status)}
                                 </div>
                             </CardHeader>
-                            <CardContent className="pb-2 space-y-2 text-sm">
-                                <div className="flex justify-between border-b pb-2">
-                                    <span className="text-muted-foreground flex items-center gap-1"><Scissors className="w-3 h-3" /> Service</span>
-                                    <span className="font-medium">{appointment.service?.name}</span>
-                                </div>
-                                <div className="flex justify-between border-b pb-2">
-                                    <span className="text-muted-foreground flex items-center gap-1"><User className="w-3 h-3" /> Staff</span>
-                                    <span className="font-medium">{appointment.staff?.name}</span>
+                            <CardContent className="py-4 px-6 space-y-4">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-1">
+                                        <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Service</p>
+                                        <div className="flex items-center gap-2">
+                                            <Scissors size={12} className="text-primary" />
+                                            <span className="font-medium text-sm truncate">{appointment.service?.name}</span>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Staff</p>
+                                        <div className="flex items-center gap-2">
+                                            <User size={12} className="text-primary" />
+                                            <span className="font-medium text-sm truncate">{appointment.staff?.name}</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </CardContent>
-                            <div className="p-4 pt-0 grid grid-cols-2 gap-2 mt-2">
+                            <div className="px-6 pb-6 pt-2 grid grid-cols-2 gap-3 mt-auto">
                                 <Button
-                                    size="sm"
                                     variant="outline"
-                                    className="w-full"
+                                    className="w-full h-10 rounded-lg font-semibold text-xs"
                                     onClick={() => {
                                         setSelectedAppointment(appointment);
                                         setDetailsOpen(true);
                                     }}
                                 >
-                                    <Eye className="h-4 w-4 mr-2" /> Details
+                                    <Eye size={14} className="mr-2" /> View
                                 </Button>
                                 {appointment.status !== 'CANCELLED' && appointment.status !== 'COMPLETED' ? (
                                     <Button
-                                        size="sm"
                                         variant="outline"
-                                        className="w-full text-red-500 border-red-200 hover:bg-red-50"
+                                        className="w-full h-10 border-rose-200 text-rose-600 rounded-lg font-semibold text-xs hover:bg-rose-50 hover:border-rose-300"
                                         disabled={isCancelling === appointment.id}
                                         onClick={() => handleCancel(appointment.id)}
                                     >
-                                        {isCancelling === appointment.id ? <Spinner size="sm" /> : <><XCircle className="h-4 w-4 mr-2" /> Cancel</>}
+                                        {isCancelling === appointment.id ? <Spinner size="sm" /> : <><XCircle size={14} className="mr-2" /> Cancel</>}
                                     </Button>
                                 ) : (
                                     <Button
-                                        size="sm"
                                         variant="outline"
-                                        className="w-full text-red-600 border-red-200 hover:bg-red-100"
+                                        className="w-full h-10 border-rose-200 text-rose-600 rounded-lg font-semibold text-xs hover:bg-rose-50 hover:border-rose-300"
                                         disabled={isDeleting === appointment.id}
                                         onClick={() => handleDelete(appointment.id)}
                                     >
-                                        {isDeleting === appointment.id ? <Spinner size="sm" /> : <><Trash2 className="h-4 w-4 mr-2" /> Delete</>}
+                                        {isDeleting === appointment.id ? <Spinner size="sm" /> : <><Trash2 size={14} className="mr-2" /> Delete</>}
                                     </Button>
                                 )}
                             </div>
@@ -410,70 +437,73 @@ export default function AppointmentsTableClient({ appointments, stats, paginatio
             </div>
 
             {/* Desktop View (Table) */}
-            <Card className="border-none shadow-sm overflow-hidden hidden md:block">
+            <Card className="t-card border-none shadow-xl overflow-hidden hidden md:block">
                 <div className="overflow-x-auto">
                     <Table>
                         <TableHeader className="bg-muted/50">
-                            <TableRow className="hover:bg-transparent">
-                                <TableHead className="w-[180px]">Date & Time</TableHead>
-                                <TableHead>Client</TableHead>
-                                <TableHead>Service</TableHead>
-                                <TableHead>Staff</TableHead>
-                                {isSuperAdmin && <TableHead>Tenant</TableHead>}
-                                <TableHead>Price</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead className="text-right">Actions</TableHead>
+                            <TableRow className="hover:bg-transparent border-b border-border/50">
+                                <TableHead className="w-[180px] text-[10px] font-bold uppercase tracking-wider text-muted-foreground py-4">Date & Time</TableHead>
+                                <TableHead className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Client</TableHead>
+                                <TableHead className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Service</TableHead>
+                                <TableHead className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Staff</TableHead>
+                                {isSuperAdmin && <TableHead className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Tenant</TableHead>}
+                                <TableHead className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Price</TableHead>
+                                <TableHead className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Status</TableHead>
+                                <TableHead className="text-right text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {appointments.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={6} className="h-32 text-center text-muted-foreground">
-                                        No appointments found
+                                    <TableCell colSpan={isSuperAdmin ? 8 : 7} className="h-32 text-center text-muted-foreground font-medium">
+                                        No appointments found in the system
                                     </TableCell>
                                 </TableRow>
                             ) : (
                                 appointments.map((appointment) => (
-                                    <TableRow key={appointment.id} className="group hover:bg-muted/50 transition-colors">
-                                        <TableCell className="font-medium whitespace-nowrap">
-                                            <div className="flex flex-col">
-                                                <span>{format(new Date(appointment.startTime), "MMM dd, yyyy")}</span>
-                                                <span className="text-xs text-muted-foreground">{format(new Date(appointment.startTime), "HH:mm")} - {format(new Date(appointment.endTime), "HH:mm")}</span>
+                                    <TableRow key={appointment.id} className="group hover:bg-muted/30 transition-colors border-b border-border/50">
+                                        <TableCell className="py-4">
+                                            <div className="flex flex-col gap-0.5">
+                                                <span className="font-bold text-sm text-foreground">{format(new Date(appointment.startTime), "MMM dd, yyyy")}</span>
+                                                <span className="text-[10px] font-medium text-muted-foreground">{format(new Date(appointment.startTime), "HH:mm")} - {format(new Date(appointment.endTime), "HH:mm")}</span>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>
+                                            <div className="flex items-center gap-3">
+                                                <Avatar className="h-8 w-8 border border-border">
+                                                    <AvatarImage src={appointment.user?.profilePic} />
+                                                    <AvatarFallback className="bg-primary/10 text-primary text-[10px] font-bold">
+                                                        {(appointment.user?.name || "G").slice(0, 2).toUpperCase()}
+                                                    </AvatarFallback>
+                                                </Avatar>
+                                                <div className="flex flex-col min-w-0">
+                                                    <span className="font-semibold text-sm truncate max-w-[120px]">{appointment.user?.name || "Guest"}</span>
+                                                    <span className="text-[10px] font-medium text-muted-foreground truncate max-w-[120px]">{appointment.user?.email || "No email"}</span>
+                                                </div>
                                             </div>
                                         </TableCell>
                                         <TableCell>
                                             <div className="flex items-center gap-2">
-                                                <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                                                    <User className="w-4 h-4 text-blue-600" />
-                                                </div>
-                                                <div className="flex flex-col">
-                                                    <span className="font-medium">{appointment.user?.name || "Guest"}</span>
-                                                    <span className="text-xs text-muted-foreground truncate max-w-[150px]">{appointment.user?.email || "No email"}</span>
-                                                </div>
+                                                <Scissors className="w-3.5 h-3.5 text-primary opacity-60" />
+                                                <span className="text-sm font-medium text-foreground">{appointment.service?.name || "Service"}</span>
                                             </div>
                                         </TableCell>
                                         <TableCell>
-                                            <div className="flex items-center gap-2">
-                                                <Scissors className="w-4 h-4 text-muted-foreground" />
-                                                <span>{appointment.service?.name || "Service"}</span>
-                                            </div>
-                                        </TableCell>
-                                        <TableCell>
-                                            <span className="font-medium">{appointment.staff?.name || "Assigned"}</span>
+                                            <span className="text-sm font-medium text-muted-foreground">{appointment.staff?.name || "Assigned"}</span>
                                         </TableCell>
                                         {isSuperAdmin && (
                                             <TableCell>
-                                                <Badge variant="outline" className="font-mono text-[10px]">
+                                                <Badge variant="secondary" className="font-bold text-[9px] uppercase tracking-wider">
                                                     {appointment.tenantId}
                                                 </Badge>
                                             </TableCell>
                                         )}
                                         <TableCell>
                                             <div className="flex flex-col">
-                                                <span className="font-medium">${appointment.total > 0 ? appointment.total : appointment.service?.price}</span>
+                                                <span className="font-bold text-sm text-foreground">${appointment.total > 0 ? appointment.total : appointment.service?.price}</span>
                                                 {appointment.discountAmount > 0 && (
-                                                    <span className="text-xs text-green-600 flex items-center gap-1">
-                                                        <Tag className="w-3 h-3" />
+                                                    <span className="text-[10px] font-bold text-emerald-600 flex items-center gap-0.5">
+                                                        <Tag className="w-2.5 h-2.5" />
                                                         -${appointment.discountAmount}
                                                     </span>
                                                 )}
@@ -483,11 +513,11 @@ export default function AppointmentsTableClient({ appointments, stats, paginatio
                                             {getStatusBadge(appointment.status)}
                                         </TableCell>
                                         <TableCell className="text-right">
-                                            <div className="flex justify-end gap-2">
+                                            <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                                 <Button
-                                                    size="sm"
+                                                    size="icon"
                                                     variant="ghost"
-                                                    className="h-8 w-8 p-0"
+                                                    className="h-8 w-8 rounded-full hover:bg-primary/10 hover:text-primary transition-all"
                                                     onClick={() => {
                                                         setSelectedAppointment(appointment);
                                                         setDetailsOpen(true);
@@ -497,28 +527,28 @@ export default function AppointmentsTableClient({ appointments, stats, paginatio
                                                 </Button>
                                                 {appointment.status !== 'CANCELLED' && appointment.status !== 'COMPLETED' ? (
                                                     <Button
-                                                        size="sm"
+                                                        size="icon"
                                                         variant="ghost"
-                                                        className="h-8 w-8 p-0 text-red-500 hover:text-red-600 hover:bg-red-50"
+                                                        className="h-8 w-8 rounded-full text-rose-500 hover:text-rose-600 hover:bg-rose-50 transition-all"
                                                         disabled={isCancelling === appointment.id}
                                                         onClick={() => handleCancel(appointment.id)}
                                                     >
                                                         {isCancelling === appointment.id ? (
-                                                            <Spinner size="sm" className="text-red-500" />
+                                                            <Spinner size="sm" />
                                                         ) : (
                                                             <XCircle className="h-4 w-4" />
                                                         )}
                                                     </Button>
                                                 ) : (
                                                     <Button
-                                                        size="sm"
+                                                        size="icon"
                                                         variant="ghost"
-                                                        className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-100"
+                                                        className="h-8 w-8 rounded-full text-muted-foreground hover:text-rose-600 hover:bg-rose-50 transition-all"
                                                         disabled={isDeleting === appointment.id}
                                                         onClick={() => handleDelete(appointment.id)}
                                                     >
                                                         {isDeleting === appointment.id ? (
-                                                            <Spinner size="sm" className="text-red-600" />
+                                                            <Spinner size="sm" />
                                                         ) : (
                                                             <Trash2 className="h-4 w-4" />
                                                         )}

@@ -156,7 +156,9 @@ export default function AdminServicesPage() {
                                             )}
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 text-sm">{service.category || '-'}</td>
+                                    <td className="px-6 py-4 text-sm">
+                                        {typeof service.category === 'object' ? (service.category as any).name : (service.category || '-')}
+                                    </td>
                                     <td className="px-6 py-4 text-sm">{service.duration} min</td>
                                     <td className="px-6 py-4 text-sm font-medium">${service.price}</td>
                                     <td className="px-6 py-4">

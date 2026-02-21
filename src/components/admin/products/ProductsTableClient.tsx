@@ -50,6 +50,7 @@ import {
     AccordionTrigger,
 } from "@/components/ui/accordion";
 import { useConfirm } from "@/hooks/use-confirm";
+import { cn } from "@/lib/utils";
 import { Product } from "@/types/product.types";
 
 type Stats = {
@@ -269,9 +270,9 @@ export default function ProductsTableClient({ products, stats, pagination, categ
     };
 
     const getStockBadge = (stock: number) => {
-        if (stock === 0) return <Badge variant="destructive">Out of Stock</Badge>;
-        if (stock < 10) return <Badge className="bg-yellow-500">Low Stock</Badge>;
-        return <Badge className="bg-green-500">In Stock</Badge>;
+        if (stock === 0) return <Badge variant="destructive" className="rounded-full shadow-none border-none bg-rose-100 text-rose-700 hover:bg-rose-100">Out of Stock</Badge>;
+        if (stock < 10) return <Badge className="rounded-full shadow-none border-none bg-amber-100 text-amber-700 hover:bg-amber-100">Low Stock</Badge>;
+        return <Badge className="rounded-full shadow-none border-none bg-emerald-100 text-emerald-700 hover:bg-emerald-100">In Stock</Badge>;
     };
 
     const StatCard = ({ icon: Icon, title, value, color }: { icon: React.ElementType; title: string; value: string | number; color: string }) => (
@@ -336,7 +337,7 @@ export default function ProductsTableClient({ products, stats, pagination, categ
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="all">All Categories</SelectItem>
-                                {categories.map(cat => (
+                                {(Array.isArray(categories) ? categories : []).map(cat => (
                                     <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
                                 ))}
                             </SelectContent>
@@ -401,43 +402,56 @@ export default function ProductsTableClient({ products, stats, pagination, categ
                                 </TableRow>
                             ) : (
                                 products.map((p) => (
-                                    <TableRow key={p.id} className="hover:bg-muted/30">
-                                        <TableCell>
+                                    <TableRow key={p.id} className="group hover:bg-muted/50 transition-colors border-b border-border/50">
+                                        <TableCell className="py-4">
                                             {p.image ? (
-                                                <Image
-                                                    src={p.image}
-                                                    alt={p.name}
-                                                    width={48}
-                                                    height={48}
-                                                    className="rounded object-cover"
-                                                />
+                                                <div className="relative w-12 h-12 rounded-lg overflow-hidden shadow-sm border border-border group-hover:scale-110 transition-transform duration-500">
+                                                    <Image
+                                                        src={p.image}
+                                                        alt={p.name}
+                                                        fill
+                                                        className="object-cover"
+                                                    />
+                                                </div>
                                             ) : (
-                                                <div className="w-12 h-12 bg-muted rounded flex items-center justify-center">
-                                                    <Package className="h-6 w-6 text-muted-foreground" />
+                                                <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center border border-border">
+                                                    <Package className="h-5 w-5 text-muted-foreground/40" />
                                                 </div>
                                             )}
                                         </TableCell>
-                                        <TableCell className="font-mono text-xs">{p.id}</TableCell>
-                                        <TableCell className="font-medium">{p.name}</TableCell>
-                                        <TableCell className="text-sm text-muted-foreground">
-                                            {p.categories?.map(c => c.name).join(", ") || "—"}
+                                        <TableCell className="font-mono text-[10px] text-muted-foreground tracking-tighter">#{p.id.slice(0, 8)}</TableCell>
+                                        <TableCell>
+                                            <span className="font-semibold text-sm">{p.name}</span>
+                                        </TableCell>
+                                        <TableCell>
+                                            <div className="flex flex-wrap gap-1">
+                                                {p.categories?.map(c => (
+                                                    <Badge key={c.id} variant="secondary" className="text-[9px] font-bold uppercase tracking-wider">
+                                                        {c.name}
+                                                    </Badge>
+                                                )) || <span className="text-muted-foreground italic text-xs">—</span>}
+                                            </div>
                                         </TableCell>
                                         {isSuperAdmin && (
                                             <TableCell>
-                                                <Badge variant="outline" className="font-mono text-[10px]">
+                                                <Badge variant="secondary" className="text-[9px] font-bold uppercase tracking-wider">
                                                     {p.tenantId}
                                                 </Badge>
                                             </TableCell>
                                         )}
-                                        <TableCell className="font-semibold">${p.price.toFixed(2)}</TableCell>
-                                        <TableCell>{p.stock || 0}</TableCell>
-                                        <TableCell>{getStockBadge(p.stock || 0)}</TableCell>
                                         <TableCell>
-                                            <div className="flex gap-1">
-                                                <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10" onClick={() => openEdit(p)}>
+                                            <span className="font-bold text-sm">${p.price.toFixed(2)}</span>
+                                        </TableCell>
+                                        <TableCell>
+                                            <span className="font-medium text-sm text-muted-foreground">{p.stock || 0}</span>
+                                        </TableCell>
+                                        <TableCell>{getStockBadge(p.stock || 0)}</TableCell>
+                                        <TableCell className="text-right">
+                                            <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <Button size="icon" variant="ghost" className="h-8 w-8 rounded-full hover:bg-primary/5 hover:text-primary" onClick={() => openEdit(p)}>
                                                     <Edit className="h-4 w-4" />
                                                 </Button>
-                                                <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10" onClick={() => deleteProduct(p.id)}>
+                                                <Button size="icon" variant="ghost" className="h-8 w-8 rounded-full hover:bg-destructive/5 hover:text-destructive" onClick={() => deleteProduct(p.id)}>
                                                     <Trash2 className="h-4 w-4" />
                                                 </Button>
                                             </div>
@@ -487,37 +501,37 @@ export default function ProductsTableClient({ products, stats, pagination, categ
             {/* Products Grid - Mobile/Tablet */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:hidden">
                 {products.map((p) => (
-                    <Card key={p.id} className="shadow-sm border-muted/50 overflow-hidden">
-                        <div className="aspect-square bg-muted relative">
+                    <Card key={p.id} className="t-card overflow-hidden group border-none">
+                        <div className="aspect-square bg-muted relative overflow-hidden">
                             {p.image ? (
                                 <Image
                                     src={p.image}
                                     alt={p.name}
                                     fill
-                                    className="object-cover"
+                                    className="object-cover transition-transform group-hover:scale-110 duration-500"
                                 />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center">
-                                    <Package className="h-16 w-16 text-muted-foreground" />
+                                    <Package className="h-16 w-16 text-muted-foreground/30" />
                                 </div>
                             )}
                         </div>
-                        <CardContent className="pt-4 space-y-3">
-                            <div>
-                                <h3 className="font-semibold text-sm line-clamp-2">{p.name}</h3>
-                                <p className="text-xs text-muted-foreground font-mono mt-1">{p.id}</p>
+                        <CardContent className="p-5 space-y-4">
+                            <div className="space-y-1">
+                                <h3 className="font-bold text-base line-clamp-1 text-foreground">{p.name}</h3>
+                                <p className="text-[10px] font-medium text-muted-foreground font-mono">ID: #{p.id.slice(0, 8)}</p>
                             </div>
-                            <div className="flex justify-between items-center text-sm">
-                                <span className="font-bold text-lg">${p.price.toFixed(2)}</span>
+                            <div className="flex justify-between items-center">
+                                <span className="font-bold text-lg text-primary">${p.price.toFixed(2)}</span>
                                 {getStockBadge(p.stock || 0)}
                             </div>
-                            <div className="flex gap-2">
-                                <Button size="sm" variant="outline" className="flex-1" onClick={() => openEdit(p)}>
-                                    <Edit className="h-4 w-4 mr-1" />
+                            <div className="flex gap-2 pt-2 border-t border-border/50">
+                                <Button size="sm" variant="outline" className="flex-1 font-semibold h-10" onClick={() => openEdit(p)}>
+                                    <Edit className="h-4 w-4 mr-2" />
                                     Edit
                                 </Button>
-                                <Button size="sm" variant="outline" className="flex-1 text-muted-foreground hover:text-destructive hover:bg-destructive/5" onClick={() => deleteProduct(p.id)} disabled={isDeleting === p.id}>
-                                    {isDeleting === p.id ? <Spinner className="h-4 w-4" /> : <Trash2 className="h-4 w-4 mr-1" />}
+                                <Button size="sm" variant="outline" className="flex-1 font-semibold h-10 text-rose-600 border-rose-100 hover:bg-rose-50" onClick={() => deleteProduct(p.id)} disabled={isDeleting === p.id}>
+                                    {isDeleting === p.id ? <Spinner className="h-4 w-4" /> : <Trash2 className="h-4 w-4 mr-2" />}
                                     Delete
                                 </Button>
                             </div>
@@ -595,7 +609,7 @@ export default function ProductsTableClient({ products, stats, pagination, categ
                                     <SelectValue placeholder="Select category" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {categories.map(cat => (
+                                    {(Array.isArray(categories) ? categories : []).map(cat => (
                                         <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
                                     ))}
                                 </SelectContent>
@@ -686,7 +700,7 @@ export default function ProductsTableClient({ products, stats, pagination, categ
                                     <SelectValue placeholder="Select category" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {categories.map(cat => (
+                                    {(Array.isArray(categories) ? categories : []).map(cat => (
                                         <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
                                     ))}
                                 </SelectContent>

@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
     const logContext = logger.createContext(endpoint, 'GET');
 
     try {
-        const token = extractTokenFromRequest(req);
+        const token = extractTokenFromRequest(req) || undefined;
         logger.info(logContext, `API Request (Stats Overview): Aggregating from multiple endpoints`);
 
         // Parallel fetch for all stats using backendFetch for consistency

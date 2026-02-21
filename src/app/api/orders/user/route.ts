@@ -4,7 +4,7 @@ import { extractTokenFromRequest } from "@/lib/server-auth";
 
 export async function GET(req: NextRequest) {
     try {
-        const token = extractTokenFromRequest(req);
+        const token = extractTokenFromRequest(req) || undefined;
         // Forward query parameters (e.g. status)
         const searchParams = req.nextUrl.search;
 

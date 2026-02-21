@@ -16,6 +16,8 @@ import {
 } from "lucide-react";
 import { useApiQuery } from "@/hooks/use-api";
 import { useFeatures } from "@/hooks/useFeatures";
+import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
 
 type Stats = {
   users: { total: number; admins: number; regular: number };
@@ -28,7 +30,12 @@ type Stats = {
 };
 
 export default function AnalyticsOverview() {
+  const [isMounted, setIsMounted] = React.useState(false);
   const { isFeatureEnabled } = useFeatures();
+
+  React.useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const { data: stats, isLoading: loading } = useApiQuery<Stats>(
     ['admin', 'stats', 'overview'],
@@ -50,32 +57,37 @@ export default function AnalyticsOverview() {
     color: string;
     trend?: 'up' | 'down';
   }) => (
-    <Card className="overflow-hidden border-none shadow-md hover:shadow-lg transition-shadow">
+    <Card className="group relative overflow-hidden border-border bg-card transition-all duration-300 hover:shadow-2xl hover:shadow-primary/5 hover:translate-y-[-2px]">
+      <div className={cn("absolute top-0 left-0 w-1 h-full opacity-0 group-hover:opacity-100 transition-opacity", color)} />
       <CardContent className="pt-6">
-        <div className="flex items-center justify-between">
-          <div className="flex-1">
-            <p className="text-sm text-muted-foreground mb-1">{title}</p>
+        <div className="flex items-start justify-between">
+          <div className="flex-1 space-y-1">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{title}</p>
             <div className="flex items-baseline gap-2">
-              <p className="text-3xl font-bold">{value}</p>
+              <p className="text-3xl font-bold tracking-tighter">{value}</p>
               {trend && (
-                trend === 'up' ? (
-                  <TrendingUp className="h-5 w-5 text-green-500" />
-                ) : (
-                  <TrendingDown className="h-5 w-5 text-red-500" />
-                )
+                <Badge variant="outline" className={cn(
+                  "px-1 py-0 border-none flex items-center gap-0.5 font-bold text-[10px]",
+                  trend === 'up' ? "text-green-600" : "text-red-600"
+                )}>
+                  {trend === 'up' ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                  {trend === 'up' ? "+12%" : "-5%"}
+                </Badge>
               )}
             </div>
             {subtitle && (
-              <p className="text-xs text-muted-foreground mt-1">{subtitle}</p>
+              <p className="text-xs font-medium text-muted-foreground/70 tracking-tight">{subtitle}</p>
             )}
           </div>
-          <div className={`p-3 rounded-full ${color}`}>
-            <Icon className="h-6 w-6 text-white" />
+          <div className={cn("p-2.5 rounded-xl transition-transform group-hover:scale-110 duration-500", color)}>
+            <Icon className="h-5 w-5 text-white" />
           </div>
         </div>
       </CardContent>
     </Card>
   );
+
+  if (!isMounted) return null;
 
   if (loading) {
     return (

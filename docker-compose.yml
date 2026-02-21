@@ -8,13 +8,17 @@ services:
     container_name: neutra-frontend
     working_dir: /app
     volumes:
-      - .:/app
+      # bind mount the project with caching/delegation to improve Windows/Mac perf
+      - .:/app:cached
       - /app/node_modules
     ports:
       - "3001:3000"
     environment:
       - NEXT_PUBLIC_API_URL=http://api-neutra-v2-app-1:4001/api
       - HOST=0.0.0.0
+      # use polling so chokidar can detect file changes over a mounted volume
+      - CHOKIDAR_USEPOLLING=true
+      - CHOKIDAR_INTERVAL=100
     command: npm run dev
     networks:
       - neutra-net

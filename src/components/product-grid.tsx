@@ -52,7 +52,7 @@ export default function ProductGrid({
 
   if (viewMode === 'list') {
     return (
-      <div className="space-y-4">
+      <div className="space-y-6">
         {products.map((p, index) => {
           const inStock = (p.stock ?? 0) > 0;
           const lowStock = (p.stock ?? 0) > 0 && (p.stock ?? 0) <= 5;
@@ -60,87 +60,89 @@ export default function ProductGrid({
           return (
             <Card
               key={p.id}
-              className="overflow-hidden border-none shadow-sm hover:shadow-xl transition-all duration-300 animate-in fade-in slide-in-from-bottom-2 fill-mode-both"
+              className="overflow-hidden border-none shadow-lg hover:shadow-2xl transition-all duration-300 rounded-[2rem] bg-background animate-in fade-in slide-in-from-bottom-2 fill-mode-both group"
               style={{ animationDelay: `${index * 50}ms` }}
             >
-              <div className="flex flex-col sm:flex-row gap-6 p-6">
+              <div className="flex flex-col sm:flex-row gap-8 p-8">
                 {/* Image */}
                 <Link
                   href={`/products/${p.id}`}
-                  className="flex-shrink-0 w-full sm:w-48 h-48 relative group overflow-hidden rounded-lg bg-muted"
+                  className="flex-shrink-0 w-full sm:w-64 h-64 relative overflow-hidden rounded-3xl bg-muted"
                 >
                   {p.image ? (
                     <Image
                       src={p.image}
                       alt={p.title || 'Product image'}
                       fill
-                      sizes="192px"
-                      className="object-cover transition-transform duration-500 group-hover:scale-110"
+                      sizes="256px"
+                      className="object-cover transition-transform duration-700 group-hover:scale-110"
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
-                      <Package className="h-16 w-16 text-muted-foreground/50" />
+                      <Package className="h-16 w-16 text-muted-foreground/20" />
                     </div>
                   )}
-                  {!inStock && (
-                    <Badge variant="destructive" className="absolute top-2 right-2 shadow-sm">
-                      Out of Stock
-                    </Badge>
-                  )}
-                  {lowStock && inStock && (
-                    <Badge variant="secondary" className="absolute top-2 right-2 bg-yellow-500 text-white shadow-sm">
-                      Low Stock
-                    </Badge>
-                  )}
+                  <div className="absolute top-4 right-4 z-10">
+                    {!inStock && (
+                      <Badge variant="destructive" className="rounded-full px-3 py-1 font-bold text-[10px] uppercase tracking-widest shadow-xl border-2 border-background">
+                        Sold Out
+                      </Badge>
+                    )}
+                    {lowStock && inStock && (
+                      <Badge className="bg-orange-500 text-white rounded-full px-3 py-1 font-bold text-[10px] uppercase tracking-widest shadow-xl border-2 border-background">
+                        Last {p.stock}
+                      </Badge>
+                    )}
+                  </div>
                 </Link>
 
                 {/* Content */}
-                <div className="flex-1 flex flex-col justify-between">
+                <div className="flex-1 flex flex-col justify-between py-2">
                   <div>
-                    <div className="flex items-start justify-between gap-4 mb-2">
-                      <div>
+                    <div className="flex items-start justify-between gap-4 mb-4">
+                      <div className="space-y-1">
                         {p.category && (
-                          <Badge variant="secondary" className="mb-2 bg-secondary/50 text-secondary-foreground">
+                          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
                             {p.category}
-                          </Badge>
+                          </p>
                         )}
-                        <h3 className="text-xl font-bold mb-2">
+                        <h3 className="text-3xl font-bold tracking-tight text-foreground">
                           <Link href={`/products/${p.id}`} className="hover:text-primary transition-colors">
                             {p.title}
                           </Link>
                         </h3>
                       </div>
                       <div className="text-right">
-                        <div className="text-2xl font-black text-primary">${p.price}</div>
+                        <div className="text-3xl font-bold text-foreground">${p.price}</div>
+                        <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mt-1">USD Tax Inc.</p>
                       </div>
                     </div>
                     {p.description && (
-                      <p className="text-sm text-muted-foreground line-clamp-2 mb-4 leading-relaxed">
+                      <p className="text-base text-muted-foreground line-clamp-2 mb-6 leading-relaxed font-medium">
                         {p.description}
                       </p>
                     )}
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-3">
+                  <div className="flex flex-wrap items-center gap-4">
                     <Button
                       onClick={() => handleAdd(p.id, p.title)}
                       disabled={loadingId === p.id || !inStock}
-                      className="flex-1 sm:flex-none font-semibold shadow-sm hover:shadow-md transition-all"
-                      variant={inStock ? "default" : "secondary"}
+                      className="h-14 px-10 bg-foreground text-background hover:bg-foreground/90 font-bold uppercase tracking-widest text-[11px] rounded-xl shadow-xl shadow-foreground/10 transition-all active:scale-95"
                     >
                       {loadingId === p.id ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Adding...
-                        </>
+                        <div className="flex items-center gap-2">
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          <span>Processing</span>
+                        </div>
                       ) : (
-                        <>
-                          <ShoppingCart className="mr-2 h-4 w-4" />
-                          Add to Cart
-                        </>
+                        <div className="flex items-center gap-2">
+                          <ShoppingCart className="h-4 w-4" />
+                          <span>Add to Cart</span>
+                        </div>
                       )}
                     </Button>
-                    <Button variant="outline" asChild className="flex-1 sm:flex-none border-2 hover:border-primary/50 transition-colors">
+                    <Button variant="outline" asChild className="h-14 px-10 rounded-xl font-bold border-2 border-border hover:bg-muted transition-all">
                       <Link href={`/products/${p.id}`}>
                         <Eye className="mr-2 h-4 w-4" />
                         View Details
@@ -156,7 +158,7 @@ export default function ProductGrid({
     );
   }
 
-  // Grid View
+  // Grid View - Professional Minimalist Style
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
       {products.map((p, index) => {
@@ -166,96 +168,90 @@ export default function ProductGrid({
         return (
           <Card
             key={p.id}
-            className="group overflow-hidden border-none shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 bg-card ring-1 ring-border/50 animate-in fade-in slide-in-from-bottom-4 fill-mode-both"
+            className="group overflow-hidden border-none shadow-lg hover:shadow-2xl transition-all duration-500 rounded-[2rem] bg-background animate-in fade-in slide-in-from-bottom-4 fill-mode-both relative"
             style={{ animationDelay: `${index * 50}ms` }}
           >
-            {/* Image */}
-            <Link href={`/products/${p.id}`} className="block relative aspect-square overflow-hidden bg-muted">
+            {/* Product Image */}
+            <Link href={`/products/${p.id}`} className="block relative aspect-[4/5] overflow-hidden bg-muted">
               {p.image ? (
                 <Image
                   src={p.image}
                   alt={p.title || 'Product image'}
                   fill
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                  className="object-cover transition-transform duration-700 group-hover:scale-110"
+                  className="object-cover transition-transform duration-1000 group-hover:scale-110"
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-muted/30">
-                  <Package className="h-20 w-20 text-muted-foreground/30" />
+                  <Package className="h-16 w-16 text-muted-foreground/20" />
                 </div>
               )}
 
-              {/* Overlay on hover */}
-              <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-[2px]">
-                <Button variant="secondary" size="sm" className="font-semibold shadow-lg scale-90 group-hover:scale-100 transition-transform duration-300">
-                  <Eye className="h-4 w-4 mr-2" />
-                  Quick View
-                </Button>
+              {/* Status Badges */}
+              <div className="absolute top-4 right-4 flex flex-col gap-2 z-10">
+                {!inStock && (
+                    <Badge variant="destructive" className="rounded-full px-3 py-1 font-bold text-[10px] uppercase tracking-widest shadow-xl border-2 border-background">
+                    Sold Out
+                    </Badge>
+                )}
+                {lowStock && inStock && (
+                    <Badge className="bg-orange-500 text-white rounded-full px-3 py-1 font-bold text-[10px] uppercase tracking-widest shadow-xl border-2 border-background">
+                    Last {p.stock}
+                    </Badge>
+                )}
               </div>
 
-              {/* Stock Badge */}
-              {!inStock && (
-                <Badge variant="destructive" className="absolute top-3 right-3 shadow-sm">
-                  Out of Stock
-                </Badge>
-              )}
-              {lowStock && inStock && (
-                <Badge variant="secondary" className="absolute top-3 right-3 bg-yellow-500 text-white hover:bg-yellow-600 shadow-sm">
-                  Low Stock
-                </Badge>
-              )}
+              {/* View Overlay */}
+              <div className="absolute inset-0 bg-foreground/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center backdrop-blur-[1px]">
+                <div className="px-6 py-3 bg-background text-foreground border border-foreground/10 rounded-full font-bold text-[10px] uppercase tracking-widest translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+                    View Product →
+                </div>
+              </div>
             </Link>
 
-            {/* Content */}
-            <CardContent className="p-5 space-y-4">
-              {/* Category */}
-              {p.category && (
-                <Badge variant="secondary" className="text-xs bg-secondary/50 text-secondary-foreground font-medium px-2.5 py-0.5">
-                  {p.category}
-                </Badge>
-              )}
-
-              {/* Title */}
-              <h3 className="font-bold text-lg line-clamp-2 min-h-[3.5rem] leading-tight group-hover:text-primary transition-colors">
-                <Link href={`/products/${p.id}`}>
-                  {p.title}
-                </Link>
-              </h3>
-
-              {/* Description */}
-              {p.description && (
-                <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
-                  {p.description}
+            {/* Content Section */}
+            <CardContent className="p-6 space-y-6">
+              <div className="space-y-1">
+                {/* Category */}
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
+                    {p.category || "General"}
                 </p>
-              )}
 
-              {/* Price */}
-              <div className="flex items-center justify-between pt-2 border-t border-border/50">
-                <div className="text-2xl font-black text-primary">
-                  ${p.price}
-                </div>
+                {/* Title */}
+                <h3 className="text-xl font-bold tracking-tight line-clamp-1 group-hover:text-primary transition-colors leading-none">
+                  <Link href={`/products/${p.id}`}>
+                    {p.title}
+                  </Link>
+                </h3>
               </div>
 
-              {/* Add to Cart Button */}
-              <Button
-                onClick={() => handleAdd(p.id, p.title)}
-                disabled={loadingId === p.id || !inStock}
-                className="w-full font-bold shadow-sm hover:shadow-md transition-all"
-                size="lg"
-                variant={inStock ? "default" : "secondary"}
-              >
-                {loadingId === p.id ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Adding...
-                  </>
-                ) : (
-                  <>
-                    <ShoppingCart className="mr-2 h-4 w-4" />
-                    Add to Cart
-                  </>
-                )}
-              </Button>
+              {/* Price & Action */}
+              <div className="space-y-4 pt-4 border-t border-border/50">
+                <div className="flex items-center justify-between">
+                    <div className="text-2xl font-bold text-foreground">
+                        ${p.price}
+                    </div>
+                </div>
+
+                <Button
+                    onClick={() => handleAdd(p.id, p.title)}
+                    disabled={loadingId === p.id || !inStock}
+                    className="w-full h-14 bg-foreground text-background hover:bg-foreground/90 font-bold uppercase tracking-widest text-[11px] rounded-xl transition-all shadow-xl shadow-foreground/5"
+                    size="lg"
+                >
+                    {loadingId === p.id ? (
+                    <div className="flex items-center gap-2">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <span>Processing</span>
+                    </div>
+                    ) : (
+                    <div className="flex items-center gap-2">
+                        <ShoppingCart className="h-4 w-4" />
+                        <span>Add to Cart</span>
+                    </div>
+                    )}
+                </Button>
+              </div>
             </CardContent>
           </Card>
         );

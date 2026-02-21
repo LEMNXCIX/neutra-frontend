@@ -88,61 +88,67 @@ export default function ProductsPage({ products }: { products: Product[] }) {
   const selectedCategory = categories.find((c) => c.id === category);
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+    <main className="min-h-screen bg-gradient-to-b from-background via-muted/20 to-background">
       {/* Header Section */}
-      <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-background border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="text-4xl font-bold mb-2 flex items-center gap-3">
-                <Package className="h-8 w-8" />
-                Products
+      <div className="bg-gradient-to-r from-primary/10 via-purple-500/5 to-pink-500/10 border-b border-border/50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+            <div className="text-center md:text-left space-y-4">
+              <Badge variant="outline" className="rounded-full px-4 py-1 border-primary/20 bg-primary/5 text-primary font-bold uppercase tracking-widest text-[10px]">
+                Curated Selection
+              </Badge>
+              <h1 className="text-5xl md:text-6xl font-black tracking-tight text-foreground leading-none">
+                Our <span className="text-primary">Collection</span>
               </h1>
-              <p className="text-muted-foreground">
-                {products.length} {products.length === 1 ? 'product' : 'products'} available
+              <p className="text-muted-foreground text-lg font-medium max-w-lg">
+                Discover {products.length} handpicked pieces designed for modern, minimalist living.
               </p>
             </div>
 
-            {/* View Toggle - Desktop Only */}
-            <div className="hidden sm:flex items-center gap-2 bg-background border rounded-lg p-1">
+            {/* View Toggle */}
+            <div className="flex items-center gap-3 bg-background/50 backdrop-blur-md border border-border/50 p-2 rounded-2xl shadow-xl">
               <Button
                 variant={viewMode === 'grid' ? 'default' : 'ghost'}
-                size="sm"
+                size="icon"
                 onClick={() => setViewMode('grid')}
+                className={`rounded-xl transition-all ${viewMode === 'grid' ? 'shadow-lg shadow-primary/20' : ''}`}
               >
-                <Grid3x3 className="h-4 w-4" />
+                <Grid3x3 className="h-5 w-5" />
               </Button>
               <Button
                 variant={viewMode === 'list' ? 'default' : 'ghost'}
-                size="sm"
+                size="icon"
                 onClick={() => setViewMode('list')}
+                className={`rounded-xl transition-all ${viewMode === 'list' ? 'shadow-lg shadow-primary/20' : ''}`}
               >
-                <List className="h-4 w-4" />
+                <List className="h-5 w-5" />
               </Button>
             </div>
           </div>
 
           {/* Active Filters */}
           {activeFiltersCount > 0 && (
-            <div className="flex flex-wrap items-center gap-2 mt-4">
-              <span className="text-sm text-muted-foreground">Active filters:</span>
+            <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 mt-8">
+              <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Active:</span>
               {search && (
-                <Badge variant="secondary" className="gap-1">
-                  Search: {search}
+                <Badge variant="secondary" className="gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary border-none">
+                  <Search className="h-3 w-3" />
+                  {search}
                   <button
                     onClick={() => handleSearch("")}
-                    className="ml-1 hover:bg-muted rounded-full p-0.5"
+                    className="hover:bg-primary/20 rounded-full p-0.5 transition-colors"
                   >
                     <X className="h-3 w-3" />
                   </button>
                 </Badge>
               )}
               {category !== "all" && selectedCategory && (
-                <Badge variant="secondary" className="gap-1">
-                  Category: {selectedCategory.name}
+                <Badge variant="secondary" className="gap-2 px-3 py-1.5 rounded-full bg-purple-500/10 text-purple-600 border-none">
+                  <SlidersHorizontal className="h-3 w-3" />
+                  {selectedCategory.name}
                   <button
                     onClick={() => handleCategoryChange("all")}
-                    className="ml-1 hover:bg-muted rounded-full p-0.5"
+                    className="hover:bg-purple-500/20 rounded-full p-0.5 transition-colors"
                   >
                     <X className="h-3 w-3" />
                   </button>
@@ -152,7 +158,7 @@ export default function ProductsPage({ products }: { products: Product[] }) {
                 variant="ghost"
                 size="sm"
                 onClick={clearFilters}
-                className="h-6 text-xs"
+                className="h-8 text-xs font-bold uppercase tracking-widest hover:text-primary rounded-full"
               >
                 Clear all
               </Button>
@@ -161,20 +167,20 @@ export default function ProductsPage({ products }: { products: Product[] }) {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12">
         {/* Filters Section */}
-        <div className="mb-6">
+        <div className="mb-12">
           {/* Mobile Filter Toggle */}
           <div className="sm:hidden mb-4">
             <Button
               variant="outline"
-              className="w-full"
+              className="w-full h-12 rounded-xl font-bold"
               onClick={() => setShowFilters(!showFilters)}
             >
-              <Filter className="h-4 w-4 mr-2" />
-              Filters
+              <Filter className="h-4 w-4 mr-2 text-primary" />
+              Refine Search
               {activeFiltersCount > 0 && (
-                <Badge variant="secondary" className="ml-2">
+                <Badge variant="default" className="ml-2 rounded-full h-5 w-5 p-0 flex items-center justify-center">
                   {activeFiltersCount}
                 </Badge>
               )}
@@ -182,39 +188,39 @@ export default function ProductsPage({ products }: { products: Product[] }) {
           </div>
 
           {/* Filters */}
-          <div className={`${showFilters ? 'block' : 'hidden'} sm:block`}>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4 sm:p-6 bg-card border rounded-lg shadow-sm">
+          <div className={`${showFilters ? 'block animate-in fade-in slide-in-from-top-4' : 'hidden'} sm:block`}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-8 bg-background/50 backdrop-blur-md border border-border/50 rounded-[2rem] shadow-2xl shadow-primary/5">
               {/* Search */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium flex items-center gap-2">
-                  <Search className="h-4 w-4" />
-                  Search Products
+              <div className="space-y-3">
+                <label className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2">
+                  <Search className="h-4 w-4 text-primary" />
+                  Keywords
                 </label>
-                <div className="relative">
+                <div className="relative group">
                   <Input
-                    placeholder="Search by name..."
+                    placeholder="What are you looking for?"
                     defaultValue={search}
                     onChange={(e) => handleSearch(e.target.value)}
-                    className="pr-8"
+                    className="h-12 pr-10 border-border/50 rounded-xl focus:ring-4 focus:ring-primary/5 group-hover:border-primary/50 transition-all"
                   />
                   {isPending && (
-                    <Loader2 className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
+                    <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 animate-spin text-primary" />
                   )}
                 </div>
               </div>
 
               {/* Category */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium flex items-center gap-2">
-                  <SlidersHorizontal className="h-4 w-4" />
+              <div className="space-y-3">
+                <label className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2">
+                  <SlidersHorizontal className="h-4 w-4 text-purple-500" />
                   Category
                 </label>
                 <Select value={category || "all"} onValueChange={handleCategoryChange}>
-                  <SelectTrigger>
+                  <SelectTrigger className="h-12 border-border/50 rounded-xl hover:border-purple-500/50 transition-all">
                     <SelectValue placeholder="All categories" />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Categories</SelectItem>
+                  <SelectContent className="rounded-xl border-border/50">
+                    <SelectItem value="all">Everything</SelectItem>
                     {categories.map((c) => (
                       <SelectItem key={c.id} value={c.id}>
                         {c.name}
@@ -224,11 +230,14 @@ export default function ProductsPage({ products }: { products: Product[] }) {
                 </Select>
               </div>
 
-              {/* Results Count */}
+              {/* Results Summary */}
               <div className="flex items-end">
-                <div className="p-4 bg-primary/5 rounded-lg w-full">
-                  <p className="text-sm text-muted-foreground mb-1">Results</p>
-                  <p className="text-2xl font-bold">{products.length}</p>
+                <div className="p-4 bg-primary/5 rounded-2xl w-full border border-primary/10 flex items-center justify-between group hover:bg-primary/10 transition-colors">
+                  <div>
+                    <p className="text-[10px] font-bold text-primary uppercase tracking-widest mb-1">Items Found</p>
+                    <p className="text-3xl font-black text-primary leading-none">{products.length}</p>
+                  </div>
+                  <Package className="h-8 w-8 text-primary/20 group-hover:scale-110 transition-transform" />
                 </div>
               </div>
             </div>

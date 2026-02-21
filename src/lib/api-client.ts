@@ -50,13 +50,31 @@ export async function apiClient<T = unknown>(
     endpoint: string,
     options: RequestInit = {}
 ): Promise<T> {
-    // Read tenant context from cookies (set by middleware)
-    let tenantSlug, tenantId;
-    try {
-        tenantSlug = Cookies.get('tenant-slug');
-        tenantId = Cookies.get('tenant-id');
-    } catch (e) {
-        console.warn('[ApiClient] Failed to read cookies:', e);
+    // Read tenant context from cookies
+    let tenantSlug, tenantId, cookieHeader;
+    
+    if (typeof window !== 'undefined') {
+        // Client-side: use js-cookie
+        try {
+            tenantSlug = Cookies.get('tenant-slug');
+            tenantId = Cookies.get('tenant-id');
+        } catch (e) {
+            console.warn('[ApiClient] Failed to read cookies:', e);
+        }
+    } else {
+        // Server-side: use next/headers
+        try {
+            const { cookies: nextCookies, headers: nextHeaders } = require('next/headers');
+            const c = await nextCookies();
+            tenantSlug = c.get('tenant-slug')?.value;
+            tenantId = c.get('tenant-id')?.value;
+            
+            // Collect all cookies to forward them
+            const allCookies = c.getAll();
+            cookieHeader = allCookies.map((cookie: any) => `${cookie.name}=${cookie.value}`).join('; ');
+        } catch (e) {
+            // next/headers might not be available in all contexts
+        }
     }
 
     // Ensure credentials are included for cookie-based auth
@@ -67,15 +85,31 @@ export async function apiClient<T = unknown>(
             'Content-Type': 'application/json',
             ...(tenantSlug && { 'x-tenant-slug': tenantSlug }),
             ...(tenantId && { 'x-tenant-id': tenantId }),
+            ...(cookieHeader && { 'Cookie': cookieHeader }),
             ...options.headers,
         },
     };
 
-    console.log(`[ApiClient] Requesting: ${endpoint}`);
-
+    const isServer = typeof window === 'undefined';
     // Use Next.js API routes (/api/...) which proxy to the backend
     // This ensures proper cookie handling and avoids CORS issues
-    const url = endpoint.startsWith('http') ? endpoint : `/api${endpoint}`;
+    let baseUrl = '';
+    if (isServer) {
+        // Server-side: Use the backend URL directly
+        baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001/api';
+        if (!baseUrl.endsWith('/api')) baseUrl += '/api';
+    } else {
+        // Client-side: Use the relative proxy
+        baseUrl = '/api';
+    }
+
+    const url = endpoint.startsWith('http') ? endpoint : `${baseUrl}${endpoint}`;
+
+    if (isServer) {
+        console.log(`[ApiClient] SERVER REQUEST | url: ${url} | endpoint: ${endpoint} | baseUrl: ${baseUrl}`);
+    } else {
+        console.log(`[ApiClient] CLIENT REQUEST | url: ${url} | endpoint: ${endpoint}`);
+    }
 
     try {
         const res = await fetch(url, config);

@@ -5,10 +5,10 @@ const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
 
 export async function PUT(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    context: { params: Promise<{ id: string }> }
 ) {
     try {
-        const { id } = await params;
+        const { id } = await context.params;
         const body = await request.json();
 
         const response = await fetch(`${BACKEND_URL}/staff/${id}/services`, {

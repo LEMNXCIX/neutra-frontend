@@ -8,13 +8,16 @@ import { CouponValidationResult } from '@/types/coupon.types';
 import { useAuthStore } from '@/store/auth-store';
 import { useFeatures } from '@/hooks/useFeatures';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
-import { Loader2, Clock, User, ChevronLeft, Check, AlertCircle, Info, Tag } from 'lucide-react';
+import { Loader2, Clock, User, ChevronLeft, Check, AlertCircle, Info, Tag, Scissors } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { EmptyState } from '@/components/ui/empty-state';
 
 interface BookingWizardProps {
     initialServices: Service[];
@@ -23,6 +26,7 @@ interface BookingWizardProps {
 }
 
 export function BookingWizard({ initialServices, initialStaff, preSelectedServiceId }: BookingWizardProps) {
+    const [isMounted, setIsMounted] = useState(false);
     const router = useRouter();
     const user = useAuthStore((state) => state.user);
     const { isFeatureEnabled } = useFeatures();
@@ -48,6 +52,10 @@ export function BookingWizard({ initialServices, initialStaff, preSelectedServic
     const [couponResult, setCouponResult] = useState<CouponValidationResult | null>(null);
     const [validatingCoupon, setValidatingCoupon] = useState(false);
     const [couponError, setCouponError] = useState<string | null>(null);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
 
     // Auto-advance to step 2 if service is pre-selected
     useEffect(() => {
@@ -150,61 +158,69 @@ export function BookingWizard({ initialServices, initialStaff, preSelectedServic
     };
 
     const steps = [
-        { number: 1, label: 'Service', icon: '🛎️' },
-        { number: 2, label: 'Staff', icon: '👤' },
-        { number: 3, label: 'Date & Time', icon: '📅' },
-        { number: 4, label: 'Confirm', icon: '✓' },
+        { number: 1, label: 'SERVICE', icon: <Scissors className="h-5 w-5" /> },
+        { number: 2, label: 'EXPERT', icon: <User className="h-5 w-5" /> },
+        { number: 3, label: 'SCHEDULE', icon: <Clock className="h-5 w-5" /> },
+        { number: 4, label: 'REVIEW', icon: <Check className="h-5 w-5" /> },
     ];
 
+    if (!isMounted) return null;
+
     return (
-        <div className="space-y-8">
-            {/* Progress Steps */}
-            <Card className="mb-8">
-                <CardContent className="pt-6">
-                    <div className="flex items-center justify-between">
-                        {steps.map((s, index) => (
-                            <div key={s.number} className="flex items-center flex-1">
-                                <div className="flex flex-col items-center">
-                                    <div className={`flex items-center justify-center w-12 h-12 rounded-full font-semibold text-lg transition-all ${
-                                        step === s.number ? 'bg-primary text-primary-foreground shadow-lg scale-110' :
-                                        step > s.number ? 'bg-green-500 text-white' : 'bg-muted text-muted-foreground'
-                                    }`}>
-                                        {step > s.number ? <Check className="h-6 w-6" /> : s.icon}
-                                    </div>
-                                    <span className={`mt-2 text-sm font-medium ${step === s.number ? 'text-foreground' : 'text-muted-foreground'}`}>
-                                        {s.label}
-                                    </span>
+        <div className="space-y-10 animate-slide-up">
+            {/* Progress Steps - Brutalist / Precision System */}
+            <div className="relative mb-12">
+                <div className="absolute top-1/2 left-0 w-full h-1 bg-muted -translate-y-1/2 z-0" />
+                <div className="relative z-10 flex justify-between">
+                    {steps.map((s, index) => {
+                        const isCurrent = step === s.number;
+                        const isDone = step > s.number;
+                        
+                        return (
+                            <div key={s.number} className="flex flex-col items-center">
+                                <div 
+                                    className={cn(
+                                        "w-12 h-12 rounded-full flex items-center justify-center transition-all duration-500 border-2",
+                                        isCurrent ? "bg-primary text-primary-foreground border-primary shadow-lg scale-110" : 
+                                        isDone ? "bg-emerald-500 text-white border-emerald-500 shadow-none" : 
+                                        "bg-background text-muted-foreground border-border shadow-none"
+                                    )}
+                                >
+                                    {isDone ? <Check className="h-5 w-5 stroke-[2.5px]" /> : s.icon}
                                 </div>
-                                {index < steps.length - 1 && (
-                                    <Separator className={`flex-1 mx-2 ${step > s.number ? 'bg-green-500' : ''}`} />
-                                )}
+                                <span className={cn(
+                                    "mt-3 text-[10px] font-bold uppercase tracking-wider transition-colors duration-300",
+                                    isCurrent ? "text-primary" : "text-muted-foreground"
+                                )}>
+                                    {s.label}
+                                </span>
                             </div>
-                        ))}
-                    </div>
-                </CardContent>
-            </Card>
+                        );
+                    })}
+                </div>
+            </div>
 
             {error && (
-                <Alert variant="destructive" className="mb-6">
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertDescription>{error}</AlertDescription>
+                <Alert variant="destructive" className="border-none bg-rose-50 text-rose-700 rounded-xl animate-in shake-1">
+                    <AlertCircle className="h-5 w-5" />
+                    <AlertDescription className="font-semibold text-sm">{error}</AlertDescription>
                 </Alert>
             )}
 
             {/* Step 1: Select Service */}
             {step === 1 && (
                 <div className="space-y-8">
-                    <div>
-                        <h2 className="text-2xl font-semibold mb-2">Select a Service</h2>
-                        <p className="text-muted-foreground">Choose the service you would like to book</p>
+                    <div className="space-y-2">
+                        <h2 className="text-3xl font-bold tracking-tight text-foreground">Select Service</h2>
+                        <p className="text-muted-foreground font-medium text-sm">Choose the session that best fits your needs</p>
                     </div>
                     {initialServices.length === 0 ? (
-                        <div className="text-center py-12 bg-muted/30 rounded-lg border-2 border-dashed">
-                            <Info className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
-                            <p className="text-muted-foreground">No services available at the moment.</p>
-                        </div>
+                        <EmptyState 
+                            icon={Info}
+                            title="Registry empty"
+                            description="No services are currently available for booking."
+                        />
                     ) : (
-                        /* Grouping logic */
                         Object.entries(initialServices.reduce((acc, s) => {
                             const cat = s.category?.name || 'Uncategorized';
                             if (!acc[cat]) acc[cat] = [];
@@ -212,23 +228,37 @@ export function BookingWizard({ initialServices, initialStaff, preSelectedServic
                             return acc;
                         }, {} as Record<string, Service[]>)).map(([cat, svcs]) => (
                             <div key={cat} className="space-y-4">
-                                <h3 className="text-lg font-medium px-1 border-l-4 border-primary">{cat}</h3>
+                                <div className="flex items-center gap-4">
+                                    <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">{cat}</h3>
+                                    <div className="h-px flex-1 bg-border/50" />
+                                </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     {svcs.map(s => (
                                         <Card 
                                             key={s.id} 
-                                            className={`cursor-pointer transition-all hover:shadow-lg ${selectedService?.id === s.id ? 'border-primary ring-1 ring-primary/20' : ''}`}
+                                            className={cn(
+                                                "cursor-pointer group transition-all duration-300 t-card",
+                                                selectedService?.id === s.id ? "ring-2 ring-primary border-primary bg-primary/5" : "border-border/50 hover:border-primary/20"
+                                            )}
                                             onClick={() => { setSelectedService(s); setStep(2); }}
                                         >
-                                            <CardHeader className="pb-3">
-                                                <div className="flex justify-between items-start mb-1">
-                                                    <Badge variant="outline" className="text-primary border-primary/20">${s.price}</Badge>
-                                                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                                        <Clock className="h-3 w-3" /> {s.duration} min
+                                            <CardHeader className="p-6">
+                                                <div className="flex justify-between items-start mb-4">
+                                                    <Badge className={cn(
+                                                        "font-bold text-[10px] px-2.5 py-0.5 rounded-full shadow-sm",
+                                                        selectedService?.id === s.id ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary"
+                                                    )}>
+                                                        ${s.price}
+                                                    </Badge>
+                                                    <div className="flex items-center gap-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider opacity-60">
+                                                        <Clock className="h-3 w-3" /> {s.duration} MIN
                                                     </div>
                                                 </div>
-                                                <CardTitle>{s.name}</CardTitle>
-                                                {s.description && <CardDescription className="line-clamp-2">{s.description}</CardDescription>}
+                                                <CardTitle className="text-xl font-bold tracking-tight text-foreground">{s.name}</CardTitle>
+                                                {s.description && <CardDescription className={cn(
+                                                    "line-clamp-2 mt-2 font-medium text-sm leading-relaxed",
+                                                    selectedService?.id === s.id ? "text-foreground/70" : "text-muted-foreground"
+                                                )}>{s.description}</CardDescription>}
                                             </CardHeader>
                                         </Card>
                                     ))}
@@ -241,136 +271,252 @@ export function BookingWizard({ initialServices, initialStaff, preSelectedServic
 
             {/* Step 2: Select Staff */}
             {step === 2 && (
-                <div className="space-y-4">
-                    <h2 className="text-2xl font-semibold mb-4">Choose Staff Member</h2>
+                <div className="space-y-8">
+                    <div className="space-y-2">
+                        <h2 className="text-3xl font-bold tracking-tight text-foreground">Expert Match</h2>
+                        <p className="text-muted-foreground font-medium text-sm">Select your assigned professional</p>
+                    </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {initialStaff.filter(m => !m.serviceIds || !selectedService || m.serviceIds.includes(selectedService.id)).map(member => (
                             <Card 
                                 key={member.id} 
-                                className={`cursor-pointer transition-all hover:shadow-lg ${selectedStaff?.id === member.id ? 'border-primary' : ''}`}
+                                className={cn(
+                                    "cursor-pointer group transition-all duration-300 t-card overflow-hidden",
+                                    selectedStaff?.id === member.id ? "ring-2 ring-primary border-primary bg-primary/5" : "border-border/50 hover:border-primary/20"
+                                )}
                                 onClick={() => { setSelectedStaff(member); setStep(3); }}
                             >
-                                <CardHeader>
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                                            <User className="h-6 w-6 text-primary" />
+                                <CardHeader className="p-6">
+                                    <div className="flex items-center gap-5">
+                                        <div className={cn(
+                                            "w-14 h-14 rounded-xl flex items-center justify-center transition-all duration-500",
+                                            selectedStaff?.id === member.id ? "bg-primary text-primary-foreground" : "bg-muted"
+                                        )}>
+                                            <User className="h-7 w-7" />
                                         </div>
-                                        <div>
-                                            <CardTitle className="text-lg">{member.name}</CardTitle>
-                                            {member.bio && <CardDescription className="mt-1 line-clamp-1">{member.bio}</CardDescription>}
+                                        <div className="space-y-1">
+                                            <CardTitle className="text-xl font-bold tracking-tight text-foreground">{member.name}</CardTitle>
+                                            {member.bio && <CardDescription className={cn(
+                                                "line-clamp-1 font-semibold text-[10px] uppercase tracking-wider",
+                                                selectedStaff?.id === member.id ? "text-primary" : "text-muted-foreground"
+                                            )}>{member.bio}</CardDescription>}
                                         </div>
                                     </div>
                                 </CardHeader>
                             </Card>
                         ))}
                     </div>
-                    <Button variant="ghost" onClick={() => setStep(1)} className="mt-4">
-                        <ChevronLeft className="h-4 w-4 mr-2" /> Back
-                    </Button>
+                    <div className="pt-4">
+                        <Button variant="ghost" onClick={() => setStep(1)} className="font-semibold text-xs h-10 px-4">
+                            <ChevronLeft className="h-4 w-4 mr-2" /> Change Service
+                        </Button>
+                    </div>
                 </div>
             )}
 
             {/* Step 3: Date & Time */}
             {step === 3 && (
-                <div className="space-y-6">
-                    <h2 className="text-2xl font-semibold mb-4">Pick Date & Time</h2>
-                    <Card>
-                        <CardHeader><CardTitle>Select Date</CardTitle></CardHeader>
-                        <CardContent>
-                            <Input 
-                                type="date" 
-                                value={selectedDate} 
-                                onChange={e => setSelectedDate(e.target.value)} 
-                                min={new Date().toISOString().split('T')[0]} 
-                            />
-                        </CardContent>
-                    </Card>
-                    {selectedDate && (
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Select Time</CardTitle>
-                                <CardDescription>{loadingAvailability ? "Checking availability..." : "Available slots"}</CardDescription>
+                <div className="space-y-8">
+                    <div className="space-y-2">
+                        <h2 className="text-3xl font-bold tracking-tight text-foreground">Schedule</h2>
+                        <p className="text-muted-foreground font-medium text-sm">Pick your preferred temporal window</p>
+                    </div>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <Card className="t-card border-none shadow-xl overflow-hidden">
+                            <CardHeader className="bg-muted/30 border-b border-border/50">
+                                <CardTitle className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Calendar Target</CardTitle>
                             </CardHeader>
-                            <CardContent>
-                                <div className="grid grid-cols-4 gap-2">
-                                    {generateTimeSlots().map(time => {
-                                        const isAvail = availableSlots.includes(time);
-                                        return isAvail ? (
-                                            <Button 
-                                                key={time} 
-                                                variant={selectedTime === time ? 'default' : 'outline'}
-                                                onClick={() => setSelectedTime(time)}
-                                            >{time}</Button>
-                                        ) : null;
-                                    })}
-                                </div>
+                            <CardContent className="pt-6 pb-8">
+                                <Input 
+                                    type="date" 
+                                    value={selectedDate} 
+                                    onChange={e => setSelectedDate(e.target.value)} 
+                                    min={new Date().toISOString().split('T')[0]} 
+                                    className="h-12 border-border focus:border-primary transition-all rounded-xl font-medium"
+                                />
                             </CardContent>
                         </Card>
-                    )}
-                    <div className="flex gap-4">
-                        <Button variant="ghost" onClick={() => setStep(2)}><ChevronLeft className="h-4 w-4 mr-2" /> Back</Button>
-                        {selectedDate && selectedTime && <Button onClick={() => setStep(4)}>Continue</Button>}
+                        
+                        {selectedDate && (
+                            <Card className="t-card border-none shadow-xl overflow-hidden animate-in fade-in slide-in-from-right-4">
+                                <CardHeader className="bg-muted/30 border-b border-border/50">
+                                    <CardTitle className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                                        {loadingAvailability ? "Searching Registry..." : "Available Windows"}
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className="pt-6 pb-8">
+                                    {loadingAvailability ? (
+                                        <div className="flex flex-col items-center justify-center py-10 gap-3">
+                                            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                                            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Querying availability...</p>
+                                        </div>
+                                    ) : availableSlots.length === 0 ? (
+                                        <div className="text-center py-10 space-y-2">
+                                            <AlertCircle className="h-8 w-8 mx-auto text-rose-500 opacity-50" />
+                                            <p className="text-[10px] font-bold uppercase tracking-widest text-rose-500">No windows available for this date</p>
+                                        </div>
+                                    ) : (
+                                        <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                                            {generateTimeSlots().map(time => {
+                                                const isAvail = availableSlots.includes(time);
+                                                if (!isAvail) return null;
+                                                return (
+                                                    <Button 
+                                                        key={time} 
+                                                        variant={selectedTime === time ? 'default' : 'outline'}
+                                                        onClick={() => setSelectedTime(time)}
+                                                        className={cn(
+                                                            "h-10 rounded-lg text-xs font-semibold transition-all",
+                                                            selectedTime === time ? "shadow-md scale-105" : "border-border/50 hover:border-primary/30"
+                                                        )}
+                                                    >
+                                                        {time}
+                                                    </Button>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
+                                </CardContent>
+                            </Card>
+                        )}
+                    </div>
+                    <div className="flex items-center justify-between pt-4">
+                        <Button variant="ghost" onClick={() => setStep(2)} className="font-semibold text-xs h-10">
+                            <ChevronLeft className="h-4 w-4 mr-2" /> Back to Expert
+                        </Button>
+                        {selectedDate && selectedTime && (
+                            <Button onClick={() => setStep(4)} className="rounded-xl font-bold h-12 px-8 shadow-lg shadow-primary/20 hover:-translate-y-0.5 transition-all">
+                                Review Details <ArrowRight className="ml-2 h-4 w-4" />
+                            </Button>
+                        )}
                     </div>
                 </div>
             )}
 
             {/* Step 4: Confirm */}
             {step === 4 && (
-                <div className="space-y-6">
-                    <h2 className="text-2xl font-semibold mb-4">Confirm Appointment</h2>
-                    <Card>
-                        <CardHeader><CardTitle>Appointment Details</CardTitle></CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="grid grid-cols-2 gap-4 text-sm">
-                                <div><p className="text-muted-foreground">Service</p><p className="font-semibold">{selectedService?.name}</p></div>
-                                <div><p className="text-muted-foreground">Staff</p><p className="font-semibold">{selectedStaff?.name}</p></div>
-                                <div><p className="text-muted-foreground">Date</p><p className="font-semibold">{new Date(selectedDate).toLocaleDateString()}</p></div>
-                                <div><p className="text-muted-foreground">Time</p><p className="font-semibold">{selectedTime}</p></div>
-                            </div>
-                            
-                            <Separator />
-                            
-                            {isFeatureEnabled('COUPONS') && (
-                                <div className="pt-2">
-                                    <Label className="mb-2 block">Have a Coupon?</Label>
-                                    <div className="flex gap-2">
-                                        <Input 
-                                            placeholder="CODE" 
-                                            value={couponCode} 
-                                            onChange={e => setCouponCode(e.target.value.toUpperCase())}
-                                            disabled={!!couponResult}
-                                        />
-                                        <Button variant="outline" onClick={validateCoupon} disabled={!couponCode || validatingCoupon}>
-                                            {validatingCoupon ? <Loader2 className="animate-spin h-4 w-4" /> : couponResult ? "Applied" : "Apply"}
-                                        </Button>
+                <div className="space-y-8">
+                    <div className="space-y-2">
+                        <h2 className="text-3xl font-bold tracking-tight text-foreground">Review Details</h2>
+                        <p className="text-muted-foreground font-medium text-sm">Validate your reservation details</p>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <div className="lg:col-span-2 space-y-6">
+                            <Card className="t-card border-none shadow-xl overflow-hidden">
+                                <CardHeader className="bg-muted/30 border-b border-border/50 p-6">
+                                    <CardTitle className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Reservation Summary</CardTitle>
+                                </CardHeader>
+                                <CardContent className="p-8 space-y-8">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                                        <div className="space-y-1">
+                                            <p className="text-[10px] font-bold text-primary uppercase tracking-widest">Service</p>
+                                            <p className="text-lg font-bold text-foreground">{selectedService?.name}</p>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <p className="text-[10px] font-bold text-primary uppercase tracking-widest">Expert</p>
+                                            <p className="text-lg font-bold text-foreground">{selectedStaff?.name}</p>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <p className="text-[10px] font-bold text-primary uppercase tracking-widest">Date</p>
+                                            <p className="text-lg font-bold text-foreground">{new Date(selectedDate).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</p>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <p className="text-[10px] font-bold text-primary uppercase tracking-widest">Time</p>
+                                            <p className="text-lg font-bold text-foreground">{selectedTime}</p>
+                                        </div>
                                     </div>
-                                    {couponError && <p className="text-xs text-destructive mt-1">{couponError}</p>}
-                                </div>
+                                    
+                                    <Separator className="bg-border/50" />
+                                    
+                                    <div className="space-y-3">
+                                        <Label className="text-xs font-semibold ml-1">Additional Notes</Label>
+                                        <Textarea 
+                                            value={notes} 
+                                            onChange={e => setNotes(e.target.value)} 
+                                            rows={4} 
+                                            placeholder="Tell us anything we should know..." 
+                                            className="rounded-xl border-border focus:border-primary transition-all bg-muted/10 font-medium"
+                                        />
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </div>
+
+                        <div className="lg:col-span-1 space-y-6">
+                            {isFeatureEnabled('COUPONS') && (
+                                <Card className="t-card border-none shadow-lg p-6">
+                                    <div className="space-y-4">
+                                        <div className="flex items-center gap-2 text-primary font-bold text-[10px] uppercase tracking-widest">
+                                            <Tag size={12} /> Discount Code
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <Input 
+                                                placeholder="CODE" 
+                                                value={couponCode} 
+                                                onChange={e => setCouponCode(e.target.value.toUpperCase())}
+                                                className="h-11 rounded-xl font-bold uppercase text-xs"
+                                                disabled={!!couponResult}
+                                            />
+                                            <Button 
+                                                variant="outline" 
+                                                onClick={validateCoupon} 
+                                                disabled={!couponCode || validatingCoupon}
+                                                className="h-11 px-4 rounded-xl font-bold text-xs"
+                                            >
+                                                {validatingCoupon ? <Loader2 className="animate-spin h-4 w-4" /> : couponResult ? "Active" : "Apply"}
+                                            </Button>
+                                        </div>
+                                        {couponError && <p className="text-[10px] font-semibold text-rose-500">{couponError}</p>}
+                                    </div>
+                                </Card>
                             )}
 
-                            <div className="bg-muted/20 p-4 rounded-lg space-y-2">
-                                <div className="flex justify-between text-sm"><span>Subtotal</span><span>${selectedService?.price}</span></div>
-                                {couponResult?.discountAmount && (
-                                    <div className="flex justify-between text-sm text-green-600"><span>Discount</span><span>-${couponResult.discountAmount}</span></div>
-                                )}
-                                <div className="flex justify-between text-lg font-bold border-t pt-2">
-                                    <span>Total</span>
-                                    <span>${Math.max(0, (selectedService?.price || 0) - (couponResult?.discountAmount || 0))}</span>
+                            <Card className="t-card border-none bg-primary text-primary-foreground shadow-2xl overflow-hidden p-8 space-y-8">
+                                <div className="space-y-4">
+                                    <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest opacity-70">
+                                        <span>Standard Rate</span>
+                                        <span>${selectedService?.price}</span>
+                                    </div>
+                                    {couponResult?.discountAmount && (
+                                        <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest text-emerald-200">
+                                            <span>Coupon Applied</span>
+                                            <span>-${couponResult.discountAmount}</span>
+                                        </div>
+                                    )}
+                                    <div className="h-px bg-white/10" />
+                                    <div className="flex flex-col gap-1">
+                                        <span className="text-[10px] font-bold uppercase tracking-widest opacity-70">Total Fee</span>
+                                        <span className="text-5xl font-bold tracking-tighter">${Math.max(0, (selectedService?.price || 0) - (couponResult?.discountAmount || 0))}</span>
+                                    </div>
                                 </div>
+                                
+                                <Button 
+                                    className="w-full h-14 bg-white text-primary hover:bg-white/90 rounded-xl font-bold shadow-lg transition-all hover:-translate-y-0.5 active:scale-95" 
+                                    onClick={handleSubmit} 
+                                    disabled={submitting}
+                                >
+                                    {submitting ? (
+                                        <>
+                                            <Loader2 className="animate-spin mr-2 h-5 w-5" />
+                                            Booking...
+                                        </>
+                                    ) : (
+                                        "Confirm Reservation"
+                                    )}
+                                </Button>
+                            </Card>
+                            
+                            <div className="text-center">
+                                <button 
+                                    onClick={() => setStep(3)} 
+                                    disabled={submitting} 
+                                    className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors"
+                                >
+                                    ← Modify Schedule
+                                </button>
                             </div>
-
-                            <div className="space-y-2">
-                                <Label>Notes (Optional)</Label>
-                                <Textarea value={notes} onChange={e => setNotes(e.target.value)} rows={3} placeholder="Any special requests..." />
-                            </div>
-                        </CardContent>
-                    </Card>
-                    <div className="flex gap-4">
-                        <Button variant="ghost" onClick={() => setStep(3)} disabled={submitting}><ChevronLeft className="h-4 w-4 mr-2" /> Back</Button>
-                        <Button className="flex-1" onClick={handleSubmit} disabled={submitting}>
-                            {submitting ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : <Check className="mr-2 h-4 w-4" />}
-                            Confirm Booking
-                        </Button>
+                        </div>
                     </div>
                 </div>
             )}

@@ -1,3 +1,4 @@
+"use client";
 
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -132,7 +133,7 @@ export function TenantForm({ tenant, onSuccess, onCancel, submitLabel, isWizard 
                                 setFormData(prev => ({ ...prev, name, slug }));
                             }}
                             placeholder="My Awesome Store"
-                            className="h-12 border-2"
+                            className="h-12"
                         />
                     </div>
                     <div className="space-y-2">
@@ -141,7 +142,7 @@ export function TenantForm({ tenant, onSuccess, onCancel, submitLabel, isWizard 
                             value={formData.slug}
                             onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))}
                             placeholder="my-store"
-                            className="h-12 border-2"
+                            className="h-12"
                         />
                         <p className="text-xs text-muted-foreground">Will be accessed at {formData.slug || 'your-slug'}.xcix.ec</p>
                     </div>
@@ -151,7 +152,7 @@ export function TenantForm({ tenant, onSuccess, onCancel, submitLabel, isWizard 
                             value={formData.type}
                             onValueChange={(val) => setFormData(prev => ({ ...prev, type: val as TenantType }))}
                         >
-                            <SelectTrigger className="h-12 border-2">
+                            <SelectTrigger className="h-12">
                                 <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
@@ -174,7 +175,7 @@ export function TenantForm({ tenant, onSuccess, onCancel, submitLabel, isWizard 
                         <div className="flex gap-2">
                             <Input
                                 type="color"
-                                className="w-12 h-12 p-1 cursor-pointer border-2"
+                                className="w-12 h-12 p-1 cursor-pointer"
                                 value={formData.config?.branding?.primaryColor || "#000000"}
                                 onChange={(e) => updateConfig('branding', 'primaryColor', e.target.value)}
                             />
@@ -182,7 +183,7 @@ export function TenantForm({ tenant, onSuccess, onCancel, submitLabel, isWizard 
                                 value={formData.config?.branding?.primaryColor || ""}
                                 onChange={(e) => updateConfig('branding', 'primaryColor', e.target.value)}
                                 placeholder="#000000"
-                                className="h-12 border-2"
+                                className="h-12"
                             />
                         </div>
                     </div>
@@ -192,7 +193,7 @@ export function TenantForm({ tenant, onSuccess, onCancel, submitLabel, isWizard 
                             value={formData.config?.branding?.tenantLogo || ""}
                             onChange={(e) => updateConfig('branding', 'tenantLogo', e.target.value)}
                             placeholder="https://example.com/logo.png"
-                            className="h-12 border-2"
+                            className="h-12"
                         />
                     </div>
                     <div className="space-y-2">
@@ -201,7 +202,7 @@ export function TenantForm({ tenant, onSuccess, onCancel, submitLabel, isWizard 
                             value={formData.config?.branding?.favicon || ""}
                             onChange={(e) => updateConfig('branding', 'favicon', e.target.value)}
                             placeholder="https://example.com/favicon.ico"
-                            className="h-12 border-2"
+                            className="h-12"
                         />
                     </div>
                     {isWizard && (
@@ -220,7 +221,7 @@ export function TenantForm({ tenant, onSuccess, onCancel, submitLabel, isWizard 
                                 value={formData.config?.settings?.supportEmail || ""}
                                 onChange={(e) => updateConfig('settings', 'supportEmail', e.target.value)}
                                 placeholder="support@example.com"
-                                className="h-12 border-2"
+                                className="h-12"
                             />
                         </div>
                         <div className="space-y-2">
@@ -229,7 +230,7 @@ export function TenantForm({ tenant, onSuccess, onCancel, submitLabel, isWizard 
                                 value={formData.config?.settings?.websiteUrl || ""}
                                 onChange={(e) => updateConfig('settings', 'websiteUrl', e.target.value)}
                                 placeholder="https://example.com"
-                                className="h-12 border-2"
+                                className="h-12"
                             />
                         </div>
                         <div className="space-y-2">
@@ -238,7 +239,7 @@ export function TenantForm({ tenant, onSuccess, onCancel, submitLabel, isWizard 
                                 value={formData.config?.settings?.currency || "USD"}
                                 onValueChange={(val) => updateConfig('settings', 'currency', val)}
                             >
-                                <SelectTrigger className="h-12 border-2">
+                                <SelectTrigger className="h-12">
                                     <SelectValue placeholder="Select currency" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -254,7 +255,7 @@ export function TenantForm({ tenant, onSuccess, onCancel, submitLabel, isWizard 
                                 value={formData.config?.settings?.language || "es"}
                                 onValueChange={(val) => updateConfig('settings', 'language', val)}
                             >
-                                <SelectTrigger className="h-12 border-2">
+                                <SelectTrigger className="h-12">
                                     <SelectValue placeholder="Select language" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -278,7 +279,7 @@ export function TenantForm({ tenant, onSuccess, onCancel, submitLabel, isWizard 
                             {platformFeatures.map(feature => (
                                 <div
                                     key={feature.id}
-                                    className={`flex items-start gap-3 p-4 border-2 transition-all cursor-pointer hover:border-primary ${formData.config?.features?.[feature.key] ? 'border-primary bg-primary/5' : 'border-border'}`}
+                                    className={`flex items-start gap-3 p-4 border rounded-xl transition-all cursor-pointer hover:border-primary/50 ${formData.config?.features?.[feature.key] ? 'border-primary bg-primary/5 shadow-sm' : 'border-border'}`}
                                     onClick={() => toggleFeature(feature.key)}
                                 >
                                     <Checkbox
@@ -290,7 +291,7 @@ export function TenantForm({ tenant, onSuccess, onCancel, submitLabel, isWizard 
                                     <div className="space-y-1">
                                         <Label htmlFor={feature.id} className="font-bold cursor-pointer">{feature.name}</Label>
                                         <p className="text-xs text-muted-foreground">{feature.description}</p>
-                                        <p className="text-xs font-black text-primary">${feature.price}/mo</p>
+                                        <p className="text-xs font-bold text-primary">${feature.price}/mo</p>
                                     </div>
                                 </div>
                             ))}
@@ -304,11 +305,11 @@ export function TenantForm({ tenant, onSuccess, onCancel, submitLabel, isWizard 
 
             <div className="flex justify-end gap-3 pt-6 border-t">
                 {onCancel && (
-                    <Button type="button" variant="outline" onClick={onCancel} disabled={isSaving}>
+                    <Button type="button" variant="outline" onClick={onCancel} disabled={isSaving} className="rounded-xl">
                         Cancel
                     </Button>
                 )}
-                <Button type="submit" disabled={isSaving} className="px-8 font-black uppercase tracking-widest shadow-lg">
+                <Button type="submit" disabled={isSaving} className="px-8 font-bold shadow-lg shadow-primary/20 rounded-xl">
                     {isSaving ? <><Spinner className="mr-2" /> Saving...</> : (submitLabel || (tenant ? "Update Tenant" : "Create My Store"))}
                 </Button>
             </div>

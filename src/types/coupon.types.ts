@@ -18,6 +18,7 @@ export interface Coupon {
     applicableProducts: string[];
     applicableCategories: string[];
     applicableServices: string[];
+    tenantId?: string;
     createdAt: Date;
     updatedAt: Date;
 }

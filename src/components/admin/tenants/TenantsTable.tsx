@@ -1,3 +1,4 @@
+"use client";
 
 import React, { useState, useEffect } from "react";
 import { Tenant } from "@/types/tenant";
@@ -19,6 +20,7 @@ interface TenantsTableProps {
 }
 
 export function TenantsTable({ initialTenants = [] }: TenantsTableProps) {
+    const [isMounted, setIsMounted] = useState(false);
     const [tenants, setTenants] = useState<Tenant[]>(initialTenants);
     const [loading, setLoading] = useState(initialTenants.length === 0);
     const [search, setSearch] = useState("");
@@ -42,6 +44,7 @@ export function TenantsTable({ initialTenants = [] }: TenantsTableProps) {
     };
 
     useEffect(() => {
+        setIsMounted(true);
         loadTenants();
     }, []);
 
@@ -84,6 +87,8 @@ export function TenantsTable({ initialTenants = [] }: TenantsTableProps) {
             toast.error("Failed to delete tenant");
         }
     };
+
+    if (!isMounted) return null;
 
     return (
         <div className="space-y-6">

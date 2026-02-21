@@ -114,7 +114,8 @@ async function getCategories() {
             return [];
         }
 
-        return result.data ? (result.data.categories || result.data) : [];
+        const data = result.data as any;
+        return data ? (data.categories || data) : [];
     } catch (error) {
         console.error("Error fetching categories:", error);
         return [];

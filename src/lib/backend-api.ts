@@ -38,6 +38,8 @@ export interface ApiRequestConfig {
     headers?: Record<string, string>;
     token?: string;
     timeout?: number;
+    cache?: RequestCache;
+    next?: NextFetchRequestConfig;
 }
 
 export interface ApiResponse<T = unknown> {
@@ -86,6 +88,8 @@ async function request<T = unknown>(
         headers = {},
         token,
         timeout = 30000,
+        cache,
+        next,
     } = config;
 
     // Normalize endpoint
@@ -142,7 +146,8 @@ async function request<T = unknown>(
         method,
         headers: requestHeaders,
         credentials: 'include',
-        cache: 'no-store',
+        cache: cache || 'no-store',
+        next,
     };
 
     if (typeof window === 'undefined') {

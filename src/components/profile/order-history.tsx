@@ -29,59 +29,75 @@ export function OrderHistory({ initialOrders }: OrderHistoryProps) {
 
     if (orders.length === 0) {
         return (
-            <Card className="text-center py-12">
-                <CardContent>
-                    <ShoppingBag className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                    <h3 className="text-xl font-semibold">No orders yet</h3>
-                    <p className="text-muted-foreground mb-6">Start shopping to see your history</p>
-                    <Button asChild><a href="/">Start Shopping</a></Button>
+            <Card className="text-center py-20 border-none shadow-xl rounded-[2rem] bg-muted/20">
+                <CardContent className="space-y-6">
+                    <div className="w-20 h-20 bg-background rounded-full flex items-center justify-center mx-auto shadow-sm">
+                        <ShoppingBag className="h-10 w-10 text-muted-foreground/40" />
+                    </div>
+                    <div className="space-y-2">
+                        <h3 className="text-2xl font-bold tracking-tight">No orders yet</h3>
+                        <p className="text-muted-foreground font-medium">Your purchase history will appear here once you place an order.</p>
+                    </div>
+                    <Button asChild size="lg" className="rounded-xl px-8 font-bold"><a href="/">Explore Products</a></Button>
                 </CardContent>
             </Card>
         );
     }
 
     return (
-        <div className="space-y-6">
-            <h2 className="text-2xl font-bold flex items-center gap-2">
-                <ShoppingBag className="h-6 w-6" /> Order History
+        <div className="space-y-8">
+            <h2 className="text-3xl font-bold tracking-tight flex items-center gap-3">
+                <ShoppingBag className="h-8 w-8 text-primary" /> Purchase History
             </h2>
-            <div className="space-y-4">
+            <div className="space-y-6">
                 {orders.map((o) => (
-                    <Card key={o.id} className="overflow-hidden border-none shadow-md">
-                        <CardHeader className="bg-muted/30">
-                            <div className="flex justify-between items-center">
-                                <div className="flex items-center gap-3">
-                                    <CardTitle className="text-lg">Order #{o.id.slice(-6)}</CardTitle>
-                                    <Badge className={getStatusColor(o.status)}>{o.status}</Badge>
+                    <Card key={o.id} className="overflow-hidden border-none shadow-lg rounded-[2rem] bg-background group hover:shadow-2xl transition-all duration-300">
+                        <CardHeader className="bg-muted/30 p-8 border-b border-border/50">
+                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                <div className="flex flex-wrap items-center gap-3">
+                                    <div className="w-12 h-12 bg-background rounded-2xl flex items-center justify-center shadow-sm">
+                                        <Package className="h-6 w-6 text-primary" />
+                                    </div>
+                                    <div>
+                                        <CardTitle className="text-xl font-bold tracking-tight">Order #{o.id.slice(-6).toUpperCase()}</CardTitle>
+                                        <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">{new Date(o.createdAt).toLocaleDateString(undefined, { dateStyle: 'long' })}</p>
+                                    </div>
+                                    <Badge className={`${getStatusColor(o.status)} rounded-full px-4 py-1 text-[10px] font-bold uppercase tracking-widest border-none shadow-sm`}>{o.status}</Badge>
                                 </div>
-                                <span className="font-bold text-lg">${o.total.toFixed(2)}</span>
+                                <div className="text-right">
+                                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Total Amount</p>
+                                    <span className="font-bold text-3xl tracking-tight text-foreground">${o.total.toFixed(2)}</span>
+                                </div>
                             </div>
                         </CardHeader>
-                        <CardContent className="pt-4 space-y-4">
-                            <div className="flex gap-4 text-sm text-muted-foreground">
-                                <span className="flex items-center gap-1"><Calendar className="h-4 w-4" /> {new Date(o.createdAt).toLocaleDateString()}</span>
-                                <span className="flex items-center gap-1"><Package className="h-4 w-4" /> {o.items.length} items</span>
+                        <CardContent className="p-8 space-y-6">
+                            <div className="flex flex-wrap gap-8 text-sm font-medium">
+                                <span className="flex items-center gap-2 text-muted-foreground"><Calendar className="h-4 w-4 text-primary" /> {new Date(o.createdAt).toLocaleDateString()}</span>
+                                <span className="flex items-center gap-2 text-muted-foreground"><Package className="h-4 w-4 text-primary" /> {o.items.length} {o.items.length === 1 ? 'item' : 'items'} included</span>
                             </div>
-                            <div className="flex gap-2">
-                                <Button variant="outline" size="sm" onClick={() => setExpanded(expanded === o.id ? null : o.id)}>
-                                    {expanded === o.id ? "Hide Details" : "View Details"}
+                            <div className="flex gap-3">
+                                <Button variant="outline" size="lg" className="rounded-xl font-bold border-2 px-6 h-12 hover:bg-muted" onClick={() => setExpanded(expanded === o.id ? null : o.id)}>
+                                    {expanded === o.id ? "Hide Summary" : "View Summary"}
                                 </Button>
-                                <Button variant="ghost" size="sm" asChild>
-                                    <a href={`/orders/${o.id}`}><Eye className="h-4 w-4 mr-1" /> Full Page</a>
+                                <Button variant="secondary" size="lg" className="rounded-xl font-bold px-6 h-12" asChild>
+                                    <a href={`/orders/${o.id}`} className="flex items-center gap-2"><Eye className="h-4 w-4" /> Full Details</a>
                                 </Button>
                             </div>
                             {expanded === o.id && (
-                                <div className="pt-4 border-t space-y-4 animate-in fade-in slide-in-from-top-2">
+                                <div className="pt-8 border-t border-border/50 space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
+                                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4">Order Items</p>
                                     {o.items.map((it) => (
-                                        <div key={it.id} className="flex justify-between text-sm">
-                                            <span>{it.product?.name || 'Product'} x {it.amount}</span>
-                                            <span className="font-medium">${(it.price * it.amount).toFixed(2)}</span>
+                                        <div key={it.id} className="flex justify-between items-center group/item p-4 rounded-xl hover:bg-muted/50 transition-colors">
+                                            <div className="space-y-1">
+                                                <p className="font-bold text-foreground">{it.product?.name || 'Product'}</p>
+                                                <p className="text-xs text-muted-foreground font-medium">Quantity: {it.amount}</p>
+                                            </div>
+                                            <span className="font-bold text-lg tracking-tight">${(it.price * it.amount).toFixed(2)}</span>
                                         </div>
                                     ))}
-                                    <Separator />
-                                    <div className="flex justify-between font-bold">
-                                        <span>Total</span>
-                                        <span>${o.total.toFixed(2)}</span>
+                                    <div className="pt-4 mt-4 border-t border-dashed border-border flex justify-between items-center px-4">
+                                        <span className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Order Total</span>
+                                        <span className="font-bold text-2xl tracking-tight text-primary">${o.total.toFixed(2)}</span>
                                     </div>
                                 </div>
                             )}

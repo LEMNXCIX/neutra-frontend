@@ -37,14 +37,18 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+  
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
+  --shadow-soft: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 10px -2px rgba(0, 0, 0, 0.02);
+  --shadow-soft-lg: 0 10px 25px -3px rgba(0, 0, 0, 0.08), 0 4px 12px -2px rgba(0, 0, 0, 0.03);
 }
 
 :root {
-  --radius: 0.625rem;
+  --radius: 0.75rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -63,11 +67,13 @@
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
+  
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
+  
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.205 0 0);
@@ -76,6 +82,9 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+
+  --shadow-main: var(--shadow-soft);
+  --shadow-hover: var(--shadow-soft-lg);
 }
 
 .dark {
@@ -97,11 +106,13 @@
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.556 0 0);
+  
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
+  
   --sidebar: oklch(0.205 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.488 0.243 264.376);
@@ -110,34 +121,52 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+
+  --shadow-main: 0 4px 20px -2px rgba(0, 0, 0, 0.3), 0 2px 10px -2px rgba(0, 0, 0, 0.2);
+  --shadow-hover: 0 10px 25px -3px rgba(0, 0, 0, 0.4), 0 4px 12px -2px rgba(0, 0, 0, 0.3);
 }
 
-/* BRUTALIST BW THEME - For Superadmin Only */
-.theme-brutalist {
-  --radius: 0px;
-  --background: #ffffff;
-  --foreground: #000000;
-  --primary: #000000;
-  --primary-foreground: #ffffff;
-  --secondary: #f4f4f5;
-  --secondary-foreground: #000000;
-  --muted: #f4f4f5;
-  --muted-foreground: #71717a;
-  --accent: #000000;
-  --accent-foreground: #ffffff;
-  --border: #000000;
-  --input: #000000;
-  --ring: #000000;
-}
+@layer components {
+  /* Unified Unified Theme Adapters (Cohesive Modern Style) */
+  .t-card {
+    @apply transition-all duration-300 ease-in-out border border-border bg-card shadow-soft rounded-[var(--radius)];
+  }
+  
+  .t-card:hover {
+    @apply shadow-soft-lg -translate-y-0.5;
+  }
 
-.theme-brutalist.dark {
-  --background: #000000;
-  --foreground: #ffffff;
-  --card: #000000;
-  --card-foreground: #ffffff;
-  --primary: #ffffff;
-  --primary-foreground: #000000;
-  --border: #ffffff;
+  .t-button {
+    @apply transition-all duration-200 font-semibold rounded-[var(--radius)] px-4 py-2 flex items-center justify-center gap-2;
+  }
+
+  .t-button-primary {
+    @apply transition-all duration-200 font-semibold rounded-[var(--radius)] px-4 py-2 flex items-center justify-center gap-2 bg-primary text-primary-foreground hover:opacity-90 active:scale-95 shadow-soft;
+  }
+
+  .t-button-outline {
+    @apply transition-all duration-200 font-semibold rounded-[var(--radius)] px-4 py-2 flex items-center justify-center gap-2 border border-border hover:bg-muted transition-colors;
+  }
+
+  .t-border {
+    @apply border border-border rounded-[var(--radius)] transition-all duration-300;
+  }
+
+  .t-shadow {
+    @apply shadow-soft transition-all duration-300;
+  }
+
+  .t-heading {
+    @apply font-bold tracking-tight text-foreground;
+  }
+
+  .t-badge {
+    @apply inline-flex items-center px-2.5 py-0.5 text-xs font-semibold transition-all rounded-full;
+  }
+
+  .t-label {
+    @apply text-sm font-medium text-foreground mb-1 block;
+  }
 }
 
 @layer base {
@@ -145,7 +174,10 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground selection:bg-primary/20 selection:text-foreground;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bold tracking-tight text-foreground;
   }
 }
 
@@ -157,29 +189,32 @@
 
 @keyframes pulse-soft {
   0% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(0.97); opacity: 0.9; }
+  50% { transform: scale(0.98); opacity: 0.95; }
   100% { transform: scale(1); opacity: 1; }
 }
 
+@keyframes slide-up-fade {
+  from { transform: translateY(10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
 .hover-scale {
-  @apply transition-transform duration-300 hover:scale-105 active:scale-95;
+  @apply transition-transform duration-300 hover:scale-[1.02] active:scale-[0.98];
 }
 
 .click-pulse {
-  @apply active:animate-[pulse-soft_200ms_ease-in-out];
+  @apply active:animate-[pulse-soft_150ms_ease-in-out];
 }
 
-@keyframes rainbow {
-  0% { color: red; }
-  15% { color: orange; }
-  30% { color: yellow; }
-  45% { color: green; }
-  60% { color: blue; }
-  75% { color: indigo; }
-  90% { color: violet; }
-  100% { color: red; }
+.animate-slide-up {
+  animation: slide-up-fade 0.4s ease-out forwards;
 }
 
-.rainbow-text {
-  animation: rainbow 2s linear infinite;
+/* Cleanup Legacy Brutalist Classes */
+.brutalist-card {
+  @apply transition-all duration-300 ease-in-out border border-border bg-card shadow-soft rounded-[var(--radius)];
+}
+
+.brutalist-button {
+  @apply transition-all duration-200 font-semibold rounded-[var(--radius)] px-4 py-2 flex items-center justify-center gap-2 bg-primary text-primary-foreground hover:opacity-90 active:scale-95 shadow-soft;
 }

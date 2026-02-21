@@ -41,6 +41,7 @@ export function getProxyHeaders(req: NextRequest): HeadersInit {
     // Forward Origin/Host for correct link generation in backend
     const origin = req.headers.get('origin');
     const referer = req.headers.get('referer');
+    const host = req.headers.get('host');
     const forwardedProto = req.headers.get('x-forwarded-proto') || 'http';
 
     if (origin && origin !== 'null') {

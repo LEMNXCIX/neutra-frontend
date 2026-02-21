@@ -11,7 +11,7 @@ export default function AdminLayout({
     children: React.ReactNode;
 }) {
     return (
-        <div className="flex flex-col min-h-screen transition-colors duration-300 theme-brutalist">
+        <div className="flex flex-col min-h-screen transition-colors duration-300">
             <NeutralNavigation />
             <div className="flex flex-1 flex-col md:flex-row border-4 border-foreground rounded-none overflow-hidden transition-all duration-300 bg-background">
                 <SuperAdminSidebar items={SUPER_ADMIN_NAV} />

@@ -60,7 +60,7 @@ export default function ServicesTableClient({
     const [editingService, setEditingService] = useState<Service | null>(null);
     const { confirm, ConfirmDialog } = useConfirm();
 
-    const [categories, setCategories] = useState<Category[]>(initialCategories || []);
+    const [categories, setCategories] = useState<Category[]>(Array.isArray(initialCategories) ? initialCategories : []);
     const [loadingCategories, setLoadingCategories] = useState(false);
     const [formData, setFormData] = useState({
         name: '',
@@ -78,7 +78,7 @@ export default function ServicesTableClient({
     }, [initialServices]);
 
     useEffect(() => {
-        setCategories(initialCategories || []);
+        setCategories(Array.isArray(initialCategories) ? initialCategories : []);
     }, [initialCategories]);
 
     useEffect(() => {
@@ -90,9 +90,10 @@ export default function ServicesTableClient({
         try {
             setLoadingCategories(true);
             const data = await categoriesService.getAll();
-            setCategories(data);
+            setCategories(Array.isArray(data) ? data : []);
         } catch (err) {
             console.error('Error loading categories:', err);
+            setCategories([]);
         } finally {
             setLoadingCategories(false);
         }
@@ -465,12 +466,12 @@ export default function ServicesTableClient({
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="none">None (Uncategorized)</SelectItem>
-                                    {categories.map((cat) => (
+                                    {(Array.isArray(categories) ? categories : []).map((cat) => (
                                         <SelectItem key={cat.id} value={cat.id}>
                                             {cat.name}
                                         </SelectItem>
                                     ))}
-                                    {categories.length === 0 && !loadingCategories && (
+                                    {(!Array.isArray(categories) || categories.length === 0) && !loadingCategories && (
                                         <div className="p-2 text-xs text-center text-muted-foreground">
                                             No service categories found.
                                         </div>

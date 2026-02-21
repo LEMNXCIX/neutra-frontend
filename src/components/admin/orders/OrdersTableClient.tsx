@@ -38,6 +38,7 @@ import {
 import { Package, TrendingUp, ShoppingCart, Eye, Truck } from "lucide-react";
 import { Order, OrderStatus } from "@/types/order.types";
 import { Spinner } from "@/components/ui/spinner";
+import { cn } from "@/lib/utils";
 
 type Stats = {
     totalOrders: number;
@@ -57,6 +58,7 @@ type Props = {
 };
 
 export default function OrdersTableClient({ orders, stats, pagination }: Props) {
+    const [isMounted, setIsMounted] = useState(false);
     const router = useRouter();
     const searchParams = useSearchParams();
 
@@ -66,6 +68,10 @@ export default function OrdersTableClient({ orders, stats, pagination }: Props) 
     const [statuses, setStatuses] = useState<{ value: string; label: string }[]>([]);
     const [isUpdatingStatus, setIsUpdatingStatus] = useState<string | null>(null);
     const [isUpdatingTracking, setIsUpdatingTracking] = useState(false);
+
+    React.useEffect(() => {
+        setIsMounted(true);
+    }, []);
 
     // URL State
     const searchQuery = searchParams.get("search") || "";
@@ -172,17 +178,17 @@ export default function OrdersTableClient({ orders, stats, pagination }: Props) 
         switch (status) {
             case "COMPLETADO":
             case "ENTREGADO":
-                return "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400";
+                return "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border-emerald-200";
             case "ENVIADO":
-                return "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400";
+                return "bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200";
             case "PAGADO":
-                return "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400";
+                return "bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 border-purple-200";
             case "PENDIENTE":
-                return "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400";
+                return "bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border-amber-200";
             case "CANCELADO":
-                return "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400";
+                return "bg-rose-50 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400 border-rose-200";
             default:
-                return "bg-muted text-foreground";
+                return "bg-muted text-foreground border-border";
         }
     };
 
@@ -205,6 +211,8 @@ export default function OrdersTableClient({ orders, stats, pagination }: Props) 
             </CardContent>
         </Card>
     );
+
+    if (!isMounted) return null;
 
     return (
         <div className="w-full space-y-6">
@@ -298,52 +306,64 @@ export default function OrdersTableClient({ orders, stats, pagination }: Props) 
                                     orders.map((o) => {
                                         const total = calculateTotal(o);
                                         return (
-                                            <TableRow key={o.id} className="hover:bg-muted/30">
-                                                <TableCell className="font-medium">{o.id}</TableCell>
-                                                <TableCell>{o.user?.name || o.userId}</TableCell>
-                                                <TableCell>{o.items?.length || 0} items</TableCell>
-                                                <TableCell className="font-semibold">${total.toFixed(2)}</TableCell>
+                                            <TableRow key={o.id} className="group hover:bg-muted/50 transition-colors border-b border-border/50">
+                                                <TableCell className="font-mono text-[10px] text-muted-foreground tracking-tighter py-4">#{o.id.slice(0, 8)}</TableCell>
+                                                <TableCell>
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs border border-primary/20">
+                                                            {(o.user?.name || "U").slice(0, 2).toUpperCase()}
+                                                        </div>
+                                                        <span className="font-semibold text-sm">{o.user?.name || o.userId}</span>
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <Badge variant="secondary" className="text-[10px] font-bold bg-muted/50 border-none shadow-none">
+                                                        {o.items?.length || 0} ITEMS
+                                                    </Badge>
+                                                </TableCell>
+                                                <TableCell className="font-bold text-sm text-foreground">${total.toFixed(2)}</TableCell>
                                                 <TableCell>
                                                     <Select
                                                         value={o.status}
                                                         onValueChange={(val) => updateOrderStatus(o.id, val)}
                                                         disabled={isUpdatingStatus === o.id}
                                                     >
-                                                        <SelectTrigger className="w-[130px]">
+                                                        <SelectTrigger className="w-[140px] h-8 rounded-full border border-border bg-background shadow-sm hover:bg-muted transition-colors">
                                                             {isUpdatingStatus === o.id ? (
                                                                 <div className="flex items-center gap-2">
-                                                                    <Spinner className="h-4 w-4" />
-                                                                    <span>Updating...</span>
+                                                                    <Spinner className="h-3 w-3" />
+                                                                    <span className="text-[10px] font-semibold uppercase">Syncing...</span>
                                                                 </div>
                                                             ) : (
-                                                                <Badge className={getStatusColor(o.status)}>
+                                                                <Badge className={cn(getStatusColor(o.status), "border-none shadow-none text-[9px] font-bold uppercase tracking-wider p-0 bg-transparent")}>
                                                                     {o.status}
                                                                 </Badge>
                                                             )}
                                                         </SelectTrigger>
-                                                        <SelectContent>
+                                                        <SelectContent className="rounded-xl border-border shadow-xl">
                                                             {statuses.map((s) => (
-                                                                <SelectItem key={s.value} value={s.value}>
+                                                                <SelectItem key={s.value} value={s.value} className="text-[10px] font-bold uppercase cursor-pointer rounded-lg">
                                                                     {s.label}
                                                                 </SelectItem>
                                                             ))}
                                                         </SelectContent>
                                                     </Select>
                                                 </TableCell>
-                                                <TableCell className="text-muted-foreground text-sm">
+                                                <TableCell className="text-muted-foreground font-mono text-[10px] tracking-tight">
                                                     {o.trackingNumber || "—"}
                                                 </TableCell>
-                                                <TableCell className="text-muted-foreground">
-                                                    {new Date(o.createdAt).toLocaleDateString()}
+                                                <TableCell className="text-muted-foreground font-semibold text-[10px]">
+                                                    {new Date(o.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                                                 </TableCell>
-                                                <TableCell>
+                                                <TableCell className="text-right">
                                                     <Button
                                                         size="sm"
                                                         variant="ghost"
+                                                        className="h-8 px-3 rounded-full hover:bg-primary/10 hover:text-primary transition-all font-bold text-[10px] uppercase tracking-wider opacity-0 group-hover:opacity-100"
                                                         onClick={() => openOrderDetails(o)}
                                                     >
-                                                        <Eye className="h-4 w-4 mr-1" />
-                                                        Details
+                                                        <Eye className="h-3 w-3 mr-1.5" />
+                                                        View
                                                     </Button>
                                                 </TableCell>
                                             </TableRow>
@@ -395,45 +415,72 @@ export default function OrdersTableClient({ orders, stats, pagination }: Props) 
                 )}
             </Card>
 
-            {/* Orders - Mobile View */}
-            <div className="flex flex-col gap-3 md:hidden">
-                {orders.map((o) => {
-                    const total = calculateTotal(o);
-                    return (
-                        <Card key={o.id} className="shadow-sm border-muted/50">
-                            <CardHeader className="pb-2">
-                                <CardTitle className="text-base flex justify-between items-center">
-                                    <span>Order #{o.id}</span>
-                                    <Badge className={`${getStatusColor(o.status)} text-xs`}>
-                                        {o.status}
-                                    </Badge>
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent className="text-sm flex flex-col gap-2">
-                                <div className="flex justify-between">
-                                    <span className="text-muted-foreground">User</span>
-                                    <span>{o.user?.name || o.userId}</span>
+            {/* Orders - Mobile View - Precision Grid */}
+            <div className="flex flex-col gap-4 md:hidden">
+                {orders.length === 0 ? (
+                    <Card className="border-dashed t-card">
+                        <CardContent className="p-12 text-center">
+                            <ShoppingCart className="h-12 w-12 mx-auto text-muted-foreground/30 mb-4" />
+                            <p className="text-sm font-medium text-muted-foreground">No transactions found</p>
+                        </CardContent>
+                    </Card>
+                ) : (
+                    orders.map((o) => {
+                        const total = calculateTotal(o);
+                        return (
+                            <Card key={o.id} className="t-card overflow-hidden">
+                                <CardHeader className="pb-4 bg-muted/10 border-b border-border/50">
+                                    <div className="flex justify-between items-start">
+                                        <div className="space-y-1">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs border border-primary/20">
+                                                    {(o.user?.name || "U").slice(0, 2).toUpperCase()}
+                                                </div>
+                                                <CardTitle className="text-base font-bold">
+                                                    {o.user?.name || "Guest Client"}
+                                                </CardTitle>
+                                            </div>
+                                            <p className="text-xs font-medium text-muted-foreground pl-[52px]">
+                                                ID: #{o.id.slice(0, 8)}
+                                            </p>
+                                        </div>
+                                        <Badge className={cn(getStatusColor(o.status), "border-none shadow-none text-[10px] font-semibold px-2.5 py-0.5 rounded-full")}>
+                                            {o.status}
+                                        </Badge>
+                                    </div>
+                                </CardHeader>
+                                <CardContent className="py-4 px-6 space-y-4">
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-1">
+                                            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Total</p>
+                                            <p className="text-xl font-bold text-foreground">${total.toFixed(2)}</p>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Date</p>
+                                            <p className="font-medium text-sm">{new Date(o.createdAt).toLocaleDateString()}</p>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-1 pt-2">
+                                        <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Tracking</p>
+                                        <p className="text-xs font-mono font-medium truncate bg-muted/50 p-2 rounded-md border border-border/50">
+                                            {o.trackingNumber || "No tracking info"}
+                                        </p>
+                                    </div>
+                                </CardContent>
+                                <div className="px-6 pb-6 pt-2">
+                                    <Button
+                                        size="lg"
+                                        variant="outline"
+                                        className="w-full h-10 rounded-lg font-semibold text-xs"
+                                        onClick={() => openOrderDetails(o)}
+                                    >
+                                        <Eye size={14} className="mr-2" /> Inspect Details
+                                    </Button>
                                 </div>
-                                <div className="flex justify-between">
-                                    <span className="text-muted-foreground">Total</span>
-                                    <span className="font-semibold">${total.toFixed(2)}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-muted-foreground">Date</span>
-                                    <span>{new Date(o.createdAt).toLocaleDateString()}</span>
-                                </div>
-                                <Button
-                                    size="sm"
-                                    className="mt-2 w-full"
-                                    onClick={() => openOrderDetails(o)}
-                                >
-                                    <Eye className="h-4 w-4 mr-1" />
-                                    View Details
-                                </Button>
-                            </CardContent>
-                        </Card>
-                    );
-                })}
+                            </Card>
+                        );
+                    })
+                )}
             </div>
 
             {/* Order Details Dialog */}

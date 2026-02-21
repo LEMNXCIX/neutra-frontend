@@ -39,18 +39,19 @@ export function ServicesGrid({ services }: ServicesGridProps) {
     }, {} as Record<string, Service[]>);
 
     return (
-        <div className="space-y-16">
+        <div className="space-y-24">
             {Object.entries(groupedServices).map(([categoryName, categoryServices], categoryIndex) => (
                 <div 
                     key={categoryName} 
-                    className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both"
+                    className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both"
                     style={{ animationDelay: `${categoryIndex * 100}ms` }}
                 >
-                    <div className="flex items-center gap-4 border-b pb-4">
-                        <h2 className="text-3xl font-bold tracking-tight text-foreground">
-                            {categoryName}
+                    <div className="flex items-center gap-6">
+                        <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground whitespace-nowrap">
+                            {categoryName} Catalog
                         </h2>
-                        <Badge variant="secondary" className="h-6 px-2 text-xs font-medium rounded-full">
+                        <div className="h-px flex-1 bg-border/50" />
+                        <Badge variant="secondary" className="h-8 w-8 flex items-center justify-center font-bold rounded-full">
                             {categoryServices.length}
                         </Badge>
                     </div>
@@ -59,44 +60,46 @@ export function ServicesGrid({ services }: ServicesGridProps) {
                         {categoryServices.map((service, index) => (
                             <Card
                                 key={service.id}
-                                className="group flex flex-col border-none shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 bg-card overflow-hidden ring-1 ring-border/50"
+                                className="group relative flex flex-col t-card border-none shadow-xl hover:-translate-y-1 overflow-hidden"
                             >
-                                <div className="absolute top-0 left-0 w-1 h-full bg-primary/0 group-hover:bg-primary transition-all duration-300" />
+                                <div className="h-1.5 bg-primary w-full" />
                                 
-                                <CardHeader className="pb-4">
-                                    <div className="flex items-start justify-between mb-3">
-                                        <Badge variant="outline" className="bg-background/50 backdrop-blur-sm">
-                                            {service.duration} min
+                                <CardHeader className="p-8 space-y-6">
+                                    <div className="flex items-start justify-between">
+                                        <Badge variant="secondary" className="font-bold uppercase tracking-wider text-[9px] px-3 py-1 rounded-full">
+                                            {service.duration} MIN SESSION
                                         </Badge>
                                         {!service.active && (
-                                            <Badge variant="destructive">Unavailable</Badge>
+                                            <Badge variant="destructive" className="font-bold uppercase tracking-wider text-[9px] rounded-full">INACTIVE</Badge>
                                         )}
                                     </div>
-                                    <CardTitle className="text-xl group-hover:text-primary transition-colors">
-                                        {service.name}
-                                    </CardTitle>
-                                    {service.description && (
-                                        <CardDescription className="line-clamp-2 mt-2 text-sm leading-relaxed">
-                                            {service.description}
-                                        </CardDescription>
-                                    )}
+                                    <div className="space-y-3">
+                                        <CardTitle className="text-2xl font-bold tracking-tight group-hover:text-primary transition-colors leading-tight">
+                                            {service.name}
+                                        </CardTitle>
+                                        {service.description && (
+                                            <CardDescription className="line-clamp-2 text-sm leading-relaxed font-medium text-muted-foreground italic border-l-2 border-primary/30 pl-4">
+                                                {service.description}
+                                            </CardDescription>
+                                        )}
+                                    </div>
                                 </CardHeader>
                                 
-                                <CardContent className="flex-1">
-                                    <div className="flex items-end gap-1 mt-auto pt-4">
-                                        <span className="text-3xl font-bold text-foreground">${service.price}</span>
-                                        <span className="text-sm text-muted-foreground mb-1">/ session</span>
+                                <CardContent className="flex-1 flex items-end px-8 pt-4 pb-8">
+                                    <div className="flex items-baseline gap-2">
+                                        <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Rate</p>
+                                        <span className="text-4xl font-bold tracking-tighter text-foreground">${service.price}</span>
                                     </div>
                                 </CardContent>
                                 
-                                <CardFooter className="pt-0">
+                                <CardFooter className="p-8 pt-0">
                                     <Button
                                         onClick={() => handleBookService(service.id)}
-                                        className="w-full h-12 text-base font-medium shadow-sm group-hover:shadow-md transition-all"
+                                        className="w-full h-12 rounded-xl font-bold text-sm shadow-lg shadow-primary/10 transition-all hover:opacity-90 active:scale-95"
                                         size="lg"
                                         disabled={!service.active}
                                     >
-                                        Book Appointment
+                                        Book Now
                                     </Button>
                                 </CardFooter>
                             </Card>

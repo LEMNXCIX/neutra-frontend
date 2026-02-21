@@ -4,7 +4,7 @@ import { extractTokenFromRequest } from "@/lib/server-auth";
 
 export async function GET(req: NextRequest) {
     try {
-        const token = extractTokenFromRequest(req);
+        const token = extractTokenFromRequest(req) || undefined;
         // The user specified /api/order/statuses as the external API route
         const result = await backendGet('/order/statuses', token);
 

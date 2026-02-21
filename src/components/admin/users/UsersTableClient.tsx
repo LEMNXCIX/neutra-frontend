@@ -54,6 +54,7 @@ import {
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { User } from "@/types/user.types";
+import { cn } from "@/lib/utils";
 
 type Stats = {
     totalUsers: number;
@@ -76,6 +77,7 @@ type Props = {
 };
 
 export default function UsersTableClient({ users, stats, pagination, showTenant = false }: Props) {
+    const [isMounted, setIsMounted] = useState(false);
     const router = useRouter();
     const searchParams = useSearchParams();
 
@@ -88,6 +90,10 @@ export default function UsersTableClient({ users, stats, pagination, showTenant 
     const [isSaving, setIsSaving] = useState(false);
     const [tenants, setTenants] = useState<Tenant[]>([]);
     const [isLoadingTenants, setIsLoadingTenants] = useState(false);
+
+    React.useEffect(() => {
+        setIsMounted(true);
+    }, []);
 
     // Fetch tenants for super admin
     React.useEffect(() => {
@@ -214,6 +220,8 @@ export default function UsersTableClient({ users, stats, pagination, showTenant 
     const startItem = users.length > 0 ? ((pagination.currentPage - 1) * pagination.itemsPerPage) + 1 : 0;
     const endItem = Math.min(pagination.currentPage * pagination.itemsPerPage, pagination.totalItems);
 
+    if (!isMounted) return null;
+
     return (
         <div className="w-full space-y-6">
             <div className="flex justify-between items-center">
@@ -304,42 +312,48 @@ export default function UsersTableClient({ users, stats, pagination, showTenant 
                                 </TableRow>
                             ) : (
                                 users.map((u) => (
-                                    <TableRow key={u.id} className="hover:bg-muted/30">
-                                        <TableCell>
-                                            <Avatar>
+                                    <TableRow key={u.id} className="group hover:bg-muted/50 transition-colors border-b border-border/50">
+                                        <TableCell className="py-4">
+                                            <Avatar className="h-10 w-10 border border-border group-hover:border-primary/20 transition-all">
                                                 <AvatarImage src={u.profilePic || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}`} />
-                                                <AvatarFallback>{u.name.slice(0, 2).toUpperCase()}</AvatarFallback>
+                                                <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
+                                                    {u.name.slice(0, 2).toUpperCase()}
+                                                </AvatarFallback>
                                             </Avatar>
                                         </TableCell>
-                                        <TableCell className="font-medium">{u.name}</TableCell>
-                                        <TableCell className="text-sm text-muted-foreground">{u.email}</TableCell>
+                                        <TableCell>
+                                            <span className="font-semibold text-sm">{u.name}</span>
+                                        </TableCell>
+                                        <TableCell>
+                                            <span className="text-xs font-medium text-muted-foreground">{u.email}</span>
+                                        </TableCell>
                                         {showTenant && (
-                                            <TableCell className="text-sm">
-                                                <Badge variant="outline" className="font-normal">
-                                                    {u.tenant?.name || 'Global'}
+                                            <TableCell>
+                                                <Badge variant="secondary" className="text-[10px] font-semibold uppercase tracking-wider">
+                                                    {u.tenant?.name || 'GLOBAL NODE'}
                                                 </Badge>
                                             </TableCell>
                                         )}
                                         <TableCell>
-                                            <Badge className={getRoleColor(u.role?.name)}>
-                                                {u.role?.name || 'No Role'}
+                                            <Badge className={cn(getRoleColor(u.role?.name), "text-[10px] font-bold uppercase tracking-wider border-none shadow-none text-white")}>
+                                                {u.role?.name || 'NO_ROLE'}
                                             </Badge>
                                         </TableCell>
-                                        <TableCell>
-                                            <div className="flex gap-2">
-                                                <Button size="sm" variant="ghost" onClick={() => openEdit(u)}>
+                                        <TableCell className="text-right">
+                                            <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <Button size="icon" variant="ghost" className="h-8 w-8 rounded-full hover:bg-primary/5 hover:text-primary" onClick={() => openEdit(u)}>
                                                     <Edit className="h-4 w-4" />
                                                 </Button>
                                                 <Button
-                                                    size="sm"
+                                                    size="icon"
                                                     variant="ghost"
+                                                    className="h-8 w-8 rounded-full hover:bg-primary/5 hover:text-primary"
                                                     onClick={() => {
                                                         setSelectedUser(u);
                                                         setRoleDialogOpen(true);
                                                     }}
                                                 >
-                                                    <UserCog className="h-4 w-4 mr-2" />
-                                                    Change Role
+                                                    <UserCog className="h-4 w-4" />
                                                 </Button>
                                             </div>
                                         </TableCell>
@@ -408,35 +422,42 @@ export default function UsersTableClient({ users, stats, pagination, showTenant 
                 )}
             </Card>
 
-            {/* Users Cards - Mobile/Tablet */}
-            <div className="space-y-3 lg:hidden">
+            {/* Users Cards - Mobile/Tablet - Precision Grid */}
+            <div className="space-y-4 lg:hidden">
                 {users.map((u) => (
-                    <Card key={u.id} className="shadow-sm border-muted/50">
-                        <CardContent className="pt-4 space-y-3">
-                            <div className="flex items-start gap-3">
-                                <Avatar>
+                    <Card key={u.id} className="t-card overflow-hidden">
+                        <CardContent className="p-6 space-y-6">
+                            <div className="flex items-center gap-4">
+                                <Avatar className="h-14 w-14 border border-border shadow-sm">
                                     <AvatarImage src={u.profilePic || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}`} />
-                                    <AvatarFallback>{u.name.slice(0, 2).toUpperCase()}</AvatarFallback>
+                                    <AvatarFallback className="bg-primary/10 text-primary font-bold text-lg">
+                                        {u.name.slice(0, 2).toUpperCase()}
+                                    </AvatarFallback>
                                 </Avatar>
-                                <div className="flex-1 min-w-0">
-                                    <h3 className="font-semibold truncate">{u.name}</h3>
-                                    <p className="text-sm text-muted-foreground truncate">{u.email}</p>
-                                    <div className="flex flex-wrap gap-1 mt-1">
-                                        <Badge className={getRoleColor(u.role?.name)}>
-                                            {u.role?.name || 'No Role'}
+                                <div className="flex-1 min-w-0 space-y-1">
+                                    <h3 className="font-bold text-lg tracking-tight text-foreground truncate">{u.name}</h3>
+                                    <p className="text-xs font-medium text-muted-foreground truncate">{u.email}</p>
+                                    <div className="flex flex-wrap gap-2 mt-2">
+                                        <Badge className={cn(getRoleColor(u.role?.name), "text-[9px] font-bold uppercase tracking-wider text-white")}>
+                                            {u.role?.name || 'NO_ROLE'}
                                         </Badge>
                                         {showTenant && (
-                                            <Badge variant="outline" className="font-normal">
-                                                {u.tenant?.name || 'Global'}
+                                            <Badge variant="secondary" className="text-[9px] font-bold uppercase tracking-wider">
+                                                {u.tenant?.name || 'GLOBAL NODE'}
                                             </Badge>
                                         )}
                                     </div>
                                 </div>
                             </div>
-                            <div className="flex gap-2">
-                                <Button size="sm" className="flex-1" onClick={() => openEdit(u)}>
-                                    <Edit className="h-4 w-4 mr-1" />
-                                    Edit
+                            
+                            <div className="grid grid-cols-2 gap-3 pt-4 border-t border-border/50">
+                                <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="w-full h-10 font-semibold text-xs"
+                                    onClick={() => openEdit(u)}
+                                >
+                                    <Edit size={14} className="mr-2" /> Edit
                                 </Button>
                                 <Button
                                     size="sm"
@@ -445,10 +466,9 @@ export default function UsersTableClient({ users, stats, pagination, showTenant 
                                         setSelectedUser(u);
                                         setRoleDialogOpen(true);
                                     }}
-                                    className="flex-1"
+                                    className="w-full h-10 font-semibold text-xs"
                                 >
-                                    <UserCog className="h-4 w-4 mr-1" />
-                                    Change Role
+                                    <UserCog size={14} className="mr-2" /> Role
                                 </Button>
                             </div>
                         </CardContent>

@@ -5,17 +5,18 @@ const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
 
 export async function GET(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    context: { params: Promise<{ id: string }> }
 ) {
+    const { id } = await context.params;
     try {
-        const response = await fetch(`${BACKEND_URL}/features/${params.id}`, {
+        const response = await fetch(`${BACKEND_URL}/features/${id}`, {
             headers: getProxyHeaders(request),
         });
 
         const data = await response.json();
         return NextResponse.json(data, { status: response.status });
     } catch (error) {
-        console.error(`Error fetching feature ${params.id}:`, error);
+        console.error(`Error fetching feature ${id}:`, error);
         return NextResponse.json(
             { success: false, message: 'Failed to fetch feature' },
             { status: 500 }
@@ -25,12 +26,13 @@ export async function GET(
 
 export async function PUT(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    context: { params: Promise<{ id: string }> }
 ) {
+    const { id } = await context.params;
     try {
         const body = await request.json();
 
-        const response = await fetch(`${BACKEND_URL}/features/${params.id}`, {
+        const response = await fetch(`${BACKEND_URL}/features/${id}`, {
             method: 'PUT',
             headers: {
                 ...getProxyHeaders(request),
@@ -42,7 +44,7 @@ export async function PUT(
         const data = await response.json();
         return NextResponse.json(data, { status: response.status });
     } catch (error) {
-        console.error(`Error updating feature ${params.id}:`, error);
+        console.error(`Error updating feature ${id}:`, error);
         return NextResponse.json(
             { success: false, message: 'Failed to update feature' },
             { status: 500 }
@@ -52,10 +54,11 @@ export async function PUT(
 
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    context: { params: Promise<{ id: string }> }
 ) {
+    const { id } = await context.params;
     try {
-        const response = await fetch(`${BACKEND_URL}/features/${params.id}`, {
+        const response = await fetch(`${BACKEND_URL}/features/${id}`, {
             method: 'DELETE',
             headers: getProxyHeaders(request),
         });
@@ -68,7 +71,7 @@ export async function DELETE(
         const data = await response.json();
         return NextResponse.json(data, { status: response.status });
     } catch (error) {
-        console.error(`Error deleting feature ${params.id}:`, error);
+        console.error(`Error deleting feature ${id}:`, error);
         return NextResponse.json(
             { success: false, message: 'Failed to delete feature' },
             { status: 500 }

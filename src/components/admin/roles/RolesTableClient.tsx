@@ -67,10 +67,15 @@ type Props = {
 };
 
 export default function RolesTableClient({ roles, permissions, allPermissions = [], stats, rolePagination, permissionPagination }: Props) {
+    const [isMounted, setIsMounted] = useState(false);
     const router = useRouter();
     const searchParams = useSearchParams();
     const pathname = usePathname();
     const { confirm, ConfirmDialog } = useConfirm();
+
+    React.useEffect(() => {
+        setIsMounted(true);
+    }, []);
 
     const handleSearch = useDebouncedCallback((term: string, type: 'role' | 'permission') => {
         const params = new URLSearchParams(searchParams);
@@ -356,6 +361,8 @@ export default function RolesTableClient({ roles, permissions, allPermissions = 
         </Card>
     );
 
+    if (!isMounted) return null;
+
     return (
         <div className="w-full space-y-6">
             <div className="flex justify-between items-center">
@@ -415,27 +422,39 @@ export default function RolesTableClient({ roles, permissions, allPermissions = 
                                         </TableRow>
                                     ) : (
                                         roles.map((role) => (
-                                            <TableRow key={role.id} className="hover:bg-muted/30">
-                                                <TableCell className="font-medium">{role.name}</TableCell>
-                                                <TableCell className="text-sm text-muted-foreground">
-                                                    {role.description || "-"}
+                                            <TableRow key={role.id} className="group hover:bg-muted/50 transition-colors border-b border-border/50">
+                                                <TableCell className="py-4">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center shadow-sm">
+                                                            <Shield size={14} />
+                                                        </div>
+                                                        <span className="font-semibold text-sm">{role.name}</span>
+                                                    </div>
                                                 </TableCell>
                                                 <TableCell>
-                                                    <Badge variant="outline">{role.level || 0}</Badge>
+                                                    <span className="text-sm text-muted-foreground font-medium line-clamp-1 max-w-[300px]">
+                                                        {role.description || "—"}
+                                                    </span>
                                                 </TableCell>
                                                 <TableCell>
-                                                    <Badge variant="secondary">
-                                                        {role.permissions?.length || 0} permissions
+                                                    <Badge variant="secondary" className="text-[10px] font-bold uppercase tracking-wider">
+                                                        Level {role.level || 0}
                                                     </Badge>
                                                 </TableCell>
                                                 <TableCell>
-                                                    <div className="flex gap-2">
-                                                        <Button size="sm" variant="ghost" onClick={() => openEdit(role)}>
+                                                    <Badge variant="secondary" className="bg-muted text-foreground font-bold text-[10px] rounded-full px-3 py-1">
+                                                        {role.permissions?.length || 0} PERMISSIONS
+                                                    </Badge>
+                                                </TableCell>
+                                                <TableCell className="text-right">
+                                                    <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        <Button size="icon" variant="ghost" className="h-8 w-8 rounded-full hover:bg-primary/5 hover:text-primary" onClick={() => openEdit(role)}>
                                                             <Edit className="h-4 w-4" />
                                                         </Button>
                                                         <Button
-                                                            size="sm"
+                                                            size="icon"
                                                             variant="ghost"
+                                                            className="h-8 w-8 rounded-full hover:bg-destructive/5 hover:text-destructive"
                                                             onClick={() => handleDelete(role.id)}
                                                             disabled={isDeletingRole === role.id}
                                                         >
