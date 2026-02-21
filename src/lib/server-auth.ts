@@ -2,12 +2,12 @@
 import { cookies } from 'next/headers';
 
 const getBackendUrl = () => {
-    const url = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
+    const url = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001/api';
     return url.endsWith('/api') ? url : `${url}/api`;
 };
 
 const BACKEND_API_URL = getBackendUrl();
-console.log(BACKEND_API_URL);
+
 export async function validateAdminAccess() {
     try {
         const cookieStore = await cookies();

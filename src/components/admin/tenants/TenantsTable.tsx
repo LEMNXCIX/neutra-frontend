@@ -14,9 +14,13 @@ import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { useConfirm } from "@/hooks/use-confirm";
 
-export function TenantsTable() {
-    const [tenants, setTenants] = useState<Tenant[]>([]);
-    const [loading, setLoading] = useState(true);
+interface TenantsTableProps {
+    initialTenants?: Tenant[];
+}
+
+export function TenantsTable({ initialTenants = [] }: TenantsTableProps) {
+    const [tenants, setTenants] = useState<Tenant[]>(initialTenants);
+    const [loading, setLoading] = useState(initialTenants.length === 0);
     const [search, setSearch] = useState("");
     const [dialogOpen, setDialogOpen] = useState(false);
     const [editingTenant, setEditingTenant] = useState<Tenant | null>(null);

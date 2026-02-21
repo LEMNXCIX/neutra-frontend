@@ -12,9 +12,13 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 
-export function FeaturesTable() {
-    const [features, setFeatures] = useState<PlatformFeature[]>([]);
-    const [loading, setLoading] = useState(true);
+interface FeaturesTableProps {
+    initialFeatures?: PlatformFeature[];
+}
+
+export function FeaturesTable({ initialFeatures = [] }: FeaturesTableProps) {
+    const [features, setFeatures] = useState<PlatformFeature[]>(initialFeatures);
+    const [loading, setLoading] = useState(initialFeatures.length === 0);
     const [search, setSearch] = useState("");
     const [dialogOpen, setDialogOpen] = useState(false);
     const [editingFeature, setEditingFeature] = useState<PlatformFeature | null>(null);

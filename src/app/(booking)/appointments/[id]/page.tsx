@@ -1,14 +1,12 @@
-'use client';
-
-import { useEffect, useState, use } from 'react';
-import { bookingService, Appointment } from '@/services/booking.service';
-import { useAuthStore } from '@/store/auth-store';
-import { Button } from '@/components/ui/button';
+import React from 'react';
+import { cookies } from 'next/headers';
+import { redirect, notFound } from 'next/navigation';
+import { authService } from '@/services/auth.service';
+import { getBackendUrl } from '@/lib/backend-api';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
-    Loader2,
     Calendar,
     Clock,
     User,
@@ -19,42 +17,59 @@ import {
     CreditCard
 } from 'lucide-react';
 import Link from 'next/link';
-import { CancelAppointmentDialog } from '@/components/booking/cancel-appointment-dialog';
+import { AppointmentDetailActions } from '@/components/booking/appointment-detail-actions';
 
-interface PageProps {
-    params: Promise<{ id: string }>;
+export const dynamic = 'force-dynamic';
+
+async function getAppointmentData(id: string) {
+    try {
+        const cookieStore = await cookies();
+        const token = cookieStore.get('token')?.value;
+        const tenantSlug = cookieStore.get('tenant-slug')?.value || '';
+
+        if (!token) return { error: 'unauthorized' };
+
+        // Validate user session
+        const authRes = await authService.validate();
+        const user = authRes?.user;
+        if (!user) return { error: 'unauthorized' };
+
+        const baseUrl = getBackendUrl();
+        const response = await fetch(`${baseUrl}/appointments/${id}`, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Cookie': `token=${token}`,
+                'x-tenant-slug': tenantSlug
+            },
+            cache: 'no-store'
+        });
+
+        if (!response.ok) {
+            if (response.status === 404) return { error: 'not_found' };
+            return { error: 'fetch_failed' };
+        }
+
+        const result = await response.json();
+        const appointment = result.data;
+
+        // Permission check
+        if (appointment && appointment.userId !== user.id && user.role?.name !== 'ADMIN' && user.role?.name !== 'SUPER_ADMIN') {
+            return { error: 'forbidden' };
+        }
+
+        return { appointment, user };
+    } catch (error) {
+        console.error('Error fetching appointment detail on server:', error);
+        return { error: 'internal_error' };
+    }
 }
 
-export default function AppointmentDetailPage({ params }: PageProps) {
-    const { id } = use(params);
-    const [appointment, setAppointment] = useState<Appointment | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    const user = useAuthStore((state) => state.user);
+export default async function AppointmentDetailPage(props: { params: Promise<{ id: string }> }) {
+    const { id } = await props.params;
+    const { appointment, user, error } = await getAppointmentData(id);
 
-    useEffect(() => {
-        loadAppointment();
-    }, [id]);
-
-    useEffect(() => {
-        if (appointment && user && appointment.userId !== user.id) {
-            setError("You do not have permission to view this appointment");
-            setAppointment(null);
-        }
-    }, [appointment, user]);
-
-    const loadAppointment = async () => {
-        try {
-            setLoading(true);
-            const data = await bookingService.getAppointmentById(id);
-            setAppointment(data);
-            setError(null);
-        } catch (err: any) {
-            setError(err.message);
-        } finally {
-            setLoading(false);
-        }
-    };
+    if (error === 'unauthorized') redirect('/login');
+    if (error === 'not_found') notFound();
 
     const getStatusVariant = (status: string): "default" | "secondary" | "destructive" | "outline" => {
         const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
@@ -68,17 +83,6 @@ export default function AppointmentDetailPage({ params }: PageProps) {
         return variants[status] || 'outline';
     };
 
-    if (loading) {
-        return (
-            <div className="container mx-auto px-4 py-12">
-                <div className="flex flex-col items-center justify-center py-20">
-                    <Loader2 className="h-12 w-12 animate-spin text-primary" />
-                    <p className="mt-4 text-muted-foreground">Loading appointment details...</p>
-                </div>
-            </div>
-        );
-    }
-
     if (error || !appointment) {
         return (
             <div className="container mx-auto px-4 py-12 max-w-2xl">
@@ -89,7 +93,7 @@ export default function AppointmentDetailPage({ params }: PageProps) {
                 <Alert variant="destructive">
                     <AlertCircle className="h-4 w-4" />
                     <AlertDescription>
-                        {error || 'Appointment not found'}
+                        {error === 'forbidden' ? 'You do not have permission to view this appointment' : 'Failed to load appointment details'}
                     </AlertDescription>
                 </Alert>
             </div>
@@ -118,7 +122,7 @@ export default function AppointmentDetailPage({ params }: PageProps) {
                                         </Badge>
                                         <span className="text-xs text-muted-foreground">#{appointment.id.split('-')[0]}</span>
                                     </div>
-                                    <CardTitle className="text-3xl font-bold tracking-tight">
+                                    <CardTitle className="text-3xl font-bold tracking-tight text-foreground">
                                         {appointment.service?.name || 'Service Appointment'}
                                     </CardTitle>
                                     <CardDescription className="text-lg">
@@ -236,27 +240,10 @@ export default function AppointmentDetailPage({ params }: PageProps) {
                                     </p>
                                 </div>
 
-                                <div className="pt-2">
-                                    <Button asChild variant="outline" className="w-full">
-                                        <Link href="/contact">View Location Map</Link>
-                                    </Button>
-                                    {appointment.status === 'PENDING' && (
-                                        <div className="mt-4 pt-2 border-t">
-                                            <p className="text-[10px] text-center mb-3 text-muted-foreground italic">
-                                                Need to reschedule? Please contact us directly.
-                                            </p>
-                                            <CancelAppointmentDialog
-                                                appointmentId={appointment.id}
-                                                onAppointmentCancelled={loadAppointment}
-                                                trigger={
-                                                    <Button variant="destructive" className="w-full">
-                                                        Cancel Appointment
-                                                    </Button>
-                                                }
-                                            />
-                                        </div>
-                                    )}
-                                </div>
+                                <AppointmentDetailActions 
+                                    appointmentId={appointment.id}
+                                    status={appointment.status}
+                                />
                             </CardContent>
                         </Card>
                     </div>
