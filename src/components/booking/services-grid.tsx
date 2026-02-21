@@ -6,7 +6,8 @@ import { Service } from '@/services/booking.service';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Clock, DollarSign } from 'lucide-react';
+import { Clock, DollarSign, CalendarSearch } from 'lucide-react';
+import { EmptyState } from '@/components/ui/empty-state';
 
 interface ServicesGridProps {
     services: Service[];
@@ -21,11 +22,11 @@ export function ServicesGrid({ services }: ServicesGridProps) {
 
     if (!services || services.length === 0) {
         return (
-            <Card className="text-center py-12">
-                <CardContent className="pt-6">
-                    <p className="text-muted-foreground text-lg">No services available at the moment.</p>
-                </CardContent>
-            </Card>
+            <EmptyState 
+                icon={CalendarSearch}
+                title="No services found"
+                description="We couldn't find any services available at the moment. Please check back later."
+            />
         );
     }
 
@@ -38,55 +39,64 @@ export function ServicesGrid({ services }: ServicesGridProps) {
     }, {} as Record<string, Service[]>);
 
     return (
-        <div className="space-y-12">
-            {Object.entries(groupedServices).map(([categoryName, categoryServices]) => (
-                <div key={categoryName} className="space-y-6">
-                    <div className="flex items-center gap-4">
-                        <h2 className="text-2xl font-bold px-3 border-l-4 border-primary bg-muted/30 py-1 rounded-r-md">
+        <div className="space-y-16">
+            {Object.entries(groupedServices).map(([categoryName, categoryServices], categoryIndex) => (
+                <div 
+                    key={categoryName} 
+                    className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both"
+                    style={{ animationDelay: `${categoryIndex * 100}ms` }}
+                >
+                    <div className="flex items-center gap-4 border-b pb-4">
+                        <h2 className="text-3xl font-bold tracking-tight text-foreground">
                             {categoryName}
                         </h2>
-                        <Badge variant="secondary" className="font-normal">
-                            {categoryServices.length} {categoryServices.length === 1 ? 'Service' : 'Services'}
+                        <Badge variant="secondary" className="h-6 px-2 text-xs font-medium rounded-full">
+                            {categoryServices.length}
                         </Badge>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {categoryServices.map((service) => (
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {categoryServices.map((service, index) => (
                             <Card
                                 key={service.id}
-                                className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col"
+                                className="group flex flex-col border-none shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 bg-card overflow-hidden ring-1 ring-border/50"
                             >
-                                <CardHeader>
-                                    <div className="flex items-start justify-between mb-2">
-                                        <Badge variant="secondary" className="capitalize">{service.category?.name || 'Service'}</Badge>
-                                        <Badge variant="outline" className="bg-background">
-                                            {service.active ? 'Available' : 'Unavailable'}
+                                <div className="absolute top-0 left-0 w-1 h-full bg-primary/0 group-hover:bg-primary transition-all duration-300" />
+                                
+                                <CardHeader className="pb-4">
+                                    <div className="flex items-start justify-between mb-3">
+                                        <Badge variant="outline" className="bg-background/50 backdrop-blur-sm">
+                                            {service.duration} min
                                         </Badge>
+                                        {!service.active && (
+                                            <Badge variant="destructive">Unavailable</Badge>
+                                        )}
                                     </div>
-                                    <CardTitle className="text-2xl">{service.name}</CardTitle>
-                                    <CardDescription className="text-base">
-                                        {service.description}
-                                    </CardDescription>
+                                    <CardTitle className="text-xl group-hover:text-primary transition-colors">
+                                        {service.name}
+                                    </CardTitle>
+                                    {service.description && (
+                                        <CardDescription className="line-clamp-2 mt-2 text-sm leading-relaxed">
+                                            {service.description}
+                                        </CardDescription>
+                                    )}
                                 </CardHeader>
+                                
                                 <CardContent className="flex-1">
-                                    <div className="flex items-center justify-between text-sm mt-auto">
-                                        <div className="flex items-center gap-2 text-muted-foreground">
-                                            <Clock className="h-4 w-4" />
-                                            <span>{service.duration} min</span>
-                                        </div>
-                                        <div className="flex items-center gap-1">
-                                            <DollarSign className="h-5 w-5 text-primary" />
-                                            <span className="text-2xl font-bold">{service.price}</span>
-                                        </div>
+                                    <div className="flex items-end gap-1 mt-auto pt-4">
+                                        <span className="text-3xl font-bold text-foreground">${service.price}</span>
+                                        <span className="text-sm text-muted-foreground mb-1">/ session</span>
                                     </div>
                                 </CardContent>
-                                <CardFooter>
+                                
+                                <CardFooter className="pt-0">
                                     <Button
                                         onClick={() => handleBookService(service.id)}
-                                        className="w-full"
+                                        className="w-full h-12 text-base font-medium shadow-sm group-hover:shadow-md transition-all"
                                         size="lg"
                                         disabled={!service.active}
                                     >
-                                        Book Now
+                                        Book Appointment
                                     </Button>
                                 </CardFooter>
                             </Card>

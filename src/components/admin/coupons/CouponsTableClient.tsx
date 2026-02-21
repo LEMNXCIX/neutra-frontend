@@ -655,15 +655,15 @@ export default function CouponsTableClient({ coupons: initialCoupons, stats, pag
                                                 {formatDate(c.expiresAt)}
                                             </TableCell>
                                             <TableCell>
-                                                <div className="flex gap-2">
-                                                    <Button size="sm" variant="ghost" onClick={() => openView(c)} title="View Details">
-                                                        <Ticket className="h-4 w-4 text-blue-500" />
+                                                <div className="flex gap-1">
+                                                    <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-blue-500 hover:bg-blue-50" onClick={() => openView(c)} title="View Details">
+                                                        <Ticket className="h-4 w-4" />
                                                     </Button>
-                                                    <Button size="sm" variant="ghost" onClick={() => openEdit(c)} title="Edit">
+                                                    <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10" onClick={() => openEdit(c)} title="Edit">
                                                         <Edit className="h-4 w-4" />
                                                     </Button>
-                                                    <Button size="sm" variant="ghost" onClick={() => deleteCoupon(c.id)} title="Delete" disabled={isDeleting === c.id}>
-                                                        {isDeleting === c.id ? <Spinner className="h-4 w-4" /> : <Trash2 className="h-4 w-4 text-red-500" />}
+                                                    <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10" onClick={() => deleteCoupon(c.id)} title="Delete" disabled={isDeleting === c.id}>
+                                                        {isDeleting === c.id ? <Spinner className="h-4 w-4" /> : <Trash2 className="h-4 w-4" />}
                                                     </Button>
                                                 </div>
                                             </TableCell>

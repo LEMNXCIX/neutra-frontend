@@ -452,11 +452,11 @@ export default function SlidersTableClient({ sliders: initialSliders, stats, pag
                                             )}
                                         </TableCell>
                                         <TableCell>
-                                            <div className="flex gap-2">
-                                                <Button size="sm" variant="ghost" onClick={() => openEdit(s)} disabled={isDeleting === s.id}>
+                                            <div className="flex gap-1">
+                                                <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10" onClick={() => openEdit(s)} disabled={isDeleting === s.id}>
                                                     {isDeleting === s.id ? <Spinner className="h-4 w-4" /> : <Edit className="h-4 w-4" />}
                                                 </Button>
-                                                <Button size="sm" variant="destructive" onClick={() => deleteSlider(s.id)} disabled={isDeleting === s.id}>
+                                                <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10" onClick={() => deleteSlider(s.id)} disabled={isDeleting === s.id}>
                                                     {isDeleting === s.id ? <Spinner className="h-4 w-4" /> : <Trash2 className="h-4 w-4" />}
                                                 </Button>
                                             </div>

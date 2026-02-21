@@ -9,6 +9,7 @@ import { QueryProvider } from '@/providers/query-provider';
 import { TenantProvider } from '@/context/tenant-context';
 import { FeatureProvider } from '@/providers/feature-provider';
 import { SWRegistration } from '@/components/sw-registration';
+import { ProgressBar } from '@/components/ui/progress-bar';
 
 
 const geist = Geist({
@@ -58,6 +59,7 @@ export default function RootLayout({
           <TenantProvider>
             <FeatureProvider>
               <SWRegistration />
+              <ProgressBar />
               <AuthInitializer />
               <QueryProvider>
                 <CartProvider>

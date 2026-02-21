@@ -433,12 +433,12 @@ export default function ProductsTableClient({ products, stats, pagination, categ
                                         <TableCell>{p.stock || 0}</TableCell>
                                         <TableCell>{getStockBadge(p.stock || 0)}</TableCell>
                                         <TableCell>
-                                            <div className="flex gap-2">
-                                                <Button size="sm" variant="ghost" onClick={() => openEdit(p)}>
+                                            <div className="flex gap-1">
+                                                <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10" onClick={() => openEdit(p)}>
                                                     <Edit className="h-4 w-4" />
                                                 </Button>
-                                                <Button size="sm" variant="destructive" onClick={() => deleteProduct(p.id)}>
-                                                    <Trash2 className="h-4 w-4 text-red-500" />
+                                                <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10" onClick={() => deleteProduct(p.id)}>
+                                                    <Trash2 className="h-4 w-4" />
                                                 </Button>
                                             </div>
                                         </TableCell>
@@ -512,12 +512,13 @@ export default function ProductsTableClient({ products, stats, pagination, categ
                                 {getStockBadge(p.stock || 0)}
                             </div>
                             <div className="flex gap-2">
-                                <Button size="sm" className="flex-1" onClick={() => openEdit(p)}>
+                                <Button size="sm" variant="outline" className="flex-1" onClick={() => openEdit(p)}>
                                     <Edit className="h-4 w-4 mr-1" />
                                     Edit
                                 </Button>
-                                <Button size="sm" variant="destructive" onClick={() => deleteProduct(p.id)} disabled={isDeleting === p.id}>
-                                    {isDeleting === p.id ? <Spinner className="h-4 w-4" /> : <Trash2 className="h-4 w-4" />}
+                                <Button size="sm" variant="outline" className="flex-1 text-muted-foreground hover:text-destructive hover:bg-destructive/5" onClick={() => deleteProduct(p.id)} disabled={isDeleting === p.id}>
+                                    {isDeleting === p.id ? <Spinner className="h-4 w-4" /> : <Trash2 className="h-4 w-4 mr-1" />}
+                                    Delete
                                 </Button>
                             </div>
                         </CardContent>

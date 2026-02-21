@@ -236,13 +236,13 @@ export function BookingNavbar() {
                                         <div className="grid gap-3 pt-2">
                                             <Button
                                                 variant="outline"
-                                                className="h-14 rounded-2xl border-2 font-bold"
+                                                className="h-14 rounded-2xl border-2 border-primary/20 font-bold hover:border-primary transition-all"
                                                 onClick={() => { setIsOpen(false); router.push('/login'); }}
                                             >
                                                 Sign In
                                             </Button>
                                             <Button
-                                                className="h-14 rounded-2xl shadow-xl shadow-primary/20 font-bold text-base"
+                                                className="h-14 rounded-2xl shadow-xl shadow-primary/20 font-bold text-base bg-primary text-primary-foreground hover:opacity-90"
                                                 onClick={() => { setIsOpen(false); router.push('/book'); }}
                                             >
                                                 Start Booking

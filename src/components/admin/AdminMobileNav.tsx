@@ -66,9 +66,9 @@ export default function AdminMobileNav({ items }: AdminMobileNavProps) {
     });
 
     return (
-        <nav className="fixed bottom-0 left-0 right-0 md:hidden border-t bg-background/80 backdrop-blur-md shadow-md z-50 pb-[env(safe-area-inset-bottom)]">
+        <nav className="fixed bottom-0 left-0 right-0 md:hidden border-t border-border bg-background/95 backdrop-blur-md z-50 pb-[env(safe-area-inset-bottom)]">
             <ScrollArea className="w-full whitespace-nowrap">
-                <div className="flex w-max space-x-4 p-2 px-4">
+                <div className="flex w-max space-x-2 p-3 px-4 mx-auto">
                     {filteredItems.map(({ href, label, icon: iconName, exact }) => {
                         const Icon = ICON_MAP[iconName] || LayoutDashboard;
                         const isActive = exact
@@ -79,11 +79,13 @@ export default function AdminMobileNav({ items }: AdminMobileNavProps) {
                             <Link
                                 key={href}
                                 href={href}
-                                className={`flex flex-col items-center text-xs min-w-[60px] ${isActive ? "text-primary" : "text-muted-foreground"
+                                className={`flex flex-col items-center justify-center px-4 py-1 rounded-xl transition-all ${isActive 
+                                    ? "text-primary bg-primary/5 font-semibold" 
+                                    : "text-muted-foreground hover:text-foreground"
                                     }`}
                             >
-                                <Icon className="w-5 h-5 mb-1" />
-                                <span>{label}</span>
+                                <Icon className={`w-5 h-5 mb-1 ${isActive ? "opacity-100" : "opacity-70"}`} />
+                                <span className="text-[10px] uppercase tracking-wide">{label}</span>
                             </Link>
                         );
                     })}

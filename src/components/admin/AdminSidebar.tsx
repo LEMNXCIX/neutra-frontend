@@ -76,29 +76,29 @@ export default function AdminSidebar({ items }: AdminSidebarProps) {
 
     return (
         <aside
-            className={`hidden md:flex flex-col border-r bg-muted/70 backdrop-blur-md transition-all duration-300 ease-in-out ${sidebarOpen ? "w-64" : "w-16"
+            className={`hidden md:flex flex-col border-r border-border bg-background transition-all duration-300 ease-in-out ${sidebarOpen ? "w-64" : "w-16"
                 }`}
         >
             {/* Header */}
-            <div className="flex items-center justify-between px-3 py-3 border-b">
+            <div className="flex items-center justify-between px-4 py-4 border-b border-border">
                 {sidebarOpen ? (
-                    <h2 className="text-lg font-semibold">Admin</h2>
+                    <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Dashboard</h2>
                 ) : (
-                    <span className="text-sm font-semibold">A</span>
+                    <span className="text-xs font-bold">A</span>
                 )}
                 <Button
                     size="icon"
                     variant="ghost"
                     onClick={() => setSidebarOpen(!sidebarOpen)}
-                    className="h-8 w-8"
+                    className="h-8 w-8 text-muted-foreground"
                 >
-                    {sidebarOpen ? <X size={18} /> : <Menu size={18} />}
+                    {sidebarOpen ? <X size={16} /> : <Menu size={16} />}
                 </Button>
             </div>
 
             {/* Scrollable menu */}
             <ScrollArea className="flex-1">
-                <nav className="p-2 flex flex-col gap-1">
+                <nav className="p-3 flex flex-col gap-1">
                     {filteredItems.map(({ href, label, icon: iconName, exact }) => {
                         const Icon = ICON_MAP[iconName] || LayoutDashboard;
                         const isActive = exact
@@ -109,13 +109,13 @@ export default function AdminSidebar({ items }: AdminSidebarProps) {
                             <Link key={href} href={href} passHref>
                                 <Button
                                     variant={isActive ? "secondary" : "ghost"}
-                                    className={`w-full justify-start gap-2 ${isActive
-                                        ? "bg-primary/10 text-primary font-medium"
-                                        : "text-foreground hover:bg-accent/60"
+                                    className={`w-full justify-start gap-3 h-11 px-3 rounded-lg transition-all ${isActive
+                                        ? "bg-primary text-primary-foreground shadow-sm font-semibold"
+                                        : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
                                         }`}
                                 >
-                                    <Icon className="w-4 h-4" />
-                                    {sidebarOpen && <span>{label}</span>}
+                                    <Icon className={`w-4 h-4 ${isActive ? "text-current" : "opacity-70"}`} />
+                                    {sidebarOpen && <span className="text-sm">{label}</span>}
                                 </Button>
                             </Link>
                         );
@@ -123,15 +123,15 @@ export default function AdminSidebar({ items }: AdminSidebarProps) {
                 </nav>
             </ScrollArea>
 
-            <Separator />
+            <Separator className="opacity-50" />
 
             {/* Footer */}
-            <div className="p-4 text-sm">
+            <div className="p-4">
                 <Link
                     href="/"
-                    className="hover:underline text-muted-foreground flex items-center gap-2"
+                    className="text-xs font-medium text-muted-foreground hover:text-primary transition-colors flex items-center gap-2 px-2"
                 >
-                    ← {sidebarOpen && "Back to shop"}
+                    ← {sidebarOpen && "Back to Shop"}
                 </Link>
             </div>
         </aside>

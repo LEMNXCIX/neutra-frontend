@@ -57,9 +57,9 @@ export default function LandingPage() {
                 <a
                   key={tenant.id}
                   href={getTenantUrl(tenant.slug)}
-                  className={`flex items-center justify-center gap-4 px-10 py-5 font-black text-xl transition-all w-full sm:w-auto uppercase tracking-tight ${tenant.type === 'STORE'
-                    ? 'bg-foreground text-background hover:bg-muted-foreground'
-                    : 'bg-background text-foreground border-4 border-foreground hover:bg-muted font-black'
+                  className={`flex items-center justify-center gap-4 px-10 py-5 font-black text-xl transition-all w-full sm:w-auto uppercase tracking-tight shadow-md hover:shadow-lg active:scale-95 ${tenant.type === 'STORE'
+                    ? 'bg-foreground text-background hover:bg-muted-foreground border-2 border-transparent'
+                    : 'bg-background text-foreground border-4 border-foreground hover:bg-foreground hover:text-background font-black'
                     }`}
                 >
                   {tenant.type === 'STORE' ? (
