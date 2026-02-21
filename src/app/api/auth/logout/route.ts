@@ -1,5 +1,10 @@
+/**
+ * API Routes for Authentication - Logout
+ */
+
 import { NextRequest, NextResponse } from "next/server";
 import { getProxyHeaders } from "@/lib/proxy";
+import { logger } from "@/lib/logger";
 
 const getBackendUrl = () => {
   const url = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4001/api";
@@ -8,20 +13,22 @@ const getBackendUrl = () => {
 
 const BACKEND_API_URL = getBackendUrl();
 
-/**
- * Shared logout logic for both GET and POST
- */
 async function handleLogout(req: NextRequest, method: "GET" | "POST") {
-  try {
-    const backendUrl = `${BACKEND_API_URL}/auth/logout`;
+  const startTime = Date.now();
+  const endpoint = '/auth/logout';
+  const logContext = logger.createContext(endpoint, method);
 
-    const response = await fetch(backendUrl, {
+  try {
+    logger.info(logContext, `Auth Request: Logout attempt`);
+
+    const response = await fetch(`${BACKEND_API_URL}/auth/logout`, {
       method,
       headers: getProxyHeaders(req),
       cache: "no-store",
     });
 
     const data = await response.json();
+    const duration = Date.now() - startTime;
 
     // Get all Set-Cookie headers from backend
     const setCookieHeaders = response.headers.getSetCookie?.() || [];
@@ -31,14 +38,18 @@ async function handleLogout(req: NextRequest, method: "GET" | "POST") {
       ? setCookieHeaders.join(', ')
       : 'token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; SameSite=Lax';
 
+    logger.info(logger.withResponse(logContext, { success: true }, response.status, duration), `Auth Response: Logout successful`);
+
     return NextResponse.json(data, {
       status: response.status,
       headers: {
         'Set-Cookie': cookieHeader,
       },
     });
-  } catch (error) {
-    console.error("Error during logout:", error);
+  } catch (error: any) {
+    const duration = Date.now() - startTime;
+    logger.error(logger.withError(logContext, error, duration), `Auth Error: ${error.message}`);
+    
     // Even on error, ensure cookie is deleted client-side
     return NextResponse.json(
       { success: true, message: 'Sesión cerrada localmente' },
@@ -52,18 +63,10 @@ async function handleLogout(req: NextRequest, method: "GET" | "POST") {
   }
 }
 
-/**
- * POST /api/auth/logout
- * Proxy to backend API for logout
- */
 export async function POST(req: NextRequest) {
   return handleLogout(req, "POST");
 }
 
-/**
- * GET /api/auth/logout
- * Proxy to backend API for logout (for compatibility)
- */
 export async function GET(req: NextRequest) {
   return handleLogout(req, "GET");
 }

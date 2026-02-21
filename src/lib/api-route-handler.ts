@@ -248,4 +248,87 @@ export const createDeleteHandler = (endpoint: EndpointResolver, options?: Partia
 export const createPatchHandler = (endpoint: EndpointResolver, options?: Partial<RouteConfig>) =>
     createRouteHandler({ method: 'PATCH', endpoint, ...options });
 
+// ============================================================================
+// Specialized Handlers
+// ============================================================================
+
+/**
+ * Creates a handler for the common pattern: List Data + Statistics
+ * Fetches from two endpoints in parallel and merges the results.
+ */
+export function createListWithStatsHandler(
+    listEndpoint: EndpointResolver,
+    statsEndpoint: string,
+    transform?: (data: any) => any
+) {
+    return async (req: NextRequest, context?: RouteContext): Promise<NextResponse> => {
+        const startTime = Date.now();
+        let logContext: LogContext | null = null;
+
+        try {
+            const token = extractTokenFromRequest(req);
+            const resolvedListEndpoint = await resolveEndpoint(
+                { method: 'GET', endpoint: listEndpoint },
+                req,
+                context
+            );
+
+            logContext = logger.createContext(resolvedListEndpoint, 'GET');
+            logger.info(logContext, `API Request (List+Stats): ${resolvedListEndpoint} & ${statsEndpoint}`);
+
+            // Fetch both in parallel
+            const [listResult, statsResult] = await Promise.all([
+                backendFetch(resolvedListEndpoint, { method: 'GET', token }).catch(err => ({ success: false, error: err.message, data: [] })),
+                backendFetch(statsEndpoint, { method: 'GET', token }).catch(err => ({ success: false, error: err.message }))
+            ]);
+
+            const duration = Date.now() - startTime;
+
+            if (!listResult.success) {
+                return NextResponse.json(listResult, { status: listResult.statusCode || 500 });
+            }
+
+            // Apply transform if provided
+            const finalData = transform && listResult.data ? transform(listResult.data) : listResult.data;
+
+            // Merge results
+            const mergedResult = {
+                success: true,
+                data: finalData,
+                users: finalData, // Backward compatibility for some components
+                stats: statsResult.success ? statsResult.data : null,
+                pagination: (listResult as any).pagination || {
+                    currentPage: 1,
+                    totalPages: 1,
+                    totalItems: Array.isArray(finalData) ? finalData.length : 0,
+                    itemsPerPage: Array.isArray(finalData) ? finalData.length : 10,
+                },
+                meta: {
+                    traceId: logContext.traceId,
+                    timestamp: new Date().toISOString(),
+                    duration: `${duration}ms`
+                }
+            };
+
+            logger.info(logger.withResponse(logContext, mergedResult, 200, duration), `API Response: Success (Merged)`);
+
+            return NextResponse.json(mergedResult);
+
+        } catch (error) {
+            const duration = Date.now() - startTime;
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            
+            if (logContext) {
+                logger.error(logger.withError(logContext, error, duration), `API Error: ${errorMessage}`);
+            }
+
+            return createErrorResponse(
+                errorMessage,
+                500,
+                logContext?.traceId || 'unknown'
+            );
+        }
+    };
+}
+
 export default createRouteHandler;

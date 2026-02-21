@@ -1,5 +1,10 @@
+/**
+ * API Routes for Authentication - Login
+ */
+
 import { NextRequest, NextResponse } from "next/server";
 import { getProxyHeaders } from "@/lib/proxy";
+import { logger } from "@/lib/logger";
 
 const getBackendUrl = () => {
   const url = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4001/api";
@@ -8,16 +13,16 @@ const getBackendUrl = () => {
 
 const BACKEND_API_URL = getBackendUrl();
 
-/**
- * POST /api/auth/login
- * Proxy to backend API for authentication
- */
 export async function POST(req: NextRequest) {
+  const startTime = Date.now();
+  const endpoint = '/auth/login';
+  const logContext = logger.createContext(endpoint, 'POST');
+
   try {
     const body = await req.json();
-    const backendUrl = `${BACKEND_API_URL}/auth/login`;
-    console.log(backendUrl);
-    const response = await fetch(backendUrl, {
+    logger.info(logContext, `Auth Request: Login attempt`);
+
+    const response = await fetch(`${BACKEND_API_URL}/auth/login`, {
       method: "POST",
       headers: {
         ...getProxyHeaders(req),
@@ -28,6 +33,7 @@ export async function POST(req: NextRequest) {
     });
 
     const data = await response.json();
+    const duration = Date.now() - startTime;
 
     // Forward set-cookie headers from backend
     const setCookieHeader = response.headers.get("set-cookie");
@@ -37,14 +43,22 @@ export async function POST(req: NextRequest) {
       headers["Set-Cookie"] = setCookieHeader;
     }
 
+    if (!response.ok) {
+      logger.warn(logger.withResponse(logContext, data, response.status, duration), `Auth Response: Login failed`);
+      return NextResponse.json(data, { status: response.status, headers });
+    }
+
+    logger.info(logger.withResponse(logContext, { success: true }, response.status, duration), `Auth Response: Login successful`);
+
     return NextResponse.json(data, {
       status: response.status,
       headers,
     });
-  } catch (error) {
-    console.error("Error during login:", error);
+  } catch (error: any) {
+    const duration = Date.now() - startTime;
+    logger.error(logger.withError(logContext, error, duration), `Auth Error: ${error.message}`);
     return NextResponse.json(
-      { error: "Login failed" },
+      { success: false, message: "Login failed" },
       { status: 500 }
     );
   }

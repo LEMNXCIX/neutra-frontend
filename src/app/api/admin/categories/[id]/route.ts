@@ -1,59 +1,22 @@
-import { NextRequest, NextResponse } from "next/server";
-import { backendPut, backendDelete } from "@/lib/backend-api";
-import { extractTokenFromRequest } from "@/lib/server-auth";
+/**
+ * API Routes for Admin Categories by ID - Refactored with unified handler
+ */
+
+import {
+    createPutHandler,
+    createDeleteHandler
+} from '@/lib/api-route-handler';
 
 /**
  * PUT /api/admin/categories/[id]
- * Update category via backend
  */
-export async function PUT(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { id } = await params;
-    const body = await req.json();
-    const token = extractTokenFromRequest(req);
-    const result = await backendPut(`/categories/${id}`, body, token);
-
-    return NextResponse.json(result, {
-      status: result.success ? 200 : 500
-    });
-  } catch (error) {
-    console.error("Error updating category:", error);
-    return NextResponse.json(
-      { success: false, error: "Failed to update category" },
-      { status: 500 }
-    );
-  }
-}
+export const PUT = createPutHandler(
+    (req, params) => `/categories/${params?.id}`
+);
 
 /**
  * DELETE /api/admin/categories/[id]
- * Delete category via backend
  */
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { id } = await params;
-    const token = extractTokenFromRequest(req);
-    const result = await backendDelete(`/categories/${id}`, token);
-
-    // Handle 204 No Content (success with no body)
-    if (result.success && !result.data) {
-      return new NextResponse(null, { status: 204 });
-    }
-
-    return NextResponse.json(result, {
-      status: result.success ? 200 : 500
-    });
-  } catch (error) {
-    console.error("Error deleting category:", error);
-    return NextResponse.json(
-      { success: false, error: "Failed to delete category" },
-      { status: 500 }
-    );
-  }
-}
+export const DELETE = createDeleteHandler(
+    (req, params) => `/categories/${params?.id}`
+);

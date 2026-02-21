@@ -1,15 +1,24 @@
+/**
+ * API Routes for Admin Dashboard Stats - Refactored with unified utilities
+ */
+
 import { NextRequest, NextResponse } from "next/server";
-import { getBackendUrl } from "@/lib/backend-api";
-import { getProxyHeaders } from "@/lib/proxy";
+import { backendFetch } from "@/lib/backend-api";
+import { extractTokenFromRequest } from "@/lib/server-auth";
+import { logger } from "@/lib/logger";
 
 export const dynamic = 'force-dynamic';
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function GET(req: NextRequest) {
-    try {
-        const headers = getProxyHeaders(req);
+    const startTime = Date.now();
+    const endpoint = '/admin/stats/overview';
+    const logContext = logger.createContext(endpoint, 'GET');
 
-        // Parallel fetch for all stats
+    try {
+        const token = extractTokenFromRequest(req);
+        logger.info(logContext, `API Request (Stats Overview): Aggregating from multiple endpoints`);
+
+        // Parallel fetch for all stats using backendFetch for consistency
         const [
             usersRes,
             productsRes,
@@ -19,62 +28,37 @@ export async function GET(req: NextRequest) {
             bannersRes,
             categoriesRes
         ] = await Promise.all([
-            fetch(`${getBackendUrl()}/users/stats/summary`, { headers, cache: 'no-store' }),
-            fetch(`${getBackendUrl()}/products/stats/summary`, { headers, cache: 'no-store' }),
-            fetch(`${getBackendUrl()}/order/stats`, { headers, cache: 'no-store' }),
-            fetch(`${getBackendUrl()}/coupons/stats`, { headers, cache: 'no-store' }),
-            fetch(`${getBackendUrl()}/slide/stats`, { headers, cache: 'no-store' }),
-            fetch(`${getBackendUrl()}/banners/stats`, { headers, cache: 'no-store' }),
-            fetch(`${getBackendUrl()}/categories/stats`, { headers, cache: 'no-store' }),
+            backendFetch('/users/stats/summary', { method: 'GET', token }).catch(() => ({ success: false, data: { totalUsers: 0, adminUsers: 0, regularUsers: 0 } })),
+            backendFetch('/products/stats/summary', { method: 'GET', token }).catch(() => ({ success: false, data: { totalProducts: 0, totalValue: 0, lowStockCount: 0, outOfStockCount: 0 } })),
+            backendFetch('/order/stats', { method: 'GET', token }).catch(() => ({ success: false, data: { totalOrders: 0, totalRevenue: 0 } })),
+            backendFetch('/coupons/stats', { method: 'GET', token }).catch(() => ({ success: false, data: { totalCoupons: 0, activeCoupons: 0, usedCoupons: 0 } })),
+            backendFetch('/slide/stats', { method: 'GET', token }).catch(() => ({ success: false, data: { totalSliders: 0, activeSliders: 0, withImages: 0 } })),
+            backendFetch('/banners/stats', { method: 'GET', token }).catch(() => ({ success: false, data: { totalBanners: 0, activeBanners: 0 } })),
+            backendFetch('/categories/stats', { method: 'GET', token }).catch(() => ({ success: false, data: { totalCategories: 0, avgProductsPerCategory: 0 } })),
         ]);
 
-        // Helper to safely parse JSON
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const safeJson = async (res: Response, defaultVal: any, name: string) => {
-            try {
-                if (!res.ok) {
-                    console.error(`[Stats] Error fetching ${name}: ${res.status} ${res.statusText}`);
-                    return defaultVal;
-                }
-                return await res.json();
-            } catch (e) {
-                console.error(`[Stats] JSON parse error for ${name}:`, e);
-                return defaultVal;
-            }
-        };
+        const ordersData: any = ordersRes.data || {};
+        const ordersCount = ordersData.totalOrders || 0;
+        const ordersRevenue = ordersData.totalRevenue || 0;
 
-        const [
-            usersData,
-            productsData,
-            ordersData,
-            couponsData,
-            slidersData,
-            bannersData,
-            categoriesData
-        ] = await Promise.all([
-            safeJson(usersRes, { data: { totalUsers: 0, adminUsers: 0, regularUsers: 0 } }, 'users'),
-            safeJson(productsRes, { data: { totalProducts: 0, totalValue: 0, lowStockCount: 0, outOfStockCount: 0 } }, 'products'),
-            safeJson(ordersRes, { data: { totalOrders: 0, totalRevenue: 0 } }, 'orders'),
-            safeJson(couponsRes, { data: { totalCoupons: 0, activeCoupons: 0, usedCoupons: 0 } }, 'coupons'),
-            safeJson(slidersRes, { data: { totalSliders: 0, activeSliders: 0, withImages: 0 } }, 'sliders'),
-            safeJson(bannersRes, { data: { totalBanners: 0, activeBanners: 0 } }, 'banners'),
-            safeJson(categoriesRes, { data: { totalCategories: 0, avgProductsPerCategory: 0 } }, 'categories'),
-        ]);
-
-        const ordersCount = ordersData.data?.totalOrders || 0;
-        const ordersRevenue = ordersData.data?.totalRevenue || 0;
+        const usersData: any = usersRes.data || {};
+        const productsData: any = productsRes.data || {};
+        const couponsData: any = couponsRes.data || {};
+        const slidersData: any = slidersRes.data || {};
+        const bannersData: any = bannersRes.data || {};
+        const categoriesData: any = categoriesRes.data || {};
 
         const stats = {
             users: {
-                total: usersData.data?.totalUsers || 0,
-                admins: usersData.data?.adminUsers || 0,
-                regular: usersData.data?.regularUsers || 0,
+                total: usersData.totalUsers || 0,
+                admins: usersData.adminUsers || 0,
+                regular: usersData.regularUsers || 0,
             },
             products: {
-                total: productsData.data?.totalProducts || 0,
-                totalValue: productsData.data?.totalValue || 0,
-                lowStock: productsData.data?.lowStockCount || 0,
-                outOfStock: productsData.data?.outOfStockCount || 0,
+                total: productsData.totalProducts || 0,
+                totalValue: productsData.totalValue || 0,
+                lowStock: productsData.lowStockCount || 0,
+                outOfStock: productsData.outOfStockCount || 0,
             },
             orders: {
                 total: ordersCount,
@@ -82,34 +66,38 @@ export async function GET(req: NextRequest) {
                 avgOrderValue: ordersCount > 0 ? ordersRevenue / ordersCount : 0,
             },
             coupons: {
-                total: couponsData.data?.totalCoupons || 0,
-                active: couponsData.data?.activeCoupons || 0,
-                used: couponsData.data?.usedCoupons || 0,
+                total: couponsData.totalCoupons || 0,
+                active: couponsData.activeCoupons || 0,
+                used: couponsData.usedCoupons || 0,
             },
             sliders: {
-                total: slidersData.data?.totalSliders || 0,
-                active: slidersData.data?.activeSliders || 0,
-                withImages: slidersData.data?.withImages || 0,
+                total: slidersData.totalSliders || 0,
+                active: slidersData.activeSliders || 0,
+                withImages: slidersData.withImages || 0,
             },
             banners: {
-                total: bannersData.data?.totalBanners || 0,
-                active: bannersData.data?.activeBanners || 0,
+                total: bannersData.totalBanners || 0,
+                active: bannersData.activeBanners || 0,
             },
             categories: {
-                total: categoriesData.data?.totalCategories || 0,
-                avgProducts: categoriesData.data?.avgProductsPerCategory || 0,
+                total: categoriesData.totalCategories || 0,
+                avgProducts: categoriesData.avgProductsPerCategory || 0,
             },
         };
 
-        return NextResponse.json({
-            success: true,
-            data: stats
-        });
+        const duration = Date.now() - startTime;
+        const result = { success: true, data: stats };
+        
+        logger.info(logger.withResponse(logContext, result, 200, duration), `API Response: Success (Stats Aggregated)`);
 
-    } catch (error) {
-        console.error("Error fetching analytics overview:", error);
+        return NextResponse.json(result);
+
+    } catch (error: any) {
+        const duration = Date.now() - startTime;
+        logger.error(logger.withError(logContext, error, duration), `API Error: ${error.message}`);
+        
         return NextResponse.json(
-            { success: false, message: "Failed to fetch analytics" },
+            { success: false, message: "Failed to fetch analytics", meta: { traceId: logContext.traceId } },
             { status: 500 }
         );
     }
