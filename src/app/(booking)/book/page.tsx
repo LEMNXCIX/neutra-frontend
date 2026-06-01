@@ -2,6 +2,12 @@ import React from 'react';
 import { cookies } from 'next/headers';
 import { getBackendUrl } from '@/lib/backend-api';
 import { BookingWizard } from '@/components/booking/booking-wizard';
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Book an Appointment",
+  description: "Schedule your next appointment online",
+};
 
 export const dynamic = 'force-dynamic';
 

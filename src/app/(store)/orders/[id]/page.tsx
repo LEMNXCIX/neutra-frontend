@@ -1,6 +1,12 @@
 
 import { notFound, redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Order Details",
+  description: "View your order status and details",
+};
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -136,7 +142,7 @@ export default async function OrderPage(props: { params: Promise<{ id: string }>
             <div className="space-y-4">
               <Button variant="ghost" asChild className="group font-bold uppercase tracking-widest text-[10px] p-0 h-auto hover:bg-transparent rounded-xl transition-all">
                 <Link href="/profile" className="flex items-center gap-2">
-                  <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1 text-primary" strokeWidth={3} />
+                  <ArrowLeft className="size-4 transition-transform group-hover:-translate-x-1 text-primary" strokeWidth={3} />
                   Back to Profile
                 </Link>
               </Button>
@@ -151,7 +157,7 @@ export default async function OrderPage(props: { params: Promise<{ id: string }>
                 target="_blank"
                 rel="noreferrer"
               >
-                <Download className="h-5 w-5 mr-3" strokeWidth={2} />
+                <Download className="size-5 mr-3" strokeWidth={2} />
                 Download Receipt
               </a>
             </Button>
@@ -163,7 +169,7 @@ export default async function OrderPage(props: { params: Promise<{ id: string }>
             <CardContent className="p-8 md:p-12">
               <div className="flex flex-col md:flex-row items-center gap-10">
                 <div className={cn("p-8 rounded-[2rem] shadow-inner border border-border/50 flex items-center justify-center", currentStatus.color.replace('bg-', 'bg-').replace('500', '500/10'))}>
-                  <StatusIcon className={cn("h-14 w-14", currentStatus.color.replace('bg-', 'text-'))} strokeWidth={2} />
+                  <StatusIcon className={cn("size-14", currentStatus.color.replace('bg-', 'text-'))} strokeWidth={2} />
                 </div>
                 <div className="flex-1 text-center md:text-left space-y-3">
                   <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
@@ -255,7 +261,7 @@ export default async function OrderPage(props: { params: Promise<{ id: string }>
                 <Card className="border-none shadow-xl rounded-[2rem] bg-background group hover:shadow-2xl transition-all duration-500">
                     <CardHeader className="pb-4">
                         <CardTitle className="text-[10px] font-bold uppercase tracking-widest text-primary flex items-center gap-3">
-                            <div className="w-8 h-8 bg-primary/10 rounded-xl flex items-center justify-center">
+                            <div className="size-8 bg-primary/10 rounded-xl flex items-center justify-center">
                                 <MapPin size={16} />
                             </div>
                             Shipping Address
@@ -269,7 +275,7 @@ export default async function OrderPage(props: { params: Promise<{ id: string }>
                 <Card className="border-none shadow-xl rounded-[2rem] bg-background group hover:shadow-2xl transition-all duration-500">
                     <CardHeader className="pb-4">
                         <CardTitle className="text-[10px] font-bold uppercase tracking-widest text-purple-600 flex items-center gap-3">
-                            <div className="w-8 h-8 bg-purple-600/10 rounded-xl flex items-center justify-center">
+                            <div className="size-8 bg-purple-600/10 rounded-xl flex items-center justify-center">
                                 <Truck size={16} />
                             </div>
                             Tracking Info
@@ -290,7 +296,7 @@ export default async function OrderPage(props: { params: Promise<{ id: string }>
                             </div>
                         ) : (
                             <div className="flex flex-col items-center justify-center py-4 space-y-2 opacity-60">
-                                <Clock className="h-8 w-8 text-muted-foreground" />
+                                <Clock className="size-8 text-muted-foreground" />
                                 <p className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Preparing for Shipment</p>
                             </div>
                         )}
@@ -315,8 +321,7 @@ export default async function OrderPage(props: { params: Promise<{ id: string }>
                         { label: 'Delivered', date: order.status === 'delivered' ? 'Final delivery successful' : 'Expected soon', active: order.status === 'delivered' }
                     ].map((step, i) => (
                         <div key={i} className="flex gap-8 relative z-10">
-                            <div className={cn(
-                                "w-5 h-5 rounded-full mt-1 border-4 transition-all duration-700",
+                            <div className={cn("size-5 rounded-full mt-1 border-4 transition-all duration-700",
                                 step.active ? "bg-primary border-primary/20 scale-125 shadow-lg shadow-primary/20" : "bg-background border-muted"
                             )} />
                             <div className="space-y-2">

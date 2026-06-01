@@ -79,7 +79,7 @@ export function FeatureDialog({ open, onOpenChange, feature, onSuccess }: Featur
             <DialogContent>
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
-                        <Zap className="h-5 w-5 text-yellow-500" />
+                        <Zap className="size-5 text-yellow-500" />
                         {feature ? "Edit Feature" : "Create Feature"}
                     </DialogTitle>
                 </DialogHeader>
@@ -123,7 +123,7 @@ export function FeatureDialog({ open, onOpenChange, feature, onSuccess }: Featur
                     <div className="space-y-2">
                         <Label>Monthly Price</Label>
                         <div className="relative">
-                            <DollarSign className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                            <DollarSign className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
                             <Input
                                 type="number"
                                 className="pl-9"

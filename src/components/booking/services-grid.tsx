@@ -51,7 +51,7 @@ export function ServicesGrid({ services }: ServicesGridProps) {
                             {categoryName} Catalog
                         </h2>
                         <div className="h-px flex-1 bg-border/50" />
-                        <Badge variant="secondary" className="h-8 w-8 flex items-center justify-center font-bold rounded-full">
+                        <Badge variant="secondary" className="size-8 flex items-center justify-center font-bold rounded-full">
                             {categoryServices.length}
                         </Badge>
                     </div>

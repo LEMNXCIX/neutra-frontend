@@ -66,7 +66,7 @@ export default function AdminShell() {
             size="icon"
             variant="ghost"
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="h-8 w-8"
+            className="size-8"
           >
             {sidebarOpen ? <X size={18} /> : <Menu size={18} />}
           </Button>
@@ -87,7 +87,7 @@ export default function AdminShell() {
                     : "text-foreground hover:bg-accent/60"
                     }`}
                 >
-                  <Icon className="w-4 h-4" />
+                  <Icon className="size-4" />
                   {sidebarOpen && <span>{label}</span>}
                 </Button>
               );
@@ -151,7 +151,7 @@ export default function AdminShell() {
                   className={`flex flex-col items-center text-xs min-w-[60px] ${activeState ? "text-primary" : "text-muted-foreground"
                     }`}
                 >
-                  <Icon className="w-5 h-5 mb-1" />
+                  <Icon className="size-5 mb-1" />
                   <span>{label}</span>
                 </button>
               );

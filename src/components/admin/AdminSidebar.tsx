@@ -117,7 +117,7 @@ export default function AdminSidebar({ items }: AdminSidebarProps) {
                                         : "text-muted-foreground hover:bg-muted hover:text-foreground"
                                     )}
                                 >
-                                    <Icon className={cn("w-4 h-4", isActive ? "opacity-100" : "opacity-70")} />
+                                    <Icon className={cn("size-4", isActive ? "opacity-100" : "opacity-70")} />
                                     {sidebarOpen && <span className="truncate">{label}</span>}
                                 </Button>
                             </Link>

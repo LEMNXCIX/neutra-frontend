@@ -1,6 +1,12 @@
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "About Us",
+  description: "Learn about our mission, vision, and team",
+};
 
 export default function AboutPage() {
     return (

@@ -2,6 +2,12 @@ import React from "react";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import AdminMobileNav from "@/components/admin/AdminMobileNav";
 import { SUPER_ADMIN_NAV } from "@/config/admin-navigation";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Admin",
+  description: "Administration dashboard",
+};
 
 export default function AdminLayout({
     children,

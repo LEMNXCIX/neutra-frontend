@@ -354,7 +354,7 @@ export default function RolesTableClient({ roles, permissions, allPermissions = 
                         <p className="text-2xl font-bold mt-1">{value}</p>
                     </div>
                     <div className={`p-3 rounded-full ${color}`}>
-                        <Icon className="h-6 w-6 text-white" />
+                        <Icon className="size-6 text-white" />
                     </div>
                 </div>
             </CardContent>
@@ -386,7 +386,7 @@ export default function RolesTableClient({ roles, permissions, allPermissions = 
                 <TabsContent value="roles" className="space-y-4">
                     <div className="flex flex-col sm:flex-row justify-between gap-4 mb-4">
                         <div className="relative w-full sm:w-72">
-                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                            <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
                             <Input
                                 placeholder="Search roles..."
                                 className="pl-9"
@@ -395,7 +395,7 @@ export default function RolesTableClient({ roles, permissions, allPermissions = 
                             />
                         </div>
                         <Button onClick={openCreate}>
-                            <Plus className="h-4 w-4 mr-2" />
+                            <Plus className="size-4 mr-2" />
                             Create Role
                         </Button>
                     </div>
@@ -425,7 +425,7 @@ export default function RolesTableClient({ roles, permissions, allPermissions = 
                                             <TableRow key={role.id} className="group hover:bg-muted/50 transition-colors border-b border-border/50">
                                                 <TableCell className="py-4">
                                                     <div className="flex items-center gap-3">
-                                                        <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center shadow-sm">
+                                                        <div className="size-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center shadow-sm">
                                                             <Shield size={14} />
                                                         </div>
                                                         <span className="font-semibold text-sm">{role.name}</span>
@@ -448,17 +448,17 @@ export default function RolesTableClient({ roles, permissions, allPermissions = 
                                                 </TableCell>
                                                 <TableCell className="text-right">
                                                     <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                        <Button size="icon" variant="ghost" className="h-8 w-8 rounded-full hover:bg-primary/5 hover:text-primary" onClick={() => openEdit(role)}>
-                                                            <Edit className="h-4 w-4" />
+                                                        <Button size="icon" variant="ghost" className="size-8 rounded-full hover:bg-primary/5 hover:text-primary" onClick={() => openEdit(role)}>
+                                                            <Edit className="size-4" />
                                                         </Button>
                                                         <Button
                                                             size="icon"
                                                             variant="ghost"
-                                                            className="h-8 w-8 rounded-full hover:bg-destructive/5 hover:text-destructive"
+                                                            className="size-8 rounded-full hover:bg-destructive/5 hover:text-destructive"
                                                             onClick={() => handleDelete(role.id)}
                                                             disabled={isDeletingRole === role.id}
                                                         >
-                                                            {isDeletingRole === role.id ? <Spinner className="h-4 w-4" /> : <Trash2 className="h-4 w-4" />}
+                                                            {isDeletingRole === role.id ? <Spinner className="size-4" /> : <Trash2 className="size-4" />}
                                                         </Button>
                                                     </div>
                                                 </TableCell>
@@ -486,7 +486,7 @@ export default function RolesTableClient({ roles, permissions, allPermissions = 
                                         }}
                                         disabled={rolePagination.currentPage === 1}
                                     >
-                                        <ChevronLeft className="h-4 w-4 mr-1" />
+                                        <ChevronLeft className="size-4 mr-1" />
                                         Previous
                                     </Button>
                                     <div className="hidden sm:flex items-center gap-1">
@@ -532,7 +532,7 @@ export default function RolesTableClient({ roles, permissions, allPermissions = 
                                         disabled={rolePagination.currentPage === rolePagination.totalPages}
                                     >
                                         Next
-                                        <ChevronRight className="h-4 w-4 ml-1" />
+                                        <ChevronRight className="size-4 ml-1" />
                                     </Button>
                                 </div>
                             </div>
@@ -564,7 +564,7 @@ export default function RolesTableClient({ roles, permissions, allPermissions = 
                                         </div>
 
                                         <div className="flex items-center gap-2">
-                                            <Shield className="h-4 w-4 text-muted-foreground" />
+                                            <Shield className="size-4 text-muted-foreground" />
                                             <Badge variant="secondary">
                                                 {role.permissions?.length || 0} permissions
                                             </Badge>
@@ -577,7 +577,7 @@ export default function RolesTableClient({ roles, permissions, allPermissions = 
                                                 className="flex-1"
                                                 onClick={() => openEdit(role)}
                                             >
-                                                <Edit className="h-4 w-4 mr-2" />
+                                                <Edit className="size-4 mr-2" />
                                                 Edit
                                             </Button>
                                             <Button
@@ -587,7 +587,7 @@ export default function RolesTableClient({ roles, permissions, allPermissions = 
                                                 onClick={() => handleDelete(role.id)}
                                                 disabled={isDeletingRole === role.id}
                                             >
-                                                {isDeletingRole === role.id ? <Spinner className="h-4 w-4 mr-2" /> : <Trash2 className="h-4 w-4 mr-2" />}
+                                                {isDeletingRole === role.id ? <Spinner className="size-4 mr-2" /> : <Trash2 className="size-4 mr-2" />}
                                                 Delete
                                             </Button>
                                         </div>
@@ -610,7 +610,7 @@ export default function RolesTableClient({ roles, permissions, allPermissions = 
                                         }}
                                         disabled={rolePagination.currentPage === 1}
                                     >
-                                        <ChevronLeft className="h-4 w-4" />
+                                        <ChevronLeft className="size-4" />
                                     </Button>
                                     <span className="text-sm text-muted-foreground">
                                         Page {rolePagination.currentPage} of {rolePagination.totalPages}
@@ -625,7 +625,7 @@ export default function RolesTableClient({ roles, permissions, allPermissions = 
                                         }}
                                         disabled={rolePagination.currentPage === rolePagination.totalPages}
                                     >
-                                        <ChevronRight className="h-4 w-4" />
+                                        <ChevronRight className="size-4" />
                                     </Button>
                                 </div>
                             </Card>
@@ -637,7 +637,7 @@ export default function RolesTableClient({ roles, permissions, allPermissions = 
                 <TabsContent value="permissions" className="space-y-4">
                     <div className="flex flex-col sm:flex-row justify-between gap-4 mb-4">
                         <div className="relative w-full sm:w-72">
-                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                            <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
                             <Input
                                 placeholder="Search permissions..."
                                 className="pl-9"
@@ -646,7 +646,7 @@ export default function RolesTableClient({ roles, permissions, allPermissions = 
                             />
                         </div>
                         <Button onClick={openPermCreate}>
-                            <Plus className="h-4 w-4 mr-2" />
+                            <Plus className="size-4 mr-2" />
                             Create Permission
                         </Button>
                     </div>
@@ -679,7 +679,7 @@ export default function RolesTableClient({ roles, permissions, allPermissions = 
                                                 <TableCell>
                                                     <div className="flex gap-2">
                                                         <Button size="sm" variant="ghost" onClick={() => openPermEdit(permission)}>
-                                                            <Edit className="h-4 w-4" />
+                                                            <Edit className="size-4" />
                                                         </Button>
                                                         <Button
                                                             size="sm"
@@ -687,7 +687,7 @@ export default function RolesTableClient({ roles, permissions, allPermissions = 
                                                             onClick={() => handlePermDelete(permission.id)}
                                                             disabled={isDeletingPerm === permission.id}
                                                         >
-                                                            {isDeletingPerm === permission.id ? <Spinner className="h-4 w-4" /> : <Trash2 className="h-4 w-4" />}
+                                                            {isDeletingPerm === permission.id ? <Spinner className="size-4" /> : <Trash2 className="size-4" />}
                                                         </Button>
                                                     </div>
                                                 </TableCell>
@@ -715,7 +715,7 @@ export default function RolesTableClient({ roles, permissions, allPermissions = 
                                         }}
                                         disabled={permissionPagination.currentPage === 1}
                                     >
-                                        <ChevronLeft className="h-4 w-4 mr-1" />
+                                        <ChevronLeft className="size-4 mr-1" />
                                         Previous
                                     </Button>
                                     <div className="hidden sm:flex items-center gap-1">
@@ -761,7 +761,7 @@ export default function RolesTableClient({ roles, permissions, allPermissions = 
                                         disabled={permissionPagination.currentPage === permissionPagination.totalPages}
                                     >
                                         Next
-                                        <ChevronRight className="h-4 w-4 ml-1" />
+                                        <ChevronRight className="size-4 ml-1" />
                                     </Button>
                                 </div>
                             </div>
@@ -782,7 +782,7 @@ export default function RolesTableClient({ roles, permissions, allPermissions = 
                                     <CardContent className="p-4 space-y-3">
                                         <div>
                                             <div className="flex items-center gap-2 mb-1">
-                                                <Key className="h-4 w-4 text-muted-foreground" />
+                                                <Key className="size-4 text-muted-foreground" />
                                                 <h3 className="font-semibold text-lg">{permission.name}</h3>
                                             </div>
                                             <p className="text-sm text-muted-foreground">
@@ -797,7 +797,7 @@ export default function RolesTableClient({ roles, permissions, allPermissions = 
                                                 className="flex-1"
                                                 onClick={() => openPermEdit(permission)}
                                             >
-                                                <Edit className="h-4 w-4 mr-2" />
+                                                <Edit className="size-4 mr-2" />
                                                 Edit
                                             </Button>
                                             <Button
@@ -807,7 +807,7 @@ export default function RolesTableClient({ roles, permissions, allPermissions = 
                                                 onClick={() => handlePermDelete(permission.id)}
                                                 disabled={isDeletingPerm === permission.id}
                                             >
-                                                {isDeletingPerm === permission.id ? <Spinner className="h-4 w-4 mr-2" /> : <Trash2 className="h-4 w-4 mr-2" />}
+                                                {isDeletingPerm === permission.id ? <Spinner className="size-4 mr-2" /> : <Trash2 className="size-4 mr-2" />}
                                                 Delete
                                             </Button>
                                         </div>
@@ -830,7 +830,7 @@ export default function RolesTableClient({ roles, permissions, allPermissions = 
                                         }}
                                         disabled={permissionPagination.currentPage === 1}
                                     >
-                                        <ChevronLeft className="h-4 w-4" />
+                                        <ChevronLeft className="size-4" />
                                     </Button>
                                     <span className="text-sm text-muted-foreground">
                                         Page {permissionPagination.currentPage} of {permissionPagination.totalPages}
@@ -845,7 +845,7 @@ export default function RolesTableClient({ roles, permissions, allPermissions = 
                                         }}
                                         disabled={permissionPagination.currentPage === permissionPagination.totalPages}
                                     >
-                                        <ChevronRight className="h-4 w-4" />
+                                        <ChevronRight className="size-4" />
                                     </Button>
                                 </div>
                             </Card>
@@ -892,7 +892,7 @@ export default function RolesTableClient({ roles, permissions, allPermissions = 
                         <div className="space-y-2">
                             <Label>Permissions</Label>
                             <div className="relative">
-                                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                                <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
                                 <Input
                                     placeholder="Search permissions..."
                                     className="pl-9 mb-2"
@@ -977,7 +977,7 @@ export default function RolesTableClient({ roles, permissions, allPermissions = 
                         <div className="space-y-2">
                             <Label>Permissions</Label>
                             <div className="relative">
-                                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                                <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
                                 <Input
                                     placeholder="Search permissions..."
                                     className="pl-9 mb-2"

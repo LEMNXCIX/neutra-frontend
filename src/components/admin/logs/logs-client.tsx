@@ -163,7 +163,7 @@ export function LogsClient({
                         System Logs
                     </h1>
                     <p className="text-muted-foreground font-medium text-sm flex items-center gap-2">
-                        <Activity className="h-4 w-4 text-primary" /> Real-time
+                        <Activity className="size-4 text-primary" /> Real-time
                         technical observability and system health
                     </p>
                 </div>
@@ -174,7 +174,7 @@ export function LogsClient({
                         className="h-11 px-6 rounded-xl font-bold shadow-md shadow-primary/10 transition-all hover:-translate-y-0.5"
                     >
                         <RefreshCcw
-                            className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`}
+                            className={`size-4 mr-2 ${loading ? "animate-spin" : ""}`}
                         />
                         Sync Logs
                     </Button>
@@ -325,7 +325,7 @@ export function LogsClient({
 
                 {/* Search Bar */}
                 <div className="relative group">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                     <input
                         type="text"
                         placeholder="Search by Trace ID, URL or Message content..."
@@ -336,7 +336,7 @@ export function LogsClient({
                     {searchTerm && (
                         <button
                             onClick={() => setSearchTerm("")}
-                            className="absolute right-4 top-1/2 -translate-y-1/2 h-6 w-6 flex items-center justify-center rounded-full bg-muted hover:bg-border transition-colors"
+                            className="absolute right-4 top-1/2 -translate-y-1/2 size-6 flex items-center justify-center rounded-full bg-muted hover:bg-border transition-colors"
                         >
                             <X size={12} />
                         </button>
@@ -400,7 +400,7 @@ export function LogsClient({
                                         className="h-64 text-center"
                                     >
                                         <div className="flex flex-col items-center justify-center gap-3 animate-pulse">
-                                            <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+                                            <div className="size-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
                                             <span className="text-sm font-semibold text-muted-foreground">
                                                 Loading Records...
                                             </span>
@@ -414,7 +414,7 @@ export function LogsClient({
                                         className="h-64 text-center"
                                     >
                                         <div className="flex flex-col items-center justify-center gap-2 opacity-40">
-                                            <Database className="h-12 w-12 mb-2" />
+                                            <Database className="size-12 mb-2" />
                                             <p className="font-semibold text-sm">
                                                 No entries match your search
                                             </p>
@@ -478,9 +478,9 @@ export function LogsClient({
                                             <Button
                                                 variant="ghost"
                                                 size="sm"
-                                                className="h-8 w-8 rounded-full p-0 opacity-0 group-hover:opacity-100 hover:bg-primary/10 hover:text-primary transition-all"
+                                                className="size-8 rounded-full p-0 opacity-0 group-hover:opacity-100 hover:bg-primary/10 hover:text-primary transition-all"
                                             >
-                                                <ArrowRight className="h-4 w-4" />
+                                                <ArrowRight className="size-4" />
                                             </Button>
                                         </TableCell>
                                     </TableRow>

@@ -72,11 +72,11 @@ export function FeaturesTable({ initialFeatures = [] }: FeaturesTableProps) {
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <h2 className="text-xl font-medium flex items-center gap-2">
-                    <Zap className="h-5 w-5 text-yellow-500" />
+                    <Zap className="size-5 text-yellow-500" />
                     Platform Features
                 </h2>
                 <Button onClick={openCreate}>
-                    <Plus className="h-4 w-4 mr-2" />
+                    <Plus className="size-4 mr-2" />
                     New Feature
                 </Button>
             </div>
@@ -85,7 +85,7 @@ export function FeaturesTable({ initialFeatures = [] }: FeaturesTableProps) {
                 <CardContent className="pt-6 space-y-4">
                     <div className="flex gap-2">
                         <div className="relative flex-1 max-w-sm">
-                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                            <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
                             <Input
                                 placeholder="Search features..."
                                 className="pl-9"
@@ -94,7 +94,7 @@ export function FeaturesTable({ initialFeatures = [] }: FeaturesTableProps) {
                             />
                         </div>
                         <Button variant="outline" size="icon" onClick={loadFeatures}>
-                            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+                            <RefreshCw className={`size-4 ${loading ? 'animate-spin' : ''}`} />
                         </Button>
                     </div>
 
@@ -139,17 +139,17 @@ export function FeaturesTable({ initialFeatures = [] }: FeaturesTableProps) {
                                             </TableCell>
                                             <TableCell>
                                                 <div className="flex items-center gap-1 font-bold text-green-600">
-                                                    <DollarSign className="h-3 w-3" />
+                                                    <DollarSign className="size-3" />
                                                     {feature.price.toFixed(2)}
                                                 </div>
                                             </TableCell>
                                             <TableCell className="text-right">
                                                 <div className="flex justify-end gap-2">
                                                     <Button variant="ghost" size="icon" onClick={() => openEdit(feature)}>
-                                                        <Edit className="h-4 w-4" />
+                                                        <Edit className="size-4" />
                                                     </Button>
                                                     <Button variant="ghost" size="icon" className="text-destructive" onClick={() => handleDelete(feature.id)}>
-                                                        <Trash2 className="h-4 w-4" />
+                                                        <Trash2 className="size-4" />
                                                     </Button>
                                                 </div>
                                             </TableCell>

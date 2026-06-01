@@ -2,6 +2,12 @@ import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { CheckCircle2, ArrowRight } from 'lucide-react';
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Returns & Refunds",
+  description: "Learn about our returns and refund policy",
+};
 
 export default function ReturnsPage() {
     return (
@@ -32,7 +38,7 @@ export default function ReturnsPage() {
                                     "Securely pack and dispatch the asset via an authorized node."
                                 ].map((step, i) => (
                                     <div key={i} className="flex gap-6 group">
-                                        <span className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold text-sm">
+                                        <span className="flex-shrink-0 size-8 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold text-sm">
                                             {i+1}
                                         </span>
                                         <span className="font-medium text-sm text-background/80 group-hover:text-background transition-colors pt-1.5">{step}</span>
@@ -54,7 +60,7 @@ export default function ReturnsPage() {
                                 "Assets designated as 'Final Sale' are ineligible for RMA protocols."
                             ].map((text, i) => (
                                 <li key={i} className="flex items-start gap-4 text-lg text-muted-foreground font-medium leading-relaxed group">
-                                    <CheckCircle2 className="w-6 h-6 text-primary shrink-0 mt-1 transition-transform group-hover:scale-110" />
+                                    <CheckCircle2 className="size-6 text-primary shrink-0 mt-1 transition-transform group-hover:scale-110" />
                                     <span className="group-hover:text-foreground transition-colors">{text}</span>
                                 </li>
                             ))}

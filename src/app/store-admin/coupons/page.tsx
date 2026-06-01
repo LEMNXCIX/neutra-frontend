@@ -3,6 +3,8 @@ import CouponsTableClient from "@/components/admin/coupons/CouponsTableClient";
 import { extractTokenFromCookies, validateAdminAccess } from "@/lib/server-auth";
 import { get as backendGet } from "../../../lib/backend-api";
 
+export const metadata = { title: "Coupons", };
+
 export const dynamic = 'force-dynamic';
 
 async function getCoupons(search: string, type: string, status: string, page: number, limit: number) {

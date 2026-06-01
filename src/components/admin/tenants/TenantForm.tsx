@@ -175,7 +175,7 @@ export function TenantForm({ tenant, onSuccess, onCancel, submitLabel, isWizard 
                         <div className="flex gap-2">
                             <Input
                                 type="color"
-                                className="w-12 h-12 p-1 cursor-pointer"
+                                className="size-12 p-1 cursor-pointer"
                                 value={formData.config?.branding?.primaryColor || "#000000"}
                                 onChange={(e) => updateConfig('branding', 'primaryColor', e.target.value)}
                             />

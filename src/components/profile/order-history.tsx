@@ -31,8 +31,8 @@ export function OrderHistory({ initialOrders }: OrderHistoryProps) {
         return (
             <Card className="text-center py-20 border-none shadow-xl rounded-[2rem] bg-muted/20">
                 <CardContent className="space-y-6">
-                    <div className="w-20 h-20 bg-background rounded-full flex items-center justify-center mx-auto shadow-sm">
-                        <ShoppingBag className="h-10 w-10 text-muted-foreground/40" />
+                    <div className="size-20 bg-background rounded-full flex items-center justify-center mx-auto shadow-sm">
+                        <ShoppingBag className="size-10 text-muted-foreground/40" />
                     </div>
                     <div className="space-y-2">
                         <h3 className="text-2xl font-bold tracking-tight">No orders yet</h3>
@@ -47,7 +47,7 @@ export function OrderHistory({ initialOrders }: OrderHistoryProps) {
     return (
         <div className="space-y-8">
             <h2 className="text-3xl font-bold tracking-tight flex items-center gap-3">
-                <ShoppingBag className="h-8 w-8 text-primary" /> Purchase History
+                <ShoppingBag className="size-8 text-primary" /> Purchase History
             </h2>
             <div className="space-y-6">
                 {orders.map((o) => (
@@ -55,8 +55,8 @@ export function OrderHistory({ initialOrders }: OrderHistoryProps) {
                         <CardHeader className="bg-muted/30 p-8 border-b border-border/50">
                             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                                 <div className="flex flex-wrap items-center gap-3">
-                                    <div className="w-12 h-12 bg-background rounded-2xl flex items-center justify-center shadow-sm">
-                                        <Package className="h-6 w-6 text-primary" />
+                                    <div className="size-12 bg-background rounded-2xl flex items-center justify-center shadow-sm">
+                                        <Package className="size-6 text-primary" />
                                     </div>
                                     <div>
                                         <CardTitle className="text-xl font-bold tracking-tight">Order #{o.id.slice(-6).toUpperCase()}</CardTitle>
@@ -72,15 +72,15 @@ export function OrderHistory({ initialOrders }: OrderHistoryProps) {
                         </CardHeader>
                         <CardContent className="p-8 space-y-6">
                             <div className="flex flex-wrap gap-8 text-sm font-medium">
-                                <span className="flex items-center gap-2 text-muted-foreground"><Calendar className="h-4 w-4 text-primary" /> {new Date(o.createdAt).toLocaleDateString()}</span>
-                                <span className="flex items-center gap-2 text-muted-foreground"><Package className="h-4 w-4 text-primary" /> {o.items.length} {o.items.length === 1 ? 'item' : 'items'} included</span>
+                                <span className="flex items-center gap-2 text-muted-foreground"><Calendar className="size-4 text-primary" /> {new Date(o.createdAt).toLocaleDateString()}</span>
+                                <span className="flex items-center gap-2 text-muted-foreground"><Package className="size-4 text-primary" /> {o.items.length} {o.items.length === 1 ? 'item' : 'items'} included</span>
                             </div>
                             <div className="flex gap-3">
                                 <Button variant="outline" size="lg" className="rounded-xl font-bold border-2 px-6 h-12 hover:bg-muted" onClick={() => setExpanded(expanded === o.id ? null : o.id)}>
                                     {expanded === o.id ? "Hide Summary" : "View Summary"}
                                 </Button>
                                 <Button variant="secondary" size="lg" className="rounded-xl font-bold px-6 h-12" asChild>
-                                    <a href={`/orders/${o.id}`} className="flex items-center gap-2"><Eye className="h-4 w-4" /> Full Details</a>
+                                    <a href={`/orders/${o.id}`} className="flex items-center gap-2"><Eye className="size-4" /> Full Details</a>
                                 </Button>
                             </div>
                             {expanded === o.id && (

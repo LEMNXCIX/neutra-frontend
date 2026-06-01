@@ -258,7 +258,7 @@ export default function AppointmentsTableClient({ appointments, stats, paginatio
                         <p className="text-xs text-muted-foreground mt-1">{description}</p>
                     </div>
                     <div className={`p-3 rounded-xl ${color}`}>
-                        <Icon className="w-6 h-6 text-white" />
+                        <Icon className="size-6 text-white" />
                     </div>
                 </div>
             </CardContent>
@@ -354,7 +354,7 @@ export default function AppointmentsTableClient({ appointments, stats, paginatio
                 {appointments.length === 0 ? (
                     <Card className="border-dashed t-card">
                         <CardContent className="p-12 text-center">
-                            <CalendarX className="h-12 w-12 mx-auto text-muted-foreground/30 mb-4" />
+                            <CalendarX className="size-12 mx-auto text-muted-foreground/30 mb-4" />
                             <p className="text-sm font-medium text-muted-foreground">No appointments found</p>
                         </CardContent>
                     </Card>
@@ -365,7 +365,7 @@ export default function AppointmentsTableClient({ appointments, stats, paginatio
                                 <div className="flex justify-between items-start">
                                     <div className="space-y-1">
                                         <div className="flex items-center gap-3">
-                                            <Avatar className="h-10 w-10 border border-border">
+                                            <Avatar className="size-10 border border-border">
                                                 <AvatarImage src={appointment.user?.profilePic} />
                                                 <AvatarFallback className="bg-primary text-primary-foreground text-xs font-bold">
                                                     {(appointment.user?.name || "G").slice(0, 2).toUpperCase()}
@@ -470,7 +470,7 @@ export default function AppointmentsTableClient({ appointments, stats, paginatio
                                         </TableCell>
                                         <TableCell>
                                             <div className="flex items-center gap-3">
-                                                <Avatar className="h-8 w-8 border border-border">
+                                                <Avatar className="size-8 border border-border">
                                                     <AvatarImage src={appointment.user?.profilePic} />
                                                     <AvatarFallback className="bg-primary/10 text-primary text-[10px] font-bold">
                                                         {(appointment.user?.name || "G").slice(0, 2).toUpperCase()}
@@ -484,7 +484,7 @@ export default function AppointmentsTableClient({ appointments, stats, paginatio
                                         </TableCell>
                                         <TableCell>
                                             <div className="flex items-center gap-2">
-                                                <Scissors className="w-3.5 h-3.5 text-primary opacity-60" />
+                                                <Scissors className="size-3.5 text-primary opacity-60" />
                                                 <span className="text-sm font-medium text-foreground">{appointment.service?.name || "Service"}</span>
                                             </div>
                                         </TableCell>
@@ -503,7 +503,7 @@ export default function AppointmentsTableClient({ appointments, stats, paginatio
                                                 <span className="font-bold text-sm text-foreground">${appointment.total > 0 ? appointment.total : appointment.service?.price}</span>
                                                 {appointment.discountAmount > 0 && (
                                                     <span className="text-[10px] font-bold text-emerald-600 flex items-center gap-0.5">
-                                                        <Tag className="w-2.5 h-2.5" />
+                                                        <Tag className="size-2.5" />
                                                         -${appointment.discountAmount}
                                                     </span>
                                                 )}
@@ -517,40 +517,40 @@ export default function AppointmentsTableClient({ appointments, stats, paginatio
                                                 <Button
                                                     size="icon"
                                                     variant="ghost"
-                                                    className="h-8 w-8 rounded-full hover:bg-primary/10 hover:text-primary transition-all"
+                                                    className="size-8 rounded-full hover:bg-primary/10 hover:text-primary transition-all"
                                                     onClick={() => {
                                                         setSelectedAppointment(appointment);
                                                         setDetailsOpen(true);
                                                     }}
                                                 >
-                                                    <Eye className="h-4 w-4" />
+                                                    <Eye className="size-4" />
                                                 </Button>
                                                 {appointment.status !== 'CANCELLED' && appointment.status !== 'COMPLETED' ? (
                                                     <Button
                                                         size="icon"
                                                         variant="ghost"
-                                                        className="h-8 w-8 rounded-full text-rose-500 hover:text-rose-600 hover:bg-rose-50 transition-all"
+                                                        className="size-8 rounded-full text-rose-500 hover:text-rose-600 hover:bg-rose-50 transition-all"
                                                         disabled={isCancelling === appointment.id}
                                                         onClick={() => handleCancel(appointment.id)}
                                                     >
                                                         {isCancelling === appointment.id ? (
                                                             <Spinner size="sm" />
                                                         ) : (
-                                                            <XCircle className="h-4 w-4" />
+                                                            <XCircle className="size-4" />
                                                         )}
                                                     </Button>
                                                 ) : (
                                                     <Button
                                                         size="icon"
                                                         variant="ghost"
-                                                        className="h-8 w-8 rounded-full text-muted-foreground hover:text-rose-600 hover:bg-rose-50 transition-all"
+                                                        className="size-8 rounded-full text-muted-foreground hover:text-rose-600 hover:bg-rose-50 transition-all"
                                                         disabled={isDeleting === appointment.id}
                                                         onClick={() => handleDelete(appointment.id)}
                                                     >
                                                         {isDeleting === appointment.id ? (
                                                             <Spinner size="sm" />
                                                         ) : (
-                                                            <Trash2 className="h-4 w-4" />
+                                                            <Trash2 className="size-4" />
                                                         )}
                                                     </Button>
                                                 )}
@@ -618,7 +618,7 @@ export default function AppointmentsTableClient({ appointments, stats, paginatio
                 <DialogContent className="max-w-lg bg-background border-muted">
                     <DialogHeader>
                         <DialogTitle className="text-xl font-bold flex items-center gap-2">
-                            <Clock className="w-5 h-5 text-blue-500" />
+                            <Clock className="size-5 text-blue-500" />
                             Appointment Details
                         </DialogTitle>
                     </DialogHeader>
@@ -637,7 +637,7 @@ export default function AppointmentsTableClient({ appointments, stats, paginatio
                                     <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Client Information</p>
                                     <div className="p-3 border rounded-lg bg-muted/30">
                                         <p className="font-bold flex items-center gap-2">
-                                            <User className="w-4 h-4 text-muted-foreground" />
+                                            <User className="size-4 text-muted-foreground" />
                                             {selectedAppointment.user?.name || "Guest Client"}
                                         </p>
                                         <p className="text-sm text-muted-foreground ml-6">{selectedAppointment.user?.email || "No email provided"}</p>
@@ -647,7 +647,7 @@ export default function AppointmentsTableClient({ appointments, stats, paginatio
                                 <div className="space-y-1">
                                     <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Service</p>
                                     <p className="font-medium flex items-center gap-2">
-                                        <Scissors className="w-4 h-4 text-muted-foreground" />
+                                        <Scissors className="size-4 text-muted-foreground" />
                                         {selectedAppointment.service?.name}
                                     </p>
                                     <p className="text-xs text-muted-foreground">{selectedAppointment.service?.duration} minutes - ${selectedAppointment.service?.price}</p>
@@ -658,7 +658,7 @@ export default function AppointmentsTableClient({ appointments, stats, paginatio
                                                 <span>${selectedAppointment.subtotal > 0 ? selectedAppointment.subtotal : selectedAppointment.service?.price}</span>
                                             </div>
                                             <div className="flex justify-between items-center text-sm text-green-600 dark:text-green-400 font-medium">
-                                                <span className="flex items-center gap-1"><Tag className="w-3 h-3" /> Discount {selectedAppointment.coupon ? `(${selectedAppointment.coupon.code})` : ''}:</span>
+                                                <span className="flex items-center gap-1"><Tag className="size-3" /> Discount {selectedAppointment.coupon ? `(${selectedAppointment.coupon.code})` : ''}:</span>
                                                 <span>-${selectedAppointment.discountAmount}</span>
                                             </div>
                                             <div className="border-t border-green-200 dark:border-green-800 my-1"></div>
@@ -705,7 +705,7 @@ export default function AppointmentsTableClient({ appointments, stats, paginatio
                                     <><Spinner className="mr-2" /> Confirming...</>
                                 ) : (
                                     <>
-                                        <CheckCircle2 className="w-4 h-4 mr-2" />
+                                        <CheckCircle2 className="size-4 mr-2" />
                                         Confirm Appointment
                                     </>
                                 )}
@@ -718,7 +718,7 @@ export default function AppointmentsTableClient({ appointments, stats, paginatio
                             disabled={isDeleting === selectedAppointment?.id}
                             className="bg-red-600 hover:bg-red-700"
                         >
-                            {isDeleting === selectedAppointment?.id ? <Spinner className="mr-2" /> : <Trash2 className="w-4 h-4 mr-2" />}
+                            {isDeleting === selectedAppointment?.id ? <Spinner className="mr-2" /> : <Trash2 className="size-4 mr-2" />}
                             Delete
                         </Button>
                     </DialogFooter>

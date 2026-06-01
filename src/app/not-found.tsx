@@ -10,8 +10,8 @@ export default function NotFound() {
         <div className="p-8 sm:p-12 text-center">
           {/* Icon */}
           <div className="mb-8">
-            <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 mb-4">
-              <PackageX className="h-12 w-12 text-primary" />
+            <div className="inline-flex items-center justify-center size-24 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 mb-4">
+              <PackageX className="size-12 text-primary" />
             </div>
           </div>
 
@@ -36,13 +36,13 @@ export default function NotFound() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" asChild className="h-12 px-6">
               <Link href="/">
-                <Home className="mr-2 h-5 w-5" />
+                <Home className="mr-2 size-5" />
                 Back to Home
               </Link>
             </Button>
             <Button size="lg" variant="outline" asChild className="h-12 px-6">
               <Link href="/products">
-                <Search className="mr-2 h-5 w-5" />
+                <Search className="mr-2 size-5" />
                 Browse Products
               </Link>
             </Button>

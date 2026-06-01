@@ -5,6 +5,8 @@ import { Permission } from "@/types/permission.types";
 import { get as backendGet } from "../../../lib/backend-api";
 import { extractTokenFromCookies, validateAdminAccess } from "@/lib/server-auth";
 
+export const metadata = { title: "Users", };
+
 export const dynamic = 'force-dynamic';
 
 async function getUsers(search: string, role: string, page: number, limit: number) {

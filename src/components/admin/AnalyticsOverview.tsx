@@ -70,7 +70,7 @@ export default function AnalyticsOverview() {
                   "px-1 py-0 border-none flex items-center gap-0.5 font-bold text-[10px]",
                   trend === 'up' ? "text-green-600" : "text-red-600"
                 )}>
-                  {trend === 'up' ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                  {trend === 'up' ? <TrendingUp className="size-3" /> : <TrendingDown className="size-3" />}
                   {trend === 'up' ? "+12%" : "-5%"}
                 </Badge>
               )}
@@ -80,7 +80,7 @@ export default function AnalyticsOverview() {
             )}
           </div>
           <div className={cn("p-2.5 rounded-xl transition-transform group-hover:scale-110 duration-500", color)}>
-            <Icon className="h-5 w-5 text-white" />
+            <Icon className="size-5 text-white" />
           </div>
         </div>
       </CardContent>
@@ -107,7 +107,7 @@ export default function AnalyticsOverview() {
                       <Skeleton className="h-9 w-28" />
                       <Skeleton className="h-3 w-40" />
                     </div>
-                    <Skeleton className="h-12 w-12 rounded-full" />
+                    <Skeleton className="size-12 rounded-full" />
                   </div>
                 </CardContent>
               </Card>
@@ -128,7 +128,7 @@ export default function AnalyticsOverview() {
                       <Skeleton className="h-9 w-20" />
                       <Skeleton className="h-3 w-44" />
                     </div>
-                    <Skeleton className="h-12 w-12 rounded-full" />
+                    <Skeleton className="size-12 rounded-full" />
                   </div>
                 </CardContent>
               </Card>
@@ -149,7 +149,7 @@ export default function AnalyticsOverview() {
                       <Skeleton className="h-9 w-24" />
                       <Skeleton className="h-3 w-48" />
                     </div>
-                    <Skeleton className="h-12 w-12 rounded-full" />
+                    <Skeleton className="size-12 rounded-full" />
                   </div>
                 </CardContent>
               </Card>
@@ -170,7 +170,7 @@ export default function AnalyticsOverview() {
                       <Skeleton className="h-9 w-24" />
                       <Skeleton className="h-3 w-36" />
                     </div>
-                    <Skeleton className="h-12 w-12 rounded-full" />
+                    <Skeleton className="size-12 rounded-full" />
                   </div>
                 </CardContent>
               </Card>

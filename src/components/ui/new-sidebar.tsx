@@ -153,10 +153,10 @@ export function SidebarTrigger() {
     <Button
       variant="ghost"
       size="icon"
-      className="h-9 w-9 p-0"
+      className="size-9 p-0"
       onClick={toggleSidebar}
     >
-      <PanelLeftIcon className="h-5 w-5" />
+      <PanelLeftIcon className="size-5" />
       <span className="sr-only">Toggle sidebar</span>
     </Button>
   )

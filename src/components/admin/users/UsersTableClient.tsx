@@ -210,7 +210,7 @@ export default function UsersTableClient({ users, stats, pagination, showTenant 
                         <p className="text-2xl font-bold mt-1">{value}</p>
                     </div>
                     <div className={`p-3 rounded-full ${color}`}>
-                        <Icon className="h-6 w-6 text-white" />
+                        <Icon className="size-6 text-white" />
                     </div>
                 </div>
             </CardContent>
@@ -240,7 +240,7 @@ export default function UsersTableClient({ users, stats, pagination, showTenant 
                 <AccordionItem value="stats" className="border rounded-lg">
                     <AccordionTrigger className="px-4 hover:no-underline">
                         <div className="flex items-center gap-3">
-                            <Users className="h-5 w-5 text-muted-foreground" />
+                            <Users className="size-5 text-muted-foreground" />
                             <span className="font-medium">User Statistics</span>
                         </div>
                     </AccordionTrigger>
@@ -314,7 +314,7 @@ export default function UsersTableClient({ users, stats, pagination, showTenant 
                                 users.map((u) => (
                                     <TableRow key={u.id} className="group hover:bg-muted/50 transition-colors border-b border-border/50">
                                         <TableCell className="py-4">
-                                            <Avatar className="h-10 w-10 border border-border group-hover:border-primary/20 transition-all">
+                                            <Avatar className="size-10 border border-border group-hover:border-primary/20 transition-all">
                                                 <AvatarImage src={u.profilePic || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}`} />
                                                 <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
                                                     {u.name.slice(0, 2).toUpperCase()}
@@ -341,19 +341,19 @@ export default function UsersTableClient({ users, stats, pagination, showTenant 
                                         </TableCell>
                                         <TableCell className="text-right">
                                             <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <Button size="icon" variant="ghost" className="h-8 w-8 rounded-full hover:bg-primary/5 hover:text-primary" onClick={() => openEdit(u)}>
-                                                    <Edit className="h-4 w-4" />
+                                                <Button size="icon" variant="ghost" className="size-8 rounded-full hover:bg-primary/5 hover:text-primary" onClick={() => openEdit(u)}>
+                                                    <Edit className="size-4" />
                                                 </Button>
                                                 <Button
                                                     size="icon"
                                                     variant="ghost"
-                                                    className="h-8 w-8 rounded-full hover:bg-primary/5 hover:text-primary"
+                                                    className="size-8 rounded-full hover:bg-primary/5 hover:text-primary"
                                                     onClick={() => {
                                                         setSelectedUser(u);
                                                         setRoleDialogOpen(true);
                                                     }}
                                                 >
-                                                    <UserCog className="h-4 w-4" />
+                                                    <UserCog className="size-4" />
                                                 </Button>
                                             </div>
                                         </TableCell>
@@ -377,7 +377,7 @@ export default function UsersTableClient({ users, stats, pagination, showTenant 
                                 onClick={() => handlePageChange(pagination.currentPage - 1)}
                                 disabled={pagination.currentPage === 1}
                             >
-                                <ChevronLeft className="h-4 w-4 mr-1" />
+                                <ChevronLeft className="size-4 mr-1" />
                                 Previous
                             </Button>
                             <div className="hidden sm:flex items-center gap-1">
@@ -415,7 +415,7 @@ export default function UsersTableClient({ users, stats, pagination, showTenant 
                                 disabled={pagination.currentPage === pagination.totalPages || pagination.totalPages === 0}
                             >
                                 Next
-                                <ChevronRight className="h-4 w-4 ml-1" />
+                                <ChevronRight className="size-4 ml-1" />
                             </Button>
                         </div>
                     </div>
@@ -428,7 +428,7 @@ export default function UsersTableClient({ users, stats, pagination, showTenant 
                     <Card key={u.id} className="t-card overflow-hidden">
                         <CardContent className="p-6 space-y-6">
                             <div className="flex items-center gap-4">
-                                <Avatar className="h-14 w-14 border border-border shadow-sm">
+                                <Avatar className="size-14 border border-border shadow-sm">
                                     <AvatarImage src={u.profilePic || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}`} />
                                     <AvatarFallback className="bg-primary/10 text-primary font-bold text-lg">
                                         {u.name.slice(0, 2).toUpperCase()}
@@ -485,7 +485,7 @@ export default function UsersTableClient({ users, stats, pagination, showTenant 
                                 onClick={() => handlePageChange(pagination.currentPage - 1)}
                                 disabled={pagination.currentPage === 1}
                             >
-                                <ChevronLeft className="h-4 w-4" />
+                                <ChevronLeft className="size-4" />
                             </Button>
                             <span className="text-sm text-muted-foreground">
                                 Page {pagination.currentPage} of {pagination.totalPages}
@@ -496,7 +496,7 @@ export default function UsersTableClient({ users, stats, pagination, showTenant 
                                 onClick={() => handlePageChange(pagination.currentPage + 1)}
                                 disabled={pagination.currentPage === pagination.totalPages || pagination.totalPages === 0}
                             >
-                                <ChevronRight className="h-4 w-4" />
+                                <ChevronRight className="size-4" />
                             </Button>
                         </div>
                     </Card>

@@ -3,6 +3,8 @@ import { cookies } from 'next/headers';
 import RolesTableClient from "@/components/admin/roles/RolesTableClient";
 import { Permission } from "@/types/permission.types";
 
+export const metadata = { title: "Roles Management", };
+
 export const dynamic = 'force-dynamic';
 
 const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001/api';

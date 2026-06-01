@@ -135,17 +135,17 @@ export function ProfileClient({ initialOrders, initialAppointments, isNeutral }:
               <div className="relative group">
                 <div className="absolute inset-0 bg-primary/20 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
                 {user.avatar ? (
-                  <img src={user.avatar} alt={user.name} className="relative z-10 w-32 h-32 rounded-full object-cover border border-border shadow-xl" />
+                  <img src={user.avatar} alt={user.name} className="relative z-10 size-32 rounded-full object-cover border border-border shadow-xl" />
                 ) : (
-                  <div className="relative z-10 w-32 h-32 bg-primary/10 text-primary rounded-full flex items-center justify-center shadow-lg border border-primary/20">
-                    <UserCircle className="h-20 w-20 opacity-90" />
+                  <div className="relative z-10 size-32 bg-primary/10 text-primary rounded-full flex items-center justify-center shadow-lg border border-primary/20">
+                    <UserCircle className="size-20 opacity-90" />
                   </div>
                 )}
                 <button 
                   onClick={openEditProfile}
                   className="absolute bottom-1 right-1 z-20 p-2.5 bg-background border border-border rounded-full shadow-lg hover:scale-110 active:scale-90 transition-all hover:border-primary/50"
                 >
-                  <Camera className="h-4 w-4 text-foreground" />
+                  <Camera className="size-4 text-foreground" />
                 </button>
               </div>
 
@@ -155,12 +155,12 @@ export function ProfileClient({ initialOrders, initialAppointments, isNeutral }:
                     <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground leading-none">{user.name}</h2>
                     {user.isAdmin && (
                       <Badge className="bg-foreground text-background font-bold text-[10px] tracking-widest px-4 py-1.5 rounded-full shadow-lg border-none">
-                        <Shield className="h-3 w-3 mr-2" /> ADMINISTRATOR
+                        <Shield className="size-3 mr-2" /> ADMINISTRATOR
                       </Badge>
                     )}
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground font-medium text-base">
-                    <Mail className="h-4 w-4 opacity-70" /> <span>{user.email}</span>
+                    <Mail className="size-4 opacity-70" /> <span>{user.email}</span>
                   </div>
                 </div>
                 
@@ -178,10 +178,10 @@ export function ProfileClient({ initialOrders, initialAppointments, isNeutral }:
 
               <div className="flex flex-col gap-3 w-full md:w-auto">
                 <Button onClick={openEditProfile} size="lg" className="h-14 px-10 rounded-2xl font-bold bg-foreground text-background hover:bg-foreground/90 shadow-xl shadow-foreground/10 transition-all hover:-translate-y-1">
-                  <Edit className="h-4 w-4 mr-2" /> Edit Profile
+                  <Edit className="size-4 mr-2" /> Edit Profile
                 </Button>
                 <Button variant="outline" size="lg" onClick={async () => { await logout(); router.push("/login"); }} className="h-14 px-10 rounded-2xl font-bold border-2 border-border hover:bg-destructive hover:text-destructive-foreground hover:border-destructive transition-all">
-                  <LogOut className="h-4 w-4 mr-2" /> Sign Out
+                  <LogOut className="size-4 mr-2" /> Sign Out
                 </Button>
               </div>
             </div>
@@ -206,7 +206,7 @@ export function ProfileClient({ initialOrders, initialAppointments, isNeutral }:
                 <div className="space-y-6 p-8">
                     <div className="flex flex-col items-center gap-4">
                         <div className="relative group">
-                            <Avatar className="w-24 h-24 border-2 border-border shadow-md group-hover:border-primary/30 transition-all">
+                            <Avatar className="size-24 border-2 border-border shadow-md group-hover:border-primary/30 transition-all">
                                 <AvatarImage src={avatarPreview || user.avatar} />
                                 <AvatarFallback className="bg-primary/10 text-primary text-2xl font-bold">
                                     {user.name.slice(0, 2).toUpperCase()}
@@ -216,7 +216,7 @@ export function ProfileClient({ initialOrders, initialAppointments, isNeutral }:
                                 onClick={() => fileInputRef.current?.click()} 
                                 className="absolute bottom-0 right-0 p-2 bg-primary text-primary-foreground rounded-full shadow-lg hover:scale-110 active:scale-95 transition-all"
                             >
-                                <Camera className="h-4 w-4" />
+                                <Camera className="size-4" />
                             </button>
                         </div>
                         <input ref={fileInputRef} type="file" accept="image/*" onChange={handleAvatarChange} className="hidden" />

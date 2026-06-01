@@ -24,8 +24,8 @@ export function EmptyState({
     <div className="flex flex-col items-center justify-center py-20 px-4 text-center animate-slide-up">
       <div className="relative mb-8">
         <div className="absolute inset-0 bg-primary/5 rounded-full scale-150 blur-2xl animate-pulse" />
-        <div className="relative w-24 h-24 bg-background border-2 border-border rounded-3xl flex items-center justify-center shadow-sm">
-          <Icon className="h-10 w-10 text-muted-foreground/40" strokeWidth={1.5} />
+        <div className="relative size-24 bg-background border-2 border-border rounded-3xl flex items-center justify-center shadow-sm">
+          <Icon className="size-10 text-muted-foreground/40" strokeWidth={1.5} />
         </div>
       </div>
       

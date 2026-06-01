@@ -224,7 +224,7 @@ export function Navigation({ minimal = false }: { minimal?: boolean }) {
                       className="w-full h-10 bg-muted/50 border border-transparent focus:border-primary/30 focus:bg-background px-4 pr-10 text-sm font-medium outline-none transition-all rounded-full"
                     />
                     <div className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors">
-                        {isSearching ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Search size={16} />}
+                        {isSearching ? <Loader2 className="size-3.5 animate-spin" /> : <Search size={16} />}
                     </div>
                   </div>
                 </form>
@@ -247,7 +247,7 @@ export function Navigation({ minimal = false }: { minimal?: boolean }) {
                               setQuery('');
                             }}
                           >
-                            <div className="w-12 h-12 bg-muted rounded-lg overflow-hidden shrink-0 border border-border/50">
+                            <div className="size-12 bg-muted rounded-lg overflow-hidden shrink-0 border border-border/50">
                               {product.image ? (
                                 <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
                               ) : (
@@ -272,7 +272,7 @@ export function Navigation({ minimal = false }: { minimal?: boolean }) {
                             }}
                             className="w-full text-xs font-bold text-primary hover:bg-primary/5 transition-all rounded-xl p-3 text-center"
                           >
-                            View all results <ArrowRight className="inline ml-1 w-3.5 h-3.5" />
+                            View all results <ArrowRight className="inline size-3.5" />
                           </button>
                         </div>
                       </div>
@@ -286,16 +286,16 @@ export function Navigation({ minimal = false }: { minimal?: boolean }) {
             {/* Admin Dashboard Link */}
             {user?.isAdmin && (
                 <Link href='/admin' className="p-2.5 hover:bg-muted transition-all rounded-full group">
-                    <LayoutDashboard className="w-5 h-5 opacity-70 group-hover:opacity-100 group-hover:text-primary transition-all" />
+                    <LayoutDashboard className="size-5 opacity-70 group-hover:opacity-100 group-hover:text-primary transition-all" />
                 </Link>
             )}
 
             {/* Cart */}
             {!minimal && (
                 <Link href='/cart' className="relative p-2.5 hover:bg-muted transition-all rounded-full group">
-                    <ShoppingBagIcon className="w-5 h-5 opacity-70 group-hover:opacity-100 group-hover:text-primary transition-all" />
+                    <ShoppingBagIcon className="size-5 opacity-70 group-hover:opacity-100 group-hover:text-primary transition-all" />
                     {count > 0 && (
-                    <span className="absolute top-1 right-1 inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px] font-bold w-4.5 h-4.5 border-2 border-background">
+                    <span className="absolute top-1 right-1 inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px] font-bold size-4.5 border-2 border-background">
                         {count}
                     </span>
                     )}
@@ -306,7 +306,7 @@ export function Navigation({ minimal = false }: { minimal?: boolean }) {
             {user ? (
                 <DropdownMenu>
                     <DropdownMenuTrigger className="ml-1 outline-none">
-                        <Avatar className="h-9 w-9 border border-border hover:border-primary/50 transition-all cursor-pointer shadow-sm">
+                        <Avatar className="size-9 border border-border hover:border-primary/50 transition-all cursor-pointer shadow-sm">
                             <AvatarImage src={user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}`} />
                             <AvatarFallback className="font-bold text-xs bg-primary/10 text-primary">{user.name.slice(0, 2).toUpperCase()}</AvatarFallback>
                         </Avatar>
@@ -342,9 +342,9 @@ export function Navigation({ minimal = false }: { minimal?: boolean }) {
                     <Button
                     variant="ghost"
                     size="icon"
-                    className="h-10 w-10 hover:bg-muted rounded-full"
+                    className="size-10 hover:bg-muted rounded-full"
                     >
-                    <Menu className="w-5 h-5" />
+                    <Menu className="size-5" />
                     </Button>
                 </SheetTrigger>
                 <SheetContent side="right" className="w-full sm:w-[380px] p-0 flex flex-col border-l border-border bg-background rounded-l-3xl">
@@ -425,7 +425,7 @@ export function Navigation({ minimal = false }: { minimal?: boolean }) {
                         {user ? (
                         <div className="space-y-6">
                             <div className="flex items-center gap-4 p-5 bg-card border border-border shadow-sm rounded-2xl">
-                                <Avatar className="h-12 w-12 border border-border">
+                                <Avatar className="size-12 border border-border">
                                     <AvatarImage src={user.avatar} />
                                     <AvatarFallback className="bg-primary/10 text-primary font-bold text-lg">
                                     {user.name.slice(0, 2).toUpperCase()}

@@ -87,7 +87,7 @@ export default function AdminMobileNav({ items }: AdminMobileNavProps) {
                                     : "text-muted-foreground hover:text-foreground font-medium"
                                 )}
                             >
-                                <Icon className={cn("w-4 h-4 mb-1", isActive ? "opacity-100" : "opacity-70")} />
+                                <Icon className={cn("size-4 mb-1", isActive ? "opacity-100" : "opacity-70")} />
                                 <span className={cn(
                                     "text-[9px] font-medium uppercase tracking-wider leading-none",
                                 )}>{label}</span>

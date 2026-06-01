@@ -3,6 +3,8 @@ import { cookies } from 'next/headers';
 import AppointmentsTableClient from "@/components/admin/appointments/AppointmentsTableClient";
 import { Appointment } from "@/services/booking.service";
 
+export const metadata = { title: "Appointments", };
+
 export const dynamic = 'force-dynamic';
 
 const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001/api';

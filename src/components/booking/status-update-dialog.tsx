@@ -59,7 +59,7 @@ export function StatusUpdateDialog({
             <DialogTrigger asChild>
                 {trigger || (
                     <Button variant={confirmButtonVariant} size="sm">
-                        {isApprove ? <CheckCircle className="h-4 w-4 mr-2" /> : <XCircle className="h-4 w-4 mr-2" />}
+                        {isApprove ? <CheckCircle className="size-4 mr-2" /> : <XCircle className="size-4 mr-2" />}
                         {isApprove ? "Aprobar" : "Rechazar"}
                     </Button>
                 )}
@@ -76,7 +76,7 @@ export function StatusUpdateDialog({
                         Cancelar
                     </Button>
                     <Button variant={confirmButtonVariant} onClick={handleUpdate} disabled={loading}>
-                        {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        {loading && <Loader2 className="mr-2 size-4 animate-spin" />}
                         Confirmar
                     </Button>
                 </DialogFooter>

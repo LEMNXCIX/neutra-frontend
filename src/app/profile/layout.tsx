@@ -1,4 +1,10 @@
 import { cookies } from 'next/headers';
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "My Profile",
+  description: "Manage your account and preferences",
+};
 import { BookingNavbar } from '@/components/booking/booking-navbar';
 import { Navigation as StoreNavbar } from '@/components/nav_bar';
 import FooterWrapper from '@/components/footer-wrapper';

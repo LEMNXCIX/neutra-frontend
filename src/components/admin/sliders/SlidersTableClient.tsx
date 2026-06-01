@@ -300,7 +300,7 @@ export default function SlidersTableClient({ sliders: initialSliders, stats, pag
                         <p className="text-2xl font-bold mt-1">{value}</p>
                     </div>
                     <div className={`p-3 rounded-full ${color}`}>
-                        <Icon className="h-6 w-6 text-white" />
+                        <Icon className="size-6 text-white" />
                     </div>
                 </div>
             </CardContent>
@@ -325,7 +325,7 @@ export default function SlidersTableClient({ sliders: initialSliders, stats, pag
                         </Select>
                     )}
                     <Button onClick={() => setCreateOpen(true)}>
-                        <Plus className="h-4 w-4 mr-2" />
+                        <Plus className="size-4 mr-2" />
                         Add Slider
                     </Button>
                 </div>
@@ -344,7 +344,7 @@ export default function SlidersTableClient({ sliders: initialSliders, stats, pag
                 <AccordionItem value="stats" className="border rounded-lg">
                     <AccordionTrigger className="px-4 hover:no-underline">
                         <div className="flex items-center gap-3">
-                            <ImageIcon className="h-5 w-5 text-muted-foreground" />
+                            <ImageIcon className="size-5 text-muted-foreground" />
                             <span className="font-medium">Slider Statistics</span>
                         </div>
                     </AccordionTrigger>
@@ -431,7 +431,7 @@ export default function SlidersTableClient({ sliders: initialSliders, stats, pag
                                                 </div>
                                             ) : (
                                                 <div className="w-24 h-14 bg-muted rounded-lg flex items-center justify-center border border-border">
-                                                    <ImageIcon className="h-5 w-5 text-muted-foreground/40" />
+                                                    <ImageIcon className="size-5 text-muted-foreground/40" />
                                                 </div>
                                             )}
                                         </TableCell>
@@ -459,11 +459,11 @@ export default function SlidersTableClient({ sliders: initialSliders, stats, pag
                                         </TableCell>
                                         <TableCell className="text-right">
                                             <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <Button size="icon" variant="ghost" className="h-8 w-8 rounded-full hover:bg-primary/5 hover:text-primary" onClick={() => openEdit(s)} disabled={isDeleting === s.id}>
-                                                    {isDeleting === s.id ? <Spinner className="h-4 w-4" /> : <Edit className="h-4 w-4" />}
+                                                <Button size="icon" variant="ghost" className="size-8 rounded-full hover:bg-primary/5 hover:text-primary" onClick={() => openEdit(s)} disabled={isDeleting === s.id}>
+                                                    {isDeleting === s.id ? <Spinner className="size-4" /> : <Edit className="size-4" />}
                                                 </Button>
-                                                <Button size="icon" variant="ghost" className="h-8 w-8 rounded-full hover:text-destructive hover:bg-destructive/10" onClick={() => deleteSlider(s.id)} disabled={isDeleting === s.id}>
-                                                    {isDeleting === s.id ? <Spinner className="h-4 w-4" /> : <Trash2 className="h-4 w-4" />}
+                                                <Button size="icon" variant="ghost" className="size-8 rounded-full hover:text-destructive hover:bg-destructive/10" onClick={() => deleteSlider(s.id)} disabled={isDeleting === s.id}>
+                                                    {isDeleting === s.id ? <Spinner className="size-4" /> : <Trash2 className="size-4" />}
                                                 </Button>
                                             </div>
                                         </TableCell>
@@ -487,7 +487,7 @@ export default function SlidersTableClient({ sliders: initialSliders, stats, pag
                                 onClick={() => handlePageChange(pagination.currentPage - 1)}
                                 disabled={pagination.currentPage === 1}
                             >
-                                <ChevronLeft className="h-4 w-4 mr-1" />
+                                <ChevronLeft className="size-4 mr-1" />
                                 Previous
                             </Button>
                             <div className="hidden sm:flex items-center gap-1">
@@ -502,7 +502,7 @@ export default function SlidersTableClient({ sliders: initialSliders, stats, pag
                                 disabled={pagination.currentPage === pagination.totalPages || pagination.totalPages === 0}
                             >
                                 Next
-                                <ChevronRight className="h-4 w-4 ml-1" />
+                                <ChevronRight className="size-4 ml-1" />
                             </Button>
                         </div>
                     </div>
@@ -525,7 +525,7 @@ export default function SlidersTableClient({ sliders: initialSliders, stats, pag
                                 </div>
                             ) : (
                                 <div className="w-full h-40 bg-muted flex items-center justify-center">
-                                    <ImageIcon className="h-10 w-10 text-muted-foreground/30" />
+                                    <ImageIcon className="size-10 text-muted-foreground/30" />
                                 </div>
                             )}
                             <div className="p-6 space-y-4">
@@ -545,11 +545,11 @@ export default function SlidersTableClient({ sliders: initialSliders, stats, pag
                                 </div>
                                 <div className="flex gap-2 pt-2 border-t border-border/50">
                                     <Button size="sm" variant="outline" className="flex-1 font-semibold h-10" onClick={() => openEdit(s)}>
-                                        <Edit className="h-4 w-4 mr-2" />
+                                        <Edit className="size-4 mr-2" />
                                         Edit
                                     </Button>
                                     <Button size="sm" variant="outline" className="flex-1 font-semibold h-10 text-rose-600 border-rose-100 hover:bg-rose-50" onClick={() => deleteSlider(s.id)}>
-                                        <Trash2 className="h-4 w-4 mr-2" />
+                                        <Trash2 className="size-4 mr-2" />
                                         Delete
                                     </Button>
                                 </div>
@@ -568,7 +568,7 @@ export default function SlidersTableClient({ sliders: initialSliders, stats, pag
                                 onClick={() => handlePageChange(pagination.currentPage - 1)}
                                 disabled={pagination.currentPage === 1}
                             >
-                                <ChevronLeft className="h-4 w-4" />
+                                <ChevronLeft className="size-4" />
                             </Button>
                             <span className="text-sm text-muted-foreground">
                                 Page {pagination.currentPage} of {pagination.totalPages}
@@ -579,7 +579,7 @@ export default function SlidersTableClient({ sliders: initialSliders, stats, pag
                                 onClick={() => handlePageChange(pagination.currentPage + 1)}
                                 disabled={pagination.currentPage === pagination.totalPages || pagination.totalPages === 0}
                             >
-                                <ChevronRight className="h-4 w-4" />
+                                <ChevronRight className="size-4" />
                             </Button>
                         </div>
                     </Card>

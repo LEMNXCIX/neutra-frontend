@@ -2,6 +2,12 @@ import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { ServicesGrid } from '@/components/booking/services-grid';
 import { cookies } from 'next/headers';
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Services",
+  description: "Browse available booking services",
+};
 
 export const dynamic = 'force-dynamic';
 

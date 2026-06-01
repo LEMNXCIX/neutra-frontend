@@ -149,7 +149,7 @@ export default function AnalyticsCharts() {
             <div className="flex items-center justify-between">
               <CardTitle className="text-base font-medium text-muted-foreground">Weekly Revenue</CardTitle>
               <div className="p-2 rounded-lg bg-green-500/10">
-                <DollarSign className="h-5 w-5 text-green-600 dark:text-green-400" />
+                <DollarSign className="size-5 text-green-600 dark:text-green-400" />
               </div>
             </div>
           </CardHeader>
@@ -159,7 +159,7 @@ export default function AnalyticsCharts() {
                 <span className="text-4xl font-bold">${last7Revenue.toFixed(0)}</span>
                 {revenueTrend !== 0 && (
                   <div className={`flex items-center gap-1 text-sm font-medium ${revenueTrend > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {revenueTrend > 0 ? <ArrowUpRight className="h-4 w-4" /> : <ArrowDownRight className="h-4 w-4" />}
+                    {revenueTrend > 0 ? <ArrowUpRight className="size-4" /> : <ArrowDownRight className="size-4" />}
                     {Math.abs(revenueTrend).toFixed(1)}%
                   </div>
                 )}
@@ -191,7 +191,7 @@ export default function AnalyticsCharts() {
             <div className="flex items-center justify-between">
               <CardTitle className="text-base font-medium text-muted-foreground">Weekly Orders</CardTitle>
               <div className="p-2 rounded-lg bg-blue-500/10">
-                <ShoppingCart className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                <ShoppingCart className="size-5 text-blue-600 dark:text-blue-400" />
               </div>
             </div>
           </CardHeader>
@@ -201,7 +201,7 @@ export default function AnalyticsCharts() {
                 <span className="text-4xl font-bold">{last7Orders}</span>
                 {ordersTrend !== 0 && (
                   <div className={`flex items-center gap-1 text-sm font-medium ${ordersTrend > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {ordersTrend > 0 ? <ArrowUpRight className="h-4 w-4" /> : <ArrowDownRight className="h-4 w-4" />}
+                    {ordersTrend > 0 ? <ArrowUpRight className="size-4" /> : <ArrowDownRight className="size-4" />}
                     {Math.abs(ordersTrend).toFixed(1)}%
                   </div>
                 )}
@@ -234,7 +234,7 @@ export default function AnalyticsCharts() {
         <Card className="overflow-hidden border-none shadow-md hover:shadow-lg transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between pb-3">
             <CardTitle className="text-base font-medium">Top Products by Revenue</CardTitle>
-            <Package className="h-5 w-5 text-muted-foreground" />
+            <Package className="size-5 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             {topProducts.length ? (
@@ -243,7 +243,7 @@ export default function AnalyticsCharts() {
                   <div key={index} className="space-y-2">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2 flex-1 min-w-0">
-                        <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-semibold text-primary">
+                        <span className="flex-shrink-0 size-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-semibold text-primary">
                           {index + 1}
                         </span>
                         <span className="font-medium text-sm truncate" title={product.name}>
@@ -270,7 +270,7 @@ export default function AnalyticsCharts() {
         <Card className="overflow-hidden border-none shadow-md hover:shadow-lg transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between pb-3">
             <CardTitle className="text-base font-medium">Recent Orders</CardTitle>
-            <ShoppingCart className="h-5 w-5 text-muted-foreground" />
+            <ShoppingCart className="size-5 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             {recentOrders.length ? (

@@ -41,8 +41,8 @@ export default function BannerBar() {
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           {/* Left content */}
           <div className="flex items-center gap-6 flex-1 text-center md:text-left">
-            <div className="hidden sm:flex items-center justify-center w-12 h-12 bg-background/10 backdrop-blur-md text-background rounded-xl border border-white/10">
-              <Sparkles className="h-6 w-6 stroke-[2px]" />
+            <div className="hidden sm:flex items-center justify-center size-12 bg-background/10 backdrop-blur-md text-background rounded-xl border border-white/10">
+              <Sparkles className="size-6 stroke-[2px]" />
             </div>
             <div className="space-y-0.5">
               <div className="text-2xl md:text-3xl font-black tracking-tight uppercase leading-none italic">
@@ -76,10 +76,10 @@ export default function BannerBar() {
 
             <button
               onClick={() => setVisibleId(null)}
-              className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10 transition-all active:scale-90"
+              className="size-10 flex items-center justify-center rounded-full hover:bg-white/10 transition-all active:scale-90"
               aria-label="Dismiss banner"
             >
-              <X className="h-5 w-5 opacity-40 hover:opacity-100" />
+              <X className="size-5 opacity-40 hover:opacity-100" />
             </button>
           </div>
         </div>

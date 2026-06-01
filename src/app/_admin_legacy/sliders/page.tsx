@@ -3,6 +3,8 @@ import SlidersTableClient from "@/components/admin/sliders/SlidersTableClient";
 import { extractTokenFromCookies, getCookieString } from "@/lib/server-auth";
 import { getBackendUrl } from "@/lib/backend-api";
 
+export const metadata = { title: "Sliders Management", };
+
 export const dynamic = 'force-dynamic';
 
 async function getSliders(search: string, status: string, page: number, limit: number) {

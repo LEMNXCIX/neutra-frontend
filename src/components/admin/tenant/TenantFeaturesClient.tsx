@@ -128,7 +128,7 @@ export default function TenantFeaturesClient({ activeTenantId }: TenantFeaturesC
     if (loadingTenants) {
         return (
             <div className="flex justify-center items-center h-64">
-                <Spinner className="h-8 w-8" />
+                <Spinner className="size-8" />
             </div>
         );
     }
@@ -145,7 +145,7 @@ export default function TenantFeaturesClient({ activeTenantId }: TenantFeaturesC
                 </div>
                 {selectedTenantId && (
                     <Button onClick={handleSave} disabled={saving || loadingFeatures}>
-                        {saving ? <><Spinner className="mr-2 h-4 w-4" /> Saving...</> : <><Save className="mr-2 h-4 w-4" /> Save Changes</>}
+                        {saving ? <><Spinner className="mr-2 size-4" /> Saving...</> : <><Save className="mr-2 size-4" /> Save Changes</>}
                     </Button>
                 )}
             </div>
@@ -155,7 +155,7 @@ export default function TenantFeaturesClient({ activeTenantId }: TenantFeaturesC
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
-                            <Building className="h-5 w-5" />
+                            <Building className="size-5" />
                             Select Tenant
                         </CardTitle>
                         <CardDescription>
@@ -185,7 +185,7 @@ export default function TenantFeaturesClient({ activeTenantId }: TenantFeaturesC
             {selectedTenantId ? (
                 loadingFeatures ? (
                     <div className="flex justify-center items-center h-40">
-                        <Spinner className="h-8 w-8" />
+                        <Spinner className="size-8" />
                     </div>
                 ) : (
                     availableFeatures.length === 0 ? (
@@ -197,7 +197,7 @@ export default function TenantFeaturesClient({ activeTenantId }: TenantFeaturesC
                             <Card>
                                 <CardHeader>
                                     <CardTitle className="flex items-center gap-2">
-                                        <Settings className="h-5 w-5" />
+                                        <Settings className="size-5" />
                                         Available Features
                                     </CardTitle>
                                     <CardDescription>

@@ -5,6 +5,8 @@ import { Role } from "@/types/role.types";
 import { get as backendGet } from "../../../lib/backend-api";
 import { extractTokenFromCookies, validateAdminAccess } from "@/lib/server-auth";
 
+export const metadata = { title: "Store Roles", };
+
 export const dynamic = 'force-dynamic';
 
 async function getRolesAndPermissions(rolePage: number, permissionPage: number, roleSearch?: string, permissionSearch?: string) {

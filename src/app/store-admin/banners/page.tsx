@@ -3,6 +3,8 @@ import BannersTableClient from "@/components/admin/banners/BannersTableClient";
 import { extractTokenFromCookies, validateAdminAccess } from "@/lib/server-auth";
 import { get as backendGet } from "../../../lib/backend-api";
 
+export const metadata = { title: "Banners", };
+
 export const dynamic = 'force-dynamic';
 
 async function getBanners() {

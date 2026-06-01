@@ -3,6 +3,8 @@ import CategoriesTableClient from "@/components/admin/categories/CategoriesTable
 import { extractTokenFromCookies, getCookieString } from "@/lib/server-auth";
 import { getBackendUrl } from "@/lib/backend-api";
 
+export const metadata = { title: "Categories Management", };
+
 export const dynamic = 'force-dynamic';
 
 async function getCategories() {

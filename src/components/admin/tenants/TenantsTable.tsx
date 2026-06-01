@@ -94,11 +94,11 @@ export function TenantsTable({ initialTenants = [] }: TenantsTableProps) {
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <h2 className="text-xl font-medium flex items-center gap-2">
-                    <Building className="h-5 w-5" />
+                    <Building className="size-5" />
                     Tenants
                 </h2>
                 <Button onClick={openCreate}>
-                    <Plus className="h-4 w-4 mr-2" />
+                    <Plus className="size-4 mr-2" />
                     New Tenant
                 </Button>
             </div>
@@ -107,7 +107,7 @@ export function TenantsTable({ initialTenants = [] }: TenantsTableProps) {
                 <CardContent className="pt-6 space-y-4">
                     <div className="flex gap-2">
                         <div className="relative flex-1 max-w-sm">
-                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                            <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
                             <Input
                                 placeholder="Search tenants..."
                                 className="pl-9"
@@ -116,7 +116,7 @@ export function TenantsTable({ initialTenants = [] }: TenantsTableProps) {
                             />
                         </div>
                         <Button variant="outline" size="icon" onClick={loadTenants}>
-                            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+                            <RefreshCw className={`size-4 ${loading ? 'animate-spin' : ''}`} />
                         </Button>
                     </div>
 
@@ -167,10 +167,10 @@ export function TenantsTable({ initialTenants = [] }: TenantsTableProps) {
                                                         onClick={() => openFeatures(tenant)}
                                                         title="Manage Features"
                                                     >
-                                                        <Settings className="h-4 w-4" />
+                                                        <Settings className="size-4" />
                                                     </Button>
                                                     <Button variant="ghost" size="icon" onClick={() => openEdit(tenant)}>
-                                                        <Edit className="h-4 w-4" />
+                                                        <Edit className="size-4" />
                                                     </Button>
                                                     <Button
                                                         variant="ghost"
@@ -178,7 +178,7 @@ export function TenantsTable({ initialTenants = [] }: TenantsTableProps) {
                                                         onClick={() => handleDelete(tenant)}
                                                         className="text-destructive hover:text-destructive"
                                                     >
-                                                        <Trash2 className="h-4 w-4" />
+                                                        <Trash2 className="size-4" />
                                                     </Button>
                                                 </div>
                                             </TableCell>
@@ -211,10 +211,10 @@ export function TenantsTable({ initialTenants = [] }: TenantsTableProps) {
                                                     onClick={() => openFeatures(tenant)}
                                                     title="Manage Features"
                                                 >
-                                                    <Settings className="h-4 w-4" />
+                                                    <Settings className="size-4" />
                                                 </Button>
                                                 <Button variant="ghost" size="icon" onClick={() => openEdit(tenant)}>
-                                                    <Edit className="h-4 w-4" />
+                                                    <Edit className="size-4" />
                                                 </Button>
                                                 <Button
                                                     variant="ghost"
@@ -222,7 +222,7 @@ export function TenantsTable({ initialTenants = [] }: TenantsTableProps) {
                                                     onClick={() => handleDelete(tenant)}
                                                     className="text-destructive hover:text-destructive"
                                                 >
-                                                    <Trash2 className="h-4 w-4" />
+                                                    <Trash2 className="size-4" />
                                                 </Button>
                                             </div>
                                         </div>

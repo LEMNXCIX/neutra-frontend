@@ -4,6 +4,12 @@ import { redirect } from "next/navigation";
 import { ProfileClient } from "@/components/profile/profile-client";
 import { authService } from "@/services/auth.service";
 import { getBackendUrl } from "@/lib/backend-api";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "My Profile",
+  description: "Manage your account settings and preferences",
+};
 
 export const dynamic = 'force-dynamic';
 

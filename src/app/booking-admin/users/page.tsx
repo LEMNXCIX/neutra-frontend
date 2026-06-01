@@ -3,6 +3,8 @@ import { cookies } from 'next/headers';
 import UsersTableClient from "@/components/admin/users/UsersTableClient";
 import { User } from "@/types/user.types";
 
+export const metadata = { title: "Booking Users", };
+
 export const dynamic = 'force-dynamic';
 
 const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001/api';

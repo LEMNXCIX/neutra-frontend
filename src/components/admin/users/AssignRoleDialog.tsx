@@ -110,7 +110,7 @@ export function AssignRoleDialog({
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
-                        <UserCog className="h-5 w-5" />
+                        <UserCog className="size-5" />
                         Assign Role
                     </DialogTitle>
                     <DialogDescription>
@@ -125,7 +125,7 @@ export function AssignRoleDialog({
                 <div className="space-y-4 py-4">
                     {loadingRoles ? (
                         <div className="flex items-center justify-center py-8">
-                            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                            <Loader2 className="size-6 animate-spin text-muted-foreground" />
                         </div>
                     ) : (
                         <div className="space-y-2">
@@ -179,7 +179,7 @@ export function AssignRoleDialog({
                         onClick={handleAssign}
                         disabled={loading || !selectedRoleId || loadingRoles}
                     >
-                        {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        {loading && <Loader2 className="mr-2 size-4 animate-spin" />}
                         Assign Role
                     </Button>
                 </DialogFooter>

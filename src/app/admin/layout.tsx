@@ -2,8 +2,14 @@ import React from "react";
 import SuperAdminSidebar from "@/components/admin/SuperAdminSidebar";
 import SuperAdminMobileNav from "@/components/admin/SuperAdminMobileNav";
 import { SUPER_ADMIN_NAV } from "@/config/admin-navigation";
+import type { Metadata } from "next";
 
 import { NeutralNavigation } from "@/components/neutral-navigation";
+
+export const metadata: Metadata = {
+  title: "Super Admin",
+  description: "Super administration dashboard",
+};
 
 export default function AdminLayout({
     children,

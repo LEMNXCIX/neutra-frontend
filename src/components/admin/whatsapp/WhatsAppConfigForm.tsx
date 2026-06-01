@@ -69,7 +69,7 @@ export function WhatsAppConfigForm() {
             <Card>
                 <CardHeader>
                     <div className="flex items-center gap-2">
-                        <MessageSquare className="h-6 w-6 text-green-600" />
+                        <MessageSquare className="size-6 text-green-600" />
                         <div>
                             <CardTitle>WhatsApp Business API</CardTitle>
                             <CardDescription>Configure your WhatsApp integration for notifications and bot.</CardDescription>
@@ -183,7 +183,7 @@ export function WhatsAppConfigForm() {
 
                     <div className="flex justify-end pt-6">
                         <Button onClick={handleSave} disabled={isSaving} className="w-full md:w-auto">
-                            {isSaving ? <><Spinner className="mr-2" /> Saving...</> : <><Save className="mr-2 h-4 w-4" /> Save Configuration</>}
+                            {isSaving ? <><Spinner className="mr-2" /> Saving...</> : <><Save className="mr-2 size-4" /> Save Configuration</>}
                         </Button>
                     </div>
                 </CardContent>

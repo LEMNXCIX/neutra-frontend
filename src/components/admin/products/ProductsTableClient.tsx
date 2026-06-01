@@ -284,7 +284,7 @@ export default function ProductsTableClient({ products, stats, pagination, categ
                         <p className="text-2xl font-bold mt-1">{value}</p>
                     </div>
                     <div className={`p-3 rounded-full ${color}`}>
-                        <Icon className="h-6 w-6 text-white" />
+                        <Icon className="size-6 text-white" />
                     </div>
                 </div>
             </CardContent>
@@ -296,7 +296,7 @@ export default function ProductsTableClient({ products, stats, pagination, categ
             <div className="flex justify-between items-center">
                 <h2 className="text-xl font-medium">Products Management</h2>
                 <Button onClick={() => setCreateOpen(true)}>
-                    <Plus className="h-4 w-4 mr-2" />
+                    <Plus className="size-4 mr-2" />
                     Add Product
                 </Button>
             </div>
@@ -313,7 +313,7 @@ export default function ProductsTableClient({ products, stats, pagination, categ
                 <AccordionItem value="stats" className="border rounded-lg">
                     <AccordionTrigger className="px-4 hover:no-underline">
                         <div className="flex items-center gap-3">
-                            <Package className="h-5 w-5 text-muted-foreground" />
+                            <Package className="size-5 text-muted-foreground" />
                             <span className="font-medium">Product Statistics</span>
                         </div>
                     </AccordionTrigger>
@@ -405,7 +405,7 @@ export default function ProductsTableClient({ products, stats, pagination, categ
                                     <TableRow key={p.id} className="group hover:bg-muted/50 transition-colors border-b border-border/50">
                                         <TableCell className="py-4">
                                             {p.image ? (
-                                                <div className="relative w-12 h-12 rounded-lg overflow-hidden shadow-sm border border-border group-hover:scale-110 transition-transform duration-500">
+                                                <div className="relative size-12 rounded-lg overflow-hidden shadow-sm border border-border group-hover:scale-110 transition-transform duration-500">
                                                     <Image
                                                         src={p.image}
                                                         alt={p.name}
@@ -414,8 +414,8 @@ export default function ProductsTableClient({ products, stats, pagination, categ
                                                     />
                                                 </div>
                                             ) : (
-                                                <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center border border-border">
-                                                    <Package className="h-5 w-5 text-muted-foreground/40" />
+                                                <div className="size-12 bg-muted rounded-lg flex items-center justify-center border border-border">
+                                                    <Package className="size-5 text-muted-foreground/40" />
                                                 </div>
                                             )}
                                         </TableCell>
@@ -448,11 +448,11 @@ export default function ProductsTableClient({ products, stats, pagination, categ
                                         <TableCell>{getStockBadge(p.stock || 0)}</TableCell>
                                         <TableCell className="text-right">
                                             <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <Button size="icon" variant="ghost" className="h-8 w-8 rounded-full hover:bg-primary/5 hover:text-primary" onClick={() => openEdit(p)}>
-                                                    <Edit className="h-4 w-4" />
+                                                <Button size="icon" variant="ghost" className="size-8 rounded-full hover:bg-primary/5 hover:text-primary" onClick={() => openEdit(p)}>
+                                                    <Edit className="size-4" />
                                                 </Button>
-                                                <Button size="icon" variant="ghost" className="h-8 w-8 rounded-full hover:bg-destructive/5 hover:text-destructive" onClick={() => deleteProduct(p.id)}>
-                                                    <Trash2 className="h-4 w-4" />
+                                                <Button size="icon" variant="ghost" className="size-8 rounded-full hover:bg-destructive/5 hover:text-destructive" onClick={() => deleteProduct(p.id)}>
+                                                    <Trash2 className="size-4" />
                                                 </Button>
                                             </div>
                                         </TableCell>
@@ -476,7 +476,7 @@ export default function ProductsTableClient({ products, stats, pagination, categ
                                 onClick={() => handlePageChange(pagination.currentPage - 1)}
                                 disabled={pagination.currentPage === 1}
                             >
-                                <ChevronLeft className="h-4 w-4 mr-1" />
+                                <ChevronLeft className="size-4 mr-1" />
                                 Previous
                             </Button>
                             <div className="hidden sm:flex items-center gap-1">
@@ -491,7 +491,7 @@ export default function ProductsTableClient({ products, stats, pagination, categ
                                 disabled={pagination.currentPage === pagination.totalPages || pagination.totalPages === 0}
                             >
                                 Next
-                                <ChevronRight className="h-4 w-4 ml-1" />
+                                <ChevronRight className="size-4 ml-1" />
                             </Button>
                         </div>
                     </div>
@@ -512,7 +512,7 @@ export default function ProductsTableClient({ products, stats, pagination, categ
                                 />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center">
-                                    <Package className="h-16 w-16 text-muted-foreground/30" />
+                                    <Package className="size-16 text-muted-foreground/30" />
                                 </div>
                             )}
                         </div>
@@ -527,11 +527,11 @@ export default function ProductsTableClient({ products, stats, pagination, categ
                             </div>
                             <div className="flex gap-2 pt-2 border-t border-border/50">
                                 <Button size="sm" variant="outline" className="flex-1 font-semibold h-10" onClick={() => openEdit(p)}>
-                                    <Edit className="h-4 w-4 mr-2" />
+                                    <Edit className="size-4 mr-2" />
                                     Edit
                                 </Button>
                                 <Button size="sm" variant="outline" className="flex-1 font-semibold h-10 text-rose-600 border-rose-100 hover:bg-rose-50" onClick={() => deleteProduct(p.id)} disabled={isDeleting === p.id}>
-                                    {isDeleting === p.id ? <Spinner className="h-4 w-4" /> : <Trash2 className="h-4 w-4 mr-2" />}
+                                    {isDeleting === p.id ? <Spinner className="size-4" /> : <Trash2 className="size-4 mr-2" />}
                                     Delete
                                 </Button>
                             </div>
@@ -549,7 +549,7 @@ export default function ProductsTableClient({ products, stats, pagination, categ
                                 onClick={() => handlePageChange(pagination.currentPage - 1)}
                                 disabled={pagination.currentPage === 1}
                             >
-                                <ChevronLeft className="h-4 w-4" />
+                                <ChevronLeft className="size-4" />
                             </Button>
                             <span className="text-sm text-muted-foreground">
                                 Page {pagination.currentPage} of {pagination.totalPages}
@@ -560,7 +560,7 @@ export default function ProductsTableClient({ products, stats, pagination, categ
                                 onClick={() => handlePageChange(pagination.currentPage + 1)}
                                 disabled={pagination.currentPage === pagination.totalPages || pagination.totalPages === 0}
                             >
-                                <ChevronRight className="h-4 w-4" />
+                                <ChevronRight className="size-4" />
                             </Button>
                         </div>
                     </Card>
@@ -624,19 +624,19 @@ export default function ProductsTableClient({ products, stats, pagination, categ
                                         <Button
                                             size="sm"
                                             variant="destructive"
-                                            className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0"
+                                            className="absolute -top-2 -right-2 size-6 rounded-full p-0"
                                             onClick={() => {
                                                 setPreview(null);
                                                 setForm({ ...form, imageBase64: "" });
                                             }}
                                         >
-                                            <X className="h-3 w-3" />
+                                            <X className="size-3" />
                                         </Button>
                                     </div>
                                 )}
                                 <label className="cursor-pointer">
                                     <div className="border-2 border-dashed rounded-lg p-4 hover:bg-muted/50 transition-colors">
-                                        <Upload className="h-6 w-6 mx-auto mb-1 text-muted-foreground" />
+                                        <Upload className="size-6 mx-auto mb-1 text-muted-foreground" />
                                         <p className="text-xs text-muted-foreground">Upload Image</p>
                                     </div>
                                     <input
@@ -715,19 +715,19 @@ export default function ProductsTableClient({ products, stats, pagination, categ
                                         <Button
                                             size="sm"
                                             variant="destructive"
-                                            className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0"
+                                            className="absolute -top-2 -right-2 size-6 rounded-full p-0"
                                             onClick={() => {
                                                 setPreview(null);
                                                 setForm({ ...form, imageBase64: "" });
                                             }}
                                         >
-                                            <X className="h-3 w-3" />
+                                            <X className="size-3" />
                                         </Button>
                                     </div>
                                 )}
                                 <label className="cursor-pointer">
                                     <div className="border-2 border-dashed rounded-lg p-4 hover:bg-muted/50 transition-colors">
-                                        <Upload className="h-6 w-6 mx-auto mb-1 text-muted-foreground" />
+                                        <Upload className="size-6 mx-auto mb-1 text-muted-foreground" />
                                         <p className="text-xs text-muted-foreground">Change Image</p>
                                     </div>
                                     <input

@@ -244,7 +244,7 @@ export default function StaffTableClient({
     if (loading) {
         return (
             <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
-                <Spinner className="h-8 w-8 text-primary" />
+                <Spinner className="size-8 text-primary" />
                 <p className="text-muted-foreground animate-pulse">Loading staff members...</p>
             </div>
         );
@@ -272,7 +272,7 @@ export default function StaffTableClient({
                         </Select>
                     )}
                     <Button onClick={openCreate} className="w-full sm:w-auto">
-                        <Plus className="h-4 w-4 mr-2" />
+                        <Plus className="size-4 mr-2" />
                         Add Staff Member
                     </Button>
                 </div>
@@ -281,14 +281,14 @@ export default function StaffTableClient({
             {staff.length === 0 ? (
                 <Card className="flex flex-col items-center justify-center py-12 px-4 text-center">
                     <div className="bg-muted rounded-full p-4 mb-4">
-                        <UserIcon className="h-8 w-8 text-muted-foreground" />
+                        <UserIcon className="size-8 text-muted-foreground" />
                     </div>
                     <CardTitle>No staff members found</CardTitle>
                     <CardDescription className="max-w-[400px] mt-2">
                         Add your first staff member to start managing appointments and services.
                     </CardDescription>
                     <Button variant="outline" className="mt-6" onClick={openCreate}>
-                        <Plus className="h-4 w-4 mr-2" />
+                        <Plus className="size-4 mr-2" />
                         Add Staff Member
                     </Button>
                 </Card>
@@ -297,7 +297,7 @@ export default function StaffTableClient({
                     {staff.map((member) => (
                         <Card key={member.id} className="overflow-hidden group hover:border-primary/50 transition-all active:scale-[0.98]">
                             <CardHeader className="flex flex-row items-start gap-4 space-y-0">
-                                <Avatar className="h-14 w-14 border-2 border-background group-hover:border-primary/20 transition-colors">
+                                <Avatar className="size-14 border-2 border-background group-hover:border-primary/20 transition-colors">
                                     <AvatarImage src={member.avatar} />
                                     <AvatarFallback className="bg-primary/10 text-primary">
                                         {member.name.split(' ').map(n => n[0]).join('').toUpperCase()}
@@ -324,13 +324,13 @@ export default function StaffTableClient({
                                 <div className="space-y-2">
                                     {member.email && (
                                         <div className="flex items-center text-sm text-muted-foreground">
-                                            <Mail className="h-4 w-4 mr-2 opacity-70" />
+                                            <Mail className="size-4 mr-2 opacity-70" />
                                             <span className="truncate">{member.email}</span>
                                         </div>
                                     )}
                                     {member.phone && (
                                         <div className="flex items-center text-sm text-muted-foreground">
-                                            <Phone className="h-4 w-4 mr-2 opacity-70" />
+                                            <Phone className="size-4 mr-2 opacity-70" />
                                             <span>{member.phone}</span>
                                         </div>
                                     )}
@@ -339,16 +339,16 @@ export default function StaffTableClient({
                             <CardFooter className="bg-muted/30 pt-4 flex justify-between gap-2">
                                 <div className="flex gap-2">
                                     <Button variant="ghost" size="sm" className="hover:bg-background" onClick={() => openEdit(member)}>
-                                        <Edit className="h-4 w-4 mr-2" />
+                                        <Edit className="size-4 mr-2" />
                                         Profile
                                     </Button>
                                     <Button variant="ghost" size="sm" className="hover:bg-background" onClick={() => openServiceAssignment(member)}>
-                                        <Scissors className="h-4 w-4 mr-2" />
+                                        <Scissors className="size-4 mr-2" />
                                         Services ({member.serviceIds?.length || 0})
                                     </Button>
                                 </div>
                                 <Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10 hover:text-destructive" onClick={() => handleDelete(member.id)}>
-                                    <Trash2 className="h-4 w-4" />
+                                    <Trash2 className="size-4" />
                                 </Button>
                             </CardFooter>
                         </Card>
@@ -494,8 +494,8 @@ export default function StaffTableClient({
                                                 <span>${service.price}</span>
                                             </div>
                                         </div>
-                                        <div className={`h-6 w-6 rounded-full border-2 flex items-center justify-center transition-all ${selectedServiceIds.includes(service.id) ? 'bg-primary border-primary text-primary-foreground' : 'border-muted-foreground/30'}`}>
-                                            {selectedServiceIds.includes(service.id) && <Check className="h-3.5 w-3.5" />}
+                                        <div className={`size-6 rounded-full border-2 flex items-center justify-center transition-all ${selectedServiceIds.includes(service.id) ? 'bg-primary border-primary text-primary-foreground' : 'border-muted-foreground/30'}`}>
+                                            {selectedServiceIds.includes(service.id) && <Check className="size-3.5" />}
                                         </div>
                                     </div>
                                 ))}

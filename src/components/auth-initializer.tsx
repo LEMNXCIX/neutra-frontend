@@ -1,38 +1,28 @@
 "use client";
 
 import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth-store';
 import { toast } from 'sonner';
 
-/**
- * AuthInitializer Component
- * 
- * Initializes authentication state and handles session validation
- * Also sets up global unauthorized event handler
- */
 export function AuthInitializer() {
-    const checkSession = useAuthStore((state) => state.checkSession);
-    const router = useRouter();
+  const checkSession = useAuthStore((state) => state.checkSession);
 
-    useEffect(() => {
-        // Check session on mount
-        checkSession();
+  useEffect(() => {
+    checkSession();
 
-        // Handle 401 unauthorized events from API calls
-        const handleUnauthorized = () => {
-            if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
-                router.push('/login');
-                toast.error('Your session has expired. Please login again.');
-            }
-        };
+    const handleUnauthorized = () => {
+      if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+        toast.error('Your session has expired. Please login again.');
+        window.location.href = '/login';
+      }
+    };
 
-        window.addEventListener('unauthorized', handleUnauthorized);
+    window.addEventListener('unauthorized', handleUnauthorized);
 
-        return () => {
-            window.removeEventListener('unauthorized', handleUnauthorized);
-        };
-    }, [checkSession, router]);
+    return () => {
+      window.removeEventListener('unauthorized', handleUnauthorized);
+    };
+  }, [checkSession]);
 
-    return null;
+  return null;
 }

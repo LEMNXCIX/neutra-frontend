@@ -250,7 +250,7 @@ export default function BannersTableClient({ banners: initialBanners, stats, pag
                         <p className="text-2xl font-bold mt-1">{value}</p>
                     </div>
                     <div className={`p-3 rounded-full ${color}`}>
-                        <Icon className="h-6 w-6 text-white" />
+                        <Icon className="size-6 text-white" />
                     </div>
                 </div>
             </CardContent>
@@ -275,7 +275,7 @@ export default function BannersTableClient({ banners: initialBanners, stats, pag
                         </Select>
                     )}
                     <Button onClick={() => setCreateOpen(true)}>
-                        <Plus className="h-4 w-4 mr-2" />
+                        <Plus className="size-4 mr-2" />
                         Add Banner
                     </Button>
                 </div>
@@ -293,7 +293,7 @@ export default function BannersTableClient({ banners: initialBanners, stats, pag
                 <AccordionItem value="stats" className="border rounded-lg">
                     <AccordionTrigger className="px-4 hover:no-underline">
                         <div className="flex items-center gap-3">
-                            <Flag className="h-5 w-5 text-muted-foreground" />
+                            <Flag className="size-5 text-muted-foreground" />
                             <span className="font-medium">Banner Statistics</span>
                         </div>
                     </AccordionTrigger>
@@ -392,11 +392,11 @@ export default function BannersTableClient({ banners: initialBanners, stats, pag
                                         </TableCell>
                                         <TableCell className="text-[10px] font-medium text-muted-foreground">
                                             <div className="flex items-center gap-2">
-                                                <div className="w-1 h-1 rounded-full bg-emerald-500" />
+                                                <div className="size-1 rounded-full bg-emerald-500" />
                                                 <span>{formatDateTime(b.startsAt)}</span>
                                             </div>
                                             <div className="flex items-center gap-2">
-                                                <div className="w-1 h-1 rounded-full bg-rose-500" />
+                                                <div className="size-1 rounded-full bg-rose-500" />
                                                 <span>{formatDateTime(b.endsAt)}</span>
                                             </div>
                                         </TableCell>
@@ -409,11 +409,11 @@ export default function BannersTableClient({ banners: initialBanners, stats, pag
                                         </TableCell>
                                         <TableCell className="text-right">
                                             <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <Button size="icon" variant="ghost" className="h-8 w-8 rounded-full hover:bg-primary/5 hover:text-primary" onClick={() => openEdit(b)}>
-                                                    <Edit className="h-4 w-4" />
+                                                <Button size="icon" variant="ghost" className="size-8 rounded-full hover:bg-primary/5 hover:text-primary" onClick={() => openEdit(b)}>
+                                                    <Edit className="size-4" />
                                                 </Button>
-                                                <Button size="icon" variant="ghost" className="h-8 w-8 rounded-full hover:text-destructive hover:bg-destructive/10" onClick={() => deleteBanner(b.id)} disabled={isDeleting === b.id}>
-                                                    {isDeleting === b.id ? <Spinner className="h-4 w-4" /> : <Trash2 className="h-4 w-4" />}
+                                                <Button size="icon" variant="ghost" className="size-8 rounded-full hover:text-destructive hover:bg-destructive/10" onClick={() => deleteBanner(b.id)} disabled={isDeleting === b.id}>
+                                                    {isDeleting === b.id ? <Spinner className="size-4" /> : <Trash2 className="size-4" />}
                                                 </Button>
                                             </div>
                                         </TableCell>
@@ -437,7 +437,7 @@ export default function BannersTableClient({ banners: initialBanners, stats, pag
                                 onClick={() => handlePageChange(pagination.currentPage - 1)}
                                 disabled={pagination.currentPage === 1}
                             >
-                                <ChevronLeft className="h-4 w-4 mr-1" />
+                                <ChevronLeft className="size-4 mr-1" />
                                 Previous
                             </Button>
                             <div className="hidden sm:flex items-center gap-1">
@@ -452,7 +452,7 @@ export default function BannersTableClient({ banners: initialBanners, stats, pag
                                 disabled={pagination.currentPage === pagination.totalPages || pagination.totalPages === 0}
                             >
                                 Next
-                                <ChevronRight className="h-4 w-4 ml-1" />
+                                <ChevronRight className="size-4 ml-1" />
                             </Button>
                         </div>
                     </div>
@@ -485,11 +485,11 @@ export default function BannersTableClient({ banners: initialBanners, stats, pag
                             </div>
                             <div className="flex gap-2">
                                 <Button size="sm" className="flex-1" onClick={() => openEdit(b)}>
-                                    <Edit className="h-4 w-4 mr-1" />
+                                    <Edit className="size-4 mr-1" />
                                     Edit
                                 </Button>
                                 <Button size="sm" variant="destructive" onClick={() => deleteBanner(b.id)}>
-                                    <Trash2 className="h-4 w-4" />
+                                    <Trash2 className="size-4" />
                                 </Button>
                             </div>
                         </CardContent>
@@ -506,7 +506,7 @@ export default function BannersTableClient({ banners: initialBanners, stats, pag
                                 onClick={() => handlePageChange(pagination.currentPage - 1)}
                                 disabled={pagination.currentPage === 1}
                             >
-                                <ChevronLeft className="h-4 w-4" />
+                                <ChevronLeft className="size-4" />
                             </Button>
                             <span className="text-sm text-muted-foreground">
                                 Page {pagination.currentPage} of {pagination.totalPages}
@@ -517,7 +517,7 @@ export default function BannersTableClient({ banners: initialBanners, stats, pag
                                 onClick={() => handlePageChange(pagination.currentPage + 1)}
                                 disabled={pagination.currentPage === pagination.totalPages || pagination.totalPages === 0}
                             >
-                                <ChevronRight className="h-4 w-4" />
+                                <ChevronRight className="size-4" />
                             </Button>
                         </div>
                     </Card>

@@ -2,6 +2,8 @@ import React from 'react';
 import { cookies } from 'next/headers';
 import ServicesTableClient from '@/components/admin/booking/ServicesTableClient';
 
+export const metadata = { title: "Booking Services", };
+
 export const dynamic = 'force-dynamic';
 
 const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001/api';

@@ -1,5 +1,11 @@
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Terms of Service",
+  description: "Our terms and conditions of service",
+};
 
 export default function TermsPage() {
     return (

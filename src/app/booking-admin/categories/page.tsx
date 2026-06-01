@@ -3,6 +3,8 @@ import CategoriesTableClient from "@/components/admin/categories/CategoriesTable
 import { backendGet } from "@/lib/backend-api";
 import { cookies } from 'next/headers';
 
+export const metadata = { title: "Booking Categories", };
+
 export const dynamic = 'force-dynamic';
 
 async function getCategories() {

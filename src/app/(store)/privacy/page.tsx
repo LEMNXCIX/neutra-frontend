@@ -1,5 +1,11 @@
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Privacy Policy",
+  description: "Our privacy policy and data handling practices",
+};
 
 export default function PrivacyPage() {
     return (

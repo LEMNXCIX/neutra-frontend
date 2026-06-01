@@ -73,7 +73,7 @@ export default function SuperAdminSidebar({ items }: SuperAdminSidebarProps) {
                     size="icon"
                     variant="ghost"
                     onClick={() => setSidebarOpen(!sidebarOpen)}
-                    className="h-8 w-8 hover:bg-muted transition-colors rounded-md"
+                    className="size-8 hover:bg-muted transition-colors rounded-md"
                 >
                     {sidebarOpen ? <X size={16} /> : <Menu size={16} />}
                 </Button>
@@ -99,7 +99,7 @@ export default function SuperAdminSidebar({ items }: SuperAdminSidebarProps) {
                                     }`}
                                 >
                                     <Icon
-                                        className={`w-4 h-4 ${isActive ? "opacity-100" : "opacity-70"}`}
+                                        className={`size-4 ${isActive ? "opacity-100" : "opacity-70"}`}
                                     />
                                     {sidebarOpen && (
                                         <span className="truncate">

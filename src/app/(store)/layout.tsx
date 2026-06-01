@@ -1,5 +1,11 @@
 import { Navigation as NavBar } from "@/components/nav_bar";
 import FooterWrapper from "@/components/footer-wrapper";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Store",
+  description: "Browse our products and services",
+};
 
 export default function StoreLayout({
     children,

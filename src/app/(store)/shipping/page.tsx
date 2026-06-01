@@ -4,6 +4,12 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Shipping",
+  description: "Shipping options, delivery times, and rates",
+};
 
 export default function ShippingPage() {
     return (
@@ -28,8 +34,8 @@ export default function ShippingPage() {
                 ].map((tier, i) => (
                     <Card key={i} className="t-card border-none shadow-lg group overflow-hidden">
                         <CardContent className="p-10 space-y-6">
-                            <div className="w-14 h-14 bg-primary/10 text-primary flex items-center justify-center rounded-2xl transition-transform group-hover:scale-110 duration-500">
-                                <tier.icon className="h-7 w-7" />
+                            <div className="size-14 bg-primary/10 text-primary flex items-center justify-center rounded-2xl transition-transform group-hover:scale-110 duration-500">
+                                <tier.icon className="size-7" />
                             </div>
                             <div className="space-y-2">
                                 <h3 className="font-bold text-xl tracking-tight">{tier.title}</h3>
@@ -69,7 +75,7 @@ export default function ShippingPage() {
 
                 <div className="lg:col-span-5 sticky top-32">
                     <Card className="t-card border-none shadow-xl bg-primary text-primary-foreground p-10 space-y-6 overflow-hidden relative">
-                        <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl" />
+                        <div className="absolute -top-10 -right-10 size-40 bg-white/10 rounded-full blur-3xl" />
                         <h3 className="font-bold text-2xl tracking-tight">Track Your Asset</h3>
                         <p className="text-sm font-medium leading-relaxed opacity-90">
                             Upon dispatch, your personal node dashboard will be updated with a unique tracking identifier. 

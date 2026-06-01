@@ -113,7 +113,7 @@ export default function ProductsPage({ products }: { products: Product[] }) {
                 onClick={() => setViewMode('grid')}
                 className={`rounded-xl transition-all ${viewMode === 'grid' ? 'shadow-lg shadow-primary/20' : ''}`}
               >
-                <Grid3x3 className="h-5 w-5" />
+                <Grid3x3 className="size-5" />
               </Button>
               <Button
                 variant={viewMode === 'list' ? 'default' : 'ghost'}
@@ -121,7 +121,7 @@ export default function ProductsPage({ products }: { products: Product[] }) {
                 onClick={() => setViewMode('list')}
                 className={`rounded-xl transition-all ${viewMode === 'list' ? 'shadow-lg shadow-primary/20' : ''}`}
               >
-                <List className="h-5 w-5" />
+                <List className="size-5" />
               </Button>
             </div>
           </div>
@@ -132,25 +132,25 @@ export default function ProductsPage({ products }: { products: Product[] }) {
               <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Active:</span>
               {search && (
                 <Badge variant="secondary" className="gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary border-none">
-                  <Search className="h-3 w-3" />
+                  <Search className="size-3" />
                   {search}
                   <button
                     onClick={() => handleSearch("")}
                     className="hover:bg-primary/20 rounded-full p-0.5 transition-colors"
                   >
-                    <X className="h-3 w-3" />
+                    <X className="size-3" />
                   </button>
                 </Badge>
               )}
               {category !== "all" && selectedCategory && (
                 <Badge variant="secondary" className="gap-2 px-3 py-1.5 rounded-full bg-purple-500/10 text-purple-600 border-none">
-                  <SlidersHorizontal className="h-3 w-3" />
+                  <SlidersHorizontal className="size-3" />
                   {selectedCategory.name}
                   <button
                     onClick={() => handleCategoryChange("all")}
                     className="hover:bg-purple-500/20 rounded-full p-0.5 transition-colors"
                   >
-                    <X className="h-3 w-3" />
+                    <X className="size-3" />
                   </button>
                 </Badge>
               )}
@@ -177,10 +177,10 @@ export default function ProductsPage({ products }: { products: Product[] }) {
               className="w-full h-12 rounded-xl font-bold"
               onClick={() => setShowFilters(!showFilters)}
             >
-              <Filter className="h-4 w-4 mr-2 text-primary" />
+              <Filter className="size-4 mr-2 text-primary" />
               Refine Search
               {activeFiltersCount > 0 && (
-                <Badge variant="default" className="ml-2 rounded-full h-5 w-5 p-0 flex items-center justify-center">
+                <Badge variant="default" className="ml-2 rounded-full size-5 p-0 flex items-center justify-center">
                   {activeFiltersCount}
                 </Badge>
               )}
@@ -193,7 +193,7 @@ export default function ProductsPage({ products }: { products: Product[] }) {
               {/* Search */}
               <div className="space-y-3">
                 <label className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2">
-                  <Search className="h-4 w-4 text-primary" />
+                  <Search className="size-4 text-primary" />
                   Keywords
                 </label>
                 <div className="relative group">
@@ -204,7 +204,7 @@ export default function ProductsPage({ products }: { products: Product[] }) {
                     className="h-12 pr-10 border-border/50 rounded-xl focus:ring-4 focus:ring-primary/5 group-hover:border-primary/50 transition-all"
                   />
                   {isPending && (
-                    <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 animate-spin text-primary" />
+                    <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 size-5 animate-spin text-primary" />
                   )}
                 </div>
               </div>
@@ -212,7 +212,7 @@ export default function ProductsPage({ products }: { products: Product[] }) {
               {/* Category */}
               <div className="space-y-3">
                 <label className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2">
-                  <SlidersHorizontal className="h-4 w-4 text-purple-500" />
+                  <SlidersHorizontal className="size-4 text-purple-500" />
                   Category
                 </label>
                 <Select value={category || "all"} onValueChange={handleCategoryChange}>
@@ -237,7 +237,7 @@ export default function ProductsPage({ products }: { products: Product[] }) {
                     <p className="text-[10px] font-bold text-primary uppercase tracking-widest mb-1">Items Found</p>
                     <p className="text-3xl font-black text-primary leading-none">{products.length}</p>
                   </div>
-                  <Package className="h-8 w-8 text-primary/20 group-hover:scale-110 transition-transform" />
+                  <Package className="size-8 text-primary/20 group-hover:scale-110 transition-transform" />
                 </div>
               </div>
             </div>
@@ -247,8 +247,8 @@ export default function ProductsPage({ products }: { products: Product[] }) {
         {/* Products Grid/List */}
         {products.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 px-4">
-            <div className="w-24 h-24 bg-muted rounded-full flex items-center justify-center mb-6">
-              <Package className="h-12 w-12 text-muted-foreground" />
+            <div className="size-24 bg-muted rounded-full flex items-center justify-center mb-6">
+              <Package className="size-12 text-muted-foreground" />
             </div>
             <h3 className="text-2xl font-semibold mb-2">No products found</h3>
             <p className="text-muted-foreground text-center mb-6 max-w-md">

@@ -205,7 +205,7 @@ export default function OrdersTableClient({ orders, stats, pagination }: Props) 
                         <p className="text-2xl font-bold mt-1">{value}</p>
                     </div>
                     <div className={`p-3 rounded-full ${color}`}>
-                        <Icon className="h-6 w-6 text-white" />
+                        <Icon className="size-6 text-white" />
                     </div>
                 </div>
             </CardContent>
@@ -310,7 +310,7 @@ export default function OrdersTableClient({ orders, stats, pagination }: Props) 
                                                 <TableCell className="font-mono text-[10px] text-muted-foreground tracking-tighter py-4">#{o.id.slice(0, 8)}</TableCell>
                                                 <TableCell>
                                                     <div className="flex items-center gap-3">
-                                                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs border border-primary/20">
+                                                        <div className="size-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs border border-primary/20">
                                                             {(o.user?.name || "U").slice(0, 2).toUpperCase()}
                                                         </div>
                                                         <span className="font-semibold text-sm">{o.user?.name || o.userId}</span>
@@ -331,7 +331,7 @@ export default function OrdersTableClient({ orders, stats, pagination }: Props) 
                                                         <SelectTrigger className="w-[140px] h-8 rounded-full border border-border bg-background shadow-sm hover:bg-muted transition-colors">
                                                             {isUpdatingStatus === o.id ? (
                                                                 <div className="flex items-center gap-2">
-                                                                    <Spinner className="h-3 w-3" />
+                                                                    <Spinner className="size-3" />
                                                                     <span className="text-[10px] font-semibold uppercase">Syncing...</span>
                                                                 </div>
                                                             ) : (
@@ -362,7 +362,7 @@ export default function OrdersTableClient({ orders, stats, pagination }: Props) 
                                                         className="h-8 px-3 rounded-full hover:bg-primary/10 hover:text-primary transition-all font-bold text-[10px] uppercase tracking-wider opacity-0 group-hover:opacity-100"
                                                         onClick={() => openOrderDetails(o)}
                                                     >
-                                                        <Eye className="h-3 w-3 mr-1.5" />
+                                                        <Eye className="size-3 mr-1.5" />
                                                         View
                                                     </Button>
                                                 </TableCell>
@@ -420,7 +420,7 @@ export default function OrdersTableClient({ orders, stats, pagination }: Props) 
                 {orders.length === 0 ? (
                     <Card className="border-dashed t-card">
                         <CardContent className="p-12 text-center">
-                            <ShoppingCart className="h-12 w-12 mx-auto text-muted-foreground/30 mb-4" />
+                            <ShoppingCart className="size-12 mx-auto text-muted-foreground/30 mb-4" />
                             <p className="text-sm font-medium text-muted-foreground">No transactions found</p>
                         </CardContent>
                     </Card>
@@ -433,7 +433,7 @@ export default function OrdersTableClient({ orders, stats, pagination }: Props) 
                                     <div className="flex justify-between items-start">
                                         <div className="space-y-1">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs border border-primary/20">
+                                                <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs border border-primary/20">
                                                     {(o.user?.name || "U").slice(0, 2).toUpperCase()}
                                                 </div>
                                                 <CardTitle className="text-base font-bold">
@@ -547,7 +547,7 @@ export default function OrdersTableClient({ orders, stats, pagination }: Props) 
                             {/* Tracking */}
                             <div>
                                 <h3 className="font-semibold mb-2 flex items-center gap-2">
-                                    <Truck className="h-4 w-4" />
+                                    <Truck className="size-4" />
                                     Tracking Number
                                 </h3>
                                 <div className="flex gap-2">
@@ -560,7 +560,7 @@ export default function OrdersTableClient({ orders, stats, pagination }: Props) 
                                         onClick={() => updateOrderTracking(selectedOrder.id, editingTracking)}
                                         disabled={isUpdatingTracking}
                                     >
-                                        {isUpdatingTracking ? <Spinner className="h-4 w-4" /> : "Update"}
+                                        {isUpdatingTracking ? <Spinner className="size-4" /> : "Update"}
                                     </Button>
                                 </div>
                             </div>

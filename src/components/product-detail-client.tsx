@@ -58,12 +58,12 @@ export default function ProductDetailClient({ product }: { product: Product }) {
           >
             {loading ? (
               <div className="flex items-center gap-3">
-                <Loader2 className="w-5 h-5 animate-spin" />
+                <Loader2 className="size-5 animate-spin" />
                 <span>Processing</span>
               </div>
             ) : (
               <div className="flex items-center gap-3">
-                <ShoppingBagIcon className="w-5 h-5" />
+                <ShoppingBagIcon className="size-5" />
                 <span>Add to Cart</span>
               </div>
             )}

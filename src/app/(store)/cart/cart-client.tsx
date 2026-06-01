@@ -134,15 +134,15 @@ export default function CartClient() {
       <div className="min-h-[60vh] flex items-center justify-center p-4">
         <Card className="max-w-md w-full text-center border-none shadow-lg">
           <CardContent className="pt-12 pb-8">
-            <div className="w-24 h-24 mx-auto mb-6 bg-muted rounded-full flex items-center justify-center">
-              <ShoppingBag className="h-12 w-12 text-muted-foreground" />
+            <div className="size-24 mx-auto mb-6 bg-muted rounded-full flex items-center justify-center">
+              <ShoppingBag className="size-12 text-muted-foreground" />
             </div>
             <h2 className="text-2xl font-bold mb-2">Your cart is empty</h2>
             <p className="text-muted-foreground mb-6">
               Looks like you haven&apos;t added anything to your cart yet
             </p>
             <Button size="lg" onClick={() => router.push("/")}>
-              <ShoppingBag className="mr-2 h-5 w-5" />
+              <ShoppingBag className="mr-2 size-5" />
               Start Shopping
             </Button>
           </CardContent>
@@ -156,7 +156,7 @@ export default function CartClient() {
         {/* Header */}
         <div className="mb-12">
           <h1 className="text-5xl font-black uppercase tracking-tighter italic mb-3 flex items-center gap-4 text-foreground">
-            <ShoppingCart className="h-10 w-10" strokeWidth={2.5} />
+            <ShoppingCart className="size-10" strokeWidth={2.5} />
             Your <span className="text-primary">Basket</span>
           </h1>
           <p className="text-muted-foreground font-bold uppercase tracking-widest text-xs">
@@ -189,7 +189,7 @@ export default function CartClient() {
                               />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center">
-                                <Package className="h-8 w-8 text-muted-foreground/30" />
+                                <Package className="size-8 text-muted-foreground/30" />
                               </div>
                             )}
                           </div>
@@ -211,11 +211,11 @@ export default function CartClient() {
                                 <Button
                                   variant="ghost"
                                   size="icon"
-                                  className="h-8 w-8 rounded-full hover:bg-background shadow-sm"
+                                  className="size-8 rounded-full hover:bg-background shadow-sm"
                                   onClick={() => handleQuantityChange(item.id, item.amount - 1)}
                                   disabled={loading || item.amount <= 1}
                                 >
-                                  <Minus className="h-3 w-3" />
+                                  <Minus className="size-3" />
                                 </Button>
                                 <div className="w-10 text-center font-black text-sm">
                                   {item.amount}
@@ -223,11 +223,11 @@ export default function CartClient() {
                                 <Button
                                   variant="ghost"
                                   size="icon"
-                                  className="h-8 w-8 rounded-full hover:bg-background shadow-sm"
+                                  className="size-8 rounded-full hover:bg-background shadow-sm"
                                   onClick={() => handleQuantityChange(item.id, item.amount + 1)}
                                   disabled={loading}
                                 >
-                                  <Plus className="h-3 w-3" />
+                                  <Plus className="size-3" />
                                 </Button>
                               </div>
                               <div className="text-right">
@@ -244,12 +244,12 @@ export default function CartClient() {
                               size="icon"
                               onClick={() => removeItem(item.id)}
                               disabled={loading}
-                              className="h-8 w-8 rounded-full text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition-all"
+                              className="size-8 rounded-full text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition-all"
                             >
                               {loading ? (
-                                <Loader2 className="h-4 w-4 animate-spin" />
+                                <Loader2 className="size-4 animate-spin" />
                               ) : (
-                                <Trash2 className="h-4 w-4" />
+                                <Trash2 className="size-4" />
                               )}
                             </Button>
                           </div>
@@ -269,7 +269,7 @@ export default function CartClient() {
                 <Card className="border-border bg-card rounded-2xl shadow-sm">
                   <CardHeader className="pb-4">
                     <CardTitle className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-muted-foreground">
-                      <Tag className="h-4 w-4" />
+                      <Tag className="size-4" />
                       Promotion Code
                     </CardTitle>
                   </CardHeader>
@@ -289,7 +289,7 @@ export default function CartClient() {
                           className="h-11 px-6 rounded-xl font-black uppercase text-xs tracking-widest"
                         >
                           {applyingCoupon ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
+                            <Loader2 className="size-4 animate-spin" />
                           ) : (
                             "Apply"
                           )}
@@ -327,7 +327,7 @@ export default function CartClient() {
               <Card className="border-border bg-card rounded-2xl shadow-sm">
                 <CardHeader className="pb-4">
                   <CardTitle className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-muted-foreground">
-                    <MapPin className="h-4 w-4" />
+                    <MapPin className="size-4" />
                     Delivery Target
                   </CardTitle>
                 </CardHeader>
@@ -346,7 +346,7 @@ export default function CartClient() {
                 <div className="h-2 bg-primary w-full" />
                 <CardHeader className="pb-6">
                   <CardTitle className="flex items-center gap-2 text-xs font-black uppercase tracking-widest opacity-60">
-                    <CreditCard className="h-4 w-4" />
+                    <CreditCard className="size-4" />
                     Final Summary
                   </CardTitle>
                 </CardHeader>
@@ -359,7 +359,7 @@ export default function CartClient() {
                     {discount > 0 && (
                       <div className="flex justify-between text-xs font-black uppercase tracking-widest text-emerald-400">
                         <span className="flex items-center gap-1">
-                          <Tag className="h-3 w-3" />
+                          <Tag className="size-3" />
                           Adjustment
                         </span>
                         <span>-${discount.toFixed(2)}</span>
@@ -390,7 +390,7 @@ export default function CartClient() {
                   >
                     {placing ? (
                       <>
-                        <Loader2 className="h-5 w-5 animate-spin mr-3" />
+                        <Loader2 className="size-5 animate-spin mr-3" />
                         Processing
                       </>
                     ) : (

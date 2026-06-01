@@ -3,6 +3,12 @@ import AdminSidebar from "@/components/admin/AdminSidebar";
 import AdminMobileNav from "@/components/admin/AdminMobileNav";
 import { BOOKING_ADMIN_NAV } from "@/config/admin-navigation";
 import { BookingNavbar } from "@/components/booking/booking-navbar";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Booking Admin",
+  description: "Booking administration dashboard",
+};
 
 export default function AdminLayout({
     children,

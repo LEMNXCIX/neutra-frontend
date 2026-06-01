@@ -4,17 +4,23 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import {
-    Package,
-    Sparkles,
-    ShoppingBag,
-    Shield,
-    Truck,
-    ArrowLeft,
+  Package,
+  Sparkles,
+  ShoppingBag,
+  Shield,
+  Truck,
+  ArrowLeft,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Image from "@/components/ui/image";
 import { backendFetch } from "@/lib/backend-api";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Product Details",
+  description: "View product details, pricing, and availability",
+};
 
 async function fetchProduct(id: string) {
     try {
@@ -48,8 +54,8 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         return (
             <div className="min-h-[60vh] flex items-center justify-center p-6">
                 <Card className="max-w-md w-full p-8 text-center border-none shadow-lg">
-                    <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-                        <Package className="h-10 w-10 text-muted-foreground" />
+                    <div className="size-20 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Package className="size-10 text-muted-foreground" />
                     </div>
                     <h2 className="text-2xl font-bold mb-2 text-foreground">
                         Product not found
@@ -60,7 +66,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
                     </p>
                     <Button asChild>
                         <Link href="/products">
-                            <ArrowLeft className="h-4 w-4 mr-2" />
+                            <ArrowLeft className="size-4 mr-2" />
                             Back to Products
                         </Link>
                     </Button>
@@ -86,7 +92,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
                             className="flex items-center gap-3"
                         >
                             <ArrowLeft
-                                className="h-4 w-4 transition-transform group-hover:-translate-x-1 text-primary"
+                                className="size-4 transition-transform group-hover:-translate-x-1 text-primary"
                                 strokeWidth={3}
                             />
                             Back to Catalog
@@ -120,7 +126,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
                                     />
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center bg-muted">
-                                        <Package className="h-32 w-32 text-muted-foreground/20" />
+                                        <Package className="size-32 text-muted-foreground/20" />
                                     </div>
                                 )}
 
@@ -168,9 +174,9 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
                                     className="p-6 text-center border-none bg-background shadow-lg rounded-3xl hover:shadow-xl transition-all group"
                                 >
                                     <div
-                                        className={`w-12 h-12 ${item.bg} ${item.color} rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500`}
+                                        className={`size-12 ${item.bg} ${item.color} rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500`}
                                     >
-                                        <item.icon className="h-6 w-6" />
+                                        <item.icon className="size-6" />
                                     </div>
                                     <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
                                         {item.label}
@@ -226,7 +232,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
                                     </p>
                                     <div className="flex items-center gap-2">
                                         <div
-                                            className={`w-2 h-2 rounded-full ${inStock ? "bg-emerald-500 animate-pulse" : "bg-destructive"}`}
+                                            className={`size-2 rounded-full ${inStock ? "bg-emerald-500 animate-pulse" : "bg-destructive"}`}
                                         />
                                         <span className="font-bold text-sm">
                                             {inStock
@@ -241,7 +247,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
                                     </p>
                                     <p className="font-bold text-sm flex items-center gap-2">
                                         Brand New{" "}
-                                        <Sparkles className="h-3 w-3 text-yellow-500" />
+                                        <Sparkles className="size-3 text-yellow-500" />
                                     </p>
                                 </div>
                             </div>
@@ -254,15 +260,15 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 
                             <div className="pt-6 flex items-center justify-center gap-8 text-[10px] font-bold text-muted-foreground uppercase tracking-widest opacity-60">
                                 <span className="flex items-center gap-2">
-                                    <Shield className="h-4 w-4" />
+                                    <Shield className="size-4" />
                                     Safe Payment
                                 </span>
                                 <span className="flex items-center gap-2">
-                                    <Truck className="h-4 w-4" />
+                                    <Truck className="size-4" />
                                     Fast Delivery
                                 </span>
                                 <span className="flex items-center gap-2">
-                                    <ShoppingBag className="h-4 w-4" />
+                                    <ShoppingBag className="size-4" />
                                     Quality Guaranteed
                                 </span>
                             </div>

@@ -4,6 +4,12 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { MapPin, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Careers",
+  description: "Join our team and explore career opportunities",
+};
 
 export default function CareersPage() {
     return (
@@ -39,14 +45,14 @@ export default function CareersPage() {
                                     <div className="flex flex-wrap items-center gap-4">
                                         <h3 className="font-bold text-2xl tracking-tight group-hover:text-primary transition-colors">{job.title}</h3>
                                         <Badge variant="secondary" className="bg-primary/10 text-primary font-bold px-3 py-1 rounded-full text-[10px]">
-                                            <MapPin className="w-3 h-3 mr-1.5" />
+                                            <MapPin className="size-3 mr-1.5" />
                                             {job.location}
                                         </Badge>
                                     </div>
                                     <p className="text-muted-foreground font-medium text-base leading-relaxed max-w-xl">{job.desc}</p>
                                 </div>
                                 <Button className="h-14 px-10 rounded-xl font-bold text-sm shadow-lg shadow-primary/10 hover:-translate-y-0.5" asChild>
-                                    <Link href="/contact">Provision Intake <ArrowRight className="ml-2 w-4 h-4" /></Link>
+                                    <Link href="/contact">Provision Intake <ArrowRight className="ml-2 size-4" /></Link>
                                 </Button>
                             </CardContent>
                         </Card>

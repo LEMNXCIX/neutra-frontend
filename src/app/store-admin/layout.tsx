@@ -2,8 +2,14 @@ import React from "react";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import AdminMobileNav from "@/components/admin/AdminMobileNav";
 import { STORE_ADMIN_NAV } from "@/config/admin-navigation";
+import type { Metadata } from "next";
 
 import { Navigation as StoreNavbar } from "@/components/nav_bar";
+
+export const metadata: Metadata = {
+  title: "Store Admin",
+  description: "Store administration dashboard",
+};
 
 export default function AdminLayout({
     children,

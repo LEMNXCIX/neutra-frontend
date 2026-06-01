@@ -5,6 +5,12 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Contact",
+  description: "Get in touch with our team",
+};
 
 export default function ContactPage() {
       return (
@@ -23,22 +29,22 @@ export default function ContactPage() {
     
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 pt-4">
                         <div className="space-y-4 group">
-                            <div className="w-12 h-12 bg-primary/10 text-primary flex items-center justify-center rounded-xl group-hover:scale-110 transition-transform duration-500 shadow-sm">
-                                <Mail className="h-5 w-5" />
+                            <div className="size-12 bg-primary/10 text-primary flex items-center justify-center rounded-xl group-hover:scale-110 transition-transform duration-500 shadow-sm">
+                                <Mail className="size-5" />
                             </div>
                             <div>
                                 <h3 className="font-semibold text-sm text-muted-foreground mb-1">Email Us</h3>
                                 <p className="font-bold text-base hover:text-primary transition-colors">contact@xcix.com</p>
                                 <p className="text-[11px] font-medium text-emerald-600 mt-1 flex items-center gap-1.5">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                    <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
                                     Active Support
                                 </p>
                             </div>
                         </div>
     
                         <div className="space-y-4 group">
-                            <div className="w-12 h-12 bg-primary/10 text-primary flex items-center justify-center rounded-xl group-hover:scale-110 transition-transform duration-500 shadow-sm">
-                                <Phone className="h-5 w-5" />
+                            <div className="size-12 bg-primary/10 text-primary flex items-center justify-center rounded-xl group-hover:scale-110 transition-transform duration-500 shadow-sm">
+                                <Phone className="size-5" />
                             </div>
                             <div>
                                 <h3 className="font-semibold text-sm text-muted-foreground mb-1">Call Us</h3>
@@ -48,8 +54,8 @@ export default function ContactPage() {
                         </div>
     
                         <div className="space-y-4 group col-span-1 sm:col-span-2">
-                            <div className="w-12 h-12 bg-primary/10 text-primary flex items-center justify-center rounded-xl group-hover:scale-110 transition-transform duration-500 shadow-sm">
-                                <MapPin className="h-5 w-5" />
+                            <div className="size-12 bg-primary/10 text-primary flex items-center justify-center rounded-xl group-hover:scale-110 transition-transform duration-500 shadow-sm">
+                                <MapPin className="size-5" />
                             </div>
                             <div>
                                 <h3 className="font-semibold text-sm text-muted-foreground mb-1">Visit Our Office</h3>

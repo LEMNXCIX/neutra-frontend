@@ -158,10 +158,10 @@ export function BookingWizard({ initialServices, initialStaff, preSelectedServic
     };
 
     const steps = [
-        { number: 1, label: 'SERVICE', icon: <Scissors className="h-5 w-5" /> },
-        { number: 2, label: 'EXPERT', icon: <User className="h-5 w-5" /> },
-        { number: 3, label: 'SCHEDULE', icon: <Clock className="h-5 w-5" /> },
-        { number: 4, label: 'REVIEW', icon: <Check className="h-5 w-5" /> },
+        { number: 1, label: 'SERVICE', icon: <Scissors className="size-5" /> },
+        { number: 2, label: 'EXPERT', icon: <User className="size-5" /> },
+        { number: 3, label: 'SCHEDULE', icon: <Clock className="size-5" /> },
+        { number: 4, label: 'REVIEW', icon: <Check className="size-5" /> },
     ];
 
     if (!isMounted) return null;
@@ -179,14 +179,13 @@ export function BookingWizard({ initialServices, initialStaff, preSelectedServic
                         return (
                             <div key={s.number} className="flex flex-col items-center">
                                 <div 
-                                    className={cn(
-                                        "w-12 h-12 rounded-full flex items-center justify-center transition-all duration-500 border-2",
+                                    className={cn("size-12 rounded-full flex items-center justify-center transition-all duration-500 border-2",
                                         isCurrent ? "bg-primary text-primary-foreground border-primary shadow-lg scale-110" : 
                                         isDone ? "bg-emerald-500 text-white border-emerald-500 shadow-none" : 
                                         "bg-background text-muted-foreground border-border shadow-none"
                                     )}
                                 >
-                                    {isDone ? <Check className="h-5 w-5 stroke-[2.5px]" /> : s.icon}
+                                    {isDone ? <Check className="size-5 stroke-[2.5px]" /> : s.icon}
                                 </div>
                                 <span className={cn(
                                     "mt-3 text-[10px] font-bold uppercase tracking-wider transition-colors duration-300",
@@ -202,7 +201,7 @@ export function BookingWizard({ initialServices, initialStaff, preSelectedServic
 
             {error && (
                 <Alert variant="destructive" className="border-none bg-rose-50 text-rose-700 rounded-xl animate-in shake-1">
-                    <AlertCircle className="h-5 w-5" />
+                    <AlertCircle className="size-5" />
                     <AlertDescription className="font-semibold text-sm">{error}</AlertDescription>
                 </Alert>
             )}
@@ -251,7 +250,7 @@ export function BookingWizard({ initialServices, initialStaff, preSelectedServic
                                                         ${s.price}
                                                     </Badge>
                                                     <div className="flex items-center gap-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider opacity-60">
-                                                        <Clock className="h-3 w-3" /> {s.duration} MIN
+                                                        <Clock className="size-3" /> {s.duration} MIN
                                                     </div>
                                                 </div>
                                                 <CardTitle className="text-xl font-bold tracking-tight text-foreground">{s.name}</CardTitle>
@@ -288,11 +287,10 @@ export function BookingWizard({ initialServices, initialStaff, preSelectedServic
                             >
                                 <CardHeader className="p-6">
                                     <div className="flex items-center gap-5">
-                                        <div className={cn(
-                                            "w-14 h-14 rounded-xl flex items-center justify-center transition-all duration-500",
+                                        <div className={cn("size-14 rounded-xl flex items-center justify-center transition-all duration-500",
                                             selectedStaff?.id === member.id ? "bg-primary text-primary-foreground" : "bg-muted"
                                         )}>
-                                            <User className="h-7 w-7" />
+                                            <User className="size-7" />
                                         </div>
                                         <div className="space-y-1">
                                             <CardTitle className="text-xl font-bold tracking-tight text-foreground">{member.name}</CardTitle>
@@ -308,7 +306,7 @@ export function BookingWizard({ initialServices, initialStaff, preSelectedServic
                     </div>
                     <div className="pt-4">
                         <Button variant="ghost" onClick={() => setStep(1)} className="font-semibold text-xs h-10 px-4">
-                            <ChevronLeft className="h-4 w-4 mr-2" /> Change Service
+                            <ChevronLeft className="size-4 mr-2" /> Change Service
                         </Button>
                     </div>
                 </div>
@@ -347,12 +345,12 @@ export function BookingWizard({ initialServices, initialStaff, preSelectedServic
                                 <CardContent className="pt-6 pb-8">
                                     {loadingAvailability ? (
                                         <div className="flex flex-col items-center justify-center py-10 gap-3">
-                                            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                                            <Loader2 className="size-8 animate-spin text-primary" />
                                             <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Querying availability...</p>
                                         </div>
                                     ) : availableSlots.length === 0 ? (
                                         <div className="text-center py-10 space-y-2">
-                                            <AlertCircle className="h-8 w-8 mx-auto text-rose-500 opacity-50" />
+                                            <AlertCircle className="size-8 mx-auto text-rose-500 opacity-50" />
                                             <p className="text-[10px] font-bold uppercase tracking-widest text-rose-500">No windows available for this date</p>
                                         </div>
                                     ) : (
@@ -382,11 +380,11 @@ export function BookingWizard({ initialServices, initialStaff, preSelectedServic
                     </div>
                     <div className="flex items-center justify-between pt-4">
                         <Button variant="ghost" onClick={() => setStep(2)} className="font-semibold text-xs h-10">
-                            <ChevronLeft className="h-4 w-4 mr-2" /> Back to Expert
+                            <ChevronLeft className="size-4 mr-2" /> Back to Expert
                         </Button>
                         {selectedDate && selectedTime && (
                             <Button onClick={() => setStep(4)} className="rounded-xl font-bold h-12 px-8 shadow-lg shadow-primary/20 hover:-translate-y-0.5 transition-all">
-                                Review Details <ArrowRight className="ml-2 h-4 w-4" />
+                                Review Details <ArrowRight className="ml-2 size-4" />
                             </Button>
                         )}
                     </div>
@@ -464,7 +462,7 @@ export function BookingWizard({ initialServices, initialStaff, preSelectedServic
                                                 disabled={!couponCode || validatingCoupon}
                                                 className="h-11 px-4 rounded-xl font-bold text-xs"
                                             >
-                                                {validatingCoupon ? <Loader2 className="animate-spin h-4 w-4" /> : couponResult ? "Active" : "Apply"}
+                                                {validatingCoupon ? <Loader2 className="animate-spin size-4" /> : couponResult ? "Active" : "Apply"}
                                             </Button>
                                         </div>
                                         {couponError && <p className="text-[10px] font-semibold text-rose-500">{couponError}</p>}
@@ -498,7 +496,7 @@ export function BookingWizard({ initialServices, initialStaff, preSelectedServic
                                 >
                                     {submitting ? (
                                         <>
-                                            <Loader2 className="animate-spin mr-2 h-5 w-5" />
+                                            <Loader2 className="animate-spin mr-2 size-5" />
                                             Booking...
                                         </>
                                     ) : (

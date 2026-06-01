@@ -1,4 +1,10 @@
 import { BookingNavbar } from '@/components/booking/booking-navbar';
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Bookings",
+  description: "Book appointments and services",
+};
 
 export default function BookingLayout({
     children,

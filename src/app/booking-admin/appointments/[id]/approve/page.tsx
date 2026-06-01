@@ -1,45 +1,27 @@
-'use client';
-
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { toast } from 'sonner';
+import { redirect } from 'next/navigation';
 import { apiClient } from '@/lib/api-client';
-import { Loader2 } from 'lucide-react';
-import { useParams } from 'next/navigation';
+import type { Metadata } from "next";
 
-export default function AppointmentApprovePage() {
-    const router = useRouter();
-    const params = useParams();
-    const id = params.id as string;
-    const [processing, setProcessing] = useState(true);
+export const metadata: Metadata = {
+  title: "Approve Appointment",
+  description: "Processing appointment approval",
+};
 
-    useEffect(() => {
-        const approveAppointment = async () => {
-            try {
-                await apiClient(`/appointments/${id}/status`, {
-                    method: 'PUT',
-                    body: JSON.stringify({ status: 'CONFIRMED' }),
-                });
-                toast.success('Cita aprobada exitosamente');
-                router.push('/booking-admin/appointments');
-            } catch (error) {
-                console.error('Error approving appointment:', error);
-                toast.error('Error al aprobar la cita');
-                router.push('/booking-admin/appointments');
-            } finally {
-                setProcessing(false);
-            }
-        };
+export default async function AppointmentApprovePage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
 
-        if (id) {
-            approveAppointment();
-        }
-    }, [id, router]);
+  try {
+    await apiClient(`/appointments/${id}/status`, {
+      method: 'PUT',
+      body: JSON.stringify({ status: 'CONFIRMED' }),
+    });
+  } catch (error) {
+    console.error('Error approving appointment:', error);
+  }
 
-    return (
-        <div className="flex flex-col items-center justify-center p-8 h-[50vh]">
-            <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
-            <p className="text-lg text-muted-foreground">Procesando aprobación de cita...</p>
-        </div>
-    );
+  redirect('/booking-admin/appointments');
 }

@@ -207,7 +207,7 @@ export default function ServicesTableClient({
     if (loading) {
         return (
             <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
-                <Spinner className="h-8 w-8 text-primary" />
+                <Spinner className="size-8 text-primary" />
                 <p className="text-muted-foreground animate-pulse">Loading services...</p>
             </div>
         );
@@ -235,7 +235,7 @@ export default function ServicesTableClient({
                         </Select>
                     )}
                     <Button onClick={openCreate} className="w-full sm:w-auto">
-                        <Plus className="h-4 w-4 mr-2" />
+                        <Plus className="size-4 mr-2" />
                         Add Service
                     </Button>
                 </div>
@@ -261,7 +261,7 @@ export default function ServicesTableClient({
                                         <div className="flex items-center gap-2 mt-1">
                                             {service.category ? (
                                                 <Badge variant="outline" className="font-normal capitalize text-xs">
-                                                    <Tag className="h-3 w-3 mr-1 opacity-70" />
+                                                    <Tag className="size-3 mr-1 opacity-70" />
                                                     {service.category.name}
                                                 </Badge>
                                             ) : (
@@ -284,16 +284,16 @@ export default function ServicesTableClient({
                                     </p>
                                 )}
                                 <div className="flex items-center text-muted-foreground pt-1">
-                                    <Clock className="h-4 w-4 mr-2" />
+                                    <Clock className="size-4 mr-2" />
                                     {service.duration} min
                                 </div>
                             </CardContent>
                             <div className="p-4 pt-0 grid grid-cols-2 gap-2 mt-2">
                                 <Button size="sm" variant="outline" className="w-full" onClick={() => openEdit(service)}>
-                                    <Edit className="h-4 w-4 mr-2" /> Edit
+                                    <Edit className="size-4 mr-2" /> Edit
                                 </Button>
                                 <Button size="sm" variant="outline" className="w-full text-destructive border-destructive/20 hover:bg-destructive/10" onClick={() => handleDelete(service.id)}>
-                                    <Trash2 className="h-4 w-4 mr-2" /> Delete
+                                    <Trash2 className="size-4 mr-2" /> Delete
                                 </Button>
                             </div>
                         </Card>
@@ -339,7 +339,7 @@ export default function ServicesTableClient({
                                         <TableCell>
                                             {service.category ? (
                                                 <Badge variant="outline" className="font-normal capitalize">
-                                                    <Tag className="h-3 w-3 mr-1 opacity-70" />
+                                                    <Tag className="size-3 mr-1 opacity-70" />
                                                     {service.category.name}
                                                 </Badge>
                                             ) : (
@@ -355,13 +355,13 @@ export default function ServicesTableClient({
                                         )}
                                         <TableCell>
                                             <div className="flex items-center text-sm text-muted-foreground">
-                                                <Clock className="h-3.5 w-3.5 mr-1.5 opacity-70" />
+                                                <Clock className="size-3.5 mr-1.5 opacity-70" />
                                                 {service.duration} min
                                             </div>
                                         </TableCell>
                                         <TableCell>
                                             <div className="flex items-center font-semibold text-primary">
-                                                <DollarSign className="h-3.5 w-3.5 mr-0.5" />
+                                                <DollarSign className="size-3.5 mr-0.5" />
                                                 {service.price.toFixed(2)}
                                             </div>
                                         </TableCell>
@@ -372,11 +372,11 @@ export default function ServicesTableClient({
                                         </TableCell>
                                         <TableCell className="text-right">
                                             <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => openEdit(service)}>
-                                                    <Edit className="h-4 w-4 text-muted-foreground" />
+                                                <Button size="icon" variant="ghost" className="size-8" onClick={() => openEdit(service)}>
+                                                    <Edit className="size-4 text-muted-foreground" />
                                                 </Button>
-                                                <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => handleDelete(service.id)}>
-                                                    <Trash2 className="h-4 w-4 text-destructive" />
+                                                <Button size="icon" variant="ghost" className="size-8" onClick={() => handleDelete(service.id)}>
+                                                    <Trash2 className="size-4 text-destructive" />
                                                 </Button>
                                             </div>
                                         </TableCell>
@@ -423,7 +423,7 @@ export default function ServicesTableClient({
                             <div className="grid gap-2">
                                 <Label htmlFor="duration">Duration (min) *</Label>
                                 <div className="relative">
-                                    <Clock className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                                    <Clock className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
                                     <Input
                                         id="duration"
                                         type="number"
@@ -438,7 +438,7 @@ export default function ServicesTableClient({
                             <div className="grid gap-2">
                                 <Label htmlFor="price">Price ($) *</Label>
                                 <div className="relative">
-                                    <DollarSign className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                                    <DollarSign className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
                                     <Input
                                         id="price"
                                         type="number"
@@ -460,7 +460,7 @@ export default function ServicesTableClient({
                             >
                                 <SelectTrigger id="categoryId" className="w-full">
                                     <div className="flex items-center">
-                                        <Tag className="h-4 w-4 mr-2 text-muted-foreground" />
+                                        <Tag className="size-4 mr-2 text-muted-foreground" />
                                         <SelectValue placeholder="Select a category" />
                                     </div>
                                 </SelectTrigger>

@@ -101,7 +101,7 @@ export function BookingNavbar() {
                 {user ? (
                     <DropdownMenu>
                         <DropdownMenuTrigger className="ml-2 outline-none">
-                            <Avatar className="h-9 w-9 border border-border hover:border-primary/50 transition-all cursor-pointer shadow-sm">
+                            <Avatar className="size-9 border border-border hover:border-primary/50 transition-all cursor-pointer shadow-sm">
                                 <AvatarImage src={user.avatar} alt={user.name} />
                                 <AvatarFallback className="font-bold text-xs bg-primary/10 text-primary">{user.name.slice(0, 2).toUpperCase()}</AvatarFallback>
                             </Avatar>
@@ -146,7 +146,7 @@ export function BookingNavbar() {
                         <Button
                             variant="ghost"
                             size="icon"
-                            className="h-10 w-10 hover:bg-foreground hover:text-background transition-all"
+                            className="size-10 hover:bg-foreground hover:text-background transition-all"
                         >
                             <Menu className="stroke-[3px]" />
                         </Button>
@@ -187,7 +187,7 @@ export function BookingNavbar() {
                                 {user ? (
                                     <div className="space-y-6">
                                         <div className="flex items-center gap-4 p-5 bg-card border border-border shadow-sm rounded-2xl">
-                                            <Avatar className="h-12 w-12 border border-border">
+                                            <Avatar className="size-12 border border-border">
                                                 <AvatarImage src={user.avatar} />
                                                 <AvatarFallback className="bg-primary/10 text-primary font-bold text-lg">
                                                     {user.name.slice(0, 2).toUpperCase()}

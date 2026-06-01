@@ -1,5 +1,11 @@
 import ProductsPage from "./products-client";
 import { backendFetch } from "@/lib/backend-api";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Products",
+  description: "Browse our complete product catalog",
+};
 
 // Frontend expects 'title' but backend uses 'name'
 type FrontendProduct = {

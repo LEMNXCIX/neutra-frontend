@@ -3,6 +3,12 @@ import { cookies } from 'next/headers';
 import { redirect, notFound } from 'next/navigation';
 import { authService } from '@/services/auth.service';
 import { getBackendUrl } from '@/lib/backend-api';
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Appointment Details",
+  description: "View your appointment details",
+};
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -87,11 +93,11 @@ export default async function AppointmentDetailPage(props: { params: Promise<{ i
         return (
             <div className="container mx-auto px-4 py-12 max-w-2xl">
                 <Link href="/appointments" className="flex items-center gap-2 text-primary hover:underline mb-8">
-                    <ArrowLeft className="h-4 w-4" />
+                    <ArrowLeft className="size-4" />
                     Back to My Appointments
                 </Link>
                 <Alert variant="destructive">
-                    <AlertCircle className="h-4 w-4" />
+                    <AlertCircle className="size-4" />
                     <AlertDescription>
                         {error === 'forbidden' ? 'You do not have permission to view this appointment' : 'Failed to load appointment details'}
                     </AlertDescription>
@@ -105,7 +111,7 @@ export default async function AppointmentDetailPage(props: { params: Promise<{ i
             <div className="container mx-auto px-4 py-12 max-w-3xl">
                 {/* Navigation */}
                 <Link href="/appointments" className="flex items-center gap-2 text-primary hover:underline mb-8">
-                    <ArrowLeft className="h-4 w-4" />
+                    <ArrowLeft className="size-4" />
                     Back to My Appointments
                 </Link>
 
@@ -135,7 +141,7 @@ export default async function AppointmentDetailPage(props: { params: Promise<{ i
                             <div className="space-y-6">
                                 <div className="flex items-start gap-4">
                                     <div className="mt-1 bg-primary/10 p-2 rounded-full">
-                                        <Calendar className="h-5 w-5 text-primary" />
+                                        <Calendar className="size-5 text-primary" />
                                     </div>
                                     <div>
                                         <p className="text-sm font-medium text-muted-foreground">Date</p>
@@ -152,7 +158,7 @@ export default async function AppointmentDetailPage(props: { params: Promise<{ i
 
                                 <div className="flex items-start gap-4">
                                     <div className="mt-1 bg-primary/10 p-2 rounded-full">
-                                        <Clock className="h-5 w-5 text-primary" />
+                                        <Clock className="size-5 text-primary" />
                                     </div>
                                     <div>
                                         <p className="text-sm font-medium text-muted-foreground">Time & Duration</p>
@@ -172,7 +178,7 @@ export default async function AppointmentDetailPage(props: { params: Promise<{ i
                             <div className="space-y-6">
                                 <div className="flex items-start gap-4">
                                     <div className="mt-1 bg-primary/10 p-2 rounded-full">
-                                        <User className="h-5 w-5 text-primary" />
+                                        <User className="size-5 text-primary" />
                                     </div>
                                     <div>
                                         <p className="text-sm font-medium text-muted-foreground">Professional</p>
@@ -182,7 +188,7 @@ export default async function AppointmentDetailPage(props: { params: Promise<{ i
 
                                 <div className="flex items-start gap-4">
                                     <div className="mt-1 bg-primary/10 p-2 rounded-full">
-                                        <CreditCard className="h-5 w-5 text-primary" />
+                                        <CreditCard className="size-5 text-primary" />
                                     </div>
                                     <div>
                                         <p className="text-sm font-medium text-muted-foreground">Service Price</p>
@@ -199,7 +205,7 @@ export default async function AppointmentDetailPage(props: { params: Promise<{ i
                         <Card className="border-none shadow-lg bg-card/50 backdrop-blur-sm">
                             <CardHeader>
                                 <CardTitle className="text-lg flex items-center gap-2">
-                                    <FileText className="h-5 w-5 text-primary" />
+                                    <FileText className="size-5 text-primary" />
                                     Appointment Details
                                 </CardTitle>
                             </CardHeader>
@@ -228,7 +234,7 @@ export default async function AppointmentDetailPage(props: { params: Promise<{ i
                         <Card className="border-none shadow-lg bg-card/50 backdrop-blur-sm">
                             <CardHeader>
                                 <CardTitle className="text-lg flex items-center gap-2">
-                                    <MapPin className="h-5 w-5 text-primary" />
+                                    <MapPin className="size-5 text-primary" />
                                     Location
                                 </CardTitle>
                             </CardHeader>

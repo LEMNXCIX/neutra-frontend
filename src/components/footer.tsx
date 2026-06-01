@@ -49,10 +49,10 @@ export default function Footer({ minimal = false }: { minimal?: boolean }) {
                 <a
                   key={i}
                   href="#"
-                  className="w-10 h-10 rounded-full bg-muted/50 border border-transparent hover:border-primary/20 hover:bg-background hover:text-primary transition-all duration-300 flex items-center justify-center group"
+                  className="size-10 rounded-full bg-muted/50 border border-transparent hover:border-primary/20 hover:bg-background hover:text-primary transition-all duration-300 flex items-center justify-center group"
                   aria-label={social.label}
                 >
-                  <social.icon className="h-4 w-4 transition-transform group-hover:scale-110" />
+                  <social.icon className="size-4 transition-transform group-hover:scale-110" />
                 </a>
               ))}
             </div>
@@ -65,7 +65,7 @@ export default function Footer({ minimal = false }: { minimal?: boolean }) {
               <ul className="space-y-3">
                 <li>
                     <Link href="/products" className="text-sm font-medium text-muted-foreground hover:text-primary transition-all flex items-center group">
-                        <ArrowRight className="w-3 h-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-all" />
+                        <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-all" />
                         All Inventory
                     </Link>
                 </li>
@@ -75,7 +75,7 @@ export default function Footer({ minimal = false }: { minimal?: boolean }) {
                       href={`/products?category=${encodeURIComponent(category.id)}`}
                       className="text-sm font-medium text-muted-foreground hover:text-primary transition-all flex items-center group"
                     >
-                      <ArrowRight className="w-3 h-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-all" />
+                      <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-all" />
                       {category.name}
                     </Link>
                   </li>
@@ -90,7 +90,7 @@ export default function Footer({ minimal = false }: { minimal?: boolean }) {
             <ul className="space-y-3">
               <li>
                 <Link href="/contact" className="text-sm font-medium text-muted-foreground hover:text-primary transition-all flex items-center group">
-                    <ArrowRight className="w-3 h-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-all" />
+                    <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-all" />
                     Help Center
                 </Link>
               </li>
@@ -98,19 +98,19 @@ export default function Footer({ minimal = false }: { minimal?: boolean }) {
                 <>
                   <li>
                     <Link href="/shipping" className="text-sm font-medium text-muted-foreground hover:text-primary transition-all flex items-center group">
-                        <ArrowRight className="w-3 h-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-all" />
+                        <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-all" />
                         Shipping Info
                     </Link>
                   </li>
                   <li>
                     <Link href="/returns" className="text-sm font-medium text-muted-foreground hover:text-primary transition-all flex items-center group">
-                        <ArrowRight className="w-3 h-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-all" />
+                        <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-all" />
                         Returns & RMAs
                     </Link>
                   </li>
                   <li>
                     <Link href="/faq" className="text-sm font-medium text-muted-foreground hover:text-primary transition-all flex items-center group">
-                        <ArrowRight className="w-3 h-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-all" />
+                        <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-all" />
                         Common FAQ
                     </Link>
                   </li>
@@ -125,25 +125,25 @@ export default function Footer({ minimal = false }: { minimal?: boolean }) {
             <ul className="space-y-3">
               <li>
                 <Link href="/about" className="text-sm font-medium text-muted-foreground hover:text-primary transition-all flex items-center group">
-                    <ArrowRight className="w-3 h-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-all" />
+                    <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-all" />
                     Our Story
                 </Link>
               </li>
               <li>
                 <Link href="/careers" className="text-sm font-medium text-muted-foreground hover:text-primary transition-all flex items-center group">
-                    <ArrowRight className="w-3 h-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-all" />
+                    <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-all" />
                     Join Network
                 </Link>
               </li>
               <li>
                 <Link href="/privacy" className="text-sm font-medium text-muted-foreground hover:text-primary transition-all flex items-center group">
-                    <ArrowRight className="w-3 h-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-all" />
+                    <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-all" />
                     Privacy Policy
                 </Link>
               </li>
               <li>
                 <Link href="/terms" className="text-sm font-medium text-muted-foreground hover:text-primary transition-all flex items-center group">
-                    <ArrowRight className="w-3 h-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-all" />
+                    <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-all" />
                     Terms of Service
                 </Link>
               </li>
@@ -158,7 +158,7 @@ export default function Footer({ minimal = false }: { minimal?: boolean }) {
           </p>
           <div className="flex items-center gap-8">
             <a href="mailto:support@xcix.com" className="text-[11px] font-semibold text-foreground hover:text-primary transition-all flex items-center gap-2">
-              <Mail className="h-3.5 w-3.5" />
+              <Mail className="size-3.5" />
               support@xcix.com
             </a>
           </div>

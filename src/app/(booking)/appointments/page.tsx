@@ -4,6 +4,12 @@ import { redirect } from 'next/navigation';
 import { AppointmentsClient } from '@/components/booking/appointments-client';
 import { authService } from '@/services/auth.service';
 import { getBackendUrl } from '@/lib/backend-api';
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "My Appointments",
+  description: "View and manage your appointments",
+};
 
 export const dynamic = 'force-dynamic';
 

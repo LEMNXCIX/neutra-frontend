@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import { bookingService, Service } from '@/services/booking.service';
 
+export const metadata = { title: "Services Management", };
+
 export default function AdminServicesPage() {
     const [services, setServices] = useState<Service[]>([]);
     const [loading, setLoading] = useState(true);

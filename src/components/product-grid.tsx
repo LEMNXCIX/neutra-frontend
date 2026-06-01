@@ -79,7 +79,7 @@ export default function ProductGrid({
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
-                      <Package className="h-16 w-16 text-muted-foreground/20" />
+                      <Package className="size-16 text-muted-foreground/20" />
                     </div>
                   )}
                   <div className="absolute top-4 right-4 z-10">
@@ -132,19 +132,19 @@ export default function ProductGrid({
                     >
                       {loadingId === p.id ? (
                         <div className="flex items-center gap-2">
-                          <Loader2 className="h-4 w-4 animate-spin" />
+                          <Loader2 className="size-4 animate-spin" />
                           <span>Processing</span>
                         </div>
                       ) : (
                         <div className="flex items-center gap-2">
-                          <ShoppingCart className="h-4 w-4" />
+                          <ShoppingCart className="size-4" />
                           <span>Add to Cart</span>
                         </div>
                       )}
                     </Button>
                     <Button variant="outline" asChild className="h-14 px-10 rounded-xl font-bold border-2 border-border hover:bg-muted transition-all">
                       <Link href={`/products/${p.id}`}>
-                        <Eye className="mr-2 h-4 w-4" />
+                        <Eye className="mr-2 size-4" />
                         View Details
                       </Link>
                     </Button>
@@ -183,7 +183,7 @@ export default function ProductGrid({
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-muted/30">
-                  <Package className="h-16 w-16 text-muted-foreground/20" />
+                  <Package className="size-16 text-muted-foreground/20" />
                 </div>
               )}
 
@@ -241,12 +241,12 @@ export default function ProductGrid({
                 >
                     {loadingId === p.id ? (
                     <div className="flex items-center gap-2">
-                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <Loader2 className="size-4 animate-spin" />
                         <span>Processing</span>
                     </div>
                     ) : (
                     <div className="flex items-center gap-2">
-                        <ShoppingCart className="h-4 w-4" />
+                        <ShoppingCart className="size-4" />
                         <span>Add to Cart</span>
                     </div>
                     )}

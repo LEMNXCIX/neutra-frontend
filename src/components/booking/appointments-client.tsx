@@ -86,12 +86,12 @@ export function AppointmentsClient({
                         <div className="flex items-center gap-2 text-sm text-muted-foreground group-hover:text-foreground transition-colors">
                             {type === 'user' ? (
                                 <>
-                                    <Briefcase className="h-4 w-4" />
+                                    <Briefcase className="size-4" />
                                     <span>Staff: {appointment.staff?.name || 'Any'}</span>
                                 </>
                             ) : (
                                 <>
-                                    <UserIcon className="h-4 w-4" />
+                                    <UserIcon className="size-4" />
                                     <span>Client: {appointment.user?.name || appointment.userId || 'Unknown'}</span>
                                 </>
                             )}
@@ -105,7 +105,7 @@ export function AppointmentsClient({
             <CardContent>
                 <div className="grid grid-cols-2 gap-4 mb-4">
                     <div className="flex items-center gap-2 text-sm">
-                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                        <Calendar className="size-4 text-muted-foreground" />
                         <div>
                             <p className="text-xs text-muted-foreground">Date</p>
                             <p className="font-medium">
@@ -119,7 +119,7 @@ export function AppointmentsClient({
                         </div>
                     </div>
                     <div className="flex items-center gap-2 text-sm">
-                        <Clock className="h-4 w-4 text-muted-foreground" />
+                        <Clock className="size-4 text-muted-foreground" />
                         <div>
                             <p className="text-xs text-muted-foreground">Time</p>
                             <p className="font-medium">
@@ -134,7 +134,7 @@ export function AppointmentsClient({
 
                 {appointment.notes && (
                     <div className="flex items-start gap-2 text-sm p-3 bg-muted/50 rounded-lg">
-                        <FileText className="h-4 w-4 text-muted-foreground mt-0.5" />
+                        <FileText className="size-4 text-muted-foreground mt-0.5" />
                         <div>
                             <p className="text-xs text-muted-foreground mb-1">Notes</p>
                             <p className="text-sm line-clamp-2">{appointment.notes}</p>
@@ -162,7 +162,7 @@ export function AppointmentsClient({
                                     onStatusUpdated={loadStaffAppointments}
                                     trigger={
                                         <Button variant="default" size="sm" className="flex-1 sm:flex-none">
-                                            <CheckCircle2 className="h-4 w-4 mr-2" />
+                                            <CheckCircle2 className="size-4 mr-2" />
                                             Aprobar
                                         </Button>
                                     }
@@ -173,7 +173,7 @@ export function AppointmentsClient({
                                     onStatusUpdated={loadStaffAppointments}
                                     trigger={
                                         <Button variant="destructive" size="sm" className="flex-1 sm:flex-none">
-                                            <XCircle className="h-4 w-4 mr-2" />
+                                            <XCircle className="size-4 mr-2" />
                                             Rechazar
                                         </Button>
                                     }
@@ -191,7 +191,7 @@ export function AppointmentsClient({
             {/* Success Alert */}
             {success && (
                 <Alert className="mb-6 border-green-500/50 bg-green-50 dark:bg-green-950">
-                    <CheckCircle2 className="h-4 w-4 text-green-600" />
+                    <CheckCircle2 className="size-4 text-green-600" />
                     <AlertDescription className="text-green-800 dark:text-green-200">
                         Appointment booked successfully! You'll receive a confirmation email shortly.
                     </AlertDescription>
@@ -201,7 +201,7 @@ export function AppointmentsClient({
             {/* Error Alert */}
             {error && (
                 <Alert variant="destructive" className="mb-6">
-                    <AlertCircle className="h-4 w-4" />
+                    <AlertCircle className="size-4" />
                     <AlertDescription>{error}</AlertDescription>
                 </Alert>
             )}
@@ -210,11 +210,11 @@ export function AppointmentsClient({
                 <Tabs defaultValue="assigned" className="space-y-6">
                     <TabsList className="grid w-full grid-cols-2 max-w-[400px]">
                         <TabsTrigger value="assigned" className="gap-2">
-                            <Briefcase className="h-4 w-4" />
+                            <Briefcase className="size-4" />
                             My Schedule
                         </TabsTrigger>
                         <TabsTrigger value="my-bookings" className="gap-2">
-                            <Calendar className="h-4 w-4" />
+                            <Calendar className="size-4" />
                             My Bookings
                         </TabsTrigger>
                     </TabsList>
@@ -223,7 +223,7 @@ export function AppointmentsClient({
                         {staffAppointments.length === 0 ? (
                             <Card className="text-center py-12">
                                 <CardContent className="pt-6">
-                                    <Briefcase className="h-8 w-8 text-muted-foreground mx-auto mb-4" />
+                                    <Briefcase className="size-8 text-muted-foreground mx-auto mb-4" />
                                     <p className="text-lg font-medium">No assigned bookings yet</p>
                                     <p className="text-muted-foreground">You'll see customer bookings here when they scheduled with you.</p>
                                 </CardContent>
@@ -239,7 +239,7 @@ export function AppointmentsClient({
                         {appointments.length === 0 ? (
                             <Card className="text-center py-12">
                                 <CardContent className="pt-6">
-                                    <Calendar className="h-8 w-8 text-muted-foreground mx-auto mb-4" />
+                                    <Calendar className="size-8 text-muted-foreground mx-auto mb-4" />
                                     <p className="text-lg font-medium">No personal bookings</p>
                                     <Button asChild variant="outline" className="mt-4">
                                         <Link href="/services">Book a Service</Link>
@@ -258,8 +258,8 @@ export function AppointmentsClient({
                 appointments.length === 0 ? (
                     <Card className="text-center py-12">
                         <CardContent className="pt-6 space-y-4">
-                            <div className="mx-auto w-16 h-16 rounded-full bg-muted flex items-center justify-center">
-                                <Calendar className="h-8 w-8 text-muted-foreground" />
+                            <div className="mx-auto size-16 rounded-full bg-muted flex items-center justify-center">
+                                <Calendar className="size-8 text-muted-foreground" />
                             </div>
                             <div>
                                 <p className="text-lg font-medium mb-2">No appointments yet</p>

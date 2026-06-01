@@ -3,6 +3,8 @@ import OrdersTableClient from "@/components/admin/orders/OrdersTableClient";
 import { extractTokenFromCookies, validateAdminAccess } from "@/lib/server-auth";
 import { get as backendGet } from "../../../lib/backend-api";
 
+export const metadata = { title: "Orders", };
+
 export const dynamic = 'force-dynamic';
 
 async function getOrders(search: string, status: string, page: number, limit: number) {

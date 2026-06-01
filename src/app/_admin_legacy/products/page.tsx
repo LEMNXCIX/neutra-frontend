@@ -4,6 +4,8 @@ import { extractTokenFromCookies, getCookieString } from "@/lib/server-auth";
 import { getBackendUrl } from "@/lib/backend-api";
 import { Product } from '@/types/product.types';
 
+export const metadata = { title: "Products Management", };
+
 export const dynamic = 'force-dynamic';
 
 async function getProducts(search: string, category: string, page: number, limit: number) {

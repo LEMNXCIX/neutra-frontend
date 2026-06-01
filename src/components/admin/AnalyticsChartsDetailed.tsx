@@ -87,7 +87,7 @@ export default function AnalyticsChartsDetailed() {
                   <Skeleton className="h-4 w-24" />
                   <Skeleton className="h-8 w-20" />
                 </div>
-                <Skeleton className="h-10 w-10 rounded-xl" />
+                <Skeleton className="size-10 rounded-xl" />
               </div>
             </CardContent>
           </Card>
@@ -118,7 +118,7 @@ export default function AnalyticsChartsDetailed() {
               <div key={i} className="space-y-2">
                 <div className="flex justify-between">
                   <div className="flex gap-3 items-center">
-                    <Skeleton className="h-6 w-6 rounded-full" />
+                    <Skeleton className="size-6 rounded-full" />
                     <Skeleton className="h-4 w-32" />
                   </div>
                   <div className="flex gap-4">
@@ -239,7 +239,7 @@ export default function AnalyticsChartsDetailed() {
                 <p className="text-3xl font-bold">${avgOrderValue.toFixed(2)}</p>
               </div>
               <div className="bg-white/20 backdrop-blur-sm p-3 rounded-xl">
-                <Package className="h-6 w-6" />
+                <Package className="size-6" />
               </div>
             </div>
           </CardContent>
@@ -342,7 +342,7 @@ export default function AnalyticsChartsDetailed() {
                   <div key={data.name} className="space-y-2">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3 flex-1 min-w-0">
-                        <span className="flex-shrink-0 w-6 h-6 rounded-full bg-gradient-to-br flex items-center justify-center text-white text-xs font-bold"
+                        <span className="flex-shrink-0 size-6 rounded-full bg-gradient-to-br flex items-center justify-center text-white text-xs font-bold"
                           style={{
                             background: `linear-gradient(135deg, ${idx === 0 ? '#ef4444, #f97316' :
                               idx === 1 ? '#f97316, #f59e0b' :

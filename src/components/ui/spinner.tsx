@@ -10,7 +10,7 @@ function Spinner({ className, size, ...props }: SpinnerProps) {
       role="status"
       aria-label="Loading"
       size={size}
-      className={cn("h-4 w-4 animate-spin", className)}
+      className={cn("size-4 animate-spin", className)}
       {...props}
     />
   );

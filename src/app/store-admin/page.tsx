@@ -5,6 +5,8 @@ import AnalyticsCharts from "@/components/admin/AnalyticsCharts";
 import AnalyticsOverview from "@/components/admin/AnalyticsOverview";
 import AnalyticsChartsDetailed from "@/components/admin/AnalyticsChartsDetailed";
 
+export const metadata = { title: "Store Admin", };
+
 export const dynamic = 'force-dynamic';
 
 const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001/api';

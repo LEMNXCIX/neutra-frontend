@@ -389,7 +389,7 @@ export default function CouponsTableClient({ coupons: initialCoupons, stats, pag
                         <p className="text-2xl font-bold mt-1">{value}</p>
                     </div>
                     <div className={`p-3 rounded-full ${color}`}>
-                        <Icon className="h-6 w-6 text-white" />
+                        <Icon className="size-6 text-white" />
                     </div>
                 </div>
             </CardContent>
@@ -516,7 +516,7 @@ export default function CouponsTableClient({ coupons: initialCoupons, stats, pag
                         resetForm();
                         setCreateOpen(true);
                     }}>
-                        <Plus className="h-4 w-4 mr-2" />
+                        <Plus className="size-4 mr-2" />
                         Add Coupon
                     </Button>
                 </div>
@@ -536,7 +536,7 @@ export default function CouponsTableClient({ coupons: initialCoupons, stats, pag
                 <AccordionItem value="stats" className="border rounded-lg">
                     <AccordionTrigger className="px-4 hover:no-underline">
                         <div className="flex items-center gap-3">
-                            <Ticket className="h-5 w-5 text-muted-foreground" />
+                            <Ticket className="size-5 text-muted-foreground" />
                             <span className="font-medium">Coupon Statistics</span>
                         </div>
                     </AccordionTrigger>
@@ -631,9 +631,9 @@ export default function CouponsTableClient({ coupons: initialCoupons, stats, pag
                                             <TableCell>
                                                 <div className="flex items-center gap-2">
                                                     {c.type === CouponType.PERCENT ? (
-                                                        <Percent className="h-4 w-4 text-muted-foreground" />
+                                                        <Percent className="size-4 text-muted-foreground" />
                                                     ) : (
-                                                        <DollarSign className="h-4 w-4 text-muted-foreground" />
+                                                        <DollarSign className="size-4 text-muted-foreground" />
                                                     )}
                                                     <span className="capitalize">{c.type === CouponType.PERCENT ? 'Percent' : 'Fixed'}</span>
                                                 </div>
@@ -656,14 +656,14 @@ export default function CouponsTableClient({ coupons: initialCoupons, stats, pag
                                             </TableCell>
                                             <TableCell>
                                                 <div className="flex gap-1">
-                                                    <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-blue-500 hover:bg-blue-50" onClick={() => openView(c)} title="View Details">
-                                                        <Ticket className="h-4 w-4" />
+                                                    <Button size="icon" variant="ghost" className="size-8 text-muted-foreground hover:text-blue-500 hover:bg-blue-50" onClick={() => openView(c)} title="View Details">
+                                                        <Ticket className="size-4" />
                                                     </Button>
-                                                    <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10" onClick={() => openEdit(c)} title="Edit">
-                                                        <Edit className="h-4 w-4" />
+                                                    <Button size="icon" variant="ghost" className="size-8 text-muted-foreground hover:text-primary hover:bg-primary/10" onClick={() => openEdit(c)} title="Edit">
+                                                        <Edit className="size-4" />
                                                     </Button>
-                                                    <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10" onClick={() => deleteCoupon(c.id)} title="Delete" disabled={isDeleting === c.id}>
-                                                        {isDeleting === c.id ? <Spinner className="h-4 w-4" /> : <Trash2 className="h-4 w-4" />}
+                                                    <Button size="icon" variant="ghost" className="size-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10" onClick={() => deleteCoupon(c.id)} title="Delete" disabled={isDeleting === c.id}>
+                                                        {isDeleting === c.id ? <Spinner className="size-4" /> : <Trash2 className="size-4" />}
                                                     </Button>
                                                 </div>
                                             </TableCell>
@@ -688,7 +688,7 @@ export default function CouponsTableClient({ coupons: initialCoupons, stats, pag
                                 onClick={() => handlePageChange(pagination.currentPage - 1)}
                                 disabled={pagination.currentPage === 1}
                             >
-                                <ChevronLeft className="h-4 w-4 mr-1" />
+                                <ChevronLeft className="size-4 mr-1" />
                                 Previous
                             </Button>
                             <div className="hidden sm:flex items-center gap-1">
@@ -703,7 +703,7 @@ export default function CouponsTableClient({ coupons: initialCoupons, stats, pag
                                 disabled={pagination.currentPage === pagination.totalPages || pagination.totalPages === 0}
                             >
                                 Next
-                                <ChevronRight className="h-4 w-4 ml-1" />
+                                <ChevronRight className="size-4 ml-1" />
                             </Button>
                         </div>
                     </div>
@@ -722,9 +722,9 @@ export default function CouponsTableClient({ coupons: initialCoupons, stats, pag
                                         <h3 className="font-mono font-bold text-lg">{c.code}</h3>
                                         <div className="flex items-center gap-2 mt-1">
                                             {c.type === CouponType.PERCENT ? (
-                                                <Percent className="h-4 w-4 text-muted-foreground" />
+                                                <Percent className="size-4 text-muted-foreground" />
                                             ) : (
-                                                <DollarSign className="h-4 w-4 text-muted-foreground" />
+                                                <DollarSign className="size-4 text-muted-foreground" />
                                             )}
                                             <span className="text-sm capitalize">{c.type === CouponType.PERCENT ? 'Percent' : 'Fixed'}</span>
                                             <span className="font-medium">
@@ -739,15 +739,15 @@ export default function CouponsTableClient({ coupons: initialCoupons, stats, pag
                                 </div>
                                 <div className="flex gap-2">
                                     <Button size="sm" variant="outline" className="flex-1" onClick={() => openView(c)}>
-                                        <Ticket className="h-4 w-4 mr-1" />
+                                        <Ticket className="size-4 mr-1" />
                                         View
                                     </Button>
                                     <Button size="sm" className="flex-1" onClick={() => openEdit(c)}>
-                                        <Edit className="h-4 w-4 mr-1" />
+                                        <Edit className="size-4 mr-1" />
                                         Edit
                                     </Button>
                                     <Button size="sm" variant="destructive" onClick={() => deleteCoupon(c.id)} disabled={isDeleting === c.id}>
-                                        {isDeleting === c.id ? <Spinner className="h-4 w-4" /> : <Trash2 className="h-4 w-4" />}
+                                        {isDeleting === c.id ? <Spinner className="size-4" /> : <Trash2 className="size-4" />}
                                     </Button>
                                 </div>
                             </CardContent>
@@ -765,7 +765,7 @@ export default function CouponsTableClient({ coupons: initialCoupons, stats, pag
                                 onClick={() => handlePageChange(pagination.currentPage - 1)}
                                 disabled={pagination.currentPage === 1}
                             >
-                                <ChevronLeft className="h-4 w-4" />
+                                <ChevronLeft className="size-4" />
                             </Button>
                             <span className="text-sm text-muted-foreground">
                                 Page {pagination.currentPage} of {pagination.totalPages}
@@ -776,7 +776,7 @@ export default function CouponsTableClient({ coupons: initialCoupons, stats, pag
                                 onClick={() => handlePageChange(pagination.currentPage + 1)}
                                 disabled={pagination.currentPage === pagination.totalPages || pagination.totalPages === 0}
                             >
-                                <ChevronRight className="h-4 w-4" />
+                                <ChevronRight className="size-4" />
                             </Button>
                         </div>
                     </Card>
