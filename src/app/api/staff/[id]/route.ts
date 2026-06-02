@@ -11,14 +11,15 @@ export async function PUT(
         const { id } = await context.params;
         const body = await request.json();
 
-        const response = await fetch(`${BACKEND_URL}/staff/${id}`, {
-            method: 'PUT',
-            headers: {
-                ...getProxyHeaders(request),
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(body),
-        });
+  const response = await fetch(`${BACKEND_URL}/staff/${id}`, {
+    method: 'PUT',
+    headers: {
+      ...getProxyHeaders(request),
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+    cache: 'no-store',
+  });
 
         const data = await response.json();
         return NextResponse.json(data, { status: response.status });
@@ -38,10 +39,11 @@ export async function DELETE(
     try {
         const { id } = await context.params;
 
-        const response = await fetch(`${BACKEND_URL}/staff/${id}`, {
-            method: 'DELETE',
-            headers: getProxyHeaders(request),
-        });
+  const response = await fetch(`${BACKEND_URL}/staff/${id}`, {
+    method: 'DELETE',
+    headers: getProxyHeaders(request),
+    cache: 'no-store',
+  });
 
         if (response.status === 204 || response.status === 200) {
             return new NextResponse(null, { status: 204 });

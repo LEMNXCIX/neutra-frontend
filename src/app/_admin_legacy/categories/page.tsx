@@ -1,11 +1,11 @@
-import React from "react";
+import React, { Suspense } from "react";
 import CategoriesTableClient from "@/components/admin/categories/CategoriesTableClient";
 import { extractTokenFromCookies, getCookieString } from "@/lib/server-auth";
 import { getBackendUrl } from "@/lib/backend-api";
 
-export const metadata = { title: "Categories Management", };
+export const metadata = { title: "Categories Management" };
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 async function getCategories() {
     try {
@@ -15,15 +15,15 @@ async function getCategories() {
         // Fetch from backend with cookies
         const response = await fetch(`${getBackendUrl()}/categories`, {
             headers: {
-                'Content-Type': 'application/json',
-                'Cookie': cookieString,
-                ...(token && { 'Authorization': `Bearer ${token}` }),
+                "Content-Type": "application/json",
+                Cookie: cookieString,
+                ...(token && { Authorization: `Bearer ${token}` }),
             },
-            cache: 'no-store',
+            cache: "no-store",
         });
 
         if (!response.ok) {
-            console.error('Failed to fetch categories:', response.status);
+            console.error("Failed to fetch categories:", response.status);
             return {
                 categories: [],
                 stats: {
@@ -40,14 +40,22 @@ async function getCategories() {
 
         // Calculate stats using productCount from backend
         const totalCategories = categories.length;
-        const totalProducts = categories.reduce((sum: number, c: { productCount?: number; _count?: { products?: number } }) => {
-            return sum + (c.productCount || c._count?.products || 0);
-        }, 0);
-        const averageProductsPerCategory = totalCategories > 0
-            ? Math.round(totalProducts / totalCategories)
-            : 0;
-        const withProducts = categories.filter((c: { productCount?: number; _count?: { products?: number } }) =>
-            (c.productCount || c._count?.products || 0) > 0
+        const totalProducts = categories.reduce(
+            (
+                sum: number,
+                c: { productCount?: number; _count?: { products?: number } },
+            ) => {
+                return sum + (c.productCount || c._count?.products || 0);
+            },
+            0,
+        );
+        const averageProductsPerCategory =
+            totalCategories > 0
+                ? Math.round(totalProducts / totalCategories)
+                : 0;
+        const withProducts = categories.filter(
+            (c: { productCount?: number; _count?: { products?: number } }) =>
+                (c.productCount || c._count?.products || 0) > 0,
         ).length;
 
         return {
@@ -77,15 +85,17 @@ export default async function CategoriesPage() {
     const data = await getCategories();
 
     return (
-        <CategoriesTableClient
-            categories={data.categories}
-            stats={data.stats}
-            pagination={{
-                currentPage: 1,
-                totalPages: 1,
-                totalItems: data.categories.length,
-                itemsPerPage: data.categories.length,
-            }}
-        />
+        <Suspense fallback={null}>
+            <CategoriesTableClient
+                categories={data.categories}
+                stats={data.stats}
+                pagination={{
+                    currentPage: 1,
+                    totalPages: 1,
+                    totalItems: data.categories.length,
+                    itemsPerPage: data.categories.length,
+                }}
+            />
+        </Suspense>
     );
 }

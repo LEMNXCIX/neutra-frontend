@@ -11,14 +11,15 @@ export async function PUT(
         const { id } = await context.params;
         const body = await request.json();
 
-        const response = await fetch(`${BACKEND_URL}/appointments/${id}/status`, {
-            method: 'PUT',
-            headers: {
-                ...getProxyHeaders(request),
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(body),
-        });
+  const response = await fetch(`${BACKEND_URL}/appointments/${id}/status`, {
+    method: 'PUT',
+    headers: {
+      ...getProxyHeaders(request),
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+    cache: 'no-store',
+  });
 
         if (!response.ok) {
             const errorText = await response.text();

@@ -1,23 +1,23 @@
-import React from 'react';
-import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
-import { AppointmentsClient } from '@/components/booking/appointments-client';
-import { authService } from '@/services/auth.service';
-import { getBackendUrl } from '@/lib/backend-api';
+import React from "react";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { AppointmentsClient } from "@/components/booking/appointments-client";
+import { authService } from "@/services/auth.service";
+import { getBackendUrl } from "@/lib/backend-api";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "My Appointments",
-  description: "View and manage your appointments",
+    title: "My Appointments",
+    description: "View and manage your appointments",
 };
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 async function getInitialData() {
     try {
         const cookieStore = await cookies();
-        const token = cookieStore.get('token')?.value;
-        const tenantSlug = cookieStore.get('tenant-slug')?.value || '';
+        const token = cookieStore.get("token")?.value;
+        const tenantSlug = cookieStore.get("tenant-slug")?.value || "";
 
         if (!token) return null;
 
@@ -26,27 +26,35 @@ async function getInitialData() {
         const user = authRes?.user;
         if (!user) return null;
 
-        const isStaff = user.role?.name === 'STAFF';
+        const isStaff = user.role?.name === "STAFF";
         const headers = {
-            'Content-Type': 'application/json',
-            'Cookie': `token=${token}`,
-            'x-tenant-slug': tenantSlug
+            "Content-Type": "application/json",
+            Cookie: `token=${token}`,
+            "x-tenant-slug": tenantSlug,
         };
 
         const baseUrl = getBackendUrl();
 
         // 2. Prepare parallel requests
         const requests: Promise<any>[] = [
-            fetch(`${baseUrl}/appointments?userId=${user.id}`, { headers, cache: 'no-store' }).then(r => r.json())
+            fetch(`${baseUrl}/appointments?userId=${user.id}`, {
+                headers,
+                cache: "no-store",
+            }).then((r) => r.json()),
         ];
 
         if (isStaff) {
-            requests.push(fetch(`${baseUrl}/staff/me`, { headers, cache: 'no-store' }).then(r => r.json()));
+            requests.push(
+                fetch(`${baseUrl}/staff/me`, {
+                    headers,
+                    cache: "no-store",
+                }).then((r) => r.json()),
+            );
         }
 
         // 3. Execute in parallel
         const results = await Promise.all(requests);
-        
+
         const userAppointments = results[0]?.data || [];
         let staffProfile = null;
         let staffAppointments: any[] = [];
@@ -54,7 +62,10 @@ async function getInitialData() {
         if (isStaff && results[1]?.success) {
             staffProfile = results[1].data;
             if (staffProfile?.id) {
-                const sAppsRes = await fetch(`${baseUrl}/appointments?staffId=${staffProfile.id}`, { headers, cache: 'no-store' });
+                const sAppsRes = await fetch(
+                    `${baseUrl}/appointments?staffId=${staffProfile.id}`,
+                    { headers, cache: "no-store" },
+                );
                 const sAppsData = await sAppsRes.json();
                 staffAppointments = sAppsData.data || [];
             }
@@ -65,20 +76,24 @@ async function getInitialData() {
             userAppointments,
             staffProfile,
             staffAppointments,
-            isStaff
+            isStaff,
         };
     } catch (error) {
-        console.error('Error fetching initial appointments data:', error);
+        console.error("Error fetching initial appointments data:", error);
         return null;
     }
 }
 
-export default async function AppointmentsPage(props: { searchParams: Promise<{ success?: string }> }) {
-    const data = await getInitialData();
-    const searchParams = await props.searchParams;
+export default async function AppointmentsPage(props: {
+    searchParams: Promise<{ success?: string }>;
+}) {
+    const [data, searchParams] = await Promise.all([
+        getInitialData(),
+        props.searchParams,
+    ]);
 
     if (!data) {
-        redirect('/login?redirect=/appointments');
+        redirect("/login?redirect=/appointments");
     }
 
     return (
@@ -90,11 +105,13 @@ export default async function AppointmentsPage(props: { searchParams: Promise<{ 
                         My <span className="text-primary">Appointments</span>
                     </h1>
                     <p className="text-muted-foreground text-lg">
-                        {data.isStaff ? 'Manage your schedule and bookings' : 'Manage your upcoming and past appointments'}
+                        {data.isStaff
+                            ? "Manage your schedule and bookings"
+                            : "Manage your upcoming and past appointments"}
                     </p>
                 </div>
 
-                <AppointmentsClient 
+                <AppointmentsClient
                     initialUserAppointments={data.userAppointments}
                     initialStaffAppointments={data.staffAppointments}
                     staffProfile={data.staffProfile}

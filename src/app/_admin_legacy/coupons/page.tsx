@@ -1,26 +1,33 @@
-import React from "react";
-import { cookies } from 'next/headers';
+import React, { Suspense } from "react";
+import { cookies } from "next/headers";
 import CouponsTableClient from "@/components/admin/coupons/CouponsTableClient";
 
-export const metadata = { title: "Coupons Management", };
+export const metadata = { title: "Coupons Management" };
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
-async function getCoupons(search: string, type: string, status: string, page: number, limit: number) {
+async function getCoupons(
+    search: string,
+    type: string,
+    status: string,
+    page: number,
+    limit: number,
+) {
     try {
         // Build query string
         const queryParams = new URLSearchParams();
-        if (search) queryParams.set('search', search);
-        if (type && type !== 'all') queryParams.set('type', type);
-        if (status && status !== 'all') queryParams.set('status', status);
-        queryParams.set('page', page.toString());
-        queryParams.set('limit', limit.toString());
+        if (search) queryParams.set("search", search);
+        if (type && type !== "all") queryParams.set("type", type);
+        if (status && status !== "all") queryParams.set("status", status);
+        queryParams.set("page", page.toString());
+        queryParams.set("limit", limit.toString());
 
         const queryString = queryParams.toString();
 
         // Server Components need absolute URLs for fetch
-        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-        const url = `${baseUrl}/api/coupons${queryString ? `?${queryString}` : ''}`;
+        const baseUrl =
+            process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+        const url = `${baseUrl}/api/coupons${queryString ? `?${queryString}` : ""}`;
 
         // Get cookies to pass to BFF route
         const cookieStore = await cookies();
@@ -28,10 +35,10 @@ async function getCoupons(search: string, type: string, status: string, page: nu
 
         // Fetch from BFF route with cookies
         const response = await fetch(url, {
-            cache: 'no-store',
+            cache: "no-store",
             headers: {
-                'Cookie': cookieHeader
-            }
+                Cookie: cookieHeader,
+            },
         });
 
         if (!response.ok) {
@@ -64,17 +71,19 @@ async function getCoupons(search: string, type: string, status: string, page: nu
                 expiredCoupons: 0,
                 activeCoupons: 0,
             },
-            pagination: data.pagination ? {
-                currentPage: data.pagination.page,
-                totalPages: data.pagination.totalPages,
-                totalItems: data.pagination.total,
-                itemsPerPage: data.pagination.limit,
-            } : {
-                currentPage: page,
-                totalPages: 0,
-                totalItems: 0,
-                itemsPerPage: limit,
-            },
+            pagination: data.pagination
+                ? {
+                      currentPage: data.pagination.page,
+                      totalPages: data.pagination.totalPages,
+                      totalItems: data.pagination.total,
+                      itemsPerPage: data.pagination.limit,
+                  }
+                : {
+                      currentPage: page,
+                      totalPages: 0,
+                      totalItems: 0,
+                      itemsPerPage: limit,
+                  },
         };
     } catch (err) {
         console.error("Error fetching coupons:", err);
@@ -103,19 +112,36 @@ type Props = {
 
 export default async function CouponsPage({ searchParams }: Props) {
     const resolvedSearchParams = await searchParams;
-    const page = typeof resolvedSearchParams.page === "string" ? parseInt(resolvedSearchParams.page) : 1;
-    const limit = typeof resolvedSearchParams.limit === "string" ? parseInt(resolvedSearchParams.limit) : 10;
-    const search = typeof resolvedSearchParams.search === "string" ? resolvedSearchParams.search : "";
-    const type = typeof resolvedSearchParams.type === "string" ? resolvedSearchParams.type : "all";
-    const status = typeof resolvedSearchParams.status === "string" ? resolvedSearchParams.status : "all";
+    const page =
+        typeof resolvedSearchParams.page === "string"
+            ? parseInt(resolvedSearchParams.page)
+            : 1;
+    const limit =
+        typeof resolvedSearchParams.limit === "string"
+            ? parseInt(resolvedSearchParams.limit)
+            : 10;
+    const search =
+        typeof resolvedSearchParams.search === "string"
+            ? resolvedSearchParams.search
+            : "";
+    const type =
+        typeof resolvedSearchParams.type === "string"
+            ? resolvedSearchParams.type
+            : "all";
+    const status =
+        typeof resolvedSearchParams.status === "string"
+            ? resolvedSearchParams.status
+            : "all";
 
     const data = await getCoupons(search, type, status, page, limit);
 
     return (
-        <CouponsTableClient
-            coupons={data.coupons}
-            stats={data.stats}
-            pagination={data.pagination}
-        />
+        <Suspense fallback={null}>
+            <CouponsTableClient
+                coupons={data.coupons}
+                stats={data.stats}
+                pagination={data.pagination}
+            />
+        </Suspense>
     );
 }

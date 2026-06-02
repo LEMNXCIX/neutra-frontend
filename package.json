@@ -7,7 +7,7 @@
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "eslint",
-    "test-local": "node tests/test-session.js && node tests/test-orders.js"
+    "test-local": "node tests/test-session.js && node tests/test-orders.js && node tests/test-auth-login-route.js"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.12",

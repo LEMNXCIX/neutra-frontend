@@ -59,7 +59,7 @@ export default function SuperAdminSidebar({ items }: SuperAdminSidebarProps) {
             }`}
         >
             {/* Header */}
-            <div className="flex items-center justify-between px-4 py-4 border-b border-border h-16">
+            <div className="flex items-center justify-between p-4 border-b border-border h-16">
                 {sidebarOpen ? (
                     <h2 className="text-sm font-bold uppercase tracking-widest text-foreground">
                         Console

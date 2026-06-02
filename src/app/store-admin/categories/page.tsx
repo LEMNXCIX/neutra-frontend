@@ -1,21 +1,30 @@
-import React from "react";
+import React, { Suspense } from "react";
 import CategoriesTableClient from "@/components/admin/categories/CategoriesTableClient";
-import { extractTokenFromCookies, validateAdminAccess } from "@/lib/server-auth";
+import {
+    extractTokenFromCookies,
+    validateAdminAccess,
+} from "@/lib/server-auth";
 import { get as backendGet } from "../../../lib/backend-api";
 
-export const metadata = { title: "Categories", };
+export const metadata = { title: "Categories" };
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 async function getCategories() {
     try {
         const token = await extractTokenFromCookies();
 
         // Fetch from backend
-        const result = await backendGet('/categories', token as string | undefined);
+        const result = await backendGet(
+            "/categories",
+            token as string | undefined,
+        );
 
         if (!result.success) {
-            console.error('Failed to fetch categories from backend:', result.error);
+            console.error(
+                "Failed to fetch categories from backend:",
+                result.error,
+            );
             return {
                 categories: [],
                 stats: {
@@ -37,25 +46,43 @@ async function getCategories() {
         }
 
         const data = result as any;
-        const categories = data.data?.categories || data.categories || (Array.isArray(data) ? data : []);
+        const categories =
+            data.data?.categories ||
+            data.categories ||
+            (Array.isArray(data) ? data : []);
 
         // Calculate stats
         const backendStats = data.data?.stats || data.stats;
         const totalCategories = categories.length;
         const activeCategories = categories.filter((c: any) => c.active).length;
-        const withImages = categories.filter((c: any) => c.image || c.img).length;
+        const withImages = categories.filter(
+            (c: any) => c.image || c.img,
+        ).length;
 
         // Use backend stats if available, otherwise calculate
-        const totalProducts = backendStats?.totalProducts ?? categories.reduce((sum: number, c: any) => sum + (c.productCount || c._count?.products || 0), 0);
-        const averageProductsPerCategory = backendStats?.avgProductsPerCategory ?? (totalCategories > 0 ? Math.round(totalProducts / totalCategories) : 0);
-        const withProducts = categories.filter((c: any) => (c.productCount || c._count?.products || 0) > 0).length;
+        const totalProducts =
+            backendStats?.totalProducts ??
+            categories.reduce(
+                (sum: number, c: any) =>
+                    sum + (c.productCount || c._count?.products || 0),
+                0,
+            );
+        const averageProductsPerCategory =
+            backendStats?.avgProductsPerCategory ??
+            (totalCategories > 0
+                ? Math.round(totalProducts / totalCategories)
+                : 0);
+        const withProducts = categories.filter(
+            (c: any) => (c.productCount || c._count?.products || 0) > 0,
+        ).length;
 
-        const pagination = data.data?.pagination || data.pagination || {
-            currentPage: 1,
-            totalPages: 1,
-            totalItems: totalCategories,
-            itemsPerPage: totalCategories > 0 ? totalCategories : 10,
-        };
+        const pagination = data.data?.pagination ||
+            data.pagination || {
+                currentPage: 1,
+                totalPages: 1,
+                totalItems: totalCategories,
+                itemsPerPage: totalCategories > 0 ? totalCategories : 10,
+            };
 
         return {
             categories,
@@ -97,15 +124,17 @@ export default async function CategoriesPage() {
     const data = await getCategories();
 
     return (
-        <CategoriesTableClient
-            categories={data.categories}
-            stats={data.stats}
-            pagination={{
-                currentPage: 1,
-                totalPages: 1,
-                totalItems: data.categories.length,
-                itemsPerPage: data.categories.length,
-            }}
-        />
+        <Suspense fallback={null}>
+            <CategoriesTableClient
+                categories={data.categories}
+                stats={data.stats}
+                pagination={{
+                    currentPage: 1,
+                    totalPages: 1,
+                    totalItems: data.categories.length,
+                    itemsPerPage: data.categories.length,
+                }}
+            />
+        </Suspense>
     );
 }

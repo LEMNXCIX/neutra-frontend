@@ -1,13 +1,18 @@
-import React from "react";
+import React, { Suspense } from "react";
 import SlidersTableClient from "@/components/admin/sliders/SlidersTableClient";
 import { extractTokenFromCookies, getCookieString } from "@/lib/server-auth";
 import { getBackendUrl } from "@/lib/backend-api";
 
-export const metadata = { title: "Sliders Management", };
+export const metadata = { title: "Sliders Management" };
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
-async function getSliders(search: string, status: string, page: number, limit: number) {
+async function getSliders(
+    search: string,
+    status: string,
+    page: number,
+    limit: number,
+) {
     try {
         const token = await extractTokenFromCookies();
         const cookieString = await getCookieString();
@@ -15,15 +20,15 @@ async function getSliders(search: string, status: string, page: number, limit: n
         // Fetch from backend with cookies
         const response = await fetch(`${getBackendUrl()}/slide`, {
             headers: {
-                'Content-Type': 'application/json',
-                'Cookie': cookieString,
-                ...(token && { 'Authorization': `Bearer ${token}` }),
+                "Content-Type": "application/json",
+                Cookie: cookieString,
+                ...(token && { Authorization: `Bearer ${token}` }),
             },
-            cache: 'no-store',
+            cache: "no-store",
         });
 
         if (!response.ok) {
-            console.error('Failed to fetch sliders:', response.status);
+            console.error("Failed to fetch sliders:", response.status);
             return {
                 sliders: [],
                 stats: {
@@ -54,9 +59,10 @@ async function getSliders(search: string, status: string, page: number, limit: n
         // Apply filters
         if (search) {
             const query = search.toLowerCase();
-            sliders = sliders.filter((s: Slider) =>
-                s.title?.toLowerCase().includes(query) ||
-                s.subtitle?.toLowerCase().includes(query)
+            sliders = sliders.filter(
+                (s: Slider) =>
+                    s.title?.toLowerCase().includes(query) ||
+                    s.subtitle?.toLowerCase().includes(query),
             );
         }
 
@@ -120,18 +126,32 @@ type Props = {
 
 export default async function SlidersPage({ searchParams }: Props) {
     const resolvedSearchParams = await searchParams;
-    const page = typeof resolvedSearchParams.page === "string" ? parseInt(resolvedSearchParams.page) : 1;
-    const limit = typeof resolvedSearchParams.limit === "string" ? parseInt(resolvedSearchParams.limit) : 10;
-    const search = typeof resolvedSearchParams.search === "string" ? resolvedSearchParams.search : "";
-    const status = typeof resolvedSearchParams.status === "string" ? resolvedSearchParams.status : "all";
+    const page =
+        typeof resolvedSearchParams.page === "string"
+            ? parseInt(resolvedSearchParams.page)
+            : 1;
+    const limit =
+        typeof resolvedSearchParams.limit === "string"
+            ? parseInt(resolvedSearchParams.limit)
+            : 10;
+    const search =
+        typeof resolvedSearchParams.search === "string"
+            ? resolvedSearchParams.search
+            : "";
+    const status =
+        typeof resolvedSearchParams.status === "string"
+            ? resolvedSearchParams.status
+            : "all";
 
     const data = await getSliders(search, status, page, limit);
 
     return (
-        <SlidersTableClient
-            sliders={data.sliders}
-            stats={data.stats}
-            pagination={data.pagination}
-        />
+        <Suspense fallback={null}>
+            <SlidersTableClient
+                sliders={data.sliders}
+                stats={data.stats}
+                pagination={data.pagination}
+            />
+        </Suspense>
     );
 }

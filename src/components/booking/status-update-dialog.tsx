@@ -10,13 +10,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { Loader2, CheckCircle, XCircle } from "lucide-react";
 import React, { useState } from "react";
-import { bookingService } from '@/services/booking.service';
+import { bookingService } from "@/services/booking.service";
 import { toast } from "sonner";
 import { Appointment } from "@/services/booking.service";
 
 interface StatusUpdateDialogProps {
     appointmentId: string;
-    newStatus: Appointment['status'];
+    newStatus: Appointment["status"];
     onStatusUpdated?: () => void;
     trigger?: React.ReactNode;
 }
@@ -25,12 +25,12 @@ export function StatusUpdateDialog({
     appointmentId,
     newStatus,
     onStatusUpdated,
-    trigger
+    trigger,
 }: StatusUpdateDialogProps) {
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
 
-    const isApprove = newStatus === 'CONFIRMED';
+    const isApprove = newStatus === "CONFIRMED";
     const title = isApprove ? "Aprobar Cita" : "Rechazar Cita";
     const description = isApprove
         ? "¿Estás seguro de que quieres aprobar esta cita?"
@@ -41,8 +41,13 @@ export function StatusUpdateDialog({
     const handleUpdate = async () => {
         try {
             setLoading(true);
-            await bookingService.updateAppointmentStatus(appointmentId, newStatus);
-            toast.success(isApprove ? "Cita aprobada correctamente" : "Cita rechazada");
+            await bookingService.updateAppointmentStatus(
+                appointmentId,
+                newStatus,
+            );
+            toast.success(
+                isApprove ? "Cita aprobada correctamente" : "Cita rechazada",
+            );
             setOpen(false);
             if (onStatusUpdated) {
                 onStatusUpdated();
@@ -59,7 +64,11 @@ export function StatusUpdateDialog({
             <DialogTrigger asChild>
                 {trigger || (
                     <Button variant={confirmButtonVariant} size="sm">
-                        {isApprove ? <CheckCircle className="size-4 mr-2" /> : <XCircle className="size-4 mr-2" />}
+                        {isApprove ? (
+                            <CheckCircle className="size-4 mr-2" />
+                        ) : (
+                            <XCircle className="size-4 mr-2" />
+                        )}
                         {isApprove ? "Aprobar" : "Rechazar"}
                     </Button>
                 )}
@@ -67,16 +76,24 @@ export function StatusUpdateDialog({
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
                     <DialogTitle>{title}</DialogTitle>
-                    <DialogDescription>
-                        {description}
-                    </DialogDescription>
+                    <DialogDescription>{description}</DialogDescription>
                 </DialogHeader>
-                <DialogFooter className="flex flex-row justify-end space-x-2 pt-4">
-                    <Button variant="outline" onClick={() => setOpen(false)} disabled={loading}>
+                <DialogFooter className="flex flex-row justify-end gap-2 pt-4">
+                    <Button
+                        variant="outline"
+                        onClick={() => setOpen(false)}
+                        disabled={loading}
+                    >
                         Cancelar
                     </Button>
-                    <Button variant={confirmButtonVariant} onClick={handleUpdate} disabled={loading}>
-                        {loading && <Loader2 className="mr-2 size-4 animate-spin" />}
+                    <Button
+                        variant={confirmButtonVariant}
+                        onClick={handleUpdate}
+                        disabled={loading}
+                    >
+                        {loading && (
+                            <Loader2 className="mr-2 size-4 animate-spin" />
+                        )}
                         Confirmar
                     </Button>
                 </DialogFooter>

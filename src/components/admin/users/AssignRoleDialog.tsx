@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { toast } from "sonner";
 import { usersService } from "@/services/users.service";
 import { rolesService } from "@/services/roles.service";
@@ -26,6 +26,22 @@ import { Loader2, UserCog } from "lucide-react";
 import { Role } from "@/types/role.types";
 import { User } from "@/types/user.types";
 
+const refreshPermissions = async () => {
+    try {
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_BASE_URL}/auth/validate`,
+            {
+                credentials: "include",
+            },
+        );
+        if (response.ok) {
+            await response.json();
+        }
+    } catch (err) {
+        console.error("Failed to refresh permissions:", err);
+    }
+};
+
 type AssignRoleDialogProps = {
     user: User | null;
     open: boolean;
@@ -44,40 +60,26 @@ export function AssignRoleDialog({
     const [loading, setLoading] = useState(false);
     const [loadingRoles, setLoadingRoles] = useState(false);
 
-    // Load roles when dialog opens
-    useEffect(() => {
-        if (open) {
-            loadRoles();
-        }
-    }, [open]);
+  const loadRoles = async () => {
+    setLoadingRoles(true);
+    try {
+      const fetchedRoles = await rolesService.getAll();
+      setRoles(fetchedRoles);
+    } catch (err) {
+      const message =
+        err instanceof ApiError ? err.message : "Failed to load roles";
+      toast.error(message);
+    } finally {
+      setLoadingRoles(false);
+    }
+  };
 
-    const loadRoles = async () => {
-        setLoadingRoles(true);
-        try {
-            const fetchedRoles = await rolesService.getAll();
-            setRoles(fetchedRoles);
-        } catch (err) {
-            const message =
-                err instanceof ApiError ? err.message : "Failed to load roles";
-            toast.error(message);
-        } finally {
-            setLoadingRoles(false);
-        }
-    };
-
-    // Helper function to refresh permissions cache
-    const refreshPermissions = async () => {
-        try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/auth/validate`, {
-                credentials: 'include',
-            });
-            if (response.ok) {
-                await response.json();
-            }
-        } catch (err) {
-            console.error('Failed to refresh permissions:', err);
-        }
-    };
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (nextOpen) {
+      loadRoles();
+    }
+    onOpenChange(nextOpen);
+  };
 
     const handleAssign = async () => {
         if (!user || !selectedRoleId) {
@@ -106,7 +108,11 @@ export function AssignRoleDialog({
     };
 
     return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
+        <Dialog
+            key={user?.id ?? "none"}
+            open={open}
+            onOpenChange={handleOpenChange}
+        >
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
@@ -116,7 +122,8 @@ export function AssignRoleDialog({
                     <DialogDescription>
                         {user && (
                             <>
-                                Assign a role to <strong>{user.name}</strong> ({user.email})
+                                Assign a role to <strong>{user.name}</strong> (
+                                {user.email})
                             </>
                         )}
                     </DialogDescription>
@@ -149,9 +156,14 @@ export function AssignRoleDialog({
                                         </div>
                                     ) : (
                                         roles.map((role) => (
-                                            <SelectItem key={role.id} value={role.id}>
+                                            <SelectItem
+                                                key={role.id}
+                                                value={role.id}
+                                            >
                                                 <div>
-                                                    <div className="font-medium">{role.name}</div>
+                                                    <div className="font-medium">
+                                                        {role.name}
+                                                    </div>
                                                     {role.description && (
                                                         <div className="text-xs text-muted-foreground">
                                                             {role.description}
@@ -179,7 +191,9 @@ export function AssignRoleDialog({
                         onClick={handleAssign}
                         disabled={loading || !selectedRoleId || loadingRoles}
                     >
-                        {loading && <Loader2 className="mr-2 size-4 animate-spin" />}
+                        {loading && (
+                            <Loader2 className="mr-2 size-4 animate-spin" />
+                        )}
                         Assign Role
                     </Button>
                 </DialogFooter>

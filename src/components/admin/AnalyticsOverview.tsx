@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useSyncExternalStore } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -29,62 +29,60 @@ type Stats = {
   categories: { total: number; avgProducts: number };
 };
 
-export default function AnalyticsOverview() {
-  const [isMounted, setIsMounted] = React.useState(false);
-  const { isFeatureEnabled } = useFeatures();
+const StatCard = ({
+  icon: Icon,
+  title,
+  value,
+  subtitle,
+  color,
+  trend,
+}: {
+  icon: React.ElementType;
+  title: string;
+  value: string | number;
+  subtitle?: string;
+  color: string;
+  trend?: 'up' | 'down';
+}) => (
+  <Card className="group relative overflow-hidden border-border bg-card transition-all duration-300 hover:shadow-2xl hover:shadow-primary/5 hover:translate-y-[-2px]">
+    <div className={cn("absolute top-0 left-0 w-1 h-full opacity-0 group-hover:opacity-100 transition-opacity", color)} />
+    <CardContent className="pt-6">
+      <div className="flex items-start justify-between">
+        <div className="flex-1 space-y-1">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{title}</p>
+          <div className="flex items-baseline gap-2">
+            <p className="text-3xl font-bold tracking-tighter">{value}</p>
+            {trend && (
+              <Badge variant="outline" className={cn(
+                "px-1 py-0 border-none flex items-center gap-0.5 font-bold text-[10px]",
+                trend === 'up' ? "text-green-600" : "text-red-600"
+              )}>
+                {trend === 'up' ? <TrendingUp className="size-3" /> : <TrendingDown className="size-3" />}
+                {trend === 'up' ? "+12%" : "-5%"}
+              </Badge>
+            )}
+          </div>
+          {subtitle && (
+            <p className="text-xs font-medium text-muted-foreground/70 tracking-tight">{subtitle}</p>
+          )}
+        </div>
+        <div className={cn("p-2.5 rounded-xl transition-transform group-hover:scale-110 duration-500", color)}>
+          <Icon className="size-5 text-white" />
+        </div>
+      </div>
+    </CardContent>
+  </Card>
+);
 
-  React.useEffect(() => {
-    setIsMounted(true);
-  }, []);
+const emptySubscribe = () => () => {};
+
+export default function AnalyticsOverview() {
+  const isMounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
+  const { isFeatureEnabled } = useFeatures();
 
   const { data: stats, isLoading: loading } = useApiQuery<Stats>(
     ['admin', 'stats', 'overview'],
     '/admin/stats/overview'
-  );
-
-  const StatCard = ({
-    icon: Icon,
-    title,
-    value,
-    subtitle,
-    color,
-    trend,
-  }: {
-    icon: React.ElementType;
-    title: string;
-    value: string | number;
-    subtitle?: string;
-    color: string;
-    trend?: 'up' | 'down';
-  }) => (
-    <Card className="group relative overflow-hidden border-border bg-card transition-all duration-300 hover:shadow-2xl hover:shadow-primary/5 hover:translate-y-[-2px]">
-      <div className={cn("absolute top-0 left-0 w-1 h-full opacity-0 group-hover:opacity-100 transition-opacity", color)} />
-      <CardContent className="pt-6">
-        <div className="flex items-start justify-between">
-          <div className="flex-1 space-y-1">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{title}</p>
-            <div className="flex items-baseline gap-2">
-              <p className="text-3xl font-bold tracking-tighter">{value}</p>
-              {trend && (
-                <Badge variant="outline" className={cn(
-                  "px-1 py-0 border-none flex items-center gap-0.5 font-bold text-[10px]",
-                  trend === 'up' ? "text-green-600" : "text-red-600"
-                )}>
-                  {trend === 'up' ? <TrendingUp className="size-3" /> : <TrendingDown className="size-3" />}
-                  {trend === 'up' ? "+12%" : "-5%"}
-                </Badge>
-              )}
-            </div>
-            {subtitle && (
-              <p className="text-xs font-medium text-muted-foreground/70 tracking-tight">{subtitle}</p>
-            )}
-          </div>
-          <div className={cn("p-2.5 rounded-xl transition-transform group-hover:scale-110 duration-500", color)}>
-            <Icon className="size-5 text-white" />
-          </div>
-        </div>
-      </CardContent>
-    </Card>
   );
 
   if (!isMounted) return null;
@@ -98,75 +96,75 @@ export default function AnalyticsOverview() {
         <div>
           <Skeleton className="h-5 w-40 mb-4" />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <Card key={i} className="overflow-hidden border-none shadow-md">
-                <CardContent className="pt-6">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-3 flex-1">
-                      <Skeleton className="h-4 w-32" />
-                      <Skeleton className="h-9 w-28" />
-                      <Skeleton className="h-3 w-40" />
+{["metrics-1", "metrics-2", "metrics-3", "metrics-4"].map((k) => (
+                <Card key={k} className="overflow-hidden border-none shadow-md">
+                  <CardContent className="pt-6">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-3 flex-1">
+                        <Skeleton className="h-4 w-32" />
+                        <Skeleton className="h-9 w-28" />
+                        <Skeleton className="h-3 w-40" />
+                      </div>
+                      <Skeleton className="size-12 rounded-full" />
                     </div>
-                    <Skeleton className="size-12 rounded-full" />
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
-        </div>
 
-        {/* Inventory Status - 3 cards */}
-        <div>
-          <Skeleton className="h-5 w-48 mb-4" />
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <Card key={i} className="overflow-hidden border-none shadow-md">
-                <CardContent className="pt-6">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-3 flex-1">
-                      <Skeleton className="h-4 w-36" />
-                      <Skeleton className="h-9 w-20" />
-                      <Skeleton className="h-3 w-44" />
+          {/* Inventory Status - 3 cards */}
+          <div>
+            <Skeleton className="h-5 w-48 mb-4" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {["inventory-1", "inventory-2", "inventory-3"].map((k) => (
+                <Card key={k} className="overflow-hidden border-none shadow-md">
+                  <CardContent className="pt-6">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-3 flex-1">
+                        <Skeleton className="h-4 w-36" />
+                        <Skeleton className="h-9 w-20" />
+                        <Skeleton className="h-3 w-44" />
+                      </div>
+                      <Skeleton className="size-12 rounded-full" />
                     </div>
-                    <Skeleton className="size-12 rounded-full" />
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
-        </div>
 
-        {/* Marketing & Promotions - 4 cards */}
-        <div>
-          <Skeleton className="h-5 w-56 mb-4" />
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <Card key={i} className="overflow-hidden border-none shadow-md">
-                <CardContent className="pt-6">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-3 flex-1">
-                      <Skeleton className="h-4 w-28" />
-                      <Skeleton className="h-9 w-24" />
-                      <Skeleton className="h-3 w-48" />
+          {/* Marketing & Promotions - 4 cards */}
+          <div>
+            <Skeleton className="h-5 w-56 mb-4" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {["marketing-1", "marketing-2", "marketing-3", "marketing-4"].map((k) => (
+                <Card key={k} className="overflow-hidden border-none shadow-md">
+                  <CardContent className="pt-6">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-3 flex-1">
+                        <Skeleton className="h-4 w-28" />
+                        <Skeleton className="h-9 w-24" />
+                        <Skeleton className="h-3 w-48" />
+                      </div>
+                      <Skeleton className="size-12 rounded-full" />
                     </div>
-                    <Skeleton className="size-12 rounded-full" />
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
-        </div>
 
-        {/* User Management - 3 cards */}
-        <div>
-          <Skeleton className="h-5 w-44 mb-4" />
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <Card key={i} className="overflow-hidden border-none shadow-md">
-                <CardContent className="pt-6">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-3 flex-1">
-                      <Skeleton className="h-4 w-32" />
+          {/* User Management - 3 cards */}
+          <div>
+            <Skeleton className="h-5 w-44 mb-4" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {["users-1", "users-2", "users-3"].map((k) => (
+                <Card key={k} className="overflow-hidden border-none shadow-md">
+                  <CardContent className="pt-6">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-3 flex-1">
+                        <Skeleton className="h-4 w-32" />
                       <Skeleton className="h-9 w-24" />
                       <Skeleton className="h-3 w-36" />
                     </div>
@@ -184,7 +182,7 @@ export default function AnalyticsOverview() {
   if (!stats) return null;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" suppressHydrationWarning>
       <h2 className="text-2xl font-bold">Analytics Overview</h2>
 
       {/* Primary Metrics */}

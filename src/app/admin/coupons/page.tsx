@@ -1,11 +1,11 @@
-
-import React from 'react';
+import React, { Suspense } from "react";
 import { redirect } from "next/navigation";
 import CouponsTableClient from "@/components/admin/coupons/CouponsTableClient";
 import { couponsService } from "@/services/coupons.service";
 import { validateAdminAccess } from "@/lib/server-auth";
 
-const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001/api';
+const BACKEND_API_URL =
+    process.env.NEXT_PUBLIC_API_URL || "http://localhost:4001/api";
 
 export default async function SuperAdminCouponsPage({
     searchParams,
@@ -16,16 +16,19 @@ export default async function SuperAdminCouponsPage({
     if (!isValid) redirect("/login");
 
     const params = await searchParams;
-    const tenantId = params.tenantId === 'all' ? undefined : params.tenantId;
+    const tenantId = params.tenantId === "all" ? undefined : params.tenantId;
 
     const query = new URLSearchParams();
-    if (tenantId) query.append('tenantId', tenantId);
+    if (tenantId) query.append("tenantId", tenantId);
 
     // Fetch data server-side
-    const response = await fetch(`${BACKEND_API_URL}/coupons?${query.toString()}`, {
-        headers: { 'Cookie': cookieHeader! },
-        cache: 'no-store'
-    });
+    const response = await fetch(
+        `${BACKEND_API_URL}/coupons?${query.toString()}`,
+        {
+            headers: { Cookie: cookieHeader! },
+            cache: "no-store",
+        },
+    );
     const result = await response.json();
     const coupons = result.data || [];
 
@@ -34,7 +37,9 @@ export default async function SuperAdminCouponsPage({
         totalCoupons: coupons.length,
         usedCoupons: coupons.filter((c: any) => c.usageCount > 0).length,
         unusedCoupons: coupons.filter((c: any) => c.usageCount === 0).length,
-        expiredCoupons: coupons.filter((c: any) => c.expiresAt && new Date(c.expiresAt) < new Date()).length,
+        expiredCoupons: coupons.filter(
+            (c: any) => c.expiresAt && new Date(c.expiresAt) < new Date(),
+        ).length,
         activeCoupons: coupons.filter((c: any) => c.active).length,
     };
 
@@ -47,12 +52,14 @@ export default async function SuperAdminCouponsPage({
 
     return (
         <div className="container mx-auto py-8">
-            <CouponsTableClient
-                coupons={coupons}
-                stats={stats}
-                pagination={pagination}
-                isSuperAdmin={true}
-            />
+            <Suspense fallback={null}>
+                <CouponsTableClient
+                    coupons={coupons}
+                    stats={stats}
+                    pagination={pagination}
+                    isSuperAdmin={true}
+                />
+            </Suspense>
         </div>
     );
 }

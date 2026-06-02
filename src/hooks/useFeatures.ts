@@ -1,11 +1,11 @@
-import { useContext } from 'react';
-import { FeatureContext } from '@/providers/feature-provider';
+import { use } from "react";
+import { FeatureContext } from "@/providers/feature-context";
 
 export function useFeatures() {
-    const context = useContext(FeatureContext);
+    const context = use(FeatureContext);
 
     if (context === undefined) {
-        throw new Error('useFeatures must be used within a FeatureProvider');
+        throw new Error("useFeatures must be used within a FeatureProvider");
     }
 
     return context;

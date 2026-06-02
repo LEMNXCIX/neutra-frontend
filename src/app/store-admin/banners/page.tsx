@@ -1,11 +1,14 @@
-import React from "react";
+import React, { Suspense } from "react";
 import BannersTableClient from "@/components/admin/banners/BannersTableClient";
-import { extractTokenFromCookies, validateAdminAccess } from "@/lib/server-auth";
+import {
+    extractTokenFromCookies,
+    validateAdminAccess,
+} from "@/lib/server-auth";
 import { get as backendGet } from "../../../lib/backend-api";
 
-export const metadata = { title: "Banners", };
+export const metadata = { title: "Banners" };
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 async function getBanners() {
     try {
@@ -13,18 +16,24 @@ async function getBanners() {
 
         // Check if user is super admin to allow global view
         const adminCheck = await validateAdminAccess();
-        const isSuperAdmin = adminCheck.isValid && adminCheck.user?.role?.name === 'SUPER_ADMIN';
+        const isSuperAdmin =
+            adminCheck.isValid && adminCheck.user?.role?.name === "SUPER_ADMIN";
 
-        console.log('[BannersPage] Fetching banners from /banners/all/list with token:', !!token);
+        console.log(
+            "[BannersPage] Fetching banners from /banners/all/list with token:",
+            !!token,
+        );
 
         // Fetch from backend with automatic tenant context and auth
-        const endpoint = isSuperAdmin ? '/banners/all/list?tenantId=all' : '/banners/all/list';
+        const endpoint = isSuperAdmin
+            ? "/banners/all/list?tenantId=all"
+            : "/banners/all/list";
         const result = await backendGet(endpoint, token);
 
-        console.log('[BannersPage] Result success:', result.success);
+        console.log("[BannersPage] Result success:", result.success);
 
         if (!result.success) {
-            console.error('Failed to fetch banners:', result.error);
+            console.error("Failed to fetch banners:", result.error);
             return {
                 banners: [],
                 stats: {
@@ -39,7 +48,7 @@ async function getBanners() {
                     totalItems: 0,
                     itemsPerPage: 10,
                 },
-                error: result.error || 'Unknown error fetching banners',
+                error: result.error || "Unknown error fetching banners",
             };
         }
 
@@ -47,8 +56,12 @@ async function getBanners() {
 
         // Calculate stats
         const totalBanners = banners.length;
-        const activeBanners = banners.filter((b: { active?: boolean }) => b.active).length;
-        const withImages = banners.filter((b: { image?: string }) => b.image).length;
+        const activeBanners = banners.filter(
+            (b: { active?: boolean }) => b.active,
+        ).length;
+        const withImages = banners.filter(
+            (b: { image?: string }) => b.image,
+        ).length;
 
         return {
             banners,
@@ -82,7 +95,7 @@ async function getBanners() {
                 totalItems: 0,
                 itemsPerPage: 10,
             },
-            error: err.message || 'Exception during banner fetch',
+            error: err.message || "Exception during banner fetch",
         };
     }
 }
@@ -93,16 +106,21 @@ export default async function BannersPage() {
     return (
         <div className="space-y-4">
             {data.error && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative" role="alert">
+                <div
+                    className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative"
+                    role="alert"
+                >
                     <strong className="font-bold">Fetch Error: </strong>
                     <span className="block sm:inline">{data.error}</span>
                 </div>
             )}
-            <BannersTableClient
-                banners={data.banners}
-                stats={data.stats}
-                pagination={data.pagination}
-            />
+            <Suspense fallback={null}>
+                <BannersTableClient
+                    banners={data.banners}
+                    stats={data.stats}
+                    pagination={data.pagination}
+                />
+            </Suspense>
         </div>
     );
 }

@@ -1,28 +1,34 @@
-
-import React from 'react';
-import { redirect } from 'next/navigation';
+import React, { Suspense } from "react";
+import { redirect } from "next/navigation";
 import AppointmentsTableClient from "@/components/admin/appointments/AppointmentsTableClient";
 import { validateAdminAccess } from "@/lib/server-auth";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
-const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001/api';
+const BACKEND_API_URL =
+    process.env.NEXT_PUBLIC_API_URL || "http://localhost:4001/api";
 
-
-export default async function GlobalAppointmentsPage({ searchParams }: { searchParams: any }) {
+export default async function GlobalAppointmentsPage({
+    searchParams,
+}: {
+    searchParams: any;
+}) {
     const { isValid, cookieHeader } = await validateAdminAccess();
-    if (!isValid) redirect('/login');
+    if (!isValid) redirect("/login");
 
     const params = await searchParams;
     const query = new URLSearchParams(params);
-    query.set('tenantId', query.get('tenantId') || 'all');
+    query.set("tenantId", query.get("tenantId") || "all");
 
-    const response = await fetch(`${BACKEND_API_URL}/appointments?${query.toString()}`, {
-        headers: {
-            'Cookie': cookieHeader!,
+    const response = await fetch(
+        `${BACKEND_API_URL}/appointments?${query.toString()}`,
+        {
+            headers: {
+                Cookie: cookieHeader!,
+            },
+            cache: "no-store",
         },
-        cache: 'no-store',
-    });
+    );
 
     const data = await response.json();
 
@@ -37,8 +43,12 @@ export default async function GlobalAppointmentsPage({ searchParams }: { searchP
 
     const stats = {
         totalAppointments: appointments.length,
-        pendingAppointments: appointments.filter((a: any) => a.status === 'PENDING').length,
-        confirmedAppointments: appointments.filter((a: any) => a.status === 'CONFIRMED').length,
+        pendingAppointments: appointments.filter(
+            (a: any) => a.status === "PENDING",
+        ).length,
+        confirmedAppointments: appointments.filter(
+            (a: any) => a.status === "CONFIRMED",
+        ).length,
         statusCounts,
     };
 
@@ -51,13 +61,17 @@ export default async function GlobalAppointmentsPage({ searchParams }: { searchP
 
     return (
         <div className="space-y-6">
-            <h2 className="text-4xl font-black uppercase tracking-tighter text-foreground">Global Appointments</h2>
-            <AppointmentsTableClient
-                appointments={appointments}
-                stats={stats}
-                pagination={pagination}
-                isSuperAdmin={true}
-            />
+            <h2 className="text-4xl font-black uppercase tracking-tighter text-foreground">
+                Global Appointments
+            </h2>
+            <Suspense fallback={null}>
+                <AppointmentsTableClient
+                    appointments={appointments}
+                    stats={stats}
+                    pagination={pagination}
+                    isSuperAdmin={true}
+                />
+            </Suspense>
         </div>
     );
 }

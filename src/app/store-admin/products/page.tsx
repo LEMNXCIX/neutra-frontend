@@ -1,19 +1,24 @@
-import React from "react";
+import React, { Suspense } from "react";
 import ProductsTableClient from "@/components/admin/products/ProductsTableClient";
 import { extractTokenFromCookies } from "@/lib/server-auth";
 import { get as backendGet } from "../../../lib/backend-api";
-import { Product } from '@/types/product.types';
+import { Product } from "@/types/product.types";
 
-export const metadata = { title: "Products", };
+export const metadata = { title: "Products" };
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
-async function getProducts(search: string, category: string, page: number, limit: number) {
+async function getProducts(
+    search: string,
+    category: string,
+    page: number,
+    limit: number,
+) {
     try {
         const token = (await extractTokenFromCookies()) || undefined;
 
         // Fetch products from backend
-        const result = await backendGet('/products', token);
+        const result = await backendGet("/products", token);
 
         // Map backend Product to frontend Product
         let products: Product[] = [];
@@ -35,12 +40,12 @@ async function getProducts(search: string, category: string, page: number, limit
             products = list.map((p: BackendProduct) => ({
                 id: p.id,
                 name: p.name,
-                description: p.description || '',
+                description: p.description || "",
                 price: p.price,
                 stock: p.stock,
                 categories: p.categories || [],
                 image: p.image || undefined,
-                ownerId: p.ownerId || '',
+                ownerId: p.ownerId || "",
                 createdAt: p.createdAt || new Date(),
                 updatedAt: p.updatedAt || new Date(),
             }));
@@ -52,15 +57,17 @@ async function getProducts(search: string, category: string, page: number, limit
             products = products.filter(
                 (p) =>
                     p.name.toLowerCase().includes(query) ||
-                    p.id.toLowerCase().includes(query)
+                    p.id.toLowerCase().includes(query),
             );
         }
 
         if (category && category !== "all") {
             products = products.filter((p) =>
                 p.categories?.some((cat) =>
-                    typeof cat === 'string' ? cat === category : cat.id === category || cat.name === category
-                )
+                    typeof cat === "string"
+                        ? cat === category
+                        : cat.id === category || cat.name === category,
+                ),
             );
         }
 
@@ -68,9 +75,11 @@ async function getProducts(search: string, category: string, page: number, limit
         const totalProducts = products.length;
         const totalValue = products.reduce(
             (sum, p) => sum + p.price * (p.stock || 0),
-            0
+            0,
         );
-        const lowStockCount = products.filter((p) => (p.stock || 0) < 10).length;
+        const lowStockCount = products.filter(
+            (p) => (p.stock || 0) < 10,
+        ).length;
 
         // Apply pagination
         const startIndex = (page - 1) * limit;
@@ -110,14 +119,14 @@ async function getProducts(search: string, category: string, page: number, limit
 async function getCategories() {
     try {
         const token = (await extractTokenFromCookies()) || undefined;
-        const result = await backendGet('/categories', token);
+        const result = await backendGet("/categories", token);
 
         if (!result.success) {
             return [];
         }
 
         const data = result.data as any;
-        return data ? (data.categories || data) : [];
+        return data ? data.categories || data : [];
     } catch (error) {
         console.error("Error fetching categories:", error);
         return [];
@@ -130,20 +139,36 @@ type Props = {
 
 export default async function ProductsPage({ searchParams }: Props) {
     const resolvedSearchParams = await searchParams;
-    const page = typeof resolvedSearchParams.page === "string" ? parseInt(resolvedSearchParams.page) : 1;
-    const limit = typeof resolvedSearchParams.limit === "string" ? parseInt(resolvedSearchParams.limit) : 12;
-    const search = typeof resolvedSearchParams.search === "string" ? resolvedSearchParams.search : "";
-    const category = typeof resolvedSearchParams.category === "string" ? resolvedSearchParams.category : "all";
+    const page =
+        typeof resolvedSearchParams.page === "string"
+            ? parseInt(resolvedSearchParams.page)
+            : 1;
+    const limit =
+        typeof resolvedSearchParams.limit === "string"
+            ? parseInt(resolvedSearchParams.limit)
+            : 12;
+    const search =
+        typeof resolvedSearchParams.search === "string"
+            ? resolvedSearchParams.search
+            : "";
+    const category =
+        typeof resolvedSearchParams.category === "string"
+            ? resolvedSearchParams.category
+            : "all";
 
-    const data = await getProducts(search, category, page, limit);
-    const categories = await getCategories();
+  const [data, categories] = await Promise.all([
+    getProducts(search, category, page, limit),
+    getCategories(),
+  ]);
 
     return (
-        <ProductsTableClient
-            products={data.products}
-            stats={data.stats}
-            pagination={data.pagination}
-            categories={categories}
-        />
+        <Suspense fallback={null}>
+            <ProductsTableClient
+                products={data.products}
+                stats={data.stats}
+                pagination={data.pagination}
+                categories={categories}
+            />
+        </Suspense>
     );
 }

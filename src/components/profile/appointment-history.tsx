@@ -1,32 +1,46 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { Appointment } from '@/services/booking.service';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Calendar, Clock, User as UserIcon, MapPin, Eye } from 'lucide-react';
-import Link from 'next/link';
-import { CancelAppointmentDialog } from '@/components/booking/cancel-appointment-dialog';
-import { useRouter } from 'next/navigation';
+import React from "react";
+import { Appointment } from "@/services/booking.service";
+import {
+    Card,
+    CardContent,
+    CardHeader,
+    CardTitle,
+    CardDescription,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Calendar, Clock, User as UserIcon, MapPin, Eye } from "lucide-react";
+import Link from "next/link";
+import { CancelAppointmentDialog } from "@/components/booking/cancel-appointment-dialog";
+import { useRouter } from "next/navigation";
 
 interface AppointmentHistoryProps {
     initialAppointments: Appointment[];
 }
 
-export function AppointmentHistory({ initialAppointments }: AppointmentHistoryProps) {
-    const router = useRouter();
+const getStatusColor = (status: string) => {
+    switch (status) {
+        case "CONFIRMED":
+            return "bg-green-500 text-white";
+        case "IN_PROGRESS":
+            return "bg-blue-500 text-white";
+        case "PENDING":
+            return "bg-yellow-500 text-white";
+        case "CANCELLED":
+            return "bg-red-500 text-white";
+        case "COMPLETED":
+            return "bg-purple-500 text-white";
+        default:
+            return "bg-gray-500 text-white";
+    }
+};
 
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case "CONFIRMED": return "bg-green-500 text-white";
-            case "IN_PROGRESS": return "bg-blue-500 text-white";
-            case "PENDING": return "bg-yellow-500 text-white";
-            case "CANCELLED": return "bg-red-500 text-white";
-            case "COMPLETED": return "bg-purple-500 text-white";
-            default: return "bg-gray-500 text-white";
-        }
-    };
+export function AppointmentHistory({
+    initialAppointments,
+}: AppointmentHistoryProps) {
+    const router = useRouter();
 
     if (initialAppointments.length === 0) {
         return (
@@ -36,10 +50,21 @@ export function AppointmentHistory({ initialAppointments }: AppointmentHistoryPr
                         <Calendar className="size-10 text-muted-foreground/40" />
                     </div>
                     <div className="space-y-2">
-                        <h3 className="text-2xl font-bold tracking-tight">No appointments yet</h3>
-                        <p className="text-muted-foreground font-medium">Your scheduled services will appear here once you make a booking.</p>
+                        <h3 className="text-2xl font-bold tracking-tight">
+                            No appointments yet
+                        </h3>
+                        <p className="text-muted-foreground font-medium">
+                            Your scheduled services will appear here once you
+                            make a booking.
+                        </p>
                     </div>
-                    <Button asChild size="lg" className="rounded-xl px-8 font-bold"><Link href="/services">Browse Services</Link></Button>
+                    <Button
+                        asChild
+                        size="lg"
+                        className="rounded-xl px-8 font-bold"
+                    >
+                        <Link href="/services">Browse Services</Link>
+                    </Button>
                 </CardContent>
             </Card>
         );
@@ -52,7 +77,10 @@ export function AppointmentHistory({ initialAppointments }: AppointmentHistoryPr
             </h2>
             <div className="space-y-6">
                 {initialAppointments.map((a) => (
-                    <Card key={a.id} className="overflow-hidden border-none shadow-lg rounded-[2rem] bg-background group hover:shadow-2xl transition-all duration-300">
+                    <Card
+                        key={a.id}
+                        className="overflow-hidden border-none shadow-lg rounded-[2rem] bg-background group hover:shadow-2xl transition-all duration-300"
+                    >
                         <CardHeader className="bg-muted/30 p-8 border-b border-border/50">
                             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                                 <div className="flex flex-wrap items-center gap-3">
@@ -60,12 +88,19 @@ export function AppointmentHistory({ initialAppointments }: AppointmentHistoryPr
                                         <Calendar className="size-6 text-primary" />
                                     </div>
                                     <div>
-                                        <CardTitle className="text-xl font-bold tracking-tight">{a.service?.name || 'Service'}</CardTitle>
+                                        <CardTitle className="text-xl font-bold tracking-tight">
+                                            {a.service?.name || "Service"}
+                                        </CardTitle>
                                         <CardDescription className="flex items-center gap-2 mt-1 font-medium">
-                                            <UserIcon className="size-3 text-primary" /> with {a.staff?.name || 'Staff'}
+                                            <UserIcon className="size-3 text-primary" />{" "}
+                                            with {a.staff?.name || "Staff"}
                                         </CardDescription>
                                     </div>
-                                    <Badge className={`${getStatusColor(a.status)} rounded-full px-4 py-1 text-[10px] font-bold uppercase tracking-widest border-none shadow-sm`}>{a.status}</Badge>
+                                    <Badge
+                                        className={`${getStatusColor(a.status)} rounded-full px-4 py-1 text-[10px] font-bold uppercase tracking-widest border-none shadow-sm`}
+                                    >
+                                        {a.status}
+                                    </Badge>
                                 </div>
                             </div>
                         </CardHeader>
@@ -74,28 +109,65 @@ export function AppointmentHistory({ initialAppointments }: AppointmentHistoryPr
                                 <div className="flex items-center gap-3 p-4 bg-muted/30 rounded-2xl">
                                     <Calendar className="size-5 text-primary" />
                                     <div className="space-y-0.5">
-                                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Date</p>
-                                        <p className="text-base font-bold">{new Date(a.startTime).toLocaleDateString(undefined, { dateStyle: 'long' })}</p>
+                                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                                            Date
+                                        </p>
+                                        <p className="text-base font-bold">
+                                            {new Date(
+                                                a.startTime,
+                                            ).toLocaleDateString(undefined, {
+                                                dateStyle: "long",
+                                            })}
+                                        </p>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-3 p-4 bg-muted/30 rounded-2xl">
                                     <Clock className="size-5 text-primary" />
                                     <div className="space-y-0.5">
-                                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Time</p>
-                                        <p className="text-base font-bold">{new Date(a.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                                            Time
+                                        </p>
+                                        <p className="text-base font-bold">
+                                            {new Date(
+                                                a.startTime,
+                                            ).toLocaleTimeString([], {
+                                                hour: "2-digit",
+                                                minute: "2-digit",
+                                            })}
+                                        </p>
                                     </div>
                                 </div>
                             </div>
                             <div className="flex gap-3 justify-end pt-4 border-t border-border/50">
-                                {a.status === 'PENDING' && (
-                                    <CancelAppointmentDialog 
-                                        appointmentId={a.id} 
-                                        onAppointmentCancelled={() => router.refresh()}
-                                        trigger={<Button variant="ghost" size="lg" className="rounded-xl font-bold text-destructive hover:bg-destructive/5 px-8">Cancel Appointment</Button>}
+                                {a.status === "PENDING" && (
+                                    <CancelAppointmentDialog
+                                        appointmentId={a.id}
+                                        onAppointmentCancelled={() =>
+                                            router.refresh()
+                                        }
+                                        trigger={
+                                            <Button
+                                                variant="ghost"
+                                                size="lg"
+                                                className="rounded-xl font-bold text-destructive hover:bg-destructive/5 px-8"
+                                            >
+                                                Cancel Appointment
+                                            </Button>
+                                        }
                                     />
                                 )}
-                                <Button variant="secondary" size="lg" className="rounded-xl font-bold px-8 h-12" asChild>
-                                    <Link href={`/appointments/${a.id}`} className="flex items-center gap-2"><Eye className="size-4" /> View Details</Link>
+                                <Button
+                                    variant="secondary"
+                                    size="lg"
+                                    className="rounded-xl font-bold px-8 h-12"
+                                    asChild
+                                >
+                                    <Link
+                                        href={`/appointments/${a.id}`}
+                                        className="flex items-center gap-2"
+                                    >
+                                        <Eye className="size-4" /> View Details
+                                    </Link>
                                 </Button>
                             </div>
                         </CardContent>

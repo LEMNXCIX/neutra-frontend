@@ -1,47 +1,103 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useReducer, useEffect, useCallback } from "react";
 import { PlatformFeature, featuresService } from "@/services/features.service";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { Edit, Trash2, Plus, Zap, Search, RefreshCw, DollarSign } from "lucide-react";
+import {
+    Edit,
+    Trash2,
+    Plus,
+    Zap,
+    Search,
+    RefreshCw,
+    DollarSign,
+} from "lucide-react";
 import { FeatureDialog } from "./FeatureDialog";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 
-interface FeaturesTableProps {
-    initialFeatures?: PlatformFeature[];
+const EMPTY_FEATURES: PlatformFeature[] = [];
+
+type FeaturesState = {
+  features: PlatformFeature[];
+  loading: boolean;
+  search: string;
+  dialogOpen: boolean;
+  editingFeature: PlatformFeature | null;
+};
+
+type FeaturesAction =
+  | { type: "SET_FEATURES"; payload: PlatformFeature[] }
+  | { type: "SET_LOADING"; payload: boolean }
+  | { type: "SET_SEARCH"; payload: string }
+  | { type: "SET_DIALOG_OPEN"; payload: boolean }
+  | { type: "SET_EDITING_FEATURE"; payload: PlatformFeature | null };
+
+function featuresReducer(state: FeaturesState, action: FeaturesAction): FeaturesState {
+  switch (action.type) {
+    case "SET_FEATURES":
+      return { ...state, features: action.payload };
+    case "SET_LOADING":
+      return { ...state, loading: action.payload };
+    case "SET_SEARCH":
+      return { ...state, search: action.payload };
+    case "SET_DIALOG_OPEN":
+      return { ...state, dialogOpen: action.payload };
+    case "SET_EDITING_FEATURE":
+      return { ...state, editingFeature: action.payload };
+    default:
+      return state;
+  }
 }
 
-export function FeaturesTable({ initialFeatures = [] }: FeaturesTableProps) {
-    const [features, setFeatures] = useState<PlatformFeature[]>(initialFeatures);
-    const [loading, setLoading] = useState(initialFeatures.length === 0);
-    const [search, setSearch] = useState("");
-    const [dialogOpen, setDialogOpen] = useState(false);
-    const [editingFeature, setEditingFeature] = useState<PlatformFeature | null>(null);
+interface FeaturesTableProps {
+  initialFeatures?: PlatformFeature[];
+}
 
-    const loadFeatures = async () => {
-        setLoading(true);
-        try {
-            const data = await featuresService.getAll();
-            setFeatures(data);
-        } catch (error) {
-            console.error(error);
-            toast.error("Failed to load features");
-        } finally {
-            setLoading(false);
-        }
-    };
+export function FeaturesTable({ initialFeatures = EMPTY_FEATURES }: FeaturesTableProps) {
+  const [state, dispatch] = useReducer(featuresReducer, {
+    features: initialFeatures,
+    loading: initialFeatures.length === 0,
+    search: "",
+    dialogOpen: false,
+    editingFeature: null,
+  });
 
-    useEffect(() => {
-        loadFeatures();
-    }, []);
+  const loadFeatures = useCallback(async () => {
+    dispatch({ type: "SET_LOADING", payload: true });
+      try {
+      const data = await featuresService.getAll();
+      dispatch({ type: "SET_FEATURES", payload: data });
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to load features");
+    } finally {
+      dispatch({ type: "SET_LOADING", payload: false });
+    }
+  }, []);
+
+  useEffect(() => {
+    loadFeatures();
+  }, [loadFeatures]);
 
     const handleDelete = async (id: string) => {
-        if (!confirm("Are you sure you want to delete this feature? This might affect tenants using it.")) return;
+        if (
+            !confirm(
+                "Are you sure you want to delete this feature? This might affect tenants using it.",
+            )
+        )
+            return;
 
         try {
             await featuresService.delete(id);
@@ -52,20 +108,21 @@ export function FeaturesTable({ initialFeatures = [] }: FeaturesTableProps) {
         }
     };
 
-    const filteredFeatures = features.filter(f =>
-        f.name.toLowerCase().includes(search.toLowerCase()) ||
-        f.key.toLowerCase().includes(search.toLowerCase()) ||
-        f.category?.toLowerCase().includes(search.toLowerCase())
+  const filteredFeatures = state.features.filter(
+    (f) =>
+      f.name.toLowerCase().includes(state.search.toLowerCase()) ||
+      f.key.toLowerCase().includes(state.search.toLowerCase()) ||
+      f.category?.toLowerCase().includes(state.search.toLowerCase()),
     );
 
     const openCreate = () => {
-        setEditingFeature(null);
-        setDialogOpen(true);
+    dispatch({ type: "SET_EDITING_FEATURE", payload: null });
+    dispatch({ type: "SET_DIALOG_OPEN", payload: true });
     };
 
     const openEdit = (feature: PlatformFeature) => {
-        setEditingFeature(feature);
-        setDialogOpen(true);
+    dispatch({ type: "SET_EDITING_FEATURE", payload: feature });
+    dispatch({ type: "SET_DIALOG_OPEN", payload: true });
     };
 
     return (
@@ -89,12 +146,18 @@ export function FeaturesTable({ initialFeatures = [] }: FeaturesTableProps) {
                             <Input
                                 placeholder="Search features..."
                                 className="pl-9"
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
+      value={state.search}
+          onChange={(e) => dispatch({ type: "SET_SEARCH", payload: e.target.value })}
                             />
                         </div>
-                        <Button variant="outline" size="icon" onClick={loadFeatures}>
-                            <RefreshCw className={`size-4 ${loading ? 'animate-spin' : ''}`} />
+                        <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={loadFeatures}
+                        >
+                            <RefreshCw
+                                className={`size-4 ${state.loading ? "animate-spin" : ""}`}
+                            />
                         </Button>
                     </div>
 
@@ -106,36 +169,57 @@ export function FeaturesTable({ initialFeatures = [] }: FeaturesTableProps) {
                                     <TableHead>Key</TableHead>
                                     <TableHead>Category</TableHead>
                                     <TableHead>Price</TableHead>
-                                    <TableHead className="text-right">Actions</TableHead>
+                                    <TableHead className="text-right">
+                                        Actions
+                                    </TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {loading && features.length === 0 ? (
+                                {state.loading && state.features.length === 0 ? (
                                     <TableRow>
-                                        <TableCell colSpan={5} className="text-center py-8">Loading...</TableCell>
+                                        <TableCell
+                                            colSpan={5}
+                                            className="text-center py-8"
+                                        >
+                                            Loading…
+                                        </TableCell>
                                     </TableRow>
                                 ) : filteredFeatures.length === 0 ? (
                                     <TableRow>
-                                        <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">No features found</TableCell>
+                                        <TableCell
+                                            colSpan={5}
+                                            className="text-center py-8 text-muted-foreground"
+                                        >
+                                            No features found
+                                        </TableCell>
                                     </TableRow>
                                 ) : (
                                     filteredFeatures.map((feature) => (
                                         <TableRow key={feature.id}>
                                             <TableCell>
-                                                <div className="font-medium">{feature.name}</div>
+                                                <div className="font-medium">
+                                                    {feature.name}
+                                                </div>
                                                 <div className="text-xs text-muted-foreground max-w-[200px] truncate">
                                                     {feature.description}
                                                 </div>
                                             </TableCell>
                                             <TableCell>
-                                                <Badge variant="secondary" className="font-mono text-[10px]">
+                                                <Badge
+                                                    variant="secondary"
+                                                    className="font-mono text-[10px]"
+                                                >
                                                     {feature.key}
                                                 </Badge>
                                             </TableCell>
                                             <TableCell>
                                                 {feature.category ? (
-                                                    <Badge variant="outline">{feature.category}</Badge>
-                                                ) : "-"}
+                                                    <Badge variant="outline">
+                                                        {feature.category}
+                                                    </Badge>
+                                                ) : (
+                                                    "-"
+                                                )}
                                             </TableCell>
                                             <TableCell>
                                                 <div className="flex items-center gap-1 font-bold text-green-600">
@@ -145,10 +229,25 @@ export function FeaturesTable({ initialFeatures = [] }: FeaturesTableProps) {
                                             </TableCell>
                                             <TableCell className="text-right">
                                                 <div className="flex justify-end gap-2">
-                                                    <Button variant="ghost" size="icon" onClick={() => openEdit(feature)}>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        onClick={() =>
+                                                            openEdit(feature)
+                                                        }
+                                                    >
                                                         <Edit className="size-4" />
                                                     </Button>
-                                                    <Button variant="ghost" size="icon" className="text-destructive" onClick={() => handleDelete(feature.id)}>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="text-destructive"
+                                                        onClick={() =>
+                                                            handleDelete(
+                                                                feature.id,
+                                                            )
+                                                        }
+                                                    >
                                                         <Trash2 className="size-4" />
                                                     </Button>
                                                 </div>
@@ -163,9 +262,9 @@ export function FeaturesTable({ initialFeatures = [] }: FeaturesTableProps) {
             </Card>
 
             <FeatureDialog
-                open={dialogOpen}
-                onOpenChange={setDialogOpen}
-                feature={editingFeature}
+open={state.dialogOpen}
+        onOpenChange={(open) => dispatch({ type: "SET_DIALOG_OPEN", payload: open })}
+        feature={state.editingFeature}
                 onSuccess={loadFeatures}
             />
         </div>

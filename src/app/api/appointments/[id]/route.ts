@@ -10,9 +10,10 @@ export async function GET(
 
     try {
         const headers = await getProxyHeaders(request);
-        const response = await fetch(`${backendUrl}/appointments/${id}`, {
-            headers,
-        });
+		const response = await fetch(`${backendUrl}/appointments/${id}`, {
+			headers,
+			cache: 'no-store',
+		});
 
         const data = await response.json();
         return NextResponse.json(data, { status: response.status });
@@ -34,10 +35,11 @@ export async function DELETE(
 
     try {
         const headers = await getProxyHeaders(request);
-        const response = await fetch(`${backendUrl}/appointments/${id}`, {
-            method: 'DELETE',
-            headers,
-        });
+		const response = await fetch(`${backendUrl}/appointments/${id}`, {
+			method: 'DELETE',
+			headers,
+			cache: 'no-store',
+		});
 
         const data = await response.json();
         return NextResponse.json(data, { status: response.status });

@@ -1,30 +1,34 @@
-import React from 'react';
-import { cookies } from 'next/headers';
-import StaffTableClient from '@/components/admin/booking/StaffTableClient';
+import React, { Suspense } from "react";
+import { cookies } from "next/headers";
+import StaffTableClient from "@/components/admin/booking/StaffTableClient";
 
-export const metadata = { title: "Booking Staff", };
+export const metadata = { title: "Booking Staff" };
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
-const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001/api';
+const BACKEND_API_URL =
+    process.env.NEXT_PUBLIC_API_URL || "http://localhost:4001/api";
 
 async function getStaff() {
     try {
         const cookieStore = await cookies();
         const cookieString = cookieStore.toString();
-        const tenantSlug = cookieStore.get('tenant-slug')?.value || '';
+        const tenantSlug = cookieStore.get("tenant-slug")?.value || "";
 
-        const response = await fetch(`${BACKEND_API_URL}/staff?activeOnly=false`, {
-            headers: {
-                'Content-Type': 'application/json',
-                'Cookie': cookieString,
-                'x-tenant-slug': tenantSlug,
+        const response = await fetch(
+            `${BACKEND_API_URL}/staff?activeOnly=false`,
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                    Cookie: cookieString,
+                    "x-tenant-slug": tenantSlug,
+                },
+                cache: "no-store",
             },
-            cache: 'no-store',
-        });
+        );
 
         if (!response.ok) {
-            console.error('Failed to fetch staff:', response.status);
+            console.error("Failed to fetch staff:", response.status);
             return [];
         }
 
@@ -41,7 +45,9 @@ export default async function AdminStaffPage() {
 
     return (
         <div className="p-6">
-            <StaffTableClient staff={staff} />
+            <Suspense fallback={null}>
+                <StaffTableClient staff={staff} />
+            </Suspense>
         </div>
     );
 }

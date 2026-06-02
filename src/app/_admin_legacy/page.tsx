@@ -1,6 +1,7 @@
 import React from 'react';
 import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
+import { backendFetch } from '@/lib/backend-api';
 import AnalyticsCharts from "@/components/admin/AnalyticsCharts";
 import AnalyticsOverview from "@/components/admin/AnalyticsOverview";
 import AnalyticsChartsDetailed from "@/components/admin/AnalyticsChartsDetailed";
@@ -53,18 +54,26 @@ async function validateAdminAccess() {
 }
 
 export default async function AdminPage() {
-    const { isValid } = await validateAdminAccess();
+	const { isValid } = await validateAdminAccess();
 
-    if (!isValid) {
-        // Not authenticated or not admin, redirect to login
-        redirect('/login');
-    }
+	if (!isValid) {
+		redirect('/login');
+	}
 
-    return (
-        <div className="space-y-6">
-            <h2 className="text-2xl font-semibold capitalize">Dashboard</h2>
-            <AnalyticsOverview />
-            <AnalyticsCharts />
+	let initialOrders: any[] = [];
+	try {
+		const result = await backendFetch("/order", { cache: "no-store" });
+		if (result.success) {
+			const data = result as any;
+			initialOrders = data.orders || data.data?.orders || [];
+		}
+	} catch {}
+
+	return (
+		<div className="space-y-6">
+			<h2 className="text-2xl font-semibold capitalize">Dashboard</h2>
+			<AnalyticsOverview />
+			<AnalyticsCharts initialOrders={initialOrders} />
             <AnalyticsChartsDetailed />
         </div>
     );

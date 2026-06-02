@@ -1,41 +1,46 @@
-'use client';
+"use client";
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import Cookies from 'js-cookie';
+import React, { createContext, use, useMemo, useSyncExternalStore } from "react";
+import Cookies from "js-cookie";
 
 interface TenantContextType {
-    tenantId: string | null;
-    tenantSlug: string | null;
-    moduleType: string | null;
+  tenantId: string | null;
+  tenantSlug: string | null;
+  moduleType: string | null;
 }
 
 const TenantContext = createContext<TenantContextType>({
-    tenantId: null,
-    tenantSlug: null,
-    moduleType: null
+  tenantId: null,
+  tenantSlug: null,
+  moduleType: null,
 });
 
+const emptySubscribe = () => () => {};
+
 export const TenantProvider = ({ children }: { children: React.ReactNode }) => {
-    const [tenantId, setTenantId] = useState<string | null>(null);
-    const [tenantSlug, setTenantSlug] = useState<string | null>(null);
-    const [moduleType, setModuleType] = useState<string | null>(null);
+  const tenantId = useSyncExternalStore(
+    emptySubscribe,
+    () => Cookies.get("tenant-id") ?? null,
+    () => null,
+  );
+  const tenantSlug = useSyncExternalStore(
+    emptySubscribe,
+    () => Cookies.get("tenant-slug") ?? null,
+    () => null,
+  );
+  const moduleType = useSyncExternalStore(
+    emptySubscribe,
+    () => Cookies.get("module-type") ?? null,
+    () => null,
+  );
 
-    useEffect(() => {
-        // Read from cookies set by middleware
-        const storedId = Cookies.get('tenant-id');
-        const storedSlug = Cookies.get('tenant-slug');
-        const storedModule = Cookies.get('module-type');
+  const value = useMemo(() => ({ tenantId, tenantSlug, moduleType }), [tenantId, tenantSlug, moduleType]);
 
-        if (storedId) setTenantId(storedId);
-        if (storedSlug) setTenantSlug(storedSlug);
-        if (storedModule) setModuleType(storedModule);
-    }, []);
-
-    return (
-        <TenantContext.Provider value={{ tenantId, tenantSlug, moduleType }}>
-            {children}
-        </TenantContext.Provider>
-    );
+  return (
+    <TenantContext.Provider value={value}>
+      {children}
+    </TenantContext.Provider>
+  );
 };
 
-export const useTenant = () => useContext(TenantContext);
+export const useTenant = () => use(TenantContext);

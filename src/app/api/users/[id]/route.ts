@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getProxyHeaders } from "@/lib/proxy";
 
-const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4001/api";
+const BACKEND_API_URL =
+    process.env.NEXT_PUBLIC_API_URL || "http://localhost:4001/api";
 
 /**
  * PUT /api/users/[id]
@@ -9,7 +10,7 @@ const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:400
  */
 export async function PUT(
     req: NextRequest,
-    { params }: { params: Promise<{ id: string }> }
+    { params }: { params: Promise<{ id: string }> },
 ) {
     try {
         const { id } = await params;
@@ -31,14 +32,14 @@ export async function PUT(
         console.error("Error updating user:", error);
         return NextResponse.json(
             { error: "Failed to update user" },
-            { status: 500 }
+            { status: 500 },
         );
     }
 }
 
 export async function GET(
     req: NextRequest,
-    { params }: { params: Promise<{ id: string }> }
+    { params }: { params: Promise<{ id: string }> },
 ) {
     try {
         const { id } = await params;
@@ -53,20 +54,21 @@ export async function GET(
         console.error("Error fetching user:", error);
         return NextResponse.json(
             { error: "Failed to fetch user" },
-            { status: 500 }
+            { status: 500 },
         );
     }
 }
 
 export async function DELETE(
     req: NextRequest,
-    { params }: { params: Promise<{ id: string }> }
+    { params }: { params: Promise<{ id: string }> },
 ) {
     try {
         const { id } = await params;
         const response = await fetch(`${BACKEND_API_URL}/users/${id}`, {
             method: "DELETE",
             headers: getProxyHeaders(req),
+            cache: "no-store",
         });
 
         const data = await response.json();
@@ -75,8 +77,7 @@ export async function DELETE(
         console.error("Error deleting user:", error);
         return NextResponse.json(
             { error: "Failed to delete user" },
-            { status: 500 }
+            { status: 500 },
         );
     }
 }
-

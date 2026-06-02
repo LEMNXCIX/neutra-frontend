@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useReducer, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import {
     Card,
     CardContent,
     CardDescription,
     CardHeader,
-    CardTitle
+    CardTitle,
 } from "@/components/ui/card";
 import {
     Select,
@@ -25,103 +25,146 @@ import { tenantService } from "@/services/tenant.service";
 import { TenantFeatures, Tenant } from "@/types/tenant";
 import { useTenant } from "@/context/tenant-context";
 
-interface TenantFeaturesClientProps {
-    activeTenantId?: string;
+type TenantFeaturesState = {
+  selectedTenantId: string | null;
+  tenants: Tenant[];
+  loadingFeatures: boolean;
+  loadingTenants: boolean;
+  saving: boolean;
+  availableFeatures: any[];
+  featureState: Record<string, boolean>;
+};
+
+type TenantFeaturesAction =
+  | { type: "SET_SELECTED_TENANT_ID"; payload: string | null }
+  | { type: "SET_TENANTS"; payload: Tenant[] }
+  | { type: "SET_LOADING_FEATURES"; payload: boolean }
+  | { type: "SET_LOADING_TENANTS"; payload: boolean }
+  | { type: "SET_SAVING"; payload: boolean }
+  | { type: "SET_AVAILABLE_FEATURES"; payload: any[] }
+  | { type: "SET_FEATURE_STATE"; payload: Record<string, boolean> };
+
+function tenantFeaturesReducer(state: TenantFeaturesState, action: TenantFeaturesAction): TenantFeaturesState {
+  switch (action.type) {
+    case "SET_SELECTED_TENANT_ID":
+      return { ...state, selectedTenantId: action.payload };
+    case "SET_TENANTS":
+      return { ...state, tenants: action.payload };
+    case "SET_LOADING_FEATURES":
+      return { ...state, loadingFeatures: action.payload };
+    case "SET_LOADING_TENANTS":
+      return { ...state, loadingTenants: action.payload };
+    case "SET_SAVING":
+      return { ...state, saving: action.payload };
+    case "SET_AVAILABLE_FEATURES":
+      return { ...state, availableFeatures: action.payload };
+    case "SET_FEATURE_STATE":
+      return { ...state, featureState: action.payload };
+    default:
+      return state;
+  }
 }
 
-export default function TenantFeaturesClient({ activeTenantId }: TenantFeaturesClientProps) {
+interface TenantFeaturesClientProps {
+  activeTenantId?: string;
+}
+
+export default function TenantFeaturesClient({
+    activeTenantId,
+}: TenantFeaturesClientProps) {
     const { tenantId: contextTenantId } = useTenant();
-    // Use prop if provided, otherwise context, otherwise null
-    const [selectedTenantId, setSelectedTenantId] = useState<string | null>(activeTenantId || contextTenantId);
-    const [tenants, setTenants] = useState<Tenant[]>([]);
+    const effectiveTenantId = activeTenantId || contextTenantId;
+    const isSuperAdminView = !effectiveTenantId;
+  const [state, dispatch] = useReducer(tenantFeaturesReducer, {
+    selectedTenantId: null,
+    tenants: [],
+    loadingFeatures: false,
+    loadingTenants: false,
+    saving: false,
+    availableFeatures: [],
+    featureState: {},
+  });
+  const { selectedTenantId, tenants, loadingFeatures, loadingTenants, saving, availableFeatures, featureState } = state;
+  const setFeatureState = (updater: any) => { const next = typeof updater === 'function' ? updater(featureState) : updater; dispatch({ type: "SET_FEATURE_STATE", payload: next }); };
 
-    const [loadingFeatures, setLoadingFeatures] = useState(false);
-    const [loadingTenants, setLoadingTenants] = useState(false);
-    const [saving, setSaving] = useState(false);
+  const loadAvailableFeatures = useCallback(async () => {
+    try {
+      const features = await tenantService.getAvailableFeatures();
+      dispatch({ type: "SET_AVAILABLE_FEATURES", payload: features });
+    } catch (error) {
+      console.error(
+        "Failed to load available features definitions",
+        error,
+      );
+    }
+  }, []);
 
-    // Dynamic features list from backend
-    const [availableFeatures, setAvailableFeatures] = useState<any[]>([]);
+  const loadTenants = useCallback(async () => {
+    try {
+      dispatch({ type: "SET_LOADING_TENANTS", payload: true });
+      const response = await tenantService.getAll();
+      const data = response as any;
+      const tenantsList = Array.isArray(data) ? data : data.data || [];
+      dispatch({ type: "SET_TENANTS", payload: tenantsList });
+    } catch (error) {
+      console.error("Failed to load tenants", error);
+      toast.error("Failed to load tenants list");
+    } finally {
+      dispatch({ type: "SET_LOADING_TENANTS", payload: false });
+    }
+  }, []);
 
-    // Feature toggle state (key -> boolean)
-    const [featureState, setFeatureState] = useState<Record<string, boolean>>({});
+  const loadTenantFeatures = useCallback(async (id: string) => {
+    try {
+      dispatch({ type: "SET_LOADING_FEATURES", payload: true });
+      const data = await tenantService.getFeatures(id);
+      dispatch({ type: "SET_FEATURE_STATE", payload: data || {} });
+    } catch (error: any) {
+      const msg = error?.message || "Unknown error";
+      toast.error(`Failed to load features: ${msg}`);
+    } finally {
+      dispatch({ type: "SET_LOADING_FEATURES", payload: false });
+    }
+  }, []);
 
-    // Load available features details on mount
-    useEffect(() => {
-        loadAvailableFeatures();
-    }, []);
+  useEffect(() => {
+    loadAvailableFeatures();
+  }, [loadAvailableFeatures]);
 
-    // Load tenants if no context tenant ID AND no active prop (Super Admin view)
-    useEffect(() => {
-        if (!contextTenantId && !activeTenantId) {
-            loadTenants();
-        } else {
-            setSelectedTenantId(activeTenantId || contextTenantId);
-        }
-    }, [contextTenantId, activeTenantId]);
+  useEffect(() => {
+    if (isSuperAdminView) {
+      loadTenants();
+    }
+  }, [isSuperAdminView, loadTenants]);
 
-    // Load features when selected tenant changes
-    useEffect(() => {
-        if (selectedTenantId) {
-            loadTenantFeatures(selectedTenantId);
-        }
-    }, [selectedTenantId]);
+  useEffect(() => {
+    if (effectiveTenantId) {
+      loadTenantFeatures(effectiveTenantId);
+    }
+  }, [effectiveTenantId, loadTenantFeatures]);
 
-    const loadAvailableFeatures = async () => {
+  const handleTenantSelect = (id: string) => {
+    dispatch({ type: "SET_SELECTED_TENANT_ID", payload: id });
+    loadTenantFeatures(id);
+  };
+
+  const handleToggle = (key: string) => {
+    setFeatureState((prev: any) => ({ ...prev, [key]: !prev[key] }));
+  };
+
+    const activeId = effectiveTenantId || selectedTenantId;
+
+  const handleSave = async () => {
+        if (!activeId) return;
         try {
-            const features = await tenantService.getAvailableFeatures();
-            setAvailableFeatures(features);
-        } catch (error) {
-            console.error("Failed to load available features definitions", error);
-        }
-    };
-
-    const loadTenants = async () => {
-        try {
-            setLoadingTenants(true);
-            const response = await tenantService.getAll();
-            const data = response as any;
-            const tenantsList = Array.isArray(data) ? data : (data.data || []);
-            setTenants(tenantsList);
-        } catch (error) {
-            console.error("Failed to load tenants", error);
-            toast.error("Failed to load tenants list");
-        } finally {
-            setLoadingTenants(false);
-        }
-    };
-
-    const loadTenantFeatures = async (id: string) => {
-        try {
-            setLoadingFeatures(true);
-            const data = await tenantService.getFeatures(id);
-            // Data is object { featureKey: boolean, ... }
-            setFeatureState(data || {});
-        } catch (error: any) {
-            const msg = error?.message || "Unknown error";
-            toast.error(`Failed to load features: ${msg}`);
-        } finally {
-            setLoadingFeatures(false);
-        }
-    };
-
-    const handleToggle = (key: string) => {
-        setFeatureState(prev => ({
-            ...prev,
-            [key]: !prev[key]
-        }));
-    };
-
-    const handleSave = async () => {
-        if (!selectedTenantId) return;
-        try {
-            setSaving(true);
-            await tenantService.updateFeatures(selectedTenantId, featureState);
+      dispatch({ type: "SET_SAVING", payload: true });
+      await tenantService.updateFeatures(activeId, featureState);
             toast.success("Features configuration saved");
         } catch (error) {
             console.error("Failed to save features", error);
             toast.error("Failed to save features");
         } finally {
-            setSaving(false);
+            dispatch({ type: "SET_SAVING", payload: false });
         }
     };
 
@@ -140,18 +183,33 @@ export default function TenantFeaturesClient({ activeTenantId }: TenantFeaturesC
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <div>
-                    <h1 className="text-2xl font-bold tracking-tight">Feature Configuration</h1>
-                    <p className="text-muted-foreground">Manage active features for your tenant</p>
+                    <h1 className="text-2xl font-bold tracking-tight">
+                        Feature Configuration
+                    </h1>
+                    <p className="text-muted-foreground">
+                        Manage active features for your tenant
+                    </p>
                 </div>
-                {selectedTenantId && (
-                    <Button onClick={handleSave} disabled={saving || loadingFeatures}>
-                        {saving ? <><Spinner className="mr-2 size-4" /> Saving...</> : <><Save className="mr-2 size-4" /> Save Changes</>}
+                {activeId && (
+                    <Button
+                        onClick={handleSave}
+                        disabled={saving || loadingFeatures}
+                    >
+                        {saving ? (
+                            <>
+                                <Spinner className="mr-2 size-4" /> Saving…
+                            </>
+                        ) : (
+                            <>
+                                <Save className="mr-2 size-4" /> Save Changes
+                            </>
+                        )}
                     </Button>
                 )}
             </div>
 
             {/* Tenant Selector for Super Admin */}
-            {!contextTenantId && !activeTenantId && (
+            {!effectiveTenantId && (
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
@@ -165,14 +223,17 @@ export default function TenantFeaturesClient({ activeTenantId }: TenantFeaturesC
                     <CardContent>
                         <Select
                             value={selectedTenantId || ""}
-                            onValueChange={setSelectedTenantId}
+                            onValueChange={handleTenantSelect}
                         >
                             <SelectTrigger className="w-full md:w-[300px]">
                                 <SelectValue placeholder="Select a tenant..." />
                             </SelectTrigger>
                             <SelectContent>
-                                {tenants.map(tenant => (
-                                    <SelectItem key={tenant.id} value={tenant.id}>
+                                {tenants.map((tenant) => (
+                                    <SelectItem
+                                        key={tenant.id}
+                                        value={tenant.id}
+                                    >
                                         {tenant.name} ({tenant.slug})
                                     </SelectItem>
                                 ))}
@@ -182,62 +243,72 @@ export default function TenantFeaturesClient({ activeTenantId }: TenantFeaturesC
                 </Card>
             )}
 
-            {selectedTenantId ? (
+            {activeId ? (
                 loadingFeatures ? (
                     <div className="flex justify-center items-center h-40">
                         <Spinner className="size-8" />
                     </div>
+                ) : availableFeatures.length === 0 ? (
+                    <div className="text-center text-muted-foreground py-8">
+                        No features definition found.
+                    </div>
                 ) : (
-                    availableFeatures.length === 0 ? (
-                        <div className="text-center text-muted-foreground py-8">
-                            No features definition found.
-                        </div>
-                    ) : (
-                        <div className="grid grid-cols-1 gap-6">
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle className="flex items-center gap-2">
-                                        <Settings className="size-5" />
-                                        Available Features
-                                    </CardTitle>
-                                    <CardDescription>
-                                        Enable or disable platform capabilities
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent className="space-y-6">
-                                    {availableFeatures.map((feature: any) => (
-                                        <div key={feature.key || feature.id} className="flex items-center justify-between space-x-2 border-b last:border-0 pb-4 last:pb-0">
-                                            <div className="space-y-0.5">
-                                                <div className="flex items-center gap-2">
-                                                    <Label className="text-base">{feature.name}</Label>
-                                                    {feature.price > 0 && (
-                                                        <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full font-medium">
-                                                            ${feature.price}
-                                                        </span>
-                                                    )}
-                                                    {feature.price === 0 && (
-                                                        <span className="text-xs bg-gray-100 text-gray-800 px-2 py-0.5 rounded-full font-medium">
-                                                            Free
-                                                        </span>
-                                                    )}
-                                                </div>
-                                                <p className="text-sm text-muted-foreground">
-                                                    {feature.description || "No description available"}
-                                                </p>
+                    <div className="grid grid-cols-1 gap-6">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2">
+                                    <Settings className="size-5" />
+                                    Available Features
+                                </CardTitle>
+                                <CardDescription>
+                                    Enable or disable platform capabilities
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-6">
+                                {availableFeatures.map((feature: any) => (
+                                    <div
+                                        key={feature.key || feature.id}
+                                        className="flex items-center justify-between gap-2 border-b last:border-0 pb-4 last:pb-0"
+                                    >
+                                        <div className="space-y-0.5">
+                                            <div className="flex items-center gap-2">
+                                                <Label className="text-base">
+                                                    {feature.name}
+                                                </Label>
+                                                {feature.price > 0 && (
+                                                    <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full font-medium">
+                                                        ${feature.price}
+                                                    </span>
+                                                )}
+                                                {feature.price === 0 && (
+                                                    <span className="text-xs bg-gray-100 text-gray-800 px-2 py-0.5 rounded-full font-medium">
+                                                        Free
+                                                    </span>
+                                                )}
                                             </div>
-                                            <Switch
-                                                checked={featureState[feature.key] ?? false}
-                                                onCheckedChange={() => handleToggle(feature.key)}
-                                            />
+                                            <p className="text-sm text-muted-foreground">
+                                                {feature.description ||
+                                                    "No description available"}
+                                            </p>
                                         </div>
-                                    ))}
-                                </CardContent>
-                            </Card>
-                        </div>
-                    )
+                                        <Switch
+                  checked={
+                    featureState[feature.key] ??
+                    false
+                  }
+                                            onCheckedChange={() =>
+                                                handleToggle(feature.key)
+                                            }
+                                        />
+                                    </div>
+                                ))}
+                            </CardContent>
+                        </Card>
+                    </div>
                 )
             ) : (
-                !contextTenantId && !activeTenantId && (
+                !contextTenantId &&
+                !activeTenantId && (
                     <div className="flex justify-center items-center h-40 border-2 border-dashed rounded-lg text-muted-foreground">
                         Please select a tenant to configure features
                     </div>

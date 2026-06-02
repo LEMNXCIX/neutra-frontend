@@ -1,7 +1,12 @@
 "use client";
 
 import React from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
 import { Tenant } from "@/types/tenant";
 import { TenantForm } from "./TenantForm";
 
@@ -12,15 +17,23 @@ interface TenantDialogProps {
     onSuccess: () => void;
 }
 
-export function TenantDialog({ open, onOpenChange, tenant, onSuccess }: TenantDialogProps) {
+export function TenantDialog({
+    open,
+    onOpenChange,
+    tenant,
+    onSuccess,
+}: TenantDialogProps) {
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="max-w-2xl">
                 <DialogHeader>
-                    <DialogTitle>{tenant ? "Edit Tenant" : "Create Tenant"}</DialogTitle>
+                    <DialogTitle>
+                        {tenant ? "Edit Tenant" : "Create Tenant"}
+                    </DialogTitle>
                 </DialogHeader>
 
                 <TenantForm
+                    key={tenant?.id ?? "new"}
                     tenant={tenant}
                     onSuccess={() => {
                         onSuccess();

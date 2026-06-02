@@ -1,35 +1,46 @@
-import React from "react";
-import { cookies } from 'next/headers';
+import React, { Suspense } from "react";
+import { cookies } from "next/headers";
 import UsersTableClient from "@/components/admin/users/UsersTableClient";
 import { User } from "@/types/user.types";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
-const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001/api';
+const BACKEND_API_URL =
+    process.env.NEXT_PUBLIC_API_URL || "http://localhost:4001/api";
 
-async function getUsers(search: string, role: string, page: number, limit: number) {
+async function getUsers(
+    search: string,
+    role: string,
+    page: number,
+    limit: number,
+) {
     try {
         // Get cookies from request
         const cookieStore = await cookies();
         const cookieString = cookieStore.toString();
-        const tenantSlug = cookieStore.get('tenant-slug')?.value || '';
+        const tenantSlug = cookieStore.get("tenant-slug")?.value || "";
 
         // Fetch from backend with cookies and explicit tenant slug
         const response = await fetch(`${BACKEND_API_URL}/users`, {
             headers: {
-                'Content-Type': 'application/json',
-                'Cookie': cookieString,
-                'x-tenant-slug': tenantSlug,
+                "Content-Type": "application/json",
+                Cookie: cookieString,
+                "x-tenant-slug": tenantSlug,
             },
-            cache: 'no-store',
+            cache: "no-store",
         });
 
         if (!response.ok) {
-            console.error('Failed to fetch users:', response.status);
+            console.error("Failed to fetch users:", response.status);
             return {
                 users: [],
                 stats: { totalUsers: 0, adminUsers: 0, regularUsers: 0 },
-                pagination: { currentPage: 1, totalPages: 0, totalItems: 0, itemsPerPage: limit },
+                pagination: {
+                    currentPage: 1,
+                    totalPages: 0,
+                    totalItems: 0,
+                    itemsPerPage: limit,
+                },
             };
         }
 
@@ -58,32 +69,44 @@ async function getUsers(search: string, role: string, page: number, limit: numbe
         // Map backend users to frontend format
         let users: User[] = [];
         if (data.success && data.data) {
-            users = (Array.isArray(data.data) ? data.data : []).map((u: any, index: number) => {
-                // Find role in tenants if not at top level
-                const tenantRole = u.role || u.tenants?.[0]?.role;
-                const tenantInfo = u.tenant || u.tenants?.[0]?.tenant;
+            users = (Array.isArray(data.data) ? data.data : []).map(
+                (u: any, index: number) => {
+                    // Find role in tenants if not at top level
+                    const tenantRole = u.role || u.tenants?.[0]?.role;
+                    const tenantInfo = u.tenant || u.tenants?.[0]?.tenant;
 
-                return {
-                    id: u.id,
-                    name: u.name,
-                    email: u.email,
-                    roleId: u.roleId || tenantRole?.id || '',
-                    active: u.active !== undefined ? u.active : true,
-                    profilePic: u.profilePic || undefined,
-                    role: tenantRole ? {
-                        id: tenantRole.id,
-                        name: tenantRole.name,
-                        permissions: tenantRole.permissions || []
-                    } : (u.roleId ? { id: u.roleId, name: 'USER', permissions: [] } : undefined),
-                    createdAt: u.createdAt ? new Date(u.createdAt) : undefined,
-                    updatedAt: u.updatedAt ? new Date(u.updatedAt) : undefined,
-                    tenant: tenantInfo ? {
-                        id: tenantInfo.id,
-                        name: tenantInfo.name,
-                        slug: tenantInfo.slug
-                    } : undefined
-                };
-            });
+                    return {
+                        id: u.id,
+                        name: u.name,
+                        email: u.email,
+                        roleId: u.roleId || tenantRole?.id || "",
+                        active: u.active !== undefined ? u.active : true,
+                        profilePic: u.profilePic || undefined,
+                        role: tenantRole
+                            ? {
+                                  id: tenantRole.id,
+                                  name: tenantRole.name,
+                                  permissions: tenantRole.permissions || [],
+                              }
+                            : u.roleId
+                              ? { id: u.roleId, name: "USER", permissions: [] }
+                              : undefined,
+                        createdAt: u.createdAt
+                            ? new Date(u.createdAt)
+                            : undefined,
+                        updatedAt: u.updatedAt
+                            ? new Date(u.updatedAt)
+                            : undefined,
+                        tenant: tenantInfo
+                            ? {
+                                  id: tenantInfo.id,
+                                  name: tenantInfo.name,
+                                  slug: tenantInfo.slug,
+                              }
+                            : undefined,
+                    };
+                },
+            );
         }
 
         // Apply filters
@@ -93,21 +116,31 @@ async function getUsers(search: string, role: string, page: number, limit: numbe
                 (u) =>
                     u.name.toLowerCase().includes(query) ||
                     u.email.toLowerCase().includes(query) ||
-                    u.id.toLowerCase().includes(query)
+                    u.id.toLowerCase().includes(query),
             );
         }
 
         if (role && role !== "all") {
             if (role === "admin") {
-                users = users.filter((u) => u.role?.name === 'SUPER_ADMIN' || u.role?.name === 'ADMIN');
+                users = users.filter(
+                    (u) =>
+                        u.role?.name === "SUPER_ADMIN" ||
+                        u.role?.name === "ADMIN",
+                );
             } else if (role === "user") {
-                users = users.filter((u) => u.role?.name !== 'SUPER_ADMIN' && u.role?.name !== 'ADMIN');
+                users = users.filter(
+                    (u) =>
+                        u.role?.name !== "SUPER_ADMIN" &&
+                        u.role?.name !== "ADMIN",
+                );
             }
         }
 
         // Calculate stats
         const totalUsers = users.length;
-        const adminUsers = users.filter((u) => u.role?.name === 'SUPER_ADMIN' || u.role?.name === 'ADMIN').length;
+        const adminUsers = users.filter(
+            (u) => u.role?.name === "SUPER_ADMIN" || u.role?.name === "ADMIN",
+        ).length;
         const regularUsers = totalUsers - adminUsers;
 
         // Apply pagination
@@ -151,19 +184,33 @@ type Props = {
 
 export default async function UsersPage({ searchParams }: Props) {
     const resolvedSearchParams = await searchParams;
-    const page = typeof resolvedSearchParams.page === "string" ? parseInt(resolvedSearchParams.page) : 1;
-    const limit = typeof resolvedSearchParams.limit === "string" ? parseInt(resolvedSearchParams.limit) : 10;
-    const search = typeof resolvedSearchParams.search === "string" ? resolvedSearchParams.search : "";
-    const role = typeof resolvedSearchParams.role === "string" ? resolvedSearchParams.role : "all";
+    const page =
+        typeof resolvedSearchParams.page === "string"
+            ? parseInt(resolvedSearchParams.page)
+            : 1;
+    const limit =
+        typeof resolvedSearchParams.limit === "string"
+            ? parseInt(resolvedSearchParams.limit)
+            : 10;
+    const search =
+        typeof resolvedSearchParams.search === "string"
+            ? resolvedSearchParams.search
+            : "";
+    const role =
+        typeof resolvedSearchParams.role === "string"
+            ? resolvedSearchParams.role
+            : "all";
 
     const data = await getUsers(search, role, page, limit);
 
     return (
-        <UsersTableClient
-            users={data.users}
-            stats={data.stats}
-            pagination={data.pagination}
-            showTenant={true}
-        />
+        <Suspense fallback={null}>
+            <UsersTableClient
+                users={data.users}
+                stats={data.stats}
+                pagination={data.pagination}
+                showTenant={true}
+            />
+        </Suspense>
     );
 }

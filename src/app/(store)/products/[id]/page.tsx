@@ -4,12 +4,12 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import {
-  Package,
-  Sparkles,
-  ShoppingBag,
-  Shield,
-  Truck,
-  ArrowLeft,
+    Package,
+    Sparkles,
+    ShoppingBag,
+    Shield,
+    Truck,
+    ArrowLeft,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -18,8 +18,8 @@ import { backendFetch } from "@/lib/backend-api";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Product Details",
-  description: "View product details, pricing, and availability",
+    title: "Product Details",
+    description: "View product details, pricing, and availability",
 };
 
 async function fetchProduct(id: string) {
@@ -117,12 +117,13 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
                             <div className="absolute inset-0 bg-gradient-to-tr from-primary/10 via-transparent to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
                             <div className="aspect-square relative overflow-hidden">
                                 {product.image ? (
-                                    <Image
-                                        src={product.image}
-                                        alt={product.title}
-                                        fill
-                                        priority
-                                        className="object-cover transition-transform duration-1000 group-hover:scale-110"
+      <Image
+        src={product.image}
+        alt={product.title}
+        fill
+        sizes="(max-width: 768px) 100vw, 50vw"
+        priority
+        className="object-cover transition-transform duration-1000 group-hover:scale-110"
                                     />
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center bg-muted">
@@ -168,9 +169,9 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
                                     color: "text-purple-500",
                                     bg: "bg-purple-500/10",
                                 },
-                            ].map((item, i) => (
+                            ].map((item) => (
                                 <Card
-                                    key={i}
+                                    key={item.label}
                                     className="p-6 text-center border-none bg-background shadow-lg rounded-3xl hover:shadow-xl transition-all group"
                                 >
                                     <div
@@ -187,7 +188,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
                     </div>
 
                     {/* Product Details Section */}
-                    <div className="flex flex-col space-y-8 pt-4">
+                    <div className="flex flex-col gap-8 pt-4">
                         <div className="space-y-6">
                             <div className="space-y-4">
                                 <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-foreground leading-[1.1]">

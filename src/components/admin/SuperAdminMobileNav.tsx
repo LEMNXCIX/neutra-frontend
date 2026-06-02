@@ -19,7 +19,7 @@ import {
     UserCog,
     Building,
     CalendarDays,
-    Zap
+    Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -37,20 +37,22 @@ const ICON_MAP: Record<string, any> = {
     UserCog,
     Building,
     CalendarDays,
-    Zap
+    Zap,
 };
 
 interface SuperAdminMobileNavProps {
     items: NavItem[];
 }
 
-export default function SuperAdminMobileNav({ items }: SuperAdminMobileNavProps) {
+export default function SuperAdminMobileNav({
+    items,
+}: SuperAdminMobileNavProps) {
     const pathname = usePathname();
 
     return (
         <nav className="fixed bottom-0 left-0 right-0 md:hidden border-t border-border bg-background/80 backdrop-blur-md z-50 pb-[env(safe-area-inset-bottom)] shadow-lg">
             <ScrollArea className="w-full">
-                <div className="flex w-max space-x-1 p-2 px-4 mx-auto items-center h-16">
+                <div className="flex w-max gap-1 p-2 px-4 mx-auto items-center h-16">
                     {items.map(({ href, label, icon: iconName, exact }) => {
                         const Icon = ICON_MAP[iconName] || LayoutDashboard;
                         const isActive = exact
@@ -63,15 +65,24 @@ export default function SuperAdminMobileNav({ items }: SuperAdminMobileNavProps)
                                 href={href}
                                 className={cn(
                                     "flex flex-col items-center justify-center min-w-[64px] h-12 rounded-lg transition-all duration-300",
-                                    isActive 
-                                    ? "bg-primary text-primary-foreground shadow-sm scale-105" 
-                                    : "text-muted-foreground hover:text-foreground font-medium"
+                                    isActive
+                                        ? "bg-primary text-primary-foreground shadow-sm scale-105"
+                                        : "text-muted-foreground hover:text-foreground font-medium",
                                 )}
                             >
-                                <Icon className={cn("size-4 mb-1", isActive ? "opacity-100" : "opacity-70")} />
-                                <span className={cn(
-                                    "text-[9px] font-medium uppercase tracking-wider leading-none",
-                                )}>{label}</span>
+                                <Icon
+                                    className={cn(
+                                        "size-4 mb-1",
+                                        isActive ? "opacity-100" : "opacity-70",
+                                    )}
+                                />
+                                <span
+                                    className={cn(
+                                        "text-[9px] font-medium uppercase tracking-wider leading-none",
+                                    )}
+                                >
+                                    {label}
+                                </span>
                             </Link>
                         );
                     })}

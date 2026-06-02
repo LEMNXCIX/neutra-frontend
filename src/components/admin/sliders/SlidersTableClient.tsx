@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useCallback, useSyncExternalStore, useReducer, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { slidersService } from "@/services/sliders.service";
@@ -75,60 +75,532 @@ type Props = {
     isSuperAdmin?: boolean;
 };
 
-export default function SlidersTableClient({ sliders: initialSliders, stats, pagination, isSuperAdmin = false }: Props) {
-    const [isMounted, setIsMounted] = useState(false);
-    const router = useRouter();
-    const searchParams = useSearchParams();
-    const { confirm, ConfirmDialog } = useConfirm();
+const StatCard = ({
+  icon: Icon,
+  title,
+  value,
+  color,
+}: {
+  icon: React.ElementType;
+  title: string;
+  value: string | number;
+  color: string;
+}) => (
+  <Card>
+    <CardContent className="pt-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-sm text-muted-foreground">{title}</p>
+          <p className="text-2xl font-bold mt-1">{value}</p>
+        </div>
+        <div className={`p-3 rounded-full ${color}`}>
+          <Icon className="size-6 text-white" />
+        </div>
+      </div>
+    </CardContent>
+  </Card>
+);
 
-    const [sliders, setSliders] = useState<Slideshow[]>(initialSliders);
-    const [loading, setLoading] = useState(false);
+function SliderFormFields({
+  form,
+  setForm,
+  imagePreview,
+  prefix,
+  onImageUpload,
+}: {
+  form: { title: string; desc: string; active: boolean; img: string };
+  setForm: React.Dispatch<React.SetStateAction<{ title: string; desc: string; active: boolean; img: string }>>;
+  imagePreview: string;
+  prefix: string;
+  onImageUpload: (e: React.ChangeEvent<HTMLInputElement>, isEdit: boolean) => void;
+}) {
+  const isEdit = prefix === "edit";
+  return (
+    <div className="space-y-4">
+      <div>
+        <label htmlFor={`${prefix}-slider-title`} className="text-sm font-medium">Title *</label>
+        <Input id={`${prefix}-slider-title`} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Slider title" />
+      </div>
+      <div>
+        <label htmlFor={`${prefix}-slider-desc`} className="text-sm font-medium">Description</label>
+        <Input id={`${prefix}-slider-desc`} value={form.desc} onChange={(e) => setForm({ ...form, desc: e.target.value })} placeholder="Optional description" />
+      </div>
+      <div>
+        <label htmlFor={`${prefix}-slider-image`} className="text-sm font-medium">Image</label>
+        <Input id={`${prefix}-slider-image`} type="file" accept="image/*" onChange={(e) => onImageUpload(e, isEdit)} />
+        {imagePreview && (
+          <div className="mt-2 relative w-full h-32 rounded overflow-hidden">
+            <Image src={imagePreview} alt="Preview" fill sizes="96px" className="object-cover" />
+          </div>
+        )}
+      </div>
+      <div className="flex items-center gap-2">
+        <Switch id={`${prefix}-slider-active`} checked={form.active} onCheckedChange={(checked) => setForm({ ...form, active: checked })} />
+        <label htmlFor={`${prefix}-slider-active`} className="text-sm font-medium">Active</label>
+      </div>
+    </div>
+  );
+}
 
-    const tenantFilter = searchParams.get('tenantId') || 'all';
+type SlidersDialogState = {
+  createOpen: boolean;
+  editOpen: boolean;
+  form: { title: string; desc: string; active: boolean; img: string };
+  imagePreview: string;
+  isCreating: boolean;
+  isEditing: boolean;
+  isDeleting: string | null;
+};
 
-    useEffect(() => {
-        setIsMounted(true);
-        setSliders(initialSliders);
-    }, [initialSliders]);
+type SlidersDialogAction =
+  | { type: "SET_CREATE_OPEN"; payload: boolean }
+  | { type: "SET_EDIT_OPEN"; payload: boolean }
+  | { type: "SET_FORM"; payload: SlidersDialogState["form"] }
+  | { type: "SET_IMAGE_PREVIEW"; payload: string }
+  | { type: "SET_IS_CREATING"; payload: boolean }
+  | { type: "SET_IS_EDITING"; payload: boolean }
+  | { type: "SET_IS_DELETING"; payload: string | null };
 
-    const handleTenantFilterChange = (value: string) => {
-        const params = new URLSearchParams(searchParams);
-        if (value === 'all') {
-            params.delete('tenantId');
-        } else {
-            params.set('tenantId', value);
-        }
-        params.set('page', '1');
-        router.push(`?${params.toString()}`);
-    };
+function slidersDialogReducer(state: SlidersDialogState, action: SlidersDialogAction): SlidersDialogState {
+  switch (action.type) {
+    case "SET_CREATE_OPEN":
+      return { ...state, createOpen: action.payload };
+    case "SET_EDIT_OPEN":
+      return { ...state, editOpen: action.payload };
+    case "SET_FORM":
+      return { ...state, form: action.payload };
+    case "SET_IMAGE_PREVIEW":
+      return { ...state, imagePreview: action.payload };
+    case "SET_IS_CREATING":
+      return { ...state, isCreating: action.payload };
+    case "SET_IS_EDITING":
+      return { ...state, isEditing: action.payload };
+    case "SET_IS_DELETING":
+      return { ...state, isDeleting: action.payload };
+    default:
+      return state;
+  }
+}
 
-    const loadSliders = async () => {
-        try {
-            setLoading(true);
-            const data = await slidersService.getAll(tenantFilter === 'all' ? undefined : tenantFilter);
-            setSliders(data);
-        } catch (err) {
-            console.error('Error loading sliders:', err);
-            toast.error("Failed to load sliders");
-        } finally {
-            setLoading(false);
-        }
-    };
+const emptySubscribe = () => () => {};
 
-    // Dialog states
-    const [createOpen, setCreateOpen] = useState(false);
-    const [editOpen, setEditOpen] = useState(false);
-    const [editing, setEditing] = useState<Slideshow | null>(null);
-    const [form, setForm] = useState({
-        title: "",
-        desc: "",
-        active: true,
-        img: "",
-    });
-    const [imagePreview, setImagePreview] = useState("");
-    const [isCreating, setIsCreating] = useState(false);
-    const [isEditing, setIsEditing] = useState(false);
-    const [isDeleting, setIsDeleting] = useState<string | null>(null);
+function StatsSection({ stats }: { stats: Stats }) {
+  return (
+    <>
+      <div className="hidden md:grid md:grid-cols-4 gap-4">
+        <StatCard icon={ImageIcon} title="Total Sliders" value={stats.totalSliders} color="bg-purple-500" />
+        <StatCard icon={CheckCircle2} title="Active Sliders" value={stats.activeSliders} color="bg-green-500" />
+        <StatCard icon={XCircle} title="Inactive Sliders" value={stats.inactiveSliders} color="bg-red-500" />
+        <StatCard icon={Upload} title="With Images" value={stats.withImages} color="bg-blue-500" />
+      </div>
+      <Accordion type="single" collapsible className="w-full md:hidden">
+        <AccordionItem value="stats" className="border rounded-lg">
+          <AccordionTrigger className="px-4 hover:no-underline">
+            <div className="flex items-center gap-3">
+              <ImageIcon className="size-5 text-muted-foreground" />
+              <span className="font-medium">Slider Statistics</span>
+            </div>
+          </AccordionTrigger>
+          <AccordionContent className="px-4 pb-4 pt-2">
+            <div className="grid grid-cols-1 gap-4">
+              <StatCard icon={ImageIcon} title="Total Sliders" value={stats.totalSliders} color="bg-purple-500" />
+              <StatCard icon={CheckCircle2} title="Active Sliders" value={stats.activeSliders} color="bg-green-500" />
+              <StatCard icon={XCircle} title="Inactive Sliders" value={stats.inactiveSliders} color="bg-red-500" />
+              <StatCard icon={Upload} title="With Images" value={stats.withImages} color="bg-blue-500" />
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+    </>
+  );
+}
+
+function FilterBar({ statusFilter, searchQuery, onFilterChange, onSearch }: {
+  statusFilter: string;
+  searchQuery: string;
+  onFilterChange: (value: string) => void;
+  onSearch: (term: string) => void;
+}) {
+  return (
+    <Card>
+      <CardContent className="pt-6">
+        <div className="flex flex-wrap gap-3">
+          <Select value={statusFilter} onValueChange={onFilterChange}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="All Statuses" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Statuses</SelectItem>
+              <SelectItem value="active">Active</SelectItem>
+              <SelectItem value="inactive">Inactive</SelectItem>
+            </SelectContent>
+          </Select>
+          <div className="flex gap-2 flex-1">
+            <Input
+              placeholder="Search by title, ID, or description..."
+              defaultValue={searchQuery}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  onSearch(e.currentTarget.value);
+                }
+              }}
+              className="max-w-md"
+            />
+            <Button
+              onClick={() => {
+                const input = document.querySelector(
+                  'input[placeholder="Search by title, ID, or description..."]',
+                ) as HTMLInputElement;
+                onSearch(input?.value || "");
+              }}
+            >
+              Search
+            </Button>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function DesktopSlidersTable({ sliders, isSuperAdmin, isDeleting, onEdit, onDelete, pagination, onPageChange }: {
+  sliders: Slideshow[];
+  isSuperAdmin: boolean;
+  isDeleting: string | null;
+  onEdit: (s: Slideshow) => void;
+  onDelete: (id: string) => void;
+  pagination: PaginationProps;
+  onPageChange: (page: number) => void;
+}) {
+  return (
+    <Card className="hidden lg:block">
+      <div className="overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[120px]">ID</TableHead>
+              <TableHead className="w-[120px]">Image</TableHead>
+              {isSuperAdmin && <TableHead className="w-[120px]">Tenant</TableHead>}
+              <TableHead className="w-[220px]">Title</TableHead>
+              <TableHead className="w-[100px]">Active</TableHead>
+              <TableHead className="w-[150px]">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {sliders.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                  No sliders found
+                </TableCell>
+              </TableRow>
+            ) : (
+              sliders.map((s) => (
+                <TableRow key={s.id} className="group hover:bg-muted/50 transition-colors border-b border-border/50">
+                  <TableCell className="font-mono text-[10px] text-muted-foreground tracking-tighter py-4">
+                    #{s.id.slice(0, 8)}
+                  </TableCell>
+                  <TableCell>
+                    {s.img ? (
+                      <div className="relative w-24 h-14 rounded-lg overflow-hidden shadow-sm border border-border group-hover:scale-105 transition-transform duration-500 bg-muted">
+                        <Image src={s.img} alt={s.title} fill sizes="96px" className="object-cover" />
+                      </div>
+                    ) : (
+                      <div className="w-24 h-14 bg-muted rounded-lg flex items-center justify-center border border-border">
+                        <ImageIcon className="size-5 text-muted-foreground/40" />
+                      </div>
+                    )}
+                  </TableCell>
+                  {isSuperAdmin && (
+                    <TableCell>
+                      <Badge variant="secondary" className="text-[10px] font-bold uppercase tracking-wider">
+                        {s.tenantId}
+                      </Badge>
+                    </TableCell>
+                  )}
+                  <TableCell>
+                    <div className="flex flex-col gap-0.5">
+                      <div className="font-semibold text-sm">{s.title}</div>
+                      {s.desc && (
+                        <div className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest">
+                          {s.desc}
+                        </div>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    {s.active ? (
+                      <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100 border-none shadow-none text-[10px] font-bold uppercase tracking-wider">
+                        Active
+                      </Badge>
+                    ) : (
+                      <Badge variant="secondary" className="bg-zinc-100 text-zinc-700 hover:bg-zinc-100 border-none shadow-none text-[10px] font-bold uppercase tracking-wider">
+                        Inactive
+                      </Badge>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button size="icon" variant="ghost" className="size-8 rounded-full hover:bg-primary/5 hover:text-primary" onClick={() => onEdit(s)} disabled={isDeleting === s.id}>
+                        {isDeleting === s.id ? <Spinner className="size-4" /> : <Edit className="size-4" />}
+                      </Button>
+                      <Button size="icon" variant="ghost" className="size-8 rounded-full hover:text-destructive hover:bg-destructive/10" onClick={() => onDelete(s.id)} disabled={isDeleting === s.id}>
+                        {isDeleting === s.id ? <Spinner className="size-4" /> : <Trash2 className="size-4" />}
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
+      {pagination.totalItems > 0 && (
+        <div className="flex flex-col sm:flex-row items-center justify-between px-4 py-3 border-t gap-3">
+          <div className="text-sm text-muted-foreground">
+            Showing {(pagination.currentPage - 1) * pagination.itemsPerPage + 1} to{" "}
+            {Math.min(pagination.currentPage * pagination.itemsPerPage, pagination.totalItems)} of {pagination.totalItems} results
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={() => onPageChange(pagination.currentPage - 1)} disabled={pagination.currentPage === 1}>
+              <ChevronLeft className="size-4 mr-1" /> Previous
+            </Button>
+            <div className="hidden sm:flex items-center gap-1">
+              <span className="text-sm text-muted-foreground px-2">
+                Page {pagination.currentPage} of {pagination.totalPages}
+              </span>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onPageChange(pagination.currentPage + 1)}
+              disabled={pagination.currentPage === pagination.totalPages || pagination.totalPages === 0}
+            >
+              Next <ChevronRight className="size-4 ml-1" />
+            </Button>
+          </div>
+        </div>
+      )}
+    </Card>
+  );
+}
+
+function MobileSlidersCards({ sliders, isDeleting, onEdit, onDelete, pagination, onPageChange }: {
+  sliders: Slideshow[];
+  isDeleting: string | null;
+  onEdit: (s: Slideshow) => void;
+  onDelete: (id: string) => void;
+  pagination: PaginationProps;
+  onPageChange: (page: number) => void;
+}) {
+  return (
+    <div className="space-y-4 lg:hidden">
+      {sliders.map((s) => (
+        <Card key={s.id} className="t-card overflow-hidden">
+          <CardContent className="p-0">
+            {s.img ? (
+              <div className="relative w-full h-40 bg-muted">
+                <Image src={s.img} alt={s.title} fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover" />
+              </div>
+            ) : (
+              <div className="w-full h-40 bg-muted flex items-center justify-center">
+                <ImageIcon className="size-10 text-muted-foreground/30" />
+              </div>
+            )}
+            <div className="p-6 space-y-4">
+              <div className="flex justify-between items-start">
+                <div className="flex-1 space-y-1">
+                  <h3 className="font-bold text-lg leading-tight">{s.title}</h3>
+                  {s.desc && <p className="text-sm text-muted-foreground font-medium">{s.desc}</p>}
+                  <p className="text-[10px] font-medium text-muted-foreground font-mono">ID: #{s.id.slice(0, 8)}</p>
+                </div>
+                {s.active ? (
+                  <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100 rounded-full font-bold text-[10px] uppercase tracking-wider">
+                    Active
+                  </Badge>
+                ) : (
+                  <Badge variant="secondary" className="bg-zinc-100 text-zinc-700 hover:bg-zinc-100 rounded-full font-bold text-[10px] uppercase tracking-wider">
+                    Inactive
+                  </Badge>
+                )}
+              </div>
+              <div className="flex gap-2 pt-2 border-t border-border/50">
+                <Button size="sm" variant="outline" className="flex-1 font-semibold h-10" onClick={() => onEdit(s)}>
+                  <Edit className="size-4 mr-2" /> Edit
+                </Button>
+                <Button size="sm" variant="outline" className="flex-1 font-semibold h-10 text-rose-600 border-rose-100 hover:bg-rose-50" onClick={() => onDelete(s.id)}>
+                  <Trash2 className="size-4 mr-2" /> Delete
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+      {pagination.totalItems > 0 && (
+        <Card className="lg:hidden">
+          <div className="flex items-center justify-between px-4 py-3">
+            <Button variant="outline" size="sm" onClick={() => onPageChange(pagination.currentPage - 1)} disabled={pagination.currentPage === 1}>
+              <ChevronLeft className="size-4" />
+            </Button>
+            <span className="text-sm text-muted-foreground">
+              Page {pagination.currentPage} of {pagination.totalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onPageChange(pagination.currentPage + 1)}
+              disabled={pagination.currentPage === pagination.totalPages || pagination.totalPages === 0}
+            >
+              <ChevronRight className="size-4" />
+            </Button>
+          </div>
+        </Card>
+      )}
+    </div>
+  );
+}
+
+function CreateSliderDialog({ open, form, imagePreview, isCreating, onOpenChange, onFormChange, onImagePreviewChange, onImageUpload, onCreate }: {
+  open: boolean;
+  form: { title: string; desc: string; active: boolean; img: string };
+  imagePreview: string;
+  isCreating: boolean;
+  onOpenChange: (open: boolean) => void;
+  onFormChange: (f: { title: string; desc: string; active: boolean; img: string } | ((prev: { title: string; desc: string; active: boolean; img: string }) => { title: string; desc: string; active: boolean; img: string })) => void;
+  onImagePreviewChange: (preview: string) => void;
+  onImageUpload: (e: React.ChangeEvent<HTMLInputElement>, isEdit: boolean) => void;
+  onCreate: () => void;
+}) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Add New Slider</DialogTitle>
+        </DialogHeader>
+        <SliderFormFields form={form} setForm={onFormChange} imagePreview={imagePreview} prefix="create" onImageUpload={onImageUpload} />
+        <DialogFooter>
+          <Button variant="outline" onClick={() => { onOpenChange(false); onImagePreviewChange(""); }}>
+            Cancel
+          </Button>
+          <Button onClick={onCreate} disabled={isCreating}>
+            {isCreating ? <><Spinner className="mr-2" /> Creating…</> : "Create Slider"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function EditSliderDialog({ open, form, imagePreview, isEditing, onOpenChange, onFormChange, onImagePreviewChange, onImageUpload, onSave }: {
+  open: boolean;
+  form: { title: string; desc: string; active: boolean; img: string };
+  imagePreview: string;
+  isEditing: boolean;
+  onOpenChange: (open: boolean) => void;
+  onFormChange: (f: { title: string; desc: string; active: boolean; img: string } | ((prev: { title: string; desc: string; active: boolean; img: string }) => { title: string; desc: string; active: boolean; img: string })) => void;
+  onImagePreviewChange: (preview: string) => void;
+  onImageUpload: (e: React.ChangeEvent<HTMLInputElement>, isEdit: boolean) => void;
+  onSave: () => void;
+}) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Edit Slider</DialogTitle>
+        </DialogHeader>
+        <SliderFormFields form={form} setForm={onFormChange} imagePreview={imagePreview} prefix="edit" onImageUpload={onImageUpload} />
+        <DialogFooter>
+          <Button variant="outline" onClick={() => { onOpenChange(false); onImagePreviewChange(""); }}>
+            Cancel
+          </Button>
+          <Button onClick={onSave} disabled={isEditing}>
+            {isEditing ? <><Spinner className="mr-2" /> Saving…</> : "Save Changes"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function PageHeader({ isSuperAdmin, tenantFilter, onTenantFilterChange, onAddClick }: {
+  isSuperAdmin: boolean;
+  tenantFilter: string;
+  onTenantFilterChange: (value: string) => void;
+  onAddClick: () => void;
+}) {
+  return (
+    <div className="flex justify-between items-center">
+      <h2 className="text-xl font-medium">Sliders Management</h2>
+      <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+        {isSuperAdmin && (
+          <Select value={tenantFilter} onValueChange={onTenantFilterChange}>
+            <SelectTrigger className="w-full sm:w-[150px]">
+              <SelectValue placeholder="All Tenants" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Tenants</SelectItem>
+            </SelectContent>
+          </Select>
+        )}
+        <Button onClick={onAddClick}>
+          <Plus className="size-4 mr-2" /> Add Slider
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function SlidersTableClientInner({
+  sliders: initialSliders,
+  stats,
+  pagination,
+  isSuperAdmin = false,
+}: Props) {
+  const isMounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { confirm, ConfirmDialog } = useConfirm();
+
+  const [sliders, setSliders] = useState<Slideshow[]>(() => initialSliders);
+  const loadingRef = useRef(false);
+
+  const tenantFilter = searchParams.get("tenantId") || "all";
+
+  const loadSliders = useCallback(async () => {
+    try {
+      loadingRef.current = true;
+      const data = await slidersService.getAll(
+        tenantFilter === "all" ? undefined : tenantFilter,
+      );
+      setSliders(data);
+    } catch (err) {
+      console.error("Error loading sliders:", err);
+      toast.error("Failed to load sliders");
+    } finally {
+      loadingRef.current = false;
+    }
+  }, [tenantFilter]);
+
+  const handleTenantFilterChange = (value: string) => {
+    const params = new URLSearchParams(searchParams);
+    if (value === "all") {
+      params.delete("tenantId");
+    } else {
+      params.set("tenantId", value);
+    }
+    params.set("page", "1");
+    router.push(`?${params.toString()}`);
+  };
+
+  const editingRef = useRef<Slideshow | null>(null);
+  const [dialogState, dispatch] = useReducer(slidersDialogReducer, {
+    createOpen: false,
+    editOpen: false,
+    form: { title: "", desc: "", active: true, img: "" },
+    imagePreview: "",
+    isCreating: false,
+    isEditing: false,
+    isDeleting: null,
+  });
 
     // URL State
     const searchQuery = searchParams.get("search") || "";
@@ -162,7 +634,10 @@ export default function SlidersTableClient({ sliders: initialSliders, stats, pag
         router.push(`?${params.toString()}`);
     };
 
-    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, isEdit: boolean = false) => {
+    const handleImageUpload = (
+        e: React.ChangeEvent<HTMLInputElement>,
+        isEdit: boolean = false,
+    ) => {
         const file = e.target.files?.[0];
         if (!file) return;
 
@@ -171,54 +646,59 @@ export default function SlidersTableClient({ sliders: initialSliders, stats, pag
             const result = reader.result as string;
             if (isEdit) {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                setEditing(s => s && ({ ...s, img: result } as any));
-                setImagePreview(result);
-            } else {
-                setForm(f => ({ ...f, img: result }));
-                setImagePreview(result);
+                if (editingRef.current)
+                    editingRef.current = {
+                        ...editingRef.current,
+                        img: result,
+                    } as any;
+      dispatch({ type: "SET_IMAGE_PREVIEW", payload: result });
+      } else {
+        dispatch({ type: "SET_FORM", payload: { ...dialogState.form, img: result } });
+        dispatch({ type: "SET_IMAGE_PREVIEW", payload: result });
             }
         };
         reader.readAsDataURL(file);
     };
 
-    const createSlider = async () => {
-        if (!form.title) {
-            toast.error("Title is required");
-            return;
-        }
-        setIsCreating(true);
-        try {
-            const res = await fetch("/api/slide", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(form),
-            });
-            if (!res.ok) {
-                const data = await res.json();
-                toast.error(data?.error || "Failed to create slider");
-                return;
-            }
-            toast.success("Slider created");
-            setCreateOpen(false);
-            setForm({ title: "", desc: "", active: true, img: "" });
-            setImagePreview("");
-            router.refresh();
-        } catch {
-            toast.error("Network error");
-        } finally {
-            setIsCreating(false);
-        }
-    };
+  const createSlider = async () => {
+    if (!dialogState.form.title) {
+      toast.error("Title is required");
+      return;
+    }
+    dispatch({ type: "SET_IS_CREATING", payload: true });
+    try {
+      const res = await fetch("/api/slide", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(dialogState.form),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        toast.error(data?.error || "Failed to create slider");
+        return;
+      }
+      toast.success("Slider created");
+      dispatch({ type: "SET_CREATE_OPEN", payload: false });
+      dispatch({ type: "SET_FORM", payload: { title: "", desc: "", active: true, img: "" } });
+      dispatch({ type: "SET_IMAGE_PREVIEW", payload: "" });
+      router.refresh();
+    } catch {
+      toast.error("Network error");
+    } finally {
+      dispatch({ type: "SET_IS_CREATING", payload: false });
+    }
+  };
 
     const deleteSlider = async (id: string) => {
         const confirmed = await confirm({
             title: "Delete Slider",
-            description: "Are you sure you want to delete this slider? This action cannot be undone.",
+            description:
+                "Are you sure you want to delete this slider? This action cannot be undone.",
             confirmText: "Delete",
             variant: "destructive",
         });
         if (!confirmed) return;
-        setIsDeleting(id);
+        dispatch({ type: "SET_IS_DELETING", payload: id });
         try {
             const res = await fetch(`/api/slide/${id}`, {
                 method: "DELETE",
@@ -232,482 +712,129 @@ export default function SlidersTableClient({ sliders: initialSliders, stats, pag
         } catch {
             toast.error("Network error");
         } finally {
-            setIsDeleting(null);
+            dispatch({ type: "SET_IS_DELETING", payload: null });
         }
     };
 
-    const openEdit = (s: Slideshow) => {
-        setEditing(s);
-        setForm({
-            title: s.title,
-            desc: s.desc || "",
-            active: s.active ?? true,
-            img: "",
-        });
-        setImagePreview(s.img || "");
-        setEditOpen(true);
-    };
+  const openEdit = (s: Slideshow) => {
+    editingRef.current = s;
+    dispatch({ type: "SET_FORM", payload: {
+      title: s.title,
+      desc: s.desc || "",
+      active: s.active ?? true,
+      img: "",
+    } });
+    dispatch({ type: "SET_IMAGE_PREVIEW", payload: s.img || "" });
+    dispatch({ type: "SET_EDIT_OPEN", payload: true });
+  };
 
-    const saveEdit = async () => {
-        if (!editing) return;
-        setIsEditing(true);
-        try {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const body: any = {
-                ...editing,
-                title: form.title,
-                desc: form.desc,
-                active: form.active,
-            };
-            if (form.img) {
-                body.img = form.img;
-            }
-            // If editing.img was updated via handleImageUpload directly to editing state, use it?
-            // handleImageUpload updates editing state directly for img.
-            // But form.img is used for new uploads in create mode.
-            // In edit mode, handleImageUpload updates `editing.img` (via `setEditing`).
-            // So `body` already has updated `img` from `...editing`.
+  const saveEdit = async () => {
+    if (!editingRef.current) return;
+    dispatch({ type: "SET_IS_EDITING", payload: true });
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const body: any = {
+        ...editingRef.current,
+        title: dialogState.form.title,
+        desc: dialogState.form.desc,
+        active: dialogState.form.active,
+      };
+      if (dialogState.form.img) {
+        body.img = dialogState.form.img;
+      }
+      // In edit mode, handleImageUpload updates editingRef.current.img
+      // So `body` already has updated `img` from `...editingRef.current`.
 
-            const res = await fetch(`/api/slide/${editing.id}`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(body),
-            });
-            if (!res.ok) {
-                const data = await res.json();
-                toast.error(data?.error || "Failed to update");
-                return;
-            }
-            toast.success("Slider updated");
-            setEditOpen(false);
-            setEditing(null);
-            setForm({ title: "", desc: "", active: true, img: "" });
-            setImagePreview("");
-            router.refresh();
-        } catch {
-            toast.error("Network error");
-        } finally {
-            setIsEditing(false);
-        }
-    };
+      const res = await fetch(`/api/slide/${editingRef.current.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        toast.error(data?.error || "Failed to update");
+        return;
+      }
+      toast.success("Slider updated");
+      dispatch({ type: "SET_EDIT_OPEN", payload: false });
+      editingRef.current = null;
+      dispatch({ type: "SET_FORM", payload: { title: "", desc: "", active: true, img: "" } });
+      dispatch({ type: "SET_IMAGE_PREVIEW", payload: "" });
+      router.refresh();
+    } catch {
+      toast.error("Network error");
+    } finally {
+      dispatch({ type: "SET_IS_EDITING", payload: false });
+    }
+  };
 
-    const StatCard = ({ icon: Icon, title, value, color }: { icon: React.ElementType; title: string; value: string | number; color: string }) => (
-        <Card>
-            <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <p className="text-sm text-muted-foreground">{title}</p>
-                        <p className="text-2xl font-bold mt-1">{value}</p>
-                    </div>
-                    <div className={`p-3 rounded-full ${color}`}>
-                        <Icon className="size-6 text-white" />
-                    </div>
-                </div>
-            </CardContent>
-        </Card>
+  if (!isMounted) return null;
+
+  return (
+    <div className="w-full space-y-6" suppressHydrationWarning>
+      <PageHeader
+        isSuperAdmin={isSuperAdmin}
+        tenantFilter={tenantFilter}
+        onTenantFilterChange={handleTenantFilterChange}
+      onAddClick={() => dispatch({ type: "SET_CREATE_OPEN", payload: true })}
+      />
+
+      <StatsSection stats={stats} />
+
+      <FilterBar statusFilter={statusFilter} searchQuery={searchQuery} onFilterChange={handleFilterChange} onSearch={handleSearch} />
+
+      <DesktopSlidersTable
+        sliders={sliders}
+        isSuperAdmin={isSuperAdmin}
+        isDeleting={dialogState.isDeleting}
+        onEdit={openEdit}
+        onDelete={deleteSlider}
+        pagination={pagination}
+        onPageChange={handlePageChange}
+      />
+
+      <MobileSlidersCards
+        sliders={sliders}
+        isDeleting={dialogState.isDeleting}
+        onEdit={openEdit}
+        onDelete={deleteSlider}
+        pagination={pagination}
+        onPageChange={handlePageChange}
+      />
+
+      <CreateSliderDialog
+        open={dialogState.createOpen}
+        form={dialogState.form}
+        imagePreview={dialogState.imagePreview}
+        isCreating={dialogState.isCreating}
+        onOpenChange={(open) => dispatch({ type: "SET_CREATE_OPEN", payload: open })}
+        onFormChange={(f) => dispatch({ type: "SET_FORM", payload: typeof f === "function" ? f(dialogState.form) : f })}
+        onImagePreviewChange={(p) => dispatch({ type: "SET_IMAGE_PREVIEW", payload: p })}
+        onImageUpload={handleImageUpload}
+        onCreate={createSlider}
+      />
+
+      <EditSliderDialog
+        open={dialogState.editOpen}
+        form={dialogState.form}
+        imagePreview={dialogState.imagePreview}
+        isEditing={dialogState.isEditing}
+        onOpenChange={(open) => dispatch({ type: "SET_EDIT_OPEN", payload: open })}
+        onFormChange={(f) => dispatch({ type: "SET_FORM", payload: typeof f === "function" ? f(dialogState.form) : f })}
+        onImagePreviewChange={(p) => dispatch({ type: "SET_IMAGE_PREVIEW", payload: p })}
+        onImageUpload={handleImageUpload}
+      onSave={saveEdit}
+      />
+
+      <ConfirmDialog />
+      </div>
     );
+  }
 
-    if (!isMounted) return null;
-
-    return (
-        <div className="w-full space-y-6">
-            <div className="flex justify-between items-center">
-                <h2 className="text-xl font-medium">Sliders Management</h2>
-                <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-                    {isSuperAdmin && (
-                        <Select value={tenantFilter} onValueChange={handleTenantFilterChange}>
-                            <SelectTrigger className="w-full sm:w-[150px]">
-                                <SelectValue placeholder="All Tenants" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">All Tenants</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    )}
-                    <Button onClick={() => setCreateOpen(true)}>
-                        <Plus className="size-4 mr-2" />
-                        Add Slider
-                    </Button>
-                </div>
-            </div>
-
-            {/* Statistics - Desktop */}
-            <div className="hidden md:grid md:grid-cols-4 gap-4">
-                <StatCard icon={ImageIcon} title="Total Sliders" value={stats.totalSliders} color="bg-purple-500" />
-                <StatCard icon={CheckCircle2} title="Active Sliders" value={stats.activeSliders} color="bg-green-500" />
-                <StatCard icon={XCircle} title="Inactive Sliders" value={stats.inactiveSliders} color="bg-red-500" />
-                <StatCard icon={Upload} title="With Images" value={stats.withImages} color="bg-blue-500" />
-            </div>
-
-            {/* Statistics - Mobile */}
-            <Accordion type="single" collapsible className="w-full md:hidden">
-                <AccordionItem value="stats" className="border rounded-lg">
-                    <AccordionTrigger className="px-4 hover:no-underline">
-                        <div className="flex items-center gap-3">
-                            <ImageIcon className="size-5 text-muted-foreground" />
-                            <span className="font-medium">Slider Statistics</span>
-                        </div>
-                    </AccordionTrigger>
-                    <AccordionContent className="px-4 pb-4 pt-2">
-                        <div className="grid grid-cols-1 gap-4">
-                            <StatCard icon={ImageIcon} title="Total Sliders" value={stats.totalSliders} color="bg-purple-500" />
-                            <StatCard icon={CheckCircle2} title="Active Sliders" value={stats.activeSliders} color="bg-green-500" />
-                            <StatCard icon={XCircle} title="Inactive Sliders" value={stats.inactiveSliders} color="bg-red-500" />
-                            <StatCard icon={Upload} title="With Images" value={stats.withImages} color="bg-blue-500" />
-                        </div>
-                    </AccordionContent>
-                </AccordionItem>
-            </Accordion>
-
-            {/* Filters */}
-            <Card>
-                <CardContent className="pt-6">
-                    <div className="flex flex-wrap gap-3">
-                        <Select value={statusFilter} onValueChange={handleFilterChange}>
-                            <SelectTrigger className="w-[180px]">
-                                <SelectValue placeholder="All Statuses" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">All Statuses</SelectItem>
-                                <SelectItem value="active">Active</SelectItem>
-                                <SelectItem value="inactive">Inactive</SelectItem>
-                            </SelectContent>
-                        </Select>
-
-                        <div className="flex gap-2 flex-1">
-                            <Input
-                                placeholder="Search by title, ID, or description..."
-                                defaultValue={searchQuery}
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter') {
-                                        handleSearch(e.currentTarget.value);
-                                    }
-                                }}
-                                className="max-w-md"
-                            />
-                            <Button onClick={() => {
-                                const input = document.querySelector('input[placeholder="Search by title, ID, or description..."]') as HTMLInputElement;
-                                handleSearch(input?.value || "");
-                            }}>Search</Button>
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
-
-            {/* Sliders Table - Desktop */}
-            <Card className="hidden lg:block">
-                <div className="overflow-x-auto">
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead className="w-[120px]">ID</TableHead>
-                                <TableHead className="w-[120px]">Image</TableHead>
-                                {isSuperAdmin && <TableHead className="w-[120px]">Tenant</TableHead>}
-                                <TableHead className="w-[220px]">Title</TableHead>
-                                <TableHead className="w-[100px]">Active</TableHead>
-                                <TableHead className="w-[150px]">Actions</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {sliders.length === 0 ? (
-                                <TableRow>
-                                    <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                                        No sliders found
-                                    </TableCell>
-                                </TableRow>
-                            ) : (
-                                sliders.map((s) => (
-                                    <TableRow key={s.id} className="group hover:bg-muted/50 transition-colors border-b border-border/50">
-                                        <TableCell className="font-mono text-[10px] text-muted-foreground tracking-tighter py-4">#{s.id.slice(0, 8)}</TableCell>
-                                        <TableCell>
-                                            {s.img ? (
-                                                <div className="relative w-24 h-14 rounded-lg overflow-hidden shadow-sm border border-border group-hover:scale-105 transition-transform duration-500 bg-muted">
-                                                    <Image
-                                                        src={s.img}
-                                                        alt={s.title}
-                                                        fill
-                                                        className="object-cover"
-                                                    />
-                                                </div>
-                                            ) : (
-                                                <div className="w-24 h-14 bg-muted rounded-lg flex items-center justify-center border border-border">
-                                                    <ImageIcon className="size-5 text-muted-foreground/40" />
-                                                </div>
-                                            )}
-                                        </TableCell>
-                                        {isSuperAdmin && (
-                                            <TableCell>
-                                                <Badge variant="secondary" className="text-[10px] font-bold uppercase tracking-wider">
-                                                    {s.tenantId}
-                                                </Badge>
-                                            </TableCell>
-                                        )}
-                                        <TableCell>
-                                            <div className="flex flex-col gap-0.5">
-                                                <div className="font-semibold text-sm">{s.title}</div>
-                                                {s.desc && (
-                                                    <div className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest">{s.desc}</div>
-                                                )}
-                                            </div>
-                                        </TableCell>
-                                        <TableCell>
-                                            {s.active ? (
-                                                <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100 border-none shadow-none text-[10px] font-bold uppercase tracking-wider">Active</Badge>
-                                            ) : (
-                                                <Badge variant="secondary" className="bg-zinc-100 text-zinc-700 hover:bg-zinc-100 border-none shadow-none text-[10px] font-bold uppercase tracking-wider">Inactive</Badge>
-                                            )}
-                                        </TableCell>
-                                        <TableCell className="text-right">
-                                            <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <Button size="icon" variant="ghost" className="size-8 rounded-full hover:bg-primary/5 hover:text-primary" onClick={() => openEdit(s)} disabled={isDeleting === s.id}>
-                                                    {isDeleting === s.id ? <Spinner className="size-4" /> : <Edit className="size-4" />}
-                                                </Button>
-                                                <Button size="icon" variant="ghost" className="size-8 rounded-full hover:text-destructive hover:bg-destructive/10" onClick={() => deleteSlider(s.id)} disabled={isDeleting === s.id}>
-                                                    {isDeleting === s.id ? <Spinner className="size-4" /> : <Trash2 className="size-4" />}
-                                                </Button>
-                                            </div>
-                                        </TableCell>
-                                    </TableRow>
-                                ))
-                            )}
-                        </TableBody>
-                    </Table>
-                </div>
-
-                {/* Pagination */}
-                {pagination.totalItems > 0 && (
-                    <div className="flex flex-col sm:flex-row items-center justify-between px-4 py-3 border-t gap-3">
-                        <div className="text-sm text-muted-foreground">
-                            Showing {((pagination.currentPage - 1) * pagination.itemsPerPage) + 1} to {Math.min(pagination.currentPage * pagination.itemsPerPage, pagination.totalItems)} of {pagination.totalItems} results
-                        </div>
-                        <div className="flex gap-2">
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handlePageChange(pagination.currentPage - 1)}
-                                disabled={pagination.currentPage === 1}
-                            >
-                                <ChevronLeft className="size-4 mr-1" />
-                                Previous
-                            </Button>
-                            <div className="hidden sm:flex items-center gap-1">
-                                <span className="text-sm text-muted-foreground px-2">
-                                    Page {pagination.currentPage} of {pagination.totalPages}
-                                </span>
-                            </div>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handlePageChange(pagination.currentPage + 1)}
-                                disabled={pagination.currentPage === pagination.totalPages || pagination.totalPages === 0}
-                            >
-                                Next
-                                <ChevronRight className="size-4 ml-1" />
-                            </Button>
-                        </div>
-                    </div>
-                )}
-            </Card>
-
-            {/* Sliders Cards - Mobile/Tablet */}
-            <div className="space-y-4 lg:hidden">
-                {sliders.map((s) => (
-                    <Card key={s.id} className="t-card overflow-hidden">
-                        <CardContent className="p-0">
-                            {s.img ? (
-                                <div className="relative w-full h-40 bg-muted">
-                                    <Image
-                                        src={s.img}
-                                        alt={s.title}
-                                        fill
-                                        className="object-cover"
-                                    />
-                                </div>
-                            ) : (
-                                <div className="w-full h-40 bg-muted flex items-center justify-center">
-                                    <ImageIcon className="size-10 text-muted-foreground/30" />
-                                </div>
-                            )}
-                            <div className="p-6 space-y-4">
-                                <div className="flex justify-between items-start">
-                                    <div className="flex-1 space-y-1">
-                                        <h3 className="font-bold text-lg leading-tight">{s.title}</h3>
-                                        {s.desc && (
-                                            <p className="text-sm text-muted-foreground font-medium">{s.desc}</p>
-                                        )}
-                                        <p className="text-[10px] font-medium text-muted-foreground font-mono">ID: #{s.id.slice(0, 8)}</p>
-                                    </div>
-                                    {s.active ? (
-                                        <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100 rounded-full font-bold text-[10px] uppercase tracking-wider">Active</Badge>
-                                    ) : (
-                                        <Badge variant="secondary" className="bg-zinc-100 text-zinc-700 hover:bg-zinc-100 rounded-full font-bold text-[10px] uppercase tracking-wider">Inactive</Badge>
-                                    )}
-                                </div>
-                                <div className="flex gap-2 pt-2 border-t border-border/50">
-                                    <Button size="sm" variant="outline" className="flex-1 font-semibold h-10" onClick={() => openEdit(s)}>
-                                        <Edit className="size-4 mr-2" />
-                                        Edit
-                                    </Button>
-                                    <Button size="sm" variant="outline" className="flex-1 font-semibold h-10 text-rose-600 border-rose-100 hover:bg-rose-50" onClick={() => deleteSlider(s.id)}>
-                                        <Trash2 className="size-4 mr-2" />
-                                        Delete
-                                    </Button>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                ))}
-
-                {/* Mobile Pagination */}
-                {pagination.totalItems > 0 && (
-                    <Card className="lg:hidden">
-                        <div className="flex items-center justify-between px-4 py-3">
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handlePageChange(pagination.currentPage - 1)}
-                                disabled={pagination.currentPage === 1}
-                            >
-                                <ChevronLeft className="size-4" />
-                            </Button>
-                            <span className="text-sm text-muted-foreground">
-                                Page {pagination.currentPage} of {pagination.totalPages}
-                            </span>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handlePageChange(pagination.currentPage + 1)}
-                                disabled={pagination.currentPage === pagination.totalPages || pagination.totalPages === 0}
-                            >
-                                <ChevronRight className="size-4" />
-                            </Button>
-                        </div>
-                    </Card>
-                )}
-            </div>
-
-            {/* Create Slider Dialog */}
-            <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-                <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
-                    <DialogHeader>
-                        <DialogTitle>Add New Slider</DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                        <div>
-                            <label className="text-sm font-medium">Title *</label>
-                            <Input
-                                value={form.title}
-                                onChange={(e) => setForm({ ...form, title: e.target.value })}
-                                placeholder="Slider title"
-                            />
-                        </div>
-                        <div>
-                            <label className="text-sm font-medium">Description</label>
-                            <Input
-                                value={form.desc}
-                                onChange={(e) => setForm({ ...form, desc: e.target.value })}
-                                placeholder="Optional description"
-                            />
-                        </div>
-                        <div>
-                            <label className="text-sm font-medium">Image</label>
-                            <Input
-                                type="file"
-                                accept="image/*"
-                                onChange={(e) => handleImageUpload(e, false)}
-                            />
-                            {imagePreview && (
-                                <div className="mt-2 relative w-full h-32 rounded overflow-hidden">
-                                    <Image
-                                        src={imagePreview}
-                                        alt="Preview"
-                                        fill
-                                        className="object-cover"
-                                    />
-                                </div>
-                            )}
-                        </div>
-                        <div className="flex items-center space-x-2">
-                            <Switch
-                                checked={form.active}
-                                onCheckedChange={(checked) => setForm({ ...form, active: checked })}
-                            />
-                            <label className="text-sm font-medium">Active</label>
-                        </div>
-                    </div>
-                    <DialogFooter>
-                        <Button variant="outline" onClick={() => {
-                            setCreateOpen(false);
-                            setImagePreview("");
-                        }}>Cancel</Button>
-                        <Button onClick={createSlider} disabled={isCreating}>
-                            {isCreating ? <><Spinner className="mr-2" /> Creating...</> : "Create Slider"}
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
-
-            {/* Edit Slider Dialog */}
-            <Dialog open={editOpen} onOpenChange={setEditOpen}>
-                <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
-                    <DialogHeader>
-                        <DialogTitle>Edit Slider</DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                        <div>
-                            <label className="text-sm font-medium">Title *</label>
-                            <Input
-                                value={form.title}
-                                onChange={(e) => setForm({ ...form, title: e.target.value })}
-                                placeholder="Slider title"
-                            />
-                        </div>
-                        <div>
-                            <label className="text-sm font-medium">Description</label>
-                            <Input
-                                value={form.desc}
-                                onChange={(e) => setForm({ ...form, desc: e.target.value })}
-                                placeholder="Optional description"
-                            />
-                        </div>
-                        <div>
-                            <label className="text-sm font-medium">Image</label>
-                            <Input
-                                type="file"
-                                accept="image/*"
-                                onChange={(e) => handleImageUpload(e, true)}
-                            />
-                            {imagePreview && (
-                                <div className="mt-2 relative w-full h-32 rounded overflow-hidden">
-                                    <Image
-                                        src={imagePreview}
-                                        alt="Preview"
-                                        fill
-                                        className="object-cover"
-                                    />
-                                </div>
-                            )}
-                        </div>
-                        <div className="flex items-center space-x-2">
-                            <Switch
-                                checked={form.active}
-                                onCheckedChange={(checked) => setForm({ ...form, active: checked })}
-                            />
-                            <label className="text-sm font-medium">Active</label>
-                        </div>
-                    </div>
-                    <DialogFooter>
-                        <Button variant="outline" onClick={() => {
-                            setEditOpen(false);
-                            setImagePreview("");
-                        }}>Cancel</Button>
-                        <Button onClick={saveEdit} disabled={isEditing}>
-                            {isEditing ? <><Spinner className="mr-2" /> Saving...</> : "Save Changes"}
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
-            <ConfirmDialog />
-        </div>
-    );
+export default function SlidersTableClient(props: Props) {
+  return (
+    <Suspense fallback={null}>
+      <SlidersTableClientInner {...props} />
+    </Suspense>
+  );
 }

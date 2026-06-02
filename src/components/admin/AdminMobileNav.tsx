@@ -19,7 +19,7 @@ import {
     BrickWallShield,
     Scissors,
     UserCog,
-    Building
+    Building,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -35,7 +35,7 @@ const ICON_MAP: Record<string, any> = {
     BrickWallShield,
     Scissors,
     UserCog,
-    Building
+    Building,
 };
 
 interface AdminMobileNavProps {
@@ -47,7 +47,7 @@ export default function AdminMobileNav({ items }: AdminMobileNavProps) {
     const { isFeatureEnabled } = useFeatures();
     const { user } = useAuthStore();
 
-    const filteredItems = items.filter(item => {
+    const filteredItems = items.filter((item) => {
         // Role check
         if (item.adminOnly && !user?.isAdmin) {
             return false;
@@ -69,36 +69,47 @@ export default function AdminMobileNav({ items }: AdminMobileNavProps) {
     return (
         <nav className="fixed bottom-0 left-0 right-0 md:hidden border-t border-border bg-background/80 backdrop-blur-md z-50 pb-[env(safe-area-inset-bottom)] shadow-lg">
             <ScrollArea className="w-full">
-                <div className="flex w-max space-x-1 p-2 px-4 mx-auto items-center h-16">
-                    {filteredItems.map(({ href, label, icon: iconName, exact }) => {
-                        const Icon = ICON_MAP[iconName] || LayoutDashboard;
-                        const isActive = exact
-                            ? pathname === href
-                            : pathname.startsWith(href);
+                <div className="flex w-max gap-1 p-2 px-4 mx-auto items-center h-16">
+                    {filteredItems.map(
+                        ({ href, label, icon: iconName, exact }) => {
+                            const Icon = ICON_MAP[iconName] || LayoutDashboard;
+                            const isActive = exact
+                                ? pathname === href
+                                : pathname.startsWith(href);
 
-                        return (
-                            <Link
-                                key={href}
-                                href={href}
-                                className={cn(
-                                    "flex flex-col items-center justify-center min-w-[64px] h-12 rounded-lg transition-all duration-300",
-                                    isActive 
-                                    ? "bg-primary text-primary-foreground shadow-sm scale-105" 
-                                    : "text-muted-foreground hover:text-foreground font-medium"
-                                )}
-                            >
-                                <Icon className={cn("size-4 mb-1", isActive ? "opacity-100" : "opacity-70")} />
-                                <span className={cn(
-                                    "text-[9px] font-medium uppercase tracking-wider leading-none",
-                                )}>{label}</span>
-                            </Link>
-                        );
-                    })}
+                            return (
+                                <Link
+                                    key={href}
+                                    href={href}
+                                    className={cn(
+                                        "flex flex-col items-center justify-center min-w-[64px] h-12 rounded-lg transition-all duration-300",
+                                        isActive
+                                            ? "bg-primary text-primary-foreground shadow-sm scale-105"
+                                            : "text-muted-foreground hover:text-foreground font-medium",
+                                    )}
+                                >
+                                    <Icon
+                                        className={cn(
+                                            "size-4 mb-1",
+                                            isActive
+                                                ? "opacity-100"
+                                                : "opacity-70",
+                                        )}
+                                    />
+                                    <span
+                                        className={cn(
+                                            "text-[9px] font-medium uppercase tracking-wider leading-none",
+                                        )}
+                                    >
+                                        {label}
+                                    </span>
+                                </Link>
+                            );
+                        },
+                    )}
                 </div>
                 <ScrollBar orientation="horizontal" className="h-1" />
             </ScrollArea>
         </nav>
     );
 }
-
-

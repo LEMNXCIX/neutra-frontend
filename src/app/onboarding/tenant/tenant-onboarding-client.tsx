@@ -1,10 +1,15 @@
-
 "use client";
 
 import React from "react";
 import { useRouter } from "next/navigation";
 import { TenantForm } from "@/components/admin/tenants/TenantForm";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+    Card,
+    CardContent,
+    CardHeader,
+    CardTitle,
+    CardDescription,
+} from "@/components/ui/card";
 import Logo from "@/components/logo";
 import Link from "next/link";
 import { Rocket } from "lucide-react";
@@ -19,19 +24,26 @@ export function TenantOnboardingPageClient() {
     };
 
     return (
-        <main className="min-h-screen bg-white dark:bg-black py-20 px-6 flex flex-col items-center animate-slide-up">
+        <main className="min-h-screen bg-white dark:bg-gray-950 py-20 px-6 flex flex-col items-center animate-slide-up">
             <div className="w-full max-w-4xl space-y-12">
                 {/* Header */}
-                <div className="flex flex-col items-center text-center space-y-6">
+                <div className="flex flex-col items-center text-center gap-6">
                     <div className="relative group">
                         <div className="absolute inset-0 bg-primary/20 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
                         <Link href="/">
-                            <Logo size={80} className="text-foreground relative z-10 transition-transform hover:scale-110 duration-500" />
+                            <Logo
+                                size={80}
+                                className="text-foreground relative z-10 transition-transform hover:scale-110 duration-500"
+                            />
                         </Link>
                     </div>
                     <div className="space-y-2">
-                        <h1 className="text-6xl font-black tracking-tighter uppercase italic leading-none">Initialize Node</h1>
-                        <p className="text-muted-foreground font-black uppercase tracking-[0.4em] text-[10px]">Architecting your enterprise grid in real-time</p>
+                        <h1 className="text-6xl font-black tracking-tighter uppercase italic leading-none">
+                            Initialize Node
+                        </h1>
+                        <p className="text-muted-foreground font-black uppercase tracking-[0.4em] text-[10px]">
+                            Architecting your enterprise grid in real-time
+                        </p>
                     </div>
                 </div>
 
@@ -44,9 +56,12 @@ export function TenantOnboardingPageClient() {
                                 <Rocket size={40} strokeWidth={2.5} />
                             </div>
                             <div className="space-y-1">
-                                <CardTitle className="text-4xl font-black uppercase tracking-tight italic">Instance Setup</CardTitle>
+                                <CardTitle className="text-4xl font-black uppercase tracking-tight italic">
+                                    Instance Setup
+                                </CardTitle>
                                 <CardDescription className="text-muted-foreground font-bold uppercase tracking-widest text-[10px]">
-                                    Configure core parameters and operational protocols
+                                    Configure core parameters and operational
+                                    protocols
                                 </CardDescription>
                             </div>
                         </div>
@@ -63,7 +78,8 @@ export function TenantOnboardingPageClient() {
 
                 {/* Footer */}
                 <p className="text-center text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground opacity-50">
-                    &copy; 2026 XCIX CORE INFRASTRUCTURE &bull; SECURED DEPLOYMENT
+                    &copy; 2026 XCIX CORE INFRASTRUCTURE &bull; SECURED
+                    DEPLOYMENT
                 </p>
             </div>
         </main>

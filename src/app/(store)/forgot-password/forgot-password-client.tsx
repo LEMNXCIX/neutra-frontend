@@ -5,7 +5,14 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+    CardFooter,
+} from "@/components/ui/card";
 import { toast } from "sonner";
 import { authService } from "@/services/auth.service";
 import { Spinner } from "@/components/ui/spinner";
@@ -42,22 +49,35 @@ export function ForgotPasswordPageClient() {
                         <div className="mx-auto size-16 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mb-4 shadow-sm animate-in zoom-in-95 duration-500">
                             <CheckCircle2 className="size-8" />
                         </div>
-                        <CardTitle className="text-2xl font-bold tracking-tight">Email Sent</CardTitle>
+                        <CardTitle className="text-2xl font-bold tracking-tight">
+                            Email Sent
+                        </CardTitle>
                         <CardDescription className="text-sm font-medium mt-1">
                             Check your inbox for reset instructions
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="text-center px-8 pb-8 space-y-6">
                         <p className="text-sm text-muted-foreground font-medium leading-relaxed">
-                            We've sent a recovery link to <span className="font-bold text-foreground">{email}</span>. 
-                            If an account is associated with this address, you'll receive instructions shortly.
+                            We've sent a recovery link to{" "}
+                            <span className="font-bold text-foreground">
+                                {email}
+                            </span>
+                            . If an account is associated with this address,
+                            you'll receive instructions shortly.
                         </p>
-                        <Button variant="outline" className="w-full h-12 rounded-xl border-border font-bold text-xs transition-all hover:bg-muted" onClick={() => setSubmitted(false)}>
+                        <Button
+                            variant="outline"
+                            className="w-full h-12 rounded-xl border-border font-bold text-xs transition-all hover:bg-muted"
+                            onClick={() => setSubmitted(false)}
+                        >
                             Try Different Email
                         </Button>
                     </CardContent>
                     <CardFooter className="justify-center border-t border-border/50 p-6 bg-muted/10">
-                        <Link href="/login" className="flex items-center text-xs font-semibold text-muted-foreground hover:text-primary transition-colors">
+                        <Link
+                            href="/login"
+                            className="flex items-center text-xs font-semibold text-muted-foreground hover:text-primary transition-colors"
+                        >
                             <ArrowLeft className="mr-2 size-4" />
                             Return to Sign In
                         </Link>
@@ -76,15 +96,21 @@ export function ForgotPasswordPageClient() {
                         <Logo size={36} />
                     </div>
                     <div className="space-y-1">
-                        <h1 className="text-3xl font-bold tracking-tight text-foreground">Recover Account</h1>
-                        <p className="text-muted-foreground font-medium text-sm">Reset your security credentials</p>
+                        <h1 className="text-3xl font-bold tracking-tight text-foreground">
+                            Recover Account
+                        </h1>
+                        <p className="text-muted-foreground font-medium text-sm">
+                            Reset your security credentials
+                        </p>
                     </div>
                 </div>
 
                 <Card className="t-card border-none shadow-2xl relative overflow-hidden">
                     <div className="absolute top-0 left-0 w-full h-1.5 bg-primary" />
                     <CardHeader className="space-y-1 pb-6 pt-8 px-8">
-                        <CardTitle className="text-xl font-bold">Password Reset</CardTitle>
+                        <CardTitle className="text-xl font-bold">
+                            Password Reset
+                        </CardTitle>
                         <CardDescription className="text-sm font-medium">
                             Enter your email to receive a recovery link
                         </CardDescription>
@@ -92,7 +118,10 @@ export function ForgotPasswordPageClient() {
                     <CardContent className="px-8 pb-8">
                         <form onSubmit={handleSubmit} className="space-y-5">
                             <div className="space-y-2">
-                                <Label htmlFor="email" className="text-xs font-semibold text-foreground ml-1">
+                                <Label
+                                    htmlFor="email"
+                                    className="text-xs font-semibold text-foreground ml-1"
+                                >
                                     Email Address
                                 </Label>
                                 <div className="relative group">
@@ -104,7 +133,9 @@ export function ForgotPasswordPageClient() {
                                         required
                                         className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-all focus:border-primary"
                                         value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
+                                        onChange={(e) =>
+                                            setEmail(e.target.value)
+                                        }
                                     />
                                 </div>
                             </div>
@@ -113,12 +144,22 @@ export function ForgotPasswordPageClient() {
                                 className="w-full h-12 text-sm font-bold shadow-lg shadow-primary/20 hover:-translate-y-0.5 transition-all rounded-xl"
                                 disabled={loading}
                             >
-                                {loading ? <Spinner className="mr-2 size-4" /> : <>Send Reset Link <ArrowRight className="ml-2 size-4" /></>}
+                                {loading ? (
+                                    <Spinner className="mr-2 size-4" />
+                                ) : (
+                                    <>
+                                        Send Reset Link{" "}
+                                        <ArrowRight className="ml-2 size-4" />
+                                    </>
+                                )}
                             </Button>
                         </form>
                     </CardContent>
-                    <CardFooter className="flex flex-col space-y-4 border-t border-border/50 p-6 bg-muted/10">
-                        <Link href="/login" className="flex items-center text-xs font-semibold text-muted-foreground hover:text-primary transition-colors">
+                    <CardFooter className="flex flex-col gap-4 border-t border-border/50 p-6 bg-muted/10">
+                        <Link
+                            href="/login"
+                            className="flex items-center text-xs font-semibold text-muted-foreground hover:text-primary transition-colors"
+                        >
                             <ArrowLeft className="mr-2 size-4" />
                             Back to Sign In
                         </Link>
