@@ -10,11 +10,14 @@ import {
 import { Tenant } from "@/types/tenant";
 import { TenantForm } from "./TenantForm";
 
+const EMPTY_PLATFORM_FEATURES: any[] = [];
+
 interface TenantDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     tenant?: Tenant | null;
     onSuccess: () => void;
+    initialPlatformFeatures?: any[];
 }
 
 export function TenantDialog({
@@ -22,6 +25,7 @@ export function TenantDialog({
     onOpenChange,
     tenant,
     onSuccess,
+    initialPlatformFeatures = EMPTY_PLATFORM_FEATURES,
 }: TenantDialogProps) {
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -35,6 +39,7 @@ export function TenantDialog({
                 <TenantForm
                     key={tenant?.id ?? "new"}
                     tenant={tenant}
+                    initialPlatformFeatures={initialPlatformFeatures}
                     onSuccess={() => {
                         onSuccess();
                         onOpenChange(false);

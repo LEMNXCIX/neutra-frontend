@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, use } from "react";
 import { logService } from "@/services/log.service";
 import {
     Activity,
@@ -31,68 +31,36 @@ interface AnalyticsStats {
     dailyTrend: { date: string; total: number; errors: number }[];
 }
 
-export default function LogAnalyticsDashboard() {
-  const [stats, setStats] = useState<AnalyticsStats | null>(null);
-  const [fetching, setFetching] = useState(true);
-  const [timeframe, setTimeframe] = useState("last_7_days");
-  const loading = !stats && fetching;
+let statsCache: Record<string, AnalyticsStats> = {};
 
-  const loadStats = useCallback(async (tf?: string) => {
-    setFetching(true);
-    try {
-      const response = await logService.getStats(tf || timeframe);
-      setStats(response);
-    } catch (error) {
-      console.error("Error loading log stats", error);
-    } finally {
-      setFetching(false);
+function fetchStats(timeframe: string): Promise<AnalyticsStats> {
+    if (statsCache[timeframe]) {
+        return Promise.resolve(statsCache[timeframe]);
     }
-  }, [timeframe]);
+    return logService.getStats(timeframe).then((response) => {
+        statsCache = { [timeframe]: response };
+        return response;
+    });
+}
 
-  useEffect(() => {
-    loadStats();
-  }, [loadStats]);
-
-  if (loading) {
-        return (
-            <div className="h-64 flex items-center justify-center border border-border border-dashed rounded-2xl animate-pulse bg-muted/30">
-                <span className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
-                    Calculating Metrics…
-                </span>
-            </div>
-        );
-    }
-
-    if (!stats) return null;
+function LogAnalyticsStats({
+    timeframe,
+    statsPromise,
+}: {
+    timeframe: string;
+    statsPromise: Promise<AnalyticsStats>;
+}) {
+    const stats = use(statsPromise);
 
     return (
         <div className="space-y-12">
-            {/* Control Bar */}
             <div className="flex justify-between items-center border-b border-border pb-4">
                 <h3 className="font-bold uppercase tracking-widest text-xs flex items-center gap-2">
                     <TrendingUp size={16} className="text-primary" />{" "}
                     Operational Health
                 </h3>
-                <div className="flex gap-4">
-                    <select
-                        className="bg-background border border-border rounded-lg px-4 py-1.5 font-semibold text-[10px] outline-none focus:border-primary transition-all shadow-sm"
-                        value={timeframe}
-                        onChange={(e) => setTimeframe(e.target.value)}
-                    >
-                        <option value="last_24h">Last 24 Hours</option>
-                        <option value="last_7_days">Last 7 Days</option>
-                    </select>
-                    <button
-                        type="button"
-                        onClick={loadStats}
-                        className="hover:rotate-180 transition-transform duration-500 p-1.5 bg-muted rounded-lg text-muted-foreground hover:text-foreground"
-                    >
-                        <RefreshCcw size={16} />
-                    </button>
-                </div>
             </div>
 
-            {/* Top Metrics Row */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <MetricCard
                     label="Error Rate"
@@ -113,7 +81,6 @@ export default function LogAnalyticsDashboard() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-                {/* Daily Trend Visualizer */}
                 <div className="space-y-6">
                     <h4 className="font-bold uppercase tracking-widest text-xs flex items-center gap-2 text-muted-foreground">
                         <Activity size={14} /> Request Trend vs Errors
@@ -159,7 +126,6 @@ export default function LogAnalyticsDashboard() {
                     </Card>
                 </div>
 
-                {/* Top Failed Endpoints */}
                 <div className="space-y-6">
                     <h4 className="font-bold uppercase tracking-widest text-xs flex items-center gap-2 text-muted-foreground">
                         <AlertCircle size={14} /> Critical Failure Points
@@ -201,7 +167,6 @@ export default function LogAnalyticsDashboard() {
                         )}
                     </div>
 
-                    {/* Status Code Mix */}
                     <div className="mt-8">
                         <h4 className="font-bold uppercase tracking-widest text-xs flex items-center gap-2 mb-4 text-muted-foreground">
                             <Database size={14} /> HTTP Distribution
@@ -226,6 +191,66 @@ export default function LogAnalyticsDashboard() {
                     </div>
                 </div>
             </div>
+        </div>
+    );
+}
+
+export default function LogAnalyticsDashboard() {
+    const [timeframe, setTimeframe] = useState("last_7_days");
+    const [statsPromise, setStatsPromise] = useState(() =>
+        fetchStats("last_7_days"),
+    );
+
+    const handleTimeframeChange = (tf: string) => {
+        setTimeframe(tf);
+        setStatsPromise(fetchStats(tf));
+    };
+
+    const handleRefresh = () => {
+        statsCache = {};
+        setStatsPromise(fetchStats(timeframe));
+    };
+
+    return (
+        <div className="space-y-12">
+            <div className="flex justify-between items-center border-b border-border pb-4">
+                <h3 className="font-bold uppercase tracking-widest text-xs flex items-center gap-2">
+                    <TrendingUp size={16} className="text-primary" />{" "}
+                    Operational Health
+                </h3>
+                <div className="flex gap-4">
+                    <select
+                        className="bg-background border border-border rounded-lg px-4 py-1.5 font-semibold text-[10px] outline-none focus:border-primary transition-all shadow-sm"
+                        value={timeframe}
+                        onChange={(e) => handleTimeframeChange(e.target.value)}
+                    >
+                        <option value="last_24h">Last 24 Hours</option>
+                        <option value="last_7_days">Last 7 Days</option>
+                    </select>
+                    <button
+                        type="button"
+                        onClick={handleRefresh}
+                        className="hover:rotate-180 transition-transform duration-500 p-1.5 bg-muted rounded-lg text-muted-foreground hover:text-foreground"
+                    >
+                        <RefreshCcw size={16} />
+                    </button>
+                </div>
+            </div>
+
+            <React.Suspense
+                fallback={
+                    <div className="h-64 flex items-center justify-center border border-border border-dashed rounded-2xl animate-pulse bg-muted/30">
+                        <span className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
+                            Calculating Metrics…
+                        </span>
+                    </div>
+                }
+            >
+                <LogAnalyticsStats
+                    timeframe={timeframe}
+                    statsPromise={statsPromise}
+                />
+            </React.Suspense>
         </div>
     );
 }

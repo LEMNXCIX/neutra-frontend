@@ -11,7 +11,13 @@ import { Truck, Shield, ArrowRight, Tag, Heart, Box, Zap } from "lucide-react";
 
 import { useFeatures } from "@/hooks/useFeatures";
 
-export function StoreHomeClient({ initialSliders }: { initialSliders?: any[] }) {
+export function StoreHomeClient({
+    initialSliders,
+    initialProducts,
+}: {
+    initialSliders?: any[];
+    initialProducts?: any[];
+}) {
     const { isFeatureEnabled } = useFeatures();
 
     return (
@@ -58,7 +64,9 @@ export function StoreHomeClient({ initialSliders }: { initialSliders?: any[] }) 
                                 <div className="hidden lg:block absolute inset-0 -m-6 bg-primary/5 rounded-[3rem] blur-3xl -z-10" />
                                 <div className="relative bg-background rounded-3xl overflow-hidden shadow-2xl border border-border/50">
                                     {isFeatureEnabled("BANNERS") && (
-					<PromoSlider initialSlides={initialSliders} />
+                                        <PromoSlider
+                                            initialSlides={initialSliders}
+                                        />
                                     )}
                                 </div>
                             </div>
@@ -100,7 +108,7 @@ export function StoreHomeClient({ initialSliders }: { initialSliders?: any[] }) 
                         </Button>
                     </div>
 
-                    <FeaturedProducts />
+                    <FeaturedProducts initialProducts={initialProducts} />
 
                     <div className="mt-12 text-center md:hidden">
                         <Button

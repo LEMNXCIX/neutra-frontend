@@ -1,5 +1,4 @@
-"use client";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import ProductGrid from "./product-grid";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -13,33 +12,14 @@ type Product = {
     category?: string;
 };
 
-export default function FeaturedProducts() {
-    const [products, setProducts] = useState<Product[]>([]);
-    const [loading, setLoading] = useState(true);
+export default function FeaturedProducts({
+    initialProducts,
+}: {
+    initialProducts?: Product[];
+}) {
+    const products = initialProducts || [];
+    const loading = products.length === 0;
 
-    useEffect(() => {
-        let mounted = true;
-        fetch("/api/products")
-            .then((r) => r.json())
-            .then((d) => {
-                // Handle both StandardResponse (d.data) and direct array/object (d.products)
-                const list = Array.isArray(d.data)
-                    ? d.data
-                    : d.data?.products || d.products;
-                console.log("list", list);
-                if (mounted && list && Array.isArray(list)) {
-                    setProducts(list.slice(0, 4));
-                } else {
-                    setProducts([]);
-                }
-            })
-            .finally(() => mounted && setLoading(false));
-
-        return () => {
-            mounted = false;
-        };
-    }, []);
-    // Skeleton con exactamente 4 tarjetas (mismo grid que el real)
     if (loading) {
         return (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -76,6 +56,8 @@ export default function FeaturedProducts() {
             </div>
         );
     }
+
+    if (products.length === 0) return null;
 
     return <ProductGrid products={products} />;
 }

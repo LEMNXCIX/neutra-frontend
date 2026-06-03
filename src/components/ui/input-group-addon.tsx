@@ -27,15 +27,14 @@ const inputGroupAddonVariants = cva(
 );
 
 function InputGroupAddon({
-    className,
-    align = "inline-start",
-    ...props
-}: React.ComponentProps<"fieldset"> &
-    VariantProps<typeof inputGroupAddonVariants>) {
-    return (
-        <div
-            role="group"
-            data-slot="input-group-addon"
+  className,
+  align = "inline-start",
+  ...props
+}: React.ComponentProps<"button"> & VariantProps<typeof inputGroupAddonVariants>) {
+  return (
+    <button
+      type="button"
+      data-slot="input-group-addon"
             data-align={align}
             className={cn(inputGroupAddonVariants({ align }), className)}
             onClick={(e) => {

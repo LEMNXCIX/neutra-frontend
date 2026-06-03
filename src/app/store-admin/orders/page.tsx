@@ -30,13 +30,17 @@ async function getOrders(
         const ordersUrl = queryString ? `/order?${queryString}` : "/order";
 
         // Fetch orders and stats in parallel from backend
-        const [ordersResult, statsResult] = await Promise.all([
+        const [ordersResult, statsResult, statusesResult] = await Promise.all([
             backendGet(ordersUrl, token).catch((err) => ({
                 success: false,
                 error: err.message,
                 data: [],
             })),
             backendGet("/order/stats", token).catch((err) => ({
+                success: false,
+                error: err.message,
+            })),
+            backendGet("/order/statuses", token).catch((err) => ({
                 success: false,
                 error: err.message,
             })),
@@ -50,6 +54,7 @@ async function getOrders(
             return {
                 orders: [],
                 stats: { totalOrders: 0, totalRevenue: 0, statusCounts: {} },
+                statuses: [],
                 pagination: {
                     currentPage: 1,
                     totalPages: 0,
@@ -78,9 +83,16 @@ async function getOrders(
                       statusCounts: {},
                   };
 
+        const statuses =
+            statusesResult.success &&
+            Array.isArray((statusesResult as any).data)
+                ? (statusesResult as any).data
+                : [];
+
         return {
             orders,
             stats,
+            statuses,
             pagination: {
                 currentPage: pagination.page || page,
                 totalPages: pagination.totalPages || 0,
@@ -93,6 +105,7 @@ async function getOrders(
         return {
             orders: [],
             stats: { totalOrders: 0, totalRevenue: 0, statusCounts: {} },
+            statuses: [],
             pagination: {
                 currentPage: 1,
                 totalPages: 0,
@@ -134,6 +147,7 @@ export default async function OrdersPage({ searchParams }: Props) {
                 orders={data.orders}
                 stats={data.stats}
                 pagination={data.pagination}
+                initialStatuses={data.statuses}
             />
         </Suspense>
     );
