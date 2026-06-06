@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { ServicesGrid } from '@/components/booking/services-grid';
 import { cookies } from 'next/headers';
 import type { Metadata } from "next";
+import { getBackendUrl } from '@/lib/backend-url';
 
 export const metadata: Metadata = {
   title: "Services",
@@ -13,7 +14,7 @@ export const dynamic = 'force-dynamic';
 
 async function getServices() {
     try {
-        const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001/api';
+        const baseUrl = getBackendUrl();
         
         // Get tenant info from cookies
         const cookieStore = await cookies();

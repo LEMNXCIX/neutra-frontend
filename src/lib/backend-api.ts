@@ -3,28 +3,24 @@
  * Centralized, type-safe client for external backend communication
  */
 
+import { getBackendUrl } from './backend-url';
+
 // ============================================================================
 // Configuration
 // ============================================================================
 
-const getBackendUrlConfig = () => {
-    const url = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001/api';
-    return url.endsWith('/api') ? url : `${url}/api`;
-};
-
-const BACKEND_API_URL = getBackendUrlConfig();
 const TOKEN_COOKIE_NAME = 'token';
 
 /**
  * Ensure URL has protocol prefix
  */
 const ensureProtocol = (url: string): string => {
-    return url.startsWith('http://') || url.startsWith('https://')
-        ? url
-        : `http://${url}`;
+  return url.startsWith('http://') || url.startsWith('https://')
+    ? url
+    : `http://${url}`;
 };
 
-const BASE_URL = ensureProtocol(BACKEND_API_URL);
+const BASE_URL = ensureProtocol(getBackendUrl());
 
 // ============================================================================
 // Types
@@ -303,10 +299,7 @@ export const backendDelete = del;
 export type BackendResponse<T = unknown> = ApiResponse<T>;
 export type BackendFetchOptions = ApiRequestConfig;
 
-/**
- * Get configured backend URL
- */
-export const getBackendUrl = (): string => BASE_URL;
+export { getBackendUrl } from './backend-url';
 
 // ============================================================================
 // Default Export (API Client Object)

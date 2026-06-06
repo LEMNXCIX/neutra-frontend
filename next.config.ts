@@ -13,7 +13,10 @@ const nextConfig: NextConfig = {
     ],
   },
   async rewrites() {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
+    const apiUrl =
+      process.env.BACKEND_API_URL ??
+      process.env.NEXT_PUBLIC_API_URL ??
+      'http://localhost:4001';
     const baseUrl = apiUrl.endsWith('/api') ? apiUrl : `${apiUrl}/api`;
 
     return [

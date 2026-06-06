@@ -1,6 +1,7 @@
 import { notFound, redirect, unstable_rethrow } from "next/navigation";
 import { cookies } from "next/headers";
 import type { Metadata } from "next";
+import { getBackendUrl } from "@/lib/backend-url";
 
 export const metadata: Metadata = {
     title: "Order Details",
@@ -327,8 +328,7 @@ const statusConfig: Record<
 };
 
 async function fetchOrder(params: { id: string }) {
-  const baseUrl =
-    process.env.NEXT_PUBLIC_API_URL || "http://localhost:4001/api";
+  const baseUrl = getBackendUrl();
   const url = `${baseUrl}/order/${params.id}`;
 
   const cookieStore = await cookies();
