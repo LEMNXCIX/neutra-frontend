@@ -124,9 +124,20 @@ export async function apiClient<T = unknown>(
             if (!suppressUnauthorized && typeof window !== 'undefined') {
                 window.dispatchEvent(new CustomEvent('unauthorized'));
             }
-            // toast.error('Ups, parece que no tienes permiso para acceder a esta página');
-            // throw new ApiError('Unauthorized', 401);
-            return null as unknown as T;
+
+            // Try to parse the error response for a meaningful message
+            try {
+                const errorData: StandardResponse<T> = await res.json();
+                throw new ApiError(
+                    errorData.message || 'Unauthorized',
+                    errorData.statusCode || 401,
+                    errorData.errors,
+                    errorData.meta?.traceId
+                );
+            } catch (error) {
+                if (error instanceof ApiError) throw error;
+                throw new ApiError('Unauthorized', 401);
+            }
         }
 
         // Handle 204 No Content

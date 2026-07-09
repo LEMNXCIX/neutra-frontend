@@ -350,17 +350,15 @@ export default async function OrderPage(props: {
 }) {
   const params = await props.params;
 
-  let res: Response;
   let fetchError = false;
-  try {
-    res = await fetchOrder(params);
-  } catch (error) {
+  const res = await fetchOrder(params).catch((error) => {
     unstable_rethrow(error);
     console.error("Error fetching order:", error);
     fetchError = true;
-  }
+    return null;
+  });
 
-  if (fetchError) {
+  if (fetchError || !res) {
     return notFound();
   }
 

@@ -235,12 +235,16 @@ const CategoriesMobileStats = ({ stats }: { stats: Stats }) => (
 const CategoriesSearchBar = ({
   searchQuery,
   onSearch,
+  typeFilter,
+  onTypeFilterChange,
   tenantFilter,
   onTenantFilterChange,
   isSuperAdmin,
 }: {
   searchQuery: string;
   onSearch: (term: string) => void;
+  typeFilter: string;
+  onTypeFilterChange: (type: string) => void;
   tenantFilter: string;
   onTenantFilterChange: (tenant: string) => void;
   isSuperAdmin: boolean;
@@ -268,6 +272,19 @@ const CategoriesSearchBar = ({
         >
           Search
         </Button>
+
+        <div className="w-[180px]">
+          <Select value={typeFilter} onValueChange={onTypeFilterChange}>
+            <SelectTrigger>
+              <SelectValue placeholder="All Types" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Types</SelectItem>
+              <SelectItem value="PRODUCT">Product</SelectItem>
+              <SelectItem value="SERVICE">Service</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
 
         {isSuperAdmin && (
           <div className="w-[180px]">
@@ -723,6 +740,7 @@ function CategoriesTableClientInner({
   const editingRef = useRef<CategoryWithCount | null>(null);
 
   const searchQuery = searchParams.get("search") || "";
+  const typeFilter = searchParams.get("type") || "all";
   const tenantFilter = searchParams.get("tenantId") || "all";
 
   const handleSearch = (term: string) => {
@@ -731,6 +749,17 @@ function CategoriesTableClientInner({
       params.set("search", term);
     } else {
       params.delete("search");
+    }
+    params.set("page", "1");
+    router.push(`?${params.toString()}`);
+  };
+
+  const handleTypeFilterChange = (newType: string) => {
+    const params = new URLSearchParams(searchParams);
+    if (newType && newType !== "all") {
+      params.set("type", newType);
+    } else {
+      params.delete("type");
     }
     params.set("page", "1");
     router.push(`?${params.toString()}`);
@@ -840,6 +869,8 @@ function CategoriesTableClientInner({
       <CategoriesSearchBar
         searchQuery={searchQuery}
         onSearch={handleSearch}
+        typeFilter={typeFilter}
+        onTypeFilterChange={handleTypeFilterChange}
         tenantFilter={tenantFilter}
         onTenantFilterChange={handleTenantFilterChange}
         isSuperAdmin={isSuperAdmin}

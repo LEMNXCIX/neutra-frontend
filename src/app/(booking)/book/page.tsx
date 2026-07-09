@@ -1,7 +1,6 @@
 import React from "react";
-import { cookies } from "next/headers";
-import { getBackendUrl } from "@/lib/backend-api";
 import { BookingWizard } from "@/components/booking/booking-wizard";
+import { apiClient } from "@/lib/api-client";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -13,37 +12,14 @@ export const dynamic = "force-dynamic";
 
 async function getData() {
     try {
-        const baseUrl = getBackendUrl();
-        const cookieStore = await cookies();
-        const tenantSlug = cookieStore.get("tenant-slug")?.value || "";
-        const tenantId = cookieStore.get("tenant-id")?.value || "";
-
-        const headers = {
-            "Content-Type": "application/json",
-            "x-tenant-slug": tenantSlug,
-            "x-tenant-id": tenantId,
-        };
-
-        // Fetch services and staff in parallel
-        const [servicesRes, staffRes] = await Promise.all([
-            fetch(`${baseUrl}/services?activeOnly=true`, {
-                headers,
-                cache: "no-store",
-            }),
-            fetch(`${baseUrl}/staff?activeOnly=true`, {
-                headers,
-                cache: "no-store",
-            }),
-        ]);
-
-        const [servicesData, staffData] = await Promise.all([
-            servicesRes.json(),
-            staffRes.json(),
+        const [services, staff] = await Promise.all([
+            apiClient<any[]>('/services?activeOnly=true'),
+            apiClient<any[]>('/staff?activeOnly=true'),
         ]);
 
         return {
-            services: servicesData.data || [],
-            staff: staffData.data || [],
+            services: services || [],
+            staff: staff || [],
         };
     } catch (error) {
         console.error("Error fetching booking wizard data on server:", error);

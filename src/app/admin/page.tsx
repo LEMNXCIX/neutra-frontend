@@ -1,6 +1,5 @@
 import LogAnalyticsDashboard from "@/components/admin/LogAnalyticsDashboard";
-import { redirect } from "next/navigation";
-import { unstable_rethrow } from "next/server";
+import { redirect, unstable_rethrow } from "next/navigation";
 
 import { validateAdminAccess } from "@/lib/server-auth";
 

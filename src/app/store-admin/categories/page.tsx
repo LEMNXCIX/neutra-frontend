@@ -10,13 +10,19 @@ export const metadata = { title: "Categories" };
 
 export const dynamic = "force-dynamic";
 
-async function getCategories() {
+async function getCategories(searchParams: { type?: string }) {
     try {
         const token = await extractTokenFromCookies();
 
-        // Fetch from backend
+        // Build query from searchParams
+        const query = new URLSearchParams();
+        if (searchParams.type) query.set("type", searchParams.type);
+
+        const endpoint = query.toString()
+            ? `/categories?${query.toString()}`
+            : "/categories";
         const result = await backendGet(
-            "/categories",
+            endpoint,
             token as string | undefined,
         );
 
@@ -120,8 +126,13 @@ async function getCategories() {
     }
 }
 
-export default async function CategoriesPage() {
-    const data = await getCategories();
+export default async function CategoriesPage({
+    searchParams,
+}: {
+    searchParams: Promise<{ type?: string }>;
+}) {
+    const params = await searchParams;
+    const data = await getCategories(params);
 
     return (
         <Suspense fallback={null}>

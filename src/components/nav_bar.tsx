@@ -667,8 +667,6 @@ function MobileMenuSheet({
     );
 }
 
-import { Category } from "@/types/category.types";
-
 const EMPTY_CATEGORIES: Category[] = [];
 
 export function Navigation({

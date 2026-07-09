@@ -7,14 +7,17 @@ export const metadata = { title: "Booking Categories" };
 
 export const dynamic = "force-dynamic";
 
-async function getCategories() {
+async function getCategories(searchParams: { type?: string }) {
     try {
         const cookieStore = await cookies();
         const token = cookieStore.get("token")?.value;
 
-        // Fetch categories from backend (filtered by type SERVICE)
-        // backendGet handles tenant forwarding automatically via next/headers
-        const response = await backendGet("/categories?type=SERVICE", token);
+        // Build query from searchParams, default to SERVICE
+        const query = new URLSearchParams();
+        const type = searchParams.type || "SERVICE";
+        query.set("type", type);
+
+        const response = await backendGet(`/categories?${query.toString()}`, token);
 
         if (!response.success) {
             console.error("Failed to fetch categories:", response.error);
@@ -70,8 +73,13 @@ async function getCategories() {
     }
 }
 
-export default async function BookingCategoriesPage() {
-    const data = await getCategories();
+export default async function BookingCategoriesPage({
+    searchParams,
+}: {
+    searchParams: Promise<{ type?: string }>;
+}) {
+    const params = await searchParams;
+    const data = await getCategories(params);
 
     return (
         <div className="p-6">
