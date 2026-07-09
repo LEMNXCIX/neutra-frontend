@@ -1,39 +1,19 @@
 import React from "react";
 import { LogsClient } from "@/components/admin/logs/logs-client";
-import { getBackendUrl } from "@/lib/backend-api";
-import { cookies } from "next/headers";
+import { api } from '@/lib/api-client';
 
 export const dynamic = "force-dynamic";
 
 async function getData() {
     try {
-        const baseUrl = getBackendUrl();
-        const cookieStore = await cookies();
-        const token = cookieStore.get("token")?.value;
-
-        const headers = {
-            "Content-Type": "application/json",
-            ...(token && { Cookie: `token=${token}` }),
-        };
-
-        // Fetch logs and tenants in parallel
-        const [logsRes, tenantsRes] = await Promise.all([
-            fetch(`${baseUrl}/admin/logs?take=50`, {
-                headers,
-                cache: "no-store",
-            }),
-            fetch(`${baseUrl}/tenants`, { headers, cache: "no-store" }),
+        const [logsResult, tenantsResult] = await Promise.all([
+            api.get<any>(`/admin/logs?take=50`).catch(() => ({ data: [], pagination: {} })),
+            api.get<any[]>('/tenants').catch(() => []),
         ]);
-
-        const [logsData, tenantsData] = await Promise.all([
-            logsRes.json(),
-            tenantsRes.json(),
-        ]);
-
         return {
-            logs: logsData.data || [],
-            total: logsData.pagination?.total || 0,
-            tenants: tenantsData.data || tenantsData || [],
+            logs: logsResult?.data || [],
+            total: logsResult?.pagination?.total || 0,
+            tenants: Array.isArray(tenantsResult) ? tenantsResult : [],
         };
     } catch (error) {
         console.error("Error fetching logs data on server:", error);

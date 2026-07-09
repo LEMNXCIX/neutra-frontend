@@ -2,11 +2,8 @@ import React, { Suspense } from "react";
 import UsersTableClient from "@/components/admin/users/UsersTableClient";
 import { User } from "@/types/user.types";
 import { Permission } from "@/types/permission.types";
-import { get as backendGet } from "../../../lib/backend-api";
-import {
-    extractTokenFromCookies,
-    validateAdminAccess,
-} from "@/lib/server-auth";
+import { api } from '@/lib/api-client';
+import { validateAdminAccess } from "@/lib/server-auth";
 
 export const metadata = { title: "Users" };
 
@@ -19,9 +16,6 @@ async function getUsers(
     limit: number,
 ) {
     try {
-        const token = await extractTokenFromCookies();
-
-        // Build query string for backend
         const queryParams = new URLSearchParams();
         if (search) queryParams.set("search", search);
         if (role && role !== "all") queryParams.set("role", role);
@@ -31,28 +25,13 @@ async function getUsers(
         const queryString = queryParams.toString();
         const usersUrl = queryString ? `/users?${queryString}` : "/users";
 
-        // Fetch from backend
-        const result = await backendGet(usersUrl, token as string | undefined);
-
-        if (!result.success) {
-            console.error("Failed to fetch users:", result.error);
-            return {
-                users: [],
-                stats: { totalUsers: 0, adminUsers: 0, regularUsers: 0 },
-                pagination: {
-                    currentPage: 1,
-                    totalPages: 0,
-                    totalItems: 0,
-                    itemsPerPage: limit,
-                },
-            };
-        }
+        const data = await api.get<any>(usersUrl);
 
         type BackendUser = {
             id: string;
             name: string;
             email: string;
-            tenantId?: string; // Added tenantId as it's in User type
+            tenantId?: string;
             roleId?: string;
             active?: boolean;
             profilePic?: string;
@@ -65,19 +44,17 @@ async function getUsers(
             updatedAt?: string;
         };
 
-        // Map backend users to frontend format
-        const data = result.data as any;
         const backendUsers = Array.isArray(data)
             ? data
-            : Array.isArray(data?.users)
+            : (Array.isArray(data?.users)
               ? data.users
-              : [];
+              : []);
 
         let users: User[] = backendUsers.map((u: BackendUser) => ({
             id: u.id,
             name: u.name,
             email: u.email,
-            tenantId: "", // Default for now
+            tenantId: "",
             roleId: u.roleId || u.role?.id || "",
             active: u.active !== undefined ? u.active : true,
             profilePic: u.profilePic || undefined,
@@ -97,7 +74,6 @@ async function getUsers(
             updatedAt: u.updatedAt ? new Date(u.updatedAt) : undefined,
         }));
 
-        // Apply filters
         if (search) {
             const query = search.toLowerCase();
             users = users.filter(

@@ -1,14 +1,11 @@
 import React, { Suspense } from "react";
-import { cookies } from "next/headers";
 import UsersTableClient from "@/components/admin/users/UsersTableClient";
 import { User } from "@/types/user.types";
+import { api } from '@/lib/api-client';
 
 export const metadata = { title: "Booking Users" };
 
 export const dynamic = "force-dynamic";
-
-const BACKEND_API_URL =
-    process.env.NEXT_PUBLIC_API_URL || "http://localhost:4001/api";
 
 async function getUsers(
     search: string,
@@ -17,36 +14,7 @@ async function getUsers(
     limit: number,
 ) {
     try {
-        // Get cookies from request
-        const cookieStore = await cookies();
-        const cookieString = cookieStore.toString();
-        const tenantSlug = cookieStore.get("tenant-slug")?.value || "";
-
-        // Fetch from backend with cookies and explicit tenant slug
-        const response = await fetch(`${BACKEND_API_URL}/users`, {
-            headers: {
-                "Content-Type": "application/json",
-                Cookie: cookieString,
-                "x-tenant-slug": tenantSlug,
-            },
-            cache: "no-store",
-        });
-
-        if (!response.ok) {
-            console.error("Failed to fetch users:", response.status);
-            return {
-                users: [],
-                stats: { totalUsers: 0, adminUsers: 0, regularUsers: 0 },
-                pagination: {
-                    currentPage: 1,
-                    totalPages: 0,
-                    totalItems: 0,
-                    itemsPerPage: limit,
-                },
-            };
-        }
-
-        const data = await response.json();
+        const data = await api.get<any>(`/users`);
 
         type BackendUser = {
             id: string;
@@ -65,8 +33,9 @@ async function getUsers(
         };
         // Map backend users to frontend format
         let users: User[] = [];
-        if (data.success && data.data) {
-            users = (Array.isArray(data.data) ? data.data : []).map(
+        if (data) {
+            const rawUsers = Array.isArray(data) ? data : (data.data || []);
+            users = rawUsers.map(
                 (u: BackendUser) => ({
                     id: u.id,
                     name: u.name,

@@ -4,50 +4,35 @@ import ServicesTableClient from "@/components/admin/booking/ServicesTableClient"
 import { bookingService } from "@/services/booking.service";
 import { categoriesService } from "@/services/categories.service";
 import { validateAdminAccess } from "@/lib/server-auth";
-
-const BACKEND_API_URL =
-    process.env.NEXT_PUBLIC_API_URL || "http://localhost:4001/api";
+import { api } from '@/lib/api-client';
 
 export default async function SuperAdminServicesPage({
     searchParams,
 }: {
     searchParams: { tenantId?: string };
 }) {
-    const { isValid, cookieHeader } = await validateAdminAccess();
+    const { isValid } = await validateAdminAccess();
     if (!isValid) redirect("/login");
 
     const params = await searchParams;
-    // Default to 'all' if no tenantId is specified
     const tenantId =
         params.tenantId === "all" ? undefined : params.tenantId || "all";
 
     const query = new URLSearchParams();
     query.append("activeOnly", "false");
-    // Always append tenantId, even if it's 'all'
     query.append("tenantId", tenantId === undefined ? "all" : tenantId);
 
-    const [servicesRes, categoriesRes] = await Promise.all([
-        fetch(`${BACKEND_API_URL}/services?${query.toString()}`, {
-            headers: { Cookie: cookieHeader! },
-            cache: "no-store",
-        }),
-        fetch(`${BACKEND_API_URL}/categories?tenantId=all&type=SERVICE`, {
-            headers: { Cookie: cookieHeader! },
-            cache: "no-store",
-        }),
+    const [servicesData, categoriesData] = await Promise.all([
+        api.get<any[]>(`/services?${query.toString()}`).catch(() => []),
+        api.get<any[]>(`/categories?tenantId=all&type=SERVICE`).catch(() => []),
     ]);
-
-  const [servicesData, categoriesData] = await Promise.all([
-    servicesRes.json(),
-    categoriesRes.json(),
-  ]);
 
     return (
         <div className="container mx-auto py-8">
             <Suspense fallback={null}>
                 <ServicesTableClient
-                    services={servicesData.data || []}
-                    categories={categoriesData.data || []}
+                    services={Array.isArray(servicesData) ? servicesData : []}
+                    categories={Array.isArray(categoriesData) ? categoriesData : []}
                     isSuperAdmin={true}
                 />
             </Suspense>

@@ -14,7 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Image from "@/components/ui/image";
-import { backendFetch } from "@/lib/backend-api";
+import { api } from '@/lib/api-client';
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -24,15 +24,9 @@ export const metadata: Metadata = {
 
 async function fetchProduct(id: string) {
     try {
-        const result = await backendFetch(`/products/${id}`, {
-            cache: "no-store",
-        });
-        if (!result.success) return null;
-
-        const p = result.data as any;
+        const p = await api.get<any>(`/products/${id}`);
         if (!p) return null;
 
-        // Map backend Product to frontend Product expected by this page
         return {
             ...p,
             title: p.name,

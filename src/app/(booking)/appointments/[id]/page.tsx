@@ -1,8 +1,7 @@
 import React from "react";
-import { cookies } from "next/headers";
 import { redirect, notFound } from "next/navigation";
 import { authService } from "@/services/auth.service";
-import { getBackendUrl } from "@/lib/backend-api";
+import { api } from '@/lib/api-client';
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -35,38 +34,14 @@ export const dynamic = "force-dynamic";
 
 async function getAppointmentData(id: string) {
     try {
-        const cookieStore = await cookies();
-        const token = cookieStore.get("token")?.value;
-        const tenantSlug = cookieStore.get("tenant-slug")?.value || "";
-
-        if (!token) return { error: "unauthorized" };
-
-        // Validate user session
         const authRes = await authService.validate();
         const user = authRes?.user;
         if (!user) return { error: "unauthorized" };
 
-        const baseUrl = getBackendUrl();
-        const response = await fetch(`${baseUrl}/appointments/${id}`, {
-            headers: {
-                "Content-Type": "application/json",
-                Cookie: `token=${token}`,
-                "x-tenant-slug": tenantSlug,
-            },
-            cache: "no-store",
-        });
+        const appointment = await api.get<any>(`/appointments/${id}`);
+        if (!appointment) return { error: "not_found" };
 
-        if (!response.ok) {
-            if (response.status === 404) return { error: "not_found" };
-            return { error: "fetch_failed" };
-        }
-
-        const result = await response.json();
-        const appointment = result.data;
-
-        // Permission check
         if (
-            appointment &&
             appointment.userId !== user.id &&
             user.role?.name !== "ADMIN" &&
             user.role?.name !== "SUPER_ADMIN"

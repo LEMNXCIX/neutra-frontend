@@ -1,14 +1,11 @@
 import React, { Suspense } from "react";
-import { cookies } from "next/headers";
 import AppointmentsTableClient from "@/components/admin/appointments/AppointmentsTableClient";
 import { Appointment } from "@/services/booking.service";
+import { api } from '@/lib/api-client';
 
 export const metadata = { title: "Appointments" };
 
 export const dynamic = "force-dynamic";
-
-const BACKEND_API_URL =
-    process.env.NEXT_PUBLIC_API_URL || "http://localhost:4001/api";
 
 async function getAppointments(
     search: string,
@@ -17,10 +14,6 @@ async function getAppointments(
     limit: number,
 ) {
     try {
-        const cookieStore = await cookies();
-        const cookieString = cookieStore.toString();
-        const tenantSlug = cookieStore.get("tenant-slug")?.value || "";
-
         const params = new URLSearchParams({
             page: page.toString(),
             limit: limit.toString(),
@@ -29,39 +22,8 @@ async function getAppointments(
         if (search) params.append("search", search);
         if (status && status !== "all") params.append("status", status);
 
-        const response = await fetch(
-            `${BACKEND_API_URL}/appointments?${params.toString()}`,
-            {
-                headers: {
-                    "Content-Type": "application/json",
-                    Cookie: cookieString,
-                    "x-tenant-slug": tenantSlug,
-                },
-                cache: "no-store",
-            },
-        );
-
-        if (!response.ok) {
-            console.error("Failed to fetch appointments:", response.status);
-            return {
-                appointments: [],
-                stats: {
-                    totalAppointments: 0,
-                    pendingAppointments: 0,
-                    confirmedAppointments: 0,
-                    statusCounts: {},
-                },
-                pagination: {
-                    currentPage: 1,
-                    totalPages: 0,
-                    totalItems: 0,
-                    totalItemsPerPage: limit,
-                },
-            };
-        }
-
-        const data = await response.json();
-        const appointments: Appointment[] = data.data || [];
+        const data = await api.get<{ data: any[]; stats?: any; pagination?: any }>(`/appointments?${params.toString()}`);
+        const appointments: Appointment[] = data?.data || [];
 
         // In a real scenario, the backend might return these stats.
         // If not, we calculate them from the current result set as a fallback,
@@ -84,7 +46,7 @@ async function getAppointments(
         };
 
         // If backend provides pagination info, use it
-        const pagination = data.pagination
+        const pagination = data?.pagination
             ? {
                   ...data.pagination,
                   totalItemsPerPage:

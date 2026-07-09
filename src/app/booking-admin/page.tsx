@@ -4,12 +4,11 @@ import { cookies } from 'next/headers';
 import AnalyticsCharts from "@/components/admin/AnalyticsCharts";
 import AnalyticsOverview from "@/components/admin/AnalyticsOverview";
 import AnalyticsChartsDetailed from "@/components/admin/AnalyticsChartsDetailed";
+import { api } from '@/lib/api-client';
 
 export const metadata = { title: "Booking Admin", };
 
 export const dynamic = 'force-dynamic';
-
-const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001/api';
 
 async function validateAdminAccess() {
     try {
@@ -20,35 +19,14 @@ async function validateAdminAccess() {
             return { isValid: false, user: null };
         }
 
-        // Serialize all cookies to forward to backend
-        const allCookies = cookieStore.getAll();
-        const cookieHeader = allCookies
-            .map(cookie => `${cookie.name}=${cookie.value}`)
-            .join('; ');
+        const authRes = await api.get<{ user: any }>('/auth/validate');
 
-        // Validate session with backend
-        const response = await fetch(`${BACKEND_API_URL}/auth/validate`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Cookie': cookieHeader,
-            },
-            cache: 'no-store',
-        });
-
-        if (!response.ok) {
+        if (!authRes?.user) {
             return { isValid: false, user: null };
         }
 
-        const data = await response.json();
+        const user = authRes.user;
 
-        if (!data.success || !data.data?.user) {
-            return { isValid: false, user: null };
-        }
-
-        const user = data.data.user;
-
-        // Check if user has admin role
         const isAdmin = user.role?.name === 'SUPER_ADMIN' || user.role?.name === 'ADMIN';
 
         return { isValid: isAdmin, user };

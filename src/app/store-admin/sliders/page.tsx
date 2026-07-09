@@ -1,10 +1,7 @@
 import React, { Suspense } from "react";
 import SlidersTableClient from "@/components/admin/sliders/SlidersTableClient";
-import { get as backendGet } from "../../../lib/backend-api";
-import {
-    extractTokenFromCookies,
-    validateAdminAccess,
-} from "@/lib/server-auth";
+import { api } from '@/lib/api-client';
+import { validateAdminAccess } from "@/lib/server-auth";
 
 export const metadata = { title: "Sliders" };
 
@@ -17,37 +14,14 @@ async function getSliders(
     limit: number,
 ) {
     try {
-        const token = (await extractTokenFromCookies()) || undefined;
-
-        // Check if user is super admin to allow global view
         const adminCheck = await validateAdminAccess();
         const isSuperAdmin =
             adminCheck.isValid && adminCheck.user?.role?.name === "SUPER_ADMIN";
 
-        // Fetch from backend
         const endpoint = isSuperAdmin ? "/slide?tenantId=all" : "/slide";
-        const result = await backendGet(endpoint, token);
+        const result = await api.get<any[]>(endpoint);
 
-        if (!result.success) {
-            console.error("Failed to fetch sliders:", result.error);
-            return {
-                sliders: [],
-                stats: {
-                    totalSliders: 0,
-                    activeSliders: 0,
-                    inactiveSliders: 0,
-                    withImages: 0,
-                },
-                pagination: {
-                    currentPage: 1,
-                    totalPages: 0,
-                    totalItems: 0,
-                    itemsPerPage: limit,
-                },
-            };
-        }
-
-        let sliders = Array.isArray(result.data) ? result.data : [];
+        let sliders = Array.isArray(result) ? result : [];
 
         type Slider = {
             title?: string;
@@ -56,7 +30,6 @@ async function getSliders(
             img?: string;
         };
 
-        // Apply filters
         if (search) {
             const query = search.toLowerCase();
             sliders = sliders.filter(
@@ -74,12 +47,10 @@ async function getSliders(
             }
         }
 
-        // Calculate stats
         const totalSliders = sliders.length;
         const activeSliders = sliders.filter((s: Slider) => s.active).length;
         const withImages = sliders.filter((s: Slider) => s.img).length;
 
-        // Apply pagination
         const startIndex = (page - 1) * limit;
         const endIndex = startIndex + limit;
         const paginatedSliders = sliders.slice(startIndex, endIndex);

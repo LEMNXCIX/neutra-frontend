@@ -1,7 +1,6 @@
 import React, { Suspense } from "react";
 import ProductsTableClient from "@/components/admin/products/ProductsTableClient";
-import { extractTokenFromCookies } from "@/lib/server-auth";
-import { get as backendGet } from "../../../lib/backend-api";
+import { api } from '@/lib/api-client';
 import { Product } from "@/types/product.types";
 
 export const metadata = { title: "Products" };
@@ -15,12 +14,8 @@ async function getProducts(
     limit: number,
 ) {
     try {
-        const token = (await extractTokenFromCookies()) || undefined;
+        const data = await api.get<any>("/products");
 
-        // Fetch products from backend
-        const result = await backendGet("/products", token);
-
-        // Map backend Product to frontend Product
         let products: Product[] = [];
         type BackendProduct = {
             id: string;
@@ -34,24 +29,20 @@ async function getProducts(
             createdAt?: string;
             updatedAt?: string;
         };
-        if (result.success && result.data) {
-            const data = result.data as any;
-            const list = data.products || (Array.isArray(data) ? data : []);
-            products = list.map((p: BackendProduct) => ({
-                id: p.id,
-                name: p.name,
-                description: p.description || "",
-                price: p.price,
-                stock: p.stock,
-                categories: p.categories || [],
-                image: p.image || undefined,
-                ownerId: p.ownerId || "",
-                createdAt: p.createdAt || new Date(),
-                updatedAt: p.updatedAt || new Date(),
-            }));
-        }
+        const list = data?.products || (Array.isArray(data) ? data : []);
+        products = list.map((p: BackendProduct) => ({
+            id: p.id,
+            name: p.name,
+            description: p.description || "",
+            price: p.price,
+            stock: p.stock,
+            categories: p.categories || [],
+            image: p.image || undefined,
+            ownerId: p.ownerId || "",
+            createdAt: p.createdAt || new Date(),
+            updatedAt: p.updatedAt || new Date(),
+        }));
 
-        // Apply filters
         if (search) {
             const query = search.toLowerCase();
             products = products.filter(
@@ -71,7 +62,6 @@ async function getProducts(
             );
         }
 
-        // Calculate stats from ALL filtered products (before pagination)
         const totalProducts = products.length;
         const totalValue = products.reduce(
             (sum, p) => sum + p.price * (p.stock || 0),
@@ -81,7 +71,6 @@ async function getProducts(
             (p) => (p.stock || 0) < 10,
         ).length;
 
-        // Apply pagination
         const startIndex = (page - 1) * limit;
         const endIndex = startIndex + limit;
         const paginatedProducts = products.slice(startIndex, endIndex);
@@ -118,15 +107,8 @@ async function getProducts(
 
 async function getCategories() {
     try {
-        const token = (await extractTokenFromCookies()) || undefined;
-        const result = await backendGet("/categories", token);
-
-        if (!result.success) {
-            return [];
-        }
-
-        const data = result.data as any;
-        return data ? data.categories || data : [];
+        const data = await api.get<any>("/categories");
+        return data ? data.categories || (Array.isArray(data) ? data : []) : [];
     } catch (error) {
         console.error("Error fetching categories:", error);
         return [];

@@ -2,38 +2,23 @@ import React, { Suspense } from "react";
 import { redirect } from "next/navigation";
 import AppointmentsTableClient from "@/components/admin/appointments/AppointmentsTableClient";
 import { validateAdminAccess } from "@/lib/server-auth";
+import { api } from '@/lib/api-client';
 
 export const dynamic = "force-dynamic";
-
-const BACKEND_API_URL =
-    process.env.NEXT_PUBLIC_API_URL || "http://localhost:4001/api";
 
 export default async function GlobalAppointmentsPage({
     searchParams,
 }: {
     searchParams: any;
 }) {
-    const { isValid, cookieHeader } = await validateAdminAccess();
+    const { isValid } = await validateAdminAccess();
     if (!isValid) redirect("/login");
 
     const params = await searchParams;
     const query = new URLSearchParams(params);
     query.set("tenantId", query.get("tenantId") || "all");
 
-    const response = await fetch(
-        `${BACKEND_API_URL}/appointments?${query.toString()}`,
-        {
-            headers: {
-                Cookie: cookieHeader!,
-            },
-            cache: "no-store",
-        },
-    );
-
-    const data = await response.json();
-
-    // Backend returns appointments directly in 'data' array
-    const appointments = data.data || [];
+    const appointments = (await api.get<any[]>(`/appointments?${query.toString()}`).catch(() => [])) || [];
 
     // Calculate stats from the appointments matching the Stats type
     const statusCounts: Record<string, number> = {};

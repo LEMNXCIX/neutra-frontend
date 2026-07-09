@@ -1,6 +1,6 @@
 import React, { Suspense } from "react";
 import ProductsPage from "./products-client";
-import { backendFetch } from "@/lib/backend-api";
+import { api } from '@/lib/api-client';
 import type { Metadata } from "next";
 import type { Category } from "@/types/category.types";
 
@@ -21,24 +21,15 @@ type FrontendProduct = {
 };
 
 async function fetchCategories(): Promise<Category[]> {
-	try {
-		const result = await backendFetch("/categories?type=PRODUCT", {
-			cache: "no-store",
-		});
-
-		if (!result.success) return [];
-
-		const data = result.data as any;
-		if (Array.isArray(data)) return data;
-		if (data?.categories) return data.categories;
-		if (data?.data?.categories) return data.data.categories;
-		if (Array.isArray(data?.data)) return data.data;
-
-		return [];
-	} catch (error) {
-		console.error("Error fetching categories:", error);
-		return [];
-	}
+    try {
+        const data = await api.get<any>("/categories?type=PRODUCT");
+        if (Array.isArray(data)) return data;
+        if (data?.categories) return data.categories;
+        return [];
+    } catch (error) {
+        console.error("Error fetching categories:", error);
+        return [];
+    }
 }
 
 async function fetchProducts(
@@ -46,25 +37,14 @@ async function fetchProducts(
     category?: string,
 ): Promise<FrontendProduct[]> {
     try {
-        // Forward filters to backend
         const queryParams = new URLSearchParams();
         if (search) queryParams.set("search", search);
         if (category && category !== "all")
             queryParams.set("category", category);
 
-        const result = await backendFetch(
-            `/products?${queryParams.toString()}`,
-            {
-                cache: "no-store",
-            },
-        );
+        const data = await api.get<any>(`/products?${queryParams.toString()}`);
+        const allProducts = (data?.products || (Array.isArray(data) ? data : [])) as any[];
 
-        if (!result.success) return [];
-
-        const data = result.data as any;
-        const allProducts = (data?.products || data || []) as any[];
-
-        // Map backend Product to frontend Product
         return allProducts.map((p) => ({
             id: p.id,
             title: p.name,

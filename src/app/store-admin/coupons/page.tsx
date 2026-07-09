@@ -1,10 +1,7 @@
 import React, { Suspense } from "react";
 import CouponsTableClient from "@/components/admin/coupons/CouponsTableClient";
-import {
-    extractTokenFromCookies,
-    validateAdminAccess,
-} from "@/lib/server-auth";
-import { get as backendGet } from "../../../lib/backend-api";
+import { validateAdminAccess } from "@/lib/server-auth";
+import { api } from '@/lib/api-client';
 
 export const metadata = { title: "Coupons" };
 
@@ -18,29 +15,6 @@ async function getCoupons(
     limit: number,
 ) {
     try {
-        const token = await extractTokenFromCookies();
-        if (!token) {
-            // Handle case where token is not available, e.g., redirect to login or return empty data
-            console.error("Authentication token not found.");
-            return {
-                coupons: [],
-                stats: {
-                    totalCoupons: 0,
-                    usedCoupons: 0,
-                    unusedCoupons: 0,
-                    expiredCoupons: 0,
-                    activeCoupons: 0,
-                },
-                pagination: {
-                    currentPage: 1,
-                    totalPages: 0,
-                    totalItems: 0,
-                    itemsPerPage: limit,
-                },
-            };
-        }
-
-        // Build query string for backend
         const queryParams = new URLSearchParams();
         if (search) queryParams.set("search", search);
         if (type && type !== "all") queryParams.set("type", type);
@@ -51,46 +25,15 @@ async function getCoupons(
         const queryString = queryParams.toString();
         const couponsUrl = queryString ? `/coupons?${queryString}` : "/coupons";
 
-        // Fetch coupons and stats in parallel from backend
         const [couponsResult, statsResult] = await Promise.all([
-            backendGet(couponsUrl, token).catch((err) => ({
-                success: false,
-                error: err.message,
-                data: [],
-            })),
-            backendGet("/coupons/stats", token).catch((err) => ({
-                success: false,
-                error: err.message,
-            })),
+            api.get<any[]>(couponsUrl).catch(() => []),
+            api.get<any>("/coupons/stats").catch(() => ({})),
         ]);
 
-        if (!couponsResult.success) {
-            console.error(
-                "Failed to fetch coupons from backend:",
-                couponsResult.error,
-            );
-            return {
-                coupons: [],
-                stats: {
-                    totalCoupons: 0,
-                    usedCoupons: 0,
-                    unusedCoupons: 0,
-                    expiredCoupons: 0,
-                    activeCoupons: 0,
-                },
-                pagination: {
-                    currentPage: 1,
-                    totalPages: 0,
-                    totalItems: 0,
-                    itemsPerPage: limit,
-                },
-            };
-        }
-
-        const coupons = Array.isArray(couponsResult.data)
-            ? couponsResult.data
+        const coupons = Array.isArray(couponsResult)
+            ? couponsResult
             : [];
-        const pagination = (couponsResult as any).pagination || {
+        const pagination = (couponsResult as any)?.pagination || {
             currentPage: 1,
             totalPages: 0,
             totalItems: 0,
@@ -98,8 +41,8 @@ async function getCoupons(
         };
 
         const stats =
-            statsResult.success && (statsResult as any).data
-                ? (statsResult as any).data
+            statsResult
+                ? statsResult
                 : {
                       totalCoupons: coupons.length,
                       activeCoupons: 0,

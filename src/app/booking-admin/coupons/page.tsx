@@ -1,6 +1,6 @@
 import { Suspense } from "react";
-import { cookies } from "next/headers";
 import CouponsTableClient from "@/components/admin/coupons/CouponsTableClient";
+import { api } from '@/lib/api-client';
 
 export const dynamic = "force-dynamic";
 
@@ -17,7 +17,6 @@ async function getCoupons(
     limit: number,
 ) {
     try {
-        // Build query string
         const queryParams = new URLSearchParams();
         if (search) queryParams.set("search", search);
         if (type && type !== "all") queryParams.set("type", type);
@@ -26,48 +25,13 @@ async function getCoupons(
         queryParams.set("limit", limit.toString());
 
         const queryString = queryParams.toString();
+        const url = `/coupons${queryString ? `?${queryString}` : ""}`;
 
-        // Server Components need absolute URLs for fetch
-        const baseUrl =
-            process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-        const url = `${baseUrl}/api/coupons${queryString ? `?${queryString}` : ""}`;
-
-        // Get cookies to pass to BFF route
-        const cookieStore = await cookies();
-        const cookieHeader = cookieStore.toString();
-
-        // Fetch from BFF route with cookies
-        const response = await fetch(url, {
-            cache: "no-store",
-            headers: {
-                Cookie: cookieHeader,
-            },
-        });
-
-        if (!response.ok) {
-            return {
-                coupons: [],
-                stats: {
-                    totalCoupons: 0,
-                    usedCoupons: 0,
-                    unusedCoupons: 0,
-                    expiredCoupons: 0,
-                    activeCoupons: 0,
-                },
-                pagination: {
-                    currentPage: 1,
-                    totalPages: 0,
-                    totalItems: 0,
-                    itemsPerPage: limit,
-                },
-            };
-        }
-
-        const data = await response.json();
+        const data = await api.get<any>(url);
 
         return {
-            coupons: data.data || [],
-            stats: data.stats || {
+            coupons: data?.data || [],
+            stats: data?.stats || {
                 totalCoupons: 0,
                 usedCoupons: 0,
                 unusedCoupons: 0,
@@ -75,7 +39,7 @@ async function getCoupons(
                 activeCoupons: 0,
                 activeDiscounts: 0,
             },
-            pagination: data.pagination
+            pagination: data?.pagination
                 ? {
                       currentPage: data.pagination.page,
                       totalPages: data.pagination.totalPages,

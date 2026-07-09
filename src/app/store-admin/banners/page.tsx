@@ -1,10 +1,7 @@
 import React, { Suspense } from "react";
 import BannersTableClient from "@/components/admin/banners/BannersTableClient";
-import {
-    extractTokenFromCookies,
-    validateAdminAccess,
-} from "@/lib/server-auth";
-import { get as backendGet } from "../../../lib/backend-api";
+import { validateAdminAccess } from "@/lib/server-auth";
+import { api } from '@/lib/api-client';
 
 export const metadata = { title: "Banners" };
 
@@ -12,49 +9,17 @@ export const dynamic = "force-dynamic";
 
 async function getBanners() {
     try {
-        const token = (await extractTokenFromCookies()) || undefined;
-
-        // Check if user is super admin to allow global view
         const adminCheck = await validateAdminAccess();
         const isSuperAdmin =
             adminCheck.isValid && adminCheck.user?.role?.name === "SUPER_ADMIN";
 
-        console.log(
-            "[BannersPage] Fetching banners from /banners/all/list with token:",
-            !!token,
-        );
-
-        // Fetch from backend with automatic tenant context and auth
         const endpoint = isSuperAdmin
             ? "/banners/all/list?tenantId=all"
             : "/banners/all/list";
-        const result = await backendGet(endpoint, token);
+        const result = await api.get<any[]>(endpoint);
 
-        console.log("[BannersPage] Result success:", result.success);
+        const banners = Array.isArray(result) ? result : [];
 
-        if (!result.success) {
-            console.error("Failed to fetch banners:", result.error);
-            return {
-                banners: [],
-                stats: {
-                    totalBanners: 0,
-                    activeBanners: 0,
-                    inactiveBanners: 0,
-                    withImages: 0,
-                },
-                pagination: {
-                    currentPage: 1,
-                    totalPages: 0,
-                    totalItems: 0,
-                    itemsPerPage: 10,
-                },
-                error: result.error || "Unknown error fetching banners",
-            };
-        }
-
-        const banners = Array.isArray(result.data) ? result.data : [];
-
-        // Calculate stats
         const totalBanners = banners.length;
         const activeBanners = banners.filter(
             (b: { active?: boolean }) => b.active,
@@ -73,9 +38,9 @@ async function getBanners() {
             },
             pagination: {
                 currentPage: 1,
-                totalPages: 1, // Assuming all items are on one page for now
+                totalPages: 1,
                 totalItems: totalBanners,
-                itemsPerPage: totalBanners > 0 ? totalBanners : 10, // Show all if any, else default
+                itemsPerPage: totalBanners > 0 ? totalBanners : 10,
             },
             error: undefined,
         };

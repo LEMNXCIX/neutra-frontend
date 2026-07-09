@@ -3,9 +3,7 @@ import { redirect } from "next/navigation";
 import SlidersTableClient from "@/components/admin/sliders/SlidersTableClient";
 import { slidersService } from "@/services/sliders.service";
 import { validateAdminAccess } from "@/lib/server-auth";
-
-const BACKEND_API_URL =
-    process.env.NEXT_PUBLIC_API_URL || "http://localhost:4001/api";
+import { api } from '@/lib/api-client';
 
 export default async function SuperAdminSlidersPage({
     searchParams,
@@ -17,7 +15,7 @@ export default async function SuperAdminSlidersPage({
         status?: string;
     };
 }) {
-    const { isValid, cookieHeader } = await validateAdminAccess();
+    const { isValid } = await validateAdminAccess();
     if (!isValid) redirect("/login");
 
     const params = await searchParams;
@@ -26,16 +24,7 @@ export default async function SuperAdminSlidersPage({
     const query = new URLSearchParams();
     if (tenantId) query.append("tenantId", tenantId);
 
-    // Fetch data server-side
-    const response = await fetch(
-        `${BACKEND_API_URL}/slide?${query.toString()}`,
-        {
-            headers: { Cookie: cookieHeader! },
-            cache: "no-store",
-        },
-    );
-    const result = await response.json();
-    const sliders = result.data || [];
+    const sliders = (await api.get<any[]>(`/slide?${query.toString()}`).catch(() => [])) || [];
 
     // Minimal stats for now
     const stats = {

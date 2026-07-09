@@ -1,49 +1,21 @@
 import React, { Suspense } from "react";
-import { cookies } from "next/headers";
 import ServicesTableClient from "@/components/admin/booking/ServicesTableClient";
+import { api } from '@/lib/api-client';
 
 export const metadata = { title: "Booking Services" };
 
 export const dynamic = "force-dynamic";
 
-const BACKEND_API_URL =
-    process.env.NEXT_PUBLIC_API_URL || "http://localhost:4001/api";
-
 async function getData() {
     try {
-        const cookieStore = await cookies();
-        const cookieString = cookieStore.toString();
-        const tenantSlug = cookieStore.get("tenant-slug")?.value || "";
-
-        const [servicesRes, categoriesRes] = await Promise.all([
-            fetch(`${BACKEND_API_URL}/services?activeOnly=false`, {
-                headers: {
-                    "Content-Type": "application/json",
-                    Cookie: cookieString,
-                    "x-tenant-slug": tenantSlug,
-                },
-                cache: "no-store",
-            }),
-            fetch(`${BACKEND_API_URL}/categories`, {
-                headers: {
-                    "Content-Type": "application/json",
-                    Cookie: cookieString,
-                    "x-tenant-slug": tenantSlug,
-                },
-                cache: "no-store",
-            }),
+        const [servicesData, categoriesData] = await Promise.all([
+            api.get<any[]>(`/services?activeOnly=false`).catch(() => []),
+            api.get<any[]>('/categories').catch(() => []),
         ]);
 
-        const servicesData = servicesRes.ok
-            ? await servicesRes.json()
-            : { data: [] };
-        const categoriesData = categoriesRes.ok
-            ? await categoriesRes.json()
-            : { data: [] };
-
         return {
-            services: servicesData.data || [],
-            categories: categoriesData.data || [],
+            services: Array.isArray(servicesData) ? servicesData : [],
+            categories: Array.isArray(categoriesData) ? categoriesData : [],
         };
     } catch (err) {
         console.error("Error fetching services data:", err);

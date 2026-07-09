@@ -1,10 +1,7 @@
 import React, { Suspense } from "react";
 import OrdersTableClient from "@/components/admin/orders/OrdersTableClient";
-import {
-    extractTokenFromCookies,
-    validateAdminAccess,
-} from "@/lib/server-auth";
-import { get as backendGet } from "../../../lib/backend-api";
+import { validateAdminAccess } from "@/lib/server-auth";
+import { api } from '@/lib/api-client';
 
 export const metadata = { title: "Orders" };
 
@@ -17,9 +14,6 @@ async function getOrders(
     limit: number,
 ) {
     try {
-        const token = (await extractTokenFromCookies()) || undefined;
-
-        // Build query string for backend
         const queryParams = new URLSearchParams();
         if (search) queryParams.set("search", search);
         if (status && status !== "all") queryParams.set("status", status);
@@ -29,45 +23,16 @@ async function getOrders(
         const queryString = queryParams.toString();
         const ordersUrl = queryString ? `/order?${queryString}` : "/order";
 
-        // Fetch orders and stats in parallel from backend
         const [ordersResult, statsResult, statusesResult] = await Promise.all([
-            backendGet(ordersUrl, token).catch((err) => ({
-                success: false,
-                error: err.message,
-                data: [],
-            })),
-            backendGet("/order/stats", token).catch((err) => ({
-                success: false,
-                error: err.message,
-            })),
-            backendGet("/order/statuses", token).catch((err) => ({
-                success: false,
-                error: err.message,
-            })),
+            api.get<any[]>(ordersUrl).catch(() => []),
+            api.get<any>("/order/stats").catch(() => ({})),
+            api.get<any[]>("/order/statuses").catch(() => []),
         ]);
 
-        if (!ordersResult.success) {
-            console.error(
-                "Failed to fetch orders from backend:",
-                ordersResult.error,
-            );
-            return {
-                orders: [],
-                stats: { totalOrders: 0, totalRevenue: 0, statusCounts: {} },
-                statuses: [],
-                pagination: {
-                    currentPage: 1,
-                    totalPages: 0,
-                    totalItems: 0,
-                    itemsPerPage: limit,
-                },
-            };
-        }
-
-        const orders = Array.isArray(ordersResult.data)
-            ? ordersResult.data
+        const orders = Array.isArray(ordersResult)
+            ? ordersResult
             : [];
-        const pagination = (ordersResult as any).pagination || {
+        const pagination = (ordersResult as any)?.pagination || {
             currentPage: 1,
             totalPages: 0,
             totalItems: 0,
@@ -75,8 +40,8 @@ async function getOrders(
         };
 
         const stats =
-            statsResult.success && (statsResult as any).data
-                ? (statsResult as any).data
+            statsResult
+                ? statsResult
                 : {
                       totalOrders: orders.length,
                       totalRevenue: 0,
@@ -84,9 +49,8 @@ async function getOrders(
                   };
 
         const statuses =
-            statusesResult.success &&
-            Array.isArray((statusesResult as any).data)
-                ? (statusesResult as any).data
+            Array.isArray(statusesResult)
+                ? statusesResult
                 : [];
 
         return {

@@ -1,7 +1,7 @@
 import { WhatsAppConfigForm } from "@/components/admin/whatsapp/WhatsAppConfigForm";
-import { backendFetch } from "@/lib/backend-api";
 import type { WhatsAppConfig } from "@/services/whatsapp.service";
 import { Metadata } from "next";
+import { api } from '@/lib/api-client';
 
 export const metadata: Metadata = {
     title: "WhatsApp Configuration | Admin",
@@ -10,11 +10,7 @@ export const metadata: Metadata = {
 
 async function fetchWhatsAppConfig(): Promise<Partial<WhatsAppConfig> | null> {
     try {
-        const result = await backendFetch("/admin/whatsapp/config", {
-            cache: "no-store",
-        });
-        if (!result.success) return null;
-        return (result as any).data || (result as any) || null;
+        return await api.get<WhatsAppConfig>("/admin/whatsapp/config");
     } catch {
         return null;
     }

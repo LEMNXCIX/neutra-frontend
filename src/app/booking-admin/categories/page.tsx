@@ -1,7 +1,6 @@
 import React, { Suspense } from "react";
 import CategoriesTableClient from "@/components/admin/categories/CategoriesTableClient";
-import { backendGet } from "@/lib/backend-api";
-import { cookies } from "next/headers";
+import { api } from '@/lib/api-client';
 
 export const metadata = { title: "Booking Categories" };
 
@@ -9,30 +8,12 @@ export const dynamic = "force-dynamic";
 
 async function getCategories(searchParams: { type?: string }) {
     try {
-        const cookieStore = await cookies();
-        const token = cookieStore.get("token")?.value;
-
-        // Build query from searchParams, default to SERVICE
         const query = new URLSearchParams();
         const type = searchParams.type || "SERVICE";
         query.set("type", type);
 
-        const response = await backendGet(`/categories?${query.toString()}`, token);
-
-        if (!response.success) {
-            console.error("Failed to fetch categories:", response.error);
-            return {
-                categories: [],
-                stats: {
-                    totalCategories: 0,
-                    totalProducts: 0,
-                    averageProductsPerCategory: 0,
-                },
-            };
-        }
-
-        const data = response as any;
-        const categories = data.data?.categories || data.data || [];
+        const data = await api.get<any>(`/categories?${query.toString()}`);
+        const categories = data?.categories || (Array.isArray(data) ? data : []);
 
         // Stats from backend if available, otherwise calculate
         const backendStats = data.data?.stats || data.stats;

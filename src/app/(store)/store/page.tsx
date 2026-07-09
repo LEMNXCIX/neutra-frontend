@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { backendFetch } from "@/lib/backend-api";
+import { api } from '@/lib/api-client';
 import { StoreHomeClient } from "./store-client";
 
 export const metadata: Metadata = {
@@ -10,10 +10,9 @@ export const metadata: Metadata = {
 
 async function fetchSliders(): Promise<any[]> {
     try {
-        const result = await backendFetch("/sliders", { cache: "no-store" });
-        if (!result.success) return [];
-        const data = result as any;
-        return data.sliders || data.data?.sliders || [];
+        const data = await api.get<any>("/sliders");
+        if (Array.isArray(data)) return data;
+        return data?.sliders || [];
     } catch {
         return [];
     }
@@ -21,12 +20,8 @@ async function fetchSliders(): Promise<any[]> {
 
 async function fetchFeaturedProducts(): Promise<any[]> {
     try {
-        const result = await backendFetch("/products", { cache: "no-store" });
-        if (!result.success) return [];
-        const data = result as any;
-        const list = Array.isArray(data.data)
-            ? data.data
-            : data.data?.products || data.products;
+        const data = await api.get<any>("/products");
+        const list = Array.isArray(data) ? data : data?.products || [];
         if (list && Array.isArray(list)) return list.slice(0, 4);
         return [];
     } catch {

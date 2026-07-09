@@ -3,16 +3,14 @@ import { redirect } from "next/navigation";
 import CouponsTableClient from "@/components/admin/coupons/CouponsTableClient";
 import { couponsService } from "@/services/coupons.service";
 import { validateAdminAccess } from "@/lib/server-auth";
-
-const BACKEND_API_URL =
-    process.env.NEXT_PUBLIC_API_URL || "http://localhost:4001/api";
+import { api } from '@/lib/api-client';
 
 export default async function SuperAdminCouponsPage({
     searchParams,
 }: {
     searchParams: { tenantId?: string };
 }) {
-    const { isValid, cookieHeader } = await validateAdminAccess();
+    const { isValid } = await validateAdminAccess();
     if (!isValid) redirect("/login");
 
     const params = await searchParams;
@@ -21,16 +19,7 @@ export default async function SuperAdminCouponsPage({
     const query = new URLSearchParams();
     if (tenantId) query.append("tenantId", tenantId);
 
-    // Fetch data server-side
-    const response = await fetch(
-        `${BACKEND_API_URL}/coupons?${query.toString()}`,
-        {
-            headers: { Cookie: cookieHeader! },
-            cache: "no-store",
-        },
-    );
-    const result = await response.json();
-    const coupons = result.data || [];
+    const coupons = (await api.get<any[]>(`/coupons?${query.toString()}`).catch(() => [])) || [];
 
     // Filter logic if needed or just provide initial stats
     const stats = {

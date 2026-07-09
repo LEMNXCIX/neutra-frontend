@@ -1,9 +1,8 @@
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { ServicesGrid } from '@/components/booking/services-grid';
-import { cookies } from 'next/headers';
 import type { Metadata } from "next";
-import { getBackendUrl } from '@/lib/backend-url';
+import { api } from '@/lib/api-client';
 
 export const metadata: Metadata = {
   title: "Services",
@@ -14,29 +13,7 @@ export const dynamic = 'force-dynamic';
 
 async function getServices() {
     try {
-        const baseUrl = getBackendUrl();
-        
-        // Get tenant info from cookies
-        const cookieStore = await cookies();
-        const tenantSlug = cookieStore.get('tenant-slug')?.value || '';
-        const tenantId = cookieStore.get('tenant-id')?.value || '';
-
-        const response = await fetch(`${baseUrl}/services?activeOnly=true`, {
-            headers: {
-                'Content-Type': 'application/json',
-                'x-tenant-slug': tenantSlug,
-                'x-tenant-id': tenantId,
-            },
-            next: { revalidate: 60 } // Cache for 1 minute
-        });
-
-        if (!response.ok) {
-            console.error('Failed to fetch services:', response.status);
-            return [];
-        }
-
-        const result = await response.json();
-        return result.data || [];
+        return await api.get<any[]>('/services?activeOnly=true') || [];
     } catch (err) {
         console.error('Error loading services on server:', err);
         return [];

@@ -1,7 +1,6 @@
-import { notFound, redirect, unstable_rethrow } from "next/navigation";
-import { cookies } from "next/headers";
+import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
-import { getBackendUrl } from "@/lib/backend-url";
+import { api } from '@/lib/api-client';
 
 export const metadata: Metadata = {
     title: "Order Details",
@@ -327,51 +326,18 @@ const statusConfig: Record<
   },
 };
 
-async function fetchOrder(params: { id: string }) {
-  const baseUrl = getBackendUrl();
-  const url = `${baseUrl}/order/${params.id}`;
-
-  const cookieStore = await cookies();
-  const cookieHeader = cookieStore.toString();
-
-  const res = await fetch(url, {
-    cache: "no-store",
-    headers: {
-      "Content-Type": "application/json",
-      Cookie: cookieHeader,
-    },
-  });
-
-  return res;
-}
-
 export default async function OrderPage(props: {
   params: Promise<{ id: string }>;
 }) {
   const params = await props.params;
 
-  let fetchError = false;
-  const res = await fetchOrder(params).catch((error) => {
-    unstable_rethrow(error);
+  let rawOrder;
+  try {
+    rawOrder = await api.get<any>(`/order/${params.id}`);
+  } catch (error) {
     console.error("Error fetching order:", error);
-    fetchError = true;
-    return null;
-  });
-
-  if (fetchError || !res) {
     return notFound();
   }
-
-  if (res.status === 401) {
-    redirect("/auth/login?returnUrl=/orders/" + params.id);
-  }
-
-  if (!res.ok) {
-    return notFound();
-  }
-
-  const data = await res.json();
-  const rawOrder = data.data || data.order;
 
   if (!rawOrder) return notFound();
 
