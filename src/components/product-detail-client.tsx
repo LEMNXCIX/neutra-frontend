@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { useCart } from "@/context/cart-context";
+import { useCart } from "@/hooks/use-cart";
 import { Button } from "./ui/button";
 import {
     Loader2,

@@ -15,7 +15,7 @@ import {
     Menu,
     Building2,
 } from "lucide-react";
-import { useTenant } from "@/context/tenant-context";
+import { useTenantStore } from "@/store/tenant-store";
 import {
     Sheet,
     SheetContent,
@@ -31,7 +31,7 @@ export function NeutralNavigation() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const user = useAuthStore((state) => state.user);
     const isAdmin = user?.isAdmin;
-    const { tenantSlug } = useTenant();
+    const { tenantSlug } = useTenantStore();
     const isSuperAdminContext = tenantSlug === "superadmin";
 
     const handleThemeToggle = () => {

@@ -5,10 +5,10 @@ import { tenantService } from "@/services/tenant.service";
 import { FeatureContext } from "@/providers/feature-context";
 import { TenantFeatures } from "@/types/tenant";
 
-import { useTenant } from "@/context/tenant-context";
+import { useTenantStore } from "@/store/tenant-store";
 
 export function FeatureProvider({ children }: { children: ReactNode }) {
-    const { tenantId } = useTenant();
+    const { tenantId } = useTenantStore();
     const [features, setFeatures] = useState<TenantFeatures>({});
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);

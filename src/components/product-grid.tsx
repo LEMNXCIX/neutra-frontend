@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useCart } from "@/context/cart-context";
+import { useCart } from "@/hooks/use-cart";
 import { Loader2, ShoppingCart, Eye, Package, PackageOpen } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
 

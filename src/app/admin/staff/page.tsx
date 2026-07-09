@@ -5,6 +5,8 @@ import { bookingService } from "@/services/booking.service";
 import { validateAdminAccess } from "@/lib/server-auth";
 import { api } from '@/lib/api-client';
 
+export const dynamic = 'force-dynamic';
+
 export default async function SuperAdminStaffPage({
     searchParams,
 }: {

@@ -6,10 +6,10 @@ const nextConfig: NextConfig = {
     ? `.next-${process.env.PORT}`
     : '.next',
   images: {
-    domains: ['picsum.photos', 'images.unsplash.com', 'ui-avatars.com'],
-    // allow remote patterns if needed
     remotePatterns: [
       { protocol: 'https', hostname: 'picsum.photos' },
+      { protocol: 'https', hostname: 'images.unsplash.com' },
+      { protocol: 'https', hostname: 'ui-avatars.com' },
     ],
   },
   async rewrites() {

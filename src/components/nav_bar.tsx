@@ -1,7 +1,7 @@
 "use client";
 import React, { useReducer, useEffect, useRef } from "react";
 import Image from "next/image";
-import { useCart } from "@/context/cart-context";
+import { useCart } from "@/hooks/use-cart";
 import { toast } from "sonner";
 import { useAuthStore } from "@/store/auth-store";
 import { useTheme } from "next-themes";

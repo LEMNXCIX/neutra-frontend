@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useCart } from "@/context/cart-context";
+import { useCart } from "@/hooks/use-cart";
 import { useFeatures } from "@/hooks/useFeatures";
 import { apiFetch } from "@/lib/api-fetch";
 import { Button } from "@/components/ui/button";

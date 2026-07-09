@@ -3,11 +3,9 @@ import { Geist } from "next/font/google";
 import { Suspense } from "react";
 import { ThemeProvider } from "next-themes";
 import "./globals.css";
-import { CartProvider } from "@/context/cart-context";
 import { AuthInitializer } from "@/components/auth-initializer";
 import { Toaster } from "@/components/ui/sonner";
 import { QueryProvider } from "@/providers/query-provider";
-import { TenantProvider } from "@/context/tenant-context";
 import { FeatureProvider } from "@/providers/feature-provider";
 import { SWRegistration } from "@/components/sw-registration";
 import { ProgressBar } from "@/components/ui/progress-bar";
@@ -56,21 +54,17 @@ export default function RootLayout({
                     enableSystem
                     disableTransitionOnChange
                 >
-                    <TenantProvider>
-                        <FeatureProvider>
-                            <SWRegistration />
-                            <Suspense fallback={null}>
-                                <ProgressBar />
-                            </Suspense>
-                            <AuthInitializer />
-                            <QueryProvider>
-                                <CartProvider>
-                                    {children}
-                                    <Toaster richColors />
-                                </CartProvider>
-                            </QueryProvider>
-                        </FeatureProvider>
-                    </TenantProvider>
+                    <FeatureProvider>
+                        <SWRegistration />
+                        <Suspense fallback={null}>
+                            <ProgressBar />
+                        </Suspense>
+                        <AuthInitializer />
+                        <QueryProvider>
+                            {children}
+                            <Toaster richColors />
+                        </QueryProvider>
+                    </FeatureProvider>
                 </ThemeProvider>
             </body>
         </html>

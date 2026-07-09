@@ -35,7 +35,7 @@ import {
   LogOut,
 } from "lucide-react";
 
-import { useTenant } from "@/context/tenant-context";
+import { useTenantStore } from "@/store/tenant-store";
 import { Order } from "@/types/order.types";
 import { Appointment } from "@/services/booking.service";
 import { OrderHistory } from "./order-history";
@@ -84,7 +84,7 @@ export function ProfileClient({
   isNeutral,
 }: ProfileClientProps) {
   const isMounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
-  const { moduleType } = useTenant();
+  const { moduleType } = useTenantStore();
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
   const updateUser = useAuthStore((state) => state.updateUser);

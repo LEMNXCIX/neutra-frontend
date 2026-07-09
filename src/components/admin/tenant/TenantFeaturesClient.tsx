@@ -23,7 +23,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { Save, Settings, Building } from "lucide-react";
 import { tenantService } from "@/services/tenant.service";
 import { TenantFeatures, Tenant } from "@/types/tenant";
-import { useTenant } from "@/context/tenant-context";
+import { useTenantStore } from "@/store/tenant-store";
 
 type TenantFeaturesState = {
   selectedTenantId: string | null;
@@ -72,7 +72,7 @@ interface TenantFeaturesClientProps {
 export default function TenantFeaturesClient({
     activeTenantId,
 }: TenantFeaturesClientProps) {
-    const { tenantId: contextTenantId } = useTenant();
+    const { tenantId: contextTenantId } = useTenantStore();
     const effectiveTenantId = activeTenantId || contextTenantId;
     const isSuperAdminView = !effectiveTenantId;
   const [state, dispatch] = useReducer(tenantFeaturesReducer, {
