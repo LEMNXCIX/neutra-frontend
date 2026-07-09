@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 export default async function GlobalAppointmentsPage({
     searchParams,
 }: {
-    searchParams: any;
+    searchParams: Promise<{ tenantId?: string }>;
 }) {
     const { isValid } = await validateAdminAccess();
     if (!isValid) redirect("/login");

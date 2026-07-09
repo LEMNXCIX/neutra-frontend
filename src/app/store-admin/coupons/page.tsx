@@ -26,14 +26,14 @@ async function getCoupons(
         const couponsUrl = queryString ? `/coupons?${queryString}` : "/coupons";
 
         const [couponsResult, statsResult] = await Promise.all([
-            api.get<any[]>(couponsUrl).catch(() => []),
+            api.get<any>(couponsUrl).catch(() => ({})),
             api.get<any>("/coupons/stats").catch(() => ({})),
         ]);
 
         const coupons = Array.isArray(couponsResult)
             ? couponsResult
             : [];
-        const pagination = (couponsResult as any)?.pagination || {
+        const pagination = couponsResult?.pagination || {
             currentPage: 1,
             totalPages: 0,
             totalItems: 0,
@@ -83,7 +83,13 @@ async function getCoupons(
 }
 
 type Props = {
-    searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+    searchParams: Promise<{
+        page?: string;
+        limit?: string;
+        search?: string;
+        type?: string;
+        status?: string;
+    }>;
 };
 
 export default async function CouponsPage({ searchParams }: Props) {

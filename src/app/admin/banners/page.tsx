@@ -10,12 +10,12 @@ export const dynamic = 'force-dynamic';
 export default async function SuperAdminBannersPage({
     searchParams,
 }: {
-    searchParams: {
+    searchParams: Promise<{
         tenantId?: string;
         page?: string;
         search?: string;
         status?: string;
-    };
+    }>;
 }) {
     const { isValid } = await validateAdminAccess();
     if (!isValid) redirect("/login");

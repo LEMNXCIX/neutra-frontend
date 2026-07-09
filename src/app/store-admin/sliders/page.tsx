@@ -92,7 +92,12 @@ async function getSliders(
 }
 
 type Props = {
-    searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+    searchParams: Promise<{
+        page?: string;
+        limit?: string;
+        search?: string;
+        status?: string;
+    }>;
 };
 
 export default async function SlidersPage({ searchParams }: Props) {

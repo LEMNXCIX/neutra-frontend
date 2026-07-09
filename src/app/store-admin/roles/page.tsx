@@ -27,8 +27,8 @@ async function getRolesAndPermissions(
         if (permissionSearch) permQueryParams.set("search", permissionSearch);
 
         const [rolesResult, permissionsResult] = await Promise.all([
-            api.get<any[]>(`/roles?${roleQueryParams.toString()}`).catch(() => []),
-            api.get<any[]>(`/permissions?${permQueryParams.toString()}`).catch(() => []),
+            api.get<any>(`/roles?${roleQueryParams.toString()}`).catch(() => ({})),
+            api.get<any>(`/permissions?${permQueryParams.toString()}`).catch(() => ({})),
         ]);
 
         const roles = (
@@ -57,17 +57,17 @@ async function getRolesAndPermissions(
             allPermissions,
             stats: {
                 totalRoles:
-                    (rolesResult as any)?.pagination?.total || roles.length,
+                    rolesResult?.pagination?.total || roles.length,
                 totalPermissions:
-                    (permissionsResult as any)?.pagination?.total ||
+                    permissionsResult?.pagination?.total ||
                     permissions.length,
             },
-            rolePagination: (rolesResult as any)?.pagination
+            rolePagination: rolesResult?.pagination
                 ? {
-                      currentPage: (rolesResult as any).pagination.page,
-                      totalPages: (rolesResult as any).pagination.totalPages,
-                      totalItems: (rolesResult as any).pagination.total,
-                      itemsPerPage: (rolesResult as any).pagination.limit,
+                      currentPage: rolesResult.pagination.page,
+                      totalPages: rolesResult.pagination.totalPages,
+                      totalItems: rolesResult.pagination.total,
+                      itemsPerPage: rolesResult.pagination.limit,
                   }
                 : {
                       currentPage: rolePage,
@@ -75,13 +75,13 @@ async function getRolesAndPermissions(
                       totalItems: roles.length,
                       itemsPerPage: 10,
                   },
-            permissionPagination: (permissionsResult as any)?.pagination
+            permissionPagination: permissionsResult?.pagination
                 ? {
-                      currentPage: (permissionsResult as any).pagination.page,
-                      totalPages: (permissionsResult as any).pagination
+                      currentPage: permissionsResult.pagination.page,
+                      totalPages: permissionsResult.pagination
                           .totalPages,
-                      totalItems: (permissionsResult as any).pagination.total,
-                      itemsPerPage: (permissionsResult as any).pagination.limit,
+                      totalItems: permissionsResult.pagination.total,
+                      itemsPerPage: permissionsResult.pagination.limit,
                   }
                 : {
                       currentPage: permissionPage,
@@ -114,7 +114,12 @@ async function getRolesAndPermissions(
 }
 
 type Props = {
-    searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+    searchParams: Promise<{
+        rolePage?: string;
+        permissionPage?: string;
+        roleSearch?: string;
+        permissionSearch?: string;
+    }>;
 };
 
 export default async function RolesPage({ searchParams }: Props) {

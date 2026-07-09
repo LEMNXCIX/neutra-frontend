@@ -43,9 +43,9 @@ async function fetchProducts(
             queryParams.set("category", category);
 
         const data = await api.get<any>(`/products?${queryParams.toString()}`);
-        const allProducts = (data?.products || (Array.isArray(data) ? data : [])) as any[];
+        const allProducts = (data?.products || (Array.isArray(data) ? data : []));
 
-        return allProducts.map((p) => ({
+        return allProducts.map((p: any) => ({
             id: p.id,
             title: p.name,
             price: p.price,
@@ -61,7 +61,7 @@ async function fetchProducts(
 }
 
 type Props = {
-    searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+    searchParams: Promise<{ search?: string; category?: string }>;
 };
 
 export default async function Page({ searchParams }: Props) {

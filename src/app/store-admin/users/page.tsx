@@ -143,7 +143,12 @@ async function getUsers(
 }
 
 type Props = {
-    searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+    searchParams: Promise<{
+        page?: string;
+        limit?: string;
+        search?: string;
+        role?: string;
+    }>;
 };
 
 export default async function UsersPage({ searchParams }: Props) {

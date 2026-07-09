@@ -24,7 +24,7 @@ async function getOrders(
         const ordersUrl = queryString ? `/order?${queryString}` : "/order";
 
         const [ordersResult, statsResult, statusesResult] = await Promise.all([
-            api.get<any[]>(ordersUrl).catch(() => []),
+            api.get<any>(ordersUrl).catch(() => ({})),
             api.get<any>("/order/stats").catch(() => ({})),
             api.get<any[]>("/order/statuses").catch(() => []),
         ]);
@@ -32,7 +32,7 @@ async function getOrders(
         const orders = Array.isArray(ordersResult)
             ? ordersResult
             : [];
-        const pagination = (ordersResult as any)?.pagination || {
+        const pagination = ordersResult?.pagination || {
             currentPage: 1,
             totalPages: 0,
             totalItems: 0,
@@ -81,7 +81,12 @@ async function getOrders(
 }
 
 type Props = {
-    searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+    searchParams: Promise<{
+        page?: string;
+        limit?: string;
+        search?: string;
+        status?: string;
+    }>;
 };
 
 export default async function OrdersPage({ searchParams }: Props) {

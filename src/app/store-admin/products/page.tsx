@@ -116,7 +116,12 @@ async function getCategories() {
 }
 
 type Props = {
-    searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+    searchParams: Promise<{
+        page?: string;
+        limit?: string;
+        search?: string;
+        category?: string;
+    }>;
 };
 
 export default async function ProductsPage({ searchParams }: Props) {

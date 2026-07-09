@@ -3,7 +3,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { backendGet } from "@/lib/backend-api";
+import { backendGet, type ApiResponse } from "@/lib/backend-api";
 import { extractTokenFromRequest } from "@/lib/server-auth";
 import { logger } from "@/lib/logger";
 
@@ -36,7 +36,7 @@ export async function GET(req: NextRequest) {
                 logger.warn(logger.withResponse(logContext, resultMe, resultMe.statusCode || 401, duration), `Auth Response: Validation failed`);
                 return NextResponse.json(resultMe, { status: resultMe.statusCode || 401 });
             }
-            result = { ...resultMe, user: resultMe.data } as any;
+            result = { ...resultMe, user: resultMe.data } as ApiResponse;
         }
 
         const duration = Date.now() - startTime;

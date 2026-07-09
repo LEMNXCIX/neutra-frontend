@@ -94,7 +94,12 @@ async function getRolesAndPermissions(
 }
 
 type Props = {
-    searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+    searchParams: Promise<{
+        rolePage?: string;
+        permissionPage?: string;
+        roleSearch?: string;
+        permissionSearch?: string;
+    }>;
 };
 
 export default async function RolesPage({ searchParams }: Props) {

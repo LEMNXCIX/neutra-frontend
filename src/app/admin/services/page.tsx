@@ -11,7 +11,7 @@ export const dynamic = 'force-dynamic';
 export default async function SuperAdminServicesPage({
     searchParams,
 }: {
-    searchParams: { tenantId?: string };
+    searchParams: Promise<{ tenantId?: string }>;
 }) {
     const { isValid } = await validateAdminAccess();
     if (!isValid) redirect("/login");
