@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import PromoSlider from "@/components/promo-slider";
 import BannerBar from "@/components/banner-bar";
 import FeaturedProducts from "@/components/featured-products";
-import { Truck, Shield, ArrowRight, Tag, Heart, Box, Zap } from "lucide-react";
+import { Truck, Shield, ArrowRight, Tag, Heart, Zap } from "lucide-react";
 
 import { useFeatures } from "@/hooks/useFeatures";
 

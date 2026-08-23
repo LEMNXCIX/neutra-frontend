@@ -587,7 +587,7 @@ function BannersTableClientInner({
         router.push(`?${params.toString()}`);
     };
 
-  const loadBanners = useCallback(async () => {
+  const _loadBanners = useCallback(async () => {
     try {
       loadingRef.current = true;
       const data = await bannersService.getAll(

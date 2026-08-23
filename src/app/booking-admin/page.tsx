@@ -1,9 +1,6 @@
 import React from 'react';
 import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
-import AnalyticsCharts from "@/components/admin/AnalyticsCharts";
-import AnalyticsOverview from "@/components/admin/AnalyticsOverview";
-import AnalyticsChartsDetailed from "@/components/admin/AnalyticsChartsDetailed";
 import { api } from '@/lib/api-client';
 
 export const metadata = { title: "Booking Admin", };

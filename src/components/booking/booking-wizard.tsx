@@ -2,7 +2,6 @@
 
 import React, {
     useReducer,
-    useEffect,
     useCallback,
     useMemo,
     useSyncExternalStore,
@@ -890,7 +889,7 @@ export function BookingWizard({
             <div className="relative mb-12">
                 <div className="absolute top-1/2 left-0 w-full h-1 bg-muted -translate-y-1/2 z-0" />
                 <div className="relative z-10 flex justify-between">
-                    {BOOKING_STEPS.map((s, index) => {
+                    {BOOKING_STEPS.map((s, _index) => {
                         const isCurrent = step === s.number;
                         const isDone = step > s.number;
 

@@ -3,7 +3,6 @@ import RolesTableClient from "@/components/admin/roles/RolesTableClient";
 import { Permission } from "@/types/permission.types";
 import { Role } from "@/types/role.types";
 import { api } from '@/lib/api-client';
-import { validateAdminAccess } from "@/lib/server-auth";
 
 export const metadata = { title: "Store Roles" };
 

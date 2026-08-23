@@ -9,10 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Card,
-  CardHeader,
   CardContent,
-  CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
 import {
   Dialog,
@@ -24,13 +21,12 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Label } from "@/components/ui/label";
-import { Spinner } from "@/components/ui/spinner";
 import {
   Camera,
   UserCircle,
   Edit,
   Mail,
-  User as UserIcon,
+  User as
   Shield,
   LogOut,
 } from "lucide-react";
@@ -40,7 +36,6 @@ import { Order } from "@/types/order.types";
 import { Appointment } from "@/services/booking.service";
 import { OrderHistory } from "./order-history";
 import { AppointmentHistory } from "./appointment-history";
-import { cn } from "@/lib/utils";
 
 type ProfileEditState = {
   editOpen: boolean;
@@ -149,7 +144,7 @@ export function ProfileClient({
         toast.success("Profile updated! 🎉");
         dispatch({ type: "SET_EDIT_OPEN", payload: false });
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error("Failed to update profile");
     } finally {
       dispatch({ type: "SET_IS_SAVING", payload: false });

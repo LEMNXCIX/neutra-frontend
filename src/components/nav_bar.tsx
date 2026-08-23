@@ -2,7 +2,6 @@
 import React, { useReducer, useEffect, useRef } from "react";
 import Image from "next/image";
 import { useCart } from "@/hooks/use-cart";
-import { toast } from "sonner";
 import { useAuthStore } from "@/store/auth-store";
 import { useTheme } from "next-themes";
 import {
@@ -10,7 +9,6 @@ import {
     NavigationMenuContent,
     NavigationMenuItem,
     NavigationMenuLink,
-    NavigationMenuList,
     NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 import { navigationMenuTriggerStyle } from "@/components/ui/navigation-menu-trigger-style";
@@ -19,9 +17,7 @@ import {
     ShoppingBagIcon,
     Menu,
     LayoutDashboard,
-    X,
     Loader2,
-    Calendar,
     User,
     ArrowRight,
     Package,
@@ -30,7 +26,6 @@ import Link from "@/components/ui/link";
 import { useRouter } from "next/navigation";
 import Logo from "@/components/logo";
 import { cn } from "@/lib/utils";
-import { InputGroup, InputGroupAddon, InputGroupInput } from "./ui/input-group";
 import { Button } from "./ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import {
@@ -53,9 +48,6 @@ import {
     SheetTrigger,
 } from "@/components/ui/sheet";
 
-import { tenantService } from "@/services/tenant.service";
-import { Tenant } from "@/types/tenant";
-import { getTenantUrl } from "@/lib/tenant";
 
 type Product = {
     id: string;

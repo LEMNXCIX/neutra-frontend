@@ -132,7 +132,7 @@ async function request<T = unknown>(
                     requestHeaders['x-tenant-id'] = tenantId;
                 }
             }
-        } catch (e) {
+        } catch (_e) {
             // next/headers might not be available in all contexts (e.g. static gen)
         }
     }

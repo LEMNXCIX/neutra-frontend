@@ -25,7 +25,6 @@ import {
 import { FeatureDialog } from "./FeatureDialog";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
-import { format } from "date-fns";
 
 const EMPTY_FEATURES: PlatformFeature[] = [];
 
@@ -103,7 +102,7 @@ export function FeaturesTable({ initialFeatures = EMPTY_FEATURES }: FeaturesTabl
             await featuresService.delete(id);
             toast.success("Feature deleted");
             loadFeatures();
-        } catch (error) {
+        } catch (_error) {
             toast.error("Failed to delete feature");
         }
     };

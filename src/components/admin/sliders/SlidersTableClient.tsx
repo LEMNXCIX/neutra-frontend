@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState, useEffect, useCallback, useSyncExternalStore, useReducer, Suspense } from "react";
+import React, { useRef, useState, useCallback, useSyncExternalStore, useReducer, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { slidersService } from "@/services/sliders.service";
@@ -52,7 +52,6 @@ import {
 import { useConfirm } from "@/hooks/use-confirm";
 import { Slideshow } from "@/types/slide.types";
 import { Spinner } from "@/components/ui/spinner";
-import { cn } from "@/lib/utils";
 
 type Stats = {
     totalSliders: number;
@@ -384,7 +383,7 @@ function DesktopSlidersTable({ sliders, isSuperAdmin, isDeleting, onEdit, onDele
   );
 }
 
-function MobileSlidersCards({ sliders, isDeleting, onEdit, onDelete, pagination, onPageChange }: {
+function MobileSlidersCards({ sliders, onEdit, onDelete, pagination, onPageChange }: {
   sliders: Slideshow[];
   isDeleting: string | null;
   onEdit: (s: Slideshow) => void;
@@ -565,7 +564,7 @@ function SlidersTableClientInner({
 
   const tenantFilter = searchParams.get("tenantId") || "all";
 
-  const loadSliders = useCallback(async () => {
+  const _loadSliders = useCallback(async () => {
     try {
       loadingRef.current = true;
       const data = await slidersService.getAll(

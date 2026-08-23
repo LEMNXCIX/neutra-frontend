@@ -7,7 +7,6 @@ import {
   Twitter,
   Instagram,
   Linkedin,
-  Youtube,
   Mail,
   ArrowRight,
 } from "lucide-react";

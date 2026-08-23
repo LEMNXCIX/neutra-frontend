@@ -21,7 +21,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Menu, X, Calendar, Clock, User, ArrowRight } from "lucide-react";
+import { Menu, Calendar, User, ArrowRight } from "lucide-react";
 import {
     Sheet,
     SheetContent,

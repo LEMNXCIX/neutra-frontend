@@ -2,7 +2,6 @@ import React from "react";
 import ProductDetailClient from "@/components/product-detail-client";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import {
     Package,
     Sparkles,

@@ -1,7 +1,6 @@
 import React, { Suspense } from "react";
 import { redirect } from "next/navigation";
 import CouponsTableClient from "@/components/admin/coupons/CouponsTableClient";
-import { couponsService } from "@/services/coupons.service";
 import { validateAdminAccess } from "@/lib/server-auth";
 import { api } from '@/lib/api-client';
 

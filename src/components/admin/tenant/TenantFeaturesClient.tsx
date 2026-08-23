@@ -22,7 +22,7 @@ import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { Save, Settings, Building } from "lucide-react";
 import { tenantService } from "@/services/tenant.service";
-import { TenantFeatures, Tenant } from "@/types/tenant";
+import { Tenant } from "@/types/tenant";
 import { useTenantStore } from "@/store/tenant-store";
 
 type TenantFeaturesState = {

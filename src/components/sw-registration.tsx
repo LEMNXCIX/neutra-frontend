@@ -8,7 +8,7 @@ export function SWRegistration() {
       const handler = () => {
         navigator.serviceWorker
           .register("/sw.js")
-          .then((registration) => {
+          .then((_registration) => {
             // console.log("SW registered:", registration)
           })
           .catch((error) => {

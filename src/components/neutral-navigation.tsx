@@ -11,7 +11,6 @@ import { Button } from "@/components/ui/button";
 import {
     LayoutDashboard,
     LogIn,
-    UserPlus,
     Menu,
     Building2,
 } from "lucide-react";

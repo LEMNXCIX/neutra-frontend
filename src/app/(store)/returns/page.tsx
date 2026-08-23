@@ -1,7 +1,7 @@
 import React from "react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { CheckCircle2, ArrowRight } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -73,7 +73,7 @@ export default function ReturnsPage() {
                                     "Assets must be in original condition, unutilized, with all integrity tags active.",
                                     "Large-scale furniture assets may incur a restocking fee.",
                                     "Assets designated as 'Final Sale' are ineligible for RMA protocols.",
-                                ].map((text, i) => (
+                                ].map((text, _i) => (
                                     <li
                                         key={text}
                                         className="flex items-start gap-4 text-lg text-muted-foreground font-medium leading-relaxed group"

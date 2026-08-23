@@ -1,14 +1,11 @@
 "use client";
 
-import React, { useEffect, useState, useCallback, use } from "react";
+import React, { useState, use } from "react";
 import { logService } from "@/services/log.service";
 import {
     Activity,
     AlertCircle,
-    Clock,
     TrendingUp,
-    ArrowRight,
-    Search,
     RefreshCcw,
     Database,
     Zap,
@@ -44,7 +41,7 @@ function fetchStats(timeframe: string): Promise<AnalyticsStats> {
 }
 
 function LogAnalyticsStats({
-    timeframe,
+
     statsPromise,
 }: {
     timeframe: string;

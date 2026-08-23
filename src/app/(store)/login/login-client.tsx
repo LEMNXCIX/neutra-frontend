@@ -28,7 +28,7 @@ import Logo from "@/components/logo";
 export function LoginForm() {
     const login = useAuthStore((state) => state.login);
     const loading = useAuthStore((state) => state.loading);
-    const user = useAuthStore((state) => state.user);
+    const _user = useAuthStore((state) => state.user);
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");

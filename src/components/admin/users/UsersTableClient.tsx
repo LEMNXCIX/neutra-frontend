@@ -28,7 +28,6 @@ DialogTitle,
 DialogFooter,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
 import {
 Select,
 SelectContent,
@@ -56,7 +55,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { User } from "@/types/user.types";
 import { cn } from "@/lib/utils";
 
-const isUserAdmin = (u: User) =>
+const _isUserAdmin = (u: User) =>
 u.role?.name === "SUPER_ADMIN" || u.role?.name === "ADMIN";
 
 const getRoleColor = (roleName?: string) => {

@@ -50,7 +50,6 @@ import {
     AccordionTrigger,
 } from "@/components/ui/accordion";
 import { useConfirm } from "@/hooks/use-confirm";
-import { cn } from "@/lib/utils";
 import { Product } from "@/types/product.types";
 
 const getStockBadge = (stock: number) => {
@@ -237,7 +236,7 @@ function ProductsDesktopTable({
   isSuperAdmin,
   openEdit,
   deleteProduct,
-  isDeleting,
+
   pagination,
   handlePageChange,
 }: {
@@ -617,7 +616,7 @@ function EditProductDialog({
   saveEdit,
   handleImageUpload,
   categories,
-  editingRef,
+
 }: {
   dialogState: ProductsDialogState;
   dispatch: React.Dispatch<ProductsDialogAction>;
@@ -887,7 +886,7 @@ function ProductsTableClientInner({
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const handleImageUpload = (
         e: React.ChangeEvent<HTMLInputElement>,
-        isEdit: boolean,
+        _isEdit: boolean,
     ) => {
         const file = e.target.files?.[0];
         if (!file) return;

@@ -8,7 +8,6 @@ import {
     CardHeader,
     CardTitle,
     CardContent,
-    CardDescription,
 } from "@/components/ui/card";
 import {
     Table,
@@ -53,7 +52,6 @@ import { Appointment } from "@/services/booking.service";
 import { Spinner } from "@/components/ui/spinner";
 import { format } from "date-fns";
 import { useConfirm } from "@/hooks/use-confirm";
-import { cn } from "@/lib/utils";
 
 const getStatusBadge = (status: Appointment["status"]) => {
     switch (status) {
@@ -1091,7 +1089,7 @@ function AppointmentsTableClientInner({
       } else {
         toast.error(data.message || "Failed to cancel appointment");
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error("An error occurred while cancelling the appointment");
     } finally {
       dispatch({ type: "SET_IS_CANCELLING", payload: null });
@@ -1115,7 +1113,7 @@ function AppointmentsTableClientInner({
       } else {
         toast.error(data.message || "Failed to confirm appointment");
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error("An error occurred while confirming the appointment");
     } finally {
       dispatch({ type: "SET_IS_CONFIRMING", payload: null });
@@ -1149,7 +1147,7 @@ function AppointmentsTableClientInner({
       } else {
         toast.error(data.message || "Failed to delete appointment");
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error("An error occurred while deleting the appointment");
     } finally {
       dispatch({ type: "SET_IS_DELETING", payload: null });

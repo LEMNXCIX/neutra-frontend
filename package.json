@@ -6,7 +6,7 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint",
+    "lint": "oxlint src",
     "test-local": "node tests/test-session.js && node tests/test-orders.js && node tests/test-auth-login-route.js",
     "test": "vitest run",
     "test:watch": "vitest",

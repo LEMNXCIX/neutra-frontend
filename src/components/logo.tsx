@@ -23,7 +23,7 @@ export default function Logo({
     );
   }
 
-  const stroke = "currentColor";
+  const _stroke = "currentColor";
   return (
     <svg
       width={size}

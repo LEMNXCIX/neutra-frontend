@@ -9,8 +9,6 @@ import {
     ShoppingCart,
     Users,
     Ticket,
-    Menu,
-    X,
     LayoutList,
     Megaphone,
     Images,
@@ -24,7 +22,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { Separator } from "@/components/ui/separator";
 import { NavItem } from "@/config/admin-navigation";
 import { useFeatures } from "@/hooks/useFeatures";
 import { useAuthStore } from "@/store/auth-store";
@@ -50,7 +47,7 @@ interface AdminSidebarProps {
 }
 
 export default function AdminSidebar({ items }: AdminSidebarProps) {
-    const [sidebarOpen, setSidebarOpen] = useState(true);
+    const [sidebarOpen, _setSidebarOpen] = useState(true);
     const pathname = usePathname();
     const { isFeatureEnabled } = useFeatures();
     const { user } = useAuthStore();

@@ -1,6 +1,5 @@
 import React, { Suspense } from "react";
 import CategoriesTableClient from "@/components/admin/categories/CategoriesTableClient";
-import { validateAdminAccess } from "@/lib/server-auth";
 import { api } from '@/lib/api-client';
 
 export const metadata = { title: "Categories" };

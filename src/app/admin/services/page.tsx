@@ -1,8 +1,6 @@
 import React, { Suspense } from "react";
 import { redirect } from "next/navigation";
 import ServicesTableClient from "@/components/admin/booking/ServicesTableClient";
-import { bookingService } from "@/services/booking.service";
-import { categoriesService } from "@/services/categories.service";
 import { validateAdminAccess } from "@/lib/server-auth";
 import { api } from '@/lib/api-client';
 

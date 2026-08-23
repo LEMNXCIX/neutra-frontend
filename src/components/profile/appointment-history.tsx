@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, User as UserIcon, MapPin, Eye } from "lucide-react";
+import { Calendar, Clock, User as UserIcon, Eye } from "lucide-react";
 import Link from "next/link";
 import { CancelAppointmentDialog } from "@/components/booking/cancel-appointment-dialog";
 import { useRouter } from "next/navigation";

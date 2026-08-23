@@ -2,7 +2,7 @@
  * API Routes for Admin Users - Refactored with unified handler
  */
 
-import { createPutHandler, createListWithStatsHandler } from '@/lib/api-route-handler';
+import { createListWithStatsHandler } from '@/lib/api-route-handler';
 
 /**
  * GET /api/admin/users

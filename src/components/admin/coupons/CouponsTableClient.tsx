@@ -57,8 +57,6 @@ import { useConfirm } from "@/hooks/use-confirm";
 import { Coupon, CouponType, CreateCouponDTO, UpdateCouponDTO } from "@/types/coupon.types";
 import { bookingService, Service } from "@/services/booking.service";
 import { Spinner } from "@/components/ui/spinner";
-import { Checkbox } from "@/components/ui/checkbox";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 type DialogState = {
 createOpen: boolean;

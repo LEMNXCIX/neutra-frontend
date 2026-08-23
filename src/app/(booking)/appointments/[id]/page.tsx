@@ -77,7 +77,7 @@ export default async function AppointmentDetailPage(props: {
     params: Promise<{ id: string }>;
 }) {
     const { id } = await props.params;
-    const { appointment, user, error } = await getAppointmentData(id);
+    const { appointment, error } = await getAppointmentData(id);
 
     if (error === "unauthorized") redirect("/login");
     if (error === "not_found") notFound();

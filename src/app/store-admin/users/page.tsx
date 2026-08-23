@@ -3,7 +3,6 @@ import UsersTableClient from "@/components/admin/users/UsersTableClient";
 import { User } from "@/types/user.types";
 import { Permission } from "@/types/permission.types";
 import { api } from '@/lib/api-client';
-import { validateAdminAccess } from "@/lib/server-auth";
 
 export const metadata = { title: "Users" };
 

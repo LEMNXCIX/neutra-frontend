@@ -4,7 +4,6 @@ import { useCart } from "@/hooks/use-cart";
 import { Button } from "./ui/button";
 import {
     Loader2,
-    Sparkles,
     ShoppingBag as ShoppingBagIcon,
 } from "lucide-react";
 import { toast } from "sonner";

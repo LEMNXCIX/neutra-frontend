@@ -49,7 +49,7 @@ export function getProxyHeaders(req: NextRequest): HeadersInit {
     } else if (referer) {
         try {
             headers['x-original-origin'] = new URL(referer).origin;
-        } catch (e) {
+        } catch (_e) {
             if (host) {
                 headers['x-original-origin'] = `${forwardedProto}://${host}`;
             }

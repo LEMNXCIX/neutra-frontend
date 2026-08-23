@@ -1,5 +1,5 @@
 import { api } from "@/lib/api-client";
-import { Tenant, CreateTenantData, UpdateTenantData, TenantFeatures } from "@/types/tenant";
+import { Tenant, CreateTenantData, UpdateTenantData } from "@/types/tenant";
 
 export const tenantService = {
     getAll: async () => {

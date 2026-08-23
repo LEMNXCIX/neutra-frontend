@@ -1,6 +1,5 @@
 import React, { Suspense } from "react";
 import UsersTableClient from "@/components/admin/users/UsersTableClient";
-import { User } from "@/types/user.types";
 import { api } from '@/lib/api-client';
 
 export const dynamic = "force-dynamic";
@@ -12,26 +11,6 @@ async function getUsers(
     limit: number,
 ) {
     try {
-        type BackendUser = {
-            id: string;
-            name: string;
-            email: string;
-            roleId?: string;
-            active?: boolean;
-            profilePic?: string;
-            role?: {
-                id: string;
-                name: string;
-                permissions?: unknown[];
-            };
-            tenant?: {
-                id: string;
-                name: string;
-                slug: string;
-            };
-            createdAt?: string;
-            updatedAt?: string;
-        };
 
         const data = await api.get<any[]>('/users').catch(() => []);
         const backendUsers = Array.isArray(data) ? data : [];

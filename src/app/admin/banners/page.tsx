@@ -1,7 +1,6 @@
 import React, { Suspense } from "react";
 import { redirect } from "next/navigation";
 import BannersTableClient from "@/components/admin/banners/BannersTableClient";
-import { bannersService } from "@/services/banners.service";
 import { validateAdminAccess } from "@/lib/server-auth";
 import { api } from '@/lib/api-client';
 

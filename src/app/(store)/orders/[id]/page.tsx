@@ -1,4 +1,4 @@
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { api } from '@/lib/api-client';
 
@@ -9,12 +9,10 @@ export const metadata: Metadata = {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import {
     Package,
     Truck,
     MapPin,
-    Calendar,
     CreditCard,
     ArrowLeft,
     Download,

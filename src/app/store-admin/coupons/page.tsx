@@ -1,6 +1,5 @@
 import React, { Suspense } from "react";
 import CouponsTableClient from "@/components/admin/coupons/CouponsTableClient";
-import { validateAdminAccess } from "@/lib/server-auth";
 import { api } from '@/lib/api-client';
 
 export const metadata = { title: "Coupons" };

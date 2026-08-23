@@ -3,7 +3,7 @@
 import React, { useReducer, useEffect, useCallback, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
-import { Plus, Edit, Trash2, Clock, DollarSign, Tag, Info } from "lucide-react";
+import { Plus, Edit, Trash2, Clock, DollarSign, Tag } from "lucide-react";
 import { bookingService, Service } from "@/services/booking.service";
 import { categoriesService } from "@/services/categories.service";
 import { Category } from "@/types/category.types";
@@ -23,8 +23,6 @@ import {
     CardContent,
     CardHeader,
     CardTitle,
-    CardDescription,
-    CardFooter,
 } from "@/components/ui/card";
 import {
     Table,

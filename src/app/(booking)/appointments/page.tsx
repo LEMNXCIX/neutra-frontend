@@ -1,5 +1,4 @@
 import React from "react";
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { AppointmentsClient } from "@/components/booking/appointments-client";
 import { authService } from "@/services/auth.service";

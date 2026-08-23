@@ -9,17 +9,11 @@ import { Tenant } from "@/types/tenant";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
-    LayoutDashboard,
-    LogIn,
-    UserPlus,
-    Menu,
-    X,
     PlusCircle,
     ShoppingCart,
     Calendar,
 } from "lucide-react";
 import { NeutralNavigation } from "@/components/neutral-navigation";
-import Logo from "@/components/logo";
 import { cn } from "@/lib/utils";
 
 const emptySubscribe = () => () => {};

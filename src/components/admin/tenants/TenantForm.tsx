@@ -338,7 +338,7 @@ export function TenantForm({
     initialPlatformFeatures = EMPTY_PLATFORM_FEATURES,
 }: TenantFormProps) {
     const [isSaving, setIsSaving] = useState(false);
-    const [platformFeatures, setPlatformFeatures] = useState<PlatformFeature[]>(
+    const [platformFeatures, _setPlatformFeatures] = useState<PlatformFeature[]>(
         initialPlatformFeatures,
     );
     const [formData, setFormData] = useState<CreateTenantData>(() => ({

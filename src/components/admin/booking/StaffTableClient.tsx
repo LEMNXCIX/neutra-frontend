@@ -9,7 +9,6 @@ import {
     Trash2,
     Mail,
     Phone,
-    Info,
     User as UserIcon,
     Scissors,
     Check,
@@ -18,7 +17,6 @@ import { bookingService, Staff, Service } from "@/services/booking.service";
 import { usersService } from "@/services/users.service";
 import { User } from "@/types/user.types";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -571,7 +569,7 @@ function staffReducer(state: StaffState, action: StaffAction): StaffState {
 
 function useStaffTable(
     initialStaff: Staff[] | undefined,
-    isSuperAdmin: boolean,
+    _isSuperAdmin: boolean,
 ) {
     const router = useRouter();
     const searchParams = useSearchParams();

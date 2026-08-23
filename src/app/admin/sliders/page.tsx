@@ -1,7 +1,6 @@
 import React, { Suspense } from "react";
 import { redirect } from "next/navigation";
 import SlidersTableClient from "@/components/admin/sliders/SlidersTableClient";
-import { slidersService } from "@/services/sliders.service";
 import { validateAdminAccess } from "@/lib/server-auth";
 import { api } from '@/lib/api-client';
 

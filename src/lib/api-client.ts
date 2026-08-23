@@ -1,5 +1,4 @@
 import { StandardResponse } from '@/types/frontend-api';
-import { toast } from 'sonner';
 import Cookies from 'js-cookie';
 
 // Note: API_BASE_URL not used - requests go through Next.js API routes
@@ -64,7 +63,7 @@ export async function apiClient<T = unknown>(
     } else {
         // Server-side: use next/headers
         try {
-            const { cookies: nextCookies, headers: nextHeaders } = require('next/headers');
+            const { cookies: nextCookies, headers: _nextHeaders } = require('next/headers');
             const c = await nextCookies();
             tenantSlug = c.get('tenant-slug')?.value;
             tenantId = c.get('tenant-id')?.value;
@@ -72,7 +71,7 @@ export async function apiClient<T = unknown>(
             // Collect all cookies to forward them
             const allCookies = c.getAll();
             cookieHeader = allCookies.map((cookie: any) => `${cookie.name}=${cookie.value}`).join('; ');
-        } catch (e) {
+        } catch (_e) {
             // next/headers might not be available in all contexts
         }
     }

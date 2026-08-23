@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useReducer, useRef } from "react";
+import React, { useCallback, useReducer, useRef } from "react";
 import { logService, LogEntry } from "@/services/log.service";
 import { Tenant } from "@/types/tenant";
 import { Badge } from "@/components/ui/badge";
@@ -712,7 +712,7 @@ function QuickStat({
     icon,
     color = "text-foreground",
     bg = "bg-muted",
-    isAlert = false,
+
 }: {
     label: string;
     value: any;

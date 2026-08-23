@@ -6,16 +6,11 @@ import { Order } from "@/types/order.types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import {
     ShoppingBag,
     Calendar,
     Package,
-    MapPin,
-    Truck,
     Eye,
-    Download,
-    DollarSign,
 } from "lucide-react";
 
 interface OrderHistoryProps {

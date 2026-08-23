@@ -66,7 +66,7 @@ export async function proxy(request: NextRequest) {
                             moduleType = 'store';
                         }
                     }
-                } catch (error) {
+                } catch (_error) {
                     // Heuristic fallback
                     if (tenantSlug.includes('booking') || tenantSlug.includes('book')) {
                         moduleType = 'booking';
