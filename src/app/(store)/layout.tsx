@@ -1,9 +1,8 @@
 import { Navigation as NavBar } from "@/components/nav_bar";
 import FooterWrapper from "@/components/footer-wrapper";
 import { TenantThemeProvider } from "@/providers/tenant-theme-provider";
-import { tenantService } from "@/services/tenant.service";
+import { getTenantBrandingFromHeaders } from "@/lib/server-theme";
 import type { Metadata } from "next";
-import { headers } from "next/headers";
 
 export const metadata: Metadata = {
   title: "Store",
@@ -15,17 +14,7 @@ export default async function StoreLayout({
 }: {
     children: React.ReactNode;
 }) {
-    const tenantSlug = (await headers()).get("x-tenant-slug");
-    let branding = null;
-
-    if (tenantSlug) {
-        try {
-            const tenant = await tenantService.getBySlug(tenantSlug);
-            branding = tenant?.config?.branding ?? null;
-        } catch {
-            // Theme is decorative: never block rendering on fetch errors
-        }
-    }
+    const branding = await getTenantBrandingFromHeaders();
 
     return (
         <TenantThemeProvider branding={branding}>
