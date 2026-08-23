@@ -149,7 +149,7 @@ function LogInspectorDialog({
 
   return (
     <Dialog open={!!log} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-0 border-none shadow-3xl rounded-3xl overflow-hidden">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-0 border-none shadow-3xl rounded-xl overflow-hidden">
         <DialogHeader className="sr-only">
           <DialogTitle>Log Inspector</DialogTitle>
           <DialogDescription>Detailed view of the system log entry</DialogDescription>
@@ -162,14 +162,14 @@ function LogInspectorDialog({
                   <div className="text-5xl font-bold tracking-tighter leading-none">{log.statusCode}</div>
                   <div className="px-3 py-1 bg-primary text-primary-foreground font-bold uppercase text-xs rounded-lg tracking-widest">{log.method}</div>
                 </div>
-                <div className="font-mono text-[10px] uppercase tracking-widest opacity-60 bg-white/5 px-2 py-1 rounded">TRACE_ID: {log.traceId}</div>
+                <div className="font-mono text-[10px] uppercase tracking-widest opacity-60 bg-foreground/5 px-2 py-1 rounded">TRACE_ID: {log.traceId}</div>
               </div>
               <div className="text-right space-y-1">
                 <div className="text-sm font-semibold opacity-60">{format(new Date(log.timestamp), "eeee, dd MMMM yyyy")}</div>
                 <div className="text-2xl font-bold tracking-tight">{format(new Date(log.timestamp), "HH:mm:ss.SSS")}</div>
               </div>
             </div>
-            <div className="text-lg font-mono font-medium break-all leading-relaxed bg-white/5 rounded-xl p-5 border border-white/10">{log.url}</div>
+            <div className="text-lg font-mono font-medium break-all leading-relaxed bg-foreground/5 rounded-xl p-5 border border-foreground/10">{log.url}</div>
           </div>
           <div className="p-8 space-y-10">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -180,7 +180,7 @@ function LogInspectorDialog({
             </div>
             <div className="space-y-4">
               <SectionTitle title="Execution Summary" icon={<Terminal />} />
-              <div className="p-6 bg-muted/30 rounded-2xl border-l border-primary/60 font-semibold tracking-tight text-xl leading-snug">{log.message}</div>
+              <div className="p-6 bg-muted/30 rounded-xl border-l border-primary/60 font-semibold tracking-tight text-xl leading-snug">{log.message}</div>
             </div>
             <div className="grid grid-cols-1 gap-10">
               <PayloadBoard title="Contextual Metadata" data={log.metadata} />
@@ -733,7 +733,7 @@ function QuickStat({
                     </h3>
                 </div>
                 <div
-                    className={`p-3 rounded-2xl ${bg} ${color} transition-transform group-hover:scale-110 duration-500`}
+                    className={`p-3 rounded-xl ${bg} ${color} transition-transform group-hover:scale-110 duration-500`}
                 >
                     {icon &&
                         React.cloneElement(icon, {
@@ -820,7 +820,7 @@ function PayloadBoard({
             </div>
             <div
                 className={cn(
-                    "rounded-2xl overflow-hidden border transition-all",
+                    "rounded-xl overflow-hidden border transition-all",
                     isCritical
                         ? "border-rose-500/30 shadow-lg shadow-rose-500/5"
                         : "border-border/50 shadow-sm",

@@ -194,7 +194,7 @@ function RecentOrdersCard({ recentOrders }: { recentOrders: Order[] }) {
                 statusColors[
                   order.status || "processing"
                 ] ||
-                "bg-gray-500/10 text-gray-600 border-gray-200";
+                "bg-muted text-muted-foreground border-border";
 
               return (
                 <div

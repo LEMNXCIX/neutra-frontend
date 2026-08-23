@@ -128,7 +128,7 @@ function DesktopMenuItems({ categories }: { categories: Category[] }) {
                     Collections
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
-                    <ul className="grid w-[400px] gap-2 p-6 md:w-[500px] md:grid-cols-2 lg:w-[600px] bg-card border border-border shadow-xl rounded-2xl">
+                    <ul className="grid w-[400px] gap-2 p-6 md:w-[500px] md:grid-cols-2 lg:w-[600px] bg-card border border-border shadow-xl rounded-xl">
                         <div className="col-span-full border-b border-border pb-3 mb-2">
                             <p className="text-[10px] font-bold uppercase tracking-widest text-primary">
                                 Catalog Categories
@@ -224,7 +224,7 @@ function DesktopSearchWithResults({
             </div>
 
             {showResults && searchResults.length > 0 && (
-                <Card className="absolute top-full mt-3 w-[400px] border border-border shadow-2xl rounded-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                <Card className="absolute top-full mt-3 w-[400px] border border-border shadow-2xl rounded-xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
                     <ScrollArea className="max-h-[480px]">
                         <div className="p-3 space-y-1">
                             <div className="px-4 py-2 border-b border-border mb-2">
@@ -339,7 +339,7 @@ function UserMenuDropdown({
                 </Avatar>
             </DropdownMenuTrigger>
             <DropdownMenuContent
-                className="w-64 p-2 border border-border shadow-2xl rounded-2xl mt-2"
+                className="w-64 p-2 border border-border shadow-2xl rounded-xl mt-2"
                 align="end"
             >
                 <DropdownMenuLabel className="p-4 mb-1">
@@ -425,7 +425,7 @@ function MobileMenuSheet({
                 >
                     <SheetHeader className="p-8 border-b border-border text-left bg-muted/20">
                         <div className="flex items-center gap-4">
-                            <div className="p-3 bg-background border border-border shadow-sm rounded-2xl">
+                            <div className="p-3 bg-background border border-border shadow-sm rounded-xl">
                                 <Logo size={32} />
                             </div>
                             <div>
@@ -478,7 +478,7 @@ function MobileMenuSheet({
                                                             });
                                                         }
                                                     }}
-                                                    className="w-full h-14 bg-muted/50 border border-transparent focus:border-primary/30 focus:bg-background px-5 pr-12 text-sm font-medium outline-none transition-all rounded-2xl"
+                                                    className="w-full h-14 bg-muted/50 border border-transparent focus:border-primary/30 focus:bg-background px-5 pr-12 text-sm font-medium outline-none transition-all rounded-xl"
                                                 />
                                                 <div className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary">
                                                     <Search size={20} />
@@ -500,7 +500,7 @@ function MobileMenuSheet({
                                                         payload: false,
                                                     })
                                                 }
-                                                className="flex items-center justify-between p-5 bg-card border border-border shadow-sm hover:shadow-md hover:border-primary/20 transition-all rounded-2xl group"
+                                                className="flex items-center justify-between p-5 bg-card border border-border shadow-sm hover:shadow-md hover:border-primary/20 transition-all rounded-xl group"
                                             >
                                                 <span className="font-bold text-lg">
                                                     Inventory Catalog
@@ -527,7 +527,7 @@ function MobileMenuSheet({
                                                                     payload: false,
                                                                 })
                                                             }
-                                                            className="flex flex-col gap-2 p-4 bg-muted/30 hover:bg-muted border border-transparent hover:border-border transition-all rounded-2xl"
+                                                            className="flex flex-col gap-2 p-4 bg-muted/30 hover:bg-muted border border-transparent hover:border-border transition-all rounded-xl"
                                                         >
                                                             <span className="text-[10px] font-bold text-primary/60 uppercase tracking-wider">
                                                                 Section
@@ -550,7 +550,7 @@ function MobileMenuSheet({
                             </span>
                             {user ? (
                                 <div className="space-y-6">
-                                    <div className="flex items-center gap-4 p-5 bg-card border border-border shadow-sm rounded-2xl">
+                                    <div className="flex items-center gap-4 p-5 bg-card border border-border shadow-sm rounded-xl">
                                         <Avatar className="size-12 border border-border">
                                             <AvatarImage src={user.avatar} />
                                             <AvatarFallback className="bg-primary/10 text-primary font-bold text-lg">
@@ -572,7 +572,7 @@ function MobileMenuSheet({
                                     <div className="grid gap-3">
                                         <Button
                                             variant="outline"
-                                            className="w-full justify-between h-14 rounded-2xl px-6 font-bold text-sm"
+                                            className="w-full justify-between h-14 rounded-xl px-6 font-bold text-sm"
                                             onClick={() => {
                                                 dispatch({
                                                     type: "SET_IS_OPEN",
@@ -590,7 +590,7 @@ function MobileMenuSheet({
                                         {user.isAdmin && (
                                             <Button
                                                 variant="outline"
-                                                className="w-full justify-between h-14 rounded-2xl px-6 font-bold text-sm"
+                                                className="w-full justify-between h-14 rounded-xl px-6 font-bold text-sm"
                                                 onClick={() => {
                                                     dispatch({
                                                         type: "SET_IS_OPEN",
@@ -608,7 +608,7 @@ function MobileMenuSheet({
                                         )}
                                         <Button
                                             variant="ghost"
-                                            className="w-full h-14 rounded-2xl font-bold text-sm text-rose-600 hover:bg-rose-500/10 mt-2"
+                                            className="w-full h-14 rounded-xl font-bold text-sm text-destructive hover:bg-destructive/10 mt-2"
                                             onClick={async () => {
                                                 await logout();
                                                 dispatch({
@@ -625,7 +625,7 @@ function MobileMenuSheet({
                             ) : (
                                 <div className="grid gap-3">
                                     <Button
-                                        className="h-14 rounded-2xl font-bold shadow-lg shadow-primary/20"
+                                        className="h-14 rounded-xl font-bold shadow-lg shadow-primary/20"
                                         onClick={() => {
                                             dispatch({
                                                 type: "SET_IS_OPEN",
@@ -638,7 +638,7 @@ function MobileMenuSheet({
                                     </Button>
                                     <Button
                                         variant="outline"
-                                        className="h-14 rounded-2xl font-bold border-border"
+                                        className="h-14 rounded-xl font-bold border-border"
                                         onClick={() => {
                                             dispatch({
                                                 type: "SET_IS_OPEN",

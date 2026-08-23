@@ -27,7 +27,7 @@ export default function FeaturedProducts({
                     (k) => (
                         <Card
                             key={k}
-                            className="overflow-hidden border-none shadow-md hover:shadow-xl transition-shadow rounded-2xl bg-background/80"
+                            className="overflow-hidden border-none shadow-md hover:shadow-xl transition-shadow rounded-xl bg-background/80"
                         >
                             {/* Imagen */}
                             <div className="relative aspect-square overflow-hidden bg-muted/50">

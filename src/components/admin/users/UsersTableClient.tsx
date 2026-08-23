@@ -60,7 +60,7 @@ const isUserAdmin = (u: User) =>
 u.role?.name === "SUPER_ADMIN" || u.role?.name === "ADMIN";
 
 const getRoleColor = (roleName?: string) => {
-if (!roleName) return "bg-gray-500";
+if (!roleName) return "bg-muted-foreground";
 
 switch (roleName.toUpperCase()) {
 case "SUPER_ADMIN":
@@ -72,9 +72,9 @@ return "bg-blue-500";
 case "MODERATOR":
 return "bg-green-500";
 case "USER":
-return "bg-gray-500";
+return "bg-muted-foreground";
 default:
-return "bg-slate-500";
+return "bg-muted-foreground";
 }
 };
 
@@ -244,7 +244,7 @@ color="bg-purple-500"
 icon={UserCircle}
 title="Regular Users"
 value={stats.regularUsers}
-color="bg-gray-500"
+color="bg-muted-foreground"
 />
 </div>
 );
@@ -278,7 +278,7 @@ color="bg-purple-500"
 icon={UserCircle}
 title="Regular Users"
 value={stats.regularUsers}
-color="bg-gray-500"
+color="bg-muted-foreground"
 />
 </div>
 </AccordionContent>

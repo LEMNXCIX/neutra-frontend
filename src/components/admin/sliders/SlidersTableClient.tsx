@@ -333,7 +333,7 @@ function DesktopSlidersTable({ sliders, isSuperAdmin, isDeleting, onEdit, onDele
                         Active
                       </Badge>
                     ) : (
-                      <Badge variant="secondary" className="bg-zinc-100 text-zinc-700 hover:bg-zinc-100 border-none shadow-none text-[10px] font-bold uppercase tracking-wider">
+                      <Badge variant="secondary" className="bg-muted text-muted-foreground hover:bg-muted border-none shadow-none text-[10px] font-bold uppercase tracking-wider">
                         Inactive
                       </Badge>
                     )}
@@ -418,7 +418,7 @@ function MobileSlidersCards({ sliders, isDeleting, onEdit, onDelete, pagination,
                     Active
                   </Badge>
                 ) : (
-                  <Badge variant="secondary" className="bg-zinc-100 text-zinc-700 hover:bg-zinc-100 rounded-full font-bold text-[10px] uppercase tracking-wider">
+                  <Badge variant="secondary" className="bg-muted text-muted-foreground hover:bg-muted rounded-full font-bold text-[10px] uppercase tracking-wider">
                     Inactive
                   </Badge>
                 )}

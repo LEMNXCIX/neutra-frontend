@@ -84,7 +84,7 @@ export default function PromoSlider({ initialSlides }: PromoSliderProps) {
             onTouchEnd={onTouchEnd}
         >
             {/* Contenedor de slides */}
-            <div className="relative w-full h-full bg-zinc-100 dark:bg-zinc-800">
+            <div className="relative w-full h-full bg-muted">
                 {slides.map((slide, index) => {
                     const isActive = index === currentIndex;
 
@@ -139,19 +139,19 @@ export default function PromoSlider({ initialSlides }: PromoSliderProps) {
             <button
                 type="button"
                 onClick={prev}
-                className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/70 dark:bg-zinc-700/70 p-2 rounded-full backdrop-blur-sm shadow-md hover:scale-110 transition-all duration-300 opacity-0 group-hover:opacity-100"
+                className="absolute left-3 top-1/2 -translate-y-1/2 bg-background/70 p-2 rounded-full backdrop-blur-sm shadow-md hover:scale-110 transition-all duration-300 opacity-0 group-hover:opacity-100"
                 aria-label="Previous Slide"
             >
-                <ChevronLeft className="text-zinc-900 dark:text-zinc-100 size-6" />
+                <ChevronLeft className="text-foreground size-6" />
             </button>
 
             <button
                 type="button"
                 onClick={next}
-                className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/70 dark:bg-zinc-700/70 p-2 rounded-full backdrop-blur-sm shadow-md hover:scale-110 transition-all duration-300 opacity-0 group-hover:opacity-100"
+                className="absolute right-3 top-1/2 -translate-y-1/2 bg-background/70 p-2 rounded-full backdrop-blur-sm shadow-md hover:scale-110 transition-all duration-300 opacity-0 group-hover:opacity-100"
                 aria-label="Next Slide"
             >
-                <ChevronRight className="text-zinc-900 dark:text-zinc-100 size-6" />
+                <ChevronRight className="text-foreground size-6" />
             </button>
 
             {/* Indicadores (dots) */}

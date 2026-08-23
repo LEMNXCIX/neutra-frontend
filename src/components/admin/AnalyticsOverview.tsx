@@ -311,7 +311,7 @@ export default function AnalyticsOverview() {
             title="Regular Users"
             value={stats.users.regular}
             subtitle="Customer accounts"
-            color="bg-gray-500"
+            color="bg-muted-foreground"
           />
           <StatCard
             icon={Users}

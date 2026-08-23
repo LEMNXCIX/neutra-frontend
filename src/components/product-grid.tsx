@@ -67,7 +67,7 @@ export default function ProductGrid({
                 {/* Image */}
                 <Link
                   href={`/products/${p.id}`}
-                  className="flex-shrink-0 w-full sm:w-64 h-64 relative overflow-hidden rounded-3xl bg-muted"
+                  className="flex-shrink-0 w-full sm:w-64 h-64 relative overflow-hidden rounded-xl bg-muted"
                 >
                   {p.image ? (
                     <Image
@@ -89,7 +89,7 @@ export default function ProductGrid({
                       </Badge>
                     )}
                     {lowStock && inStock && (
-                      <Badge className="bg-orange-500 text-white rounded-full px-3 py-1 font-bold text-[10px] uppercase tracking-widest shadow-xl border-2 border-background">
+                      <Badge className="bg-destructive text-destructive-foreground rounded-full px-3 py-1 font-bold text-[10px] uppercase tracking-widest shadow-xl border-2 border-background">
                         Last {p.stock}
                       </Badge>
                     )}
@@ -195,7 +195,7 @@ export default function ProductGrid({
                     </Badge>
                 )}
                 {lowStock && inStock && (
-                    <Badge className="bg-orange-500 text-white rounded-full px-3 py-1 font-bold text-[10px] uppercase tracking-widest shadow-xl border-2 border-background">
+                    <Badge className="bg-destructive text-destructive-foreground rounded-full px-3 py-1 font-bold text-[10px] uppercase tracking-widest shadow-xl border-2 border-background">
                     Last {p.stock}
                     </Badge>
                 )}

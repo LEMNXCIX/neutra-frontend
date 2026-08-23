@@ -239,7 +239,7 @@ export default function LogAnalyticsDashboard() {
 
             <React.Suspense
                 fallback={
-                    <div className="h-64 flex items-center justify-center border border-border border-dashed rounded-2xl animate-pulse bg-muted/30">
+                    <div className="h-64 flex items-center justify-center border border-border border-dashed rounded-xl animate-pulse bg-muted/30">
                         <span className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
                             Calculating Metrics…
                         </span>

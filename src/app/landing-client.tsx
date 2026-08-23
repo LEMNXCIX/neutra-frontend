@@ -138,7 +138,7 @@ export function LandingPageClient() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
                         {/* E-Commerce Card */}
                         <div className="p-12 t-card space-y-8 group">
-                            <div className="size-16 bg-primary/10 text-primary flex items-center justify-center rounded-2xl transition-transform group-hover:scale-110 duration-500">
+                            <div className="size-16 bg-primary/10 text-primary flex items-center justify-center rounded-xl transition-transform group-hover:scale-110 duration-500">
                                 <ShoppingCart className="size-8" />
                             </div>
                             <div className="space-y-2">
@@ -167,7 +167,7 @@ export function LandingPageClient() {
 
                         {/* Booking Card */}
                         <div className="p-12 t-card space-y-8 group">
-                            <div className="size-16 bg-primary/10 text-primary flex items-center justify-center rounded-2xl transition-transform group-hover:scale-110 duration-500">
+                            <div className="size-16 bg-primary/10 text-primary flex items-center justify-center rounded-xl transition-transform group-hover:scale-110 duration-500">
                                 <Calendar className="size-8" />
                             </div>
                             <div className="space-y-2">

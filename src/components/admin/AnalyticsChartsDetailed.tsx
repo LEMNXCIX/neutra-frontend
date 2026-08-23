@@ -42,7 +42,7 @@ function SummaryStatsCards({
 
 function AvgOrderValueCard({ value }: { value: number }) {
     return (
-        <Card className="border-none shadow-md rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white">
+        <Card className="border-none shadow-md rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white">
             <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                     <div>
@@ -80,7 +80,7 @@ function TimelineCard({
     barGradient: string;
 }) {
     return (
-        <Card className="border-none shadow-md rounded-2xl">
+        <Card className="border-none shadow-md rounded-xl">
             <CardHeader>
                 <CardTitle className="text-sm text-muted-foreground">
                     {title}
@@ -147,7 +147,7 @@ function TopProductsCard({
     maxProductQty: number;
 }) {
     return (
-        <Card className="border-none shadow-md rounded-2xl">
+        <Card className="border-none shadow-md rounded-xl">
             <CardHeader>
                 <CardTitle className="text-sm text-muted-foreground">
                     Top Selling Products
@@ -279,7 +279,7 @@ export default function AnalyticsChartsDetailed() {
                             <Skeleton className="h-10 w-[180px]" />
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <Card className="md:col-span-2 border-none shadow-md rounded-2xl">
+                            <Card className="md:col-span-2 border-none shadow-md rounded-xl">
                                 <CardHeader>
                                     <Skeleton className="h-4 w-24" />
                                 </CardHeader>
@@ -299,7 +299,7 @@ export default function AnalyticsChartsDetailed() {
                                     </div>
                                 </CardContent>
                             </Card>
-                            <Card className="border-none shadow-md rounded-2xl">
+                            <Card className="border-none shadow-md rounded-xl">
                                 <CardContent className="p-6">
                                     <div className="flex items-center justify-between">
                                         <div className="space-y-2">
@@ -315,7 +315,7 @@ export default function AnalyticsChartsDetailed() {
                             {["timeline-1", "timeline-2"].map((k) => (
                                 <Card
                                     key={k}
-                                    className="border-none shadow-md rounded-2xl"
+                                    className="border-none shadow-md rounded-xl"
                                 >
                                     <CardHeader>
                                         <Skeleton className="h-4 w-32" />
@@ -340,7 +340,7 @@ export default function AnalyticsChartsDetailed() {
                                 </Card>
                             ))}
                         </div>
-                        <Card className="border-none shadow-md rounded-2xl">
+                        <Card className="border-none shadow-md rounded-xl">
                             <CardHeader>
                                 <Skeleton className="h-4 w-40" />
                             </CardHeader>
@@ -450,7 +450,7 @@ function AnalyticsContent({
     return (
         <>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Card className="md:col-span-2 border-none shadow-md rounded-2xl bg-card">
+                <Card className="md:col-span-2 border-none shadow-md rounded-xl bg-card">
                     <CardHeader>
                         <CardTitle className="text-sm text-muted-foreground">
                             Orders by Status

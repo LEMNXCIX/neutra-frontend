@@ -106,7 +106,7 @@ const getStatusBadge = (status: Appointment["status"]) => {
             return (
                 <Badge
                     variant="secondary"
-                    className="bg-zinc-100 text-zinc-700 hover:bg-zinc-100 border-none shadow-none"
+                    className="bg-muted text-muted-foreground hover:bg-muted border-none shadow-none"
                 >
                     No Show
                 </Badge>

@@ -202,7 +202,7 @@ return String(date);
 function getCouponStatus(c: Coupon) {
 const isFullyUsed = c.usageLimit ? c.usageCount >= c.usageLimit : false;
 
-if (!c.active) return { label: "Inactive", variant: "secondary" as const, color: "text-gray-500" };
+if (!c.active) return { label: "Inactive", variant: "secondary" as const, color: "text-muted-foreground" };
 if (isFullyUsed) return { label: "Used/Limit Reached", variant: "secondary" as const, color: "text-muted-foreground" };
 if (isExpired(c.expiresAt)) return { label: "Expired", variant: "destructive" as const, color: "text-red-500" };
 return { label: "Active", variant: "default" as const, color: "text-green-500" };
@@ -238,7 +238,7 @@ return (
 <StatCard icon={Ticket} title="Total Coupons" value={stats.totalCoupons} color="bg-purple-500" />
 <StatCard icon={Zap} title="Active" value={stats.activeCoupons} color="bg-green-500" />
 <StatCard icon={CheckCircle2} title="Used" value={stats.usedCoupons} color="bg-blue-500" />
-<StatCard icon={XCircle} title="Unused" value={stats.unusedCoupons} color="bg-gray-500" />
+<StatCard icon={XCircle} title="Unused" value={stats.unusedCoupons} color="bg-muted-foreground" />
 <StatCard icon={Clock} title="Expired" value={stats.expiredCoupons} color="bg-red-500" />
 </div>
 
@@ -255,7 +255,7 @@ return (
 <StatCard icon={Ticket} title="Total Coupons" value={stats.totalCoupons} color="bg-purple-500" />
 <StatCard icon={Zap} title="Active" value={stats.activeCoupons} color="bg-green-500" />
 <StatCard icon={CheckCircle2} title="Used" value={stats.usedCoupons} color="bg-blue-500" />
-<StatCard icon={XCircle} title="Unused" value={stats.unusedCoupons} color="bg-gray-500" />
+<StatCard icon={XCircle} title="Unused" value={stats.unusedCoupons} color="bg-muted-foreground" />
 <StatCard icon={Clock} title="Expired" value={stats.expiredCoupons} color="bg-red-500" />
 </div>
 </AccordionContent>
