@@ -58,6 +58,28 @@ const CSS_VAR_MAP: Record<string, string> = {
 
 export const THEME_CSS_VARS = Object.values(CSS_VAR_MAP);
 
+const FONT_FALLBACKS = 'ui-sans-serif, system-ui, -apple-system, sans-serif';
+
+const FONT_VARS = ["--font-tenant-font", "--font-tenant-heading"];
+
+/**
+ * Inject a Google Fonts stylesheet for a font family if not already loaded.
+ * Custom fonts are referenced by family name; anything not available as a
+ * system font is fetched from Google Fonts. No-op on the server.
+ */
+function ensureFontLoaded(family: string): void {
+    if (typeof document === "undefined" || !family.trim()) return;
+
+    const id = `tenant-font-${family.toLowerCase().replace(/\s+/g, "-")}`;
+    if (document.getElementById(id)) return;
+
+    const link = document.createElement("link");
+    link.id = id;
+    link.rel = "stylesheet";
+    link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(family).replace(/%20/g, "+")}:wght@300;400;500;600;700;800&display=swap`;
+    document.head.appendChild(link);
+}
+
 /**
  * Apply tenant branding as inline CSS variables on <html>.
  * Falls back to DEFAULT_BRANDING values for any missing token.
@@ -76,6 +98,23 @@ export function applyTenantTheme(branding?: TenantBranding | null): void {
     // Derived tokens
     root.style.setProperty("--input", merged.border);
     root.style.setProperty("--ring", merged.primaryColor);
+
+    // Typography
+    const { fontFamily, headingFont } = merged;
+    if (fontFamily?.trim()) {
+        ensureFontLoaded(fontFamily);
+        root.style.setProperty(
+            "--font-tenant-font",
+            `"${fontFamily}", ${FONT_FALLBACKS}`,
+        );
+    }
+    if (headingFont?.trim()) {
+        ensureFontLoaded(headingFont);
+        root.style.setProperty(
+            "--font-tenant-heading",
+            `"${headingFont}", ${fontFamily?.trim() ? `"${fontFamily}"` : ""} ${FONT_FALLBACKS}`,
+        );
+    }
 }
 
 /** Remove tenant theme overrides, restoring globals.css defaults. */
@@ -86,6 +125,10 @@ export function clearTenantTheme(): void {
     for (const cssVar of THEME_CSS_VARS) {
         root.style.removeProperty(cssVar);
     }
+    for (const cssVar of FONT_VARS) {
+        root.style.removeProperty(cssVar);
+    }
     root.style.removeProperty("--input");
     root.style.removeProperty("--ring");
 }
+

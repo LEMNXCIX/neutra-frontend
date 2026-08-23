@@ -53,6 +53,10 @@ export interface TenantBranding {
     destructive?: string;
     border?: string;
     radius?: string; // e.g. "0.75rem"
+    /** Font family for body/general text (family name, e.g. "Inter") */
+    fontFamily?: string;
+    /** Font family for headings/titles (family name, e.g. "Playfair Display") */
+    headingFont?: string;
     tenantLogo?: string;
     favicon?: string;
 }

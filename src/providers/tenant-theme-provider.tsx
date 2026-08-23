@@ -15,7 +15,13 @@ export function TenantThemeProvider({
 }: TenantThemeProviderProps) {
     useEffect(() => {
         applyTenantTheme(branding);
-        return () => clearTenantTheme();
+        if (branding && Object.keys(branding).length > 0) {
+            document.documentElement.classList.add("tenant-theme");
+        }
+        return () => {
+            clearTenantTheme();
+            document.documentElement.classList.remove("tenant-theme");
+        };
     }, [branding]);
 
     return <>{children}</>;
