@@ -123,35 +123,37 @@ function DesktopMenuItems({ categories }: { categories: Category[] }) {
                 </NavigationMenuLink>
             </NavigationMenuItem>
 
-            <NavigationMenuItem className="list-none">
-                <NavigationMenuTrigger className="bg-transparent font-semibold text-xs tracking-tight hover:bg-muted transition-colors rounded-lg">
-                    Collections
-                </NavigationMenuTrigger>
-                <NavigationMenuContent>
-                    <ul className="grid w-[400px] gap-2 p-6 md:w-[500px] md:grid-cols-2 lg:w-[600px] bg-card border border-border shadow-xl rounded-xl">
-                        <div className="col-span-full border-b border-border pb-3 mb-2">
-                            <p className="text-[10px] font-bold uppercase tracking-widest text-primary">
-                                Catalog Categories
-                            </p>
-                        </div>
-                        {(Array.isArray(categories) ? categories : []).map(
-                            (c) => {
-                                const href = `/products?category=${encodeURIComponent(c.id)}`;
-                                return (
-                                    <ListItem
-                                        key={c.id}
-                                        title={c.name}
-                                        href={href}
-                                        className="rounded-xl hover:bg-muted transition-colors p-3"
-                                    >
-                                        {c.description}
-                                    </ListItem>
-                                );
-                            },
-                        )}
-                    </ul>
-                </NavigationMenuContent>
-            </NavigationMenuItem>
+            {(Array.isArray(categories) && categories.length > 0) && (
+                <NavigationMenuItem className="list-none">
+                    <NavigationMenuTrigger className="bg-transparent font-semibold text-xs tracking-tight hover:bg-muted transition-colors rounded-lg">
+                        Collections
+                    </NavigationMenuTrigger>
+                    <NavigationMenuContent>
+                        <ul className="grid w-[400px] gap-2 p-6 md:w-[500px] md:grid-cols-2 lg:w-[600px] bg-card border border-border shadow-xl rounded-xl">
+                            <div className="col-span-full border-b border-border pb-3 mb-2">
+                                <p className="text-[10px] font-bold uppercase tracking-widest text-primary">
+                                    Catalog Categories
+                                </p>
+                            </div>
+                            {categories.map(
+                                (c) => {
+                                    const href = `/products?category=${encodeURIComponent(c.id)}`;
+                                    return (
+                                        <ListItem
+                                            key={c.id}
+                                            title={c.name}
+                                            href={href}
+                                            className="rounded-xl hover:bg-muted transition-colors p-3"
+                                        >
+                                            {c.description}
+                                        </ListItem>
+                                    );
+                                },
+                            )}
+                        </ul>
+                    </NavigationMenuContent>
+                </NavigationMenuItem>
+            )}
         </div>
     );
 }
@@ -384,6 +386,8 @@ function MobileMenuSheet({
     categories,
     user,
     minimal,
+    tenantName,
+    tenantLogo,
     logout,
     router,
     dispatch,
@@ -398,6 +402,8 @@ function MobileMenuSheet({
         isAdmin?: boolean;
     } | null;
     minimal: boolean;
+    tenantName?: string | null;
+    tenantLogo?: string | null;
     logout: () => Promise<void>;
     router: ReturnType<typeof useRouter>;
     dispatch: React.Dispatch<NavigationAction>;
@@ -426,13 +432,13 @@ function MobileMenuSheet({
                     <SheetHeader className="p-8 border-b border-border text-left bg-muted/20">
                         <div className="flex items-center gap-4">
                             <div className="p-3 bg-background border border-border shadow-sm rounded-xl">
-                                <Logo size={32} />
+                                <Logo size={32} src={tenantLogo} />
                             </div>
                             <div>
                                 <SheetTitle className="text-2xl font-bold tracking-tight">
-                                    XCIX
+                                    {tenantName || "XCIX"}
                                 </SheetTitle>
-                                {!minimal && (
+                                {!minimal && !tenantName && (
                                     <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mt-0.5">
                                         Platform Core
                                     </p>
@@ -511,13 +517,12 @@ function MobileMenuSheet({
                                                 />
                                             </Link>
 
-                                            <div className="grid grid-cols-2 gap-3 mt-2">
-                                                {(Array.isArray(categories)
-                                                    ? categories
-                                                    : []
-                                                )
-                                                    .slice(0, 4)
-                                                    .map((c) => (
+                                            {(Array.isArray(categories) &&
+                                                categories.length > 0) && (
+                                                <div className="grid grid-cols-2 gap-3 mt-2">
+                                                    {categories
+                                                        .slice(0, 4)
+                                                        .map((c) => (
                                                         <Link
                                                             key={c.id}
                                                             href={`/products?category=${encodeURIComponent(c.id)}`}
@@ -537,7 +542,8 @@ function MobileMenuSheet({
                                                             </span>
                                                         </Link>
                                                     ))}
-                                            </div>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 </>
@@ -672,9 +678,13 @@ const EMPTY_CATEGORIES: Category[] = [];
 export function Navigation({
     minimal = false,
     initialCategories = EMPTY_CATEGORIES,
+    tenantName,
+    tenantLogo,
 }: {
     minimal?: boolean;
     initialCategories?: Category[];
+    tenantName?: string | null;
+    tenantLogo?: string | null;
 }) {
     const [state, dispatch] = useReducer(navigationReducer, {
         isOpen: false,
@@ -760,6 +770,7 @@ export function Navigation({
                                 <Logo
                                     size={minimal ? 40 : 32}
                                     className="relative z-10"
+                                    src={tenantLogo}
                                 />
                             </div>
                         </div>
@@ -771,9 +782,9 @@ export function Navigation({
                                         minimal ? "text-2xl" : "text-lg",
                                     )}
                                 >
-                                    XCIX
+                                    {tenantName || "XCIX"}
                                 </span>
-                                {!minimal && (
+                                {!minimal && !tenantName && (
                                     <span className="text-[9px] font-medium text-muted-foreground uppercase tracking-widest">
                                         Platform Core
                                     </span>
@@ -847,6 +858,8 @@ export function Navigation({
                             categories={state.categories}
                             user={user}
                             minimal={minimal}
+                            tenantName={tenantName}
+                            tenantLogo={tenantLogo}
                             logout={logout}
                             router={router}
                             dispatch={dispatch}

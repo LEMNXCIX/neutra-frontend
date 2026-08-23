@@ -58,19 +58,19 @@ const getStockBadge = (stock: number) => {
         return (
             <Badge
                 variant="destructive"
-                className="rounded-full shadow-none border-none bg-rose-100 text-rose-700 hover:bg-rose-100"
+                className="rounded-full shadow-none border-none bg-destructive/10 text-destructive hover:bg-destructive/10"
             >
                 Out of Stock
             </Badge>
         );
     if (stock < 10)
         return (
-            <Badge className="rounded-full shadow-none border-none bg-amber-100 text-amber-700 hover:bg-amber-100">
+            <Badge className="rounded-full shadow-none border-none bg-accent text-accent-foreground hover:bg-accent">
                 Low Stock
             </Badge>
         );
     return (
-        <Badge className="rounded-full shadow-none border-none bg-emerald-100 text-emerald-700 hover:bg-emerald-100">
+        <Badge className="rounded-full shadow-none border-none bg-primary/10 text-primary hover:bg-primary/10">
             In Stock
         </Badge>
     );
@@ -116,7 +116,7 @@ const StatCard = ({
           <p className="text-2xl font-bold mt-1">{value}</p>
         </div>
         <div className={`p-3 rounded-full ${color}`}>
-          <Icon className="size-6 text-white" />
+          <Icon className="size-6" />
         </div>
       </div>
     </CardContent>
@@ -514,7 +514,7 @@ function ProductsMobileCards({
               <Button
                 size="sm"
                 variant="outline"
-                className="flex-1 font-semibold h-10 text-rose-600 border-rose-100 hover:bg-rose-50"
+                className="flex-1 font-semibold h-10 text-destructive border-destructive/20 hover:bg-destructive/10"
                 onClick={() => deleteProduct(p.id)}
                 disabled={isDeleting === p.id}
               >
@@ -664,19 +664,19 @@ function ProductsStats({ stats }: { stats: Stats }) {
           icon={Package}
           title="Total Products"
           value={stats.totalProducts}
-          color="bg-blue-500"
+          color="bg-primary/10 text-primary"
         />
         <StatCard
           icon={DollarSign}
           title="Total Inventory Value"
           value={`$${stats.totalValue.toFixed(2)}`}
-          color="bg-green-500"
+          color="bg-accent text-accent-foreground"
         />
         <StatCard
           icon={AlertTriangle}
           title="Low Stock Items"
           value={stats.lowStockCount}
-          color="bg-yellow-500"
+          color="bg-destructive/10 text-destructive"
         />
       </div>
 
@@ -696,19 +696,19 @@ function ProductsStats({ stats }: { stats: Stats }) {
                 icon={Package}
                 title="Total Products"
                 value={stats.totalProducts}
-                color="bg-blue-500"
+                color="bg-primary/10 text-primary"
               />
               <StatCard
                 icon={DollarSign}
                 title="Total Inventory Value"
                 value={`$${stats.totalValue.toFixed(2)}`}
-                color="bg-green-500"
+                color="bg-accent text-accent-foreground"
               />
               <StatCard
                 icon={AlertTriangle}
                 title="Low Stock Items"
                 value={stats.lowStockCount}
-                color="bg-yellow-500"
+                color="bg-destructive/10 text-destructive"
               />
             </div>
           </AccordionContent>

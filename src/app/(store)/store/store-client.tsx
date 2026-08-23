@@ -14,11 +14,14 @@ import { useFeatures } from "@/hooks/useFeatures";
 export function StoreHomeClient({
     initialSliders,
     initialProducts,
+    tenantName,
 }: {
     initialSliders?: any[];
     initialProducts?: any[];
+    tenantName?: string | null;
 }) {
     const { isFeatureEnabled } = useFeatures();
+    const brandName = tenantName || "XCIX";
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-background via-muted/20 to-background">
@@ -34,8 +37,10 @@ export function StoreHomeClient({
                         <div className="text-center lg:text-left space-y-8 lg:col-span-1">
                             <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-foreground leading-[1.1]">
                                 Timeless{" "}
-                                <span className="text-primary">Design</span> for
-                                Modern Living
+                                <span className="text-primary">Design</span>{" "}
+                                <span className="font-heading italic font-medium">
+                                    for Modern Living
+                                </span>
                             </h1>
 
                             <p className="text-lg md:text-xl text-muted-foreground max-w-xl mx-auto lg:mx-0 leading-relaxed font-medium">
@@ -76,6 +81,7 @@ export function StoreHomeClient({
             </section>
 
             {/* FEATURED PRODUCTS */}
+            {initialProducts && initialProducts.length > 0 && (
             <section className="py-24 border-t border-border/50">
                 <div className="max-w-7xl mx-auto px-6">
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-16">
@@ -88,7 +94,9 @@ export function StoreHomeClient({
                             </Badge>
                             <h2 className="text-4xl font-bold tracking-tight">
                                 Featured{" "}
-                                <span className="text-primary">Products</span>
+                                <span className="text-primary font-heading italic font-medium">
+                                    Products
+                                </span>
                             </h2>
                         </div>
 
@@ -121,6 +129,7 @@ export function StoreHomeClient({
                     </div>
                 </div>
             </section>
+            )}
 
             {/* FEATURES */}
             <section className="py-24 bg-muted/30 border-y border-border/50">
@@ -130,10 +139,10 @@ export function StoreHomeClient({
                             variant="secondary"
                             className="px-4 py-1 rounded-full text-xs"
                         >
-                            Why Choose XCIX
+                            Why Choose {brandName}
                         </Badge>
                         <h2 className="text-4xl font-bold tracking-tight">
-                            The XCIX Experience
+                            The {brandName} Experience
                         </h2>
                         <p className="text-muted-foreground font-medium">
                             Premium materials, modern design, and exceptional
@@ -204,16 +213,16 @@ export function StoreHomeClient({
                 </div>
 
                 <div className="relative max-w-5xl mx-auto px-6 text-center space-y-12">
-                    <h2 className="text-6xl md:text-8xl font-black tracking-tighter leading-none uppercase">
+                    <h2 className="text-background text-6xl md:text-8xl font-black tracking-tighter leading-none uppercase">
                         UP TO{" "}
                         <span className="text-primary italic">30% OFF</span>{" "}
                         <br />
-                        <span className="text-3xl md:text-5xl opacity-80">
+                        <span className="text-3xl md:text-5xl opacity-90 font-heading italic font-medium">
                             Everything Sitewide
                         </span>
                     </h2>
 
-                    <p className="text-xl md:text-2xl font-medium opacity-60 max-w-2xl mx-auto leading-relaxed italic">
+                    <p className="text-xl md:text-2xl font-medium opacity-80 max-w-2xl mx-auto leading-relaxed italic">
                         Join the minimalist movement. Limited time offer for our
                         new collection.
                     </p>
@@ -222,7 +231,7 @@ export function StoreHomeClient({
                         <Button
                             size="lg"
                             className="h-16 px-12 text-xl font-bold bg-background text-foreground hover:bg-background/90
-                   shadow-2xl rounded-none transition-all hover:-translate-y-1"
+                   shadow-2xl transition-all hover:-translate-y-1"
                             asChild
                         >
                             <Link
@@ -237,8 +246,8 @@ export function StoreHomeClient({
                         <Button
                             size="lg"
                             variant="outline"
-                            className="h-16 px-12 text-xl font-bold border-2 border-background text-background
-                   hover:bg-background hover:text-foreground rounded-none transition-all"
+                            className="h-16 px-12 text-xl font-bold bg-transparent border-2 border-background text-background
+                   hover:bg-background hover:text-foreground transition-all"
                             asChild
                         >
                             <Link href="/products">Explore Arrivals</Link>

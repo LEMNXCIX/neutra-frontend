@@ -60,21 +60,21 @@ const isUserAdmin = (u: User) =>
 u.role?.name === "SUPER_ADMIN" || u.role?.name === "ADMIN";
 
 const getRoleColor = (roleName?: string) => {
-if (!roleName) return "bg-muted-foreground";
+if (!roleName) return "bg-muted text-muted-foreground";
 
 switch (roleName.toUpperCase()) {
 case "SUPER_ADMIN":
-return "bg-pink-600";
+return "bg-primary text-primary-foreground";
 case "ADMIN":
-return "bg-purple-500";
+return "bg-accent text-accent-foreground";
 case "MANAGER":
-return "bg-blue-500";
+return "bg-primary/10 text-primary";
 case "MODERATOR":
-return "bg-green-500";
+return "bg-muted text-muted-foreground";
 case "USER":
-return "bg-muted-foreground";
+return "bg-muted text-muted-foreground";
 default:
-return "bg-muted-foreground";
+return "bg-muted text-muted-foreground";
 }
 };
 
@@ -117,7 +117,7 @@ color: string;
 <p className="text-2xl font-bold mt-1">{value}</p>
 </div>
 <div className={`p-3 rounded-full ${color}`}>
-<Icon className="size-6 text-white" />
+<Icon className="size-6" />
 </div>
 </div>
 </CardContent>
@@ -232,19 +232,19 @@ return (
 icon={Users}
 title="Total Users"
 value={stats.totalUsers}
-color="bg-blue-500"
+color="bg-primary/10 text-primary"
 />
 <StatCard
 icon={Shield}
 title="Administrators"
 value={stats.adminUsers}
-color="bg-purple-500"
+color="bg-accent text-accent-foreground"
 />
 <StatCard
 icon={UserCircle}
 title="Regular Users"
 value={stats.regularUsers}
-color="bg-muted-foreground"
+color="bg-muted text-muted-foreground"
 />
 </div>
 );
@@ -266,19 +266,19 @@ return (
 icon={Users}
 title="Total Users"
 value={stats.totalUsers}
-color="bg-blue-500"
+color="bg-primary/10 text-primary"
 />
 <StatCard
 icon={Shield}
 title="Administrators"
 value={stats.adminUsers}
-color="bg-purple-500"
+color="bg-accent text-accent-foreground"
 />
 <StatCard
 icon={UserCircle}
 title="Regular Users"
 value={stats.regularUsers}
-color="bg-muted-foreground"
+color="bg-muted text-muted-foreground"
 />
 </div>
 </AccordionContent>
@@ -451,7 +451,7 @@ className="text-[10px] font-semibold uppercase tracking-wider"
 <Badge
 className={cn(
 getRoleColor(u.role?.name),
-"text-[10px] font-bold uppercase tracking-wider border-none shadow-none text-white",
+"text-[10px] font-bold uppercase tracking-wider border-none shadow-none",
 )}
 >
 {u.role?.name || "NO_ROLE"}
@@ -618,7 +618,7 @@ u.profilePic ||
 <Badge
 className={cn(
 getRoleColor(u.role?.name),
-"text-[9px] font-bold uppercase tracking-wider text-white",
+"text-[9px] font-bold uppercase tracking-wider",
 )}
 >
 {u.role?.name || "NO_ROLE"}

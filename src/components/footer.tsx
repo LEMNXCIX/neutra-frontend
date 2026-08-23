@@ -16,7 +16,7 @@ import Logo from "@/components/logo";
 
 const EMPTY_CATEGORIES: Category[] = [];
 
-export default function Footer({ minimal = false, initialCategories = EMPTY_CATEGORIES }: { minimal?: boolean; initialCategories?: Category[] }) {
+export default function Footer({ minimal = false, tenantName, tenantLogo, initialCategories = EMPTY_CATEGORIES }: { minimal?: boolean; tenantName?: string | null; tenantLogo?: string | null; initialCategories?: Category[] }) {
   const categories = initialCategories.filter((c) => c.active).slice(0, 5);
 
     return (
@@ -27,10 +27,10 @@ export default function Footer({ minimal = false, initialCategories = EMPTY_CATE
                     <div className="md:col-span-1 space-y-8">
                         <div className="flex items-center gap-3">
                             <div className="p-2.5 bg-primary/5 rounded-xl border border-primary/10">
-                                <Logo size={32} className="text-primary" />
+                                <Logo size={32} className="text-primary" src={tenantLogo} />
                             </div>
                             <h3 className="text-2xl font-bold tracking-tight text-foreground">
-                                XCIX
+                                {tenantName || "XCIX"}
                             </h3>
                         </div>
                         <p className="text-sm font-medium text-muted-foreground leading-relaxed max-w-[240px]">

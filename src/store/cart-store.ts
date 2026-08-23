@@ -63,17 +63,25 @@ export const useCartStore = create<CartState & CartActions>()((set, get) => ({
 
     set({ loading: true, error: null });
     try {
-      const cart = await cartService.get();
-      const mappedItems: MappedCartItem[] =
-        cart?.map((item) => ({
-          id: item.id,
+      const response = await cartService.get();
+      const cart = Array.isArray(response)
+        ? response
+        : Array.isArray((response as any)?.items)
+          ? (response as any).items
+          : Array.isArray((response as any)?.cart)
+            ? (response as any).cart
+            : Array.isArray((response as any)?.products)
+              ? (response as any).products
+              : [];
+      const mappedItems: MappedCartItem[] = cart.map((item: any) => ({
+          id: item.productId ?? item.id,
           cartItemId: item.id,
           name: item.name || "Unknown",
           amount: item.amount,
           price: item.price,
           image: item.image || undefined,
           stock: item.stock,
-        })) ?? [];
+        }));
 
       set({ items: mappedItems, loading: false });
     } catch (err) {

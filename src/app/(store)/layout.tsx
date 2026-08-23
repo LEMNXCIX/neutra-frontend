@@ -1,7 +1,10 @@
 import { Navigation as NavBar } from "@/components/nav_bar";
 import FooterWrapper from "@/components/footer-wrapper";
 import { TenantThemeProvider } from "@/providers/tenant-theme-provider";
-import { getTenantBrandingFromHeaders } from "@/lib/server-theme";
+import {
+    getTenantBrandingFromHeaders,
+    getTenantNameFromHeaders,
+} from "@/lib/server-theme";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -14,7 +17,10 @@ export default async function StoreLayout({
 }: {
     children: React.ReactNode;
 }) {
-    const branding = await getTenantBrandingFromHeaders();
+    const [branding, tenantName] = await Promise.all([
+        getTenantBrandingFromHeaders(),
+        getTenantNameFromHeaders(),
+    ]);
 
     return (
         <TenantThemeProvider branding={branding}>
@@ -25,9 +31,9 @@ export default async function StoreLayout({
                     marginLeft: 'var(--sidebar-width, 0px)',
                 } as React.CSSProperties}
             >
-                <NavBar />
+                <NavBar tenantName={tenantName} tenantLogo={branding?.tenantLogo} />
                 <div className="pt-16">{children}</div>
-                <FooterWrapper />
+                <FooterWrapper tenantName={tenantName} tenantLogo={branding?.tenantLogo} />
             </div>
         </TenantThemeProvider>
     );

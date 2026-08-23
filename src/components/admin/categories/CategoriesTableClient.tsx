@@ -94,7 +94,7 @@ const StatCard = ({
           <p className="text-2xl font-bold mt-1">{value}</p>
         </div>
         <div className={`p-3 rounded-full ${color}`}>
-          <Icon className="size-6 text-white" />
+          <Icon className="size-6" />
         </div>
       </div>
     </CardContent>
@@ -178,19 +178,19 @@ const CategoriesDesktopStats = ({ stats }: { stats: Stats }) => (
       icon={Folder}
       title="Total Categories"
       value={stats.totalCategories}
-      color="bg-purple-500"
+      color="bg-primary/10 text-primary"
     />
     <StatCard
       icon={Package}
       title="Total Products"
       value={stats.totalProducts}
-      color="bg-blue-500"
+      color="bg-accent text-accent-foreground"
     />
     <StatCard
       icon={TrendingUp}
       title="Avg Products/Category"
       value={stats.averageProductsPerCategory}
-      color="bg-green-500"
+      color="bg-muted text-muted-foreground"
     />
   </div>
 );
@@ -212,19 +212,19 @@ const CategoriesMobileStats = ({ stats }: { stats: Stats }) => (
             icon={Folder}
             title="Total Categories"
             value={stats.totalCategories}
-            color="bg-purple-500"
+            color="bg-primary/10 text-primary"
           />
           <StatCard
             icon={Package}
             title="Total Products"
             value={stats.totalProducts}
-            color="bg-blue-500"
+            color="bg-accent text-accent-foreground"
           />
           <StatCard
             icon={TrendingUp}
             title="Avg Products/Category"
             value={stats.averageProductsPerCategory}
-            color="bg-green-500"
+            color="bg-muted text-muted-foreground"
           />
         </div>
       </AccordionContent>
@@ -574,7 +574,7 @@ const CategoriesMobileCards = ({
               <Button
                 size="icon"
                 variant="outline"
-                className="size-10 border-rose-200 text-rose-600 rounded-lg hover:bg-rose-50"
+                className="size-10 border-destructive/20 text-destructive rounded-lg hover:bg-destructive/10"
                 onClick={() => onDelete(c.id)}
                 disabled={isDeleting === c.id}
               >

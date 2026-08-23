@@ -108,7 +108,7 @@ describe('productsService.search', () => {
 
 describe('productsService.create', () => {
     it('creates a product with correct data', async () => {
-        const data = { name: 'New Product', price: 30, description: 'A new item' };
+        const data = { name: 'New Product', price: 30, description: 'A new item', stock: 10, ownerId: 'user-1' };
         const created = { id: '3', ...data };
 
         (mockApi.post as any).mockResolvedValueOnce(created);

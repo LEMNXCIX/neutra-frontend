@@ -1,6 +1,28 @@
 import React from 'react';
 
-export default function Logo({ size = 32, className = '' }: { size?: number; className?: string }) {
+export default function Logo({
+  size = 32,
+  className = '',
+  src,
+}: {
+  size?: number;
+  className?: string;
+  /** Tenant logo URL. When provided it replaces the default XCIX mark. */
+  src?: string | null;
+}) {
+  if (src) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={src}
+        alt="Logo"
+        width={size}
+        height={size}
+        className={`${className ? className + ' ' : ''}object-contain`}
+      />
+    );
+  }
+
   const stroke = "currentColor";
   return (
     <svg

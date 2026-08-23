@@ -19,3 +19,19 @@ export async function getTenantBrandingFromHeaders(): Promise<TenantBranding | n
         return null;
     }
 }
+
+/**
+ * Resolve the current tenant display name from the x-tenant-slug header.
+ * Returns null when there is no tenant context (e.g. superadmin).
+ */
+export async function getTenantNameFromHeaders(): Promise<string | null> {
+    try {
+        const tenantSlug = (await headers()).get("x-tenant-slug");
+        if (!tenantSlug) return null;
+
+        const tenant = await tenantService.getBySlug(tenantSlug);
+        return tenant?.name ?? null;
+    } catch {
+        return null;
+    }
+}

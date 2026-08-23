@@ -220,7 +220,6 @@
   @apply transition-all duration-200 font-semibold rounded-[var(--radius)] px-4 py-2 flex items-center justify-center gap-2 bg-primary text-primary-foreground hover:opacity-90 active:scale-95 shadow-soft;
 }
 
-/* Tenant branding: headings use the tenant heading font when a theme is active */
-.tenant-theme :is(h1, h2, h3, h4, h5, h6) {
-  font-family: var(--font-tenant-heading, inherit);
-}
+/* Tenant branding: the tenant heading font is an accent face, not the
+   default for all titles. Use the `font-heading` utility (optionally with
+   italic) on part of a title to create a mixed-typography effect. */
