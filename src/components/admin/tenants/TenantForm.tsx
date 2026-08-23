@@ -21,6 +21,7 @@ const EMPTY_PLATFORM_FEATURES: PlatformFeature[] = [];
 import { toast } from "sonner";
 import { ApiError } from "@/lib/api-client";
 import { Checkbox } from "@/components/ui/checkbox";
+import { BrandingEditor } from "./BrandingEditor";
 
 interface TenantFormProps {
     tenant?: Tenant | null;
@@ -140,65 +141,21 @@ function GeneralTabContent({
 
 function BrandingTabContent({
     formData,
-    updateConfig,
+    setFormData,
     isWizard,
     setActiveTab,
 }: TabContentProps) {
     return (
         <TabsContent value="branding" className="py-4 space-y-4">
-            <div className="space-y-2">
-                <Label>Primary Color</Label>
-                <div className="flex gap-2">
-                    <Input
-                        type="color"
-                        className="size-12 p-1 cursor-pointer"
-                        value={
-                            formData.config?.branding?.primaryColor || "#000000"
-                        }
-                        onChange={(e) =>
-                            updateConfig(
-                                "branding",
-                                "primaryColor",
-                                e.target.value,
-                            )
-                        }
-                    />
-                    <Input
-                        value={formData.config?.branding?.primaryColor || ""}
-                        onChange={(e) =>
-                            updateConfig(
-                                "branding",
-                                "primaryColor",
-                                e.target.value,
-                            )
-                        }
-                        placeholder="#000000"
-                        className="h-12"
-                    />
-                </div>
-            </div>
-            <div className="space-y-2">
-                <Label>Logo URL</Label>
-                <Input
-                    value={formData.config?.branding?.tenantLogo || ""}
-                    onChange={(e) =>
-                        updateConfig("branding", "tenantLogo", e.target.value)
-                    }
-                    placeholder="https://example.com/logo.png"
-                    className="h-12"
-                />
-            </div>
-            <div className="space-y-2">
-                <Label>Favicon URL</Label>
-                <Input
-                    value={formData.config?.branding?.favicon || ""}
-                    onChange={(e) =>
-                        updateConfig("branding", "favicon", e.target.value)
-                    }
-                    placeholder="https://example.com/favicon.ico"
-                    className="h-12"
-                />
-            </div>
+            <BrandingEditor
+                value={formData.config?.branding}
+                onChange={(branding) =>
+                    setFormData((prev) => ({
+                        ...prev,
+                        config: { ...prev.config, branding },
+                    }))
+                }
+            />
             {isWizard && (
                 <div className="pt-4 flex justify-between">
                     <Button
