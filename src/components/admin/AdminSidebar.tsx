@@ -19,6 +19,7 @@ import {
     Building,
     MessageSquare,
     ArrowLeft,
+    Palette,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -41,6 +42,7 @@ const ICON_MAP: Record<string, any> = {
     UserCog,
     Building,
     MessageSquare,
+    Palette,
 };
 
 interface AdminSidebarProps {

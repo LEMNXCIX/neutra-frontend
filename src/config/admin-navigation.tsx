@@ -10,6 +10,7 @@ export interface NavItem {
 
 export const STORE_ADMIN_NAV: NavItem[] = [
     { href: "/admin", label: "Dashboard", icon: "LayoutDashboard", exact: true },
+    { href: "/admin/appearance", label: "Appearance", icon: "Palette" },
     { href: "/admin/products", label: "Products", icon: "Package" },
     { href: "/admin/categories", label: "Categories", icon: "LayoutList" },
     { href: "/admin/banners", label: "Banners", icon: "Megaphone", requiredFeature: 'BANNERS' },
@@ -23,6 +24,7 @@ export const STORE_ADMIN_NAV: NavItem[] = [
 
 export const BOOKING_ADMIN_NAV: NavItem[] = [
     { href: "/admin", label: "Dashboard", icon: "LayoutDashboard", exact: true },
+    { href: "/admin/appearance", label: "Appearance", icon: "Palette" },
     { href: "/admin/appointments", label: "Appointments", icon: "CalendarDays", requiredFeature: 'APPOINTMENTS' },
     { href: "/admin/services", label: "Services", icon: "Scissors" },
     { href: "/admin/categories", label: "Categories", icon: "LayoutList" },

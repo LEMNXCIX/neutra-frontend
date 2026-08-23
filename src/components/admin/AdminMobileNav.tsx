@@ -20,6 +20,7 @@ import {
     Scissors,
     UserCog,
     Building,
+    Palette,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -36,6 +37,7 @@ const ICON_MAP: Record<string, any> = {
     Scissors,
     UserCog,
     Building,
+    Palette,
 };
 
 interface AdminMobileNavProps {
