@@ -162,10 +162,15 @@ export const useCartStore = create<CartState & CartActions>()((set, get) => ({
 
     set({ loading: true });
     try {
-      await Promise.all([
-        cartService.removeItem(item.cartItemId),
-        cartService.addItem({ productId: id, amount: newQty }),
-      ]);
+      // Sequential remove+add: if the add fails we re-add the original item
+      // so the cart is not left without the product.
+      await cartService.removeItem(item.cartItemId);
+      try {
+        await cartService.addItem({ productId: id, amount: newQty });
+      } catch (addErr) {
+        await cartService.addItem({ productId: id, amount: item.amount });
+        throw addErr;
+      }
       await get().fetchCart();
     } catch (err) {
       const message =

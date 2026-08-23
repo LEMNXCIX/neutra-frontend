@@ -1,6 +1,52 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
+/**
+ * Short-lived in-memory cache for tenant config (module type + tenant id).
+ * Tenant types can change (e.g. store -> booking), so unlike the previous
+ * cookie-based cache (1h), this keeps routing fresh while still avoiding
+ * a backend fetch on every request.
+ */
+const TENANT_CONFIG_TTL_MS = 60_000;
+const tenantConfigCache = new Map<
+    string,
+    { moduleType: string; tenantId: string; expires: number }
+>();
+
+async function fetchTenantConfig(
+    tenantSlug: string,
+): Promise<{ moduleType: string; tenantId: string } | null> {
+    const cached = tenantConfigCache.get(tenantSlug);
+    if (cached && cached.expires > Date.now()) {
+        return { moduleType: cached.moduleType, tenantId: cached.tenantId };
+    }
+
+    try {
+        const baseUrl =
+            process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
+        const apiUrl = baseUrl.endsWith('/api') ? baseUrl : `${baseUrl}/api`;
+        const response = await fetch(`${apiUrl}/tenants/config/${tenantSlug}`);
+
+        if (response.ok) {
+            const result = await response.json();
+            if (result.success && result.data) {
+                const config = {
+                    moduleType: result.data.type?.toLowerCase() || 'store',
+                    tenantId: result.data.id || '',
+                };
+                tenantConfigCache.set(tenantSlug, {
+                    ...config,
+                    expires: Date.now() + TENANT_CONFIG_TTL_MS,
+                });
+                return config;
+            }
+        }
+    } catch {
+        // Fall through to null; caller applies heuristic fallback
+    }
+    return null;
+}
+
 export async function proxy(request: NextRequest) {
     const hostname = request.headers.get('host') || 'localhost';
     const url = request.nextUrl;
@@ -36,43 +82,17 @@ export async function proxy(request: NextRequest) {
         if (resolvedSlug && resolvedSlug !== 'www' && resolvedSlug !== 'api' && resolvedSlug !== 'localhost' && !/^\d+$/.test(resolvedSlug)) {
             tenantSlug = resolvedSlug;
 
-            // Try to get module type from cookie cache first
-            const cachedModuleType = request.cookies.get(`${tenantSlug}-module-type`)?.value;
-            const cachedTenantId = request.cookies.get(`${tenantSlug}-tenant-id`)?.value;
-
-            if (cachedModuleType && cachedTenantId) {
-                moduleType = cachedModuleType;
-                tenantId = cachedTenantId;
+            // Resolve module type from the short-lived cache / backend API
+            const config = await fetchTenantConfig(tenantSlug);
+            if (config) {
+                moduleType = config.moduleType;
+                tenantId = config.tenantId;
             } else {
-                // Fetch from backend API
-                try {
-                    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
-                    const apiUrl = baseUrl.endsWith('/api') ? baseUrl : `${baseUrl}/api`;
-                    const response = await fetch(`${apiUrl}/tenants/config/${tenantSlug}`, {
-                        next: { revalidate: 3600 } // Cache for 1 hour if supported
-                    });
-
-                    if (response.ok) {
-                        const result = await response.json();
-                        if (result.success && result.data) {
-                            moduleType = result.data.type?.toLowerCase() || 'store';
-                            tenantId = result.data.id || '';
-                        }
-                    } else {
-                        // Simple heuristic fallback if API is down or tenant not found
-                        if (tenantSlug.includes('booking') || tenantSlug.includes('book')) {
-                            moduleType = 'booking';
-                        } else {
-                            moduleType = 'store';
-                        }
-                    }
-                } catch (_error) {
-                    // Heuristic fallback
-                    if (tenantSlug.includes('booking') || tenantSlug.includes('book')) {
-                        moduleType = 'booking';
-                    } else {
-                        moduleType = 'store';
-                    }
+                // Heuristic fallback if API is down or tenant not found
+                if (tenantSlug.includes('booking') || tenantSlug.includes('book')) {
+                    moduleType = 'booking';
+                } else {
+                    moduleType = 'store';
                 }
             }
         }
@@ -128,11 +148,9 @@ export async function proxy(request: NextRequest) {
                 headers: requestHeaders,
             },
         });
-        response.cookies.set('tenant-slug', tenantSlug);
-        response.cookies.set('module-type', moduleType);
-        if (tenantId) response.cookies.set('tenant-id', tenantId);
-        response.cookies.set(`${tenantSlug}-module-type`, moduleType, { maxAge: 3600 });
-        if (tenantId) response.cookies.set(`${tenantSlug}-tenant-id`, tenantId, { maxAge: 3600 });
+        response.cookies.set('tenant-slug', tenantSlug, { sameSite: 'lax' });
+        response.cookies.set('module-type', moduleType, { sameSite: 'lax' });
+        if (tenantId) response.cookies.set('tenant-id', tenantId, { sameSite: 'lax' });
         return response;
     }
 
@@ -145,11 +163,9 @@ export async function proxy(request: NextRequest) {
             },
         });
         // Set cookie for client-side access
-        response.cookies.set('tenant-slug', tenantSlug);
-        response.cookies.set('module-type', moduleType);
-        if (tenantId) response.cookies.set('tenant-id', tenantId);
-        response.cookies.set(`${tenantSlug}-module-type`, moduleType, { maxAge: 3600 });
-        if (tenantId) response.cookies.set(`${tenantSlug}-tenant-id`, tenantId, { maxAge: 3600 });
+        response.cookies.set('tenant-slug', tenantSlug, { sameSite: 'lax' });
+        response.cookies.set('module-type', moduleType, { sameSite: 'lax' });
+        if (tenantId) response.cookies.set('tenant-id', tenantId, { sameSite: 'lax' });
         return response;
     }
 
@@ -160,14 +176,9 @@ export async function proxy(request: NextRequest) {
     });
 
     // Set cookie for client-side access
-    response.cookies.set('tenant-slug', tenantSlug);
-    response.cookies.set('module-type', moduleType);
-    if (tenantId) response.cookies.set('tenant-id', tenantId);
-
-    if (tenantSlug) {
-        response.cookies.set(`${tenantSlug}-module-type`, moduleType, { maxAge: 3600 });
-        if (tenantId) response.cookies.set(`${tenantSlug}-tenant-id`, tenantId, { maxAge: 3600 });
-    }
+    response.cookies.set('tenant-slug', tenantSlug, { sameSite: 'lax' });
+    response.cookies.set('module-type', moduleType, { sameSite: 'lax' });
+    if (tenantId) response.cookies.set('tenant-id', tenantId, { sameSite: 'lax' });
 
     return response;
 }

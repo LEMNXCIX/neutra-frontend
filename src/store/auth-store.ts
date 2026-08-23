@@ -128,6 +128,10 @@ export const useAuthStore = create<AuthState>()(
         }),
         {
             name: 'auth-storage',
+            // Never persist session data (user/role): it is spoofable and
+            // goes stale. The session is restored from the HttpOnly cookie
+            // via checkSession() on boot.
+            partialize: (state) => ({ error: state.error }),
         }
     )
 );

@@ -8,10 +8,16 @@ import { TenantFeatures } from "@/types/tenant";
 import { useTenantStore } from "@/store/tenant-store";
 
 export function FeatureProvider({ children }: { children: ReactNode }) {
-    const { tenantId } = useTenantStore();
+    const { tenantId, syncFromCookies } = useTenantStore();
     const [features, setFeatures] = useState<TenantFeatures>({});
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
+
+    // Tenant cookies are set by the proxy on the first response and may not
+    // exist when this store module initializes; re-read them on mount.
+    useEffect(() => {
+        syncFromCookies();
+    }, [syncFromCookies]);
 
     const fetchFeatures = useCallback(async () => {
         if (!tenantId) {

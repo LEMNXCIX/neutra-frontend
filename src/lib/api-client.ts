@@ -104,10 +104,12 @@ export async function apiClient<T = unknown>(
 
     const url = endpoint.startsWith('http') ? endpoint : `${baseUrl}${endpoint}`;
 
-    if (isServer) {
-        console.log(`[ApiClient] SERVER REQUEST | url: ${url} | endpoint: ${endpoint} | baseUrl: ${baseUrl}`);
-    } else {
-        console.log(`[ApiClient] CLIENT REQUEST | url: ${url} | endpoint: ${endpoint}`);
+    if (process.env.NODE_ENV === 'development') {
+        if (isServer) {
+            console.log(`[ApiClient] SERVER REQUEST | url: ${url} | endpoint: ${endpoint} | baseUrl: ${baseUrl}`);
+        } else {
+            console.log(`[ApiClient] CLIENT REQUEST | url: ${url} | endpoint: ${endpoint}`);
+        }
     }
 
     try {

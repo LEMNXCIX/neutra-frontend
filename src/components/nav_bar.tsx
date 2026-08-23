@@ -699,6 +699,7 @@ export function Navigation({
     };
 
     useEffect(() => {
+        const controller = new AbortController();
         const searchProducts = async () => {
             if (state.query.trim().length < 2) {
                 dispatch({ type: "SET_SEARCH_RESULTS", payload: [] });
@@ -710,21 +711,28 @@ export function Navigation({
             try {
                 const res = await fetch(
                     `/api/products?search=${encodeURIComponent(state.query)}&pageSize=5`,
+                    { signal: controller.signal },
                 );
                 const data = await res.json();
                 const list = data.data?.products || data.products || [];
                 dispatch({ type: "SET_SEARCH_RESULTS", payload: list });
                 dispatch({ type: "SET_SHOW_RESULTS", payload: true });
             } catch (error) {
+                if ((error as Error).name === "AbortError") return;
                 console.error("Search error:", error);
                 dispatch({ type: "SET_SEARCH_RESULTS", payload: [] });
             } finally {
-                dispatch({ type: "SET_IS_SEARCHING", payload: false });
+                if (!controller.signal.aborted) {
+                    dispatch({ type: "SET_IS_SEARCHING", payload: false });
+                }
             }
         };
 
         const debounce = setTimeout(searchProducts, 300);
-        return () => clearTimeout(debounce);
+        return () => {
+            clearTimeout(debounce);
+            controller.abort();
+        };
     }, [state.query]);
 
     useEffect(() => {
