@@ -55,7 +55,7 @@ function CartItemCard({
 }) {
   const itemTotal = (item.price || 0) * item.amount;
   return (
-    <Card className="group relative overflow-hidden border-border bg-card transition-all duration-500 hover:shadow-2xl hover:shadow-primary/5 rounded-2xl">
+    <Card className="group relative overflow-hidden border-border bg-card transition-all duration-500 hover:shadow-2xl hover:shadow-primary/5 rounded-xl">
       <CardContent className="p-6">
         <div className="flex flex-col sm:flex-row gap-6">
           <div className="flex-shrink-0 w-full sm:w-32 h-32 bg-muted rounded-xl overflow-hidden border border-border/50 group-hover:scale-105 transition-transform duration-500">
@@ -117,7 +117,7 @@ function CouponCard({
   applyingCoupon: boolean;
 }) {
   return (
-    <Card className="border-border bg-card rounded-2xl shadow-sm">
+    <Card className="border-border bg-card rounded-xl shadow-sm">
       <CardHeader className="pb-4">
         <CardTitle className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-muted-foreground">
           <Tag className="size-4" /> Promotion Code
@@ -180,7 +180,7 @@ function OrderSummaryCard({
   onPlaceOrder: () => void;
 }) {
   return (
-    <Card className="border-none bg-foreground text-background rounded-2xl shadow-2xl overflow-hidden">
+    <Card className="border-none bg-foreground text-background rounded-xl shadow-2xl overflow-hidden">
       <div className="h-2 bg-primary w-full" />
       <CardHeader className="pb-6">
         <CardTitle className="flex items-center gap-2 text-xs font-black uppercase tracking-widest opacity-60">
@@ -347,7 +347,7 @@ export default function CartClient() {
         );
 
     return (
-        <div className="min-h-screen bg-white dark:bg-gray-950 py-12 px-4 animate-slide-up">
+        <div className="min-h-screen bg-background py-12 px-4 animate-slide-up">
             <div className="max-w-6xl mx-auto">
                 {/* Header */}
                 <div className="mb-12">
@@ -386,7 +386,7 @@ export default function CartClient() {
               />
             )}
 
-            <Card className="border-border bg-card rounded-2xl shadow-sm">
+            <Card className="border-border bg-card rounded-xl shadow-sm">
               <CardHeader className="pb-4">
                 <CardTitle className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-muted-foreground">
                   <MapPin className="size-4" /> Delivery Target

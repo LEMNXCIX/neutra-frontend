@@ -9,10 +9,10 @@ interface ServiceCardProps {
 
 export default function ServiceCard({ service, onBook }: ServiceCardProps) {
     return (
-        <div className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow">
+        <div className="bg-background border border-border rounded-lg p-6 hover:shadow-lg transition-shadow">
             <div className="flex justify-between items-start mb-4">
                 <div>
-                    <h3 className="text-lg font-semibold text-gray-900">
+                    <h3 className="text-lg font-semibold text-foreground">
                         {service.name}
                     </h3>
                     {service.category && (
@@ -22,20 +22,20 @@ export default function ServiceCard({ service, onBook }: ServiceCardProps) {
                     )}
                 </div>
                 <div className="text-right">
-                    <p className="text-2xl font-bold text-gray-900">
+                    <p className="text-2xl font-bold text-foreground">
                         ${service.price}
                     </p>
                 </div>
             </div>
 
             {service.description && (
-                <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
                     {service.description}
                 </p>
             )}
 
-            <div className="flex justify-between items-center mt-4 pt-4 border-t border-gray-100">
-                <div className="flex items-center text-sm text-gray-500">
+            <div className="flex justify-between items-center mt-4 pt-4 border-t border-border">
+                <div className="flex items-center text-sm text-muted-foreground">
                     <svg
                         className="size-4 mr-1"
                         fill="none"
@@ -55,7 +55,7 @@ export default function ServiceCard({ service, onBook }: ServiceCardProps) {
                 <button
                     type="button"
                     onClick={() => onBook?.(service)}
-                    className="px-4 py-2 bg-gray-950 text-white text-sm font-medium rounded-md hover:bg-gray-800 transition-colors"
+                    className="px-4 py-2 bg-primary text-primary-foreground text-sm font-medium rounded-md hover:bg-primary/90 transition-colors"
                 >
                     Book Now
                 </button>

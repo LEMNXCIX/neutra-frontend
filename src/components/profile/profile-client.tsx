@@ -208,7 +208,7 @@ export function ProfileClient({
               </div>
 
               <div className="flex flex-wrap gap-4 pt-4">
-                <div className="px-6 py-3 bg-muted/40 rounded-2xl border border-border/50">
+                <div className="px-6 py-3 bg-muted/40 rounded-xl border border-border/50">
                   <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1 opacity-70">
                     Account Level
                   </p>
@@ -216,7 +216,7 @@ export function ProfileClient({
                     {user.roleName || "Member"}
                   </p>
                 </div>
-                <div className="px-6 py-3 bg-muted/40 rounded-2xl border border-border/50">
+                <div className="px-6 py-3 bg-muted/40 rounded-xl border border-border/50">
                   <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1 opacity-70">
                     Registration Date
                   </p>
@@ -231,7 +231,7 @@ export function ProfileClient({
               <Button
                 onClick={openEditProfile}
                 size="lg"
-                className="h-14 px-10 rounded-2xl font-bold bg-foreground text-background hover:bg-foreground/90 shadow-xl shadow-foreground/10 transition-all hover:-translate-y-1"
+                className="h-14 px-10 rounded-xl font-bold bg-foreground text-background hover:bg-foreground/90 shadow-xl shadow-foreground/10 transition-all hover:-translate-y-1"
               >
                 <Edit className="size-4 mr-2" /> Edit Profile
               </Button>
@@ -242,7 +242,7 @@ export function ProfileClient({
                   await logout();
                   router.push("/login");
                 }}
-                className="h-14 px-10 rounded-2xl font-bold border-2 border-border hover:bg-destructive hover:text-destructive-foreground hover:border-destructive transition-all"
+                className="h-14 px-10 rounded-xl font-bold border-2 border-border hover:bg-destructive hover:text-destructive-foreground hover:border-destructive transition-all"
               >
                 <LogOut className="size-4 mr-2" /> Sign Out
               </Button>
@@ -266,7 +266,7 @@ export function ProfileClient({
 
       {/* Edit Dialog */}
       <Dialog open={editState.editOpen} onOpenChange={(open) => dispatch({ type: "SET_EDIT_OPEN", payload: open })}>
-        <DialogContent className="max-w-md rounded-2xl p-0 overflow-hidden border-none shadow-2xl">
+        <DialogContent className="max-w-md rounded-xl p-0 overflow-hidden border-none shadow-2xl">
           <DialogHeader className="p-8 pb-0">
             <DialogTitle className="text-xl font-bold">
               Edit Profile

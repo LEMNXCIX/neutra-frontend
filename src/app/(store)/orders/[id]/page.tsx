@@ -60,7 +60,7 @@ function OrderItemsSection({ items }: { items: OrderItem[] }) {
           return (
             <Card
               key={item.id}
-              className="group border-none shadow-lg hover:shadow-2xl transition-all duration-500 rounded-3xl overflow-hidden bg-background"
+              className="group border-none shadow-lg hover:shadow-2xl transition-all duration-500 rounded-xl overflow-hidden bg-background"
             >
               <CardContent className="p-8">
                 <div className="flex items-center justify-between gap-6">
@@ -172,7 +172,7 @@ function OrderInfoGrid({ address, trackingNumber }: { address: string; trackingN
         <CardContent className="pb-8">
           {trackingNumber ? (
             <div className="space-y-4">
-              <div className="bg-muted/50 px-6 py-4 rounded-2xl font-mono text-base font-bold tracking-tight border border-border/30 text-center">
+              <div className="bg-muted/50 px-6 py-4 rounded-xl font-mono text-base font-bold tracking-tight border border-border/30 text-center">
                 {trackingNumber}
               </div>
               <Button
@@ -280,7 +280,7 @@ function OrderHelpCard() {
       </div>
       <Button
         variant="outline"
-        className="w-full h-14 rounded-2xl border-2 font-bold uppercase tracking-widest text-[10px] hover:bg-foreground hover:text-background transition-all"
+        className="w-full h-14 rounded-xl border-2 font-bold uppercase tracking-widest text-[10px] hover:bg-foreground hover:text-background transition-all"
         asChild
       >
         <Link href="/contact">Contact Support</Link>
@@ -404,7 +404,7 @@ const currentStatus =
                             </div>
                         </div>
                         <Button
-                            className="h-14 px-10 rounded-2xl font-bold bg-foreground text-background hover:bg-foreground/90 shadow-xl shadow-foreground/10 transition-all hover:-translate-y-1"
+                            className="h-14 px-10 rounded-xl font-bold bg-foreground text-background hover:bg-foreground/90 shadow-xl shadow-foreground/10 transition-all hover:-translate-y-1"
                             asChild
                         >
                             <a

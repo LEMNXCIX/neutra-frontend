@@ -84,7 +84,7 @@ export function AppointmentHistory({
                         <CardHeader className="bg-muted/30 p-8 border-b border-border/50">
                             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                                 <div className="flex flex-wrap items-center gap-3">
-                                    <div className="size-12 bg-background rounded-2xl flex items-center justify-center shadow-sm">
+                                    <div className="size-12 bg-background rounded-xl flex items-center justify-center shadow-sm">
                                         <Calendar className="size-6 text-primary" />
                                     </div>
                                     <div>
@@ -106,7 +106,7 @@ export function AppointmentHistory({
                         </CardHeader>
                         <CardContent className="p-8 space-y-6">
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm font-medium">
-                                <div className="flex items-center gap-3 p-4 bg-muted/30 rounded-2xl">
+                                <div className="flex items-center gap-3 p-4 bg-muted/30 rounded-xl">
                                     <Calendar className="size-5 text-primary" />
                                     <div className="space-y-0.5">
                                         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
@@ -121,7 +121,7 @@ export function AppointmentHistory({
                                         </p>
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-3 p-4 bg-muted/30 rounded-2xl">
+                                <div className="flex items-center gap-3 p-4 bg-muted/30 rounded-xl">
                                     <Clock className="size-5 text-primary" />
                                     <div className="space-y-0.5">
                                         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">

@@ -113,7 +113,7 @@ export function RegisterPageClient() {
             <div className="w-full max-w-[480px] space-y-8">
                 {/* Logo/Brand Section */}
                 <div className="text-center space-y-4">
-                    <div className="inline-flex items-center justify-center size-16 rounded-2xl bg-primary/10 text-primary mb-2 transition-transform hover:scale-110 duration-500 shadow-sm">
+                    <div className="inline-flex items-center justify-center size-16 rounded-xl bg-primary/10 text-primary mb-2 transition-transform hover:scale-110 duration-500 shadow-sm">
                         <Logo size={36} />
                     </div>
                     <div className="space-y-1">

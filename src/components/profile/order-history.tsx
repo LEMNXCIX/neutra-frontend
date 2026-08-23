@@ -86,7 +86,7 @@ export function OrderHistory({ initialOrders }: OrderHistoryProps) {
                         <CardHeader className="bg-muted/30 p-8 border-b border-border/50">
                             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                                 <div className="flex flex-wrap items-center gap-3">
-                                    <div className="size-12 bg-background rounded-2xl flex items-center justify-center shadow-sm">
+                                    <div className="size-12 bg-background rounded-xl flex items-center justify-center shadow-sm">
                                         <Package className="size-6 text-primary" />
                                     </div>
                                     <div>

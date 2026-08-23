@@ -56,7 +56,7 @@ export default function ShippingPage() {
                             className="t-card border-none shadow-lg group overflow-hidden"
                         >
                             <CardContent className="p-10 space-y-6">
-                                <div className="size-14 bg-primary/10 text-primary flex items-center justify-center rounded-2xl transition-transform group-hover:scale-110 duration-500">
+                                <div className="size-14 bg-primary/10 text-primary flex items-center justify-center rounded-xl transition-transform group-hover:scale-110 duration-500">
                                     <tier.icon className="size-7" />
                                 </div>
                                 <div className="space-y-2">

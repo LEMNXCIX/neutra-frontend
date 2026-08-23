@@ -142,7 +142,7 @@ designed for modern, minimalist living.
 </div>
 
 {/* View Toggle */}
-<div className="flex items-center gap-3 bg-background/50 backdrop-blur-md border border-border/50 p-2 rounded-2xl shadow-xl">
+<div className="flex items-center gap-3 bg-background/50 backdrop-blur-md border border-border/50 p-2 rounded-xl shadow-xl">
 <Button
           variant={
         state.viewMode === "grid" ? "default" : "ghost"
@@ -306,7 +306,7 @@ Everything
 
 {/* Results Summary */}
 <div className="flex items-end">
-<div className="p-4 bg-primary/5 rounded-2xl w-full border border-primary/10 flex items-center justify-between group hover:bg-primary/10 transition-colors">
+<div className="p-4 bg-primary/5 rounded-xl w-full border border-primary/10 flex items-center justify-between group hover:bg-primary/10 transition-colors">
 <div>
 <p className="text-[10px] font-bold text-primary uppercase tracking-widest mb-1">
 Items Found

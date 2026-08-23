@@ -62,7 +62,7 @@ export function StoreHomeClient({
                         <div className="lg:col-span-2">
                             <div className="relative">
                                 <div className="hidden lg:block absolute inset-0 -m-6 bg-primary/5 rounded-[3rem] blur-3xl -z-10" />
-                                <div className="relative bg-background rounded-3xl overflow-hidden shadow-2xl border border-border/50">
+                                <div className="relative bg-background rounded-xl overflow-hidden shadow-2xl border border-border/50">
                                     {isFeatureEnabled("BANNERS") && (
                                         <PromoSlider
                                             initialSlides={initialSliders}
@@ -178,7 +178,7 @@ export function StoreHomeClient({
                             >
                                 <CardContent className="p-10 text-center space-y-6">
                                     <div
-                                        className={`size-20 rounded-2xl bg-gradient-to-br ${f.c1} ${f.c2} flex items-center justify-center mx-auto text-white shadow-lg transition-transform group-hover:scale-110 group-hover:rotate-3 duration-500`}
+                                        className={`size-20 rounded-xl bg-gradient-to-br ${f.c1} ${f.c2} flex items-center justify-center mx-auto text-white shadow-lg transition-transform group-hover:scale-110 group-hover:rotate-3 duration-500`}
                                     >
                                         <f.icon className="size-10" />
                                     </div>
@@ -254,7 +254,7 @@ export function StoreHomeClient({
                 <div className="absolute -bottom-40 -left-40 size-96 bg-purple-600/10 rounded-full blur-3xl" />
 
                 <div className="max-w-5xl mx-auto px-6 relative">
-                    <Card className="t-card border-none shadow-2xl bg-background/70 backdrop-blur-2xl relative overflow-hidden rounded-3xl">
+                    <Card className="t-card border-none shadow-2xl bg-background/70 backdrop-blur-2xl relative overflow-hidden rounded-xl">
                         <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-primary via-purple-500 to-pink-500" />
 
                         <CardContent className="p-16 md:p-24 text-center space-y-10">
@@ -275,13 +275,13 @@ export function StoreHomeClient({
                                     required
                                     aria-label="Email for newsletter"
                                     placeholder="your@email.com"
-                                    className="flex-1 h-16 px-8 rounded-2xl bg-background border border-border/50
+                                    className="flex-1 h-16 px-8 rounded-xl bg-background border border-border/50
                      focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10
                      font-medium transition-all shadow-inner text-lg"
                                 />
                                 <Button
                                     size="lg"
-                                    className="h-16 px-10 font-bold bg-primary hover:bg-primary/90 shadow-xl shadow-primary/20 hover:-translate-y-1 hover:scale-105 rounded-2xl transition-all text-lg"
+                                    className="h-16 px-10 font-bold bg-primary hover:bg-primary/90 shadow-xl shadow-primary/20 hover:-translate-y-1 hover:scale-105 rounded-xl transition-all text-lg"
                                 >
                                     <Zap className="mr-2 size-5" />
                                     Subscribe

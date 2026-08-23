@@ -24,7 +24,7 @@ export function TenantOnboardingPageClient() {
     };
 
     return (
-        <main className="min-h-screen bg-white dark:bg-gray-950 py-20 px-6 flex flex-col items-center animate-slide-up">
+        <main className="min-h-screen bg-background py-20 px-6 flex flex-col items-center animate-slide-up">
             <div className="w-full max-w-4xl space-y-12">
                 {/* Header */}
                 <div className="flex flex-col items-center text-center gap-6">
@@ -52,7 +52,7 @@ export function TenantOnboardingPageClient() {
                     <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-primary via-purple-500 to-pink-500" />
                     <CardHeader className="border-b-4 border-foreground pb-10 pt-12 px-10 bg-muted/30">
                         <div className="flex flex-col md:flex-row md:items-center gap-8">
-                            <div className="p-5 bg-foreground text-background rounded-3xl shadow-2xl">
+                            <div className="p-5 bg-foreground text-background rounded-xl shadow-2xl">
                                 <Rocket size={40} strokeWidth={2.5} />
                             </div>
                             <div className="space-y-1">

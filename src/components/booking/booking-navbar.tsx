@@ -66,7 +66,7 @@ function MobileMenuSheet({ isOpen, setIsOpen, navItems, user, logout, router }: 
       >
         <SheetHeader className="p-8 border-b border-border text-left bg-muted/20">
           <div className="flex items-center gap-4">
-            <div className="p-3 bg-background border border-border shadow-sm rounded-2xl">
+            <div className="p-3 bg-background border border-border shadow-sm rounded-xl">
               <Logo size={32} />
             </div>
             <div>
@@ -93,7 +93,7 @@ function MobileMenuSheet({ isOpen, setIsOpen, navItems, user, logout, router }: 
                   onClick={() =>
                     setIsOpen(false)
                   }
-                  className="flex items-center justify-between p-4 bg-card border border-border shadow-sm hover:shadow-md hover:border-primary/20 transition-all rounded-2xl group"
+                  className="flex items-center justify-between p-4 bg-card border border-border shadow-sm hover:shadow-md hover:border-primary/20 transition-all rounded-xl group"
                 >
                   <span className="font-bold text-lg">
                     {item.label}
@@ -113,7 +113,7 @@ function MobileMenuSheet({ isOpen, setIsOpen, navItems, user, logout, router }: 
             </span>
             {user ? (
               <div className="space-y-6">
-                <div className="flex items-center gap-4 p-5 bg-card border border-border shadow-sm rounded-2xl">
+                <div className="flex items-center gap-4 p-5 bg-card border border-border shadow-sm rounded-xl">
                   <Avatar className="size-12 border border-border">
                     <AvatarImage
                       src={user.avatar}
@@ -137,7 +137,7 @@ function MobileMenuSheet({ isOpen, setIsOpen, navItems, user, logout, router }: 
                 <div className="grid gap-3">
                   <Button
                     variant="outline"
-                    className="w-full justify-between h-14 rounded-2xl px-6 font-bold text-sm"
+                    className="w-full justify-between h-14 rounded-xl px-6 font-bold text-sm"
                     onClick={() => {
                       setIsOpen(false);
                       router.push(
@@ -155,7 +155,7 @@ function MobileMenuSheet({ isOpen, setIsOpen, navItems, user, logout, router }: 
                   </Button>
                   <Button
                     variant="outline"
-                    className="w-full justify-between h-14 rounded-2xl px-6 font-bold text-sm"
+                    className="w-full justify-between h-14 rounded-xl px-6 font-bold text-sm"
                     onClick={() => {
                       setIsOpen(false);
                       router.push(
@@ -173,7 +173,7 @@ function MobileMenuSheet({ isOpen, setIsOpen, navItems, user, logout, router }: 
                   </Button>
                   <Button
                     variant="ghost"
-                    className="w-full h-14 rounded-2xl font-bold text-sm text-rose-600 hover:bg-rose-500/10 mt-2"
+                    className="w-full h-14 rounded-xl font-bold text-sm text-rose-600 hover:bg-rose-500/10 mt-2"
                     onClick={async () => {
                       await logout();
                       setIsOpen(false);
@@ -187,7 +187,7 @@ function MobileMenuSheet({ isOpen, setIsOpen, navItems, user, logout, router }: 
             ) : (
               <div className="grid gap-3 pt-2">
                 <Button
-                  className="h-14 rounded-2xl font-bold shadow-lg shadow-primary/20"
+                  className="h-14 rounded-xl font-bold shadow-lg shadow-primary/20"
                   onClick={() => {
                     setIsOpen(false);
                     router.push("/login");
@@ -197,7 +197,7 @@ function MobileMenuSheet({ isOpen, setIsOpen, navItems, user, logout, router }: 
                 </Button>
                 <Button
                   variant="outline"
-                  className="h-14 rounded-2xl font-bold border-border shadow-sm"
+                  className="h-14 rounded-xl font-bold border-border shadow-sm"
                   onClick={() => {
                     setIsOpen(false);
                     router.push("/book");
@@ -320,7 +320,7 @@ export function BookingNavbar() {
                                     </Avatar>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent
-                                    className="w-64 p-2 border border-border shadow-2xl rounded-2xl mt-2"
+                                    className="w-64 p-2 border border-border shadow-2xl rounded-xl mt-2"
                                     align="end"
                                 >
                                     <DropdownMenuLabel className="p-4 mb-1">

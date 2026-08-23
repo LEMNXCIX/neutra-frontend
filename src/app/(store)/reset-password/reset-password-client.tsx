@@ -75,7 +75,7 @@ function ResetPasswordForm() {
             <Card className="w-full max-w-[440px] t-card border-none shadow-2xl overflow-hidden relative">
                 <div className="absolute top-0 left-0 w-full h-1.5 bg-rose-600" />
                 <CardHeader className="text-center pt-12 pb-6">
-                    <div className="mx-auto size-16 bg-rose-100 text-rose-600 rounded-2xl flex items-center justify-center mb-4 shadow-sm">
+                    <div className="mx-auto size-16 bg-rose-100 text-rose-600 rounded-xl flex items-center justify-center mb-4 shadow-sm">
                         <AlertCircle className="size-8" />
                     </div>
                     <CardTitle className="text-2xl font-bold tracking-tight">
@@ -110,7 +110,7 @@ function ResetPasswordForm() {
             <Card className="w-full max-w-[440px] t-card border-none shadow-2xl overflow-hidden relative">
                 <div className="absolute top-0 left-0 w-full h-1.5 bg-emerald-500" />
                 <CardHeader className="text-center pt-12 pb-6">
-                    <div className="mx-auto size-16 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mb-4 shadow-sm animate-in zoom-in-95 duration-500">
+                    <div className="mx-auto size-16 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center mb-4 shadow-sm animate-in zoom-in-95 duration-500">
                         <CheckCircle2 className="size-8" />
                     </div>
                     <CardTitle className="text-2xl font-bold tracking-tight">

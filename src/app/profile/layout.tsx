@@ -16,7 +16,7 @@ export default async function ProfileLayout({ children }: { children: React.Reac
 
     if (moduleType === 'booking') {
         return (
-            <div className="min-h-screen bg-white flex flex-col">
+            <div className="min-h-screen bg-background flex flex-col">
                 <BookingNavbar />
                 <main className="flex-1">
                     {children}
@@ -30,7 +30,7 @@ export default async function ProfileLayout({ children }: { children: React.Reac
     return (
         <div id="root-content" className="min-h-screen flex flex-col">
             {isNeutral ? <NeutralNavigation /> : <StoreNavbar />}
-            <div className="pt-16 flex-1 bg-white">
+            <div className="pt-16 flex-1 bg-background">
                 {children}
             </div>
             <FooterWrapper minimal={isNeutral} />
