@@ -39,12 +39,26 @@ export interface TenantFeatures {
     [key: string]: boolean | undefined;
 }
 
+export interface TenantBranding {
+    primaryColor?: string;
+    primaryForeground?: string;
+    secondaryColor?: string;
+    secondaryForeground?: string;
+    background?: string;
+    foreground?: string;
+    muted?: string;
+    mutedForeground?: string;
+    accent?: string;
+    accentForeground?: string;
+    destructive?: string;
+    border?: string;
+    radius?: string; // e.g. "0.75rem"
+    tenantLogo?: string;
+    favicon?: string;
+}
+
 export interface TenantConfig {
-    branding?: {
-        primaryColor?: string;
-        tenantLogo?: string;
-        favicon?: string;
-    };
+    branding?: TenantBranding;
     settings?: {
         supportEmail?: string;
         websiteUrl?: string;
