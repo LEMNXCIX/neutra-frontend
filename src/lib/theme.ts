@@ -1,7 +1,10 @@
 import type { TenantBranding } from "@/types/tenant";
 
 /**
- * Default branding values (hex).
+ * Editor fallback values (hex). Used only to prefill the BrandingEditor UI.
+ * Runtime theming applies ONLY the tokens explicitly set by the tenant, so
+ * unset tokens keep the site's original palette instead of being hijacked
+ * by defaults.
  *
  * Note: globals.css uses oklch() for the shadcn CSS variables, but we store
  * branding as hex. Runtime overrides are applied as inline styles on
@@ -58,6 +61,34 @@ const CSS_VAR_MAP: Record<string, string> = {
 
 export const THEME_CSS_VARS = Object.values(CSS_VAR_MAP);
 
+/**
+ * Tokens not exposed in the editor but affected by dark mode. When a tenant
+ * theme is active we pin them to derived values so a leaked `.dark` class
+ * (next-themes may re-add it after our provider runs) can't turn cards,
+ * popovers or sidebars black on a light branded page.
+ */
+const DERIVED_SURFACE_VARS: Array<[string, string]> = [
+    ["--card", "color-mix(in srgb, var(--background) 97%, var(--foreground))"],
+    ["--card-foreground", "var(--foreground)"],
+    ["--popover", "var(--background)"],
+    ["--popover-foreground", "var(--foreground)"],
+    ["--sidebar", "var(--background)"],
+    ["--sidebar-foreground", "var(--foreground)"],
+    ["--sidebar-primary", "var(--primary)"],
+    ["--sidebar-primary-foreground", "var(--primary-foreground)"],
+    ["--sidebar-accent", "var(--muted)"],
+    ["--sidebar-accent-foreground", "var(--foreground)"],
+    ["--sidebar-border", "var(--border)"],
+    ["--sidebar-ring", "var(--ring)"],
+];
+
+export const ALL_THEME_VARS = [
+    ...THEME_CSS_VARS,
+    ...DERIVED_SURFACE_VARS.map(([v]) => v),
+    "--input",
+    "--ring",
+];
+
 const FONT_FALLBACKS = 'ui-sans-serif, system-ui, -apple-system, sans-serif';
 
 const FONT_VARS = ["--font-tenant-font", "--font-tenant-heading"];
@@ -82,25 +113,34 @@ export function ensureFontLoaded(family: string): void {
 
 /**
  * Apply tenant branding as inline CSS variables on <html>.
- * Falls back to DEFAULT_BRANDING values for any missing token.
+ *
+ * Only tokens explicitly set in `branding` are overridden; everything else
+ * keeps the site's original stylesheet values. Surface-derived tokens
+ * (card, popover, sidebar) are always pinned so a leaked `.dark` class
+ * cannot produce inconsistent dark surfaces.
  */
 export function applyTenantTheme(branding?: TenantBranding | null): void {
     if (typeof document === "undefined") return;
 
     const root = document.documentElement;
-    const merged = { ...DEFAULT_BRANDING, ...branding };
+    const b = branding ?? {};
 
     for (const [key, cssVar] of Object.entries(CSS_VAR_MAP)) {
-        const value = (merged as Record<string, string | undefined>)[key];
-        if (value) root.style.setProperty(cssVar, value);
+        const value = (b as Record<string, string | undefined>)[key];
+        if (value?.trim()) root.style.setProperty(cssVar, value);
     }
 
-    // Derived tokens
-    root.style.setProperty("--input", merged.border);
-    root.style.setProperty("--ring", merged.primaryColor);
+    // Derived tokens (only when their source exists)
+    if (b.border?.trim()) root.style.setProperty("--input", b.border);
+    if (b.primaryColor?.trim()) root.style.setProperty("--ring", b.primaryColor);
+
+    // Pin surface tokens to fight dark-mode leaks
+    for (const [cssVar, value] of DERIVED_SURFACE_VARS) {
+        root.style.setProperty(cssVar, value);
+    }
 
     // Typography
-    const { fontFamily, headingFont } = merged;
+    const { fontFamily, headingFont } = b;
     if (fontFamily?.trim()) {
         ensureFontLoaded(fontFamily);
         root.style.setProperty(
@@ -122,13 +162,10 @@ export function clearTenantTheme(): void {
     if (typeof document === "undefined") return;
 
     const root = document.documentElement;
-    for (const cssVar of THEME_CSS_VARS) {
+    for (const cssVar of ALL_THEME_VARS) {
         root.style.removeProperty(cssVar);
     }
     for (const cssVar of FONT_VARS) {
         root.style.removeProperty(cssVar);
     }
-    root.style.removeProperty("--input");
-    root.style.removeProperty("--ring");
 }
-

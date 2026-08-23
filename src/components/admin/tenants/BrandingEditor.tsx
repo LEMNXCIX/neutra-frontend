@@ -35,19 +35,30 @@ interface ColorFieldProps {
 function ColorField({ label, value, onChange }: ColorFieldProps) {
     return (
         <div className="space-y-2">
-            <Label>{label}</Label>
+            <div className="flex items-center justify-between">
+                <Label>{label}</Label>
+                {value?.trim() && (
+                    <button
+                        type="button"
+                        onClick={() => onChange("")}
+                        className="text-[10px] text-muted-foreground underline hover:text-foreground"
+                    >
+                        reset
+                    </button>
+                )}
+            </div>
             <div className="flex gap-2">
                 <Input
                     type="color"
                     aria-label={`${label} color picker`}
                     className="size-12 p-1 cursor-pointer"
-                    value={value || "#000000"}
+                    value={value || "#ffffff"}
                     onChange={(e) => onChange(e.target.value)}
                 />
                 <Input
                     value={value || ""}
                     onChange={(e) => onChange(e.target.value)}
-                    placeholder="#000000"
+                    placeholder="site default"
                 />
             </div>
         </div>
@@ -277,8 +288,12 @@ export function BrandingEditor({
 }: BrandingEditorProps) {
     const branding = value ?? {};
 
-    const set = (key: keyof TenantBranding, v: string | undefined) =>
-        onChange({ ...branding, [key]: v });
+    const set = (key: keyof TenantBranding, v?: string) => {
+        const next = { ...branding };
+        if (v && v.trim()) next[key] = v;
+        else delete next[key];
+        onChange(next);
+    };
 
     useEffect(() => {
         if (!livePreview) return;

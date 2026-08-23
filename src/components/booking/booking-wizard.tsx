@@ -669,19 +669,19 @@ function ReviewStep({
                         </Card>
                     )}
 
-                    <Card className="t-card border-none bg-primary text-primary-foreground shadow-2xl overflow-hidden p-8 space-y-8">
+                    <Card className="t-card border-none bg-card text-foreground shadow-2xl overflow-hidden p-8 space-y-8">
                         <div className="space-y-4">
                             <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest opacity-70">
                                 <span>Standard Rate</span>
                                 <span>${selectedService?.price}</span>
                             </div>
                             {couponResult?.discountAmount && (
-                                <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest text-emerald-200">
+                                <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest text-emerald-600 dark:text-emerald-400">
                                     <span>Coupon Applied</span>
                                     <span>-${couponResult.discountAmount}</span>
                                 </div>
                             )}
-                            <div className="h-px bg-white/10" />
+                            <div className="h-px bg-border" />
                             <div className="flex flex-col gap-1">
                                 <span className="text-[10px] font-bold uppercase tracking-widest opacity-70">
                                     Total Fee
@@ -698,7 +698,7 @@ function ReviewStep({
                         </div>
 
                         <Button
-                            className="w-full h-14 bg-white text-primary hover:bg-white/90 rounded-xl font-bold shadow-lg transition-all hover:-translate-y-0.5 active:scale-95"
+                            className="w-full h-14 bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl font-bold shadow-lg transition-all hover:-translate-y-0.5 active:scale-95"
                             onClick={handleSubmit}
                             disabled={submitting}
                         >

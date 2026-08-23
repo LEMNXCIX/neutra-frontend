@@ -50,7 +50,25 @@ export function TenantThemeProvider({
             document.documentElement.classList.add("tenant-theme");
         }
         setDarkMode(hasTheme);
+
+        // next-themes (parent provider) may re-add .dark after our effects
+        // run: child effects execute before parent ones. Enforce light mode
+        // while a tenant theme is active.
+        let observer: MutationObserver | undefined;
+        if (hasTheme) {
+            observer = new MutationObserver(() => {
+                if (document.documentElement.classList.contains("dark")) {
+                    document.documentElement.classList.remove("dark");
+                }
+            });
+            observer.observe(document.documentElement, {
+                attributes: true,
+                attributeFilter: ["class"],
+            });
+        }
+
         return () => {
+            observer?.disconnect();
             clearTenantTheme();
             document.documentElement.classList.remove("tenant-theme");
             setDarkMode(false);
