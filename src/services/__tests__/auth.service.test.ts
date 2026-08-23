@@ -149,7 +149,7 @@ describe('authService.googleLogin', () => {
     it('redirects to Google OAuth URL', () => {
         const mockAssign = vi.fn();
         vi.stubGlobal('window', { location: { href: '', assign: mockAssign } });
-        vi.stubEnv('NEXT_PUBLIC_BASE_URL', '');
+        vi.stubEnv('NEXT_PUBLIC_API_URL', 'http://localhost:4000/api');
 
         Object.defineProperty(window.location, 'href', {
             writable: true,
@@ -158,6 +158,6 @@ describe('authService.googleLogin', () => {
 
         authService.googleLogin();
 
-        expect(window.location.href).toBe('http://localhost:4001/api/auth/google');
+        expect(window.location.href).toBe('http://localhost:4000/api/auth/google');
     });
 });

@@ -29,7 +29,7 @@ import { User } from "@/types/user.types";
 const refreshPermissions = async () => {
     try {
         const response = await fetch(
-            `${process.env.NEXT_PUBLIC_BASE_URL}/auth/validate`,
+            `/api/auth/validate`,
             {
                 credentials: "include",
             },

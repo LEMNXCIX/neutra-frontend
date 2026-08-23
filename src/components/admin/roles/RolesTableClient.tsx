@@ -71,7 +71,7 @@ allPermissions?: Permission[];
 const refreshPermissions = async () => {
 try {
 const response = await fetch(
-`${process.env.NEXT_PUBLIC_BASE_URL}/auth/validate`,
+`/api/auth/validate`,
 {
 credentials: "include",
 },
@@ -103,7 +103,7 @@ color: string;
 <p className="text-2xl font-bold mt-1">{value}</p>
 </div>
 <div className={`p-3 rounded-full ${color}`}>
-<Icon className="size-6 text-white" />
+<Icon className="size-6" />
 </div>
 </div>
 </CardContent>
@@ -1507,8 +1507,8 @@ return (
 <h2 className="text-xl font-medium">Roles & Permissions Management</h2>
 </div>
 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-<StatCard icon={Shield} title="Total Roles" value={stats.totalRoles} color="bg-purple-500" />
-<StatCard icon={Key} title="Total Permissions" value={stats.totalPermissions} color="bg-blue-500" />
+<StatCard icon={Shield} title="Total Roles" value={stats.totalRoles} color="bg-primary/10 text-primary" />
+<StatCard icon={Key} title="Total Permissions" value={stats.totalPermissions} color="bg-muted text-muted-foreground" />
 </div>
 <Tabs defaultValue="roles" className="w-full">
 <TabsList className="grid w-full max-w-md grid-cols-2">
