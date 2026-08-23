@@ -67,7 +67,7 @@ const FONT_VARS = ["--font-tenant-font", "--font-tenant-heading"];
  * Custom fonts are referenced by family name; anything not available as a
  * system font is fetched from Google Fonts. No-op on the server.
  */
-function ensureFontLoaded(family: string): void {
+export function ensureFontLoaded(family: string): void {
     if (typeof document === "undefined" || !family.trim()) return;
 
     const id = `tenant-font-${family.toLowerCase().replace(/\s+/g, "-")}`;

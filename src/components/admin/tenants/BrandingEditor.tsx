@@ -11,7 +11,12 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { applyTenantTheme, clearTenantTheme, DEFAULT_BRANDING } from "@/lib/theme";
+import {
+    applyTenantTheme,
+    clearTenantTheme,
+    ensureFontLoaded,
+    DEFAULT_BRANDING,
+} from "@/lib/theme";
 import type { TenantBranding } from "@/types/tenant";
 
 interface BrandingEditorProps {
@@ -281,6 +286,13 @@ export function BrandingEditor({
         return () => clearTenantTheme();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [livePreview, JSON.stringify(branding)]);
+
+    // Always load preview fonts, even without live document theming
+    useEffect(() => {
+        if (branding.fontFamily?.trim()) ensureFontLoaded(branding.fontFamily);
+        if (branding.headingFont?.trim())
+            ensureFontLoaded(branding.headingFont);
+    }, [branding.fontFamily, branding.headingFont]);
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

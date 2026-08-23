@@ -12,6 +12,7 @@ import { ProgressBar } from "@/components/ui/progress-bar";
 
 const geist = Geist({
     subsets: ["latin"],
+    variable: "--font-geist-sans",
 });
 
 export const metadata: Metadata = {
@@ -47,7 +48,7 @@ export default function RootLayout({
 }) {
     return (
         <html lang="es" suppressHydrationWarning>
-            <body className={`${geist.className} antialiased`}>
+            <body className={`${geist.variable} font-sans antialiased`}>
                 <ThemeProvider
                     attribute="class"
                     defaultTheme="system"
