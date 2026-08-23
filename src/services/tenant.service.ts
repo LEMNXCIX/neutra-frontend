@@ -6,6 +6,21 @@ export const tenantService = {
         return api.get<Tenant[]>('/tenants');
     },
 
+    getBySlug: async (slug: string): Promise<Tenant | null> => {
+        // Server-side (RSC): hit the backend directly; relative URLs don't resolve.
+        const url =
+            typeof window === "undefined"
+                ? `${
+                      process.env.NEXT_PUBLIC_API_URL || "http://localhost:4001"
+                  }/api/tenants/config/${encodeURIComponent(slug)}`
+                : `/api/tenants/config/${encodeURIComponent(slug)}`;
+
+        const response = await fetch(url, { cache: "no-store" });
+        if (!response.ok) return null;
+        const result = await response.json().catch(() => null);
+        return result?.data ?? null;
+    },
+
     getAvailableFeatures: async (): Promise<any[]> => {
         const response: any = await api.get('/features');
         // Ensure we return an array
