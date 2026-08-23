@@ -35,10 +35,8 @@ function TrendCard({
   dates,
   getBarValue,
   total,
-  gradient,
-  iconBg,
-  iconColor,
-  barColor,
+  /** CSS variable holding the accent color, e.g. "--primary" */
+  colorVar,
   minBarHeight,
   formatBarTitle,
 }: {
@@ -49,22 +47,31 @@ function TrendCard({
   dates: string[];
   getBarValue: (date: string) => number;
   total: number;
-  gradient: string;
-  iconBg: string;
-  iconColor: string;
-  barColor: string;
+  colorVar: string;
   minBarHeight: number;
   formatBarTitle: (date: string, val: number) => string;
 }) {
   return (
-    <Card className={`overflow-hidden border-none shadow-lg hover:shadow-xl transition-all bg-gradient-to-br ${gradient}`}>
+    <Card
+      className="overflow-hidden border-none shadow-lg hover:shadow-xl transition-all"
+      style={{
+        background:
+          `linear-gradient(135deg, color-mix(in srgb, var(${colorVar}) 6%, transparent), color-mix(in srgb, var(${colorVar}) 14%, transparent))`,
+      }}
+    >
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="text-base font-medium text-muted-foreground">
             {title}
           </CardTitle>
-          <div className={`p-2 rounded-lg ${iconBg}`}>
-            <Icon className={`size-5 ${iconColor}`} />
+          <div
+            className="p-2 rounded-lg"
+            style={{ backgroundColor: `color-mix(in srgb, var(${colorVar}) 12%, transparent)` }}
+          >
+            <Icon
+              className="size-5"
+              style={{ color: `var(${colorVar})` }}
+            />
           </div>
         </div>
       </CardHeader>
@@ -99,9 +106,10 @@ function TrendCard({
               return (
                 <div
                   key={date}
-                  className={`flex-1 ${barColor} rounded-t opacity-60 hover:opacity-100 transition-opacity`}
+                  className="flex-1 rounded-t opacity-60 hover:opacity-100 transition-opacity"
                   style={{
                     height: `${Math.max(height, minBarHeight)}%`,
+                    backgroundColor: `var(${colorVar})`,
                   }}
                   title={formatBarTitle(date, dayValue)}
                 />
@@ -360,10 +368,7 @@ export default function AnalyticsCharts({ initialOrders }: AnalyticsChartsProps 
           dates={last7Days}
           getBarValue={(d) => ordersByDate.get(d)?.revenue || 0}
           total={last7Revenue}
-          gradient="from-green-50 to-emerald-50 dark:from-green-950 dark:to-emerald-950"
-          iconBg="bg-green-500/10"
-          iconColor="text-green-600 dark:text-green-400"
-          barColor="bg-green-500"
+          colorVar="--primary"
           minBarHeight={5}
           formatBarTitle={(d, v) => `${d}: $${v.toFixed(2)}`}
         />
@@ -375,10 +380,7 @@ export default function AnalyticsCharts({ initialOrders }: AnalyticsChartsProps 
           dates={last7Days}
           getBarValue={(d) => ordersByDate.get(d)?.count || 0}
           total={last7Orders}
-          gradient="from-blue-50 to-cyan-50 dark:from-blue-950 dark:to-cyan-950"
-          iconBg="bg-blue-500/10"
-          iconColor="text-blue-600 dark:text-blue-400"
-          barColor="bg-blue-500"
+          colorVar="--accent"
           minBarHeight={10}
           formatBarTitle={(d, v) => `${d}: ${v} orders`}
         />

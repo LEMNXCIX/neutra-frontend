@@ -42,7 +42,13 @@ function SummaryStatsCards({
 
 function AvgOrderValueCard({ value }: { value: number }) {
     return (
-        <Card className="border-none shadow-md rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white">
+        <Card
+            className="border-none shadow-md rounded-xl text-primary-foreground"
+            style={{
+                background:
+                    "linear-gradient(135deg, var(--primary), color-mix(in srgb, var(--accent) 80%, var(--primary)))",
+            }}
+        >
             <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                     <div>
@@ -53,7 +59,7 @@ function AvgOrderValueCard({ value }: { value: number }) {
                             ${value.toFixed(2)}
                         </p>
                     </div>
-                    <div className="bg-white/20 backdrop-blur-sm p-3 rounded-xl">
+                    <div className="bg-primary-foreground/20 backdrop-blur-sm p-3 rounded-xl">
                         <Package className="size-6" />
                     </div>
                 </div>
@@ -68,16 +74,15 @@ function TimelineCard({
     getDisplayValue,
     maxDisplayValue,
     valueLabel,
-    valueColor,
-    barGradient,
+    /** CSS variable holding the accent color, e.g. "--primary" */
+    colorVar,
 }: {
     title: string;
     dates: string[];
     getDisplayValue: (date: string, idx: number) => number;
     maxDisplayValue: number;
     valueLabel: (val: number) => string;
-    valueColor: string;
-    barGradient: string;
+    colorVar: string;
 }) {
     return (
         <Card className="border-none shadow-md rounded-xl">
@@ -107,15 +112,19 @@ function TimelineCard({
                                             {formattedDate}
                                         </span>
                                         <span
-                                            className={`font-semibold ${valueColor}`}
+                                            className="font-semibold"
+                                            style={{ color: `var(${colorVar})` }}
                                         >
                                             {valueLabel(value)}
                                         </span>
                                     </div>
                                     <div className="h-2 bg-muted rounded-full overflow-hidden">
                                         <div
-                                            className={`h-full bg-gradient-to-r ${barGradient} rounded-full transition-all duration-500`}
-                                            style={{ width: `${percentage}%` }}
+                                            className="h-full rounded-full transition-all duration-500"
+                                            style={{
+                                                width: `${percentage}%`,
+                                                backgroundColor: `var(${colorVar})`,
+                                            }}
                                         />
                                     </div>
                                 </div>
@@ -470,8 +479,7 @@ function AnalyticsContent({
                     getDisplayValue={(_, idx) => orderCounts[idx]}
                     maxDisplayValue={maxOrderCount}
                     valueLabel={(v) => `${v} orders`}
-                    valueColor="text-indigo-600 dark:text-indigo-400"
-                    barGradient="from-indigo-500 to-purple-500"
+                    colorVar="--accent"
                 />
                 <TimelineCard
                     title="Revenue Timeline"
@@ -479,8 +487,7 @@ function AnalyticsContent({
                     getDisplayValue={(_, idx) => revenues[idx]}
                     maxDisplayValue={maxRevenue}
                     valueLabel={(v) => `$${v.toFixed(2)}`}
-                    valueColor="text-emerald-600 dark:text-emerald-400"
-                    barGradient="from-emerald-500 to-teal-500"
+                    colorVar="--primary"
                 />
             </div>
 

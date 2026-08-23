@@ -29,23 +29,44 @@ type Stats = {
   categories: { total: number; avgProducts: number };
 };
 
+const COLOR_VARIANTS = {
+  primary: {
+    bar: "bg-primary",
+    icon: "bg-primary/10 text-primary",
+  },
+  accent: {
+    bar: "bg-accent",
+    icon: "bg-accent text-accent-foreground",
+  },
+  muted: {
+    bar: "bg-muted-foreground",
+    icon: "bg-muted text-muted-foreground",
+  },
+  destructive: {
+    bar: "bg-destructive",
+    icon: "bg-destructive/10 text-destructive",
+  },
+} as const;
+
+type ColorVariant = keyof typeof COLOR_VARIANTS;
+
 const StatCard = ({
   icon: Icon,
   title,
   value,
   subtitle,
-  color,
+  variant = "primary",
   trend,
 }: {
   icon: React.ElementType;
   title: string;
   value: string | number;
   subtitle?: string;
-  color: string;
+  variant?: ColorVariant;
   trend?: 'up' | 'down';
 }) => (
   <Card className="group relative overflow-hidden border-border bg-card transition-all duration-300 hover:shadow-2xl hover:shadow-primary/5 hover:translate-y-[-2px]">
-    <div className={cn("absolute top-0 left-0 w-1 h-full opacity-0 group-hover:opacity-100 transition-opacity", color)} />
+    <div className={cn("absolute top-0 left-0 w-1 h-full opacity-0 group-hover:opacity-100 transition-opacity", COLOR_VARIANTS[variant].bar)} />
     <CardContent className="pt-6">
       <div className="flex items-start justify-between">
         <div className="flex-1 space-y-1">
@@ -66,8 +87,8 @@ const StatCard = ({
             <p className="text-xs font-medium text-muted-foreground/70 tracking-tight">{subtitle}</p>
           )}
         </div>
-        <div className={cn("p-2.5 rounded-xl transition-transform group-hover:scale-110 duration-500", color)}>
-          <Icon className="size-5 text-white" />
+        <div className={cn("p-2.5 rounded-xl transition-transform group-hover:scale-110 duration-500", COLOR_VARIANTS[variant].icon)}>
+          <Icon className="size-5" />
         </div>
       </div>
     </CardContent>
@@ -196,7 +217,7 @@ export default function AnalyticsOverview() {
                 title="Total Orders"
                 value={stats.orders.total}
                 subtitle={`$${stats.orders.revenue.toFixed(2)} revenue`}
-                color="bg-blue-500"
+                variant="primary"
                 trend="up"
               />
               <StatCard
@@ -204,7 +225,7 @@ export default function AnalyticsOverview() {
                 title="Total Revenue"
                 value={`$${stats.orders.revenue.toFixed(2)}`}
                 subtitle={`Avg: $${stats.orders.avgOrderValue.toFixed(2)}/order`}
-                color="bg-green-500"
+                variant="primary"
                 trend="up"
               />
             </>
@@ -214,14 +235,14 @@ export default function AnalyticsOverview() {
             title="Total Users"
             value={stats.users.total}
             subtitle={`${stats.users.admins} admins, ${stats.users.regular} users`}
-            color="bg-purple-500"
+            variant="accent"
           />
           <StatCard
             icon={Package}
             title="Total Products"
             value={stats.products.total}
             subtitle={`$${stats.products.totalValue.toFixed(2)} inventory value`}
-            color="bg-orange-500"
+            variant="muted"
           />
         </div>
       </div>
@@ -235,21 +256,21 @@ export default function AnalyticsOverview() {
             title="Low Stock Items"
             value={stats.products.lowStock}
             subtitle="Products below 10 units"
-            color="bg-yellow-500"
+            variant="accent"
           />
           <StatCard
             icon={Package}
             title="Out of Stock"
             value={stats.products.outOfStock}
             subtitle="Needs restocking"
-            color="bg-red-500"
+            variant="destructive"
           />
           <StatCard
             icon={Package}
             title="Total Categories"
             value={stats.categories.total}
             subtitle={`Avg ${stats.categories.avgProducts.toFixed(1)} products/category`}
-            color="bg-indigo-500"
+            variant="primary"
           />
         </div>
       </div>
@@ -265,14 +286,14 @@ export default function AnalyticsOverview() {
                 title="Coupons"
                 value={stats.coupons.total}
                 subtitle={`${stats.coupons.active} active, ${stats.coupons.used} used`}
-                color="bg-pink-500"
+                variant="primary"
               />
               <StatCard
                 icon={Ticket}
                 title="Active Coupons"
                 value={stats.coupons.active}
                 subtitle="Available for use"
-                color="bg-green-500"
+                variant="primary"
               />
             </>
           )}
@@ -281,7 +302,7 @@ export default function AnalyticsOverview() {
             title="Sliders"
             value={stats.sliders.total}
             subtitle={`${stats.sliders.active} active, ${stats.sliders.withImages} with images`}
-            color="bg-cyan-500"
+            variant="accent"
           />
           {isFeatureEnabled("BANNERS") && (
             <StatCard
@@ -289,7 +310,7 @@ export default function AnalyticsOverview() {
               title="Banners"
               value={stats.banners.total}
               subtitle={`${stats.banners.active} active`}
-              color="bg-teal-500"
+              variant="muted"
             />
           )}
         </div>
@@ -304,21 +325,21 @@ export default function AnalyticsOverview() {
             title="Administrators"
             value={stats.users.admins}
             subtitle="System admins"
-            color="bg-purple-500"
+            variant="accent"
           />
           <StatCard
             icon={Users}
             title="Regular Users"
             value={stats.users.regular}
             subtitle="Customer accounts"
-            color="bg-muted-foreground"
+            variant="muted"
           />
           <StatCard
             icon={Users}
             title="Admin Ratio"
             value={`${stats.users.total > 0 ? ((stats.users.admins / stats.users.total) * 100).toFixed(1) : 0}%`}
             subtitle="Percentage of admins"
-            color="bg-blue-500"
+            variant="primary"
           />
         </div>
       </div>
