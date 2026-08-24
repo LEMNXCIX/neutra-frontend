@@ -121,7 +121,7 @@ export async function proxy(request: NextRequest) {
         rewritePath = '/store';
     } else if (moduleType === 'booking' && url.pathname === '/') {
         shouldRewrite = true;
-        rewritePath = '/services';
+        rewritePath = '/home';
     }
 
     // Clone the request headers

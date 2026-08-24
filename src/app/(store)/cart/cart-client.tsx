@@ -178,7 +178,7 @@ function OrderSummaryCard({
   onPlaceOrder: () => void;
 }) {
   return (
-    <Card className="border-none bg-foreground text-background rounded-xl shadow-2xl overflow-hidden">
+    <Card className="border-none bg-card text-card-foreground rounded-xl shadow-2xl overflow-hidden">
       <div className="h-2 bg-primary w-full" />
       <CardHeader className="pb-6">
         <CardTitle className="flex items-center gap-2 text-xs font-black uppercase tracking-widest opacity-60">
@@ -197,7 +197,7 @@ function OrderSummaryCard({
               <span>-${discount.toFixed(2)}</span>
             </div>
           )}
-          <div className="h-px bg-background/20" />
+          <div className="h-px bg-border" />
           <div className="flex justify-between items-end">
             <span className="text-xs font-black uppercase tracking-widest opacity-60 mb-1">Total Amount</span>
             <span className="text-4xl font-black italic tracking-tighter">${total.toFixed(2)}</span>
@@ -213,7 +213,7 @@ function OrderSummaryCard({
       </CardContent>
       <CardFooter className="pb-8">
         <Button
-          className="w-full h-14 text-sm font-black uppercase tracking-[0.2em] bg-background text-foreground hover:bg-background/90 rounded-xl transition-all hover:scale-105 active:scale-95"
+          className="w-full h-14 text-sm font-black uppercase tracking-[0.2em] bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl transition-all hover:scale-105 active:scale-95"
           onClick={onPlaceOrder}
           disabled={placing || loading || addressEmpty}
           size="lg"
