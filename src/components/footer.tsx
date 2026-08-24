@@ -34,7 +34,7 @@ export default function Footer({ minimal = false, tenantName, tenantLogo, footer
                         </div>
                         <p className="text-sm font-medium text-muted-foreground leading-relaxed max-w-[240px]">
                             {footerDescription ??
-                                "Redefining the digital architecture of modern commerce and high-performance scheduling systems."}
+                                "Redefiniendo la arquitectura digital del comercio moderno y los sistemas de agendado de alto rendimiento."}
                         </p>
                         {/* Social Media Icons */}
                         <div className="flex items-center gap-3">
@@ -60,7 +60,7 @@ export default function Footer({ minimal = false, tenantName, tenantLogo, footer
                     {!minimal && (
                         <div className="space-y-6">
                             <h4 className="text-xs font-bold uppercase tracking-widest text-primary">
-                                Shop Catalog
+                                Catálogo
                             </h4>
                             <ul className="space-y-3">
                                 <li>
@@ -69,7 +69,7 @@ export default function Footer({ minimal = false, tenantName, tenantLogo, footer
                                         className="text-sm font-medium text-muted-foreground hover:text-primary transition-all flex items-center group"
                                     >
                                         <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-all" />
-                                        All Inventory
+                                        Todo el Inventario
                                     </Link>
                                 </li>
                                 {categories.map((category) => (
@@ -90,7 +90,7 @@ export default function Footer({ minimal = false, tenantName, tenantLogo, footer
                     {/* Customer Service Column */}
                     <div className="space-y-6">
                         <h4 className="text-xs font-bold uppercase tracking-widest text-primary">
-                            Assistance
+                            Asistencia
                         </h4>
                         <ul className="space-y-3">
                             <li>
@@ -99,7 +99,7 @@ export default function Footer({ minimal = false, tenantName, tenantLogo, footer
                                     className="text-sm font-medium text-muted-foreground hover:text-primary transition-all flex items-center group"
                                 >
                                     <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-all" />
-                                    Help Center
+                                    Centro de Ayuda
                                 </Link>
                             </li>
                             {!minimal && (
@@ -110,7 +110,7 @@ export default function Footer({ minimal = false, tenantName, tenantLogo, footer
                                             className="text-sm font-medium text-muted-foreground hover:text-primary transition-all flex items-center group"
                                         >
                                             <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-all" />
-                                            Shipping Info
+                                            Información de Envíos
                                         </Link>
                                     </li>
                                     <li>
@@ -119,7 +119,7 @@ export default function Footer({ minimal = false, tenantName, tenantLogo, footer
                                             className="text-sm font-medium text-muted-foreground hover:text-primary transition-all flex items-center group"
                                         >
                                             <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-all" />
-                                            Returns & RMAs
+                                            Devoluciones y RMA
                                         </Link>
                                     </li>
                                     <li>
@@ -128,7 +128,7 @@ export default function Footer({ minimal = false, tenantName, tenantLogo, footer
                                             className="text-sm font-medium text-muted-foreground hover:text-primary transition-all flex items-center group"
                                         >
                                             <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-all" />
-                                            Common FAQ
+                                            Preguntas Frecuentes
                                         </Link>
                                     </li>
                                 </>
@@ -139,7 +139,7 @@ export default function Footer({ minimal = false, tenantName, tenantLogo, footer
                     {/* Company Column */}
                     <div className="space-y-6">
                         <h4 className="text-xs font-bold uppercase tracking-widest text-primary">
-                            Company
+                            Empresa
                         </h4>
                         <ul className="space-y-3">
                             <li>
@@ -148,7 +148,7 @@ export default function Footer({ minimal = false, tenantName, tenantLogo, footer
                                     className="text-sm font-medium text-muted-foreground hover:text-primary transition-all flex items-center group"
                                 >
                                     <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-all" />
-                                    Our Story
+                                    Nuestra Historia
                                 </Link>
                             </li>
                             <li>
@@ -157,7 +157,7 @@ export default function Footer({ minimal = false, tenantName, tenantLogo, footer
                                     className="text-sm font-medium text-muted-foreground hover:text-primary transition-all flex items-center group"
                                 >
                                     <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-all" />
-                                    Join Network
+                                    Únete a la Red
                                 </Link>
                             </li>
                             <li>
@@ -166,7 +166,7 @@ export default function Footer({ minimal = false, tenantName, tenantLogo, footer
                                     className="text-sm font-medium text-muted-foreground hover:text-primary transition-all flex items-center group"
                                 >
                                     <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-all" />
-                                    Privacy Policy
+                                    Política de Privacidad
                                 </Link>
                             </li>
                             <li>
@@ -175,7 +175,7 @@ export default function Footer({ minimal = false, tenantName, tenantLogo, footer
                                     className="text-sm font-medium text-muted-foreground hover:text-primary transition-all flex items-center group"
                                 >
                                     <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-all" />
-                                    Terms of Service
+                                    Términos de Servicio
                                 </Link>
                             </li>
                         </ul>

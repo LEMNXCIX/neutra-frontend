@@ -19,21 +19,22 @@ async function requireSuperAdmin() {
     }
 }
 
+const PER_PAGE = 10;
+
 async function getRolesAndPermissions(
     rolePage: number,
     permissionPage: number,
     roleSearch?: string,
     permissionSearch?: string,
 ) {
+    // Roles/permissions are small config lists: fetch complete (no page/limit)
+    // and paginate client-side. The backend's paginated mode drops `total`,
+    // so its metadata is unusable.
     try {
         const roleQueryParams = new URLSearchParams();
-        roleQueryParams.set("page", rolePage.toString());
-        roleQueryParams.set("limit", "10");
         if (roleSearch) roleQueryParams.set("search", roleSearch);
 
         const permQueryParams = new URLSearchParams();
-        permQueryParams.set("page", permissionPage.toString());
-        permQueryParams.set("limit", "10");
         if (permissionSearch) permQueryParams.set("search", permissionSearch);
 
         const [rolesResult, permissionsResult] = await Promise.all([
@@ -41,64 +42,36 @@ async function getRolesAndPermissions(
             api.get<any>(`/permissions?${permQueryParams.toString()}`).catch(() => ({})),
         ]);
 
-        const roles = (
+        const allRoles: Role[] = (
             Array.isArray(rolesResult) ? rolesResult : []
         ).map((r: any) => ({
             ...r,
             tenantId: r.tenantId || "",
-        })) as Role[];
-        const permissions = Array.isArray(permissionsResult)
+        }));
+        const allPermissions: Permission[] = Array.isArray(permissionsResult)
             ? permissionsResult
             : [];
 
-        let allPermissions: Permission[] = [];
-        try {
-            const allPermsResult = await api.get<any[]>("/permissions");
-            allPermissions = Array.isArray(allPermsResult)
-                ? allPermsResult
-                : [];
-        } catch (error) {
-            console.error("Failed to fetch all permissions:", error);
-        }
+        const roles = allRoles.slice((rolePage - 1) * PER_PAGE, rolePage * PER_PAGE);
+        const permissions = allPermissions.slice((permissionPage - 1) * PER_PAGE, permissionPage * PER_PAGE);
+
+        const buildPagination = (total: number, page: number) => ({
+            currentPage: page,
+            totalPages: Math.max(1, Math.ceil(total / PER_PAGE)),
+            totalItems: total,
+            itemsPerPage: PER_PAGE,
+        });
 
         return {
             roles,
             permissions,
             allPermissions,
             stats: {
-                totalRoles:
-                    rolesResult?.pagination?.total || roles.length,
-                totalPermissions:
-                    permissionsResult?.pagination?.total ||
-                    permissions.length,
+                totalRoles: allRoles.length,
+                totalPermissions: allPermissions.length,
             },
-            rolePagination: rolesResult?.pagination
-                ? {
-                      currentPage: rolesResult.pagination.page,
-                      totalPages: rolesResult.pagination.totalPages,
-                      totalItems: rolesResult.pagination.total,
-                      itemsPerPage: rolesResult.pagination.limit,
-                  }
-                : {
-                      currentPage: rolePage,
-                      totalPages: 1,
-                      totalItems: roles.length,
-                      itemsPerPage: 10,
-                  },
-            permissionPagination: permissionsResult?.pagination
-                ? {
-                      currentPage: permissionsResult.pagination.page,
-                      totalPages: permissionsResult.pagination
-                          .totalPages,
-                      totalItems: permissionsResult.pagination.total,
-                      itemsPerPage: permissionsResult.pagination.limit,
-                  }
-                : {
-                      currentPage: permissionPage,
-                      totalPages: 1,
-                      totalItems: permissions.length,
-                      itemsPerPage: 10,
-                  },
+            rolePagination: buildPagination(allRoles.length, rolePage),
+            permissionPagination: buildPagination(allPermissions.length, permissionPage),
         };
     } catch (err) {
         console.error("Error fetching roles and permissions:", err);

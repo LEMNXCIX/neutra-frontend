@@ -18,16 +18,21 @@ async function requireSuperAdmin() {
     }
 }
 
+const PER_PAGE = 10;
+
 async function getRolesAndPermissions(
     rolePage: number,
     permissionPage: number,
     roleSearch?: string,
     permissionSearch?: string,
 ) {
+    // Roles/permissions are small config lists: fetch complete (no page/limit)
+    // and paginate client-side. The backend's paginated mode drops `total`,
+    // so its metadata is unusable.
     try {
-        const roleParams = new URLSearchParams({ page: rolePage.toString(), limit: "10" });
+        const roleParams = new URLSearchParams();
         if (roleSearch) roleParams.set("search", roleSearch);
-        const permParams = new URLSearchParams({ page: permissionPage.toString(), limit: "10" });
+        const permParams = new URLSearchParams();
         if (permissionSearch) permParams.set("search", permissionSearch);
 
         const [rolesResult, permissionsResult] = await Promise.all([
@@ -35,51 +40,29 @@ async function getRolesAndPermissions(
             api.get<any>(`/permissions?${permParams.toString()}`).catch(() => ({})),
         ]);
 
-        const roles = rolesResult?.data || (Array.isArray(rolesResult) ? rolesResult : []);
-        const permissions = permissionsResult?.data || (Array.isArray(permissionsResult) ? permissionsResult : []);
+        const allRoles: any[] = rolesResult?.data || (Array.isArray(rolesResult) ? rolesResult : []);
+        const allPermissions: Permission[] = permissionsResult?.data || (Array.isArray(permissionsResult) ? permissionsResult : []);
 
-        let allPermissions: Permission[] = [];
-        try {
-            const allPermsResult = await api.get<any[]>('/permissions');
-            allPermissions = Array.isArray(allPermsResult) ? allPermsResult : [];
-        } catch (error) {
-            console.error("Failed to fetch all permissions:", error);
-        }
+        const roles = allRoles.slice((rolePage - 1) * PER_PAGE, rolePage * PER_PAGE);
+        const permissions = allPermissions.slice((permissionPage - 1) * PER_PAGE, permissionPage * PER_PAGE);
+
+        const buildPagination = (total: number, page: number) => ({
+            currentPage: page,
+            totalPages: Math.max(1, Math.ceil(total / PER_PAGE)),
+            totalItems: total,
+            itemsPerPage: PER_PAGE,
+        });
 
         return {
             roles,
             permissions,
             allPermissions,
             stats: {
-                totalRoles: rolesResult?.pagination?.total || roles.length,
-                totalPermissions: permissionsResult?.pagination?.total || permissions.length,
+                totalRoles: allRoles.length,
+                totalPermissions: allPermissions.length,
             },
-            rolePagination: rolesResult?.pagination
-                ? {
-                      currentPage: rolesResult.pagination.page,
-                      totalPages: rolesResult.pagination.totalPages,
-                      totalItems: rolesResult.pagination.total,
-                      itemsPerPage: rolesResult.pagination.limit,
-                  }
-                : {
-                      currentPage: rolePage,
-                      totalPages: 1,
-                      totalItems: roles.length,
-                      itemsPerPage: 10,
-                  },
-            permissionPagination: permissionsResult?.pagination
-                ? {
-                      currentPage: permissionsResult.pagination.page,
-                      totalPages: permissionsResult.pagination.totalPages,
-                      totalItems: permissionsResult.pagination.total,
-                      itemsPerPage: permissionsResult.pagination.limit,
-                  }
-                : {
-                      currentPage: permissionPage,
-                      totalPages: 1,
-                      totalItems: permissions.length,
-                      itemsPerPage: 10,
-                  },
+            rolePagination: buildPagination(allRoles.length, rolePage),
+            permissionPagination: buildPagination(allPermissions.length, permissionPage),
         };
     } catch (err) {
         console.error("Error fetching roles and permissions:", err);

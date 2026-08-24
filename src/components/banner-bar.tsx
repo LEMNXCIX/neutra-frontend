@@ -80,7 +80,7 @@ export default function BannerBar() {
                             type="button"
                             onClick={() => setVisibleId(null)}
                             className="size-10 flex items-center justify-center rounded-full hover:bg-primary-foreground/10 transition-all active:scale-90"
-                            aria-label="Dismiss banner"
+                            aria-label="Cerrar aviso"
                         >
                             <X className="size-5 opacity-40 hover:opacity-100" />
                         </button>

@@ -42,8 +42,8 @@ export default function ProductGrid({
     return (
       <EmptyState
         icon={PackageOpen}
-        title="No products found"
-        description="We couldn't find any products matching your criteria. Try adjusting your filters."
+        title="No se encontraron productos"
+        description="No encontramos productos que coincidan con tu búsqueda. Probá ajustar los filtros."
         actionLabel="Clear Filters"
         actionHref="/products"
       />

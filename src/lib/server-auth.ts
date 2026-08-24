@@ -38,8 +38,9 @@ export async function validateAdminAccess() {
 
         const user = data.data.user;
 
-        // We consider an admin anyone who has SUPER_ADMIN role
-        const isAdmin = user.role?.name === "SUPER_ADMIN";
+        // We consider an admin anyone with SUPER_ADMIN or ADMIN role
+        const isAdmin =
+            user.role?.name === "SUPER_ADMIN" || user.role?.name === "ADMIN";
 
         return { isValid: isAdmin, user, cookieHeader };
     } catch (error) {

@@ -111,14 +111,14 @@ function DesktopMenuItems({ categories }: { categories: Category[] }) {
                         "bg-transparent font-semibold text-xs tracking-tight hover:bg-muted transition-colors rounded-lg",
                     )}
                 >
-                    <Link href="/products">Products</Link>
+                    <Link href="/products">Productos</Link>
                 </NavigationMenuLink>
             </NavigationMenuItem>
 
             {(Array.isArray(categories) && categories.length > 0) && (
                 <NavigationMenuItem className="list-none">
                     <NavigationMenuTrigger className="bg-transparent font-semibold text-xs tracking-tight hover:bg-muted transition-colors rounded-lg">
-                        Collections
+                        Colecciones
                     </NavigationMenuTrigger>
                     <NavigationMenuContent>
                         <ul className="grid w-[400px] gap-2 p-6 md:w-[500px] md:grid-cols-2 lg:w-[600px] bg-card border border-border shadow-xl rounded-xl">
@@ -175,8 +175,8 @@ function DesktopSearchWithResults({
             <div role="search" className="w-64">
                 <div className="relative group">
                     <input
-                        placeholder="Search catalog..."
-                        aria-label="Search catalog"
+                        placeholder="Buscar en el catálogo..."
+                        aria-label="Buscar en el catálogo"
                         value={query}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                             dispatch({
@@ -338,7 +338,7 @@ function UserMenuDropdown({
             >
                 <DropdownMenuLabel className="p-4 mb-1">
                     <p className="text-[10px] font-bold uppercase tracking-widest text-primary mb-1">
-                        Account
+                        Cuenta
                     </p>
                     <p className="font-bold text-sm">{user.name}</p>
                     <p className="text-xs text-muted-foreground font-medium truncate">
@@ -354,7 +354,7 @@ function UserMenuDropdown({
                         href="/profile"
                         className="flex items-center gap-3 font-semibold text-sm w-full"
                     >
-                        <User size={16} className="opacity-70" /> My Profile
+                        <User size={16} className="opacity-70" /> Mi Perfil
                     </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator className="mx-2 bg-border/50" />
@@ -365,7 +365,7 @@ function UserMenuDropdown({
                         router.push("/");
                     }}
                 >
-                    <span className="font-bold text-sm">Sign Out</span>
+                    <span className="font-bold text-sm">Cerrar Sesión</span>
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
@@ -445,13 +445,13 @@ function MobileMenuSheet({
                                 <>
                                     <div className="space-y-4">
                                         <span className="text-[10px] font-bold text-primary uppercase tracking-widest px-1">
-                                            Search Catalog
+                                            Buscar en el Catálogo
                                         </span>
                                         <div role="search">
                                             <div className="relative group">
                                                 <input
-                                                    placeholder="What are you looking for?"
-                                                    aria-label="Search catalog"
+                                                    placeholder="¿Qué estás buscando?"
+                                                    aria-label="Buscar en el catálogo"
                                                     value={query}
                                                     onChange={(
                                                         e: React.ChangeEvent<HTMLInputElement>,
@@ -501,7 +501,7 @@ function MobileMenuSheet({
                                                 className="flex items-center justify-between p-5 bg-card border border-border shadow-sm hover:shadow-md hover:border-primary/20 transition-all rounded-xl group"
                                             >
                                                 <span className="font-bold text-lg">
-                                                    Inventory Catalog
+                                                    Catálogo de Productos
                                                 </span>
                                                 <ArrowRight
                                                     size={20}
@@ -544,7 +544,7 @@ function MobileMenuSheet({
 
                         <div className="space-y-6 pt-10 border-t border-border">
                             <span className="text-[10px] font-bold text-primary uppercase tracking-widest px-1">
-                                Account
+                                Cuenta
                             </span>
                             {user ? (
                                 <div className="space-y-6">
@@ -616,7 +616,7 @@ function MobileMenuSheet({
                                                 router.push("/");
                                             }}
                                         >
-                                            Sign Out
+                                            Cerrar Sesión
                                         </Button>
                                     </div>
                                 </div>
@@ -632,7 +632,7 @@ function MobileMenuSheet({
                                             router.push("/login");
                                         }}
                                     >
-                                        Sign In
+                                        Iniciar Sesión
                                     </Button>
                                     <Button
                                         variant="outline"
@@ -645,7 +645,7 @@ function MobileMenuSheet({
                                             router.push("/register");
                                         }}
                                     >
-                                        Create Account
+                                        Crear Cuenta
                                     </Button>
                                 </div>
                             )}
@@ -847,7 +847,7 @@ export function Navigation({
                                     variant="default"
                                     className="h-10 rounded-full px-6 font-bold text-xs shadow-md shadow-primary/20"
                                 >
-                                    Sign In
+                                    Iniciar Sesión
                                 </Button>
                             </Link>
                         )}

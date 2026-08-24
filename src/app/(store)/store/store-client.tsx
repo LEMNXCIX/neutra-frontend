@@ -43,10 +43,10 @@ const FEATURE_ICONS: Record<string, any> = {
 };
 
 const DEFAULT_FEATURES = [
-    { icon: Truck, title: "Fast Delivery", c1: "from-blue-500", c2: "to-cyan-500", desc: "Free shipping on all orders over $50" },
-    { icon: Shield, title: "Secure Checkout", c1: "from-emerald-500", c2: "to-teal-500", desc: "Industry-leading payment security" },
-    { icon: Tag, title: "Best Prices", c1: "from-purple-500", c2: "to-pink-500", desc: "Exclusive deals and seasonal offers" },
-    { icon: Heart, title: "Quality Assured", c1: "from-rose-500", c2: "to-orange-500", desc: "Premium craftsmanship guaranteed" },
+    { icon: Truck, title: "Envío Rápido", c1: "from-blue-500", c2: "to-cyan-500", desc: "Envío gratis en pedidos superiores a $50" },
+    { icon: Shield, title: "Pago Seguro", c1: "from-emerald-500", c2: "to-teal-500", desc: "Seguridad de pago líder del sector" },
+    { icon: Tag, title: "Mejores Precios", c1: "from-purple-500", c2: "to-pink-500", desc: "Ofertas exclusivas y promociones de temporada" },
+    { icon: Heart, title: "Calidad Garantizada", c1: "from-rose-500", c2: "to-orange-500", desc: "Artesanía premium garantizada" },
 ];
 
 export function StoreHomeClient({
@@ -84,18 +84,18 @@ export function StoreHomeClient({
                         {/* COLUMNA 1 – Texto */}
                         <div className="text-center lg:text-left space-y-8 lg:col-span-1">
                             <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-foreground leading-[1.1]">
-                                {cms?.heroTitle ?? "Timeless"}{" "}
+                                {cms?.heroTitle ?? "Diseño"}{" "}
                                 <span className="text-primary">
-                                    {cms?.heroHighlight ?? "Design"}
+                                    {cms?.heroHighlight ?? "atemporal"}
                                 </span>{" "}
                                 <span className="font-heading italic font-medium">
-                                    {cms?.heroSubtitle ?? "for Modern Living"}
+                                    {cms?.heroSubtitle ?? "para la vida moderna"}
                                 </span>
                             </h1>
 
                             <p className="text-lg md:text-xl text-muted-foreground max-w-xl mx-auto lg:mx-0 leading-relaxed font-medium">
                                 {cms?.heroDescription ??
-                                    "Handpicked furniture and decor that blend Scandinavian minimalism with contemporary comfort."}
+                                    "Muebles y decoración seleccionados que combinan minimalismo escandinavo con confort contemporáneo."}
                             </p>
 
                             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
@@ -105,7 +105,7 @@ export function StoreHomeClient({
                                     asChild
                                 >
                                     <Link href={cms?.heroCtaHref ?? "/products"}>
-                                        {cms?.heroCtaLabel ?? "Shop Collection"}
+                                        {cms?.heroCtaLabel ?? "Ver Colección"}
                                         <ArrowRight className="ml-2 size-5" />
                                     </Link>
                                 </Button>
@@ -139,12 +139,12 @@ export function StoreHomeClient({
                                 variant="secondary"
                                 className="px-4 py-1 rounded-full"
                             >
-                                Curated Selection
+                                Selección Curada
                             </Badge>
                             <h2 className="text-4xl font-bold tracking-tight">
-                                Featured{" "}
+                                Productos{" "}
                                 <span className="text-primary font-heading italic font-medium">
-                                    Products
+                                    Destacados
                                 </span>
                             </h2>
                         </div>
@@ -159,7 +159,7 @@ export function StoreHomeClient({
                                 href="/products"
                                 className="flex items-center gap-2"
                             >
-                                View Full Catalog{" "}
+                                Ver Catálogo Completo{" "}
                                 <ArrowRight className="size-4" />
                             </Link>
                         </Button>
@@ -173,7 +173,7 @@ export function StoreHomeClient({
                             className="w-full h-14 rounded-xl font-bold border-border"
                             asChild
                         >
-                            <Link href="/products">View All Products</Link>
+                            <Link href="/products">Ver Todos los Productos</Link>
                         </Button>
                     </div>
                 </div>
@@ -188,14 +188,14 @@ export function StoreHomeClient({
                             variant="secondary"
                             className="px-4 py-1 rounded-full text-xs"
                         >
-                            Why Choose {brandName}
+                            Por Qué Elegir {brandName}
                         </Badge>
                         <h2 className="text-4xl font-bold tracking-tight">
-                            {cms?.featuresTitle ?? `The ${brandName} Experience`}
+                            {cms?.featuresTitle ?? `La Experiencia ${brandName}`}
                         </h2>
                         <p className="text-muted-foreground font-medium">
                             {cms?.featuresSubtitle ??
-                                "Premium materials, modern design, and exceptional shopping experience at every step."}
+                                "Materiales premium, diseño moderno y una experiencia de compra excepcional en cada paso."}
                         </p>
                     </div>
 
@@ -234,19 +234,19 @@ export function StoreHomeClient({
 
                 <div className="relative max-w-5xl mx-auto px-6 text-center space-y-12">
                     <h2 className="text-background text-6xl md:text-8xl font-black tracking-tighter leading-none uppercase">
-                        {cms?.ctaTitle ?? "UP TO"}{" "}
+                        {cms?.ctaTitle ?? "HASTA"}{" "}
                         <span className="text-primary italic">
-                            {cms?.ctaHighlight ?? "30% OFF"}
+                            {cms?.ctaHighlight ?? "30% DTO"}
                         </span>{" "}
                         <br />
                         <span className="text-3xl md:text-5xl opacity-90 font-heading italic font-medium">
-                            {cms?.ctaSubtitle ?? "Everything Sitewide"}
+                            {cms?.ctaSubtitle ?? "En todo el sitio"}
                         </span>
                     </h2>
 
                     <p className="text-xl md:text-2xl font-medium opacity-80 max-w-2xl mx-auto leading-relaxed italic">
                         {cms?.ctaDescription ??
-                            "Join the minimalist movement. Limited time offer for our new collection."}
+                            "Únete al movimiento minimalista. Oferta por tiempo limitado en nuestra nueva colección."}
                     </p>
 
                     <div className="flex flex-col sm:flex-row gap-6 justify-center items-center pt-4">
@@ -260,7 +260,7 @@ export function StoreHomeClient({
                                 href={cms?.ctaPrimaryHref ?? "/register"}
                                 className="flex items-center gap-3"
                             >
-                                {cms?.ctaPrimaryLabel ?? "Claim Discount"}
+                                {cms?.ctaPrimaryLabel ?? "Reclamar Descuento"}
                                 <ArrowRight className="size-6" />
                             </Link>
                         </Button>
@@ -273,7 +273,7 @@ export function StoreHomeClient({
                             asChild
                         >
                             <Link href={cms?.ctaSecondaryHref ?? "/products"}>
-                                {cms?.ctaSecondaryLabel ?? "Explore Arrivals"}
+                                {cms?.ctaSecondaryLabel ?? "Ver Novedades"}
                             </Link>
                         </Button>
                     </div>
@@ -293,11 +293,11 @@ export function StoreHomeClient({
                         <CardContent className="p-16 md:p-24 text-center space-y-10">
                             <div className="space-y-4">
                                 <h2 className="text-5xl md:text-6xl font-black tracking-tight text-foreground">
-                                    {cms?.newsletterTitle ?? "Never Miss a Drop"}
+                                    {cms?.newsletterTitle ?? "No Te Pierdas Nada"}
                                 </h2>
                                 <p className="text-xl text-muted-foreground max-w-2xl mx-auto font-medium leading-relaxed">
                                     {cms?.newsletterSubtitle ??
-                                        "Exclusive early access, private sales, and interior inspiration delivered straight to your inbox."}
+                                        "Acceso anticipado, ventas privadas e inspiración para tu hogar directo en tu correo."}
                                 </p>
                             </div>
 
@@ -305,7 +305,7 @@ export function StoreHomeClient({
                                 <input
                                     type="email"
                                     required
-                                    aria-label="Email for newsletter"
+                                    aria-label="Email para el boletín"
                                     placeholder="your@email.com"
                                     className="flex-1 h-16 px-8 rounded-xl bg-background border border-border/50
                      focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10

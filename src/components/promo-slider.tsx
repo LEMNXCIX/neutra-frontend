@@ -140,7 +140,7 @@ export default function PromoSlider({ initialSlides }: PromoSliderProps) {
                 type="button"
                 onClick={prev}
                 className="absolute left-3 top-1/2 -translate-y-1/2 bg-background/70 p-2 rounded-full backdrop-blur-sm shadow-md hover:scale-110 transition-all duration-300 opacity-0 group-hover:opacity-100"
-                aria-label="Previous Slide"
+                aria-label="Diapositiva anterior"
             >
                 <ChevronLeft className="text-foreground size-6" />
             </button>
@@ -149,7 +149,7 @@ export default function PromoSlider({ initialSlides }: PromoSliderProps) {
                 type="button"
                 onClick={next}
                 className="absolute right-3 top-1/2 -translate-y-1/2 bg-background/70 p-2 rounded-full backdrop-blur-sm shadow-md hover:scale-110 transition-all duration-300 opacity-0 group-hover:opacity-100"
-                aria-label="Next Slide"
+                aria-label="Siguiente diapositiva"
             >
                 <ChevronRight className="text-foreground size-6" />
             </button>
