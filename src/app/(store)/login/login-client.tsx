@@ -41,7 +41,7 @@ export function LoginForm() {
         setError("");
 
         if (!email || !password) {
-            setError("Please fill in all fields");
+            setError("Por favor completá todos los campos");
             return;
         }
 
@@ -49,7 +49,7 @@ export function LoginForm() {
             await login(email, password);
             router.push(redirectTo);
         } catch (err) {
-            let msg = "Login failed";
+            let msg = "Error al iniciar sesión";
             if (err instanceof Error) msg = err.message;
             setError(msg);
         }
@@ -63,7 +63,7 @@ export function LoginForm() {
                 </div>
                 <div className="space-y-1">
                     <h1 className="text-3xl font-bold tracking-tight text-foreground">
-                        Welcome Back
+                        Bienvenido de Nuevo
                     </h1>
                     <p className="text-muted-foreground font-medium text-sm">
                         Secure access to your account
@@ -89,14 +89,14 @@ export function LoginForm() {
                                 htmlFor="email"
                                 className="text-xs font-semibold text-foreground ml-1"
                             >
-                                Email Address
+                                Correo Electrónico
                             </Label>
                             <div className="relative group">
                                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                                 <Input
                                     id="email"
                                     type="email"
-                                    placeholder="john@example.com"
+                                    placeholder="juan@ejemplo.com"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-all focus:border-primary"
@@ -175,14 +175,14 @@ export function LoginForm() {
 
                         <div className="text-center space-y-4">
                             <p className="text-xs font-medium text-muted-foreground">
-                                Don't have an account yet?
+                                ¿Aún no tenés una cuenta?
                             </p>
                             <Button
                                 variant="outline"
                                 className="w-full h-12 rounded-xl border-border font-bold text-xs transition-all hover:bg-muted"
                                 asChild
                             >
-                                <Link href="/register">Create New Account</Link>
+                                <Link href="/register">Crear Nueva Cuenta</Link>
                             </Button>
                         </div>
                     </form>

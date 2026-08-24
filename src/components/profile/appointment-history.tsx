@@ -63,7 +63,7 @@ export function AppointmentHistory({
                         size="lg"
                         className="rounded-xl px-8 font-bold"
                     >
-                        <Link href="/services">Browse Services</Link>
+                        <Link href="/services">Ver Servicios</Link>
                     </Button>
                 </CardContent>
             </Card>

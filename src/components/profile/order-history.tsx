@@ -60,7 +60,7 @@ export function OrderHistory({ initialOrders }: OrderHistoryProps) {
                         size="lg"
                         className="rounded-xl px-8 font-bold"
                     >
-                        <Link href="/">Explore Products</Link>
+                        <Link href="/">Explorar Productos</Link>
                     </Button>
                 </CardContent>
             </Card>
@@ -138,8 +138,8 @@ export function OrderHistory({ initialOrders }: OrderHistoryProps) {
                                     }
                                 >
                                     {expanded === o.id
-                                        ? "Hide Summary"
-                                        : "View Summary"}
+                                        ? "Ocultar Resumen"
+                                        : "Ver Resumen"}
                                 </Button>
                                 <Button
                                     variant="secondary"

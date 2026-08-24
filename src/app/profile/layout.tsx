@@ -2,8 +2,8 @@ import { cookies } from 'next/headers';
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "My Profile",
-  description: "Manage your account and preferences",
+  title: "Mi Perfil",
+  description: "Gestioná tu cuenta y preferencias",
 };
 import { BookingNavbar } from '@/components/booking/booking-navbar';
 import { Navigation as StoreNavbar } from '@/components/nav_bar';

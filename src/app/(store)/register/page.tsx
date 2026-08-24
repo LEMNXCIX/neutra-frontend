@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { RegisterPageClient } from "./register-client";
 
 export const metadata: Metadata = {
-  title: "Register",
-  description: "Create a new account",
+  title: "Registrarse",
+  description: "Crear una nueva cuenta",
 };
 
 export default function RegisterPage() {

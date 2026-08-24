@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { ForgotPasswordPageClient } from "./forgot-password-client";
 
 export const metadata: Metadata = {
-  title: "Forgot Password",
-  description: "Request a password reset link for your account",
+  title: "Recuperar Contraseña",
+  description: "Solicitá un enlace para restablecer tu contraseña",
 };
 
 export default function ForgotPasswordPage() {

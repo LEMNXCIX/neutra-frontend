@@ -3,8 +3,8 @@ import type { Metadata } from "next";
 import { LoginPageClient } from "./login-client";
 
 export const metadata: Metadata = {
-    title: "Login",
-    description: "Sign in to your account",
+    title: "Iniciar Sesión",
+    description: "Iniciá sesión en tu cuenta",
 };
 
 export default function LoginPage() {

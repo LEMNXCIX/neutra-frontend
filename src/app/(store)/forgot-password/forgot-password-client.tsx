@@ -32,9 +32,9 @@ export function ForgotPasswordPageClient() {
             setLoading(true);
             await authService.forgotPassword(email);
             setSubmitted(true);
-            toast.success("Reset link sent if account exists");
+            toast.success("Enlace enviado si la cuenta existe");
         } catch (error: any) {
-            toast.error(error?.message || "Something went wrong");
+            toast.error(error?.message || "Algo salió mal");
         } finally {
             setLoading(false);
         }
@@ -122,14 +122,14 @@ export function ForgotPasswordPageClient() {
                                     htmlFor="email"
                                     className="text-xs font-semibold text-foreground ml-1"
                                 >
-                                    Email Address
+                                    Correo Electrónico
                                 </Label>
                                 <div className="relative group">
                                     <Mail className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                                     <Input
                                         id="email"
                                         type="email"
-                                        placeholder="john@example.com"
+                                        placeholder="juan@ejemplo.com"
                                         required
                                         className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-all focus:border-primary"
                                         value={email}

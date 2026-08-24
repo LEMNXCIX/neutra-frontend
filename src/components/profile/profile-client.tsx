@@ -117,7 +117,7 @@ export function ProfileClient({
 
   const saveProfile = async () => {
     if (!editState.profileForm.name.trim() || !editState.profileForm.email.trim()) {
-      toast.error("Name and Email are required");
+      toast.error("Nombre y correo son obligatorios");
       return;
     }
 
@@ -136,7 +136,7 @@ export function ProfileClient({
         body: JSON.stringify(body),
       });
 
-      if (!res.ok) throw new Error("Failed to update profile");
+      if (!res.ok) throw new Error("Error al actualizar el perfil");
 
       const data = await res.json();
       if (data.success) {
@@ -145,7 +145,7 @@ export function ProfileClient({
         dispatch({ type: "SET_EDIT_OPEN", payload: false });
       }
     } catch (_error) {
-      toast.error("Failed to update profile");
+      toast.error("Error al actualizar el perfil");
     } finally {
       dispatch({ type: "SET_IS_SAVING", payload: false });
     }
@@ -285,7 +285,7 @@ export function ProfileClient({
                 type="file"
                 accept="image/*"
                 onChange={handleAvatarChange}
-                aria-label="Upload avatar image"
+                aria-label="Subir imagen de avatar"
                 className="hidden"
               />
             </div>
@@ -336,7 +336,7 @@ export function ProfileClient({
               disabled={editState.isSaving}
               className="rounded-xl font-bold h-12 flex-1 shadow-lg shadow-primary/20"
             >
-              {editState.isSaving ? "Saving..." : "Save Changes"}
+              {editState.isSaving ? "Guardando..." : "Guardar Cambios"}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -9,8 +9,8 @@ import { getTenantBrandingFromHeaders } from "@/lib/server-theme";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "My Profile",
-  description: "Manage your account settings and preferences",
+  title: "Mi Perfil",
+  description: "Gestioná la configuración y preferencias de tu cuenta",
 };
 
 export const dynamic = 'force-dynamic';
@@ -47,7 +47,7 @@ async function getData() {
             moduleType
         };
     } catch (error) {
-        console.error("Error loading profile data on server:", error);
+        console.error("Error al cargar los datos del perfil en el servidor:", error);
         return null;
     }
 }
@@ -68,10 +68,10 @@ export default async function ProfilePage() {
                 <div className="max-w-6xl mx-auto space-y-12">
                     <div className={data.isNeutral ? "text-center space-y-4" : "space-y-2"}>
                         <h1 className={`font-bold tracking-tight text-foreground ${data.isNeutral ? "text-5xl md:text-7xl" : "text-4xl"}`}>
-                            {data.isNeutral ? "User Profile" : "Account Overview"}
+                            {data.isNeutral ? "Perfil de Usuario" : "Resumen de la Cuenta"}
                         </h1>
                         <p className="text-muted-foreground text-lg font-medium">
-                            {data.isNeutral ? "Manage your global security and preferences" : "Review your recent activity and account settings"}
+                            {data.isNeutral ? "Gestioná tu seguridad y preferencias globales" : "Revisá tu actividad reciente y la configuración de tu cuenta"}
                         </p>
                     </div>
 

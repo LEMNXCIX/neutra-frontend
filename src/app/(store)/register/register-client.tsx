@@ -31,10 +31,10 @@ import { cn } from "@/lib/utils";
 const getPasswordStrength = (pass: string) => {
   if (pass.length === 0) return { strength: 0, label: "", color: "" };
   if (pass.length < 6)
-    return { strength: 1, label: "Weak", color: "bg-rose-500" };
+    return { strength: 1, label: "Débil", color: "bg-rose-500" };
   if (pass.length < 10)
-    return { strength: 2, label: "Medium", color: "bg-amber-500" };
-  return { strength: 3, label: "Strong", color: "bg-emerald-500" };
+    return { strength: 2, label: "Media", color: "bg-amber-500" };
+  return { strength: 3, label: "Fuerte", color: "bg-emerald-500" };
 };
 
 type RegisterState = {
@@ -84,17 +84,17 @@ export function RegisterPageClient() {
     dispatch({ type: "CLEAR_ERROR" });
 
   if (!state.name || !state.email || !state.password || !state.confirmPassword) {
-    dispatch({ type: "SET_ERROR", value: "Please fill in all fields" });
+    dispatch({ type: "SET_ERROR", value: "Por favor completá todos los campos" });
     return;
   }
 
   if (state.password !== state.confirmPassword) {
-    dispatch({ type: "SET_ERROR", value: "Passwords do not match" });
+    dispatch({ type: "SET_ERROR", value: "Las contraseñas no coinciden" });
     return;
   }
 
   if (state.password.length < 6) {
-    dispatch({ type: "SET_ERROR", value: "Password must be at least 6 characters long" });
+    dispatch({ type: "SET_ERROR", value: "La contraseña debe tener al menos 6 caracteres" });
     return;
   }
 
@@ -102,7 +102,7 @@ export function RegisterPageClient() {
     await register(state.name, state.email, state.password);
     router.push("/");
   } catch (err) {
-    let msg = "Registration failed";
+    let msg = "Error al registrarse";
     if (err instanceof Error) msg = err.message;
     dispatch({ type: "SET_ERROR", value: msg });
   }
@@ -152,7 +152,7 @@ export function RegisterPageClient() {
                                     <User className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                                     <Input
                                         id="name"
-                                        placeholder="John Doe"
+                                        placeholder="Juan Pérez"
                   value={state.name}
                   onChange={(e) =>
                     dispatch({ type: "SET_FIELD", field: "name", value: e.target.value })
@@ -169,14 +169,14 @@ export function RegisterPageClient() {
                                     htmlFor="email"
                                     className="text-xs font-semibold text-foreground ml-1"
                                 >
-                                    Email Address
+                                    Correo Electrónico
                                 </Label>
                                 <div className="relative group">
                                     <Mail className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                                     <Input
                                         id="email"
                                         type="email"
-                                        placeholder="john@example.com"
+                                        placeholder="juan@ejemplo.com"
                   value={state.email}
                   onChange={(e) =>
                     dispatch({ type: "SET_FIELD", field: "email", value: e.target.value })
@@ -338,7 +338,7 @@ export function RegisterPageClient() {
                                     className="w-full h-12 rounded-xl border-border font-bold text-xs transition-all hover:bg-muted"
                                     asChild
                                 >
-                                    <Link href="/login">Identify Session</Link>
+                                    <Link href="/login">Identificar Sesión</Link>
                                 </Button>
                             </div>
                         </form>

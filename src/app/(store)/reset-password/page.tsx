@@ -3,8 +3,8 @@ import type { Metadata } from "next";
 import { ResetPasswordPageClient } from "./reset-password-client";
 
 export const metadata: Metadata = {
-    title: "Reset Password",
-    description: "Set a new password for your account",
+    title: "Restablecer Contraseña",
+    description: "Establecé una nueva contraseña para tu cuenta",
 };
 
 export default function ResetPasswordPage() {

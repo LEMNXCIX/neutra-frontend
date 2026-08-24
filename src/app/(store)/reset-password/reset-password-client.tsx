@@ -37,7 +37,7 @@ function ResetPasswordForm() {
 
     useEffect(() => {
         if (!token) {
-            toast.error("Invalid or missing reset token");
+            toast.error("Token de restablecimiento inválido o faltante");
         }
     }, [token]);
 
@@ -46,12 +46,12 @@ function ResetPasswordForm() {
         if (!token) return;
 
         if (password !== confirmPassword) {
-            toast.error("Passwords do not match");
+            toast.error("Las contraseñas no coinciden");
             return;
         }
 
         if (password.length < 6) {
-            toast.error("Password must be at least 6 characters");
+            toast.error("La contraseña debe tener al menos 6 caracteres");
             return;
         }
 
@@ -59,12 +59,12 @@ function ResetPasswordForm() {
             setLoading(true);
             await authService.resetPassword({ token, newPassword: password });
             setSuccess(true);
-            toast.success("Password reset successfully");
+            toast.success("Contraseña restablecida correctamente");
             setTimeout(() => {
                 router.push("/login");
             }, 3000);
         } catch (error: any) {
-            toast.error(error?.message || "Failed to reset password");
+            toast.error(error?.message || "Error al restablecer la contraseña");
         } finally {
             setLoading(false);
         }
