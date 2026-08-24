@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { api } from '@/lib/api-client';
 import { getTenantNameFromHeaders } from "@/lib/server-theme";
+import { getHomeContent } from "@/lib/strapi";
 import { StoreHomeClient } from "./store-client";
 
 export const metadata: Metadata = {
@@ -31,16 +32,18 @@ async function fetchFeaturedProducts(): Promise<any[]> {
 }
 
 export default async function StoreHomePage() {
-    const [sliders, featuredProducts, tenantName] = await Promise.all([
+    const [sliders, featuredProducts, tenantName, cms] = await Promise.all([
         fetchSliders(),
         fetchFeaturedProducts(),
         getTenantNameFromHeaders(),
+        getHomeContent(),
     ]);
     return (
         <StoreHomeClient
             initialSliders={sliders}
             initialProducts={featuredProducts}
             tenantName={tenantName}
+            cms={cms}
         />
     );
 }

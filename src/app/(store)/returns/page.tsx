@@ -32,7 +32,7 @@ export default function ReturnsPage() {
 
                 <section className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-start">
                     <div className="lg:col-span-5">
-                        <Card className="t-card border-none shadow-2xl bg-foreground text-background overflow-hidden relative">
+                        <Card className="t-card border-none shadow-2xl bg-card text-card-foreground overflow-hidden relative">
                             <div className="absolute top-0 left-0 w-full h-1.5 bg-primary" />
                             <CardContent className="p-10">
                                 <h2 className="text-3xl font-bold tracking-tight mb-10">
@@ -52,7 +52,7 @@ export default function ReturnsPage() {
                                             <span className="flex-shrink-0 size-8 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold text-sm">
                                                 {i + 1}
                                             </span>
-                                            <span className="font-medium text-sm text-background/80 group-hover:text-background transition-colors pt-1.5">
+                                            <span className="font-medium text-sm text-muted-foreground group-hover:text-foreground transition-colors pt-1.5">
                                                 {step}
                                             </span>
                                         </div>

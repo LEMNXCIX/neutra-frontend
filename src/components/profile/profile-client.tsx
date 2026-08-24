@@ -205,14 +205,6 @@ export function ProfileClient({
               <div className="flex flex-wrap gap-4 pt-4">
                 <div className="px-6 py-3 bg-muted/40 rounded-xl border border-border/50">
                   <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1 opacity-70">
-                    Account Level
-                  </p>
-                  <p className="text-sm font-bold text-foreground">
-                    {user.roleName || "Member"}
-                  </p>
-                </div>
-                <div className="px-6 py-3 bg-muted/40 rounded-xl border border-border/50">
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1 opacity-70">
                     Registration Date
                   </p>
                   <p className="text-sm font-bold text-foreground">

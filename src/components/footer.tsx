@@ -15,7 +15,7 @@ import Logo from "@/components/logo";
 
 const EMPTY_CATEGORIES: Category[] = [];
 
-export default function Footer({ minimal = false, tenantName, tenantLogo, initialCategories = EMPTY_CATEGORIES }: { minimal?: boolean; tenantName?: string | null; tenantLogo?: string | null; initialCategories?: Category[] }) {
+export default function Footer({ minimal = false, tenantName, tenantLogo, footerDescription, initialCategories = EMPTY_CATEGORIES }: { minimal?: boolean; tenantName?: string | null; tenantLogo?: string | null; footerDescription?: string | null; initialCategories?: Category[] }) {
   const categories = initialCategories.filter((c) => c.active).slice(0, 5);
 
     return (
@@ -33,8 +33,8 @@ export default function Footer({ minimal = false, tenantName, tenantLogo, initia
                             </h3>
                         </div>
                         <p className="text-sm font-medium text-muted-foreground leading-relaxed max-w-[240px]">
-                            Redefining the digital architecture of modern
-                            commerce and high-performance scheduling systems.
+                            {footerDescription ??
+                                "Redefining the digital architecture of modern commerce and high-performance scheduling systems."}
                         </p>
                         {/* Social Media Icons */}
                         <div className="flex items-center gap-3">

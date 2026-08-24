@@ -7,21 +7,69 @@ import { Badge } from "@/components/ui/badge";
 import PromoSlider from "@/components/promo-slider";
 import BannerBar from "@/components/banner-bar";
 import FeaturedProducts from "@/components/featured-products";
-import { Truck, Shield, ArrowRight, Tag, Heart, Zap } from "lucide-react";
+import { Truck, Shield, ArrowRight, Tag, Heart, Zap, Box } from "lucide-react";
 
 import { useFeatures } from "@/hooks/useFeatures";
+
+export type HomeCms = {
+    heroTitle?: string;
+    heroHighlight?: string;
+    heroSubtitle?: string;
+    heroDescription?: string;
+    heroCtaLabel?: string;
+    heroCtaHref?: string;
+    featuresTitle?: string;
+    featuresSubtitle?: string;
+    features?: { icon?: string; title?: string; description?: string }[] | null;
+    ctaTitle?: string;
+    ctaHighlight?: string;
+    ctaSubtitle?: string;
+    ctaDescription?: string;
+    ctaPrimaryLabel?: string;
+    ctaPrimaryHref?: string;
+    ctaSecondaryLabel?: string;
+    ctaSecondaryHref?: string;
+    newsletterTitle?: string;
+    newsletterSubtitle?: string;
+};
+
+const FEATURE_ICONS: Record<string, any> = {
+    truck: Truck,
+    shield: Shield,
+    tag: Tag,
+    heart: Heart,
+    box: Box,
+    zap: Zap,
+};
+
+const DEFAULT_FEATURES = [
+    { icon: Truck, title: "Fast Delivery", c1: "from-blue-500", c2: "to-cyan-500", desc: "Free shipping on all orders over $50" },
+    { icon: Shield, title: "Secure Checkout", c1: "from-emerald-500", c2: "to-teal-500", desc: "Industry-leading payment security" },
+    { icon: Tag, title: "Best Prices", c1: "from-purple-500", c2: "to-pink-500", desc: "Exclusive deals and seasonal offers" },
+    { icon: Heart, title: "Quality Assured", c1: "from-rose-500", c2: "to-orange-500", desc: "Premium craftsmanship guaranteed" },
+];
 
 export function StoreHomeClient({
     initialSliders,
     initialProducts,
     tenantName,
+    cms,
 }: {
     initialSliders?: any[];
     initialProducts?: any[];
     tenantName?: string | null;
+    cms?: HomeCms | null;
 }) {
     const { isFeatureEnabled } = useFeatures();
     const brandName = tenantName || "XCIX";
+    const features = (cms?.features?.length ? cms.features : DEFAULT_FEATURES).map(
+        (f: any, i: number) => ({
+            ...DEFAULT_FEATURES[i % DEFAULT_FEATURES.length],
+            icon: FEATURE_ICONS[f.icon] ?? DEFAULT_FEATURES[i % DEFAULT_FEATURES.length].icon,
+            title: f.title ?? DEFAULT_FEATURES[i % DEFAULT_FEATURES.length].title,
+            desc: f.description ?? DEFAULT_FEATURES[i % DEFAULT_FEATURES.length].desc,
+        })
+    );
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-background via-muted/20 to-background">
@@ -36,17 +84,18 @@ export function StoreHomeClient({
                         {/* COLUMNA 1 – Texto */}
                         <div className="text-center lg:text-left space-y-8 lg:col-span-1">
                             <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-foreground leading-[1.1]">
-                                Timeless{" "}
-                                <span className="text-primary">Design</span>{" "}
+                                {cms?.heroTitle ?? "Timeless"}{" "}
+                                <span className="text-primary">
+                                    {cms?.heroHighlight ?? "Design"}
+                                </span>{" "}
                                 <span className="font-heading italic font-medium">
-                                    for Modern Living
+                                    {cms?.heroSubtitle ?? "for Modern Living"}
                                 </span>
                             </h1>
 
                             <p className="text-lg md:text-xl text-muted-foreground max-w-xl mx-auto lg:mx-0 leading-relaxed font-medium">
-                                Handpicked furniture and decor that blend
-                                Scandinavian minimalism with contemporary
-                                comfort.
+                                {cms?.heroDescription ??
+                                    "Handpicked furniture and decor that blend Scandinavian minimalism with contemporary comfort."}
                             </p>
 
                             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
@@ -55,8 +104,8 @@ export function StoreHomeClient({
                                     className="h-14 px-10 text-base font-bold rounded-xl shadow-lg shadow-primary/20 hover:-translate-y-0.5 transition-all"
                                     asChild
                                 >
-                                    <Link href="/products">
-                                        Shop Collection
+                                    <Link href={cms?.heroCtaHref ?? "/products"}>
+                                        {cms?.heroCtaLabel ?? "Shop Collection"}
                                         <ArrowRight className="ml-2 size-5" />
                                     </Link>
                                 </Button>
@@ -142,45 +191,16 @@ export function StoreHomeClient({
                             Why Choose {brandName}
                         </Badge>
                         <h2 className="text-4xl font-bold tracking-tight">
-                            The {brandName} Experience
+                            {cms?.featuresTitle ?? `The ${brandName} Experience`}
                         </h2>
                         <p className="text-muted-foreground font-medium">
-                            Premium materials, modern design, and exceptional
-                            shopping experience at every step.
+                            {cms?.featuresSubtitle ??
+                                "Premium materials, modern design, and exceptional shopping experience at every step."}
                         </p>
                     </div>
 
                     <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-                        {[
-                            {
-                                icon: Truck,
-                                title: "Fast Delivery",
-                                c1: "from-blue-500",
-                                c2: "to-cyan-500",
-                                desc: "Free shipping on all orders over $50",
-                            },
-                            {
-                                icon: Shield,
-                                title: "Secure Checkout",
-                                c1: "from-emerald-500",
-                                c2: "to-teal-500",
-                                desc: "Industry-leading payment security",
-                            },
-                            {
-                                icon: Tag,
-                                title: "Best Prices",
-                                c1: "from-purple-500",
-                                c2: "to-pink-500",
-                                desc: "Exclusive deals and seasonal offers",
-                            },
-                            {
-                                icon: Heart,
-                                title: "Quality Assured",
-                                c1: "from-rose-500",
-                                c2: "to-orange-500",
-                                desc: "Premium craftsmanship guaranteed",
-                            },
-                        ].map((f) => (
+                        {features.map((f) => (
                             <Card
                                 key={f.title}
                                 className="t-card border-none shadow-md hover:shadow-xl hover:-translate-y-2 transition-all duration-300 group bg-background/60 backdrop-blur-xl"
@@ -214,17 +234,19 @@ export function StoreHomeClient({
 
                 <div className="relative max-w-5xl mx-auto px-6 text-center space-y-12">
                     <h2 className="text-background text-6xl md:text-8xl font-black tracking-tighter leading-none uppercase">
-                        UP TO{" "}
-                        <span className="text-primary italic">30% OFF</span>{" "}
+                        {cms?.ctaTitle ?? "UP TO"}{" "}
+                        <span className="text-primary italic">
+                            {cms?.ctaHighlight ?? "30% OFF"}
+                        </span>{" "}
                         <br />
                         <span className="text-3xl md:text-5xl opacity-90 font-heading italic font-medium">
-                            Everything Sitewide
+                            {cms?.ctaSubtitle ?? "Everything Sitewide"}
                         </span>
                     </h2>
 
                     <p className="text-xl md:text-2xl font-medium opacity-80 max-w-2xl mx-auto leading-relaxed italic">
-                        Join the minimalist movement. Limited time offer for our
-                        new collection.
+                        {cms?.ctaDescription ??
+                            "Join the minimalist movement. Limited time offer for our new collection."}
                     </p>
 
                     <div className="flex flex-col sm:flex-row gap-6 justify-center items-center pt-4">
@@ -235,10 +257,10 @@ export function StoreHomeClient({
                             asChild
                         >
                             <Link
-                                href="/register"
+                                href={cms?.ctaPrimaryHref ?? "/register"}
                                 className="flex items-center gap-3"
                             >
-                                Claim Discount
+                                {cms?.ctaPrimaryLabel ?? "Claim Discount"}
                                 <ArrowRight className="size-6" />
                             </Link>
                         </Button>
@@ -250,7 +272,9 @@ export function StoreHomeClient({
                    hover:bg-background hover:text-foreground transition-all"
                             asChild
                         >
-                            <Link href="/products">Explore Arrivals</Link>
+                            <Link href={cms?.ctaSecondaryHref ?? "/products"}>
+                                {cms?.ctaSecondaryLabel ?? "Explore Arrivals"}
+                            </Link>
                         </Button>
                     </div>
                 </div>
@@ -269,12 +293,11 @@ export function StoreHomeClient({
                         <CardContent className="p-16 md:p-24 text-center space-y-10">
                             <div className="space-y-4">
                                 <h2 className="text-5xl md:text-6xl font-black tracking-tight text-foreground">
-                                    Never Miss a Drop
+                                    {cms?.newsletterTitle ?? "Never Miss a Drop"}
                                 </h2>
                                 <p className="text-xl text-muted-foreground max-w-2xl mx-auto font-medium leading-relaxed">
-                                    Exclusive early access, private sales, and
-                                    interior inspiration delivered straight to
-                                    your inbox.
+                                    {cms?.newsletterSubtitle ??
+                                        "Exclusive early access, private sales, and interior inspiration delivered straight to your inbox."}
                                 </p>
                             </div>
 

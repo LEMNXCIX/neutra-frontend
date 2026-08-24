@@ -5,6 +5,7 @@ import {
     getTenantBrandingFromHeaders,
     getTenantNameFromHeaders,
 } from "@/lib/server-theme";
+import { getHomeContent } from "@/lib/strapi";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -17,9 +18,10 @@ export default async function StoreLayout({
 }: {
     children: React.ReactNode;
 }) {
-    const [branding, tenantName] = await Promise.all([
+    const [branding, tenantName, cms] = await Promise.all([
         getTenantBrandingFromHeaders(),
         getTenantNameFromHeaders(),
+        getHomeContent(),
     ]);
 
     return (
@@ -33,7 +35,11 @@ export default async function StoreLayout({
             >
                 <NavBar tenantName={tenantName} tenantLogo={branding?.tenantLogo} />
                 <div className="pt-16">{children}</div>
-                <FooterWrapper tenantName={tenantName} tenantLogo={branding?.tenantLogo} />
+                <FooterWrapper
+                    tenantName={tenantName}
+                    tenantLogo={branding?.tenantLogo}
+                    footerDescription={cms?.footerDescription}
+                />
             </div>
         </TenantThemeProvider>
     );

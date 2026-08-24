@@ -38,6 +38,8 @@ type MobileMenuSheetProps = {
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
   navItems: NavItem[];
+  tenantName?: string | null;
+  tenantLogo?: string;
   user: {
     name: string;
     email?: string;
@@ -48,7 +50,7 @@ type MobileMenuSheetProps = {
   router: ReturnType<typeof useRouter>;
 };
 
-function MobileMenuSheet({ isOpen, setIsOpen, navItems, user, logout, router }: MobileMenuSheetProps) {
+function MobileMenuSheet({ isOpen, setIsOpen, navItems, tenantName, tenantLogo, user, logout, router }: MobileMenuSheetProps) {
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
@@ -67,15 +69,17 @@ function MobileMenuSheet({ isOpen, setIsOpen, navItems, user, logout, router }: 
         <SheetHeader className="p-8 border-b border-border text-left bg-muted/20">
           <div className="flex items-center gap-4">
             <div className="p-3 bg-background border border-border shadow-sm rounded-xl">
-              <Logo size={32} />
+              <Logo size={32} src={tenantLogo} />
             </div>
             <div>
               <SheetTitle className="text-2xl font-bold tracking-tight">
-                XCIX
+                {tenantName || "XCIX"}
               </SheetTitle>
-              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mt-0.5">
-                Booking Node
-              </p>
+              {!tenantName && (
+                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mt-0.5">
+                  Booking Node
+                </p>
+              )}
             </div>
           </div>
         </SheetHeader>
@@ -222,7 +226,7 @@ function MobileMenuSheet({ isOpen, setIsOpen, navItems, user, logout, router }: 
   );
 }
 
-export function BookingNavbar() {
+export function BookingNavbar({ tenantName, tenantLogo }: { tenantName?: string | null; tenantLogo?: string }) {
     const [isOpen, setIsOpen] = useState(false);
     const { theme, setTheme } = useTheme();
     const router = useRouter();
@@ -260,7 +264,7 @@ export function BookingNavbar() {
                         >
                             <div className="relative">
                                 <div className="absolute inset-0 bg-primary/20 rounded-full blur-lg opacity-0 group-hover:opacity-100 transition-opacity" />
-                                <Logo size={36} className="relative z-10" />
+                                <Logo size={36} className="relative z-10" src={tenantLogo} />
                             </div>
                         </div>
                         <Link
@@ -268,11 +272,13 @@ export function BookingNavbar() {
                             className="ml-3 flex flex-col leading-tight"
                         >
                             <span className="text-lg font-bold tracking-tight">
-                                XCIX
+                                {tenantName || "XCIX"}
                             </span>
-                            <span className="text-[9px] font-medium text-muted-foreground uppercase tracking-widest">
-                                Booking Node
-                            </span>
+                            {!tenantName && (
+                                <span className="text-[9px] font-medium text-muted-foreground uppercase tracking-widest">
+                                    Booking Node
+                                </span>
+                            )}
                         </Link>
                     </div>
 
@@ -400,6 +406,8 @@ export function BookingNavbar() {
             isOpen={isOpen}
             setIsOpen={setIsOpen}
             navItems={navItems}
+            tenantName={tenantName}
+            tenantLogo={tenantLogo}
             user={user}
             logout={logout}
             router={router}

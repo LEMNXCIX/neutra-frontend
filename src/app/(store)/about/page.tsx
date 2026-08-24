@@ -1,3 +1,4 @@
+import CmsPageContent from "@/components/cms-page-content";
 import React from "react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -10,6 +11,7 @@ export const metadata: Metadata = {
 
 export default function AboutPage() {
     return (
+        <CmsPageContent slug="">
         <div className="max-w-5xl mx-auto px-6 py-24 lg:py-32 animate-slide-up">
             <div className="space-y-24">
                 <header className="space-y-6 max-w-3xl">
@@ -84,5 +86,6 @@ export default function AboutPage() {
                 </div>
             </div>
         </div>
+        </CmsPageContent>
     );
 }

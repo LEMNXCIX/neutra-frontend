@@ -1,3 +1,4 @@
+import CmsPageContent from "@/components/cms-page-content";
 import React from "react";
 import { Mail, MapPin, Phone, Send } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -14,6 +15,7 @@ export const metadata: Metadata = {
 
 export default function ContactPage() {
     return (
+        <CmsPageContent slug="">
         <div className="max-w-6xl mx-auto px-6 py-24 animate-slide-up">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
                 <div className="space-y-10">
@@ -156,5 +158,6 @@ export default function ContactPage() {
                 </Card>
             </div>
         </div>
+        </CmsPageContent>
     );
 }

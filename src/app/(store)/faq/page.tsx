@@ -1,3 +1,4 @@
+import CmsPageContent from "@/components/cms-page-content";
 import React from "react";
 import {
     Accordion,
@@ -17,6 +18,7 @@ export const metadata: Metadata = {
 
 export default function FAQPage() {
     return (
+        <CmsPageContent slug="">
         <div className="max-w-4xl mx-auto px-6 py-24 lg:py-32 animate-slide-up">
             <div className="space-y-16">
                 <header className="space-y-6 max-w-2xl">
@@ -96,5 +98,6 @@ export default function FAQPage() {
                 </div>
             </div>
         </div>
+        </CmsPageContent>
     );
 }
