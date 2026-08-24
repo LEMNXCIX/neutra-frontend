@@ -15,8 +15,15 @@ export default defineConfig({
         coverage: {
             provider: 'v8',
             reporter: ['text', 'lcov'],
-            include: ['src/lib/api-client.ts', 'src/services/**/*.ts', 'src/app/api/**/route.ts'],
+            include: [
+                'src/lib/api-client.ts',
+                'src/lib/api-route-handler.ts',
+                'src/lib/theme.ts',
+                'src/store/**/*.ts',
+                'src/services/**/*.ts',
+                'src/app/api/**/route.ts',
+            ],
         },
-        setupFiles: [],
+        setupFiles: ['./tests/setup.ts'],
     },
 });
