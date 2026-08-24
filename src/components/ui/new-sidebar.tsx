@@ -169,7 +169,7 @@ export function SidebarTrigger() {
             onClick={toggleSidebar}
         >
             <PanelLeftIcon className="size-5" />
-            <span className="sr-only">Toggle sidebar</span>
+            <span className="sr-only">Mostrar/ocultar barra lateral</span>
         </Button>
     );
 }

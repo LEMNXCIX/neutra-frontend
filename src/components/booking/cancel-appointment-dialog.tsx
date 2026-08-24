@@ -59,7 +59,7 @@ export function CancelAppointmentDialog({
                 </DialogHeader>
                 <div className="space-y-4 py-4">
                     <Textarea
-                        placeholder="Reason for cancellation (optional)"
+                        placeholder="Motivo de la cancelación (opcional)"
                         value={reason}
                         onChange={(e) => setReason(e.target.value)}
                         className="resize-none"

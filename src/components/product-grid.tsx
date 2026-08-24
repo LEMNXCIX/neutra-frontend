@@ -138,7 +138,7 @@ export default function ProductGrid({
                       ) : (
                         <div className="flex items-center gap-2">
                           <ShoppingCart className="size-4" />
-                          <span>Add to Cart</span>
+                          <span>Agregar al Carrito</span>
                         </div>
                       )}
                     </Button>
@@ -247,7 +247,7 @@ export default function ProductGrid({
                     ) : (
                     <div className="flex items-center gap-2">
                         <ShoppingCart className="size-4" />
-                        <span>Add to Cart</span>
+                        <span>Agregar al Carrito</span>
                     </div>
                     )}
                 </Button>

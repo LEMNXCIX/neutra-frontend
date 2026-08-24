@@ -89,7 +89,7 @@ export function BusinessHoursClient() {
         return (
             <div className="flex flex-col items-center justify-center gap-3 py-20 text-center">
                 <Clock className="size-10 text-muted-foreground" />
-                <p className="font-semibold">No tenant context</p>
+                <p className="font-semibold">Sin contexto de tenant</p>
             </div>
         );
     }

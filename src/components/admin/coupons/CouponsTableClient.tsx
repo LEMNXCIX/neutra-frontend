@@ -561,7 +561,7 @@ return (
 <Input
 value={form.code}
 onChange={(e) => onFormChange({ ...form, code: e.target.value })}
-placeholder="COUPON CODE"
+placeholder="CÓDIGO DE CUPÓN"
 className="uppercase"
 />
 </div>

@@ -152,7 +152,7 @@ function LogInspectorDialog({
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-0 border-none shadow-3xl rounded-xl overflow-hidden">
         <DialogHeader className="sr-only">
           <DialogTitle>Log Inspector</DialogTitle>
-          <DialogDescription>Detailed view of the system log entry</DialogDescription>
+          <DialogDescription>Vista detallada del registro del sistema</DialogDescription>
         </DialogHeader>
         <div className="flex flex-col min-h-full bg-background">
           <div className="p-8 space-y-6 bg-foreground text-background">

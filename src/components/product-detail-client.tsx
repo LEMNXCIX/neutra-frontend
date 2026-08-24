@@ -67,7 +67,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                 ) : (
                     <div className="flex items-center gap-3">
                         <ShoppingBagIcon className="size-5" />
-                        <span>Add to Cart</span>
+                        <span>Agregar al Carrito</span>
                     </div>
                 )}
             </Button>

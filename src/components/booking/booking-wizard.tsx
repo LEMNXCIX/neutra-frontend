@@ -622,7 +622,7 @@ function ReviewStep({
                                         })
                                     }
                                     rows={4}
-                                    placeholder="Tell us anything we should know..."
+                                    placeholder="Contanos cualquier cosa que debamos saber..."
                                     className="rounded-xl border-border focus:border-primary transition-all bg-muted/10 font-medium"
                                 />
                             </div>
@@ -639,7 +639,7 @@ function ReviewStep({
                                 </div>
                                 <div className="flex gap-2">
                                     <Input
-                                        placeholder="CODE"
+                                        placeholder="CÓDIGO"
                                         value={couponCode}
                                         onChange={(e) =>
                                             dispatch({

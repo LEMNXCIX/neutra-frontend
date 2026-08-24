@@ -208,7 +208,7 @@ function StaffEmptyState({ onCreate }: { onCreate: () => void }) {
             <div className="bg-muted rounded-full p-4 mb-4">
                 <UserIcon className="size-8 text-muted-foreground" />
             </div>
-            <CardTitle>No staff members found</CardTitle>
+            <CardTitle>No se encontraron miembros del equipo</CardTitle>
             <CardDescription className="max-w-[400px] mt-2">
                 Add your first staff member to start managing appointments and
                 services.

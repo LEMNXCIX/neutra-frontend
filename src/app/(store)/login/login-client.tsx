@@ -79,7 +79,7 @@ export function LoginForm() {
                         Sign In
                     </CardTitle>
                     <CardDescription className="text-sm font-medium">
-                        Enter your credentials to continue
+                        Ingresá tus credenciales para continuar
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="pb-8">

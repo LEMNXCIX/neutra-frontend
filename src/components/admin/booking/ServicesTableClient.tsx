@@ -186,7 +186,7 @@ function ServiceFormFields({
               <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
             ))}
             {(!Array.isArray(categories) || categories.length === 0) && !loadingCategories && (
-              <div className="p-2 text-xs text-center text-muted-foreground">No service categories found.</div>
+              <div className="p-2 text-xs text-center text-muted-foreground">No se encontraron categorías de servicios.</div>
             )}
           </SelectContent>
         </Select>
@@ -194,7 +194,7 @@ function ServiceFormFields({
       <div className="flex items-center justify-between p-3 border rounded-lg bg-muted/20">
         <div className="space-y-0.5">
           <Label htmlFor="active" className="text-sm font-medium">Active Status</Label>
-          <p className="text-xs text-muted-foreground">Show this service to customers</p>
+          <p className="text-xs text-muted-foreground">Mostrar este servicio a los clientes</p>
         </div>
         <Switch
           id="active"

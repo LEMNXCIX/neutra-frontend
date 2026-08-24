@@ -29,7 +29,7 @@ function SummaryStatsCards({
                 </div>
             ))}
             {Object.keys(statusCounts).length === 0 && (
-                <div className="text-sm text-muted-foreground">No data</div>
+                <div className="text-sm text-muted-foreground">Sin datos</div>
             )}
         </div>
     );
@@ -127,7 +127,7 @@ function TimelineCard({
                         })}
                     </div>
                 ) : (
-                    <div className="text-sm text-muted-foreground">No data</div>
+                    <div className="text-sm text-muted-foreground">Sin datos</div>
                 )}
             </CardContent>
         </Card>
@@ -271,7 +271,7 @@ export default function AnalyticsChartsDetailed() {
                     <option value="7d">Last 7 days</option>
                     <option value="30d">Last 30 days</option>
                     <option value="90d">Last 90 days</option>
-                    <option value="all">All time</option>
+                    <option value="all">Todo el período</option>
                 </select>
             </div>
 

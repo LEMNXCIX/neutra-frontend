@@ -137,7 +137,7 @@ return (
 </div>
 <div className="space-y-2">
 <Label htmlFor={`${prefix}-description`}>Description</Label>
-<Input id={`${prefix}-description`} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Role description" />
+<Input id={`${prefix}-description`} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Descripción del rol" />
 </div>
 <div className="space-y-2">
 <Label htmlFor={`${prefix}-level`}>Level</Label>
@@ -153,7 +153,7 @@ return (
 {isSearchingPerms ? (
 <div className="text-center py-4 text-sm text-muted-foreground">Searching…</div>
 ) : availablePermissions.length === 0 ? (
-<div className="text-center py-4 text-sm text-muted-foreground">No permissions found</div>
+<div className="text-center py-4 text-sm text-muted-foreground">No se encontraron permisos</div>
 ) : (
 availablePermissions.map((permission) => (
 <div key={permission.id} className="flex items-center gap-2">
@@ -188,7 +188,7 @@ return (
 </div>
 <div>
 <Label htmlFor={`${prefix}-perm-description`}>Description</Label>
-<Input id={`${prefix}-perm-description`} value={permForm.description} onChange={(e) => setPermForm({ ...permForm, description: e.target.value })} placeholder="Permission description" />
+<Input id={`${prefix}-perm-description`} value={permForm.description} onChange={(e) => setPermForm({ ...permForm, description: e.target.value })} placeholder="Descripción del permiso" />
 </div>
 </div>
 );
