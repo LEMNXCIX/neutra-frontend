@@ -15,7 +15,6 @@ import {
     MapPin,
     CreditCard,
     ArrowLeft,
-    Download,
     CheckCircle2,
     Clock,
     XCircle,
@@ -23,6 +22,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { PrintReceiptButton } from "@/components/print-receipt-button";
 
 type OrderItem = { id: string; name: string; qty: number; price: number };
 type Order = {
@@ -374,7 +374,7 @@ const currentStatus =
             <main className="min-h-screen bg-gradient-to-b from-background via-muted/20 to-background py-16 px-6 animate-in fade-in duration-700">
                 <div className="max-w-5xl mx-auto space-y-12">
                     {/* Header */}
-                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 border-b border-border/50 pb-10">
+                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 border-b border-border/50 pb-10 print:hidden">
                         <div className="space-y-4">
                             <Button
                                 variant="ghost"
@@ -401,26 +401,11 @@ const currentStatus =
                                 </p>
                             </div>
                         </div>
-                        <Button
-                            className="h-14 px-10 rounded-xl font-bold bg-foreground text-background hover:bg-foreground/90 shadow-xl shadow-foreground/10 transition-all hover:-translate-y-1"
-                            asChild
-                        >
-                            <a
-                                href={`/api/orders/${order.id}/receipt`}
-                                target="_blank"
-                                rel="noreferrer"
-                            >
-                                <Download
-                                    className="size-5 mr-3"
-                                    strokeWidth={2}
-                                />
-                                Download Receipt
-                            </a>
-                        </Button>
+                        <PrintReceiptButton />
                     </div>
 
                     {/* Status Card */}
-                    <Card className="border-none shadow-2xl rounded-[2.5rem] bg-background overflow-hidden relative group">
+                    <Card className="border-none shadow-2xl rounded-[2.5rem] bg-background overflow-hidden relative group print:hidden">
                         <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-primary via-purple-500 to-pink-500" />
                         <CardContent className="p-8 md:p-12">
                             <div className="flex flex-col md:flex-row items-center gap-10">
@@ -474,7 +459,7 @@ const currentStatus =
                         </CardContent>
                     </Card>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 print:hidden">
         <div className="lg:col-span-2 space-y-10">
         <OrderItemsSection items={order.items} />
         <OrderPricingSummary subtotal={subtotal} discount={discount} couponCode={order.couponCode} total={order.total} />
@@ -486,6 +471,33 @@ const currentStatus =
       <OrderHelpCard />
       </div>
       </div>
+
+                    {/* Receipt — only visible when printing (Download Receipt → Save as PDF) */}
+                    <div className="hidden print:block text-black bg-white p-8">
+                        <h1 className="text-2xl font-bold mb-1">Recibo de compra</h1>
+                        <p className="text-sm mb-6">Orden #{order.id} — {order.date}</p>
+                        <table className="w-full text-sm">
+                            <tbody>
+                                {order.items.map((item) => (
+                                    <tr key={item.id} className="border-b border-gray-200">
+                                        <td className="py-2">{item.qty} × {item.name}</td>
+                                        <td className="py-2 text-right">${(item.price * item.qty).toFixed(2)}</td>
+                                    </tr>
+                                ))}
+                                {discount > 0 && (
+                                    <tr>
+                                        <td className="py-2">Descuento {order.couponCode ? `(${order.couponCode})` : ""}</td>
+                                        <td className="py-2 text-right">-${discount.toFixed(2)}</td>
+                                    </tr>
+                                )}
+                                <tr>
+                                    <td className="py-3 text-lg font-bold">Total</td>
+                                    <td className="py-3 text-lg font-bold text-right">${order.total.toFixed(2)}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <p className="text-xs mt-6">{order.address}</p>
+                    </div>
       </div>
       </main>
   );

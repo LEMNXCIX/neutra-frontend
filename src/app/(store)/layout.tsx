@@ -33,13 +33,17 @@ export default async function StoreLayout({
                     marginLeft: 'var(--sidebar-width, 0px)',
                 } as React.CSSProperties}
             >
-                <NavBar tenantName={tenantName} tenantLogo={branding?.tenantLogo} />
-                <div className="pt-16">{children}</div>
-                <FooterWrapper
-                    tenantName={tenantName}
-                    tenantLogo={branding?.tenantLogo}
-                    footerDescription={cms?.footerDescription}
-                />
+                <div className="print:hidden">
+                    <NavBar tenantName={tenantName} tenantLogo={branding?.tenantLogo} />
+                </div>
+                <div className="pt-16 print:pt-0">{children}</div>
+                <div className="print:hidden">
+                    <FooterWrapper
+                        tenantName={tenantName}
+                        tenantLogo={branding?.tenantLogo}
+                        footerDescription={cms?.footerDescription}
+                    />
+                </div>
             </div>
         </TenantThemeProvider>
     );
