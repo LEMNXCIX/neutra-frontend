@@ -48,7 +48,9 @@ export async function GET(req: NextRequest) {
 
         logger.info(logger.withResponse(logContext, { success: true }, 200, duration), `Auth Response: Session valid`);
 
-        return NextResponse.json(result.data || result);
+        // Forward the StandardResponse ({success, data}) — apiClient checks
+        // data.success; unwrapping here broke session restore on refresh.
+        return NextResponse.json(result);
     } catch (error: any) {
         const duration = Date.now() - startTime;
         logger.error(logger.withError(logContext, error, duration), `Auth Error: ${error.message}`);

@@ -3,6 +3,7 @@
 import React, {
     useReducer,
     useCallback,
+    useEffect,
     useMemo,
     useSyncExternalStore,
 } from "react";
@@ -42,9 +43,14 @@ import {
     Tag,
     Scissors,
     ArrowRight,
+    CalendarOff,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { EmptyState } from "@/components/ui/empty-state";
+import {
+    AvailabilityCalendar,
+    workingWeekdays,
+} from "@/components/booking/availability-calendar";
 
 interface BookingWizardProps {
     initialServices: Service[];
@@ -102,12 +108,14 @@ function bookingWizardReducer(
             return {
                 ...state,
                 selectedStaff: action.payload,
+                selectedTime: "",
                 availableSlots: [],
             };
         case "SET_SELECTED_DATE":
             return {
                 ...state,
                 selectedDate: action.payload,
+                selectedTime: "",
                 availableSlots: [],
             };
         case "SET_SELECTED_TIME":
@@ -261,7 +269,6 @@ interface StaffStepProps {
     selectedService: Service | null;
     selectedStaff: Staff | null;
     dispatch: DispatchFn;
-    onCheckAvailability: () => void;
 }
 
 function StaffStep({
@@ -269,7 +276,6 @@ function StaffStep({
     selectedService,
     selectedStaff,
     dispatch,
-    onCheckAvailability,
 }: StaffStepProps) {
     return (
         <div className="space-y-8">
@@ -304,7 +310,6 @@ function StaffStep({
                                     payload: member,
                                 });
                                 dispatch({ type: "SET_STEP", payload: 3 });
-                                onCheckAvailability();
                             }}
                         >
                             <CardHeader className="p-6">
@@ -363,6 +368,7 @@ interface ScheduleStepProps {
     selectedTime: string;
     availableSlots: string[];
     loadingAvailability: boolean;
+    selectedStaff: Staff | null;
     dispatch: DispatchFn;
 }
 
@@ -372,8 +378,18 @@ function ScheduleStep({
     selectedTime,
     availableSlots,
     loadingAvailability,
+    selectedStaff,
     dispatch,
 }: ScheduleStepProps) {
+    const workingDays = useMemo(
+        () => workingWeekdays(selectedStaff?.workingHours),
+        [selectedStaff],
+    );
+    const isDayOff =
+        selectedDate &&
+        workingDays.size > 0 &&
+        !workingDays.has(new Date(`${selectedDate}T12:00:00`).getDay());
+
     return (
         <div className="space-y-8">
             <div className="space-y-2">
@@ -392,17 +408,16 @@ function ScheduleStep({
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="pt-6 pb-8">
-                        <Input
-                            type="date"
+                        <AvailabilityCalendar
                             value={selectedDate}
-                            onChange={(e) =>
+                            onChange={(payload) =>
                                 dispatch({
                                     type: "SET_SELECTED_DATE",
-                                    payload: e.target.value,
+                                    payload,
                                 })
                             }
-                            min={today}
-                            className="h-12 border-border focus:border-primary transition-all rounded-xl font-medium"
+                            workingDays={workingDays}
+                            minDate={today}
                         />
                     </CardContent>
                 </Card>
@@ -424,11 +439,21 @@ function ScheduleStep({
                                         Querying availability…
                                     </p>
                                 </div>
+                            ) : isDayOff ? (
+                                <div className="text-center py-10 space-y-2">
+                                    <CalendarOff className="size-8 mx-auto text-muted-foreground opacity-60" />
+                                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                                        {selectedStaff?.name} no labora este día
+                                    </p>
+                                    <p className="text-xs text-muted-foreground">
+                                        Elige otro día en el calendario
+                                    </p>
+                                </div>
                             ) : availableSlots.length === 0 ? (
                                 <div className="text-center py-10 space-y-2">
                                     <AlertCircle className="size-8 mx-auto text-rose-500 opacity-50" />
                                     <p className="text-[10px] font-bold uppercase tracking-widest text-rose-500">
-                                        No windows available for this date
+                                        Sin horarios disponibles para esta fecha
                                     </p>
                                 </div>
                             ) : (
@@ -789,6 +814,10 @@ export function BookingWizard({
         }
     }, [state.selectedStaff, state.selectedDate, state.selectedService]);
 
+    useEffect(() => {
+        checkAvailability();
+    }, [checkAvailability]);
+
     const validateCoupon = async () => {
         if (!state.couponCode.trim() || !state.selectedService) return;
         try {
@@ -940,7 +969,6 @@ export function BookingWizard({
                     selectedService={selectedService}
                     selectedStaff={selectedStaff}
                     dispatch={dispatch}
-                    onCheckAvailability={checkAvailability}
                 />
             )}
 
@@ -951,6 +979,7 @@ export function BookingWizard({
                     selectedTime={selectedTime}
                     availableSlots={availableSlots}
                     loadingAvailability={loadingAvailability}
+                    selectedStaff={selectedStaff}
                     dispatch={dispatch}
                 />
             )}

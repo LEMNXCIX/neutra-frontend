@@ -27,7 +27,7 @@ export default async function BookingLayout({
                 </main>
                 <footer className="border-t border-border py-6 px-6">
                     <p className="text-[10px] text-muted-foreground text-center font-semibold uppercase tracking-widest">
-                        &copy; {new Date().getFullYear()} XCIX Platforms. All Rights Reserved.
+                        &copy; {new Date().getFullYear()} {tenantName || "XCIX Platforms"}. All Rights Reserved.
                     </p>
                 </footer>
             </div>

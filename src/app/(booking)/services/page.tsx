@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { ServicesGrid } from '@/components/booking/services-grid';
 import type { Metadata } from "next";
 import { api } from '@/lib/api-client';
+import { getHomeContent } from '@/lib/strapi';
 
 export const metadata: Metadata = {
   title: "Services",
@@ -21,7 +22,7 @@ async function getServices() {
 }
 
 export default async function ServicesPage() {
-    const services = await getServices();
+    const [services, cms] = await Promise.all([getServices(), getHomeContent()]);
 
     return (
         <div className="min-h-screen bg-background">
@@ -30,10 +31,14 @@ export default async function ServicesPage() {
                 <div className="mb-12 text-center">
                     <Badge variant="outline" className="mb-4">Professional Services</Badge>
                     <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4 text-foreground">
-                        Our <span className="text-primary">Services</span>
+                        {cms?.servicesTitle ?? (
+                            <>
+                                Our <span className="text-primary">Services</span>
+                            </>
+                        )}
                     </h1>
                     <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                        Choose from our range of professional services tailored to your needs
+                        {cms?.servicesSubtitle ?? "Choose from our range of professional services tailored to your needs"}
                     </p>
                 </div>
 
