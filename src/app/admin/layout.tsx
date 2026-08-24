@@ -19,7 +19,7 @@ export default function AdminLayout({
     return (
         <div className="flex flex-col min-h-screen transition-colors duration-300">
             <NeutralNavigation />
-            <div className="flex flex-1 flex-col md:flex-row border-4 border-foreground rounded-none overflow-hidden transition-all duration-300 bg-background">
+            <div className="flex flex-1 flex-col md:flex-row overflow-hidden transition-all duration-300 bg-background">
                 <SuperAdminSidebar items={SUPER_ADMIN_NAV} />
 
                 <main className="flex-1 p-6 overflow-y-auto pb-20 md:pb-6 transition-all duration-300 bg-background">

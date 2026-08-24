@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
 async function fetchSliders(): Promise<any[]> {
     try {
-        const data = await api.get<any>("/sliders");
+        const data = await api.get<any>("/slide");
         if (Array.isArray(data)) return data;
         return data?.sliders || [];
     } catch {

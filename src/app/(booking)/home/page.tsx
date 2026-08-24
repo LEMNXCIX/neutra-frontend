@@ -4,6 +4,7 @@ import { ArrowRight, CalendarDays } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ServicesGrid } from "@/components/booking/services-grid";
+import { BookingBanners } from "@/components/booking/booking-banners";
 import { api } from "@/lib/api-client";
 import { getHomeContent } from "@/lib/strapi";
 import { getTenantNameFromHeaders } from "@/lib/server-theme";
@@ -24,11 +25,22 @@ async function getServices() {
     }
 }
 
+async function getSlides() {
+    try {
+        const data = await api.get<any>("/slide");
+        if (Array.isArray(data)) return data;
+        return data?.sliders || [];
+    } catch {
+        return [];
+    }
+}
+
 export default async function BookingHomePage() {
-    const [services, cms, tenantName] = await Promise.all([
+    const [services, cms, tenantName, slides] = await Promise.all([
         getServices(),
         getHomeContent(),
         getTenantNameFromHeaders(),
+        getSlides(),
     ]);
     const brandName = tenantName || "XCIX";
 
@@ -74,6 +86,9 @@ export default async function BookingHomePage() {
                 </div>
             </section>
 
+            {/* BANNERS + SLIDER (solo si la feature BANNERS está activa) */}
+            <BookingBanners slides={slides} />
+
             {/* SERVICES */}
             <section className="py-16 border-t border-border/50">
                 <div className="container mx-auto px-4 max-w-7xl">
@@ -81,7 +96,7 @@ export default async function BookingHomePage() {
                         <div className="inline-flex items-center gap-2 text-muted-foreground mb-3">
                             <CalendarDays className="size-4" />
                             <span className="text-xs font-bold uppercase tracking-widest">
-                                What we offer
+                                {cms?.servicesBadge ?? "What we offer"}
                             </span>
                         </div>
                         <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-3 text-foreground">

@@ -1,4 +1,5 @@
 import React, { Suspense } from "react";
+import { redirect } from "next/navigation";
 import RolesTableClient from "@/components/admin/roles/RolesTableClient";
 import { Permission } from "@/types/permission.types";
 import { Role } from "@/types/role.types";
@@ -7,6 +8,16 @@ import { api } from '@/lib/api-client';
 export const metadata = { title: "Store Roles" };
 
 export const dynamic = "force-dynamic";
+
+async function requireSuperAdmin() {
+    try {
+        const auth = await api.get<{ user: { role?: { name?: string } } }>('/auth/validate');
+        if (auth?.user?.role?.name !== "SUPER_ADMIN") redirect("/");
+    } catch (e) {
+        if (e && typeof e === "object" && "digest" in (e as object)) throw e; // next redirect
+        redirect("/login");
+    }
+}
 
 async function getRolesAndPermissions(
     rolePage: number,
@@ -122,6 +133,7 @@ type Props = {
 };
 
 export default async function RolesPage({ searchParams }: Props) {
+    await requireSuperAdmin();
     const resolvedSearchParams = await searchParams;
     const rolePage =
         typeof resolvedSearchParams.rolePage === "string"

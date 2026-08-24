@@ -133,9 +133,9 @@ function LogAnalyticsStats({
                                 System stable / No errors detected
                             </div>
                         ) : (
-                            stats.topFailedEndpoints.map((endpoint) => (
+                            stats.topFailedEndpoints.map((endpoint, i) => (
                                 <div
-                                    key={endpoint.url}
+                                    key={`${endpoint.url}-${i}`}
                                     className="p-4 flex justify-between items-center hover:bg-muted/30 transition-colors"
                                 >
                                     <div className="space-y-1">

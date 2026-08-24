@@ -63,11 +63,19 @@ export async function apiClient<T = unknown>(
     } else {
         // Server-side: use next/headers
         try {
-            const { cookies: nextCookies, headers: _nextHeaders } = require('next/headers');
+            const { cookies: nextCookies, headers: nextHeaders } = require('next/headers');
+            // Prefer the x-tenant-* request headers: the proxy sets them for
+            // THIS request (always correct). Cookies can be stale — they're
+            // set on the response, so a request that follows a visit to
+            // another subdomain still carries the previous tenant's cookie.
+            const h = await nextHeaders();
+            tenantSlug = (h.get('x-tenant-slug') || undefined) as any;
+            tenantId = (h.get('x-tenant-id') || undefined) as any;
+
             const c = await nextCookies();
-            tenantSlug = c.get('tenant-slug')?.value;
-            tenantId = c.get('tenant-id')?.value;
-            
+            if (!tenantSlug) tenantSlug = c.get('tenant-slug')?.value;
+            if (!tenantId) tenantId = c.get('tenant-id')?.value;
+
             // Collect all cookies to forward them
             const allCookies = c.getAll();
             cookieHeader = allCookies.map((cookie: any) => `${cookie.name}=${cookie.value}`).join('; ');

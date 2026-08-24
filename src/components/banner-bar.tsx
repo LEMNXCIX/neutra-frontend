@@ -33,17 +33,17 @@ export default function BannerBar() {
     if (!b) return null;
 
     return (
-        <div className="w-full bg-foreground text-background relative overflow-hidden mt-8 shadow-2xl border-b border-white/5">
+        <div className="w-full bg-primary text-primary-foreground relative overflow-hidden mt-8 shadow-2xl border-b border-primary-foreground/10">
             {/* Subtle animated background pattern */}
             <div className="absolute inset-0 opacity-5 pointer-events-none">
-                <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_center,_var(--primary)_0%,_transparent_70%)]" />
+                <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_center,_color-mix(in_srgb,_var(--primary-foreground)_35%,_transparent)_0%,_transparent_70%)]" />
             </div>
 
             <div className="relative max-w-7xl mx-auto px-6 py-4">
                 <div className="flex flex-col md:flex-row items-center justify-between gap-6">
                     {/* Left content */}
                     <div className="flex items-center gap-6 flex-1 text-center md:text-left">
-                        <div className="hidden sm:flex items-center justify-center size-12 bg-background/10 backdrop-blur-md text-background rounded-xl border border-white/10">
+                        <div className="hidden sm:flex items-center justify-center size-12 bg-primary-foreground/10 backdrop-blur-md text-primary-foreground rounded-xl border border-primary-foreground/10">
                             <Sparkles className="size-6 stroke-[2px]" />
                         </div>
                         <div className="space-y-0.5">
@@ -63,7 +63,7 @@ export default function BannerBar() {
                         {b.ctaUrl ? (
                             <Button
                                 asChild
-                                className="bg-background text-foreground hover:bg-background/90 font-black uppercase tracking-widest text-[10px] shadow-2xl h-11 px-8 rounded-none transition-all active:scale-95"
+                                className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 font-black uppercase tracking-widest text-[10px] shadow-2xl h-11 px-8 rounded-lg transition-all active:scale-95"
                                 size="sm"
                             >
                                 <Link href={b.ctaUrl}>
@@ -71,7 +71,7 @@ export default function BannerBar() {
                                 </Link>
                             </Button>
                         ) : b.cta ? (
-                            <span className="bg-background text-foreground px-8 py-3 rounded-none font-black uppercase tracking-widest text-[10px] shadow-2xl">
+                            <span className="bg-primary-foreground text-primary px-8 py-3 rounded-lg font-black uppercase tracking-widest text-[10px] shadow-2xl">
                                 {b.cta}
                             </span>
                         ) : null}
@@ -79,7 +79,7 @@ export default function BannerBar() {
                         <button
                             type="button"
                             onClick={() => setVisibleId(null)}
-                            className="size-10 flex items-center justify-center rounded-full hover:bg-white/10 transition-all active:scale-90"
+                            className="size-10 flex items-center justify-center rounded-full hover:bg-primary-foreground/10 transition-all active:scale-90"
                             aria-label="Dismiss banner"
                         >
                             <X className="size-5 opacity-40 hover:opacity-100" />
