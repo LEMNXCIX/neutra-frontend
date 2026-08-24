@@ -3,8 +3,8 @@ import type { Metadata } from "next";
 import { api } from '@/lib/api-client';
 
 export const metadata: Metadata = {
-    title: "Order Details",
-    description: "View your order status and details",
+    title: "Detalles del Pedido",
+    description: "Ver el estado y los detalles de tu pedido",
 };
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -113,7 +113,7 @@ function OrderPricingSummary({ subtotal, discount, couponCode, total }: { subtot
           </div>
         )}
         <div className="flex justify-between items-center text-sm font-bold uppercase tracking-widest text-muted-foreground/70">
-          <span>Shipping</span>
+          <span>Envío</span>
           <span className="text-foreground">
             Calculated at checkout
           </span>
@@ -197,24 +197,24 @@ function OrderInfoGrid({ address, trackingNumber }: { address: string; trackingN
 function OrderTimeline({ orderDate, status }: { orderDate: string; status: string }) {
   const steps = [
     {
-      label: "Order Placed",
+      label: "Pedido Realizado",
       date: orderDate,
       active: true,
     },
     {
-      label: "In Transit",
+      label: "En Tránsito",
       date:
         status === "shipped" || status === "delivered"
-          ? "Shipped to destination"
-          : "Processing in warehouse",
+          ? "Enviado a destino"
+          : "Procesándose en depósito",
       active: status === "shipped" || status === "delivered",
     },
     {
-      label: "Delivered",
+      label: "Entregado",
       date:
         status === "delivered"
-          ? "Final delivery successful"
-          : "Expected soon",
+          ? "Entrega final exitosa"
+          : "Pronto disponible",
       active: status === "delivered",
     },
   ];
@@ -281,7 +281,7 @@ function OrderHelpCard() {
         className="w-full h-14 rounded-xl border-2 font-bold uppercase tracking-widest text-[10px] hover:bg-foreground hover:text-background transition-all"
         asChild
       >
-        <Link href="/contact">Contact Support</Link>
+        <Link href="/contact">Contactar Soporte</Link>
       </Button>
     </Card>
   );
@@ -293,34 +293,34 @@ const statusConfig: Record<
   { label: string; color: string; icon: any; description: string }
 > = {
   processing: {
-    label: "Processing",
+    label: "Procesando",
     color: "bg-yellow-500",
     icon: Clock,
-    description: "Your order is being prepared",
+    description: "Tu pedido se está preparando",
   },
   shipped: {
-    label: "Shipped",
+    label: "Enviado",
     color: "bg-blue-500",
     icon: Truck,
-    description: "Your order is on its way",
+    description: "Tu pedido está en camino",
   },
   delivered: {
-    label: "Delivered",
+    label: "Entregado",
     color: "bg-green-500",
     icon: CheckCircle2,
-    description: "Your order has been delivered",
+    description: "Tu pedido fue entregado",
   },
   cancelled: {
-    label: "Cancelled",
+    label: "Cancelado",
     color: "bg-red-500",
     icon: XCircle,
-    description: "This order was cancelled",
+    description: "Este pedido fue cancelado",
   },
   PAGADO: {
-    label: "Paid",
+    label: "Pagado",
     color: "bg-blue-500",
     icon: CreditCard,
-    description: "Order has been paid and is being processed",
+    description: "Pedido pagado y en proceso",
   },
 };
 
@@ -346,12 +346,12 @@ export default async function OrderPage(props: {
             total: rawOrder.total,
             status: rawOrder.status,
             trackingNumber: rawOrder.trackingNumber,
-            address: rawOrder.user?.email || "Address not available", // Fallback since address might not be in response
+            address: rawOrder.user?.email || "Dirección no disponible", // Fallback since address might not be in response
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             items:
                 rawOrder.items?.map((item: any) => ({
                     id: item.id,
-                    name: item.product?.name || "Unknown Product",
+                    name: item.product?.name || "Producto desconocido",
                     qty: item.amount,
                     price: item.price,
                 })) || [],

@@ -5,8 +5,8 @@ import type { Metadata } from "next";
 import type { Category } from "@/types/category.types";
 
 export const metadata: Metadata = {
-    title: "Products",
-    description: "Browse our complete product catalog",
+    title: "Productos",
+    description: "Explorá nuestro catálogo completo de productos",
 };
 
 // Frontend expects 'title' but backend uses 'name'

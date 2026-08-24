@@ -4,8 +4,8 @@ import { Badge } from "@/components/ui/badge";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-    title: "Terms of Service",
-    description: "Our terms and conditions of service",
+    title: "Términos de Servicio",
+    description: "Nuestros términos y condiciones del servicio",
 };
 
 export default function TermsPage() {
@@ -21,7 +21,7 @@ export default function TermsPage() {
                         Legal Protocol
                     </Badge>
                     <h1 className="text-5xl md:text-6xl font-bold tracking-tight text-foreground leading-tight">
-                        Service <span className="text-primary">Agreement</span>
+                        Service <span className="text-primary">Acuerdo</span>
                     </h1>
         <p className="text-muted-foreground font-semibold uppercase tracking-widest text-[10px]" suppressHydrationWarning>
           Registry Revision: {new Date().toLocaleDateString()}

@@ -289,7 +289,7 @@ onValueChange={handleCategoryChange}
 id="product-category"
 className="h-12 border-border/50 rounded-xl hover:border-purple-500/50 transition-all"
 >
-<SelectValue placeholder="All categories" />
+<SelectValue placeholder="Todas las categorías" />
 </SelectTrigger>
 <SelectContent className="rounded-xl border-border/50">
 <SelectItem value="all">
@@ -334,7 +334,7 @@ No products found
 <p className="text-muted-foreground text-center mb-6 max-w-md">
 {search || category !== "all"
 ? "Try adjusting your filters or search terms"
-: "There are no products available at the moment"}
+: "No hay productos disponibles por el momento"}
 </p>
 {activeFiltersCount > 0 && (
 <Button onClick={clearFilters} variant="outline">

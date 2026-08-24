@@ -7,8 +7,8 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-    title: "Shipping",
-    description: "Shipping options, delivery times, and rates",
+    title: "Envíos",
+    description: "Opciones de envío, tiempos de entrega y tarifas",
 };
 
 export default function ShippingPage() {
@@ -23,7 +23,7 @@ export default function ShippingPage() {
                         Logistics & Delivery
                     </Badge>
                     <h1 className="text-6xl md:text-8xl font-bold tracking-tight text-foreground leading-[0.9]">
-                        Global <span className="text-primary">Dispatch</span>
+                        Global <span className="text-primary">Envío</span>
                     </h1>
                     <p className="text-xl text-muted-foreground font-medium leading-relaxed">
                         Our distribution network is optimized for technical
@@ -37,17 +37,17 @@ export default function ShippingPage() {
                     {[
                         {
                             icon: Truck,
-                            title: "Standard Dispatch",
-                            desc: "Complementary for assets above $99 within the continental network.",
+                            title: "Despacho Estándar",
+                            desc: "Sin cargo para pedidos superiores a $99 dentro del país.",
                         },
                         {
                             icon: Clock,
-                            title: "Express Priority",
-                            desc: "Accelerated temporal windows available for urgent asset intake.",
+                            title: "Prioridad Exprés",
+                            desc: "Tiempos acelerados disponibles para pedidos urgentes.",
                         },
                         {
                             icon: Globe,
-                            title: "Global Network",
+                            title: "Red Global",
                             desc: "Logistics covering 50+ sovereign regions with customs optimization.",
                         },
                     ].map((tier) => (
@@ -93,15 +93,15 @@ export default function ShippingPage() {
                             <ul className="space-y-4">
                                 {[
                                     {
-                                        label: "Standard Distribution",
+                                        label: "Distribución Estándar",
                                         time: "03 - 07 Cycles",
                                     },
                                     {
-                                        label: "Priority Express",
+                                        label: "Exprés Prioritario",
                                         time: "01 - 03 Cycles",
                                     },
                                     {
-                                        label: "Global Logistics",
+                                        label: "Logística Global",
                                         time: "07 - 21 Cycles",
                                     },
                                 ].map((item) => (
@@ -136,7 +136,7 @@ export default function ShippingPage() {
                                 className="w-full h-14 rounded-xl font-bold bg-white text-primary hover:bg-white/90 shadow-lg"
                                 asChild
                             >
-                                <Link href="/profile">Access Dashboard →</Link>
+                                <Link href="/profile">Ir al Panel →</Link>
                             </Button>
                         </Card>
                     </div>

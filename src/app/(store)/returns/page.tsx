@@ -5,8 +5,8 @@ import { CheckCircle2 } from "lucide-react";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-    title: "Returns & Refunds",
-    description: "Learn about our returns and refund policy",
+    title: "Devoluciones y Reembolsos",
+    description: "Conocé nuestra política de devoluciones y reembolsos",
 };
 
 export default function ReturnsPage() {
@@ -21,7 +21,7 @@ export default function ReturnsPage() {
                         RMA Protocol
                     </Badge>
                     <h1 className="text-6xl md:text-8xl font-bold tracking-tight text-foreground leading-[0.9]">
-                        Reverse <span className="text-primary">Logistics</span>
+                        Reverse <span className="text-primary">Logística</span>
                     </h1>
                     <p className="text-xl text-muted-foreground font-medium max-w-2xl leading-relaxed">
                         We ensure asset satisfaction. If an instance does not
@@ -41,9 +41,9 @@ export default function ReturnsPage() {
                                 <div className="space-y-8">
                                     {[
                                         "Access your Profile Dashboard.",
-                                        "Select the specific Order Identification.",
-                                        "Initialize RMA Protocol to generate a logistics label.",
-                                        "Securely pack and dispatch the asset via an authorized node.",
+                                        "Seleccioná el número de pedido correspondiente.",
+                                        "Iniciá el proceso de RMA para generar la etiqueta de envío.",
+                                        "Empaquetá bien el producto y despachalo por un punto autorizado.",
                                     ].map((step, i) => (
                                         <div
                                             key={step}
@@ -69,9 +69,9 @@ export default function ReturnsPage() {
                             </h2>
                             <ul className="space-y-6">
                                 {[
-                                    "Return must be initialized within 30 solar days of receipt.",
-                                    "Assets must be in original condition, unutilized, with all integrity tags active.",
-                                    "Large-scale furniture assets may incur a restocking fee.",
+                                    "La devolución debe iniciarse dentro de los 30 días de recibido el pedido.",
+                                    "Los productos deben estar en su estado original, sin uso y con todas sus etiquetas.",
+                                    "Los muebles de gran tamaño pueden tener un cargo de reposición.",
                                     "Assets designated as 'Final Sale' are ineligible for RMA protocols.",
                                 ].map((text, _i) => (
                                     <li

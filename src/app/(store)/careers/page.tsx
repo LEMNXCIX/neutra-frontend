@@ -8,8 +8,8 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-    title: "Careers",
-    description: "Join our team and explore career opportunities",
+    title: "Trabajá con Nosotros",
+    description: "Sumate al equipo y explorá oportunidades profesionales",
 };
 
 export default function CareersPage() {
@@ -25,7 +25,7 @@ export default function CareersPage() {
                         Human Resources
                     </Badge>
                     <h1 className="text-6xl md:text-8xl font-bold tracking-tight text-foreground leading-[0.9]">
-                        Join Our <span className="text-primary">Network</span>
+                        Join Our <span className="text-primary">Red</span>
                     </h1>
                     <p className="text-xl text-muted-foreground font-medium leading-relaxed">
                         We are engineering a new paradigm for minimalist
@@ -45,14 +45,14 @@ export default function CareersPage() {
                     <div className="grid grid-cols-1 gap-6">
                         {[
                             {
-                                title: "Senior Grid Architect",
-                                location: "Global / Remote",
-                                desc: "Lead the spatial design protocol for our next-generation asset collection.",
+                                title: "Arquitecto Senior de Diseño",
+                                location: "Global / Remoto",
+                                desc: "Liderá el diseño espacial de nuestra próxima colección de productos.",
                             },
                             {
-                                title: "Operations Controller",
-                                location: "NYC Intelligence Hub",
-                                desc: "Optimize the logistic flow and supply chain integrity across all network nodes.",
+                                title: "Controller de Operaciones",
+                                location: "Hub de Nueva York",
+                                desc: "Optimizá el flujo logístico y la integridad de la cadena de suministro en toda la red.",
                             },
                         ].map((job) => (
                             <Card

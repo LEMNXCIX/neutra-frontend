@@ -126,7 +126,7 @@ function CouponCard({
           <Input
             value={code}
             onChange={(e) => onCodeChange(e.target.value.toUpperCase())}
-            placeholder="ENTER CODE"
+            placeholder="INGRESÁ CÓDIGO"
             className="flex-1 h-11 border-2 font-black uppercase tracking-widest text-xs rounded-xl"
             disabled={!!coupon}
           />
@@ -135,7 +135,7 @@ function CouponCard({
               {applyingCoupon ? <Loader2 className="size-4 animate-spin" /> : "Apply"}
             </Button>
           ) : (
-            <Button variant="outline" onClick={onRemove} className="h-11 rounded-xl font-black uppercase text-xs border-2">Clear</Button>
+            <Button variant="outline" onClick={onRemove} className="h-11 rounded-xl font-black uppercase text-xs border-2">Vaciar</Button>
           )}
         </div>
         {coupon && (
@@ -248,7 +248,7 @@ export default function CartClient() {
 
     const handleApplyCoupon = async () => {
         if (!code.trim()) {
-            toast.error("Please enter a coupon code");
+            toast.error("Ingresá un código de cupón");
             return;
         }
         setApplyingCoupon(true);
@@ -273,8 +273,8 @@ export default function CartClient() {
     };
 
     const placeOrder = async () => {
-        if (items.length === 0) return toast.error("Cart is empty");
-        if (!address.trim()) return toast.error("Enter delivery address");
+        if (items.length === 0) return toast.error("El carrito está vacío");
+        if (!address.trim()) return toast.error("Ingresá la dirección de envío");
 
         setPlacing(true);
         try {
@@ -292,7 +292,7 @@ export default function CartClient() {
 
             const data = await res.json().catch(() => ({}));
             if (!res.ok) {
-                toast.error(data?.error || "Failed to place order");
+                toast.error(data?.error || "Error al realizar el pedido");
                 setPlacing(false);
                 return;
             }
@@ -311,7 +311,7 @@ export default function CartClient() {
                 err && typeof err === "object" && "message" in err
                     ? String((err as { message?: unknown }).message)
                     : String(err);
-            toast.error(msg || "Unexpected error");
+            toast.error(msg || "Error inesperado");
         } finally {
             setPlacing(false);
         }
@@ -351,7 +351,7 @@ export default function CartClient() {
                 <div className="mb-12">
                     <h1 className="text-5xl font-black uppercase tracking-tighter italic mb-3 flex items-center gap-4 text-foreground">
                         <ShoppingCart className="size-10" strokeWidth={2.5} />
-                        Your <span className="text-primary">Basket</span>
+                        Your <span className="text-primary">Carrito</span>
                     </h1>
                     <p className="text-muted-foreground font-bold uppercase tracking-widest text-xs">
                         Review your{" "}
@@ -394,7 +394,7 @@ export default function CartClient() {
                 <Input
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
-                  placeholder="FULL SHIPPING ADDRESS"
+                  placeholder="DIRECCIÓN COMPLETA DE ENVÍO"
                   className="w-full h-11 border-2 font-bold text-sm rounded-xl"
                 />
               </CardContent>

@@ -13,7 +13,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
     title: "FAQ",
-    description: "Frequently asked questions and answers",
+    description: "Preguntas y respuestas frecuentes",
 };
 
 export default function FAQPage() {
@@ -29,7 +29,7 @@ export default function FAQPage() {
                         Operational Logic
                     </Badge>
                     <h1 className="text-5xl md:text-6xl font-bold tracking-tight text-foreground leading-tight">
-                        Frequently <span className="text-primary">Asked</span>{" "}
+                        Frequently <span className="text-primary">Frecuentes</span>{" "}
                         Questions
                     </h1>
                     <p className="text-lg text-muted-foreground font-medium leading-relaxed">
@@ -45,23 +45,23 @@ export default function FAQPage() {
                 >
                     {[
                         {
-                            q: "Accepted Transaction Methods",
-                            a: "We support all primary credit protocols (Visa, MasterCard, Amex), PayPal, and Apple Pay for secure asset acquisition.",
+                            q: "Métodos de Pago Aceptados",
+                            a: "Aceptamos las principales tarjetas (Visa, MasterCard, Amex), PayPal y Apple Pay para compras seguras.",
                         },
                         {
-                            q: "Global Logistic Reach",
-                            a: "Current distribution network covers 50+ sovereign regions. Temporal estimates and rates vary by node location.",
+                            q: "Cobertura Logística Global",
+                            a: "Nuestra red de distribución cubre más de 50 países. Los tiempos y tarifas varían según la ubicación.",
                         },
                         {
-                            q: "Textile Maintenance Protocols",
+                            q: "Cuidado de los Productos",
                             a: "Asset care varies by material composition. Consult the specific specification sheet or internal tag for precise maintenance logic.",
                         },
                         {
-                            q: "Protocol Monitoring",
+                            q: "Seguimiento de Pedidos",
                             a: "Upon logistics exit, a tracking identifier will be dispatched. Real-time status is available via your personal dashboard.",
                         },
                         {
-                            q: "Warranty Framework",
+                            q: "Marco de Garantía",
                             a: "We provide a 12-month structural integrity guarantee on all furniture and lighting. Textiles are covered by a 90-day operational warranty.",
                         },
                     ].map((item) => (

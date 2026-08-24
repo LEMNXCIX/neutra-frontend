@@ -9,8 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-    title: "Contact",
-    description: "Get in touch with our team",
+    title: "Contacto",
+    description: "Ponete en contacto con nuestro equipo",
 };
 
 export default function ContactPage() {
@@ -27,7 +27,7 @@ export default function ContactPage() {
                             Support & Inquiry
                         </Badge>
                         <h1 className="text-5xl md:text-6xl font-bold tracking-tight text-foreground leading-tight">
-                            Get In <span className="text-primary">Touch</span>
+                            Get In <span className="text-primary">Contacto</span>
                         </h1>
                         <p className="text-lg text-muted-foreground font-medium max-w-md leading-relaxed">
                             Have questions? We're here to help. Reach out to our
@@ -115,7 +115,7 @@ export default function ContactPage() {
                             <Input
                                 type="text"
                                 id="name"
-                                placeholder="John Doe"
+                                placeholder="Juan Pérez"
                                 className="h-12 border-muted-foreground/20 focus:border-primary transition-all"
                             />
                         </div>
@@ -129,7 +129,7 @@ export default function ContactPage() {
                             <Input
                                 type="email"
                                 id="email"
-                                placeholder="john@example.com"
+                                placeholder="juan@ejemplo.com"
                                 className="h-12 border-muted-foreground/20 focus:border-primary transition-all"
                             />
                         </div>
@@ -144,7 +144,7 @@ export default function ContactPage() {
                                 id="message"
                                 rows={5}
                                 className="border-muted-foreground/20 focus:border-primary transition-all resize-none"
-                                placeholder="How can we help you?"
+                                placeholder="¿Cómo podemos ayudarte?"
                             />
                         </div>
                         <Button

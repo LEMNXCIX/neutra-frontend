@@ -5,8 +5,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-    title: "About Us",
-    description: "Learn about our mission, vision, and team",
+    title: "Sobre Nosotros",
+    description: "Conocé nuestra misión, visión y equipo",
 };
 
 export default function AboutPage() {
@@ -23,7 +23,7 @@ export default function AboutPage() {
                     </Badge>
                     <h1 className="text-6xl md:text-8xl font-bold tracking-tight text-foreground leading-[0.9]">
                         Our Unique{" "}
-                        <span className="text-primary">Identity</span>
+                        <span className="text-primary">Identidad</span>
                     </h1>
                     <p className="text-xl text-muted-foreground font-medium leading-relaxed">
                         Redefining modern environments through intentional
@@ -65,9 +65,9 @@ export default function AboutPage() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                     {[
-                        { label: "Asset Validation", value: "100%" },
-                        { label: "Nodes Active", value: "48k" },
-                        { label: "Global Reach", value: "50+" },
+                        { label: "Validación de Activos", value: "100%" },
+                        { label: "Nodos Activos", value: "48k" },
+                        { label: "Alcance Global", value: "50+" },
                     ].map((stat) => (
                         <Card
                             key={stat.label}

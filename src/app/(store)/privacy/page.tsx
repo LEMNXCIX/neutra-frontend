@@ -4,8 +4,8 @@ import { Badge } from "@/components/ui/badge";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-    title: "Privacy Policy",
-    description: "Our privacy policy and data handling practices",
+    title: "Política de Privacidad",
+    description: "Nuestra política de privacidad y manejo de datos",
 };
 
 export default function PrivacyPage() {
@@ -21,7 +21,7 @@ export default function PrivacyPage() {
                         Data Standards
                     </Badge>
                     <h1 className="text-5xl md:text-6xl font-bold tracking-tight text-foreground leading-tight">
-                        Privacy <span className="text-primary">Protocol</span>
+                        Privacy <span className="text-primary">Proceso</span>
                     </h1>
         <p className="text-muted-foreground font-semibold uppercase tracking-widest text-[10px]" suppressHydrationWarning>
           Security Hash Updated: {new Date().toLocaleDateString()}
