@@ -46,6 +46,9 @@ export default async function BookingHomePage() {
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-background via-muted/20 to-background">
+            {/* BANNERS + SLIDER (solo si la feature BANNERS está activa) */}
+            <BookingBanners slides={slides} />
+
             {/* HERO */}
             <section className="relative overflow-hidden py-24 md:py-32">
                 <div className="absolute inset-0 bg-gradient-to-b from-muted/20 via-transparent to-transparent" />
@@ -85,9 +88,6 @@ export default async function BookingHomePage() {
                     </div>
                 </div>
             </section>
-
-            {/* BANNERS + SLIDER (solo si la feature BANNERS está activa) */}
-            <BookingBanners slides={slides} />
 
             {/* SERVICES */}
             <section className="py-16 border-t border-border/50">
