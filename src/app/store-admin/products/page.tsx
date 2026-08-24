@@ -3,7 +3,7 @@ import ProductsTableClient from "@/components/admin/products/ProductsTableClient
 import { api } from '@/lib/api-client';
 import { Product } from "@/types/product.types";
 
-export const metadata = { title: "Products" };
+export const metadata = { title: "Productos" };
 
 export const dynamic = "force-dynamic";
 

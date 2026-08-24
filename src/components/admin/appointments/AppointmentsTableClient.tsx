@@ -222,10 +222,10 @@ function AppointmentDetailsDialog({
               <div className="p-3 border rounded-lg bg-muted/30">
                 <p className="font-bold flex items-center gap-2">
                   <User className="size-4 text-muted-foreground" />
-                  {appointment.user?.name || "Guest Client"}
+                  {appointment.user?.name || "Cliente Invitado"}
                 </p>
                 <p className="text-sm text-muted-foreground ml-6">
-                  {appointment.user?.email || "No email provided"}
+                  {appointment.user?.email || "Sin correo"}
                 </p>
                 <p className="text-xs text-muted-foreground ml-6 mt-1 italic">
                   ID: {appointment.userId}
@@ -444,7 +444,7 @@ function AppointmentsMobileCards({
                     </Avatar>
                     <CardTitle className="text-base font-bold">
                       {appointment.user?.name ||
-                        "Guest Client"}
+                        "Cliente Invitado"}
                     </CardTitle>
                   </div>
                   <p className="text-xs font-medium text-muted-foreground pl-[52px]">
@@ -674,12 +674,12 @@ function AppointmentsDesktopTable({
                       <div className="flex flex-col min-w-0">
                         <span className="font-semibold text-sm truncate max-w-[120px]">
                           {appointment.user
-                            ?.name || "Guest"}
+                            ?.name || "Invitado"}
                         </span>
                         <span className="text-[10px] font-medium text-muted-foreground truncate max-w-[120px]">
                           {appointment.user
                             ?.email ||
-                            "No email"}
+                            "Sin correo"}
                         </span>
                       </div>
                     </div>
@@ -689,14 +689,14 @@ function AppointmentsDesktopTable({
                       <Scissors className="size-3.5 text-primary opacity-60" />
                       <span className="text-sm font-medium text-foreground">
                         {appointment.service
-                          ?.name || "Service"}
+                          ?.name || "Servicio"}
                       </span>
                     </div>
                   </TableCell>
                   <TableCell>
                     <span className="text-sm font-medium text-muted-foreground">
                       {appointment.staff?.name ||
-                        "Assigned"}
+                        "Asignado"}
                     </span>
                   </TableCell>
                   {isSuperAdmin && (
@@ -933,7 +933,7 @@ function AppointmentsFiltersBar({
       <CardContent className="p-4 flex flex-col md:flex-row gap-4 items-center">
         <div className="relative flex-1 w-full">
           <Input
-            placeholder="Search by client name or ID..."
+            placeholder="Buscar por nombre o ID del cliente..."
             value={searchQuery}
             onChange={(e) => handleSearch(e.target.value)}
             className="bg-background border-muted-foreground/20"
@@ -945,7 +945,7 @@ function AppointmentsFiltersBar({
             onValueChange={handleStatusFilterChange}
           >
             <SelectTrigger className="bg-background border-muted-foreground/20 text-foreground">
-              <SelectValue placeholder="All Statuses" />
+              <SelectValue placeholder="Todos los Estados" />
             </SelectTrigger>
             <SelectContent className="bg-background border-muted">
               <SelectItem value="all">
@@ -975,7 +975,7 @@ function AppointmentsFiltersBar({
               onValueChange={handleTenantFilterChange}
             >
               <SelectTrigger className="bg-background border-muted-foreground/20 text-foreground">
-                <SelectValue placeholder="All Tenants" />
+                <SelectValue placeholder="Todos los Tenants" />
               </SelectTrigger>
               <SelectContent className="bg-background border-muted">
                 <SelectItem value="all">
@@ -1063,11 +1063,11 @@ function AppointmentsTableClientInner({
 
     const handleCancel = async (id: string) => {
         const confirmed = await confirm({
-            title: "Cancel Appointment",
+            title: "Cancelar Cita",
             description:
-                "Are you sure you want to cancel this appointment? This action cannot be undone.",
-            confirmText: "Yes, Cancel Appointment",
-            cancelText: "No, Keep It",
+                "¿Seguro que querés cancelar esta cita? Esta acción no se puede deshacer.",
+            confirmText: "Sí, Cancelar Cita",
+            cancelText: "No, Conservarlo",
             variant: "destructive",
         });
 
@@ -1083,14 +1083,14 @@ function AppointmentsTableClientInner({
 
       const data = await response.json();
       if (data.success) {
-        toast.success("Appointment cancelled successfully");
+        toast.success("Cita cancelada correctamente");
         router.refresh();
         dispatch({ type: "SET_DETAILS_OPEN", payload: false });
       } else {
-        toast.error(data.message || "Failed to cancel appointment");
+        toast.error(data.message || "Error al cancelar la cita");
       }
     } catch (_error) {
-      toast.error("An error occurred while cancelling the appointment");
+      toast.error("Ocurrió un error al cancelar la cita");
     } finally {
       dispatch({ type: "SET_IS_CANCELLING", payload: null });
     }
@@ -1107,14 +1107,14 @@ function AppointmentsTableClientInner({
 
       const data = await response.json();
       if (data.success) {
-        toast.success("Appointment confirmed successfully");
+        toast.success("Cita confirmada correctamente");
         router.refresh();
         dispatch({ type: "SET_DETAILS_OPEN", payload: false });
       } else {
-        toast.error(data.message || "Failed to confirm appointment");
+        toast.error(data.message || "Error al confirmar la cita");
       }
     } catch (_error) {
-      toast.error("An error occurred while confirming the appointment");
+      toast.error("Ocurrió un error al confirmar la cita");
     } finally {
       dispatch({ type: "SET_IS_CONFIRMING", payload: null });
     }
@@ -1122,11 +1122,11 @@ function AppointmentsTableClientInner({
 
     const handleDelete = async (id: string) => {
         const confirmed = await confirm({
-            title: "Delete Appointment",
+            title: "Eliminar Cita",
             description:
-                "Are you sure you want to PERMANENTLY delete this appointment? This action cannot be undone.",
-            confirmText: "Yes, Delete Permanently",
-            cancelText: "Cancel",
+                "¿Seguro que querés eliminar PERMANENTEMENTE esta cita? Esta acción no se puede deshacer.",
+            confirmText: "Sí, Eliminar Permanentemente",
+            cancelText: "Cancelar",
             variant: "destructive",
         });
 
@@ -1141,14 +1141,14 @@ function AppointmentsTableClientInner({
 
       const data = await response.json();
       if (data.success) {
-        toast.success("Appointment deleted successfully");
+        toast.success("Cita eliminada correctamente");
         router.refresh();
         dispatch({ type: "SET_DETAILS_OPEN", payload: false });
       } else {
-        toast.error(data.message || "Failed to delete appointment");
+        toast.error(data.message || "Error al eliminar la cita");
       }
     } catch (_error) {
-      toast.error("An error occurred while deleting the appointment");
+      toast.error("Ocurrió un error al eliminar la cita");
     } finally {
       dispatch({ type: "SET_IS_DELETING", payload: null });
     }
@@ -1168,34 +1168,34 @@ function AppointmentsTableClientInner({
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <StatCard
                     icon={CalendarDays}
-                    title="Total Appointments"
+                    title="Total de Citas"
                     value={stats?.totalAppointments || 0}
                     color="bg-blue-500"
                     description="Across all statuses"
                 />
                 <StatCard
                     icon={Clock}
-                    title="Pending"
+                    title="Pendiente"
                     value={stats?.pendingAppointments || 0}
                     color="bg-yellow-500"
-                    description="Awaiting confirmation"
+                    description="Esperando confirmación"
                 />
                 <StatCard
                     icon={CalendarCheck}
-                    title="Confirmed"
+                    title="Confirmadas"
                     value={stats?.confirmedAppointments || 0}
                     color="bg-green-500"
-                    description="Upcoming bookings"
+                    description="Reservas próximas"
                 />
                 <StatCard
                     icon={CalendarX}
-                    title="Cancelled/No-Show"
+                    title="Canceladas / No Asistió"
                     value={
                         (stats?.statusCounts?.["CANCELLED"] || 0) +
                         (stats?.statusCounts?.["NO_SHOW"] || 0)
                     }
                     color="bg-red-500"
-                    description="Non-completed visits"
+                    description="Visitas no completadas"
                 />
             </div>
 

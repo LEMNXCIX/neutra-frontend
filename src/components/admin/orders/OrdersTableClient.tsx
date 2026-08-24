@@ -218,7 +218,7 @@ function OrderDetailsDialog({
                                 onChange={(e) =>
                                     setEditingTracking(e.target.value)
                                 }
-                                placeholder="Enter tracking number..."
+                                placeholder="Ingresá el número de seguimiento..."
                             />
                             <Button
                                 onClick={() =>
@@ -229,7 +229,7 @@ function OrderDetailsDialog({
                                 {isUpdatingTracking ? (
                                     <Spinner className="size-4" />
                                 ) : (
-                                    "Update"
+                                    "Actualizar"
                                 )}
                             </Button>
                         </div>
@@ -364,19 +364,19 @@ function OrdersStats({ stats }: { stats: Stats }) {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <StatCard
                 icon={ShoppingCart}
-                title="Total Orders"
+                title="Total de Pedidos"
                 value={stats.totalOrders}
                 color="bg-blue-500"
             />
             <StatCard
                 icon={TrendingUp}
-                title="Total Revenue"
+                title="Ingresos Totales"
                 value={`$${stats.totalRevenue.toFixed(2)}`}
                 color="bg-green-500"
             />
             <StatCard
                 icon={Package}
-                title="Pending"
+                title="Pendiente"
                 value={stats.statusCounts.PENDIENTE || 0}
                 color="bg-yellow-500"
             />
@@ -403,7 +403,7 @@ function OrdersFilters({
                 <div className="flex flex-wrap gap-3">
                     <Select value={statusFilter} onValueChange={onFilterChange}>
                         <SelectTrigger className="w-[180px]">
-                            <SelectValue placeholder="All Statuses" />
+                            <SelectValue placeholder="Todos los Estados" />
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="all">All Statuses</SelectItem>
@@ -417,7 +417,7 @@ function OrdersFilters({
 
                     <div className="flex gap-2 flex-1">
                         <Input
-                            placeholder="Search by Order ID or User ID..."
+                            placeholder="Buscar por ID de pedido o de usuario..."
                             defaultValue={searchQuery}
                             onKeyDown={(e) => {
                                 if (e.key === "Enter") {
@@ -429,7 +429,7 @@ function OrdersFilters({
                         <Button
                             onClick={() => {
                                 const input = document.querySelector(
-                                    'input[placeholder="Search by Order ID or User ID..."]',
+                                    'input[placeholder="Buscar por ID de pedido o de usuario..."]',
                                 ) as HTMLInputElement;
                                 onSearch(input?.value || "");
                             }}
@@ -710,7 +710,7 @@ function OrdersMobileCards({
                                                     .toUpperCase()}
                                             </div>
                                             <CardTitle className="text-base font-bold">
-                                                {o.user?.name || "Guest Client"}
+                                                {o.user?.name || "Cliente Invitado"}
                                             </CardTitle>
                                         </div>
                                         <p className="text-xs font-medium text-muted-foreground pl-[52px]">
@@ -753,7 +753,7 @@ function OrdersMobileCards({
                                         Tracking
                                     </p>
                                     <p className="text-xs font-mono font-medium truncate bg-muted/50 p-2 rounded-md border border-border/50">
-                                        {o.trackingNumber || "No tracking info"}
+                                        {o.trackingNumber || "Sin información de seguimiento"}
                                     </p>
                                 </div>
                             </CardContent>
@@ -841,11 +841,11 @@ function OrdersTableClientInner({
 
             if (!res.ok) {
                 const error = await res.json();
-                toast.error(error.error || "Failed to update status");
+                toast.error(error.error || "Error al actualizar el estado");
                 return;
             }
 
-            toast.success("Status updated");
+            toast.success("Estado actualizado");
             router.refresh();
 
             if (
@@ -861,7 +861,7 @@ function OrdersTableClientInner({
                 });
             }
         } catch {
-            toast.error("Network error");
+            toast.error("Error de red");
         } finally {
             dispatch({ type: "SET_IS_UPDATING_STATUS", payload: null });
         }
@@ -878,15 +878,15 @@ function OrdersTableClientInner({
 
             if (!res.ok) {
                 const error = await res.json();
-                toast.error(error.error || "Failed to update tracking");
+                toast.error(error.error || "Error al actualizar el seguimiento");
                 return;
             }
 
-            toast.success("Tracking updated");
+            toast.success("Seguimiento actualizado");
             dispatch({ type: "SET_DETAILS_OPEN", payload: false });
             router.refresh();
         } catch {
-            toast.error("Network error");
+            toast.error("Error de red");
         } finally {
             dispatch({ type: "SET_IS_UPDATING_TRACKING", payload: false });
         }

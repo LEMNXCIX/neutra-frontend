@@ -200,10 +200,10 @@ return String(date);
 function getCouponStatus(c: Coupon) {
 const isFullyUsed = c.usageLimit ? c.usageCount >= c.usageLimit : false;
 
-if (!c.active) return { label: "Inactive", variant: "secondary" as const, color: "text-muted-foreground" };
-if (isFullyUsed) return { label: "Used/Limit Reached", variant: "secondary" as const, color: "text-muted-foreground" };
-if (isExpired(c.expiresAt)) return { label: "Expired", variant: "destructive" as const, color: "text-red-500" };
-return { label: "Active", variant: "default" as const, color: "text-green-500" };
+if (!c.active) return { label: "Inactivo", variant: "secondary" as const, color: "text-muted-foreground" };
+if (isFullyUsed) return { label: "Usados / Límite Alcanzado", variant: "secondary" as const, color: "text-muted-foreground" };
+if (isExpired(c.expiresAt)) return { label: "Expirados", variant: "destructive" as const, color: "text-red-500" };
+return { label: "Activo", variant: "default" as const, color: "text-green-500" };
 }
 
 function CouponsSearchParamsConsumer({ children }: { children: (params: URLSearchParams) => React.ReactNode }) {
@@ -233,11 +233,11 @@ function CouponsStatsSection({ stats }: { stats: Stats }) {
 return (
 <>
 <div className="hidden md:grid md:grid-cols-5 gap-4">
-<StatCard icon={Ticket} title="Total Coupons" value={stats.totalCoupons} color="bg-purple-500" />
-<StatCard icon={Zap} title="Active" value={stats.activeCoupons} color="bg-green-500" />
+<StatCard icon={Ticket} title="Total de Cupones" value={stats.totalCoupons} color="bg-purple-500" />
+<StatCard icon={Zap} title="Activo" value={stats.activeCoupons} color="bg-green-500" />
 <StatCard icon={CheckCircle2} title="Used" value={stats.usedCoupons} color="bg-blue-500" />
-<StatCard icon={XCircle} title="Unused" value={stats.unusedCoupons} color="bg-muted-foreground" />
-<StatCard icon={Clock} title="Expired" value={stats.expiredCoupons} color="bg-red-500" />
+<StatCard icon={XCircle} title="Sin Usar" value={stats.unusedCoupons} color="bg-muted-foreground" />
+<StatCard icon={Clock} title="Expirados" value={stats.expiredCoupons} color="bg-red-500" />
 </div>
 
 <Accordion type="single" collapsible className="w-full lg:hidden">
@@ -250,11 +250,11 @@ return (
 </AccordionTrigger>
 <AccordionContent className="px-4 pb-4 pt-2">
 <div className="grid grid-cols-1 gap-4">
-<StatCard icon={Ticket} title="Total Coupons" value={stats.totalCoupons} color="bg-purple-500" />
-<StatCard icon={Zap} title="Active" value={stats.activeCoupons} color="bg-green-500" />
+<StatCard icon={Ticket} title="Total de Cupones" value={stats.totalCoupons} color="bg-purple-500" />
+<StatCard icon={Zap} title="Activo" value={stats.activeCoupons} color="bg-green-500" />
 <StatCard icon={CheckCircle2} title="Used" value={stats.usedCoupons} color="bg-blue-500" />
-<StatCard icon={XCircle} title="Unused" value={stats.unusedCoupons} color="bg-muted-foreground" />
-<StatCard icon={Clock} title="Expired" value={stats.expiredCoupons} color="bg-red-500" />
+<StatCard icon={XCircle} title="Sin Usar" value={stats.unusedCoupons} color="bg-muted-foreground" />
+<StatCard icon={Clock} title="Expirados" value={stats.expiredCoupons} color="bg-red-500" />
 </div>
 </AccordionContent>
 </AccordionItem>
@@ -284,7 +284,7 @@ return (
 <div className="flex flex-wrap gap-3">
 <Select value={typeFilter} onValueChange={onTypeFilterChange}>
 <SelectTrigger className="w-[150px]">
-<SelectValue placeholder="All Types" />
+<SelectValue placeholder="Todos los Tipos" />
 </SelectTrigger>
 <SelectContent>
 <SelectItem value="all">All Types</SelectItem>
@@ -295,7 +295,7 @@ return (
 
 <Select value={statusFilter} onValueChange={onStatusFilterChange}>
 <SelectTrigger className="w-[150px]">
-<SelectValue placeholder="All Status" />
+<SelectValue placeholder="Todos los Estados" />
 </SelectTrigger>
 <SelectContent>
 <SelectItem value="all">All Status</SelectItem>
@@ -308,7 +308,7 @@ return (
 
 <div className="flex gap-2 flex-1">
 <Input
-placeholder="Search by code..."
+placeholder="Buscar por código..."
 defaultValue={searchQuery}
 onKeyDown={(e) => {
 if (e.key === 'Enter') {
@@ -318,7 +318,7 @@ onSearch(e.currentTarget.value);
 className="max-w-md"
 />
 <Button onClick={() => {
-const input = document.querySelector('input[placeholder="Search by code..."]') as HTMLInputElement;
+const input = document.querySelector('input[placeholder="Buscar por código..."]') as HTMLInputElement;
 onSearch(input?.value || "");
 }}>Search</Button>
 </div>
@@ -403,13 +403,13 @@ return (
 </TableCell>
 <TableCell>
 <div className="flex gap-1">
-<Button size="icon" variant="ghost" className="size-8 text-muted-foreground hover:text-blue-500 hover:bg-blue-50" onClick={() => onView(c)} title="View Details">
+<Button size="icon" variant="ghost" className="size-8 text-muted-foreground hover:text-blue-500 hover:bg-blue-50" onClick={() => onView(c)} title="Ver Detalles">
 <Ticket className="size-4" />
 </Button>
 <Button size="icon" variant="ghost" className="size-8 text-muted-foreground hover:text-primary hover:bg-primary/10" onClick={() => onEdit(c)} title="Edit">
 <Edit className="size-4" />
 </Button>
-<Button size="icon" variant="ghost" className="size-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10" onClick={() => onDelete(c.id)} title="Delete" disabled={isDeleting === c.id}>
+<Button size="icon" variant="ghost" className="size-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10" onClick={() => onDelete(c.id)} title="Eliminar" disabled={isDeleting === c.id}>
 {isDeleting === c.id ? <Spinner className="size-4" /> : <Trash2 className="size-4" />}
 </Button>
 </div>
@@ -572,7 +572,7 @@ value={form.type}
 onValueChange={(v) => onFormChange({ ...form, type: v as CouponType })}
 >
 <SelectTrigger>
-<SelectValue placeholder="Select type" />
+<SelectValue placeholder="Seleccionar tipo" />
 </SelectTrigger>
 <SelectContent>
 <SelectItem value={CouponType.FIXED}>Amount ($)</SelectItem>
@@ -607,7 +607,7 @@ onChange={(e) => onFormChange({ ...form, expiresAt: e.target.value })}
 <Input
 value={form.description}
 onChange={(e) => onFormChange({ ...form, description: e.target.value })}
-placeholder="Optional description"
+placeholder="Descripción opcional"
 />
 </div>
 
@@ -640,7 +640,7 @@ disabled={form.type !== CouponType.PERCENT}
 type="number"
 value={form.usageLimit}
 onChange={(e) => onFormChange({ ...form, usageLimit: e.target.value })}
-placeholder="Unlimited"
+placeholder="Ilimitado"
 />
 </div>
 <div className="flex items-center gap-2 pt-8">
@@ -680,7 +680,7 @@ return (
 <DialogFooter>
 <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
 <Button onClick={onCreate} disabled={isCreating}>
-{isCreating ? <><Spinner className="mr-2" /> Creating…</> : "Create Coupon"}
+{isCreating ? <><Spinner className="mr-2" /> Creating…</> : "Crear Cupón"}
 </Button>
 </DialogFooter>
 </DialogContent>
@@ -713,7 +713,7 @@ return (
 <DialogFooter>
 <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
 <Button onClick={onSave} disabled={isEditing}>
-{isEditing ? <><Spinner className="mr-2" /> Saving…</> : "Save Changes"}
+{isEditing ? <><Spinner className="mr-2" /> Saving…</> : "Guardar Cambios"}
 </Button>
 </DialogFooter>
 </DialogContent>
@@ -778,7 +778,7 @@ return (
 </div>
 <div>
               <span className="text-sm font-medium text-muted-foreground">Max Discount</span>
-<p>{coupon.maxDiscountAmount ? `$${coupon.maxDiscountAmount}` : "Unlimited"}</p>
+<p>{coupon.maxDiscountAmount ? `$${coupon.maxDiscountAmount}` : "Ilimitado"}</p>
 </div>
 </div>
 
@@ -875,8 +875,8 @@ const setAppliesToAll = (v: boolean) => dispatch({ type: "SET_APPLIES_TO_ALL", p
       const data = await bookingService.getServices();
       setServices(data);
     } catch (error) {
-      console.error("Failed to load services", error);
-      toast.error("Failed to load services");
+      console.error("Error al cargar los servicios", error);
+      toast.error("Error al cargar los servicios");
     } finally {
       loadingServicesRef.current = false;
     }
@@ -917,7 +917,7 @@ const statusFilter = searchParams.get("status") || "all";
 
 const createCoupon = async () => {
 if (!form.code) {
-toast.error("Code is required");
+toast.error("El código es obligatorio");
 return;
 }
 setIsCreating(true);
@@ -935,12 +935,12 @@ expiresAt: form.expiresAt ? new Date(form.expiresAt) : new Date(new Date().setFu
 applicableServices: appliesToAll ? [] : form.applicableServices,
 };
 await couponsService.create(body);
-toast.success("Coupon created");
+toast.success("Cupón creado");
 setCreateOpen(false);
 resetForm();
 router.refresh();
 } catch (err) {
-const message = err instanceof ApiError ? err.message : "Failed to create coupon";
+const message = err instanceof ApiError ? err.message : "Error al crear el cupón";
 toast.error(message);
 } finally {
 setIsCreating(false);
@@ -950,18 +950,18 @@ setIsCreating(false);
 const deleteCoupon = async (id: string) => {
 const confirmed = await confirm({
 title: "Delete Coupon",
-description: "Are you sure you want to delete this coupon? This action cannot be undone.",
-confirmText: "Delete",
+description: "¿Seguro que querés eliminar este cupón? Esta acción no se puede deshacer.",
+confirmText: "Eliminar",
 variant: "destructive",
 });
 if (!confirmed) return;
 setIsDeleting(id);
 try {
 await couponsService.delete(id);
-toast.success("Coupon deleted");
+toast.success("Cupón eliminado");
 router.refresh();
 } catch (err) {
-const message = err instanceof ApiError ? err.message : "Failed to delete coupon";
+const message = err instanceof ApiError ? err.message : "Error al eliminar el cupón";
 toast.error(message);
 } finally {
 setIsDeleting(null);
@@ -979,7 +979,7 @@ const offset = date.getTimezoneOffset() * 60000;
 const localISOTime = (new Date(date.getTime() - offset)).toISOString().slice(0, 16);
 formattedDate = localISOTime;
 } catch (e) {
-console.error("Error parsing date", e);
+console.error("Error al interpretar la fecha", e);
 }
 }
 
@@ -1021,13 +1021,13 @@ expiresAt: form.expiresAt ? new Date(form.expiresAt) : undefined,
 applicableServices: appliesToAll ? [] : form.applicableServices,
 };
 await couponsService.update(editing.id, body);
-toast.success("Coupon updated");
+toast.success("Cupón actualizado");
 setEditOpen(false);
 setEditing(null);
 resetForm();
 router.refresh();
 } catch (err) {
-const message = err instanceof ApiError ? err.message : "Failed to update coupon";
+const message = err instanceof ApiError ? err.message : "Error al actualizar el cupón";
 toast.error(message);
 } finally {
 setIsEditing(false);
@@ -1042,7 +1042,7 @@ return (
 {isSuperAdmin && (
 <Select value={tenantFilter} onValueChange={handleTenantFilterChange}>
 <SelectTrigger className="w-full sm:w-[150px]">
-<SelectValue placeholder="All Tenants" />
+<SelectValue placeholder="Todos los Tenants" />
 </SelectTrigger>
 <SelectContent>
 <SelectItem value="all">All Tenants</SelectItem>

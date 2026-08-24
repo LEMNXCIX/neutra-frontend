@@ -5,7 +5,7 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
 	title: "WhatsApp Configuration | Admin",
-	description: "Manage WhatsApp Business API integration",
+	description: "Gestiona la integración con WhatsApp Business API",
 };
 
 async function fetchWhatsAppConfig(): Promise<Partial<WhatsAppConfig> | null> {

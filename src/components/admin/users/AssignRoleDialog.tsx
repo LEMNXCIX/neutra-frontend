@@ -38,7 +38,7 @@ const refreshPermissions = async () => {
             await response.json();
         }
     } catch (err) {
-        console.error("Failed to refresh permissions:", err);
+        console.error("Error al actualizar permisos:", err);
     }
 };
 
@@ -67,7 +67,7 @@ export function AssignRoleDialog({
       setRoles(fetchedRoles);
     } catch (err) {
       const message =
-        err instanceof ApiError ? err.message : "Failed to load roles";
+        err instanceof ApiError ? err.message : "Error al cargar los roles";
       toast.error(message);
     } finally {
       setLoadingRoles(false);
@@ -83,7 +83,7 @@ export function AssignRoleDialog({
 
     const handleAssign = async () => {
         if (!user || !selectedRoleId) {
-            toast.error("Please select a role");
+            toast.error("Seleccioná un rol");
             return;
         }
 
@@ -100,7 +100,7 @@ export function AssignRoleDialog({
             onSuccess?.();
         } catch (err) {
             const message =
-                err instanceof ApiError ? err.message : "Failed to assign role";
+                err instanceof ApiError ? err.message : "Error al asignar el rol";
             toast.error(message);
         } finally {
             setLoading(false);
@@ -147,7 +147,7 @@ export function AssignRoleDialog({
                                 onValueChange={setSelectedRoleId}
                             >
                                 <SelectTrigger id="role-select">
-                                    <SelectValue placeholder="Choose a role..." />
+                                    <SelectValue placeholder="Elegí un rol..." />
                                 </SelectTrigger>
                                 <SelectContent>
                                     {roles.length === 0 ? (

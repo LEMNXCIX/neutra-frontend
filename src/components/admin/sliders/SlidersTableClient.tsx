@@ -118,18 +118,18 @@ function SliderFormFields({
     <div className="space-y-4">
       <div>
         <label htmlFor={`${prefix}-slider-title`} className="text-sm font-medium">Title *</label>
-        <Input id={`${prefix}-slider-title`} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Slider title" />
+        <Input id={`${prefix}-slider-title`} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Título del slider" />
       </div>
       <div>
         <label htmlFor={`${prefix}-slider-desc`} className="text-sm font-medium">Description</label>
-        <Input id={`${prefix}-slider-desc`} value={form.desc} onChange={(e) => setForm({ ...form, desc: e.target.value })} placeholder="Optional description" />
+        <Input id={`${prefix}-slider-desc`} value={form.desc} onChange={(e) => setForm({ ...form, desc: e.target.value })} placeholder="Descripción opcional" />
       </div>
       <div>
         <label htmlFor={`${prefix}-slider-image`} className="text-sm font-medium">Image</label>
         <Input id={`${prefix}-slider-image`} type="file" accept="image/*" onChange={(e) => onImageUpload(e, isEdit)} />
         {imagePreview && (
           <div className="mt-2 relative w-full h-32 rounded overflow-hidden">
-            <Image src={imagePreview} alt="Preview" fill sizes="96px" className="object-cover" />
+            <Image src={imagePreview} alt="Vista Previa" fill sizes="96px" className="object-cover" />
           </div>
         )}
       </div>
@@ -187,10 +187,10 @@ function StatsSection({ stats }: { stats: Stats }) {
   return (
     <>
       <div className="hidden md:grid md:grid-cols-4 gap-4">
-        <StatCard icon={ImageIcon} title="Total Sliders" value={stats.totalSliders} color="bg-purple-500" />
-        <StatCard icon={CheckCircle2} title="Active Sliders" value={stats.activeSliders} color="bg-green-500" />
-        <StatCard icon={XCircle} title="Inactive Sliders" value={stats.inactiveSliders} color="bg-red-500" />
-        <StatCard icon={Upload} title="With Images" value={stats.withImages} color="bg-blue-500" />
+        <StatCard icon={ImageIcon} title="Total de Sliders" value={stats.totalSliders} color="bg-purple-500" />
+        <StatCard icon={CheckCircle2} title="Sliders Activos" value={stats.activeSliders} color="bg-green-500" />
+        <StatCard icon={XCircle} title="Sliders Inactivos" value={stats.inactiveSliders} color="bg-red-500" />
+        <StatCard icon={Upload} title="Con Imágenes" value={stats.withImages} color="bg-blue-500" />
       </div>
       <Accordion type="single" collapsible className="w-full md:hidden">
         <AccordionItem value="stats" className="border rounded-lg">
@@ -202,10 +202,10 @@ function StatsSection({ stats }: { stats: Stats }) {
           </AccordionTrigger>
           <AccordionContent className="px-4 pb-4 pt-2">
             <div className="grid grid-cols-1 gap-4">
-              <StatCard icon={ImageIcon} title="Total Sliders" value={stats.totalSliders} color="bg-purple-500" />
-              <StatCard icon={CheckCircle2} title="Active Sliders" value={stats.activeSliders} color="bg-green-500" />
-              <StatCard icon={XCircle} title="Inactive Sliders" value={stats.inactiveSliders} color="bg-red-500" />
-              <StatCard icon={Upload} title="With Images" value={stats.withImages} color="bg-blue-500" />
+              <StatCard icon={ImageIcon} title="Total de Sliders" value={stats.totalSliders} color="bg-purple-500" />
+              <StatCard icon={CheckCircle2} title="Sliders Activos" value={stats.activeSliders} color="bg-green-500" />
+              <StatCard icon={XCircle} title="Sliders Inactivos" value={stats.inactiveSliders} color="bg-red-500" />
+              <StatCard icon={Upload} title="Con Imágenes" value={stats.withImages} color="bg-blue-500" />
             </div>
           </AccordionContent>
         </AccordionItem>
@@ -226,7 +226,7 @@ function FilterBar({ statusFilter, searchQuery, onFilterChange, onSearch }: {
         <div className="flex flex-wrap gap-3">
           <Select value={statusFilter} onValueChange={onFilterChange}>
             <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="All Statuses" />
+              <SelectValue placeholder="Todos los Estados" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Statuses</SelectItem>
@@ -236,7 +236,7 @@ function FilterBar({ statusFilter, searchQuery, onFilterChange, onSearch }: {
           </Select>
           <div className="flex gap-2 flex-1">
             <Input
-              placeholder="Search by title, ID, or description..."
+              placeholder="Buscar por título, ID o descripción..."
               defaultValue={searchQuery}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
@@ -248,7 +248,7 @@ function FilterBar({ statusFilter, searchQuery, onFilterChange, onSearch }: {
             <Button
               onClick={() => {
                 const input = document.querySelector(
-                  'input[placeholder="Search by title, ID, or description..."]',
+                  'input[placeholder="Buscar por título, ID o descripción..."]',
                 ) as HTMLInputElement;
                 onSearch(input?.value || "");
               }}
@@ -481,7 +481,7 @@ function CreateSliderDialog({ open, form, imagePreview, isCreating, onOpenChange
             Cancel
           </Button>
           <Button onClick={onCreate} disabled={isCreating}>
-            {isCreating ? <><Spinner className="mr-2" /> Creating…</> : "Create Slider"}
+            {isCreating ? <><Spinner className="mr-2" /> Creating…</> : "Crear Slider"}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -512,7 +512,7 @@ function EditSliderDialog({ open, form, imagePreview, isEditing, onOpenChange, o
             Cancel
           </Button>
           <Button onClick={onSave} disabled={isEditing}>
-            {isEditing ? <><Spinner className="mr-2" /> Saving…</> : "Save Changes"}
+            {isEditing ? <><Spinner className="mr-2" /> Saving…</> : "Guardar Cambios"}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -533,7 +533,7 @@ function PageHeader({ isSuperAdmin, tenantFilter, onTenantFilterChange, onAddCli
         {isSuperAdmin && (
           <Select value={tenantFilter} onValueChange={onTenantFilterChange}>
             <SelectTrigger className="w-full sm:w-[150px]">
-              <SelectValue placeholder="All Tenants" />
+              <SelectValue placeholder="Todos los Tenants" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Tenants</SelectItem>
@@ -573,7 +573,7 @@ function SlidersTableClientInner({
       setSliders(data);
     } catch (err) {
       console.error("Error loading sliders:", err);
-      toast.error("Failed to load sliders");
+      toast.error("Error al cargar los sliders");
     } finally {
       loadingRef.current = false;
     }
@@ -661,7 +661,7 @@ function SlidersTableClientInner({
 
   const createSlider = async () => {
     if (!dialogState.form.title) {
-      toast.error("Title is required");
+      toast.error("El título es obligatorio");
       return;
     }
     dispatch({ type: "SET_IS_CREATING", payload: true });
@@ -673,16 +673,16 @@ function SlidersTableClientInner({
       });
       if (!res.ok) {
         const data = await res.json();
-        toast.error(data?.error || "Failed to create slider");
+        toast.error(data?.error || "Error al crear el slider");
         return;
       }
-      toast.success("Slider created");
+      toast.success("Slider creado");
       dispatch({ type: "SET_CREATE_OPEN", payload: false });
       dispatch({ type: "SET_FORM", payload: { title: "", desc: "", active: true, img: "" } });
       dispatch({ type: "SET_IMAGE_PREVIEW", payload: "" });
       router.refresh();
     } catch {
-      toast.error("Network error");
+      toast.error("Error de red");
     } finally {
       dispatch({ type: "SET_IS_CREATING", payload: false });
     }
@@ -690,10 +690,10 @@ function SlidersTableClientInner({
 
     const deleteSlider = async (id: string) => {
         const confirmed = await confirm({
-            title: "Delete Slider",
+            title: "Eliminar Slider",
             description:
-                "Are you sure you want to delete this slider? This action cannot be undone.",
-            confirmText: "Delete",
+                "¿Seguro que querés eliminar este slider? Esta acción no se puede deshacer.",
+            confirmText: "Eliminar",
             variant: "destructive",
         });
         if (!confirmed) return;
@@ -703,13 +703,13 @@ function SlidersTableClientInner({
                 method: "DELETE",
             });
             if (!res.ok) {
-                toast.error("Failed to delete");
+                toast.error("Error al eliminar");
                 return;
             }
-            toast.success("Slider deleted");
+            toast.success("Slider eliminado");
             router.refresh();
         } catch {
-            toast.error("Network error");
+            toast.error("Error de red");
         } finally {
             dispatch({ type: "SET_IS_DELETING", payload: null });
         }
@@ -751,17 +751,17 @@ function SlidersTableClientInner({
       });
       if (!res.ok) {
         const data = await res.json();
-        toast.error(data?.error || "Failed to update");
+        toast.error(data?.error || "Error al actualizar");
         return;
       }
-      toast.success("Slider updated");
+      toast.success("Slider actualizado");
       dispatch({ type: "SET_EDIT_OPEN", payload: false });
       editingRef.current = null;
       dispatch({ type: "SET_FORM", payload: { title: "", desc: "", active: true, img: "" } });
       dispatch({ type: "SET_IMAGE_PREVIEW", payload: "" });
       router.refresh();
     } catch {
-      toast.error("Network error");
+      toast.error("Error de red");
     } finally {
       dispatch({ type: "SET_IS_EDITING", payload: false });
     }

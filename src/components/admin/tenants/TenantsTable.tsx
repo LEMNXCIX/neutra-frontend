@@ -83,7 +83,7 @@ function TenantRow({
                         variant="ghost"
                         size="icon"
                         onClick={() => onFeatures(tenant)}
-                        title="Manage Features"
+                        title="Gestionar Funciones"
                     >
                         <Settings className="size-4" />
                     </Button>
@@ -134,7 +134,7 @@ function TenantCard({
                             variant="ghost"
                             size="icon"
                             onClick={() => onFeatures(tenant)}
-                            title="Manage Features"
+                            title="Gestionar Funciones"
                         >
                             <Settings className="size-4" />
                         </Button>
@@ -244,7 +244,7 @@ export function TenantsTable({
             dispatch({ type: "SET_TENANTS", payload: data });
         } catch (error) {
             console.error(error);
-            toast.error("Failed to load tenants");
+            toast.error("Error al cargar los tenants");
         } finally {
             dispatch({ type: "SET_LOADING", payload: false });
         }
@@ -277,10 +277,10 @@ export function TenantsTable({
 
     const handleDelete = async (tenant: Tenant) => {
         const confirmed = await confirm({
-            title: "Delete Tenant",
+            title: "Eliminar Tenant",
             description: `Are you sure you want to delete "${tenant.name}"? This action cannot be undone and will remove all data associated with this tenant.`,
-            confirmText: "Delete",
-            cancelText: "Cancel",
+            confirmText: "Eliminar",
+            cancelText: "Cancelar",
         });
 
         if (!confirmed) return;
@@ -291,7 +291,7 @@ export function TenantsTable({
             loadTenants();
         } catch (error) {
             console.error(error);
-            toast.error("Failed to delete tenant");
+            toast.error("Error al eliminar el tenant");
         }
     };
 
@@ -316,7 +316,7 @@ export function TenantsTable({
                         <div className="relative flex-1 max-w-sm">
                             <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
                             <Input
-                                placeholder="Search tenants..."
+                                placeholder="Buscar tenants..."
                                 className="pl-9"
                                 value={state.search}
                                 onChange={(e) =>

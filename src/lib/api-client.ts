@@ -47,7 +47,8 @@ export class ApiError extends Error {
  */
 export async function apiClient<T = unknown>(
     endpoint: string,
-    options: RequestInit = {}
+    options: RequestInit = {},
+    includeMeta = false
 ): Promise<T> {
     // Read tenant context from cookies
     let tenantSlug, tenantId, cookieHeader;
@@ -166,8 +167,8 @@ export async function apiClient<T = unknown>(
             );
         }
 
-        // Return the actual data payload
-        return data.data as T;
+        // Return the actual data payload (plus envelope meta if requested)
+        return (includeMeta ? { data: data.data as T, meta: data.meta } : data.data) as T;
     } catch (error) {
         // Re-throw ApiError as-is
         if (error instanceof ApiError) {
@@ -219,6 +220,10 @@ export async function apiFetch(input: RequestInfo, init?: RequestInit) {
 export const api = {
     get: <T = unknown>(endpoint: string, options?: RequestInit) =>
         apiClient<T>(endpoint, { ...options, method: 'GET' }),
+
+    /** Like get(), but also returns the envelope meta (e.g. meta.pagination). */
+    getWithMeta: <T = unknown>(endpoint: string, options?: RequestInit) =>
+        apiClient<{ data: T; meta?: Record<string, any> }>(endpoint, { ...options, method: 'GET' }, true),
 
     post: <T = unknown>(endpoint: string, body?: unknown, options?: RequestInit) =>
         apiClient<T>(endpoint, {

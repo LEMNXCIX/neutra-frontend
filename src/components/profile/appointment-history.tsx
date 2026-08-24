@@ -89,11 +89,11 @@ export function AppointmentHistory({
                                     </div>
                                     <div>
                                         <CardTitle className="text-xl font-bold tracking-tight">
-                                            {a.service?.name || "Service"}
+                                            {a.service?.name || "Servicio"}
                                         </CardTitle>
                                         <CardDescription className="flex items-center gap-2 mt-1 font-medium">
                                             <UserIcon className="size-3 text-primary" />{" "}
-                                            with {a.staff?.name || "Staff"}
+                                            with {a.staff?.name || "Personal"}
                                         </CardDescription>
                                     </div>
                                     <Badge

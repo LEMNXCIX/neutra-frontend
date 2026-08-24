@@ -5,7 +5,7 @@ import { Permission } from "@/types/permission.types";
 import { Role } from "@/types/role.types";
 import { api } from '@/lib/api-client';
 
-export const metadata = { title: "Store Roles" };
+export const metadata = { title: "Roles de la Tienda" };
 
 export const dynamic = "force-dynamic";
 

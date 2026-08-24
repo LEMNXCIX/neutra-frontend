@@ -80,7 +80,7 @@ if (response.ok) {
 await response.json();
 }
 } catch (err) {
-console.error("Failed to refresh permissions:", err);
+console.error("Error al actualizar permisos:", err);
 }
 };
 
@@ -147,7 +147,7 @@ return (
 <Label>Permissions</Label>
 <div className="relative">
 <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
-<Input placeholder="Search permissions..." className="pl-9 mb-2" value={rolePermissionSearch} onChange={(e) => onSearchChange(e.target.value)} />
+<Input placeholder="Buscar permisos..." className="pl-9 mb-2" value={rolePermissionSearch} onChange={(e) => onSearchChange(e.target.value)} />
 </div>
 <div className="mt-2 space-y-2 max-h-60 overflow-y-auto border rounded-md p-3">
 {isSearchingPerms ? (
@@ -615,7 +615,7 @@ roles.map((role) => (
 {role.name}
 </h3>
 <p className="text-sm text-muted-foreground mt-1">
-{role.description || "No description"}
+{role.description || "Sin descripción"}
 </p>
 </div>
 <Badge
@@ -1014,7 +1014,7 @@ className="overflow-hidden"
 </h3>
 </div>
 <p className="text-sm text-muted-foreground">
-{permission.description || "No description"}
+{permission.description || "Sin descripción"}
 </p>
 </div>
 
@@ -1162,7 +1162,7 @@ disabled={dialogState.isCreatingRole}
 <Spinner className="mr-2" /> Creating…
 </>
 ) : (
-"Create Role"
+"Crear Rol"
 )}
 </Button>
 </DialogFooter>
@@ -1213,7 +1213,7 @@ Cancel
 <Spinner className="mr-2" /> Updating…
 </>
 ) : (
-"Update Role"
+"Actualizar Rol"
 )}
 </Button>
 </DialogFooter>
@@ -1254,7 +1254,7 @@ disabled={permState.isCreatingPerm}
 <Spinner className="mr-2" /> Creating…
 </>
 ) : (
-"Create Permission"
+"Crear Permiso"
 )}
 </Button>
 </DialogFooter>
@@ -1295,7 +1295,7 @@ disabled={permState.isEditingPerm}
 <Spinner className="mr-2" /> Updating…
 </>
 ) : (
-"Update Permission"
+"Actualizar Permiso"
 )}
 </Button>
 </DialogFooter>
@@ -1347,8 +1347,8 @@ return;
 const results = await permissionsService.getAll(term);
 dispatch({ type: "SET_AVAILABLE_PERMISSIONS", payload: results });
 } catch (error) {
-console.error("Failed to search permissions:", error);
-toast.error("Failed to search permissions");
+console.error("Error al buscar permisos:", error);
+toast.error("Error al buscar permisos");
 } finally {
 dispatch({ type: "SET_IS_SEARCHING_PERMS", payload: false });
 }
@@ -1382,16 +1382,16 @@ dispatch({ type: "SET_EDIT_OPEN", payload: true });
 };
 
 const handleCreate = async () => {
-if (!dialogState.form.name) { toast.error("Role name is required"); return; }
+if (!dialogState.form.name) { toast.error("El nombre del rol es obligatorio"); return; }
 dispatch({ type: "SET_IS_CREATING_ROLE", payload: true });
 try {
 await rolesService.create(dialogState.form);
-toast.success("Role created successfully");
+toast.success("Rol creado correctamente");
 dispatch({ type: "SET_CREATE_OPEN", payload: false });
 await refreshPermissions();
 router.refresh();
 } catch (err) {
-const message = err instanceof ApiError ? err.message : "Failed to create role";
+const message = err instanceof ApiError ? err.message : "Error al crear el rol";
 toast.error(message);
 } finally {
 dispatch({ type: "SET_IS_CREATING_ROLE", payload: false });
@@ -1403,12 +1403,12 @@ if (!editingRef.current) return;
 dispatch({ type: "SET_IS_EDITING_ROLE", payload: true });
 try {
 await rolesService.update(editingRef.current.id, dialogState.form);
-toast.success("Role updated successfully");
+toast.success("Rol actualizado correctamente");
 dispatch({ type: "SET_EDIT_OPEN", payload: false });
 await refreshPermissions();
 router.refresh();
 } catch (err) {
-const message = err instanceof ApiError ? err.message : "Failed to update role";
+const message = err instanceof ApiError ? err.message : "Error al actualizar el rol";
 toast.error(message);
 } finally {
 dispatch({ type: "SET_IS_EDITING_ROLE", payload: false });
@@ -1416,16 +1416,16 @@ dispatch({ type: "SET_IS_EDITING_ROLE", payload: false });
 };
 
 const handleDelete = async (id: string) => {
-const confirmed = await confirm({ title: "Delete Role", description: "Are you sure you want to delete this role?", confirmText: "Delete", variant: "destructive" });
+const confirmed = await confirm({ title: "Eliminar Rol", description: "¿Seguro que querés eliminar este rol?", confirmText: "Eliminar", variant: "destructive" });
 if (!confirmed) return;
 if (!confirmed) return;
 dispatch({ type: "SET_IS_DELETING_ROLE", payload: id });
 try {
 await rolesService.delete(id);
-toast.success("Role deleted successfully");
+toast.success("Rol eliminado correctamente");
 router.refresh();
 } catch (err) {
-const message = err instanceof ApiError ? err.message : "Failed to delete role";
+const message = err instanceof ApiError ? err.message : "Error al eliminar el rol";
 toast.error(message);
 } finally {
 dispatch({ type: "SET_IS_DELETING_ROLE", payload: null });
@@ -1448,15 +1448,15 @@ permDispatch({ type: "SET_PERM_EDIT_OPEN", payload: true });
 };
 
 const handlePermCreate = async () => {
-if (!permState.permForm.name) { toast.error("Permission name is required"); return; }
+if (!permState.permForm.name) { toast.error("El nombre del permiso es obligatorio"); return; }
 permDispatch({ type: "SET_IS_CREATING_PERM", payload: true });
 try {
 await permissionsService.create(permState.permForm);
-toast.success("Permission created successfully");
+toast.success("Permiso creado correctamente");
 permDispatch({ type: "SET_PERM_CREATE_OPEN", payload: false });
 router.refresh();
 } catch (err) {
-const message = err instanceof ApiError ? err.message : "Failed to create permission";
+const message = err instanceof ApiError ? err.message : "Error al crear el permiso";
 toast.error(message);
 } finally {
 permDispatch({ type: "SET_IS_CREATING_PERM", payload: false });
@@ -1468,11 +1468,11 @@ if (!permEditingRef.current) return;
 permDispatch({ type: "SET_IS_EDITING_PERM", payload: true });
 try {
 await permissionsService.update(permEditingRef.current.id, permState.permForm);
-toast.success("Permission updated successfully");
+toast.success("Permiso actualizado correctamente");
 permDispatch({ type: "SET_PERM_EDIT_OPEN", payload: false });
 router.refresh();
 } catch (err) {
-const message = err instanceof ApiError ? err.message : "Failed to update permission";
+const message = err instanceof ApiError ? err.message : "Error al actualizar el permiso";
 toast.error(message);
 } finally {
 permDispatch({ type: "SET_IS_EDITING_PERM", payload: false });
@@ -1480,16 +1480,16 @@ permDispatch({ type: "SET_IS_EDITING_PERM", payload: false });
 };
 
 const handlePermDelete = async (id: string) => {
-const confirmed = await confirm({ title: "Delete Permission", description: "Are you sure you want to delete this permission?", confirmText: "Delete", variant: "destructive" });
+const confirmed = await confirm({ title: "Eliminar Permiso", description: "¿Seguro que querés eliminar este permiso?", confirmText: "Eliminar", variant: "destructive" });
 if (!confirmed) return;
 permDispatch({ type: "SET_IS_DELETING_PERM", payload: id });
 try {
 await permissionsService.delete(id);
-toast.success("Permission deleted successfully");
+toast.success("Permiso eliminado correctamente");
 await refreshPermissions();
 router.refresh();
 } catch (err) {
-const message = err instanceof ApiError ? err.message : "Failed to delete permission";
+const message = err instanceof ApiError ? err.message : "Error al eliminar el permiso";
 toast.error(message);
 } finally {
 permDispatch({ type: "SET_IS_DELETING_PERM", payload: null });
@@ -1507,8 +1507,8 @@ return (
 <h2 className="text-xl font-medium">Roles & Permissions Management</h2>
 </div>
 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-<StatCard icon={Shield} title="Total Roles" value={stats.totalRoles} color="bg-primary/10 text-primary" />
-<StatCard icon={Key} title="Total Permissions" value={stats.totalPermissions} color="bg-muted text-muted-foreground" />
+<StatCard icon={Shield} title="Total de Roles" value={stats.totalRoles} color="bg-primary/10 text-primary" />
+<StatCard icon={Key} title="Total de Permisos" value={stats.totalPermissions} color="bg-muted text-muted-foreground" />
 </div>
 <Tabs defaultValue="roles" className="w-full">
 <TabsList className="grid w-full max-w-md grid-cols-2">
@@ -1517,7 +1517,7 @@ return (
 </TabsList>
 <TabsContent value="roles" className="space-y-4">
 <div className="flex flex-col sm:flex-row justify-between gap-4 mb-4">
-<SearchBar placeholder="Search roles..." searchKey="roleSearch" onSearch={(term) => handleSearch(term, "role")} searchParams={searchParams} />
+<SearchBar placeholder="Buscar roles..." searchKey="roleSearch" onSearch={(term) => handleSearch(term, "role")} searchParams={searchParams} />
 <Button onClick={openCreate}><Plus className="size-4 mr-2" />Create Role</Button>
 </div>
 <RolesDesktopTable {...roleProps} />
@@ -1525,7 +1525,7 @@ return (
 </TabsContent>
 <TabsContent value="permissions" className="space-y-4">
 <div className="flex flex-col sm:flex-row justify-between gap-4 mb-4">
-<SearchBar placeholder="Search permissions..." searchKey="permissionSearch" onSearch={(term) => handleSearch(term, "permission")} searchParams={searchParams} />
+<SearchBar placeholder="Buscar permisos..." searchKey="permissionSearch" onSearch={(term) => handleSearch(term, "permission")} searchParams={searchParams} />
 <Button onClick={openPermCreate}><Plus className="size-4 mr-2" />Create Permission</Button>
 </div>
 <PermissionsDesktopTable {...permProps} />

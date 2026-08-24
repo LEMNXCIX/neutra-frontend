@@ -93,7 +93,7 @@ export default function TenantFeaturesClient({
       dispatch({ type: "SET_AVAILABLE_FEATURES", payload: features });
     } catch (error) {
       console.error(
-        "Failed to load available features definitions",
+        "Error al cargar las definiciones de funciones",
         error,
       );
     }
@@ -107,8 +107,8 @@ export default function TenantFeaturesClient({
       const tenantsList = Array.isArray(data) ? data : data.data || [];
       dispatch({ type: "SET_TENANTS", payload: tenantsList });
     } catch (error) {
-      console.error("Failed to load tenants", error);
-      toast.error("Failed to load tenants list");
+      console.error("Error al cargar los tenants", error);
+      toast.error("Error al cargar la lista de tenants");
     } finally {
       dispatch({ type: "SET_LOADING_TENANTS", payload: false });
     }
@@ -120,7 +120,7 @@ export default function TenantFeaturesClient({
       const data = await tenantService.getFeatures(id);
       dispatch({ type: "SET_FEATURE_STATE", payload: data || {} });
     } catch (error: any) {
-      const msg = error?.message || "Unknown error";
+      const msg = error?.message || "Error desconocido";
       toast.error(`Failed to load features: ${msg}`);
     } finally {
       dispatch({ type: "SET_LOADING_FEATURES", payload: false });
@@ -159,10 +159,10 @@ export default function TenantFeaturesClient({
         try {
       dispatch({ type: "SET_SAVING", payload: true });
       await tenantService.updateFeatures(activeId, featureState);
-            toast.success("Features configuration saved");
+            toast.success("Configuración de funciones guardada");
         } catch (error) {
-            console.error("Failed to save features", error);
-            toast.error("Failed to save features");
+            console.error("Error al guardar las funciones", error);
+            toast.error("Error al guardar las funciones");
         } finally {
             dispatch({ type: "SET_SAVING", payload: false });
         }
@@ -226,7 +226,7 @@ export default function TenantFeaturesClient({
                             onValueChange={handleTenantSelect}
                         >
                             <SelectTrigger className="w-full md:w-[300px]">
-                                <SelectValue placeholder="Select a tenant..." />
+                                <SelectValue placeholder="Seleccioná un tenant..." />
                             </SelectTrigger>
                             <SelectContent>
                                 {tenants.map((tenant) => (
@@ -288,7 +288,7 @@ export default function TenantFeaturesClient({
                                             </div>
                                             <p className="text-sm text-muted-foreground">
                                                 {feature.description ||
-                                                    "No description available"}
+                                                    "Sin descripción disponible"}
                                             </p>
                                         </div>
                                         <Switch

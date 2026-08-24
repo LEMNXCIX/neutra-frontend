@@ -121,7 +121,7 @@ export default function SuperAdminSidebar({ items }: SuperAdminSidebarProps) {
                     href="/"
                     className="text-muted-foreground hover:text-foreground font-medium flex items-center gap-2 transition-colors"
                 >
-                    <ArrowLeft size={14} /> {sidebarOpen && "Exit to Grid"}
+                    <ArrowLeft size={14} /> {sidebarOpen && "Volver a la Grilla"}
                 </Link>
             </div>
         </aside>

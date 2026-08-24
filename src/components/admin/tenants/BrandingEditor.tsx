@@ -85,7 +85,7 @@ function RadiusSlider({
                 max={1.5}
                 step={0.05}
                 value={rem}
-                aria-label="Corner radius"
+                aria-label="Radio de las esquinas"
                 className="w-full accent-primary cursor-pointer"
                 onChange={(e) => onChange(`${Number(e.target.value).toFixed(2)}rem`)}
             />
@@ -126,7 +126,7 @@ function FontField({
             <Input
                 value={value || ""}
                 onChange={(e) => onChange(e.target.value)}
-                placeholder="Font family name"
+                placeholder="Nombre de la familia tipográfica"
                 list={`font-suggestions-${label.replace(/\s+/g, "-").toLowerCase()}`}
             />
             <datalist
@@ -182,13 +182,13 @@ function BrandingPreview({ branding }: { branding: TenantBranding }) {
                             // eslint-disable-next-line @next/next/no-img-element
                             <img
                                 src={b.tenantLogo}
-                                alt="Tenant logo preview"
+                                alt="Vista previa del logo del tenant"
                                 className="h-10 w-auto object-contain"
                             />
                         )}
                         {b.favicon && (
                             // eslint-disable-next-line @next/next/no-img-element
-                            <img src={b.favicon} alt="Favicon preview" className="size-5" />
+                            <img src={b.favicon} alt="Vista previa del favicon" className="size-5" />
                         )}
                     </div>
                 )}
@@ -313,71 +313,71 @@ export function BrandingEditor({
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="space-y-4">
                 <ColorField
-                    label="Primary Color"
+                    label="Color Primario"
                     value={branding.primaryColor}
                     onChange={(v) => set("primaryColor", v)}
                 />
                 <ColorField
-                    label="Primary Foreground"
+                    label="Texto sobre Primario"
                     value={branding.primaryForeground}
                     onChange={(v) => set("primaryForeground", v)}
                 />
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <ColorField
-                        label="Background"
+                        label="Fondo"
                         value={branding.background}
                         onChange={(v) => set("background", v)}
                     />
                     <ColorField
-                        label="Foreground"
+                        label="Texto"
                         value={branding.foreground}
                         onChange={(v) => set("foreground", v)}
                     />
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <ColorField
-                        label="Secondary"
+                        label="Secundario"
                         value={branding.secondaryColor}
                         onChange={(v) => set("secondaryColor", v)}
                     />
                     <ColorField
-                        label="Secondary Foreground"
+                        label="Texto sobre Secundario"
                         value={branding.secondaryForeground}
                         onChange={(v) => set("secondaryForeground", v)}
                     />
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <ColorField
-                        label="Muted"
+                        label="Atenuado"
                         value={branding.muted}
                         onChange={(v) => set("muted", v)}
                     />
                     <ColorField
-                        label="Muted Foreground"
+                        label="Texto Atenuado"
                         value={branding.mutedForeground}
                         onChange={(v) => set("mutedForeground", v)}
                     />
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <ColorField
-                        label="Accent"
+                        label="Acento"
                         value={branding.accent}
                         onChange={(v) => set("accent", v)}
                     />
                     <ColorField
-                        label="Accent Foreground"
+                        label="Texto sobre Acento"
                         value={branding.accentForeground}
                         onChange={(v) => set("accentForeground", v)}
                     />
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <ColorField
-                        label="Destructive"
+                        label="Destructivo"
                         value={branding.destructive}
                         onChange={(v) => set("destructive", v)}
                     />
                     <ColorField
-                        label="Border"
+                        label="Borde"
                         value={branding.border}
                         onChange={(v) => set("border", v)}
                     />
@@ -391,14 +391,14 @@ export function BrandingEditor({
                 <div className="space-y-4 pt-2 border-t">
                     <p className="text-sm font-semibold">Typography</p>
                     <FontField
-                        label="Body Font"
-                        hint="Applied to all general text. Loaded from Google Fonts by family name."
+                        label="Fuente del Cuerpo"
+                        hint="Se aplica a todo el texto general. Se carga desde Google Fonts por nombre de familia."
                         value={branding.fontFamily}
                         onChange={(v) => set("fontFamily", v)}
                     />
                     <FontField
-                        label="Heading Font"
-                        hint="Applied to titles/headings. Leave empty to reuse the body font."
+                        label="Fuente de Títulos"
+                        hint="Se aplica a títulos y encabezados. Dejalo vacío para reutilizar la fuente del cuerpo."
                         value={branding.headingFont}
                         onChange={(v) => set("headingFont", v)}
                     />

@@ -150,7 +150,7 @@ export default function AdminSidebar({ items }: AdminSidebarProps) {
                         size={14}
                         className="transition-transform group-hover:-translate-x-1"
                     />
-                    {sidebarOpen && "Exit to Grid"}
+                    {sidebarOpen && "Volver a la Grilla"}
                 </Link>
             </div>
         </aside>

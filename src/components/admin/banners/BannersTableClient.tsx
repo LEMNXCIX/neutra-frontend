@@ -121,15 +121,15 @@ const BannerFormFields = ({
   <div className="space-y-4">
     <div>
       <label htmlFor={`${prefix}-title`} className="text-sm font-medium">Title *</label>
-      <Input id={`${prefix}-title`} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Banner title" />
+      <Input id={`${prefix}-title`} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Título del banner" />
     </div>
     <div>
       <label htmlFor={`${prefix}-subtitle`} className="text-sm font-medium">Subtitle</label>
-      <Input id={`${prefix}-subtitle`} value={form.subtitle} onChange={(e) => setForm({ ...form, subtitle: e.target.value })} placeholder="Optional subtitle" />
+      <Input id={`${prefix}-subtitle`} value={form.subtitle} onChange={(e) => setForm({ ...form, subtitle: e.target.value })} placeholder="Subtítulo opcional" />
     </div>
     <div>
       <label htmlFor={`${prefix}-cta`} className="text-sm font-medium">CTA Text</label>
-      <Input id={`${prefix}-cta`} value={form.cta} onChange={(e) => setForm({ ...form, cta: e.target.value })} placeholder="Call to action text" />
+      <Input id={`${prefix}-cta`} value={form.cta} onChange={(e) => setForm({ ...form, cta: e.target.value })} placeholder="Texto del botón de acción" />
     </div>
     <div>
       <label htmlFor={`${prefix}-cta-url`} className="text-sm font-medium">CTA URL</label>
@@ -190,9 +190,9 @@ function StatsSection({ stats }: { stats: Stats }) {
   return (
     <>
       <div className="hidden md:grid md:grid-cols-3 gap-4">
-        <StatCard icon={Flag} title="Total Banners" value={stats.totalBanners} color="bg-blue-500" />
-        <StatCard icon={CheckCircle2} title="Active Banners" value={stats.activeBanners} color="bg-green-500" />
-        <StatCard icon={XCircle} title="Inactive Banners" value={stats.inactiveBanners} color="bg-red-500" />
+        <StatCard icon={Flag} title="Total de Banners" value={stats.totalBanners} color="bg-blue-500" />
+        <StatCard icon={CheckCircle2} title="Banners Activos" value={stats.activeBanners} color="bg-green-500" />
+        <StatCard icon={XCircle} title="Banners Inactivos" value={stats.inactiveBanners} color="bg-red-500" />
       </div>
 
       <Accordion type="single" collapsible className="w-full md:hidden">
@@ -205,9 +205,9 @@ function StatsSection({ stats }: { stats: Stats }) {
           </AccordionTrigger>
           <AccordionContent className="px-4 pb-4 pt-2">
             <div className="grid grid-cols-1 gap-4">
-              <StatCard icon={Flag} title="Total Banners" value={stats.totalBanners} color="bg-blue-500" />
-              <StatCard icon={CheckCircle2} title="Active Banners" value={stats.activeBanners} color="bg-green-500" />
-              <StatCard icon={XCircle} title="Inactive Banners" value={stats.inactiveBanners} color="bg-red-500" />
+              <StatCard icon={Flag} title="Total de Banners" value={stats.totalBanners} color="bg-blue-500" />
+              <StatCard icon={CheckCircle2} title="Banners Activos" value={stats.activeBanners} color="bg-green-500" />
+              <StatCard icon={XCircle} title="Banners Inactivos" value={stats.inactiveBanners} color="bg-red-500" />
             </div>
           </AccordionContent>
         </AccordionItem>
@@ -233,7 +233,7 @@ function FilterBar({
         <div className="flex flex-wrap gap-3">
           <Select value={statusFilter} onValueChange={onFilterChange}>
             <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="All Statuses" />
+              <SelectValue placeholder="Todos los Estados" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Statuses</SelectItem>
@@ -244,7 +244,7 @@ function FilterBar({
 
           <div className="flex gap-2 flex-1">
             <Input
-              placeholder="Search by title, ID, or subtitle..."
+              placeholder="Buscar por título, ID o subtítulo..."
               defaultValue={searchQuery}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
@@ -256,7 +256,7 @@ function FilterBar({
             <Button
               onClick={() => {
                 const input = document.querySelector(
-                  'input[placeholder="Search by title, ID, or subtitle..."]',
+                  'input[placeholder="Buscar por título, ID o subtítulo..."]',
                 ) as HTMLInputElement;
                 onSearch(input?.value || "");
               }}
@@ -517,7 +517,7 @@ function CreateBannerDialog({
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
           <Button onClick={onCreate} disabled={isCreating}>
-            {isCreating ? <><Spinner className="mr-2" /> Creating…</> : "Create Banner"}
+            {isCreating ? <><Spinner className="mr-2" /> Creating…</> : "Crear Banner"}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -550,7 +550,7 @@ function EditBannerDialog({
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
           <Button onClick={onSave} disabled={isEditing}>
-            {isEditing ? <><Spinner className="mr-2" /> Saving…</> : "Save Changes"}
+            {isEditing ? <><Spinner className="mr-2" /> Saving…</> : "Guardar Cambios"}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -596,7 +596,7 @@ function BannersTableClientInner({
       setBanners(data);
     } catch (err) {
       console.error("Error loading banners:", err);
-      toast.error("Failed to load banners");
+      toast.error("Error al cargar los banners");
     } finally {
       loadingRef.current = false;
     }
@@ -654,13 +654,13 @@ function BannersTableClientInner({
 
     const createBanner = async () => {
         if (!dialogState.form.title) {
-            toast.error("Title is required");
+            toast.error("El título es obligatorio");
             return;
         }
   dispatch({ type: "SET_IS_CREATING", payload: true });
   try {
 await bannersService.create(dialogState.form as any);
-      toast.success("Banner created");
+      toast.success("Banner creado");
       dispatch({ type: "SET_CREATE_OPEN", payload: false });
       dispatch({ type: "SET_FORM", payload: {
         title: "",
@@ -673,7 +673,7 @@ active: true,
 } });
       router.refresh();
         } catch (err: any) {
-            toast.error(err?.message || "Failed to create banner");
+            toast.error(err?.message || "Error al crear el banner");
         } finally {
             dispatch({ type: "SET_IS_CREATING", payload: false });
         }
@@ -681,20 +681,20 @@ active: true,
 
     const deleteBanner = async (id: string) => {
         const confirmed = await confirm({
-            title: "Delete Banner",
+            title: "Eliminar Banner",
             description:
-                "Are you sure you want to delete this banner? This action cannot be undone.",
-            confirmText: "Delete",
+                "¿Seguro que querés eliminar este banner? Esta acción no se puede deshacer.",
+            confirmText: "Eliminar",
             variant: "destructive",
         });
         if (!confirmed) return;
         dispatch({ type: "SET_IS_DELETING", payload: id });
         try {
             await bannersService.delete(id);
-            toast.success("Banner deleted");
+            toast.success("Banner eliminado");
             router.refresh();
         } catch (err: any) {
-            toast.error(err?.message || "Failed to delete");
+            toast.error(err?.message || "Error al eliminar");
         } finally {
             dispatch({ type: "SET_IS_DELETING", payload: null });
         }
@@ -723,7 +723,7 @@ active: true,
   dispatch({ type: "SET_IS_EDITING", payload: true });
   try {
     await bannersService.update(editingRef.current.id, dialogState.form as any);
-    toast.success("Banner updated");
+    toast.success("Banner actualizado");
     dispatch({ type: "SET_EDIT_OPEN", payload: false });
 editingRef.current = null;
       dispatch({ type: "SET_FORM", payload: {
@@ -737,7 +737,7 @@ active: true,
 } });
       router.refresh();
         } catch (err: any) {
-            toast.error(err?.message || "Failed to update");
+            toast.error(err?.message || "Error al actualizar");
         } finally {
             dispatch({ type: "SET_IS_EDITING", payload: false });
         }
@@ -753,7 +753,7 @@ active: true,
           {isSuperAdmin && (
             <Select value={tenantFilter} onValueChange={handleTenantFilterChange}>
               <SelectTrigger className="w-full sm:w-[150px]">
-                <SelectValue placeholder="All Tenants" />
+                <SelectValue placeholder="Todos los Tenants" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Tenants</SelectItem>

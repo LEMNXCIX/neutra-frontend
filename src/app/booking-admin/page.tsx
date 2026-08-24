@@ -53,9 +53,9 @@ export default async function BookingDashboardPage() {
     const confirmed = appointments.filter((a) => a.status === "CONFIRMED").length;
 
     const stats = [
-        { label: "Pending", value: pending, icon: Clock, href: "/admin/appointments?status=PENDING" },
-        { label: "Confirmed", value: confirmed, icon: CalendarDays, href: "/admin/appointments?status=CONFIRMED" },
-        { label: "Staff", value: staff.length, icon: Users, href: "/admin/staff" },
+        { label: "Pendiente", value: pending, icon: Clock, href: "/admin/appointments?status=PENDING" },
+        { label: "Confirmadas", value: confirmed, icon: CalendarDays, href: "/admin/appointments?status=CONFIRMED" },
+        { label: "Personal", value: staff.length, icon: Users, href: "/admin/staff" },
         { label: "Services", value: services.length, icon: Scissors, href: "/admin/services" },
     ];
 

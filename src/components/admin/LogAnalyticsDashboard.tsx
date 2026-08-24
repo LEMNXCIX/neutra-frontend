@@ -60,20 +60,20 @@ function LogAnalyticsStats({
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <MetricCard
-                    label="Error Rate"
+                    label="Tasa de Error"
                     value={`${stats.errorRate.toFixed(2)}%`}
                     subtext={`${stats.errorCount} total failures`}
                     isAlert={stats.errorRate > 5}
                 />
                 <MetricCard
-                    label="Avg Latency"
+                    label="Latencia Media"
                     value={`${stats.performance.avgDuration.toFixed(0)}ms`}
                     subtext={`Max reached: ${stats.performance.maxDuration}ms`}
                 />
                 <MetricCard
-                    label="Throughput"
+                    label="Rendimiento"
                     value={stats.totalRequests.toLocaleString()}
-                    subtext="Total processed events"
+                    subtext="Eventos procesados en total"
                 />
             </div>
 

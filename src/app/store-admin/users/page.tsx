@@ -4,7 +4,7 @@ import { User } from "@/types/user.types";
 import { Permission } from "@/types/permission.types";
 import { api } from '@/lib/api-client';
 
-export const metadata = { title: "Users" };
+export const metadata = { title: "Usuarios" };
 
 export const dynamic = "force-dynamic";
 

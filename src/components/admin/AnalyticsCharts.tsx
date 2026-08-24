@@ -361,7 +361,7 @@ export default function AnalyticsCharts({ initialOrders }: AnalyticsChartsProps 
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <TrendCard
-          title="Weekly Revenue"
+          title="Ingresos Semanales"
           icon={DollarSign}
           value={`$${last7Revenue.toFixed(0)}`}
           trend={revenueTrend}
@@ -373,7 +373,7 @@ export default function AnalyticsCharts({ initialOrders }: AnalyticsChartsProps 
           formatBarTitle={(d, v) => `${d}: $${v.toFixed(2)}`}
         />
         <TrendCard
-          title="Weekly Orders"
+          title="Pedidos Semanales"
           icon={ShoppingCart}
           value={`${last7Orders}`}
           trend={ordersTrend}

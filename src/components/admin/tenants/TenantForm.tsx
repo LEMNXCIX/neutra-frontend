@@ -82,7 +82,7 @@ function GeneralTabContent({
                             slug,
                         }));
                     }}
-                    placeholder="My Awesome Store"
+                    placeholder="Mi Tienda Increíble"
                     className="h-12"
                 />
             </div>
@@ -238,7 +238,7 @@ function SettingsTabContent({
                         }
                     >
                         <SelectTrigger className="h-12">
-                            <SelectValue placeholder="Select currency" />
+                            <SelectValue placeholder="Seleccionar moneda" />
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="USD">USD ($)</SelectItem>
@@ -256,7 +256,7 @@ function SettingsTabContent({
                         }
                     >
                         <SelectTrigger className="h-12">
-                            <SelectValue placeholder="Select language" />
+                            <SelectValue placeholder="Seleccionar idioma" />
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="es">Español</SelectItem>
@@ -425,7 +425,7 @@ export function TenantForm({
     const handleSubmit = async (e?: React.FormEvent) => {
         e?.preventDefault();
         if (!formData.name || !formData.slug) {
-            toast.error("Name and Slug are required");
+            toast.error("Nombre y slug son obligatorios");
             return;
         }
 
@@ -433,15 +433,15 @@ export function TenantForm({
         try {
             if (tenant) {
                 await tenantService.update(tenant.id, formData);
-                toast.success("Tenant updated");
+                toast.success("Tenant actualizado");
             } else {
                 await tenantService.create(formData);
-                toast.success("Tenant created successfully!");
+                toast.success("¡Tenant creado correctamente!");
             }
             onSuccess();
         } catch (err: any) {
             const message =
-                err instanceof ApiError ? err.message : "Failed to save tenant";
+                err instanceof ApiError ? err.message : "Error al guardar el tenant";
             toast.error(message);
         } finally {
             setIsSaving(false);
@@ -531,7 +531,7 @@ export function TenantForm({
                         </>
                     ) : (
                         submitLabel ||
-                        (tenant ? "Update Tenant" : "Create My Store")
+                        (tenant ? "Actualizar Tenant" : "Crear Mi Tienda")
                     )}
                 </Button>
             </div>

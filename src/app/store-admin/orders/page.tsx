@@ -4,7 +4,7 @@ import { api } from '@/lib/api-client';
 import { apiFetch } from '@/lib/api-client';
 import type { Order } from '@/types/order.types';
 
-export const metadata = { title: "Orders" };
+export const metadata = { title: "Pedidos" };
 
 export const dynamic = "force-dynamic";
 

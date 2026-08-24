@@ -193,7 +193,7 @@ return (
 <div className="space-y-4">
 <div>
 <label htmlFor="edit-user-name" className="text-sm font-medium">Name</label>
-<Input id="edit-user-name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="User name" />
+<Input id="edit-user-name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Nombre del usuario" />
 </div>
 <div>
 <label htmlFor="edit-user-email" className="text-sm font-medium">Email</label>
@@ -203,7 +203,7 @@ return (
 <div>
 <label htmlFor="edit-user-tenant" className="text-sm font-medium">Tenant</label>
 <Select value={form.tenantId} onValueChange={(val) => setForm({ ...form, tenantId: val })} disabled={isLoadingTenants}>
-<SelectTrigger id="edit-user-tenant"><SelectValue placeholder="Select Tenant" /></SelectTrigger>
+<SelectTrigger id="edit-user-tenant"><SelectValue placeholder="Seleccionar Tenant" /></SelectTrigger>
 <SelectContent>
 {tenants.map((t) => (<SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>))}
 </SelectContent>
@@ -214,7 +214,7 @@ return (
 <DialogFooter>
 <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSaving}>Cancel</Button>
 <Button onClick={onSave} disabled={isSaving}>
-{isSaving ? (<><Spinner className="mr-2" /> Saving…</>) : "Save Changes"}
+{isSaving ? (<><Spinner className="mr-2" /> Saving…</>) : "Guardar Cambios"}
 </Button>
 </DialogFooter>
 </DialogContent>
@@ -229,19 +229,19 @@ return (
 <div className="hidden lg:grid lg:grid-cols-3 gap-4">
 <StatCard
 icon={Users}
-title="Total Users"
+title="Total de Usuarios"
 value={stats.totalUsers}
 color="bg-primary/10 text-primary"
 />
 <StatCard
 icon={Shield}
-title="Administrators"
+title="Administradores"
 value={stats.adminUsers}
 color="bg-accent text-accent-foreground"
 />
 <StatCard
 icon={UserCircle}
-title="Regular Users"
+title="Usuarios Regulares"
 value={stats.regularUsers}
 color="bg-muted text-muted-foreground"
 />
@@ -263,19 +263,19 @@ return (
 <div className="grid grid-cols-1 gap-4">
 <StatCard
 icon={Users}
-title="Total Users"
+title="Total de Usuarios"
 value={stats.totalUsers}
 color="bg-primary/10 text-primary"
 />
 <StatCard
 icon={Shield}
-title="Administrators"
+title="Administradores"
 value={stats.adminUsers}
 color="bg-accent text-accent-foreground"
 />
 <StatCard
 icon={UserCircle}
-title="Regular Users"
+title="Usuarios Regulares"
 value={stats.regularUsers}
 color="bg-muted text-muted-foreground"
 />
@@ -306,7 +306,7 @@ value={roleFilter}
 onValueChange={onRoleFilterChange}
 >
 <SelectTrigger className="w-[180px]">
-<SelectValue placeholder="All Roles" />
+<SelectValue placeholder="Todos los Roles" />
 </SelectTrigger>
 <SelectContent>
 <SelectItem value="all">All Roles</SelectItem>
@@ -321,7 +321,7 @@ Regular Users
 
 <div className="flex gap-2 flex-1">
 <Input
-placeholder="Search by name, email, or ID..."
+placeholder="Buscar por nombre, correo o ID..."
 defaultValue={searchQuery}
 onKeyDown={(e) => {
 if (e.key === "Enter") {
@@ -333,7 +333,7 @@ className="max-w-md"
 <Button
 onClick={() => {
 const input = document.querySelector(
-'input[placeholder="Search by name, email, or ID..."]',
+'input[placeholder="Buscar por nombre, correo o ID..."]',
 ) as HTMLInputElement;
 onSearch(input?.value || "");
 }}
@@ -730,7 +730,7 @@ try {
 const data = await tenantService.getAll();
 dispatch({ type: "SET_TENANTS", payload: data });
 } catch (err) {
-console.error("Failed to fetch tenants:", err);
+console.error("Error al obtener los tenants:", err);
 } finally {
 dispatch({ type: "SET_IS_LOADING_TENANTS", payload: false });
 }
@@ -798,14 +798,14 @@ name: dialogState.form.name,
 email: dialogState.form.email,
 tenantId: showTenant ? dialogState.form.tenantId : undefined,
 });
-toast.success("User updated");
+toast.success("Usuario actualizado");
 dispatch({ type: "SET_EDIT_OPEN", payload: false });
 editingRef.current = null;
 dispatch({ type: "SET_FORM", payload: { name: "", email: "", tenantId: "" } });
 router.refresh();
 } catch (err) {
 const message =
-err instanceof ApiError ? err.message : "Failed to update user";
+err instanceof ApiError ? err.message : "Error al actualizar el usuario";
 toast.error(message);
 } finally {
 dispatch({ type: "SET_IS_SAVING", payload: false });

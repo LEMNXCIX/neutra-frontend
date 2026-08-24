@@ -469,7 +469,7 @@ function AnalyticsContent({
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <TimelineCard
-                    title="Orders Timeline"
+                    title="Evolución de Pedidos"
                     dates={dates}
                     getDisplayValue={(_, idx) => orderCounts[idx]}
                     maxDisplayValue={maxOrderCount}
@@ -477,7 +477,7 @@ function AnalyticsContent({
                     colorVar="--accent"
                 />
                 <TimelineCard
-                    title="Revenue Timeline"
+                    title="Evolución de Ingresos"
                     dates={dates}
                     getDisplayValue={(_, idx) => revenues[idx]}
                     maxDisplayValue={maxRevenue}

@@ -173,22 +173,22 @@ function LogInspectorDialog({
           </div>
           <div className="p-8 space-y-10">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <MetaInfo label="Performance" value={`${log.duration}ms`} icon={<Clock />} large color={log.duration > 1000 ? "text-rose-500" : "text-emerald-500"} />
-              <MetaInfo label="Client IP" value={log.ip || "UNKNOWN"} icon={<Globe />} />
-              <MetaInfo label="User ID" value={log.userId || "GUEST"} icon={<User />} />
+              <MetaInfo label="Rendimiento" value={`${log.duration}ms`} icon={<Clock />} large color={log.duration > 1000 ? "text-rose-500" : "text-emerald-500"} />
+              <MetaInfo label="IP del Cliente" value={log.ip || "UNKNOWN"} icon={<Globe />} />
+              <MetaInfo label="ID de usuario" value={log.userId || "GUEST"} icon={<User />} />
               <MetaInfo label="Tenant" value={log.tenantId || "GLOBAL"} icon={<Activity />} />
             </div>
             <div className="space-y-4">
-              <SectionTitle title="Execution Summary" icon={<Terminal />} />
+              <SectionTitle title="Resumen de Ejecución" icon={<Terminal />} />
               <div className="p-6 bg-muted/30 rounded-xl border-l border-primary/60 font-semibold tracking-tight text-xl leading-snug">{log.message}</div>
             </div>
             <div className="grid grid-cols-1 gap-10">
-              <PayloadBoard title="Contextual Metadata" data={log.metadata} />
+              <PayloadBoard title="Metadatos Contextuales" data={log.metadata} />
               {log.error && Object.keys(log.error).length > 0 && (
-                <PayloadBoard title="Error Diagnostics" data={log.error} isCritical />
+                <PayloadBoard title="Diagnóstico de Errores" data={log.error} isCritical />
               )}
               <div className="space-y-4">
-                <SectionTitle title="Client Agent" icon={<Globe />} />
+                <SectionTitle title="Agente del Cliente" icon={<Globe />} />
                 <div className="text-[10px] font-mono leading-relaxed bg-muted/20 p-4 rounded-xl border border-border/50 text-muted-foreground">{log.userAgent}</div>
               </div>
             </div>
@@ -331,8 +331,8 @@ function LogsFiltersSection({
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
         <input
           type="text"
-          aria-label="Search logs"
-          placeholder="Search by Trace ID, URL or Message content..."
+          aria-label="Buscar logs"
+          placeholder="Buscar por Trace ID, URL o contenido del mensaje..."
           value={searchTerm}
           onChange={(e) => dispatch({ type: "SET_SEARCH_TERM", payload: e.target.value })}
           className="w-full h-12 pl-11 pr-4 bg-muted/30 border border-transparent focus:border-primary/30 focus:bg-background rounded-xl font-medium text-sm transition-all outline-none"
@@ -653,14 +653,14 @@ export function LogsClient({
             {/* Quick Stats */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 <QuickStat
-                    label="Requests"
+                    label="Peticiones"
                     value={state.total}
                     icon={<Database />}
                     color="text-primary"
                     bg="bg-primary/5"
                 />
                 <QuickStat
-                    label="Errors"
+                    label="Errores"
           value={
             (state.logs || []).filter((l) => l.statusCode >= 500).length
                     }
@@ -677,7 +677,7 @@ export function LogsClient({
                     bg="bg-amber-50"
                 />
                 <QuickStat
-                    label="Live Entries"
+                    label="Registros en Vivo"
                     value={(state.logs || []).length}
                     icon={<Terminal />}
                     color="text-emerald-600"

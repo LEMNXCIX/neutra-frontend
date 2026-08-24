@@ -53,8 +53,8 @@ export function WhatsAppConfigForm({ initialConfig }: WhatsAppConfigFormProps) {
 				});
 			}
 		} catch (err) {
-			console.error("Failed to load configs", err);
-			toast.error("Failed to load WhatsApp configuration");
+			console.error("Error al cargar las configuraciones", err);
+			toast.error("Error al cargar la configuración de WhatsApp");
 		} finally {
 			setIsLoading(false);
 		}
@@ -64,13 +64,13 @@ export function WhatsAppConfigForm({ initialConfig }: WhatsAppConfigFormProps) {
         setIsSaving(true);
         try {
             await whatsappService.updateConfig(config);
-            toast.success("Configuration saved successfully");
+            toast.success("Configuración guardada correctamente");
 		await loadConfig();
         } catch (err: any) {
             const message =
                 err instanceof ApiError
                     ? err.message
-                    : "Failed to save configuration";
+                    : "Error al guardar la configuración";
             toast.error(message);
         } finally {
             setIsSaving(false);
@@ -115,7 +115,7 @@ export function WhatsAppConfigForm({ initialConfig }: WhatsAppConfigFormProps) {
                                     }
                                 />
                                 <span className="text-sm text-muted-foreground">
-                                    {config.enabled ? "Active" : "Inactive"}
+                                    {config.enabled ? "Activo" : "Inactivo"}
                                 </span>
                             </div>
                         </div>
@@ -133,8 +133,8 @@ export function WhatsAppConfigForm({ initialConfig }: WhatsAppConfigFormProps) {
                                 />
                                 <span className="text-sm text-muted-foreground">
                                     {config.notificationsEnabled
-                                        ? "Enabled"
-                                        : "Disabled"}
+                                        ? "Habilitado"
+                                        : "Deshabilitado"}
                                 </span>
                             </div>
                         </div>
@@ -150,7 +150,7 @@ export function WhatsAppConfigForm({ initialConfig }: WhatsAppConfigFormProps) {
                                     }
                                 />
                                 <span className="text-sm text-muted-foreground">
-                                    {config.botEnabled ? "Enabled" : "Disabled"}
+                                    {config.botEnabled ? "Habilitado" : "Deshabilitado"}
                                 </span>
                             </div>
                         </div>
@@ -228,7 +228,7 @@ export function WhatsAppConfigForm({ initialConfig }: WhatsAppConfigFormProps) {
                                         navigator.clipboard.writeText(
                                             config.webhookVerifyToken || "",
                                         );
-                                        toast.success("Copied to clipboard");
+                                        toast.success("Copiado al portapapeles");
                                     }}
                                 >
                                     Copy
@@ -254,7 +254,7 @@ export function WhatsAppConfigForm({ initialConfig }: WhatsAppConfigFormProps) {
                                         navigator.clipboard.writeText(
                                             `${window.location.origin}/api/webhooks/whatsapp`,
                                         );
-                                        toast.success("Copied to clipboard");
+                                        toast.success("Copiado al portapapeles");
                                     }}
                                 >
                                     Copy

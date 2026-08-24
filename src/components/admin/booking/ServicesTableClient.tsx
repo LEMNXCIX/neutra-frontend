@@ -131,7 +131,7 @@ function ServiceFormFields({
           id="description"
           value={formData.description}
           onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-          placeholder="Describe what this service includes..."
+          placeholder="Describí qué incluye este servicio..."
           rows={3}
         />
       </div>
@@ -177,7 +177,7 @@ function ServiceFormFields({
           <SelectTrigger id="categoryId" className="w-full">
             <div className="flex items-center">
               <Tag className="size-4 mr-2 text-muted-foreground" />
-              <SelectValue placeholder="Select a category" />
+              <SelectValue placeholder="Seleccioná una categoría" />
             </div>
           </SelectTrigger>
           <SelectContent>
@@ -236,7 +236,7 @@ function ServicesHeader({
             onValueChange={onTenantFilterChange}
           >
             <SelectTrigger className="w-full sm:w-[180px]">
-              <SelectValue placeholder="All Tenants" />
+              <SelectValue placeholder="Todos los Tenants" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Tenants</SelectItem>
@@ -305,8 +305,8 @@ function ServicesMobileCards({
                       className="text-xs"
                     >
                       {service.active
-                        ? "Active"
-                        : "Inactive"}
+                        ? "Activo"
+                        : "Inactivo"}
                     </Badge>
                   </div>
                 </div>
@@ -468,8 +468,8 @@ function ServicesDesktopTable({
                       }
                     >
                       {service.active
-                        ? "Active"
-                        : "Inactive"}
+                        ? "Activo"
+                        : "Inactivo"}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
@@ -533,13 +533,13 @@ function ServicesFormDialog({
         <DialogHeader>
           <DialogTitle>
             {editingService
-              ? "Edit Service"
-              : "Add New Service"}
+              ? "Editar Servicio"
+              : "Agregar Nuevo Servicio"}
           </DialogTitle>
           <DialogDescription>
             {editingService
-              ? "Modify the service details below."
-              : "Define the details of the service you want to offer."}
+              ? "Modificá los detalles del servicio abajo."
+              : "Definí los detalles del servicio que querés ofrecer."}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={onSubmit} className="space-y-5 pt-4">
@@ -555,10 +555,10 @@ function ServicesFormDialog({
             </Button>
             <Button type="submit" disabled={isSaving}>
               {isSaving
-                ? "Saving..."
+                ? "Guardando..."
                 : editingService
-                ? "Update Service"
-                : "Create Service"}
+                ? "Actualizar Servicio"
+                : "Crear Servicio"}
             </Button>
           </DialogFooter>
         </form>
@@ -637,7 +637,7 @@ function ServicesTableClientInner({
       dispatch({ type: "SET_SERVICES", payload: data });
     } catch (err) {
       console.error("Error loading services:", err);
-      toast.error("Failed to load services");
+      toast.error("Error al cargar los servicios");
     } finally {
       dispatch({ type: "SET_LOADING", payload: false });
         }
@@ -709,7 +709,7 @@ dispatch({ type: "SET_FORM_DATA", payload: {
       `Error ${editingService ? "updating" : "creating"} service:`,
       err,
             );
-            toast.error("An unexpected error occurred");
+            toast.error("Ocurrió un error inesperado");
         } finally {
             dispatch({ type: "SET_IS_SAVING", payload: false });
         }
@@ -717,10 +717,10 @@ dispatch({ type: "SET_FORM_DATA", payload: {
 
     const handleDelete = async (id: string) => {
         const confirmed = await confirm({
-            title: "Delete Service",
+            title: "Eliminar Servicio",
             description:
-                "Are you sure you want to delete this service? This action cannot be undone.",
-            confirmText: "Delete",
+                "¿Seguro que querés eliminar este servicio? Esta acción no se puede deshacer.",
+            confirmText: "Eliminar",
             variant: "destructive",
         });
 
@@ -732,15 +732,15 @@ dispatch({ type: "SET_FORM_DATA", payload: {
             });
 
             if (response.ok) {
-                toast.success("Service deleted successfully");
+                toast.success("Servicio eliminado correctamente");
                 await loadServices();
             } else {
                 const errorData = await response.json();
-                toast.error(errorData.message || "Failed to delete service");
+                toast.error(errorData.message || "Error al eliminar el servicio");
             }
         } catch (err) {
-            console.error("Error deleting service:", err);
-            toast.error("An unexpected error occurred");
+            console.error("Error al eliminar el servicio:", err);
+            toast.error("Ocurrió un error inesperado");
         }
     };
 

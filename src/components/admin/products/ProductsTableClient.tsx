@@ -145,7 +145,7 @@ function ProductFormFields({
     <div className="space-y-4">
       <div>
         <label htmlFor={`${prefix}-product-name`} className="text-sm font-medium">Name</label>
-        <Input id={`${prefix}-product-name`} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Product name" />
+        <Input id={`${prefix}-product-name`} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Nombre del producto" />
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
@@ -160,7 +160,7 @@ function ProductFormFields({
       <div>
         <label htmlFor={`${prefix}-product-category`} className="text-sm font-medium">Category</label>
         <Select value={form.category} onValueChange={(val) => setForm({ ...form, category: val })}>
-          <SelectTrigger id={`${prefix}-product-category`}><SelectValue placeholder="Select category" /></SelectTrigger>
+          <SelectTrigger id={`${prefix}-product-category`}><SelectValue placeholder="Seleccionar categoría" /></SelectTrigger>
           <SelectContent>
             {(Array.isArray(categories) ? categories : []).map((cat) => (
               <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
@@ -173,7 +173,7 @@ function ProductFormFields({
         <div className="mt-2 flex items-center gap-3">
           {preview && (
             <div className="relative">
-              <Image src={preview} alt="Preview" width={64} height={64} className="rounded object-cover" />
+              <Image src={preview} alt="Vista Previa" width={64} height={64} className="rounded object-cover" />
               <Button size="sm" variant="destructive" className="absolute -top-2 -right-2 size-6 rounded-full p-0" onClick={() => { setPreview(null); setForm({ ...form, imageBase64: "" }); }}>
                 <X className="size-3" />
               </Button>
@@ -182,7 +182,7 @@ function ProductFormFields({
           <label htmlFor={`${prefix}-product-image`} className="cursor-pointer">
             <div className="border-2 border-dashed rounded-lg p-4 hover:bg-muted/50 transition-colors">
               <Upload className="size-6 mx-auto mb-1 text-muted-foreground" />
-              <p className="text-xs text-muted-foreground">{isEdit ? "Change Image" : "Upload Image"}</p>
+              <p className="text-xs text-muted-foreground">{isEdit ? "Cambiar Imagen" : "Subir Imagen"}</p>
             </div>
             <input id={`${prefix}-product-image`} type="file" accept="image/*" className="hidden" onChange={(e) => onImageUpload(e, isEdit)} />
           </label>
@@ -602,7 +602,7 @@ function CreateProductDialog({
                 <Spinner className="mr-2" /> Creating…
               </>
             ) : (
-              "Create Product"
+              "Crear Producto"
             )}
           </Button>
         </DialogFooter>
@@ -647,7 +647,7 @@ function EditProductDialog({
                 <Spinner className="mr-2" /> Saving…
               </>
             ) : (
-              "Save Changes"
+              "Guardar Cambios"
             )}
           </Button>
         </DialogFooter>
@@ -662,19 +662,19 @@ function ProductsStats({ stats }: { stats: Stats }) {
       <div className="hidden md:grid md:grid-cols-3 gap-4">
         <StatCard
           icon={Package}
-          title="Total Products"
+          title="Total de Productos"
           value={stats.totalProducts}
           color="bg-primary/10 text-primary"
         />
         <StatCard
           icon={DollarSign}
-          title="Total Inventory Value"
+          title="Valor Total del Inventario"
           value={`$${stats.totalValue.toFixed(2)}`}
           color="bg-accent text-accent-foreground"
         />
         <StatCard
           icon={AlertTriangle}
-          title="Low Stock Items"
+          title="Productos con Poco Stock"
           value={stats.lowStockCount}
           color="bg-destructive/10 text-destructive"
         />
@@ -694,19 +694,19 @@ function ProductsStats({ stats }: { stats: Stats }) {
             <div className="grid grid-cols-1 gap-4">
               <StatCard
                 icon={Package}
-                title="Total Products"
+                title="Total de Productos"
                 value={stats.totalProducts}
                 color="bg-primary/10 text-primary"
               />
               <StatCard
                 icon={DollarSign}
-                title="Total Inventory Value"
+                title="Valor Total del Inventario"
                 value={`$${stats.totalValue.toFixed(2)}`}
                 color="bg-accent text-accent-foreground"
               />
               <StatCard
                 icon={AlertTriangle}
-                title="Low Stock Items"
+                title="Productos con Poco Stock"
                 value={stats.lowStockCount}
                 color="bg-destructive/10 text-destructive"
               />
@@ -746,7 +746,7 @@ function ProductsFilters({
             onValueChange={handleFilterChange}
           >
             <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="All Categories" />
+              <SelectValue placeholder="Todas las Categorías" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">
@@ -770,7 +770,7 @@ function ProductsFilters({
                 onValueChange={handleTenantFilterChange}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="All Tenants" />
+                  <SelectValue placeholder="Todos los Tenants" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">
@@ -783,7 +783,7 @@ function ProductsFilters({
 
           <div className="flex gap-2 flex-1">
             <Input
-              placeholder="Search by product name or ID..."
+              placeholder="Buscar por nombre o ID de producto..."
               defaultValue={searchQuery}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
@@ -795,7 +795,7 @@ function ProductsFilters({
             <Button
               onClick={() => {
                 const input = document.querySelector(
-                  'input[placeholder="Search by product name or ID..."]',
+                  'input[placeholder="Buscar por nombre o ID de producto..."]',
                 ) as HTMLInputElement;
                 handleSearch(input?.value || "");
               }}
@@ -902,11 +902,11 @@ function ProductsTableClientInner({
 
     const createProduct = async () => {
         if (!dialogState.form.name) {
-            toast.error("Name is required");
+            toast.error("El nombre es obligatorio");
             return;
         }
   if (Number(dialogState.form.price) < 0 || Number(dialogState.form.stock) < 0) {
-    toast.error("Price and Stock cannot be negative");
+    toast.error("El precio y el stock no pueden ser negativos");
     return;
   }
 
@@ -924,10 +924,10 @@ function ProductsTableClientInner({
             try {
                 await api.post("/products", body);
             } catch (err) {
-                toast.error(err instanceof ApiError ? err.message : "Failed to create product");
+                toast.error(err instanceof ApiError ? err.message : "Error al crear el producto");
                 return;
             }
-    toast.success("Product created");
+    toast.success("Producto creado");
     dispatch({ type: "SET_CREATE_OPEN", payload: false });
     dispatch({ type: "SET_FORM", payload: {
       name: "",
@@ -939,7 +939,7 @@ function ProductsTableClientInner({
     dispatch({ type: "SET_PREVIEW", payload: null });
     router.refresh();
   } catch {
-    toast.error("Network error");
+    toast.error("Error de red");
   } finally {
     dispatch({ type: "SET_IS_CREATING", payload: false });
         }
@@ -947,10 +947,10 @@ function ProductsTableClientInner({
 
     const deleteProduct = async (id: string) => {
         const confirmed = await confirm({
-            title: "Delete Product",
+            title: "Eliminar Producto",
             description:
-                "Are you sure you want to delete this product? This action cannot be undone.",
-            confirmText: "Delete",
+                "¿Seguro que querés eliminar este producto? Esta acción no se puede deshacer.",
+            confirmText: "Eliminar",
             variant: "destructive",
         });
         if (!confirmed) return;
@@ -959,13 +959,13 @@ function ProductsTableClientInner({
             try {
                 await api.delete(`/products/${id}`);
             } catch (err) {
-                toast.error(err instanceof ApiError ? err.message : "Failed to delete");
+                toast.error(err instanceof ApiError ? err.message : "Error al eliminar");
                 return;
             }
-            toast.success("Product deleted");
+            toast.success("Producto eliminado");
             router.refresh();
         } catch {
-            toast.error("Network error");
+            toast.error("Error de red");
         } finally {
             dispatch({ type: "SET_IS_DELETING", payload: null });
         }
@@ -987,7 +987,7 @@ function ProductsTableClientInner({
     const saveEdit = async () => {
         if (!editingRef.current) return;
   if (Number(dialogState.form.price) < 0 || Number(dialogState.form.stock) < 0) {
-    toast.error("Price and Stock cannot be negative");
+    toast.error("El precio y el stock no pueden ser negativos");
     return;
   }
 
@@ -1005,10 +1005,10 @@ function ProductsTableClientInner({
             try {
                 await api.put(`/products/${editingRef.current.id}`, body);
             } catch (err) {
-                toast.error(err instanceof ApiError ? err.message : "Failed to update");
+                toast.error(err instanceof ApiError ? err.message : "Error al actualizar");
                 return;
             }
-    toast.success("Product updated");
+    toast.success("Producto actualizado");
     dispatch({ type: "SET_EDIT_OPEN", payload: false });
     editingRef.current = null;
     dispatch({ type: "SET_FORM", payload: {
@@ -1021,7 +1021,7 @@ function ProductsTableClientInner({
     dispatch({ type: "SET_PREVIEW", payload: null });
     router.refresh();
   } catch {
-    toast.error("Network error");
+    toast.error("Error de red");
   } finally {
     dispatch({ type: "SET_IS_EDITING", payload: false });
         }

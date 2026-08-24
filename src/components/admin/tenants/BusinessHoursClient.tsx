@@ -53,7 +53,7 @@ export function BusinessHoursClient() {
             );
             setHolidays(current?.config?.settings?.holidays ?? []);
         } catch {
-            toast.error("Failed to load tenant settings");
+            toast.error("Error al cargar la configuración del tenant");
         } finally {
             setLoading(false);
         }
@@ -77,9 +77,9 @@ export function BusinessHoursClient() {
                     },
                 },
             });
-            toast.success("Schedule saved");
+            toast.success("Horario guardado");
         } catch {
-            toast.error("Failed to save schedule");
+            toast.error("Error al guardar el horario");
         } finally {
             setSaving(false);
         }
@@ -128,7 +128,7 @@ export function BusinessHoursClient() {
                             <Spinner className="mr-2 size-4" /> Saving…
                         </>
                     ) : (
-                        "Save changes"
+                        "Guardar cambios"
                     )}
                 </Button>
             </div>
@@ -168,7 +168,7 @@ export function BusinessHoursClient() {
                             <Spinner className="mr-2 size-4" /> Saving…
                         </>
                     ) : (
-                        "Save changes"
+                        "Guardar cambios"
                     )}
                 </Button>
             </div>

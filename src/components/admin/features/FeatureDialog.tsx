@@ -46,7 +46,7 @@ export function FeatureDialog({
 
     const handleSubmit = async () => {
         if (!formData.name || !formData.key) {
-            toast.error("Name and Key are required");
+            toast.error("Nombre y clave son obligatorios");
             return;
         }
 
@@ -54,10 +54,10 @@ export function FeatureDialog({
         try {
             if (feature) {
                 await featuresService.update(feature.id, formData);
-                toast.success("Feature updated");
+                toast.success("Función actualizada");
             } else {
                 await featuresService.create(formData);
-                toast.success("Feature created");
+                toast.success("Función creada");
             }
             onSuccess();
             onOpenChange(false);
@@ -65,7 +65,7 @@ export function FeatureDialog({
             const message =
                 err instanceof ApiError
                     ? err.message
-                    : "Failed to save feature";
+                    : "Error al guardar la función";
             toast.error(message);
         } finally {
             setIsSaving(false);
@@ -82,7 +82,7 @@ export function FeatureDialog({
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
                         <Zap className="size-5 text-yellow-500" />
-                        {feature ? "Edit Feature" : "Create Feature"}
+                        {feature ? "Editar Función" : "Crear Función"}
                     </DialogTitle>
                 </DialogHeader>
 
@@ -107,7 +107,7 @@ export function FeatureDialog({
                                         key,
                                     }));
                                 }}
-                                placeholder="Advanced Analytics"
+                                placeholder="Analíticas Avanzadas"
                             />
                         </div>
                         <div className="space-y-2">
@@ -171,7 +171,7 @@ export function FeatureDialog({
                                     description: e.target.value,
                                 }))
                             }
-                            placeholder="Describe what this feature enables..."
+                            placeholder="Describí qué habilita esta función..."
                             rows={3}
                         />
                     </div>

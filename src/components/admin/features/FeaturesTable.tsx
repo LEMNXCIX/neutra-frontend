@@ -80,7 +80,7 @@ export function FeaturesTable({ initialFeatures = EMPTY_FEATURES }: FeaturesTabl
       dispatch({ type: "SET_FEATURES", payload: data });
     } catch (error) {
       console.error(error);
-      toast.error("Failed to load features");
+      toast.error("Error al cargar las funciones");
     } finally {
       dispatch({ type: "SET_LOADING", payload: false });
     }
@@ -93,17 +93,17 @@ export function FeaturesTable({ initialFeatures = EMPTY_FEATURES }: FeaturesTabl
     const handleDelete = async (id: string) => {
         if (
             !confirm(
-                "Are you sure you want to delete this feature? This might affect tenants using it.",
+                "¿Seguro que querés eliminar esta función? Podría afectar a los tenants que la usan.",
             )
         )
             return;
 
         try {
             await featuresService.delete(id);
-            toast.success("Feature deleted");
+            toast.success("Función eliminada");
             loadFeatures();
         } catch (_error) {
-            toast.error("Failed to delete feature");
+            toast.error("Error al eliminar la función");
         }
     };
 
@@ -143,7 +143,7 @@ export function FeaturesTable({ initialFeatures = EMPTY_FEATURES }: FeaturesTabl
                         <div className="relative flex-1 max-w-sm">
                             <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
                             <Input
-                                placeholder="Search features..."
+                                placeholder="Buscar funciones..."
                                 className="pl-9"
       value={state.search}
           onChange={(e) => dispatch({ type: "SET_SEARCH", payload: e.target.value })}

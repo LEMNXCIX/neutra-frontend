@@ -32,7 +32,7 @@ export function TenantDialog({
             <DialogContent className="max-w-2xl">
                 <DialogHeader>
                     <DialogTitle>
-                        {tenant ? "Edit Tenant" : "Create Tenant"}
+                        {tenant ? "Editar Tenant" : "Crear Tenant"}
                     </DialogTitle>
                 </DialogHeader>
 

@@ -38,7 +38,7 @@ export function AppearanceClient() {
             setTenant(current);
             setBranding(current?.config?.branding ?? {});
         } catch {
-            toast.error("Failed to load tenant settings");
+            toast.error("Error al cargar la configuración del tenant");
         } finally {
             setLoading(false);
         }
@@ -58,9 +58,9 @@ export function AppearanceClient() {
                     branding,
                 },
             });
-            toast.success("Appearance saved");
+            toast.success("Apariencia guardada");
         } catch {
-            toast.error("Failed to save appearance");
+            toast.error("Error al guardar la apariencia");
         } finally {
             setSaving(false);
         }
@@ -112,7 +112,7 @@ export function AppearanceClient() {
                             <Spinner className="mr-2 size-4" /> Saving…
                         </>
                     ) : (
-                        "Save changes"
+                        "Guardar cambios"
                     )}
                 </Button>
             </div>
@@ -140,7 +140,7 @@ export function AppearanceClient() {
                             <Spinner className="mr-2 size-4" /> Saving…
                         </>
                     ) : (
-                        "Save changes"
+                        "Guardar cambios"
                     )}
                 </Button>
             </div>

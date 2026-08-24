@@ -9,8 +9,8 @@ import { TenantThemeProvider } from "@/providers/tenant-theme-provider";
 import { getTenantBrandingFromHeaders } from "@/lib/server-theme";
 
 export const metadata: Metadata = {
-  title: "Store Admin",
-  description: "Store administration dashboard",
+  title: "Administración de la Tienda",
+  description: "Panel de administración de la tienda",
 };
 
 export default async function AdminLayout({

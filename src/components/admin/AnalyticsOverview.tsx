@@ -214,7 +214,7 @@ export default function AnalyticsOverview() {
             <>
               <StatCard
                 icon={ShoppingCart}
-                title="Total Orders"
+                title="Total de Pedidos"
                 value={stats.orders.total}
                 subtitle={`$${stats.orders.revenue.toFixed(2)} revenue`}
                 variant="primary"
@@ -222,7 +222,7 @@ export default function AnalyticsOverview() {
               />
               <StatCard
                 icon={DollarSign}
-                title="Total Revenue"
+                title="Ingresos Totales"
                 value={`$${stats.orders.revenue.toFixed(2)}`}
                 subtitle={`Avg: $${stats.orders.avgOrderValue.toFixed(2)}/order`}
                 variant="primary"
@@ -232,14 +232,14 @@ export default function AnalyticsOverview() {
           )}
           <StatCard
             icon={Users}
-            title="Total Users"
+            title="Total de Usuarios"
             value={stats.users.total}
             subtitle={`${stats.users.admins} admins, ${stats.users.regular} users`}
             variant="accent"
           />
           <StatCard
             icon={Package}
-            title="Total Products"
+            title="Total de Productos"
             value={stats.products.total}
             subtitle={`$${stats.products.totalValue.toFixed(2)} inventory value`}
             variant="muted"
@@ -253,21 +253,21 @@ export default function AnalyticsOverview() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <StatCard
             icon={AlertTriangle}
-            title="Low Stock Items"
+            title="Productos con Poco Stock"
             value={stats.products.lowStock}
-            subtitle="Products below 10 units"
+            subtitle="Productos con menos de 10 unidades"
             variant="accent"
           />
           <StatCard
             icon={Package}
-            title="Out of Stock"
+            title="Sin Stock"
             value={stats.products.outOfStock}
-            subtitle="Needs restocking"
+            subtitle="Necesita reposición"
             variant="destructive"
           />
           <StatCard
             icon={Package}
-            title="Total Categories"
+            title="Total de Categorías"
             value={stats.categories.total}
             subtitle={`Avg ${stats.categories.avgProducts.toFixed(1)} products/category`}
             variant="primary"
@@ -283,16 +283,16 @@ export default function AnalyticsOverview() {
             <>
               <StatCard
                 icon={Ticket}
-                title="Coupons"
+                title="Cupones"
                 value={stats.coupons.total}
                 subtitle={`${stats.coupons.active} active, ${stats.coupons.used} used`}
                 variant="primary"
               />
               <StatCard
                 icon={Ticket}
-                title="Active Coupons"
+                title="Cupones Activos"
                 value={stats.coupons.active}
-                subtitle="Available for use"
+                subtitle="Disponible para uso"
                 variant="primary"
               />
             </>
@@ -322,23 +322,23 @@ export default function AnalyticsOverview() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <StatCard
             icon={Shield}
-            title="Administrators"
+            title="Administradores"
             value={stats.users.admins}
-            subtitle="System admins"
+            subtitle="Administradores del sistema"
             variant="accent"
           />
           <StatCard
             icon={Users}
-            title="Regular Users"
+            title="Usuarios Regulares"
             value={stats.users.regular}
-            subtitle="Customer accounts"
+            subtitle="Cuentas de clientes"
             variant="muted"
           />
           <StatCard
             icon={Users}
-            title="Admin Ratio"
+            title="Proporción de Admins"
             value={`${stats.users.total > 0 ? ((stats.users.admins / stats.users.total) * 100).toFixed(1) : 0}%`}
-            subtitle="Percentage of admins"
+            subtitle="Porcentaje de administradores"
             variant="primary"
           />
         </div>

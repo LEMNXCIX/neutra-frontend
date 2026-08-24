@@ -2,7 +2,7 @@ import React, { Suspense } from "react";
 import CouponsTableClient from "@/components/admin/coupons/CouponsTableClient";
 import { api } from '@/lib/api-client';
 
-export const metadata = { title: "Coupons" };
+export const metadata = { title: "Cupones" };
 
 export const dynamic = "force-dynamic";
 

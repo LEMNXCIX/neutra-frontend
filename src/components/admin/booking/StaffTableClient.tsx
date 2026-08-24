@@ -150,7 +150,7 @@ function ServiceAssignmentDialog({
                         Cancel
                     </Button>
                     <Button type="button" onClick={onSave} disabled={isSaving}>
-                        {isSaving ? "Saving..." : "Save Assignments"}
+                        {isSaving ? "Guardando..." : "Guardar Asignaciones"}
                     </Button>
                 </DialogFooter>
             </DialogContent>
@@ -186,7 +186,7 @@ function StaffHeader({
                         onValueChange={onTenantFilterChange}
                     >
                         <SelectTrigger className="w-full sm:w-[180px]">
-                            <SelectValue placeholder="All Tenants" />
+                            <SelectValue placeholder="Todos los Tenants" />
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="all">All Tenants</SelectItem>
@@ -263,7 +263,7 @@ function StaffCardsGrid({
                                     }
                                     className="shrink-0"
                                 >
-                                    {member.active ? "Active" : "Inactive"}
+                                    {member.active ? "Activo" : "Inactivo"}
                                 </Badge>
                             </div>
                             <CardDescription className="line-clamp-1">
@@ -360,13 +360,13 @@ function StaffFormDialog({
                 <DialogHeader>
                     <DialogTitle>
                         {editingStaff
-                            ? "Edit Staff Profile"
-                            : "Add Staff Member"}
+                            ? "Editar Perfil del Equipo"
+                            : "Agregar Miembro"}
                     </DialogTitle>
                     <DialogDescription>
                         {editingStaff
-                            ? "Update professional information for this team member."
-                            : "Create a new professional profile for your team."}
+                            ? "Actualizá la información profesional de este miembro del equipo."
+                            : "Creá un nuevo perfil profesional para tu equipo."}
                     </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={onSubmit} className="space-y-5 pt-4">
@@ -389,7 +389,7 @@ function StaffFormDialog({
                             }}
                         >
                             <SelectTrigger>
-                                <SelectValue placeholder="Select a user to link..." />
+                                <SelectValue placeholder="Seleccioná un usuario para vincular..." />
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="none">
@@ -461,7 +461,7 @@ function StaffFormDialog({
                                     bio: e.target.value,
                                 })
                             }
-                            placeholder="Briefly describe their expertise..."
+                            placeholder="Describí brevemente su especialidad..."
                             rows={3}
                         />
                     </div>
@@ -510,10 +510,10 @@ function StaffFormDialog({
                         </Button>
                         <Button type="submit" disabled={isSaving}>
                             {isSaving
-                                ? "Saving..."
+                                ? "Guardando..."
                                 : editingStaff
-                                  ? "Update Profile"
-                                  : "Add Staff Member"}
+                                  ? "Actualizar Perfil"
+                                  : "Agregar Miembro"}
                         </Button>
                     </DialogFooter>
                 </form>
@@ -660,7 +660,7 @@ function useStaffTable(
                 dispatch({ type: "SET_STAFF", payload: data });
             } catch (err) {
                 console.error("Error loading staff:", err);
-                toast.error("Failed to load staff members");
+                toast.error("Error al cargar el equipo");
             } finally {
                 dispatch({ type: "SET_LOADING", payload: false });
             }
@@ -745,12 +745,12 @@ function useStaffTable(
                 editingStaff!.id,
                 selectedServiceIds,
             );
-            toast.success("Services assigned successfully");
+            toast.success("Servicios asignados correctamente");
             dispatch({ type: "SET_SERVICE_DIALOG_OPEN", payload: false });
             await loadStaff();
         } catch (err) {
-            console.error("Error saving staff services:", err);
-            toast.error("Failed to assign services");
+            console.error("Error al guardar los servicios del equipo:", err);
+            toast.error("Error al asignar servicios");
         } finally {
             dispatch({ type: "SET_IS_SAVING_SERVICES", payload: false });
         }
@@ -796,7 +796,7 @@ function useStaffTable(
                 `Error ${editingStaff ? "updating" : "creating"} staff:`,
                 err,
             );
-            toast.error("An unexpected error occurred");
+            toast.error("Ocurrió un error inesperado");
         } finally {
             dispatch({ type: "SET_IS_SAVING", payload: false });
         }
@@ -804,10 +804,10 @@ function useStaffTable(
 
     const handleDelete = async (id: string) => {
         const confirmed = await confirm({
-            title: "Delete Staff Member",
+            title: "Eliminar Miembro",
             description:
-                "Are you sure you want to remove this staff member? This action cannot be undone.",
-            confirmText: "Delete",
+                "¿Seguro que querés eliminar a este miembro del equipo? Esta acción no se puede deshacer.",
+            confirmText: "Eliminar",
             variant: "destructive",
         });
 
@@ -819,17 +819,17 @@ function useStaffTable(
             });
 
             if (response.ok) {
-                toast.success("Staff member removed successfully");
+                toast.success("Miembro del equipo eliminado correctamente");
                 await loadStaff();
             } else {
                 const errorData = await response.json();
                 toast.error(
-                    errorData.message || "Failed to remove staff member",
+                    errorData.message || "Error al eliminar al miembro del equipo",
                 );
             }
         } catch (err) {
-            console.error("Error deleting staff:", err);
-            toast.error("An unexpected error occurred");
+            console.error("Error al eliminar al miembro del equipo:", err);
+            toast.error("Ocurrió un error inesperado");
         }
     };
 

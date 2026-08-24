@@ -113,17 +113,17 @@ const CategoryFormFields = ({
   <div className="space-y-4">
     <div>
       <label htmlFor={`${prefix}-name`} className="text-sm font-medium">Name</label>
-      <Input id={`${prefix}-name`} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Category name" />
+      <Input id={`${prefix}-name`} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Nombre de la categoría" />
     </div>
     <div>
       <label htmlFor={`${prefix}-description`} className="text-sm font-medium">Description</label>
-      <Input id={`${prefix}-description`} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Optional description" />
+      <Input id={`${prefix}-description`} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Descripción opcional" />
     </div>
     <div>
       <label htmlFor={`${prefix}-type`} className="text-sm font-medium">Type</label>
       <Select value={form.type} onValueChange={(value) => setForm({ ...form, type: value })}>
         <SelectTrigger id={`${prefix}-type`}>
-          <SelectValue placeholder="Select type" />
+          <SelectValue placeholder="Seleccionar tipo" />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="PRODUCT">Product</SelectItem>
@@ -176,19 +176,19 @@ const CategoriesDesktopStats = ({ stats }: { stats: Stats }) => (
   <div className="hidden md:grid md:grid-cols-3 gap-4">
     <StatCard
       icon={Folder}
-      title="Total Categories"
+      title="Total de Categorías"
       value={stats.totalCategories}
       color="bg-primary/10 text-primary"
     />
     <StatCard
       icon={Package}
-      title="Total Products"
+      title="Total de Productos"
       value={stats.totalProducts}
       color="bg-accent text-accent-foreground"
     />
     <StatCard
       icon={TrendingUp}
-      title="Avg Products/Category"
+      title="Prom. Productos/Categoría"
       value={stats.averageProductsPerCategory}
       color="bg-muted text-muted-foreground"
     />
@@ -210,19 +210,19 @@ const CategoriesMobileStats = ({ stats }: { stats: Stats }) => (
         <div className="grid grid-cols-1 gap-4">
           <StatCard
             icon={Folder}
-            title="Total Categories"
+            title="Total de Categorías"
             value={stats.totalCategories}
             color="bg-primary/10 text-primary"
           />
           <StatCard
             icon={Package}
-            title="Total Products"
+            title="Total de Productos"
             value={stats.totalProducts}
             color="bg-accent text-accent-foreground"
           />
           <StatCard
             icon={TrendingUp}
-            title="Avg Products/Category"
+            title="Prom. Productos/Categoría"
             value={stats.averageProductsPerCategory}
             color="bg-muted text-muted-foreground"
           />
@@ -253,7 +253,7 @@ const CategoriesSearchBar = ({
     <CardContent className="pt-6">
       <div className="flex gap-2">
         <Input
-          placeholder="Search by name, ID, or description..."
+          placeholder="Buscar por nombre, ID o descripción..."
           defaultValue={searchQuery}
           onKeyDown={(e) => {
             if (e.key === "Enter") {
@@ -265,7 +265,7 @@ const CategoriesSearchBar = ({
         <Button
           onClick={() => {
             const input = document.querySelector(
-              'input[placeholder="Search by name, ID, or description..."]',
+              'input[placeholder="Buscar por nombre, ID o descripción..."]',
             ) as HTMLInputElement;
             onSearch(input?.value || "");
           }}
@@ -276,7 +276,7 @@ const CategoriesSearchBar = ({
         <div className="w-[180px]">
           <Select value={typeFilter} onValueChange={onTypeFilterChange}>
             <SelectTrigger>
-              <SelectValue placeholder="All Types" />
+              <SelectValue placeholder="Todos los Tipos" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Types</SelectItem>
@@ -293,7 +293,7 @@ const CategoriesSearchBar = ({
               onValueChange={onTenantFilterChange}
             >
               <SelectTrigger>
-                <SelectValue placeholder="All Tenants" />
+                <SelectValue placeholder="Todos los Tenants" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">
@@ -660,7 +660,7 @@ const CreateCategoryDialog = ({
               <Spinner className="mr-2" /> Creating…
             </>
           ) : (
-            "Create Category"
+            "Crear Categoría"
           )}
         </Button>
       </DialogFooter>
@@ -702,7 +702,7 @@ const EditCategoryDialog = ({
               <Spinner className="mr-2" /> Saving…
             </>
           ) : (
-            "Save Changes"
+            "Guardar Cambios"
           )}
         </Button>
       </DialogFooter>
@@ -784,18 +784,18 @@ function CategoriesTableClientInner({
 
   const createCategory = async () => {
     if (!dialogState.form.name) {
-      toast.error("Name is required");
+      toast.error("El nombre es obligatorio");
       return;
     }
     dispatch({ type: "SET_IS_CREATING", payload: true });
     try {
       await api.post("/categories", dialogState.form);
-      toast.success("Category created");
+      toast.success("Categoría creada");
       dispatch({ type: "SET_CREATE_OPEN", payload: false });
       dispatch({ type: "SET_FORM", payload: { name: "", description: "", type: "PRODUCT" } });
       router.refresh();
     } catch (error: any) {
-      toast.error(error.message || "Failed to create category");
+      toast.error(error.message || "Error al crear la categoría");
     } finally {
       dispatch({ type: "SET_IS_CREATING", payload: false });
     }
@@ -803,20 +803,20 @@ function CategoriesTableClientInner({
 
   const deleteCategory = async (id: string) => {
     const confirmed = await confirm({
-      title: "Delete Category",
+      title: "Eliminar Categoría",
       description:
-        "Are you sure you want to delete this category? This action cannot be undone.",
-      confirmText: "Delete",
+        "¿Seguro que querés eliminar esta categoría? Esta acción no se puede deshacer.",
+      confirmText: "Eliminar",
       variant: "destructive",
     });
     if (!confirmed) return;
     dispatch({ type: "SET_IS_DELETING", payload: id });
     try {
       await api.delete(`/categories/${id}`);
-      toast.success("Category deleted");
+      toast.success("Categoría eliminada");
       router.refresh();
     } catch (error: any) {
-      toast.error(error.message || "Failed to delete");
+      toast.error(error.message || "Error al eliminar");
     } finally {
       dispatch({ type: "SET_IS_DELETING", payload: null });
     }
@@ -840,13 +840,13 @@ function CategoriesTableClientInner({
     dispatch({ type: "SET_IS_EDITING", payload: true });
     try {
       await api.put(`/categories/${editingRef.current.id}`, dialogState.form);
-      toast.success("Category updated");
+      toast.success("Categoría actualizada");
       dispatch({ type: "SET_EDIT_OPEN", payload: false });
       editingRef.current = null;
       dispatch({ type: "SET_FORM", payload: { name: "", description: "", type: "PRODUCT" } });
       router.refresh();
     } catch (error: any) {
-      toast.error(error.message || "Failed to update");
+      toast.error(error.message || "Error al actualizar");
     } finally {
       dispatch({ type: "SET_IS_EDITING", payload: false });
     }

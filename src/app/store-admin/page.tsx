@@ -6,7 +6,7 @@ import AnalyticsCharts from "@/components/admin/AnalyticsCharts";
 import AnalyticsOverview from "@/components/admin/AnalyticsOverview";
 import AnalyticsChartsDetailed from "@/components/admin/AnalyticsChartsDetailed";
 
-export const metadata = { title: "Store Admin", };
+export const metadata = { title: "Administración de la Tienda", };
 
 export const dynamic = 'force-dynamic';
 
