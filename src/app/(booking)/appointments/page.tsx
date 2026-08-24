@@ -7,7 +7,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
     title: "My Appointments",
-    description: "View and manage your appointments",
+    description: "Ver y gestionar tus citas",
 };
 
 export const dynamic = "force-dynamic";
@@ -66,12 +66,12 @@ export default async function AppointmentsPage(props: {
                 {/* Header */}
                 <div className="mb-8">
                     <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-2 text-foreground">
-                        My <span className="text-primary">Appointments</span>
+                        My <span className="text-primary">Citas</span>
                     </h1>
                     <p className="text-muted-foreground text-lg">
                         {data.isStaff
-                            ? "Manage your schedule and bookings"
-                            : "Manage your upcoming and past appointments"}
+                            ? "Gestiona tu agenda y reservas"
+                            : "Gestiona tus citas próximas y pasadas"}
                     </p>
                 </div>
 

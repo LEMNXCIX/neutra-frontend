@@ -24,7 +24,7 @@ export function ServicesGrid({ services }: ServicesGridProps) {
         return (
             <EmptyState 
                 icon={CalendarSearch}
-                title="No services found"
+                title="No se encontraron servicios"
                 description="We couldn't find any services available at the moment. Please check back later."
             />
         );

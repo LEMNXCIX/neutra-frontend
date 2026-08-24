@@ -7,7 +7,7 @@ import { getHomeContent } from '@/lib/strapi';
 
 export const metadata: Metadata = {
   title: "Services",
-  description: "Browse available booking services",
+  description: "Explora los servicios disponibles para reservar",
 };
 
 export const dynamic = 'force-dynamic';
@@ -38,7 +38,7 @@ export default async function ServicesPage() {
                         )}
                     </h1>
                     <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                        {cms?.servicesSubtitle ?? "Choose from our range of professional services tailored to your needs"}
+                        {cms?.servicesSubtitle ?? "Elige entre nuestra gama de servicios profesionales adaptados a tus necesidades"}
                     </p>
                 </div>
 

@@ -239,7 +239,7 @@ export function BookingNavbar({ tenantName, tenantLogo }: { tenantName?: string 
 
     const navItems = [
         { label: "Services", href: "/services" },
-        { label: "Book Now", href: "/book" },
+        { label: "Reservar Ahora", href: "/book" },
     ];
 
     if (user) {

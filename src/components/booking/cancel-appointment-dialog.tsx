@@ -33,13 +33,13 @@ export function CancelAppointmentDialog({
         try {
             setLoading(true);
             await bookingService.cancelAppointment(appointmentId, reason || undefined);
-            toast.success("Appointment cancelled successfully");
+            toast.success("Cita cancelada correctamente");
             setOpen(false);
             if (onAppointmentCancelled) {
                 onAppointmentCancelled();
             }
         } catch (err: any) {
-            toast.error(err.message || "Failed to cancel appointment");
+            toast.error(err.message || "Error al cancelar la cita");
         } finally {
             setLoading(false);
         }

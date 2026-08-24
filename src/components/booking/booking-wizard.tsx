@@ -185,7 +185,7 @@ function ServiceStep({
                 Object.entries(
                     services.reduce(
                         (acc, s) => {
-                            const cat = s.category?.name || "Uncategorized";
+                            const cat = s.category?.name || "Sin categoría";
                             if (!acc[cat]) acc[cat] = [];
                             acc[cat].push(s);
                             return acc;
@@ -427,8 +427,8 @@ function ScheduleStep({
                         <CardHeader className="bg-muted/30 border-b border-border/50">
                             <CardTitle className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
                                 {loadingAvailability
-                                    ? "Searching Registry..."
-                                    : "Available Windows"}
+                                    ? "Buscando..."
+                                    : "Horarios Disponibles"}
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="pt-6 pb-8">
@@ -662,7 +662,7 @@ function ReviewStep({
                                         {validatingCoupon ? (
                                             <Loader2 className="animate-spin size-4" />
                                         ) : couponResult ? (
-                                            "Active"
+                                            "Activo"
                                         ) : (
                                             "Apply"
                                         )}
@@ -716,7 +716,7 @@ function ReviewStep({
                                     Booking…
                                 </>
                             ) : (
-                                "Confirm Reservation"
+                                "Confirmar Reserva"
                             )}
                         </Button>
                     </Card>
@@ -808,7 +808,7 @@ export function BookingWizard({
             );
             dispatch({ type: "SET_AVAILABLE_SLOTS", payload: slots });
         } catch (err) {
-            console.error("Failed to check availability", err);
+            console.error("Error al verificar disponibilidad", err);
         } finally {
             dispatch({ type: "SET_LOADING_AVAILABILITY", payload: false });
         }
@@ -835,14 +835,14 @@ export function BookingWizard({
             } else {
                 dispatch({
                     type: "SET_COUPON_ERROR",
-                    payload: result.message || "Invalid coupon code",
+                    payload: result.message || "Código de cupón inválido",
                 });
                 dispatch({ type: "SET_COUPON_RESULT", payload: null });
             }
         } catch (err: any) {
             dispatch({
                 type: "SET_COUPON_ERROR",
-                payload: err.message || "Failed to validate coupon",
+                payload: err.message || "Error al validar el cupón",
             });
         } finally {
             dispatch({ type: "SET_VALIDATING_COUPON", payload: false });
@@ -858,7 +858,7 @@ export function BookingWizard({
         ) {
             dispatch({
                 type: "SET_ERROR",
-                payload: "Please complete all required fields",
+                payload: "Por favor completa todos los campos obligatorios",
             });
             return;
         }
@@ -888,7 +888,7 @@ export function BookingWizard({
         } catch (err: any) {
             dispatch({
                 type: "SET_ERROR",
-                payload: err.message || "Failed to create appointment",
+                payload: err.message || "Error al crear la cita",
             });
         } finally {
             dispatch({ type: "SET_SUBMITTING", payload: false });

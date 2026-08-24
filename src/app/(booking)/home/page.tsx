@@ -11,8 +11,8 @@ import { getTenantNameFromHeaders } from "@/lib/server-theme";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-    title: "Home",
-    description: "Book appointments and services",
+    title: "Inicio",
+    description: "Reserva citas y servicios",
 };
 
 export const dynamic = "force-dynamic";
@@ -57,9 +57,9 @@ export default async function BookingHomePage() {
                         {brandName}
                     </Badge>
                     <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-foreground leading-[1.1]">
-                        {cms?.bookingHeroTitle ?? "Book Your"}{" "}
+                        {cms?.bookingHeroTitle ?? "Reserva tu"}{" "}
                         <span className="text-primary">
-                            {cms?.bookingHeroHighlight ?? "Appointment"}
+                            {cms?.bookingHeroHighlight ?? "Cita"}
                         </span>
                     </h1>
                     <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed font-medium">
@@ -73,7 +73,7 @@ export default async function BookingHomePage() {
                             asChild
                         >
                             <Link href={cms?.bookingCtaHref ?? "/book"}>
-                                {cms?.bookingCtaLabel ?? "Book Now"}
+                                {cms?.bookingCtaLabel ?? "Reservar Ahora"}
                                 <ArrowRight className="ml-2 size-5" />
                             </Link>
                         </Button>
@@ -83,7 +83,7 @@ export default async function BookingHomePage() {
                             className="h-14 px-10 text-base font-bold rounded-xl border-border"
                             asChild
                         >
-                            <Link href="/services">View Services</Link>
+                            <Link href="/services">Ver Servicios</Link>
                         </Button>
                     </div>
                 </div>
@@ -96,7 +96,7 @@ export default async function BookingHomePage() {
                         <div className="inline-flex items-center gap-2 text-muted-foreground mb-3">
                             <CalendarDays className="size-4" />
                             <span className="text-xs font-bold uppercase tracking-widest">
-                                {cms?.servicesBadge ?? "What we offer"}
+                                {cms?.servicesBadge ?? "Qué ofrecemos"}
                             </span>
                         </div>
                         <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-3 text-foreground">
@@ -108,7 +108,7 @@ export default async function BookingHomePage() {
                         </h2>
                         <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
                             {cms?.servicesSubtitle ??
-                                "Choose from our range of professional services tailored to your needs"}
+                                "Elige entre nuestra gama de servicios profesionales adaptados a tus necesidades"}
                         </p>
                     </div>
                     <ServicesGrid services={services} />

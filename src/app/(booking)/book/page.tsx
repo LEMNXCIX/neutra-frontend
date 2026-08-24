@@ -4,8 +4,8 @@ import { apiClient } from "@/lib/api-client";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-    title: "Book an Appointment",
-    description: "Schedule your next appointment online",
+    title: "Reservar una Cita",
+    description: "Agenda tu próxima cita en línea",
 };
 
 export const dynamic = "force-dynamic";
@@ -41,7 +41,7 @@ export default async function BookPage(props: {
                 <div className="mb-8">
                     <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-2 text-foreground">
                         Book an{" "}
-                        <span className="text-primary">Appointment</span>
+                        <span className="text-primary">Cita</span>
                     </h1>
                     <p className="text-muted-foreground text-lg">
                         Complete the steps below to schedule your appointment
