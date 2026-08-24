@@ -22,6 +22,13 @@ import { toast } from "sonner";
 import { ApiError } from "@/lib/api-client";
 import { Checkbox } from "@/components/ui/checkbox";
 import { BrandingEditor } from "./BrandingEditor";
+import { Clock } from "lucide-react";
+import {
+    DEFAULT_WORKING_HOURS,
+    HolidaysEditor,
+    WorkingHoursEditor,
+    normalizeWorkingHours,
+} from "@/components/admin/booking/working-hours-editor";
 
 interface TenantFormProps {
     tenant?: Tenant | null;
@@ -180,10 +187,15 @@ function BrandingTabContent({
 
 function SettingsTabContent({
     formData,
+    setFormData,
     updateConfig,
     isWizard,
     setActiveTab,
 }: TabContentProps) {
+    const businessHours = normalizeWorkingHours(
+        formData.config?.settings?.businessHours ?? DEFAULT_WORKING_HOURS,
+    );
+    const holidays: string[] = formData.config?.settings?.holidays ?? [];
     return (
         <TabsContent value="settings" className="py-4 space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -252,6 +264,44 @@ function SettingsTabContent({
                         </SelectContent>
                     </Select>
                 </div>
+            </div>
+            <div className="space-y-2">
+                <Label className="flex items-center gap-1.5">
+                    <Clock className="size-3.5" /> Horario del local
+                </Label>
+                <WorkingHoursEditor
+                    value={businessHours}
+                    onChange={(value) =>
+                        setFormData((prev) => ({
+                            ...prev,
+                            config: {
+                                ...prev.config,
+                                settings: {
+                                    ...prev.config?.settings,
+                                    businessHours: value,
+                                },
+                            },
+                        }))
+                    }
+                />
+            </div>
+            <div className="space-y-2">
+                <Label>Feriados</Label>
+                <HolidaysEditor
+                    value={holidays}
+                    onChange={(value) =>
+                        setFormData((prev) => ({
+                            ...prev,
+                            config: {
+                                ...prev.config,
+                                settings: {
+                                    ...prev.config?.settings,
+                                    holidays: value,
+                                },
+                            },
+                        }))
+                    }
+                />
             </div>
             {isWizard && (
                 <div className="pt-4 flex justify-between">

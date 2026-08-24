@@ -69,6 +69,8 @@ export interface TenantConfig {
         currency?: string;
         language?: string;
         timezone?: string;
+        businessHours?: Record<string, { start: string; end: string }[] | null>;
+        holidays?: string[];
     };
     features?: TenantFeatures;
     notifications?: NotificationSettings;

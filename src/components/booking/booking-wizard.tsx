@@ -52,19 +52,6 @@ interface BookingWizardProps {
     preSelectedServiceId?: string | null;
 }
 
-const generateTimeSlots = () => {
-    const slots = [];
-    for (let hour = 9; hour <= 17; hour++) {
-        for (let minute = 0; minute < 60; minute += 30) {
-            if (hour === 17 && minute > 0) break;
-            slots.push(
-                `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`,
-            );
-        }
-    }
-    return slots;
-};
-
 type BookingWizardState = {
     step: number;
     selectedService: Service | null;
@@ -446,10 +433,7 @@ function ScheduleStep({
                                 </div>
                             ) : (
                                 <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-                                    {generateTimeSlots().map((time) => {
-                                        const isAvail =
-                                            availableSlots.includes(time);
-                                        if (!isAvail) return null;
+                                    {availableSlots.map((time) => {
                                         return (
                                             <Button
                                                 key={time}

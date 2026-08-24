@@ -21,6 +21,7 @@ import {
     UserCog,
     Building,
     Palette,
+    Clock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -38,6 +39,7 @@ const ICON_MAP: Record<string, any> = {
     UserCog,
     Building,
     Palette,
+    Clock,
 };
 
 interface AdminMobileNavProps {

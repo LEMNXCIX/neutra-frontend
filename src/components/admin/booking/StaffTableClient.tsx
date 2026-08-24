@@ -48,6 +48,13 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import {
+    DEFAULT_WORKING_HOURS,
+    WorkingHoursEditor,
+    normalizeWorkingHours,
+    type WorkingHours,
+} from "@/components/admin/booking/working-hours-editor";
+import { Clock } from "lucide-react";
 
 interface Props {
     staff: Staff[];
@@ -458,6 +465,17 @@ function StaffFormDialog({
                             rows={3}
                         />
                     </div>
+                    <div className="grid gap-2">
+                        <Label className="flex items-center gap-1.5">
+                            <Clock className="size-3.5" /> Horario de trabajo
+                        </Label>
+                        <WorkingHoursEditor
+                            value={formData.workingHours}
+                            onChange={(workingHours) =>
+                                onFormChange({ ...formData, workingHours })
+                            }
+                        />
+                    </div>
                     <div className="flex items-center justify-between p-3 border rounded-lg bg-muted/20">
                         <div className="space-y-0.5">
                             <Label
@@ -518,6 +536,7 @@ type StaffState = {
         phone: string;
         bio: string;
         active: boolean;
+        workingHours: WorkingHours;
     };
     allServices: Service[];
     serviceDialogOpen: boolean;
@@ -587,6 +606,7 @@ function useStaffTable(
             phone: "",
             bio: "",
             active: true,
+            workingHours: DEFAULT_WORKING_HOURS,
         },
         allServices: [],
         serviceDialogOpen: false,
@@ -675,6 +695,7 @@ function useStaffTable(
                 phone: "",
                 bio: "",
                 active: true,
+                workingHours: DEFAULT_WORKING_HOURS,
             },
         });
         dispatch({ type: "SET_DIALOG_OPEN", payload: true });
@@ -691,6 +712,7 @@ function useStaffTable(
                 phone: member.phone || "",
                 bio: member.bio || "",
                 active: member.active,
+                workingHours: normalizeWorkingHours(member.workingHours),
             },
         });
         dispatch({ type: "SET_DIALOG_OPEN", payload: true });

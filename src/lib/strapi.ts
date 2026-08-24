@@ -39,12 +39,12 @@ export async function strapiFindOneByTenant<T = any>(
 }
 
 export async function getHomeContent(): Promise<any | null> {
-    return strapiFindOneByTenant("home-content", await getTenantIdFromHeaders());
+    return strapiFindOneByTenant("home-contents", await getTenantIdFromHeaders());
 }
 
 export async function getPageBySlug(slug: string): Promise<any | null> {
     return strapiFindOneByTenant(
-        "page",
+        "pages",
         await getTenantIdFromHeaders(),
         `&filters[slug][$eq]=${encodeURIComponent(slug)}&populate[blocks][populate]=*`
     );
