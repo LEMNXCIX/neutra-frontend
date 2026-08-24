@@ -10,6 +10,7 @@ export interface ServiceItem {
     category?: { id: string; name: string };
     active: boolean;
     tenantId: string;
+    tenant?: { id: string; name: string; slug: string };
     createdAt: string;
     updatedAt: string;
 }

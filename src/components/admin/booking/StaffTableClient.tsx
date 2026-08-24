@@ -270,7 +270,7 @@ function StaffCardsGrid({
                                 Staff Member{" "}
                                 {isSuperAdmin && (
                                     <span className="text-[10px] font-mono opacity-50 ml-1">
-                                        ({member.tenantId})
+                                        ({member.tenant?.name || member.tenantId})
                                     </span>
                                 )}
                             </CardDescription>

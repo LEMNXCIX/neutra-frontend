@@ -13,6 +13,7 @@ export interface Service {
     };
     active: boolean;
     tenantId: string;
+    tenant?: { id: string; name: string; slug: string };
     createdAt: string;
     updatedAt: string;
 }
@@ -29,6 +30,7 @@ export interface Staff {
     workingHours?: any;
     serviceIds?: string[];
     tenantId: string;
+    tenant?: { id: string; name: string; slug: string };
     createdAt: string;
     updatedAt: string;
 }
@@ -54,6 +56,7 @@ export interface Appointment {
     confirmationSent: boolean;
     reminderSent: boolean;
     tenantId: string;
+    tenant?: { id: string; name: string; slug: string };
     createdAt: string;
     updatedAt: string;
     user?: any;

@@ -443,7 +443,7 @@ function ServicesDesktopTable({
                         variant="outline"
                         className="font-mono text-[10px] uppercase"
                       >
-                        {service.tenantId}
+                        {service.tenant?.name || service.tenantId}
                       </Badge>
                     </TableCell>
                   )}

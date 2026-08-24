@@ -104,3 +104,9 @@ export interface NotificationChannels {
 }
 
 
+
+export interface TenantMinimal {
+    id: string;
+    name: string;
+    slug: string;
+}

@@ -35,7 +35,8 @@ const defaultConfig: Partial<WhatsAppConfig> = {
 };
 
 export function WhatsAppConfigForm({ initialConfig }: WhatsAppConfigFormProps) {
-	const [isLoading, setIsLoading] = useState(!initialConfig);
+	// A missing config (404) is a valid state: show the empty form, not a spinner.
+	const [isLoading, setIsLoading] = useState(false);
 	const [isSaving, setIsSaving] = useState(false);
 	const [config, setConfig] = useState<Partial<WhatsAppConfig>>(
 		initialConfig ? { ...defaultConfig, ...initialConfig } : defaultConfig,

@@ -12,6 +12,7 @@ export interface StaffMember {
     workingHours?: Record<string, { start: string; end: string }>;
     serviceIds?: string[];
     tenantId: string;
+    tenant?: { id: string; name: string; slug: string };
     createdAt: string;
     updatedAt: string;
 }

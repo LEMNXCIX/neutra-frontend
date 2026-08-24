@@ -388,7 +388,7 @@ return (
 {isSuperAdmin && (
 <TableCell>
 <Badge variant="outline" className="font-mono text-[10px] uppercase">
-{c.tenantId}
+{c.tenant?.name || "—"}
 </Badge>
 </TableCell>
 )}

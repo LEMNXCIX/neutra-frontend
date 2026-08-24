@@ -705,7 +705,7 @@ function AppointmentsDesktopTable({
                         variant="secondary"
                         className="font-bold text-[9px] uppercase tracking-wider"
                       >
-                        {appointment.tenantId}
+                        {appointment.tenant?.name || "—"}
                       </Badge>
                     </TableCell>
                   )}

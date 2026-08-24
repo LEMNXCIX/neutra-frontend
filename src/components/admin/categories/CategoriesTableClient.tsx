@@ -400,7 +400,7 @@ const CategoriesDesktopTable = ({
                       variant="secondary"
                       className="text-[10px] font-bold uppercase tracking-wider"
                     >
-                      {c.tenantId}
+                      {c.tenant?.name || "—"}
                     </Badge>
                   </TableCell>
                 )}

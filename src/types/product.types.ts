@@ -13,6 +13,7 @@ export interface Product {
     updatedAt?: Date;
     categories?: Category[];
     tenantId: string;
+    tenant?: { id: string; name: string; slug: string };
 }
 
 export interface CreateProductDTO {

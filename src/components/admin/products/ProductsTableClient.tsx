@@ -348,7 +348,7 @@ function ProductsDesktopTable({
                         variant="secondary"
                         className="text-[9px] font-bold uppercase tracking-wider"
                       >
-                        {p.tenantId}
+                        {p.tenant?.name || "—"}
                       </Badge>
                     </TableCell>
                   )}

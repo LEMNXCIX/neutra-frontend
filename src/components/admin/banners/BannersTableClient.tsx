@@ -328,7 +328,7 @@ function DesktopBannersTable({
                   {isSuperAdmin && (
                     <TableCell>
                       <Badge variant="secondary" className="text-[10px] font-bold uppercase tracking-wider">
-                        {b.tenantId}
+                        {b.tenant?.name || "—"}
                       </Badge>
                     </TableCell>
                   )}
