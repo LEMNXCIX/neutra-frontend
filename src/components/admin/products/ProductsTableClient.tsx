@@ -3,6 +3,7 @@
 import React, { Suspense, useRef, useReducer } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
+import { api, ApiError } from "@/lib/api-client";
 import { Button } from "@/components/ui/button";
 import Image from "@/components/ui/image";
 import { Input } from "@/components/ui/input";
@@ -920,14 +921,10 @@ function ProductsTableClientInner({
       image: dialogState.form.imageBase64 || undefined,
                 ownerId: "admin",
             };
-            const res = await fetch("/api/products", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(body),
-            });
-            if (!res.ok) {
-                const data = await res.json();
-                toast.error(data?.error || "Failed to create product");
+            try {
+                await api.post("/products", body);
+            } catch (err) {
+                toast.error(err instanceof ApiError ? err.message : "Failed to create product");
                 return;
             }
     toast.success("Product created");
@@ -959,11 +956,10 @@ function ProductsTableClientInner({
         if (!confirmed) return;
         dispatch({ type: "SET_IS_DELETING", payload: id });
         try {
-            const res = await fetch(`/api/products/${id}`, {
-                method: "DELETE",
-            });
-            if (!res.ok) {
-                toast.error("Failed to delete");
+            try {
+                await api.delete(`/products/${id}`);
+            } catch (err) {
+                toast.error(err instanceof ApiError ? err.message : "Failed to delete");
                 return;
             }
             toast.success("Product deleted");
@@ -1006,14 +1002,10 @@ function ProductsTableClientInner({
     };
     if (dialogState.form.imageBase64) body.image = dialogState.form.imageBase64;
 
-            const res = await fetch(`/api/products/${editingRef.current.id}`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(body),
-            });
-            if (!res.ok) {
-                const data = await res.json();
-                toast.error(data?.error || "Failed to update");
+            try {
+                await api.put(`/products/${editingRef.current.id}`, body);
+            } catch (err) {
+                toast.error(err instanceof ApiError ? err.message : "Failed to update");
                 return;
             }
     toast.success("Product updated");
