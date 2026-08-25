@@ -1,4 +1,3 @@
-import CmsPageContent from "@/components/cms-page-content";
 import React from "react";
 import {
     Accordion,
@@ -9,16 +8,54 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { getCmsPage } from "@/lib/strapi";
+import { cmsHeader } from "@/lib/cms-page";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = {
-    title: "FAQ",
-    description: "Preguntas y respuestas frecuentes",
-};
+export async function generateMetadata(): Promise<Metadata> {
+    const cms = await getCmsPage("faq-pages");
+    return {
+        title: cms?.title ?? "Preguntas Frecuentes",
+        description: cms?.subtitle ?? "Preguntas y respuestas frecuentes",
+    };
+}
 
-export default function FAQPage() {
+const DEFAULT_FAQS = [
+    {
+        q: "Métodos de Pago Aceptados",
+        a: "Aceptamos las principales tarjetas (Visa, MasterCard, Amex), PayPal y Apple Pay para compras seguras.",
+    },
+    {
+        q: "Cobertura Logística Global",
+        a: "Nuestra red de distribución cubre más de 50 países. Los tiempos y tarifas varían según la ubicación.",
+    },
+    {
+        q: "Cuidado de los Productos",
+        a: "El cuidado varía según la composición del material. Consultá la ficha técnica o la etiqueta interna para instrucciones precisas.",
+    },
+    {
+        q: "Seguimiento de Pedidos",
+        a: "Al despachar tu pedido recibirás un número de seguimiento. El estado en tiempo real está disponible en tu panel personal.",
+    },
+    {
+        q: "Marco de Garantía",
+        a: "Ofrecemos 12 meses de garantía estructural en muebles e iluminación. Los textiles tienen 90 días de garantía.",
+    },
+];
+
+export default async function FAQPage() {
+    const cms = await getCmsPage("faq-pages");
+    const header = cmsHeader(cms, {
+        badge: "Lógica Operativa",
+        title: "Preguntas",
+        highlight: "Frecuentes",
+        subtitle: "Procedimientos estándar y respuestas del ecosistema.",
+    });
+    const faqs = cms?.faqs?.length
+        ? cms.faqs.map((f: any) => ({ q: f.question, a: f.answer }))
+        : DEFAULT_FAQS;
+
     return (
-        <CmsPageContent slug="">
         <div className="max-w-4xl mx-auto px-6 py-24 lg:py-32 animate-slide-up">
             <div className="space-y-16">
                 <header className="space-y-6 max-w-2xl">
@@ -26,15 +63,14 @@ export default function FAQPage() {
                         variant="secondary"
                         className="px-4 py-1 rounded-full"
                     >
-                        Operational Logic
+                        {header.badge}
                     </Badge>
                     <h1 className="text-5xl md:text-6xl font-bold tracking-tight text-foreground leading-tight">
-                        Frequently <span className="text-primary">Frecuentes</span>{" "}
-                        Questions
+                        {header.title}{" "}
+                        <span className="text-primary">{header.highlight}</span>
                     </h1>
                     <p className="text-lg text-muted-foreground font-medium leading-relaxed">
-                        Standard operating procedures and protocol
-                        clarifications for the XCIX ecosystem.
+                        {header.subtitle}
                     </p>
                 </header>
 
@@ -43,28 +79,7 @@ export default function FAQPage() {
                     collapsible
                     className="w-full space-y-4"
                 >
-                    {[
-                        {
-                            q: "Métodos de Pago Aceptados",
-                            a: "Aceptamos las principales tarjetas (Visa, MasterCard, Amex), PayPal y Apple Pay para compras seguras.",
-                        },
-                        {
-                            q: "Cobertura Logística Global",
-                            a: "Nuestra red de distribución cubre más de 50 países. Los tiempos y tarifas varían según la ubicación.",
-                        },
-                        {
-                            q: "Cuidado de los Productos",
-                            a: "Asset care varies by material composition. Consult the specific specification sheet or internal tag for precise maintenance logic.",
-                        },
-                        {
-                            q: "Seguimiento de Pedidos",
-                            a: "Upon logistics exit, a tracking identifier will be dispatched. Real-time status is available via your personal dashboard.",
-                        },
-                        {
-                            q: "Marco de Garantía",
-                            a: "We provide a 12-month structural integrity guarantee on all furniture and lighting. Textiles are covered by a 90-day operational warranty.",
-                        },
-                    ].map((item) => (
+                    {faqs.map((item) => (
                         <AccordionItem
                             key={item.q}
                             value={item.q}
@@ -84,20 +99,17 @@ export default function FAQPage() {
 
                 <div className="mt-20 p-12 bg-primary/5 border border-primary/10 rounded-[2.5rem] text-center space-y-6">
                     <p className="text-muted-foreground font-semibold uppercase tracking-widest text-xs">
-                        Still have questions?
+                        ¿Todavía tenés preguntas?
                     </p>
                     <Button
                         size="lg"
                         className="h-14 px-10 rounded-xl font-bold shadow-xl shadow-primary/10 transition-all hover:-translate-y-0.5"
                         asChild
                     >
-                        <Link href="/contact">
-                            Initialize Support Protocol →
-                        </Link>
+                        <Link href="/contact">Contactá a Soporte →</Link>
                     </Button>
                 </div>
             </div>
         </div>
-        </CmsPageContent>
     );
 }

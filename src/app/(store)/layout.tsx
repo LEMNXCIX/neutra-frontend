@@ -38,11 +38,12 @@ export default async function StoreLayout({
                 </div>
                 <div className="pt-16 print:pt-0">{children}</div>
                 <div className="print:hidden">
-                    <FooterWrapper
-                        tenantName={tenantName}
-                        tenantLogo={branding?.tenantLogo}
-                        footerDescription={cms?.footerDescription}
-                    />
+                <FooterWrapper
+                    tenantName={tenantName}
+                    tenantLogo={branding?.tenantLogo}
+                    footerDescription={cms?.footerDescription}
+                    socialLinks={cms?.socialLinks}
+                />
                 </div>
             </div>
         </TenantThemeProvider>

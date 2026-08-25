@@ -1,16 +1,34 @@
-import CmsPageContent from "@/components/cms-page-content";
 import React from "react";
 import { Badge } from "@/components/ui/badge";
+import { getCmsPage } from "@/lib/strapi";
+import { cmsHeader, cmsRichText } from "@/lib/cms-page";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = {
-    title: "Términos de Servicio",
-    description: "Nuestros términos y condiciones del servicio",
-};
+export async function generateMetadata(): Promise<Metadata> {
+    const cms = await getCmsPage("terms-pages");
+    return {
+        title: cms?.title ?? "Términos de Servicio",
+        description: cms?.subtitle ?? "Nuestros términos y condiciones del servicio",
+    };
+}
 
-export default function TermsPage() {
+const FALLBACK_HTML = `
+<h2>1. Terminología y Acuerdo</h2><p>Al acceder o utilizar esta plataforma, aceptás estos Términos de Servicio. Si no estás de acuerdo con estas condiciones, no inicies sesión.</p>
+<h2>2. Precios y Precisión</h2><p>Buscamos precisión en la representación de nuestros productos. Sin embargo, no podemos garantizar la reproducción exacta de colores en tu pantalla. Los precios son dinámicos y pueden actualizarse sin aviso previo.</p>
+<h2>3. Devoluciones y Reembolsos</h2><p>El proceso de devolución tiene una ventana de 30 días. Los productos deben conservar su estado original para ser elegibles a reembolso. Los productos de venta final no admiten devolución.</p>
+<h2>4. Responsabilidad</h2><p>No asumimos responsabilidad por fallas indirectas o incidentales derivadas del uso de los productos o de la inability de acceder a los servicios de la plataforma.</p>
+`;
+
+export default async function TermsPage() {
+    const cms = await getCmsPage("terms-pages");
+    const header = cmsHeader(cms, {
+        badge: "Marco Legal",
+        title: "Términos de",
+        highlight: "Servicio",
+        subtitle: "Nuestros términos y condiciones del servicio",
+    });
+
     return (
-        <CmsPageContent slug="">
         <div className="max-w-4xl mx-auto px-6 py-24 lg:py-32 animate-slide-up">
             <div className="space-y-16">
                 <header className="space-y-6 max-w-2xl">
@@ -18,57 +36,31 @@ export default function TermsPage() {
                         variant="secondary"
                         className="px-4 py-1 rounded-full"
                     >
-                        Legal Protocol
+                        {header.badge}
                     </Badge>
                     <h1 className="text-5xl md:text-6xl font-bold tracking-tight text-foreground leading-tight">
-                        Service <span className="text-primary">Acuerdo</span>
+                        {header.title}{" "}
+                        <span className="text-primary">{header.highlight}</span>
                     </h1>
-        <p className="text-muted-foreground font-semibold uppercase tracking-widest text-[10px]" suppressHydrationWarning>
-          Registry Revision: {new Date().toLocaleDateString()}
+                    <p className="text-lg text-muted-foreground font-medium leading-relaxed">
+                        {header.subtitle}
                     </p>
                 </header>
 
-                <div className="space-y-16">
-                    {[
-                        {
-                            h: "1. Terminology & Agreement",
-                            p: "By accessing or utilizing the XCIX infrastructure, you acknowledge and accept these Terms of Service. If you do not align with these protocols, do not initiate a session.",
-                        },
-                        {
-                            h: "2. Asset Valuation & Accuracy",
-                            p: "We strive for chromatic accuracy in our asset representations. However, we cannot guarantee your terminal's visual reproduction of specific hues. Asset pricing is dynamic and subject to update without prior notification.",
-                        },
-                        {
-                            h: "3. Restoration & Credit",
-                            p: "Our RMA protocol is restricted to a 30-day temporal window. Assets must maintain original integrity to be eligible for credit restoration. Final sale designations are non-restorable.",
-                        },
-                        {
-                            h: "4. Liability Parameters",
-                            p: "XCIX holds zero liability for collateral, indirect, or incidental performance failures resulting from asset utilization or inability to access platform protocols.",
-                        },
-                    ].map((section) => (
-                        <section
-                            key={section.h}
-                            className="space-y-4 border-l-2 border-primary/20 pl-10 group hover:border-primary transition-all duration-500"
-                        >
-                            <h2 className="text-2xl font-bold tracking-tight text-foreground group-hover:text-primary transition-colors">
-                                {section.h}
-                            </h2>
-                            <p className="text-muted-foreground font-medium text-lg leading-relaxed">
-                                {section.p}
-                            </p>
-                        </section>
-                    ))}
-                </div>
+                <div
+                    className="space-y-10"
+                    dangerouslySetInnerHTML={{
+                        __html: cmsRichText(cms?.content, FALLBACK_HTML),
+                    }}
+                />
 
                 <footer className="pt-16 border-t border-border mt-20">
                     <p className="text-xs font-medium text-muted-foreground italic">
-                        Utilizing this platform constitutes a binding legal
-                        commitment to the above protocols.
+                        La utilización de esta plataforma constituye un
+                        compromiso legal vinculante con los términos anteriores.
                     </p>
                 </footer>
             </div>
         </div>
-        </CmsPageContent>
     );
 }

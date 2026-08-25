@@ -53,7 +53,7 @@ export default function AdminMobileNav({ items }: AdminMobileNavProps) {
 
     const filteredItems = items.filter((item) => {
         // Role check
-        if (item.adminOnly && user?.roleName !== "SUPER_ADMIN") {
+        if (item.adminOnly && !user?.isAdmin) {
             return false;
         }
 

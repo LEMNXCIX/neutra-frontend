@@ -42,10 +42,7 @@ export async function getHomeContent(): Promise<any | null> {
     return strapiFindOneByTenant("home-contents", await getTenantIdFromHeaders());
 }
 
-export async function getPageBySlug(slug: string): Promise<any | null> {
-    return strapiFindOneByTenant(
-        "pages",
-        await getTenantIdFromHeaders(),
-        `&filters[slug][$eq]=${encodeURIComponent(slug)}&populate[blocks][populate]=*`
-    );
+/** Fetch a per-tenant single-page content type (about-page, faq-page, ...). */
+export async function getCmsPage(name: string): Promise<any | null> {
+    return strapiFindOneByTenant(name, await getTenantIdFromHeaders());
 }

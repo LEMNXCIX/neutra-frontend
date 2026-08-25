@@ -1,4 +1,3 @@
-import CmsPageContent from "@/components/cms-page-content";
 import React from "react";
 import { Mail, MapPin, Phone, Send } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -6,16 +5,29 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { getCmsPage } from "@/lib/strapi";
+import { cmsHeader } from "@/lib/cms-page";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = {
-    title: "Contacto",
-    description: "Ponete en contacto con nuestro equipo",
-};
+export async function generateMetadata(): Promise<Metadata> {
+    const cms = await getCmsPage("contact-pages");
+    return {
+        title: cms?.title ?? "Contacto",
+        description: cms?.subtitle ?? "Ponete en contacto con nuestro equipo",
+    };
+}
 
-export default function ContactPage() {
+export default async function ContactPage() {
+    const cms = await getCmsPage("contact-pages");
+    const header = cmsHeader(cms, {
+        badge: "Soporte y Consultas",
+        title: "Ponete en",
+        highlight: "Contacto",
+        subtitle:
+            "¿Tenés preguntas? Estamos para ayudarte. Escribinos por cualquier consulta.",
+    });
+
     return (
-        <CmsPageContent slug="">
         <div className="max-w-6xl mx-auto px-6 py-24 animate-slide-up">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
                 <div className="space-y-10">
@@ -24,14 +36,14 @@ export default function ContactPage() {
                             variant="secondary"
                             className="px-4 py-1 rounded-full"
                         >
-                            Support & Inquiry
+                            {header.badge}
                         </Badge>
                         <h1 className="text-5xl md:text-6xl font-bold tracking-tight text-foreground leading-tight">
-                            Get In <span className="text-primary">Contacto</span>
+                            {header.title}{" "}
+                            <span className="text-primary">{header.highlight}</span>
                         </h1>
                         <p className="text-lg text-muted-foreground font-medium max-w-md leading-relaxed">
-                            Have questions? We're here to help. Reach out to our
-                            team for any assistance or inquiries.
+                            {header.subtitle}
                         </p>
                     </div>
 
@@ -42,14 +54,14 @@ export default function ContactPage() {
                             </div>
                             <div>
                                 <h3 className="font-semibold text-sm text-muted-foreground mb-1">
-                                    Email Us
+                                    Escribinos
                                 </h3>
                                 <p className="font-bold text-base hover:text-primary transition-colors">
-                                    contact@xcix.com
+                                    {cms?.email ?? "contacto@xcix.com"}
                                 </p>
                                 <p className="text-[11px] font-medium text-emerald-600 mt-1 flex items-center gap-1.5">
                                     <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                                    Active Support
+                                    Soporte Activo
                                 </p>
                             </div>
                         </div>
@@ -60,13 +72,13 @@ export default function ContactPage() {
                             </div>
                             <div>
                                 <h3 className="font-semibold text-sm text-muted-foreground mb-1">
-                                    Call Us
+                                    Llamanos
                                 </h3>
                                 <p className="font-bold text-base">
-                                    +1 (555) 800-XCIX
+                                    {cms?.phone ?? "+1 (555) 800-XCIX"}
                                 </p>
                                 <p className="text-[11px] font-medium text-muted-foreground mt-1">
-                                    Mon - Fri • 9AM - 6PM
+                                    Lun - Vie • 9AM - 6PM
                                 </p>
                             </div>
                         </div>
@@ -77,16 +89,17 @@ export default function ContactPage() {
                             </div>
                             <div>
                                 <h3 className="font-semibold text-sm text-muted-foreground mb-1">
-                                    Visit Our Office
+                                    Visitá Nuestra Oficina
                                 </h3>
                                 <p className="font-bold text-base">
-                                    123 Design Avenue, Metropolis, NY 10012
+                                    {cms?.address ??
+                                        "123 Design Avenue, Metropolis, NY 10012"}
                                 </p>
                                 <button
                                     type="button"
                                     className="text-[11px] font-semibold text-primary mt-1 hover:underline underline-offset-4 flex items-center gap-1"
                                 >
-                                    Open in Maps →
+                                    Abrir en Maps →
                                 </button>
                             </div>
                         </div>
@@ -97,11 +110,11 @@ export default function ContactPage() {
                     <div className="absolute top-0 left-0 w-full h-1.5 bg-primary" />
                     <CardHeader className="p-8 pb-4">
                         <CardTitle className="text-2xl font-bold tracking-tight">
-                            Send Message
+                            Enviar Mensaje
                         </CardTitle>
                         <p className="text-sm text-muted-foreground">
-                            Fill out the form below and we'll get back to you
-                            shortly.
+                            Completá el formulario y te responderemos a la
+                            brevedad.
                         </p>
                     </CardHeader>
                     <CardContent className="p-8 pt-4 space-y-5">
@@ -110,7 +123,7 @@ export default function ContactPage() {
                                 htmlFor="name"
                                 className="text-xs font-semibold text-foreground ml-1"
                             >
-                                Full Name
+                                Nombre Completo
                             </label>
                             <Input
                                 type="text"
@@ -124,7 +137,7 @@ export default function ContactPage() {
                                 htmlFor="email"
                                 className="text-xs font-semibold text-foreground ml-1"
                             >
-                                Email Address
+                                Correo Electrónico
                             </label>
                             <Input
                                 type="email"
@@ -138,7 +151,7 @@ export default function ContactPage() {
                                 htmlFor="message"
                                 className="text-xs font-semibold text-foreground ml-1"
                             >
-                                Your Message
+                                Tu Mensaje
                             </label>
                             <Textarea
                                 id="message"
@@ -151,13 +164,11 @@ export default function ContactPage() {
                             type="button"
                             className="w-full h-14 text-sm font-bold shadow-lg shadow-primary/20 hover:-translate-y-0.5 transition-all"
                         >
-                            <Send size={16} className="mr-2" /> Send
-                            Transmission
+                            <Send size={16} className="mr-2" /> Enviar Mensaje
                         </Button>
                     </CardContent>
                 </Card>
             </div>
         </div>
-        </CmsPageContent>
     );
 }

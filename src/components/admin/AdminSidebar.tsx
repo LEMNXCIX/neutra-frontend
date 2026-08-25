@@ -58,8 +58,8 @@ export default function AdminSidebar({ items }: AdminSidebarProps) {
 
     // Filter items based on features and roles
     const filteredItems = items.filter((item) => {
-        // Role check — roles management is superadmin-only
-        if (item.adminOnly && user?.roleName !== "SUPER_ADMIN") {
+        // Role check — tenant admins manage their own (tenant-scoped) roles
+        if (item.adminOnly && !user?.isAdmin) {
             return false;
         }
 

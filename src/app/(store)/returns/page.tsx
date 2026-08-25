@@ -1,15 +1,50 @@
+import { getCmsPage } from "@/lib/strapi";
+import { cmsHeader } from "@/lib/cms-page";
 import React from "react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle2 } from "lucide-react";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = {
-    title: "Devoluciones y Reembolsos",
-    description: "Conocé nuestra política de devoluciones y reembolsos",
-};
+export async function generateMetadata(): Promise<Metadata> {
+    const cms = await getCmsPage("returns-pages");
+    return {
+        title: cms?.title ?? "Devoluciones y Reembolsos",
+        description:
+            cms?.subtitle ?? "Conocé nuestra política de devoluciones y reembolsos",
+    };
+}
 
-export default function ReturnsPage() {
+const DEFAULT_STEPS = [
+    "Accedé a tu panel de perfil.",
+    "Seleccioná el número de pedido correspondiente.",
+    "Iniciá el proceso de RMA para generar la etiqueta de envío.",
+    "Empaquetá bien el producto y despachalo por un punto autorizado.",
+];
+
+const DEFAULT_POLICIES = [
+    "La devolución debe iniciarse dentro de los 30 días de recibido el pedido.",
+    "Los productos deben estar en su estado original, sin uso y con todas sus etiquetas.",
+    "Los muebles de gran tamaño pueden tener un cargo de reposición.",
+    "Los productos de venta final no admiten devolución.",
+];
+
+export default async function ReturnsPage() {
+    const cms = await getCmsPage("returns-pages");
+    const header = cmsHeader(cms, {
+        badge: "Protocolo de Devoluciones",
+        title: "Logística Inversa",
+        highlight: "Devoluciones",
+        subtitle:
+            "Nos aseguramos de que estés satisfecho. Si un producto no cumple tus expectativas, tenés 30 días desde la entrega para devolverlo.",
+    });
+    const steps = cms?.steps?.length
+        ? cms.steps.map((x: any) => x.text)
+        : DEFAULT_STEPS;
+    const policies = cms?.policies?.length
+        ? cms.policies.map((x: any) => x.text)
+        : DEFAULT_POLICIES;
+
     return (
         <div className="max-w-5xl mx-auto px-6 py-24 lg:py-32 animate-slide-up">
             <div className="space-y-24">
@@ -18,15 +53,14 @@ export default function ReturnsPage() {
                         variant="secondary"
                         className="px-4 py-1 rounded-full"
                     >
-                        RMA Protocol
+                        {header.badge}
                     </Badge>
                     <h1 className="text-6xl md:text-8xl font-bold tracking-tight text-foreground leading-[0.9]">
-                        Reverse <span className="text-primary">Logística</span>
+                        {header.title}{" "}
+                        <span className="text-primary">{header.highlight}</span>
                     </h1>
                     <p className="text-xl text-muted-foreground font-medium max-w-2xl leading-relaxed">
-                        We ensure asset satisfaction. If an instance does not
-                        meet your operational standards, we provide a 30-day
-                        return window from the point of delivery.
+                        {header.subtitle}
                     </p>
                 </header>
 
@@ -36,15 +70,10 @@ export default function ReturnsPage() {
                             <div className="absolute top-0 left-0 w-full h-1.5 bg-primary" />
                             <CardContent className="p-10">
                                 <h2 className="text-3xl font-bold tracking-tight mb-10">
-                                    Initialization
+                                    Cómo Iniciar
                                 </h2>
                                 <div className="space-y-8">
-                                    {[
-                                        "Access your Profile Dashboard.",
-                                        "Seleccioná el número de pedido correspondiente.",
-                                        "Iniciá el proceso de RMA para generar la etiqueta de envío.",
-                                        "Empaquetá bien el producto y despachalo por un punto autorizado.",
-                                    ].map((step, i) => (
+                                    {steps.map((step, i) => (
                                         <div
                                             key={step}
                                             className="flex gap-6 group"
@@ -65,15 +94,10 @@ export default function ReturnsPage() {
                     <div className="lg:col-span-7 space-y-16">
                         <div className="space-y-8">
                             <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-primary">
-                                Policy Framework
+                                Políticas
                             </h2>
                             <ul className="space-y-6">
-                                {[
-                                    "La devolución debe iniciarse dentro de los 30 días de recibido el pedido.",
-                                    "Los productos deben estar en su estado original, sin uso y con todas sus etiquetas.",
-                                    "Los muebles de gran tamaño pueden tener un cargo de reposición.",
-                                    "Assets designated as 'Final Sale' are ineligible for RMA protocols.",
-                                ].map((text, _i) => (
+                                {policies.map((text, _i) => (
                                     <li
                                         key={text}
                                         className="flex items-start gap-4 text-lg text-muted-foreground font-medium leading-relaxed group"
@@ -89,14 +113,13 @@ export default function ReturnsPage() {
 
                         <div className="space-y-6 p-10 bg-muted/30 rounded-[2rem] border border-border/50">
                             <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-primary">
-                                Refund Protocol
+                                Reembolsos
                             </h2>
                             <p className="text-lg text-foreground font-medium leading-relaxed italic">
-                                Upon successful asset intake and validation,
-                                please allow 5-7 business cycles for credit
-                                restoration. Funds will be returned to the
-                                original source. Logistics costs are
-                                non-restorable.
+                                Una vez recibido y validado el producto, el
+                                reembolso se acredita en 5-7 días hábiles. Los
+                                fondos se devuelven por el mismo medio de pago.
+                                Los costos de envío no son reembolsables.
                             </p>
                         </div>
                     </div>

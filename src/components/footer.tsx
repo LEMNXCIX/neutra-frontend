@@ -15,7 +15,14 @@ import Logo from "@/components/logo";
 
 const EMPTY_CATEGORIES: Category[] = [];
 
-export default function Footer({ minimal = false, tenantName, tenantLogo, footerDescription, initialCategories = EMPTY_CATEGORIES }: { minimal?: boolean; tenantName?: string | null; tenantLogo?: string | null; footerDescription?: string | null; initialCategories?: Category[] }) {
+const SOCIAL_ICONS: Record<string, any> = {
+    facebook: Facebook,
+    twitter: Twitter,
+    instagram: Instagram,
+    linkedin: Linkedin,
+};
+
+export default function Footer({ minimal = false, tenantName, tenantLogo, footerDescription, socialLinks, initialCategories = EMPTY_CATEGORIES }: { minimal?: boolean; tenantName?: string | null; tenantLogo?: string | null; footerDescription?: string | null; socialLinks?: any[] | null; initialCategories?: Category[] }) {
   const categories = initialCategories.filter((c) => c.active).slice(0, 5);
 
     return (
@@ -38,21 +45,35 @@ export default function Footer({ minimal = false, tenantName, tenantLogo, footer
                         </p>
                         {/* Social Media Icons */}
                         <div className="flex items-center gap-3">
-                            {[
-                                { icon: Facebook, label: "Facebook" },
-                                { icon: Twitter, label: "Twitter" },
-                                { icon: Instagram, label: "Instagram" },
-                                { icon: Linkedin, label: "LinkedIn" },
-                            ].map((social) => (
-                <button
-                  type="button"
-                  key={social.label}
-                  className="size-10 rounded-full bg-muted/50 border border-transparent hover:border-primary/20 hover:bg-background hover:text-primary transition-all duration-300 flex items-center justify-center group"
-                  aria-label={social.label}
-                >
-                  <social.icon className="size-4 transition-transform group-hover:scale-110" />
-                </button>
-                            ))}
+                            {(socialLinks?.length
+                                ? socialLinks
+                                : [
+                                      { platform: "facebook", url: "" },
+                                      { platform: "twitter", url: "" },
+                                      { platform: "instagram", url: "" },
+                                      { platform: "linkedin", url: "" },
+                                  ]
+                            ).map((social: any, i: number) => {
+                                const icon = SOCIAL_ICONS[social.platform] ?? [
+                                    Facebook,
+                                    Twitter,
+                                    Instagram,
+                                    Linkedin,
+                                ][i % 4];
+                                const Icon = icon;
+                                return (
+                                    <a
+                                        href={social.url || "#"}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        key={social.platform + i}
+                                        className="size-10 rounded-full bg-muted/50 border border-transparent hover:border-primary/20 hover:bg-background hover:text-primary transition-all duration-300 flex items-center justify-center group"
+                                        aria-label={social.platform}
+                                    >
+                                        <Icon className="size-4 transition-transform group-hover:scale-110" />
+                                    </a>
+                                );
+                            })}
                         </div>
                     </div>
 

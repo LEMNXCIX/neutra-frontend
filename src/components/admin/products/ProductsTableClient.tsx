@@ -150,11 +150,11 @@ function ProductFormFields({
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label htmlFor={`${prefix}-product-price`} className="text-sm font-medium">Price</label>
-          <Input id={`${prefix}-product-price`} type="number" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} placeholder="0.00" />
+          <Input id={`${prefix}-product-price`} type="number" min="0" step="0.01" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} placeholder="0.00" />
         </div>
         <div>
           <label htmlFor={`${prefix}-product-stock`} className="text-sm font-medium">Stock</label>
-          <Input id={`${prefix}-product-stock`} type="number" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} placeholder="0" />
+          <Input id={`${prefix}-product-stock`} type="number" min="0" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} placeholder="0" />
         </div>
       </div>
       <div>
