@@ -22,14 +22,13 @@ async function getAppointments(
         if (search) params.append("search", search);
         if (status && status !== "all") params.append("status", status);
 
-        const data = await api.get<{ data: any[]; stats?: any; pagination?: any }>(`/appointments?${params.toString()}`);
-        const appointments: Appointment[] = data?.data || [];
+        // getWithMeta keeps meta.pagination — the backend now returns real
+        // pagination when page/limit are sent.
+        const result = await api.getWithMeta<{ data: any[] }>(`/appointments?${params.toString()}`);
+        const appointments: Appointment[] = result?.data?.data || [];
 
-        // In a real scenario, the backend might return these stats.
-        // If not, we calculate them from the current result set as a fallback,
-        // though full stats should ideally come from backend.
         const stats = {
-            totalAppointments: appointments.length, // Fallback if backend doesn't provide total
+            totalAppointments: appointments.length,
             pendingAppointments: appointments.filter(
                 (a) => a.status === "PENDING",
             ).length,
@@ -46,13 +45,11 @@ async function getAppointments(
         };
 
         // If backend provides pagination info, use it
-        const pagination = data?.pagination
+        const pagination = result?.meta?.pagination
             ? {
-                  ...data.pagination,
+                  ...result.meta.pagination,
                   totalItemsPerPage:
-                      data.pagination.itemsPerPage ||
-                      data.pagination.limit ||
-                      limit,
+                      result.meta.pagination.limit || limit,
               }
             : {
                   currentPage: page,
@@ -63,7 +60,7 @@ async function getAppointments(
 
         return {
             appointments,
-            stats: data.stats || stats,
+            stats,
             pagination,
         };
     } catch (err) {

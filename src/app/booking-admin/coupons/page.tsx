@@ -9,6 +9,8 @@ export const metadata = {
     description: "Manage discount coupons for appointments",
 };
 
+const PER_PAGE = 10;
+
 async function getCoupons(
     search: string,
     type: string,
@@ -16,42 +18,41 @@ async function getCoupons(
     page: number,
     limit: number,
 ) {
+    // Coupons are a small config list: fetch complete (no page/limit) and
+    // paginate client-side — the backend's paginated branch drops `total`.
     try {
         const queryParams = new URLSearchParams();
         if (search) queryParams.set("search", search);
         if (type && type !== "all") queryParams.set("type", type);
         if (status && status !== "all") queryParams.set("status", status);
-        queryParams.set("page", page.toString());
-        queryParams.set("limit", limit.toString());
 
         const queryString = queryParams.toString();
         const url = `/coupons${queryString ? `?${queryString}` : ""}`;
 
-        const data = await api.get<any>(url);
+        const result = await api.get<any>(url);
+        const allCoupons: any[] = Array.isArray(result) ? result : [];
+
+        const now = new Date();
+        const stats = {
+            totalCoupons: allCoupons.length,
+            usedCoupons: allCoupons.filter((c) => c.usageCount > 0).length,
+            unusedCoupons: allCoupons.filter((c) => !c.usageCount).length,
+            expiredCoupons: allCoupons.filter(
+                (c) => c.expiresAt && new Date(c.expiresAt) < now,
+            ).length,
+            activeCoupons: allCoupons.filter((c) => c.active).length,
+            activeDiscounts: allCoupons.filter((c) => c.active).length,
+        };
 
         return {
-            coupons: data?.data || [],
-            stats: data?.stats || {
-                totalCoupons: 0,
-                usedCoupons: 0,
-                unusedCoupons: 0,
-                expiredCoupons: 0,
-                activeCoupons: 0,
-                activeDiscounts: 0,
+            coupons: allCoupons.slice((page - 1) * PER_PAGE, page * PER_PAGE),
+            stats,
+            pagination: {
+                currentPage: page,
+                totalPages: Math.max(1, Math.ceil(allCoupons.length / PER_PAGE)),
+                totalItems: allCoupons.length,
+                itemsPerPage: PER_PAGE,
             },
-            pagination: data?.pagination
-                ? {
-                      currentPage: data.pagination.page,
-                      totalPages: data.pagination.totalPages,
-                      totalItems: data.pagination.total,
-                      itemsPerPage: data.pagination.limit,
-                  }
-                : {
-                      currentPage: page,
-                      totalPages: 0,
-                      totalItems: 0,
-                      itemsPerPage: limit,
-                  },
         };
     } catch (err) {
         console.error("Error fetching coupons:", err);

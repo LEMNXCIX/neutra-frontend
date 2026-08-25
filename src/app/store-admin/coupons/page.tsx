@@ -6,6 +6,8 @@ export const metadata = { title: "Cupones" };
 
 export const dynamic = "force-dynamic";
 
+const PER_PAGE = 10;
+
 async function getCoupons(
     search: string,
     type: string,
@@ -13,51 +15,44 @@ async function getCoupons(
     page: number,
     limit: number,
 ) {
+    // Coupons are a small config list: fetch complete (no page/limit) and
+    // paginate client-side — the backend's paginated branch drops `total`.
     try {
         const queryParams = new URLSearchParams();
         if (search) queryParams.set("search", search);
         if (type && type !== "all") queryParams.set("type", type);
         if (status && status !== "all") queryParams.set("status", status);
-        queryParams.set("page", page.toString());
-        queryParams.set("limit", limit.toString());
 
         const queryString = queryParams.toString();
         const couponsUrl = queryString ? `/coupons?${queryString}` : "/coupons";
 
         const [couponsResult, statsResult] = await Promise.all([
-            api.get<any>(couponsUrl).catch(() => ({})),
-            api.get<any>("/coupons/stats").catch(() => ({})),
+            api.get<any>(couponsUrl).catch(() => []),
+            api.get<any>("/coupons/stats").catch(() => null),
         ]);
 
-        const coupons = Array.isArray(couponsResult)
-            ? couponsResult
-            : [];
-        const pagination = couponsResult?.pagination || {
-            currentPage: 1,
-            totalPages: 0,
-            totalItems: 0,
-            itemsPerPage: limit,
-        };
+        const allCoupons = Array.isArray(couponsResult) ? couponsResult : [];
+        const coupons = allCoupons.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+        const now = new Date();
 
-        const stats =
-            statsResult
-                ? statsResult
-                : {
-                      totalCoupons: coupons.length,
-                      activeCoupons: 0,
-                      usedCoupons: 0,
-                      unusedCoupons: coupons.length,
-                      expiredCoupons: 0,
-                  };
+        const stats = statsResult || {
+            totalCoupons: allCoupons.length,
+            activeCoupons: allCoupons.filter((c) => c.active).length,
+            usedCoupons: allCoupons.filter((c) => c.usageCount > 0).length,
+            unusedCoupons: allCoupons.filter((c) => !c.usageCount).length,
+            expiredCoupons: allCoupons.filter(
+                (c) => c.expiresAt && new Date(c.expiresAt) < now,
+            ).length,
+        };
 
         return {
             coupons,
             stats,
             pagination: {
-                currentPage: pagination.page || page,
-                totalPages: pagination.totalPages || 0,
-                totalItems: pagination.total || 0,
-                itemsPerPage: pagination.limit || limit,
+                currentPage: page,
+                totalPages: Math.max(1, Math.ceil(allCoupons.length / PER_PAGE)),
+                totalItems: allCoupons.length,
+                itemsPerPage: PER_PAGE,
             },
         };
     } catch (err) {

@@ -79,7 +79,7 @@ export default async function FAQPage() {
                     collapsible
                     className="w-full space-y-4"
                 >
-                    {faqs.map((item) => (
+                    {faqs.map((item: any) => (
                         <AccordionItem
                             key={item.q}
                             value={item.q}

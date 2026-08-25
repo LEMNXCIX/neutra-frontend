@@ -73,7 +73,7 @@ export default async function ReturnsPage() {
                                     Cómo Iniciar
                                 </h2>
                                 <div className="space-y-8">
-                                    {steps.map((step, i) => (
+                                    {steps.map((step: any, i: number) => (
                                         <div
                                             key={step}
                                             className="flex gap-6 group"
@@ -97,7 +97,7 @@ export default async function ReturnsPage() {
                                 Políticas
                             </h2>
                             <ul className="space-y-6">
-                                {policies.map((text, _i) => (
+                                {policies.map((text: string, _i: number) => (
                                     <li
                                         key={text}
                                         className="flex items-start gap-4 text-lg text-muted-foreground font-medium leading-relaxed group"

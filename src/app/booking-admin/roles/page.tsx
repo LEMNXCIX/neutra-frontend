@@ -3,20 +3,11 @@ import { redirect } from "next/navigation";
 import RolesTableClient from "@/components/admin/roles/RolesTableClient";
 import { Permission } from "@/types/permission.types";
 import { api } from '@/lib/api-client';
+import { validateAdminAccess } from '@/lib/server-auth';
 
 export const metadata = { title: "Booking Roles" };
 
 export const dynamic = "force-dynamic";
-
-async function requireSuperAdmin() {
-    try {
-        const auth = await api.get<{ user: { role?: { name?: string } } }>('/auth/validate');
-        if (auth?.user?.role?.name !== "SUPER_ADMIN") redirect("/");
-    } catch (e) {
-        if (e && typeof e === "object" && "digest" in (e as object)) throw e; // next redirect
-        redirect("/login");
-    }
-}
 
 const PER_PAGE = 10;
 
@@ -97,7 +88,8 @@ type Props = {
 };
 
 export default async function RolesPage({ searchParams }: Props) {
-    await requireSuperAdmin();
+    const { isValid } = await validateAdminAccess();
+    if (!isValid) redirect("/login");
     const resolvedSearchParams = await searchParams;
     const rolePage =
         typeof resolvedSearchParams.rolePage === "string"

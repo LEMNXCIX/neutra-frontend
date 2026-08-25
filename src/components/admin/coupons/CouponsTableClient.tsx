@@ -587,6 +587,9 @@ onValueChange={(v) => onFormChange({ ...form, type: v as CouponType })}
 <Label>Value *</Label>
 <Input
 type="number"
+min="0"
+max={form.type === CouponType.PERCENT ? 100 : undefined}
+step="0.01"
 value={form.value}
 onChange={(e) => onFormChange({ ...form, value: e.target.value })}
 placeholder={form.type === CouponType.PERCENT ? "10" : "25"}
@@ -616,6 +619,8 @@ placeholder="Descripción opcional"
 <Label>Min Purchase Amount</Label>
 <Input
 type="number"
+min="0"
+step="0.01"
 value={form.minPurchaseAmount}
 onChange={(e) => onFormChange({ ...form, minPurchaseAmount: e.target.value })}
 placeholder="0"
@@ -625,6 +630,8 @@ placeholder="0"
 <Label>Max Discount Amount</Label>
 <Input
 type="number"
+min="0"
+step="0.01"
 value={form.maxDiscountAmount}
 onChange={(e) => onFormChange({ ...form, maxDiscountAmount: e.target.value })}
 placeholder="0"
@@ -638,6 +645,7 @@ disabled={form.type !== CouponType.PERCENT}
 <Label>Usage Limit</Label>
 <Input
 type="number"
+min="0"
 value={form.usageLimit}
 onChange={(e) => onFormChange({ ...form, usageLimit: e.target.value })}
 placeholder="Ilimitado"
