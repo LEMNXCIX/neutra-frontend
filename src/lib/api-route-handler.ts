@@ -187,9 +187,13 @@ export function createRouteHandler(config: RouteConfig) {
             );
             logger.info(successContext, `API Response: Success`);
 
-            // Return successful response
+            // Return successful response (204 must be body-less)
+            const successStatus = getSuccessStatus(config);
+            if (successStatus === 204) {
+                return new NextResponse(null, { status: 204 });
+            }
             return NextResponse.json(result, {
-                status: getSuccessStatus(config)
+                status: successStatus
             });
 
         } catch (error) {
