@@ -1,8 +1,7 @@
 import React, { Suspense } from "react";
 import OrdersTableClient from "@/components/admin/orders/OrdersTableClient";
 import { api } from '@/lib/api-client';
-import { apiFetch } from '@/lib/api-client';
-import type { Order } from '@/types/order.types';
+import { parseOrdersResponse } from '@/lib/orders-page';
 
 export const metadata = { title: "Pedidos" };
 
@@ -25,47 +24,14 @@ async function getOrders(
         const ordersUrl = queryString ? `/order?${queryString}` : "/order";
 
         const [ordersResult, statsResult, statusesResult] = await Promise.all([
-            // apiFetch keeps the full envelope so we can read meta.pagination
-            apiFetch(ordersUrl).catch(() => ({})),
+            // getWithMeta keeps meta.pagination (backend orders endpoint is
+            // the only one that returns real pagination metadata).
+            api.getWithMeta<any>(ordersUrl).catch(() => ({ data: [], meta: undefined })),
             api.get<any>("/order/stats").catch(() => ({})),
             api.get<any[]>("/order/statuses").catch(() => []),
         ]);
 
-        const orders = Array.isArray((ordersResult as { data?: Order[] }).data)
-            ? (ordersResult as { data: Order[] }).data
-            : [];
-        const pagination = (ordersResult as { meta?: { pagination?: Record<string, number> } })?.meta?.pagination || {
-            currentPage: 1,
-            totalPages: 0,
-            totalItems: 0,
-            itemsPerPage: limit,
-        };
-
-        const stats =
-            statsResult
-                ? statsResult
-                : {
-                      totalOrders: orders.length,
-                      totalRevenue: 0,
-                      statusCounts: {},
-                  };
-
-        const statuses =
-            Array.isArray(statusesResult)
-                ? statusesResult
-                : [];
-
-        return {
-            orders,
-            stats,
-            statuses,
-            pagination: {
-                currentPage: pagination.page || page,
-                totalPages: pagination.totalPages || 0,
-                totalItems: pagination.total || 0,
-                itemsPerPage: pagination.limit || limit,
-            },
-        };
+        return parseOrdersResponse(ordersResult, statsResult, statusesResult, page, limit);
     } catch (err) {
         console.error("Error fetching orders:", err);
         return {
