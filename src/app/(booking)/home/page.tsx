@@ -27,7 +27,7 @@ async function getServices() {
 
 async function getSlides() {
     try {
-        const data = await api.get<any>("/slide");
+        const data = await api.get<any>("/slide?activeOnly=true");
         if (Array.isArray(data)) return data;
         return data?.sliders || [];
     } catch {
