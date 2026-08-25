@@ -18,7 +18,7 @@ describe('BrandingEditor', () => {
         render(<BrandingEditor value={{ primaryColor: '#7c3aed' }} onChange={vi.fn()} />);
 
         expect(screen.getByText('Live Preview')).toBeInTheDocument();
-        expect(screen.getByText('Primary Color')).toBeInTheDocument();
+        expect(screen.getByText('Color Primario')).toBeInTheDocument();
         expect(screen.getByText('Logo URL')).toBeInTheDocument();
     });
 
@@ -46,7 +46,7 @@ describe('BrandingEditor', () => {
         const onChange = vi.fn();
         render(<BrandingEditor value={{}} onChange={onChange} />);
 
-        const slider = screen.getByLabelText('Corner radius');
+        const slider = screen.getByLabelText('Radio de las esquinas');
         const { fireEvent } = await import('@testing-library/dom');
         fireEvent.change(slider, { target: { value: '0.5' } });
 
