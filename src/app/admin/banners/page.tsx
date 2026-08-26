@@ -25,7 +25,9 @@ export default async function SuperAdminBannersPage({
     const query = new URLSearchParams();
     if (tenantId) query.append("tenantId", tenantId);
 
-    const banners = (await api.get<any[]>(`/banners?${query.toString()}`).catch(() => [])) || [];
+    // /banners/all/list is the admin endpoint (all banners incl. inactive,
+    // resolveSuperAdminTenant honors the tenantId filter).
+    const banners = (await api.get<any[]>(`/banners/all/list?${query.toString()}`).catch(() => [])) || [];
 
     // Minimal stats for now
     const stats = {
