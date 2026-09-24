@@ -14,6 +14,7 @@ import {
     Calendar,
 } from "lucide-react";
 import { NeutralNavigation } from "@/components/neutral-navigation";
+import FooterWrapper from "@/components/footer-wrapper";
 import { cn } from "@/lib/utils";
 
 const emptySubscribe = () => () => {};
@@ -51,26 +52,19 @@ export function LandingPageClient() {
                         variant="secondary"
                         className="px-4 py-1 rounded-full mb-4"
                     >
-                        Version 2.5 Dynamic Core
+                        Versión 2.5 · Núcleo dinámico
                     </Badge>
 
                     <h1 className="text-5xl md:text-8xl font-bold mb-6 tracking-tight text-foreground">
-                        The Complete
+                        El núcleo
                         <br />
-                        Business Core.
+                        completo de tu negocio.
                     </h1>
 
                     <p className="text-lg md:text-xl text-muted-foreground mb-12 max-w-2xl mx-auto font-medium leading-relaxed">
-                        Architecting the future of multi-tenant{" "}
-                        <span className="text-foreground font-bold">
-                            commerce
-                        </span>{" "}
-                        and{" "}
-                        <span className="text-foreground font-bold">
-                            appointments
-                        </span>
-                        . Run your entire business from a single unified
-                        platform.
+                        Diseñamos el futuro del comercio multi-inquilino y las
+                        citas. Gestiona todo tu negocio desde una plataforma
+                        unificada.
                     </p>
 
                     {user ? (
@@ -101,7 +95,7 @@ export function LandingPageClient() {
                                 className="flex items-center justify-center gap-3 px-8 py-4 font-semibold text-sm bg-primary text-primary-foreground hover:opacity-90 transition-all rounded-xl shadow-md hover:-translate-y-0.5"
                             >
                                 <PlusCircle className="size-4" />
-                                <span>Launch New Instance</span>
+                                <span>Crear nueva instancia</span>
                             </Link>
                         </div>
                     ) : (
@@ -111,7 +105,7 @@ export function LandingPageClient() {
                                 className="h-14 px-10 rounded-xl font-bold text-sm shadow-lg shadow-primary/20"
                                 asChild
                             >
-                                <Link href="/register">Get Started Now</Link>
+                                <Link href="/register">Comenzar ahora</Link>
                             </Button>
                             <Button
                                 variant="outline"
@@ -119,7 +113,7 @@ export function LandingPageClient() {
                                 className="h-14 px-10 rounded-xl font-bold text-sm"
                                 asChild
                             >
-                                <Link href="/login">Identity Access</Link>
+                                <Link href="/login">Acceso seguro</Link>
                             </Button>
                         </div>
                     )}
@@ -137,24 +131,24 @@ export function LandingPageClient() {
                             </div>
                             <div className="space-y-2">
                                 <h3 className="text-3xl font-bold tracking-tight">
-                                    Store Engine
+                                    Motor de la tienda
                                 </h3>
                                 <p className="font-semibold uppercase tracking-widest text-[10px] text-primary">
-                                    High-Performance Commerce Core
+                                    Núcleo de comercio de alto rendimiento
                                 </p>
                             </div>
                             <ul className="space-y-3 text-sm font-medium text-muted-foreground">
                                 <li className="flex items-center gap-3">
                                     <div className="size-1.5 rounded-full bg-primary" />
-                                    <span>Inventory Management</span>
+                                    <span>Gestión de inventario</span>
                                 </li>
                                 <li className="flex items-center gap-3">
                                     <div className="size-1.5 rounded-full bg-primary" />
-                                    <span>Real-time Analytics</span>
+                                    <span>Analítica en tiempo real</span>
                                 </li>
                                 <li className="flex items-center gap-3">
                                     <div className="size-1.5 rounded-full bg-primary" />
-                                    <span>Global Checkout Flow</span>
+                                    <span>Flujo de pago global</span>
                                 </li>
                             </ul>
                         </div>
@@ -166,24 +160,24 @@ export function LandingPageClient() {
                             </div>
                             <div className="space-y-2">
                                 <h3 className="text-3xl font-bold tracking-tight">
-                                    Booking Layer
+                                    Capa de reservas
                                 </h3>
                                 <p className="font-semibold uppercase tracking-widest text-[10px] text-primary">
-                                    Enterprise Scheduling Protocol
+                                    Protocolo de agendas empresariales
                                 </p>
                             </div>
                             <ul className="space-y-3 text-sm font-medium text-muted-foreground">
                                 <li className="flex items-center gap-3">
                                     <div className="size-1.5 rounded-full bg-primary" />
-                                    <span>Expert Availability</span>
+                                    <span>Disponibilidad de profesionales</span>
                                 </li>
                                 <li className="flex items-center gap-3">
                                     <div className="size-1.5 rounded-full bg-primary" />
-                                    <span>Conflict Management</span>
+                                    <span>Gestión de conflictos</span>
                                 </li>
                                 <li className="flex items-center gap-3">
                                     <div className="size-1.5 rounded-full bg-primary" />
-                                    <span>Unified Dashboard</span>
+                                    <span>Panel unificado</span>
                                 </li>
                             </ul>
                         </div>
@@ -191,32 +185,7 @@ export function LandingPageClient() {
                 </div>
             </section>
 
-            {/* Footer */}
-            <footer className="container mx-auto px-4 py-12">
-                <div className="flex flex-col md:flex-row justify-between items-center gap-8 text-muted-foreground font-medium text-xs uppercase tracking-widest">
-                    <p>© 2026 XCIX Platforms</p>
-            <div className="flex gap-8">
-              <button
-                type="button"
-                className="hover:text-foreground transition-colors"
-              >
-                Twitter
-              </button>
-              <button
-                type="button"
-                className="hover:text-foreground transition-colors"
-              >
-                Github
-              </button>
-<Link
-          href="/privacy"
-          className="hover:text-foreground transition-colors"
-        >
-          Privacy
-        </Link>
-            </div>
-                </div>
-            </footer>
+            <FooterWrapper minimal tenantName="Neutra SuperAdmin" />
         </div>
     );
 }

@@ -306,7 +306,7 @@ export function StoreHomeClient({
                                     type="email"
                                     required
                                     aria-label="Email para el boletín"
-                                    placeholder="your@email.com"
+                                    placeholder="tu@correo.com"
                                     className="flex-1 h-16 px-8 rounded-xl bg-background border border-border/50
                      focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10
                      font-medium transition-all shadow-inner text-lg"
@@ -316,19 +316,19 @@ export function StoreHomeClient({
                                     className="h-16 px-10 font-bold bg-primary hover:bg-primary/90 shadow-xl shadow-primary/20 hover:-translate-y-1 hover:scale-105 rounded-xl transition-all text-lg"
                                 >
                                     <Zap className="mr-2 size-5" />
-                                    Subscribe
+                                    Suscribirme
                                 </Button>
                             </form>
 
                             <div className="flex flex-col sm:flex-row items-center justify-center gap-6 pt-6 text-base text-muted-foreground font-medium">
                                 <span className="flex items-center gap-2">
                                     <Shield className="size-5 text-emerald-500" />
-                                    No spam, unsubscribe anytime
+                                    Sin spam. Cancelá cuando quieras
                                 </span>
                                 <span className="hidden sm:block opacity-20 text-foreground">
                                     |
                                 </span>
-                                <span>Join 48,000+ design lovers</span>
+                                <span>Sumate a más de 48.000 amantes del diseño</span>
                             </div>
                         </CardContent>
                     </Card>

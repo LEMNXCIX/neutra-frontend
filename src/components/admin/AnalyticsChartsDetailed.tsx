@@ -13,6 +13,14 @@ type Order = {
     items?: Array<{ id?: string; name?: string; qty?: number; price?: number }>;
 };
 
+const STATUS_LABELS: Record<string, string> = {
+    processing: "Procesando",
+    shipped: "Enviado",
+    delivered: "Entregado",
+    cancelled: "Cancelado",
+    pending: "Pendiente",
+};
+
 function SummaryStatsCards({
     statusCounts,
 }: {
@@ -23,7 +31,7 @@ function SummaryStatsCards({
             {Object.entries(statusCounts).map(([status, count]) => (
                 <div key={status} className="flex flex-col">
                     <span className="text-xs text-muted-foreground capitalize">
-                        {status.toLowerCase()}
+                        {STATUS_LABELS[status.toLowerCase()] || status}
                     </span>
                     <span className="text-xl font-bold">{count as number}</span>
                 </div>
@@ -48,7 +56,7 @@ function AvgOrderValueCard({ value }: { value: number }) {
                 <div className="flex items-center justify-between">
                     <div>
                         <p className="text-sm opacity-90 mb-1">
-                            Avg Order Value
+                            Valor promedio del pedido
                         </p>
                         <p className="text-3xl font-bold">
                             ${value.toFixed(2)}
@@ -95,7 +103,7 @@ function TimelineCard({
                             const percentage = (value / maxDisplayValue) * 100;
                             const formattedDate = new Date(
                                 date,
-                            ).toLocaleDateString("en-US", {
+                            ).toLocaleDateString("es-ES", {
                                 month: "short",
                                 day: "numeric",
                             });
@@ -154,7 +162,7 @@ function TopProductsCard({
         <Card className="border-none shadow-md rounded-xl">
             <CardHeader>
                 <CardTitle className="text-sm text-muted-foreground">
-                    Top Selling Products
+                    Productos más vendidos
                 </CardTitle>
             </CardHeader>
             <CardContent>
@@ -193,7 +201,7 @@ function TopProductsCard({
                                         </div>
                                         <div className="flex items-center gap-4 flex-shrink-0">
                                             <span className="text-xs text-muted-foreground">
-                                                {data.qty} sold
+                                                {data.qty} vendidos
                                             </span>
                                             <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
                                                 ${data.revenue.toFixed(2)}
@@ -212,7 +220,7 @@ function TopProductsCard({
                     </div>
                 ) : (
                     <div className="text-sm text-muted-foreground">
-                        No products
+                        No hay productos
                     </div>
                 )}
             </CardContent>
@@ -261,16 +269,16 @@ export default function AnalyticsChartsDetailed() {
         <div className="p-6 space-y-6">
             <div className="flex items-center justify-between">
                 <h2 className="text-xl font-bold tracking-tight">
-                    Order Analytics
+                    Analíticas de pedidos
                 </h2>
                 <select
                     className="bg-background border border-border rounded-lg px-4 py-1.5 text-sm"
                     value={range}
                     onChange={(e) => handleRangeChange(e.target.value)}
                 >
-                    <option value="7d">Last 7 days</option>
-                    <option value="30d">Last 30 days</option>
-                    <option value="90d">Last 90 days</option>
+                    <option value="7d">Últimos 7 días</option>
+                    <option value="30d">Últimos 30 días</option>
+                    <option value="90d">Últimos 90 días</option>
                     <option value="all">Todo el período</option>
                 </select>
             </div>
@@ -413,7 +421,7 @@ function AnalyticsContent({
                 (it as any).product?.name ||
                 it.name ||
                 (it as any).title ||
-                "Unknown Product";
+                "Producto desconocido";
             const name = rawName.trim();
 
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -457,7 +465,7 @@ function AnalyticsContent({
                 <Card className="md:col-span-2 border-none shadow-md rounded-xl bg-card">
                     <CardHeader>
                         <CardTitle className="text-sm text-muted-foreground">
-                            Orders by Status
+                            Pedidos por estado
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -473,7 +481,7 @@ function AnalyticsContent({
                     dates={dates}
                     getDisplayValue={(_, idx) => orderCounts[idx]}
                     maxDisplayValue={maxOrderCount}
-                    valueLabel={(v) => `${v} orders`}
+                    valueLabel={(v) => `${v} pedidos`}
                     colorVar="--accent"
                 />
                 <TimelineCard

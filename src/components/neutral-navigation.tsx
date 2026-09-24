@@ -80,12 +80,12 @@ export function NeutralNavigation() {
                                 className="flex items-center gap-2 text-xs font-semibold hover:text-primary transition-colors text-foreground uppercase tracking-wider"
                             >
                                 <LayoutDashboard size={14} />
-                                Control Center
+                                Centro de control
                             </a>
                             <div className="h-4 w-px bg-border" />
                             <div className="flex items-center gap-3">
                                 <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest">
-                                    Network:
+                                    Red:
                                 </span>
                                 <div className="flex gap-2">
                                     {tenants.map((tenant) => (
@@ -109,7 +109,7 @@ export function NeutralNavigation() {
                                 className="flex items-center gap-2 text-xs font-semibold hover:text-primary transition-colors text-foreground uppercase tracking-wider"
                             >
                                 <Building2 size={16} />
-                                Launch Instance
+                                Crear instancia
                             </Link>
                         </div>
                     )}
@@ -131,13 +131,13 @@ export function NeutralNavigation() {
                                     href="/login"
                                     className="text-xs font-semibold hover:text-primary transition-colors flex items-center gap-2 text-foreground uppercase tracking-wider"
                                 >
-                                    <LogIn size={14} /> Access
+                                    <LogIn size={14} /> Acceder
                                 </Link>
                                 <Link
                                     href="/register"
                                     className="px-5 py-2 bg-primary text-primary-foreground text-xs font-bold rounded-lg hover:opacity-90 transition-all uppercase tracking-wider shadow-sm"
                                 >
-                                    Join Network
+                                    Unite a la red
                                 </Link>
                             </>
                         )}
@@ -195,7 +195,7 @@ export function NeutralNavigation() {
                                                         <LayoutDashboard
                                                             size={18}
                                                         />
-                                                        Dashboard
+                                                        Panel
                                                     </a>
                                                 </nav>
                                                 <div className="pt-2 space-y-3">
@@ -254,7 +254,7 @@ export function NeutralNavigation() {
                                                             }
                                                             className="py-2 text-sm font-medium hover:text-primary transition-colors text-foreground"
                                                         >
-                                                            Login
+                                                            Iniciar sesión
                                                         </Link>
                                                         <Link
                                                             href="/register"
@@ -265,7 +265,7 @@ export function NeutralNavigation() {
                                                             }
                                                             className="py-2 text-sm font-medium hover:text-primary transition-colors text-foreground"
                                                         >
-                                                            Register
+                                                            Registrarse
                                                         </Link>
                                                     </>
                                                 )}

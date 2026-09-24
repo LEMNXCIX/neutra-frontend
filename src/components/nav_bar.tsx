@@ -124,7 +124,7 @@ function DesktopMenuItems({ categories }: { categories: Category[] }) {
                         <ul className="grid w-[400px] gap-2 p-6 md:w-[500px] md:grid-cols-2 lg:w-[600px] bg-card border border-border shadow-xl rounded-xl">
                             <div className="col-span-full border-b border-border pb-3 mb-2">
                                 <p className="text-[10px] font-bold uppercase tracking-widest text-primary">
-                                    Catalog Categories
+                                    Categorías del catálogo
                                 </p>
                             </div>
                             {categories.map(
@@ -223,7 +223,7 @@ function DesktopSearchWithResults({
                         <div className="p-3 space-y-1">
                             <div className="px-4 py-2 border-b border-border mb-2">
                                 <p className="text-[10px] font-bold uppercase tracking-widest text-primary">
-                                    Search Results
+                                    Resultados de búsqueda
                                 </p>
                             </div>
                             {(Array.isArray(searchResults)
@@ -273,7 +273,7 @@ function DesktopSearchWithResults({
                                             variant="destructive"
                                             className="text-[9px] rounded-full px-2"
                                         >
-                                            Out
+                                            Agotado
                                         </Badge>
                                     )}
                                 </Link>
@@ -296,7 +296,7 @@ function DesktopSearchWithResults({
                                     }}
                                     className="w-full text-xs font-bold text-primary hover:bg-primary/5 transition-all rounded-xl p-3 text-center"
                                 >
-                                    View all results{" "}
+                                    Ver todos los resultados{" "}
                                     <ArrowRight className="inline size-3.5" />
                                 </button>
                             </div>
@@ -432,7 +432,7 @@ function MobileMenuSheet({
                                 </SheetTitle>
                                 {!minimal && !tenantName && (
                                     <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mt-0.5">
-                                        Platform Core
+                                        Núcleo de la plataforma
                                     </p>
                                 )}
                             </div>
@@ -487,7 +487,7 @@ function MobileMenuSheet({
 
                                     <div className="space-y-4">
                                         <span className="text-[10px] font-bold text-primary uppercase tracking-widest px-1">
-                                            Explore
+                                            Explorar
                                         </span>
                                         <div className="grid gap-3">
                                             <Link
@@ -527,7 +527,7 @@ function MobileMenuSheet({
                                                             className="flex flex-col gap-2 p-4 bg-muted/30 hover:bg-muted border border-transparent hover:border-border transition-all rounded-xl"
                                                         >
                                                             <span className="text-[10px] font-bold text-primary/60 uppercase tracking-wider">
-                                                                Section
+                                                                Sección
                                                             </span>
                                                             <span className="font-semibold text-sm truncate">
                                                                 {c.name}
@@ -579,7 +579,7 @@ function MobileMenuSheet({
                                                 router.push("/profile");
                                             }}
                                         >
-                                            <span>Dashboard</span>
+                                            <span>Panel</span>
                                             <User
                                                 size={18}
                                                 className="opacity-60"
@@ -597,7 +597,7 @@ function MobileMenuSheet({
                                                     router.push("/admin");
                                                 }}
                                             >
-                                                <span>Control Center</span>
+                                                <span>Centro de control</span>
                                                 <LayoutDashboard
                                                     size={18}
                                                     className="opacity-60"
@@ -656,7 +656,7 @@ function MobileMenuSheet({
                         <p className="text-[10px] text-muted-foreground text-center font-semibold uppercase tracking-widest leading-relaxed">
                             &copy; 2026 XCIX Platforms.
                             <br />
-                            All Rights Reserved.
+                            Todos los derechos reservados.
                         </p>
                     </div>
                 </SheetContent>
@@ -786,7 +786,7 @@ export function Navigation({
                                 </span>
                                 {!minimal && !tenantName && (
                                     <span className="text-[9px] font-medium text-muted-foreground uppercase tracking-widest">
-                                        Platform Core
+                                        Núcleo de la plataforma
                                     </span>
                                 )}
                             </div>

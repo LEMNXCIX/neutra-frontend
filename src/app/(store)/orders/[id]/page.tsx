@@ -47,7 +47,7 @@ function OrderItemsSection({ items }: { items: OrderItem[] }) {
             size={18}
             className="text-primary"
           />{" "}
-          Order Items
+          Artículos del pedido
         </h3>
         <div className="h-px flex-1 bg-border/30" />
       </div>
@@ -68,11 +68,11 @@ function OrderItemsSection({ items }: { items: OrderItem[] }) {
                     </h3>
                     <div className="flex items-center gap-4 text-xs font-bold uppercase tracking-widest text-muted-foreground">
                       <span className="bg-muted px-3 py-1 rounded-full">
-                        Qty:{" "}
+                        Cantidad:{" "}
                         {item.qty}
                       </span>
                       <span className="bg-muted px-3 py-1 rounded-full">
-                        Price: ${item.price.toFixed(2)}
+                        Precio: ${item.price.toFixed(2)}
                       </span>
                     </div>
                   </div>
@@ -104,7 +104,7 @@ function OrderPricingSummary({ subtotal, discount, couponCode, total }: { subtot
         {discount > 0 && (
           <div className="flex justify-between items-center text-sm font-bold uppercase tracking-widest text-emerald-600">
             <span className="flex items-center gap-2">
-              <Tag size={16} /> Discount{" "}
+              <Tag size={16} /> Descuento{" "}
               {couponCode && `(${couponCode})`}
             </span>
             <span>
@@ -115,7 +115,7 @@ function OrderPricingSummary({ subtotal, discount, couponCode, total }: { subtot
         <div className="flex justify-between items-center text-sm font-bold uppercase tracking-widest text-muted-foreground/70">
           <span>Envío</span>
           <span className="text-foreground">
-            Calculated at checkout
+            Se calcula al finalizar la compra
           </span>
         </div>
       </div>
@@ -123,7 +123,7 @@ function OrderPricingSummary({ subtotal, discount, couponCode, total }: { subtot
       <div className="flex justify-between items-end">
         <div className="space-y-1">
           <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-muted-foreground">
-            Total Amount
+            Total
           </span>
           <div className="flex items-baseline gap-2">
             <span className="text-sm font-bold text-muted-foreground uppercase">
@@ -148,7 +148,7 @@ function OrderInfoGrid({ address, trackingNumber }: { address: string; trackingN
             <div className="size-8 bg-primary/10 rounded-xl flex items-center justify-center">
               <MapPin size={16} />
             </div>
-            Shipping Address
+            Dirección de envío
           </CardTitle>
         </CardHeader>
         <CardContent className="pb-8">
@@ -164,7 +164,7 @@ function OrderInfoGrid({ address, trackingNumber }: { address: string; trackingN
             <div className="size-8 bg-purple-600/10 rounded-xl flex items-center justify-center">
               <Truck size={16} />
             </div>
-            Tracking Info
+            Información de seguimiento
           </CardTitle>
         </CardHeader>
         <CardContent className="pb-8">
@@ -177,14 +177,14 @@ function OrderInfoGrid({ address, trackingNumber }: { address: string; trackingN
                 variant="outline"
                 className="w-full h-12 rounded-xl font-bold uppercase text-[10px] tracking-widest border-2 hover:bg-foreground hover:text-background transition-all"
               >
-                Copy Number
+                Copiar número
               </Button>
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center py-4 gap-2 opacity-60">
               <Clock className="size-8 text-muted-foreground" />
               <p className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
-                Preparing for Shipment
+                Preparando el envío
               </p>
             </div>
           )}
@@ -223,7 +223,7 @@ function OrderTimeline({ orderDate, status }: { orderDate: string; status: strin
     <Card className="border-none shadow-2xl rounded-[2rem] bg-background overflow-hidden">
       <CardHeader className="bg-muted/30 p-8 border-b border-border/50">
         <CardTitle className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">
-          Order Timeline
+          Seguimiento del pedido
         </CardTitle>
       </CardHeader>
       <CardContent className="p-10">
@@ -270,10 +270,10 @@ function OrderHelpCard() {
     <Card className="border-none shadow-xl rounded-[2rem] bg-gradient-to-br from-primary/5 to-purple-600/5 p-10 text-center space-y-8">
       <div className="space-y-3">
         <p className="text-[10px] font-bold uppercase tracking-widest text-primary">
-          Need Assistance?
+          ¿Necesitás ayuda?
         </p>
         <p className="text-base font-medium leading-relaxed text-muted-foreground">
-          Have questions about your order or need to request a return?
+          ¿Tenés dudas sobre tu pedido o necesitás solicitar una devolución?
         </p>
       </div>
       <Button
@@ -355,7 +355,7 @@ export default async function OrderPage(props: {
                     qty: item.amount,
                     price: item.price,
                 })) || [],
-            date: new Date(rawOrder.createdAt).toLocaleDateString(),
+            date: new Date(rawOrder.createdAt).toLocaleDateString("es-ES"),
             couponCode: rawOrder.couponId,
             discount: rawOrder.discountAmount,
 };
@@ -389,15 +389,15 @@ const currentStatus =
                                         className="size-4 transition-transform group-hover:-translate-x-1 text-primary"
                                         strokeWidth={3}
                                     />
-                                    Back to Profile
+                                    Volver al perfil
                                 </Link>
                             </Button>
                             <div className="space-y-2">
                                 <h1 className="text-5xl md:text-6xl font-bold tracking-tight text-foreground leading-none">
-                                    Order Details
+                                    Detalles del pedido
                                 </h1>
                                 <p className="text-muted-foreground font-bold uppercase tracking-widest text-[10px]">
-                                    Order ID: #{order.id}
+                                    ID del pedido: #{order.id}
                                 </p>
                             </div>
                         </div>
@@ -439,7 +439,7 @@ const currentStatus =
                                                 currentStatus.color,
                                             )}
                                         >
-                                            {order.status}
+                                            {currentStatus.label}
                                         </Badge>
                                     </div>
                                     <p className="text-muted-foreground font-medium text-lg max-w-md">
@@ -449,7 +449,7 @@ const currentStatus =
                                 <div className="hidden md:block w-px h-20 bg-border/50" />
                                 <div className="text-center md:text-right space-y-2">
                                     <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest opacity-60">
-                                        Order Date
+                                        Fecha del pedido
                                     </p>
                                     <p className="text-2xl font-bold text-foreground">
                                         {order.date}

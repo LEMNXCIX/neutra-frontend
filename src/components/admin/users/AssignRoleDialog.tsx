@@ -90,7 +90,7 @@ export function AssignRoleDialog({
         setLoading(true);
         try {
             await usersService.assignRole(user.id, selectedRoleId);
-            toast.success(`Role assigned to ${user.name}`);
+            toast.success(`Rol asignado a ${user.name}`);
 
             // Refresh permissions cache in backend
             await refreshPermissions();
@@ -117,12 +117,12 @@ export function AssignRoleDialog({
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
                         <UserCog className="size-5" />
-                        Assign Role
+                        Asignar rol
                     </DialogTitle>
                     <DialogDescription>
                         {user && (
                             <>
-                                Assign a role to <strong>{user.name}</strong> (
+                                Asigná un rol a <strong>{user.name}</strong> (
                                 {user.email})
                             </>
                         )}
@@ -140,7 +140,7 @@ export function AssignRoleDialog({
                                 htmlFor="role-select"
                                 className="text-sm font-medium"
                             >
-                                Select Role
+                                Seleccionar rol
                             </label>
                             <Select
                                 value={selectedRoleId}
@@ -152,7 +152,7 @@ export function AssignRoleDialog({
                                 <SelectContent>
                                     {roles.length === 0 ? (
                                         <div className="p-2 text-sm text-muted-foreground text-center">
-                                            No roles available
+                                            No hay roles disponibles
                                         </div>
                                     ) : (
                                         roles.map((role) => (
@@ -185,7 +185,7 @@ export function AssignRoleDialog({
                         onClick={() => onOpenChange(false)}
                         disabled={loading}
                     >
-                        Cancel
+                        Cancelar
                     </Button>
                     <Button
                         onClick={handleAssign}
@@ -194,7 +194,7 @@ export function AssignRoleDialog({
                         {loading && (
                             <Loader2 className="mr-2 size-4 animate-spin" />
                         )}
-                        Assign Role
+                        Asignar rol
                     </Button>
                 </DialogFooter>
             </DialogContent>

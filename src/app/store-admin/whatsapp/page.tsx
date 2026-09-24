@@ -4,7 +4,7 @@ import type { WhatsAppConfig } from "@/services/whatsapp.service";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-	title: "WhatsApp Configuration | Admin",
+	title: "Configuración de WhatsApp | Administración",
 	description: "Gestiona la integración con WhatsApp Business API",
 };
 
@@ -22,9 +22,9 @@ export default async function WhatsAppConfigPage() {
 	return (
 		<div className="container py-8">
 			<div className="mb-8">
-				<h1 className="text-3xl font-bold tracking-tight">WhatsApp Integration</h1>
+				<h1 className="text-3xl font-bold tracking-tight">Integración de WhatsApp</h1>
 				<p className="text-muted-foreground">
-					Connect your Meta Business Account to enable automated notifications and conversational bot.
+					Conectá tu cuenta comercial de Meta para habilitar notificaciones automáticas y un bot conversacional.
 				</p>
 			</div>
 

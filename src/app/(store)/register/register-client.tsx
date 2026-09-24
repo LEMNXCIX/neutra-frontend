@@ -118,10 +118,10 @@ export function RegisterPageClient() {
                     </div>
                     <div className="space-y-1">
                         <h1 className="text-3xl font-bold tracking-tight text-foreground">
-                            Join the Network
+                            Unite a la red
                         </h1>
                         <p className="text-muted-foreground font-medium text-sm">
-                            Initialize your professional profile today
+                            Inicializá tu perfil profesional hoy
                         </p>
                     </div>
                 </div>
@@ -132,10 +132,10 @@ export function RegisterPageClient() {
                     <CardHeader className="space-y-1 pb-6 pt-8">
                         <CardTitle className="text-xl font-bold flex items-center gap-2">
                             <UserPlus className="size-5 text-primary" />
-                            Provision Account
+                            Crear cuenta
                         </CardTitle>
                         <CardDescription className="text-sm font-medium">
-                            Provide your details to establish your global ID
+                            Ingresá tus datos para crear tu identidad global
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="pb-8">
@@ -146,7 +146,7 @@ export function RegisterPageClient() {
                                     htmlFor="name"
                                     className="text-xs font-semibold text-foreground ml-1"
                                 >
-                                    Full Name
+                                    Nombre completo
                                 </Label>
                                 <div className="relative group">
                                     <User className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
@@ -193,7 +193,7 @@ export function RegisterPageClient() {
                                     htmlFor="password"
                                     className="text-xs font-semibold text-foreground ml-1"
                                 >
-                                    Password
+                                    Contraseña
                                 </Label>
                                 <div className="relative group">
                                     <Lock className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
@@ -228,7 +228,7 @@ export function RegisterPageClient() {
                                         </div>
                                         {passwordStrength.label && (
                                             <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                                                Strength:{" "}
+                                                Seguridad:{" "}
                                                 <span
                                                     className={cn(
                                                         passwordStrength.color.replace(
@@ -251,7 +251,7 @@ export function RegisterPageClient() {
                                     htmlFor="confirmPassword"
                                     className="text-xs font-semibold text-foreground ml-1"
                                 >
-                                    Confirm Password
+                                    Confirmar contraseña
                                 </Label>
                                 <div className="relative group">
                                     <Lock className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
@@ -273,14 +273,14 @@ export function RegisterPageClient() {
                                             <>
                                                 <CheckCircle2 className="size-3 text-emerald-500" />
                                                 <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider">
-                                                    Passwords Match
+                                                    Las contraseñas coinciden
                                                 </span>
                                             </>
                                         ) : (
                                             <>
                                                 <AlertCircle className="size-3 text-rose-500" />
                                                 <span className="text-[10px] font-bold text-rose-600 uppercase tracking-wider">
-                                                    Mismatch
+                                                    No coinciden
                                                 </span>
                                             </>
                                         )}
@@ -310,11 +310,11 @@ export function RegisterPageClient() {
                                 {loading ? (
                                     <>
                                         <Loader2 className="mr-2 size-4 animate-spin" />
-                                        Provisioning…
+                                        Creando cuenta…
                                     </>
                                 ) : (
                                     <>
-                                        Create Account{" "}
+                                        Crear cuenta{" "}
                                         <ArrowRight className="ml-2 size-4" />
                                     </>
                                 )}
@@ -324,14 +324,14 @@ export function RegisterPageClient() {
                             <div className="relative py-2">
                                 <Separator className="bg-border" />
                                 <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-card px-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                                    OR
+                                    O
                                 </span>
                             </div>
 
                             {/* Login Link */}
                             <div className="text-center space-y-4">
                                 <p className="text-xs font-medium text-muted-foreground">
-                                    Already have an account?
+                                    ¿Ya tenés una cuenta?
                                 </p>
                                 <Button
                                     variant="outline"
@@ -347,7 +347,7 @@ export function RegisterPageClient() {
 
                 {/* Footer */}
                 <p className="text-center text-[10px] font-medium text-muted-foreground opacity-60">
-                    SECURED BY XCIX CRYPTOGRAPHY • 2026
+                    PROTEGIDO POR XCIX CRYPTOGRAPHY • 2026
                 </p>
             </div>
         </main>

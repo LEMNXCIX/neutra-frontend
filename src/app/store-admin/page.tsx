@@ -51,7 +51,7 @@ export default async function AdminPage() {
 
 	return (
 		<div className="space-y-6">
-			<h2 className="text-2xl font-semibold capitalize">Store Dashboard</h2>
+			<h2 className="text-2xl font-semibold capitalize">Panel de tienda</h2>
 			<AnalyticsOverview />
 			<AnalyticsCharts initialOrders={initialOrders} />
             <AnalyticsChartsDetailed />

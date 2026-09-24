@@ -17,8 +17,8 @@ import { api } from '@/lib/api-client';
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-    title: "Product Details",
-    description: "View product details, pricing, and availability",
+    title: "Detalles del producto",
+    description: "Mirá los detalles, el precio y la disponibilidad del producto",
 };
 
 async function fetchProduct(id: string) {
@@ -51,16 +51,15 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
                         <Package className="size-10 text-muted-foreground" />
                     </div>
                     <h2 className="text-2xl font-bold mb-2 text-foreground">
-                        Product not found
+                        Producto no encontrado
                     </h2>
                     <p className="text-muted-foreground mb-6">
-                        The product you&apos;re looking for doesn&apos;t exist
-                        or has been removed
+                        El producto que buscás no existe o fue eliminado
                     </p>
                     <Button asChild>
                         <Link href="/products">
                             <ArrowLeft className="size-4 mr-2" />
-                            Back to Products
+                            Volver a productos
                         </Link>
                     </Button>
                 </Card>
@@ -88,7 +87,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
                                 className="size-4 transition-transform group-hover:-translate-x-1 text-primary"
                                 strokeWidth={3}
                             />
-                            Back to Catalog
+                            Volver al catálogo
                         </Link>
                     </Button>
                     <div className="flex items-center gap-2">
@@ -130,12 +129,12 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
                                             variant="destructive"
                                             className="shadow-xl font-bold uppercase tracking-widest text-[10px] px-4 py-2 rounded-full border-2 border-background animate-pulse"
                                         >
-                                            Out of Stock
+                                            Sin stock
                                         </Badge>
                                     )}
                                     {lowStock && inStock && (
                                         <Badge className="bg-orange-500 text-white shadow-xl font-bold uppercase tracking-widest text-[10px] px-4 py-2 rounded-full border-2 border-background">
-                                            Only {product.stock} left
+                                            Quedan {product.stock} unidades
                                         </Badge>
                                     )}
                                 </div>
@@ -146,19 +145,19 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
                             {[
                                 {
                                     icon: Truck,
-                                    label: "Express Shipping",
+                                    label: "Envío exprés",
                                     color: "text-blue-500",
                                     bg: "bg-blue-500/10",
                                 },
                                 {
                                     icon: Shield,
-                                    label: "Secure Payment",
+                                    label: "Pago seguro",
                                     color: "text-emerald-500",
                                     bg: "bg-emerald-500/10",
                                 },
                                 {
                                     icon: ShoppingBag,
-                                    label: "Easy Returns",
+                                    label: "Devoluciones fáciles",
                                     color: "text-purple-500",
                                     bg: "bg-purple-500/10",
                                 },
@@ -190,7 +189,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
                                 <div className="flex items-center gap-4">
                                     <div className="h-1.5 w-24 bg-primary rounded-full" />
                                     <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                                        Product Reference:{" "}
+                                        Referencia del producto:{" "}
                                         {product.id.slice(0, 8)}
                                     </p>
                                 </div>
@@ -204,25 +203,25 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
                                     variant="secondary"
                                     className="rounded-full px-4 py-1 text-xs font-bold"
                                 >
-                                    Tax Included
+                                    Impuestos incluidos
                                 </Badge>
                             </div>
 
                             <div className="space-y-4 pt-4">
                                 <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2">
                                     <span className="w-8 h-px bg-muted-foreground/30" />
-                                    Description
+                                    Descripción
                                 </h2>
                                 <p className="text-xl text-foreground/80 font-medium leading-relaxed">
                                     {product.description ||
-                                        "Experience the perfect blend of minimalist design and exceptional functionality with this carefully curated piece."}
+                                        "Una pieza seleccionada que combina diseño minimalista y funcionalidad excepcional."}
                                 </p>
                             </div>
 
                             <div className="grid grid-cols-2 gap-6 py-8 border-y border-border/50">
                                 <div className="space-y-2">
                                     <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-                                        Availability
+                                        Disponibilidad
                                     </p>
                                     <div className="flex items-center gap-2">
                                         <div
@@ -230,17 +229,17 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
                                         />
                                         <span className="font-bold text-sm">
                                             {inStock
-                                                ? "Ready to ship"
-                                                : "Currently unavailable"}
+                                                ? "Listo para enviar"
+                                                : "No disponible actualmente"}
                                         </span>
                                     </div>
                                 </div>
                                 <div className="space-y-2">
                                     <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-                                        Condition
+                                        Condición
                                     </p>
                                     <p className="font-bold text-sm flex items-center gap-2">
-                                        Brand New{" "}
+                                        Nuevo{" "}
                                         <Sparkles className="size-3 text-yellow-500" />
                                     </p>
                                 </div>
@@ -255,15 +254,15 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
                             <div className="pt-6 flex items-center justify-center gap-8 text-[10px] font-bold text-muted-foreground uppercase tracking-widest opacity-60">
                                 <span className="flex items-center gap-2">
                                     <Shield className="size-4" />
-                                    Safe Payment
+                                    Pago seguro
                                 </span>
                                 <span className="flex items-center gap-2">
                                     <Truck className="size-4" />
-                                    Fast Delivery
+                                    Entrega rápida
                                 </span>
                                 <span className="flex items-center gap-2">
                                     <ShoppingBag className="size-4" />
-                                    Quality Guaranteed
+                                    Calidad garantizada
                                 </span>
                             </div>
                         </div>

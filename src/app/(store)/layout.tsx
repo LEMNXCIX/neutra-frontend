@@ -1,4 +1,6 @@
+import { headers } from "next/headers";
 import { Navigation as NavBar } from "@/components/nav_bar";
+import { NeutralNavigation } from "@/components/neutral-navigation";
 import FooterWrapper from "@/components/footer-wrapper";
 import { TenantThemeProvider } from "@/providers/tenant-theme-provider";
 import {
@@ -9,8 +11,8 @@ import { getHomeContent } from "@/lib/strapi";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Store",
-  description: "Browse our products and services",
+  title: "Tienda",
+  description: "Explorá nuestros productos y servicios",
 };
 
 export default async function StoreLayout({
@@ -18,6 +20,10 @@ export default async function StoreLayout({
 }: {
     children: React.ReactNode;
 }) {
+    const requestHeaders = await headers();
+    const isSuperAdmin =
+        requestHeaders.get("x-tenant-slug") === "superadmin";
+
     const [branding, tenantName, cms] = await Promise.all([
         getTenantBrandingFromHeaders(),
         getTenantNameFromHeaders(),
@@ -34,12 +40,30 @@ export default async function StoreLayout({
                 } as React.CSSProperties}
             >
                 <div className="print:hidden">
-                    <NavBar tenantName={tenantName} tenantLogo={branding?.tenantLogo} />
+                    {isSuperAdmin ? (
+                        <NeutralNavigation />
+                    ) : (
+                        <NavBar
+                            tenantName={tenantName}
+                            tenantLogo={branding?.tenantLogo}
+                        />
+                    )}
                 </div>
-                <div className="pt-16 print:pt-0">{children}</div>
+                <div
+                    className={
+                        isSuperAdmin
+                            ? "print:pt-0"
+                            : "pt-16 print:pt-0"
+                    }
+                >
+                    {children}
+                </div>
                 <div className="print:hidden">
                 <FooterWrapper
-                    tenantName={tenantName}
+                    minimal={isSuperAdmin}
+                    tenantName={
+                        isSuperAdmin ? "Neutra SuperAdmin" : tenantName
+                    }
                     tenantLogo={branding?.tenantLogo}
                     footerDescription={cms?.footerDescription}
                     socialLinks={cms?.socialLinks}

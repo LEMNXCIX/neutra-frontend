@@ -11,6 +11,14 @@ import {
   ArrowDownRight,
 } from "lucide-react";
 
+const ORDER_STATUS_LABELS: Record<string, string> = {
+  processing: "Procesando",
+  shipped: "Enviado",
+  delivered: "Entregado",
+  cancelled: "Cancelado",
+  pending: "Pendiente",
+};
+
 type Order = {
   id: string;
   total?: number;
@@ -95,7 +103,7 @@ function TrendCard({
             )}
           </div>
           <p className="text-sm text-muted-foreground">
-            Compared to previous 7 days
+            Comparado con los 7 días anteriores
           </p>
 
           <div className="w-full h-16 flex items-end gap-1">
@@ -127,7 +135,7 @@ function TopProductsCard({ topProducts }: { topProducts: { name: string; qty: nu
     <Card className="overflow-hidden border-none shadow-md hover:shadow-lg transition-shadow">
       <CardHeader className="flex flex-row items-center justify-between pb-3">
         <CardTitle className="text-base font-medium">
-          Top Products by Revenue
+          Productos con más ingresos
         </CardTitle>
         <Package className="size-5 text-muted-foreground" />
       </CardHeader>
@@ -157,7 +165,7 @@ function TopProductsCard({ topProducts }: { topProducts: { name: string; qty: nu
                       {product.revenue.toFixed(2)}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {product.qty} sold
+                      {product.qty} vendidos
                     </p>
                   </div>
                 </div>
@@ -166,7 +174,7 @@ function TopProductsCard({ topProducts }: { topProducts: { name: string; qty: nu
           </div>
         ) : (
           <div className="h-40 flex items-center justify-center text-sm text-muted-foreground">
-            No product sales yet
+            Todavía no hay ventas de productos
           </div>
         )}
       </CardContent>
@@ -190,7 +198,7 @@ function RecentOrdersCard({ recentOrders }: { recentOrders: Order[] }) {
     <Card className="overflow-hidden border-none shadow-md hover:shadow-lg transition-shadow">
       <CardHeader className="flex flex-row items-center justify-between pb-3">
         <CardTitle className="text-base font-medium">
-          Recent Orders
+          Pedidos recientes
         </CardTitle>
         <ShoppingCart className="size-5 text-muted-foreground" />
       </CardHeader>
@@ -211,7 +219,7 @@ function RecentOrdersCard({ recentOrders }: { recentOrders: Order[] }) {
                 >
                   <div className="flex-1 min-w-0 pr-3">
                     <p className="font-medium text-sm truncate">
-                      Order #{order.id}
+                      Pedido n.º {order.id}
                     </p>
                     <p className="text-xs text-muted-foreground mt-0.5">
                       {order.date}
@@ -222,7 +230,7 @@ function RecentOrdersCard({ recentOrders }: { recentOrders: Order[] }) {
                     <span
                       className={`px-2 py-1 rounded text-xs font-medium border whitespace-nowrap ${statusColor}`}
                     >
-                      {order.status || "pending"}
+                      {ORDER_STATUS_LABELS[order.status || "pending"] || order.status}
                     </span>
                     <p className="font-semibold text-sm whitespace-nowrap">
                       $
@@ -237,7 +245,7 @@ function RecentOrdersCard({ recentOrders }: { recentOrders: Order[] }) {
           </div>
         ) : (
           <div className="h-40 flex items-center justify-center text-sm text-muted-foreground">
-            No recent orders
+            No hay pedidos recientes
           </div>
         )}
       </CardContent>
@@ -307,7 +315,7 @@ export default function AnalyticsCharts({ initialOrders }: AnalyticsChartsProps 
       const price = (item as any).price || 0;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const name =
-        (item as any).product?.name || item.name || "Unknown Product";
+        (item as any).product?.name || item.name || "Producto desconocido";
 
       const current = productSales.get(productId) || {
         name,
@@ -353,9 +361,9 @@ export default function AnalyticsCharts({ initialOrders }: AnalyticsChartsProps 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Analytics Details</h2>
+        <h2 className="text-2xl font-bold">Detalle de analíticas</h2>
         <Badge variant="outline" className="text-sm">
-          Last 30 days
+          Últimos 30 días
         </Badge>
       </div>
 
@@ -382,7 +390,7 @@ export default function AnalyticsCharts({ initialOrders }: AnalyticsChartsProps 
           total={last7Orders}
           colorVar="--accent"
           minBarHeight={10}
-          formatBarTitle={(d, v) => `${d}: ${v} orders`}
+          formatBarTitle={(d, v) => `${d}: ${v} pedidos`}
         />
       </div>
 

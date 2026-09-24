@@ -78,7 +78,7 @@ export default async function ContactPage() {
                                     {cms?.phone ?? "+1 (555) 800-XCIX"}
                                 </p>
                                 <p className="text-[11px] font-medium text-muted-foreground mt-1">
-                                    Lun - Vie • 9AM - 6PM
+                                    Lun - Vie • 9:00 - 18:00
                                 </p>
                             </div>
                         </div>
@@ -93,7 +93,7 @@ export default async function ContactPage() {
                                 </h3>
                                 <p className="font-bold text-base">
                                     {cms?.address ??
-                                        "123 Design Avenue, Metropolis, NY 10012"}
+                                        "123 Avenida del Diseño, Metrópolis, NY 10012"}
                                 </p>
                                 <button
                                     type="button"

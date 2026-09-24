@@ -50,27 +50,26 @@ export function ForgotPasswordPageClient() {
                             <CheckCircle2 className="size-8" />
                         </div>
                         <CardTitle className="text-2xl font-bold tracking-tight">
-                            Email Sent
+                            Correo enviado
                         </CardTitle>
                         <CardDescription className="text-sm font-medium mt-1">
-                            Check your inbox for reset instructions
+                            Revisá tu bandeja de entrada para ver las instrucciones
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="text-center px-8 pb-8 space-y-6">
                         <p className="text-sm text-muted-foreground font-medium leading-relaxed">
-                            We've sent a recovery link to{" "}
+                            Enviamos un enlace de recuperación a{" "}
                             <span className="font-bold text-foreground">
                                 {email}
                             </span>
-                            . If an account is associated with this address,
-                            you'll receive instructions shortly.
+                            . Si hay una cuenta asociada a esta dirección, recibirás las instrucciones en breve.
                         </p>
                         <Button
                             variant="outline"
                             className="w-full h-12 rounded-xl border-border font-bold text-xs transition-all hover:bg-muted"
                             onClick={() => setSubmitted(false)}
                         >
-                            Try Different Email
+                            Probar con otro correo
                         </Button>
                     </CardContent>
                     <CardFooter className="justify-center border-t border-border/50 p-6 bg-muted/10">
@@ -79,7 +78,7 @@ export function ForgotPasswordPageClient() {
                             className="flex items-center text-xs font-semibold text-muted-foreground hover:text-primary transition-colors"
                         >
                             <ArrowLeft className="mr-2 size-4" />
-                            Return to Sign In
+                            Volver al inicio de sesión
                         </Link>
                     </CardFooter>
                 </Card>
@@ -97,10 +96,10 @@ export function ForgotPasswordPageClient() {
                     </div>
                     <div className="space-y-1">
                         <h1 className="text-3xl font-bold tracking-tight text-foreground">
-                            Recover Account
+                            Recuperar cuenta
                         </h1>
                         <p className="text-muted-foreground font-medium text-sm">
-                            Reset your security credentials
+                            Restablecé tus credenciales de seguridad
                         </p>
                     </div>
                 </div>
@@ -109,10 +108,10 @@ export function ForgotPasswordPageClient() {
                     <div className="absolute top-0 left-0 w-full h-1.5 bg-primary" />
                     <CardHeader className="space-y-1 pb-6 pt-8 px-8">
                         <CardTitle className="text-xl font-bold">
-                            Password Reset
+                            Restablecer contraseña
                         </CardTitle>
                         <CardDescription className="text-sm font-medium">
-                            Enter your email to receive a recovery link
+                            Ingresá tu correo para recibir un enlace de recuperación
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="px-8 pb-8">
@@ -148,7 +147,7 @@ export function ForgotPasswordPageClient() {
                                     <Spinner className="mr-2 size-4" />
                                 ) : (
                                     <>
-                                        Send Reset Link{" "}
+                                        Enviar enlace{" "}
                                         <ArrowRight className="ml-2 size-4" />
                                     </>
                                 )}
@@ -161,7 +160,7 @@ export function ForgotPasswordPageClient() {
                             className="flex items-center text-xs font-semibold text-muted-foreground hover:text-primary transition-colors"
                         >
                             <ArrowLeft className="mr-2 size-4" />
-                            Back to Sign In
+                            Volver al inicio de sesión
                         </Link>
                     </CardFooter>
                 </Card>

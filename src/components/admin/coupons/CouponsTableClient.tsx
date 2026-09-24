@@ -235,7 +235,7 @@ return (
 <div className="hidden md:grid md:grid-cols-5 gap-4">
 <StatCard icon={Ticket} title="Total de Cupones" value={stats.totalCoupons} color="bg-purple-500" />
 <StatCard icon={Zap} title="Activo" value={stats.activeCoupons} color="bg-green-500" />
-<StatCard icon={CheckCircle2} title="Used" value={stats.usedCoupons} color="bg-blue-500" />
+<StatCard icon={CheckCircle2} title="Usados" value={stats.usedCoupons} color="bg-blue-500" />
 <StatCard icon={XCircle} title="Sin Usar" value={stats.unusedCoupons} color="bg-muted-foreground" />
 <StatCard icon={Clock} title="Expirados" value={stats.expiredCoupons} color="bg-red-500" />
 </div>
@@ -245,14 +245,14 @@ return (
 <AccordionTrigger className="px-4 hover:no-underline">
 <div className="flex items-center gap-3">
 <Ticket className="size-5 text-muted-foreground" />
-<span className="font-medium">Coupon Statistics</span>
+<span className="font-medium">Estadísticas de cupones</span>
 </div>
 </AccordionTrigger>
 <AccordionContent className="px-4 pb-4 pt-2">
 <div className="grid grid-cols-1 gap-4">
 <StatCard icon={Ticket} title="Total de Cupones" value={stats.totalCoupons} color="bg-purple-500" />
 <StatCard icon={Zap} title="Activo" value={stats.activeCoupons} color="bg-green-500" />
-<StatCard icon={CheckCircle2} title="Used" value={stats.usedCoupons} color="bg-blue-500" />
+<StatCard icon={CheckCircle2} title="Usados" value={stats.usedCoupons} color="bg-blue-500" />
 <StatCard icon={XCircle} title="Sin Usar" value={stats.unusedCoupons} color="bg-muted-foreground" />
 <StatCard icon={Clock} title="Expirados" value={stats.expiredCoupons} color="bg-red-500" />
 </div>
@@ -287,9 +287,9 @@ return (
 <SelectValue placeholder="Todos los Tipos" />
 </SelectTrigger>
 <SelectContent>
-<SelectItem value="all">All Types</SelectItem>
-<SelectItem value={CouponType.FIXED}>Amount</SelectItem>
-<SelectItem value={CouponType.PERCENT}>Percent</SelectItem>
+<SelectItem value="all">Todos los tipos</SelectItem>
+<SelectItem value={CouponType.FIXED}>Monto</SelectItem>
+<SelectItem value={CouponType.PERCENT}>Porcentaje</SelectItem>
 </SelectContent>
 </Select>
 
@@ -298,11 +298,11 @@ return (
 <SelectValue placeholder="Todos los Estados" />
 </SelectTrigger>
 <SelectContent>
-<SelectItem value="all">All Status</SelectItem>
-<SelectItem value="active">Active</SelectItem>
-<SelectItem value="used">Used</SelectItem>
-<SelectItem value="unused">Unused</SelectItem>
-<SelectItem value="expired">Expired</SelectItem>
+<SelectItem value="all">Todos los estados</SelectItem>
+<SelectItem value="active">Activo</SelectItem>
+<SelectItem value="used">Usado</SelectItem>
+<SelectItem value="unused">Sin usar</SelectItem>
+<SelectItem value="expired">Expirado</SelectItem>
 </SelectContent>
 </Select>
 
@@ -320,7 +320,7 @@ className="max-w-md"
 <Button onClick={() => {
 const input = document.querySelector('input[placeholder="Buscar por código..."]') as HTMLInputElement;
 onSearch(input?.value || "");
-}}>Search</Button>
+}}>Buscar</Button>
 </div>
 </div>
 </CardContent>
@@ -353,20 +353,20 @@ return (
 <Table>
 <TableHeader>
 <TableRow>
-<TableHead className="w-[150px]">Code</TableHead>
-<TableHead className="w-[120px]">Type</TableHead>
-{isSuperAdmin && <TableHead className="w-[120px]">Tenant</TableHead>}
-<TableHead className="w-[120px]">Value</TableHead>
-<TableHead className="w-[120px]">Status</TableHead>
-<TableHead className="w-[150px]">Expires</TableHead>
-<TableHead className="w-[150px]">Actions</TableHead>
+<TableHead className="w-[150px]">Código</TableHead>
+<TableHead className="w-[120px]">Tipo</TableHead>
+{isSuperAdmin && <TableHead className="w-[120px]">Organización</TableHead>}
+<TableHead className="w-[120px]">Valor</TableHead>
+<TableHead className="w-[120px]">Estado</TableHead>
+<TableHead className="w-[150px]">Vence</TableHead>
+<TableHead className="w-[150px]">Acciones</TableHead>
 </TableRow>
 </TableHeader>
 <TableBody>
 {coupons.length === 0 ? (
 <TableRow>
 <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-No coupons found
+No se encontraron cupones
 </TableCell>
 </TableRow>
 ) : (
@@ -382,7 +382,7 @@ return (
 ) : (
 <DollarSign className="size-4 text-muted-foreground" />
 )}
-<span className="capitalize">{c.type === CouponType.PERCENT ? 'Percent' : 'Fixed'}</span>
+<span className="capitalize">{c.type === CouponType.PERCENT ? 'Porcentaje' : 'Monto fijo'}</span>
 </div>
 </TableCell>
 {isSuperAdmin && (
@@ -406,7 +406,7 @@ return (
 <Button size="icon" variant="ghost" className="size-8 text-muted-foreground hover:text-blue-500 hover:bg-blue-50" onClick={() => onView(c)} title="Ver Detalles">
 <Ticket className="size-4" />
 </Button>
-<Button size="icon" variant="ghost" className="size-8 text-muted-foreground hover:text-primary hover:bg-primary/10" onClick={() => onEdit(c)} title="Edit">
+<Button size="icon" variant="ghost" className="size-8 text-muted-foreground hover:text-primary hover:bg-primary/10" onClick={() => onEdit(c)} title="Editar">
 <Edit className="size-4" />
 </Button>
 <Button size="icon" variant="ghost" className="size-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10" onClick={() => onDelete(c.id)} title="Eliminar" disabled={isDeleting === c.id}>
@@ -425,7 +425,7 @@ return (
 {pagination.totalItems > 0 && (
 <div className="flex flex-col sm:flex-row items-center justify-between px-4 py-3 border-t gap-3">
 <div className="text-sm text-muted-foreground">
-Showing {((pagination.currentPage - 1) * pagination.itemsPerPage) + 1} to {Math.min(pagination.currentPage * pagination.itemsPerPage, pagination.totalItems)} of {pagination.totalItems} results
+Mostrando {((pagination.currentPage - 1) * pagination.itemsPerPage) + 1} a {Math.min(pagination.currentPage * pagination.itemsPerPage, pagination.totalItems)} de {pagination.totalItems} resultados
 </div>
 <div className="flex gap-2">
 <Button
@@ -435,11 +435,11 @@ onClick={() => onPageChange(pagination.currentPage - 1)}
 disabled={pagination.currentPage === 1}
 >
 <ChevronLeft className="size-4 mr-1" />
-Previous
+Anterior
 </Button>
 <div className="hidden sm:flex items-center gap-1">
 <span className="text-sm text-muted-foreground px-2">
-Page {pagination.currentPage} of {pagination.totalPages}
+Página {pagination.currentPage} de {pagination.totalPages}
 </span>
 </div>
 <Button
@@ -448,7 +448,7 @@ size="sm"
 onClick={() => onPageChange(pagination.currentPage + 1)}
 disabled={pagination.currentPage === pagination.totalPages || pagination.totalPages === 0}
 >
-Next
+Siguiente
 <ChevronRight className="size-4 ml-1" />
 </Button>
 </div>
@@ -491,7 +491,7 @@ return (
 ) : (
 <DollarSign className="size-4 text-muted-foreground" />
 )}
-<span className="text-sm capitalize">{c.type === CouponType.PERCENT ? 'Percent' : 'Fixed'}</span>
+<span className="text-sm capitalize">{c.type === CouponType.PERCENT ? 'Porcentaje' : 'Monto fijo'}</span>
 <span className="font-medium">
 {c.type === CouponType.PERCENT ? `${c.value}%` : `$${c.value}`}
 </span>
@@ -500,16 +500,16 @@ return (
 <Badge variant={status.variant}>{status.label}</Badge>
 </div>
 <div className="text-sm text-muted-foreground">
-Expires: {formatDate(c.expiresAt)}
+Vence: {formatDate(c.expiresAt)}
 </div>
 <div className="flex gap-2">
 <Button size="sm" variant="outline" className="flex-1" onClick={() => onView(c)}>
 <Ticket className="size-4 mr-1" />
-View
+Ver
 </Button>
 <Button size="sm" className="flex-1" onClick={() => onEdit(c)}>
 <Edit className="size-4 mr-1" />
-Edit
+Editar
 </Button>
 <Button size="sm" variant="destructive" onClick={() => onDelete(c.id)} disabled={isDeleting === c.id}>
 {isDeleting === c.id ? <Spinner className="size-4" /> : <Trash2 className="size-4" />}
@@ -532,7 +532,7 @@ disabled={pagination.currentPage === 1}
 <ChevronLeft className="size-4" />
 </Button>
 <span className="text-sm text-muted-foreground">
-Page {pagination.currentPage} of {pagination.totalPages}
+Página {pagination.currentPage} de {pagination.totalPages}
 </span>
 <Button
 variant="outline"
@@ -557,7 +557,7 @@ return (
 <div className="space-y-4">
 <div className="grid grid-cols-2 gap-4">
 <div className="space-y-2">
-<Label>Code *</Label>
+<Label>Código *</Label>
 <Input
 value={form.code}
 onChange={(e) => onFormChange({ ...form, code: e.target.value })}
@@ -566,7 +566,7 @@ className="uppercase"
 />
 </div>
 <div className="space-y-2">
-<Label>Type</Label>
+<Label>Tipo</Label>
 <Select
 value={form.type}
 onValueChange={(v) => onFormChange({ ...form, type: v as CouponType })}
@@ -575,8 +575,8 @@ onValueChange={(v) => onFormChange({ ...form, type: v as CouponType })}
 <SelectValue placeholder="Seleccionar tipo" />
 </SelectTrigger>
 <SelectContent>
-<SelectItem value={CouponType.FIXED}>Amount ($)</SelectItem>
-<SelectItem value={CouponType.PERCENT}>Percent (%)</SelectItem>
+<SelectItem value={CouponType.FIXED}>Monto ($)</SelectItem>
+<SelectItem value={CouponType.PERCENT}>Porcentaje (%)</SelectItem>
 </SelectContent>
 </Select>
 </div>
@@ -584,7 +584,7 @@ onValueChange={(v) => onFormChange({ ...form, type: v as CouponType })}
 
 <div className="grid grid-cols-2 gap-4">
 <div className="space-y-2">
-<Label>Value *</Label>
+<Label>Valor *</Label>
 <Input
 type="number"
 min="0"
@@ -596,7 +596,7 @@ placeholder={form.type === CouponType.PERCENT ? "10" : "25"}
 />
 </div>
 <div className="space-y-2">
-<Label>Expires (Optional)</Label>
+<Label>Vencimiento (opcional)</Label>
 <Input
 type="datetime-local"
 value={form.expiresAt}
@@ -606,7 +606,7 @@ onChange={(e) => onFormChange({ ...form, expiresAt: e.target.value })}
 </div>
 
 <div className="space-y-2">
-<Label>Description</Label>
+<Label>Descripción</Label>
 <Input
 value={form.description}
 onChange={(e) => onFormChange({ ...form, description: e.target.value })}
@@ -616,7 +616,7 @@ placeholder="Descripción opcional"
 
 <div className="grid grid-cols-2 gap-4">
 <div className="space-y-2">
-<Label>Min Purchase Amount</Label>
+<Label>Monto mínimo de compra</Label>
 <Input
 type="number"
 min="0"
@@ -627,7 +627,7 @@ placeholder="0"
 />
 </div>
 <div className="space-y-2">
-<Label>Max Discount Amount</Label>
+<Label>Monto máximo del descuento</Label>
 <Input
 type="number"
 min="0"
@@ -642,7 +642,7 @@ disabled={form.type !== CouponType.PERCENT}
 
 <div className="grid grid-cols-2 gap-4">
 <div className="space-y-2">
-<Label>Usage Limit</Label>
+<Label>Límite de usos</Label>
 <Input
 type="number"
 min="0"
@@ -656,7 +656,7 @@ placeholder="Ilimitado"
 checked={form.active}
 onCheckedChange={(checked) => onFormChange({ ...form, active: checked })}
 />
-<Label>Active</Label>
+<Label>Activo</Label>
 </div>
 </div>
 </div>
@@ -682,13 +682,13 @@ return (
 <Dialog open={open} onOpenChange={onOpenChange}>
 <DialogContent className="max-w-md">
 <DialogHeader>
-<DialogTitle>Add New Coupon</DialogTitle>
+<DialogTitle>Agregar cupón</DialogTitle>
 </DialogHeader>
 <CouponFormFields form={form} onFormChange={onFormChange} />
 <DialogFooter>
-<Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+<Button variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
 <Button onClick={onCreate} disabled={isCreating}>
-{isCreating ? <><Spinner className="mr-2" /> Creating…</> : "Crear Cupón"}
+{isCreating ? <><Spinner className="mr-2" /> Creando…</> : "Crear cupón"}
 </Button>
 </DialogFooter>
 </DialogContent>
@@ -715,13 +715,13 @@ return (
 <Dialog open={open} onOpenChange={onOpenChange}>
 <DialogContent className="max-w-md">
 <DialogHeader>
-<DialogTitle>Edit Coupon</DialogTitle>
+<DialogTitle>Editar cupón</DialogTitle>
 </DialogHeader>
 <CouponFormFields form={form} onFormChange={onFormChange} />
 <DialogFooter>
-<Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+<Button variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
 <Button onClick={onSave} disabled={isEditing}>
-{isEditing ? <><Spinner className="mr-2" /> Saving…</> : "Guardar Cambios"}
+{isEditing ? <><Spinner className="mr-2" /> Guardando…</> : "Guardar cambios"}
 </Button>
 </DialogFooter>
 </DialogContent>
@@ -744,17 +744,17 @@ return (
 <Dialog open={open} onOpenChange={onOpenChange}>
 <DialogContent className="max-w-md">
 <DialogHeader>
-<DialogTitle>Coupon Details</DialogTitle>
+<DialogTitle>Detalles del cupón</DialogTitle>
 </DialogHeader>
 {coupon && (
 <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <span className="text-sm font-medium text-muted-foreground">Code</span>
+              <span className="text-sm font-medium text-muted-foreground">Código</span>
               <p className="font-mono font-bold text-lg">{coupon.code}</p>
             </div>
             <div>
-              <span className="text-sm font-medium text-muted-foreground">Status</span>
+              <span className="text-sm font-medium text-muted-foreground">Estado</span>
 <div className="mt-1">
 <Badge variant={getCouponStatus(coupon).variant}>{getCouponStatus(coupon).label}</Badge>
 </div>
@@ -763,11 +763,11 @@ return (
 
 <div className="grid grid-cols-2 gap-4">
             <div>
-              <span className="text-sm font-medium text-muted-foreground">Type</span>
-              <p className="capitalize">{coupon.type === CouponType.PERCENT ? 'Percent' : 'Fixed Amount'}</p>
+              <span className="text-sm font-medium text-muted-foreground">Tipo</span>
+              <p className="capitalize">{coupon.type === CouponType.PERCENT ? 'Porcentaje' : 'Monto fijo'}</p>
             </div>
             <div>
-              <span className="text-sm font-medium text-muted-foreground">Value</span>
+              <span className="text-sm font-medium text-muted-foreground">Valor</span>
 <p className="font-medium">
 {coupon.type === CouponType.PERCENT ? `${coupon.value}%` : `$${coupon.value}`}
 </p>
@@ -775,45 +775,45 @@ return (
 </div>
 
           <div>
-              <span className="text-sm font-medium text-muted-foreground">Description</span>
+              <span className="text-sm font-medium text-muted-foreground">Descripción</span>
 <p className="text-sm">{coupon.description || "—"}</p>
 </div>
 
 <div className="grid grid-cols-2 gap-4">
 <div>
-              <span className="text-sm font-medium text-muted-foreground">Min Purchase</span>
+              <span className="text-sm font-medium text-muted-foreground">Compra mínima</span>
 <p>${coupon.minPurchaseAmount || 0}</p>
 </div>
 <div>
-              <span className="text-sm font-medium text-muted-foreground">Max Discount</span>
+              <span className="text-sm font-medium text-muted-foreground">Descuento máximo</span>
 <p>{coupon.maxDiscountAmount ? `$${coupon.maxDiscountAmount}` : "Ilimitado"}</p>
 </div>
 </div>
 
 <div className="grid grid-cols-2 gap-4">
 <div>
-              <span className="text-sm font-medium text-muted-foreground">Usage</span>
+              <span className="text-sm font-medium text-muted-foreground">Usos</span>
 <p>{coupon.usageCount} / {coupon.usageLimit || "∞"}</p>
 </div>
 <div>
-              <span className="text-sm font-medium text-muted-foreground">Expires</span>
+              <span className="text-sm font-medium text-muted-foreground">Vencimiento</span>
 <p>{formatDate(coupon.expiresAt)}</p>
 </div>
 </div>
 
 <div className="grid grid-cols-2 gap-4 text-xs text-muted-foreground pt-2 border-t">
 <div>
-<span className="block">Created</span>
+<span className="block">Creado</span>
 {formatDate(coupon.createdAt)}
 </div>
 <div>
-<span className="block">Updated</span>
+<span className="block">Actualizado</span>
 {formatDate(coupon.updatedAt)}
 </div>
 </div>
 
 <div className="pt-2 border-t">
-            <span className="text-sm font-medium text-muted-foreground mb-1 block">Applicable Services</span>
+            <span className="text-sm font-medium text-muted-foreground mb-1 block">Servicios aplicables</span>
 {coupon.applicableServices && coupon.applicableServices.length > 0 ? (
 <div className="flex flex-wrap gap-1">
 {coupon.applicableServices.map(serviceId => {
@@ -826,13 +826,13 @@ return (
 })}
 </div>
 ) : (
-<p className="text-sm">All Services</p>
+<p className="text-sm">Todos los servicios</p>
 )}
 </div>
 </div>
 )}
 <DialogFooter>
-<Button onClick={() => onOpenChange(false)}>Close</Button>
+<Button onClick={() => onOpenChange(false)}>Cerrar</Button>
 </DialogFooter>
 </DialogContent>
 </Dialog>
@@ -957,7 +957,7 @@ setIsCreating(false);
 
 const deleteCoupon = async (id: string) => {
 const confirmed = await confirm({
-title: "Delete Coupon",
+title: "Eliminar cupón",
 description: "¿Seguro que querés eliminar este cupón? Esta acción no se puede deshacer.",
 confirmText: "Eliminar",
 variant: "destructive",
@@ -1045,15 +1045,15 @@ setIsEditing(false);
 return (
 <div className="w-full space-y-6">
 <div className="flex justify-between items-center">
-<h2 className="text-xl font-medium">Coupons Management</h2>
+<h2 className="text-xl font-medium">Gestión de cupones</h2>
 <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
 {isSuperAdmin && (
 <Select value={tenantFilter} onValueChange={handleTenantFilterChange}>
 <SelectTrigger className="w-full sm:w-[150px]">
-<SelectValue placeholder="Todos los Tenants" />
+<SelectValue placeholder="Todos las organizaciones" />
 </SelectTrigger>
 <SelectContent>
-<SelectItem value="all">All Tenants</SelectItem>
+<SelectItem value="all">Todas las organizaciones</SelectItem>
 </SelectContent>
 </Select>
 )}
@@ -1063,7 +1063,7 @@ loadServicesIfNeeded();
 setCreateOpen(true);
 }}>
 <Plus className="size-4 mr-2" />
-Add Coupon
+Agregar cupón
 </Button>
 </div>
 </div>

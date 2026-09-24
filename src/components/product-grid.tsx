@@ -44,7 +44,7 @@ export default function ProductGrid({
         icon={PackageOpen}
         title="No se encontraron productos"
         description="No encontramos productos que coincidan con tu búsqueda. Probá ajustar los filtros."
-        actionLabel="Clear Filters"
+        actionLabel="Limpiar filtros"
         actionHref="/products"
       />
     );
@@ -72,7 +72,7 @@ export default function ProductGrid({
                   {p.image ? (
                     <Image
                       src={p.image}
-                      alt={p.title || 'Product image'}
+                      alt={p.title || 'Imagen del producto'}
                       fill
                       sizes="256px"
                       className="object-cover transition-transform duration-700 group-hover:scale-110"
@@ -85,12 +85,12 @@ export default function ProductGrid({
                   <div className="absolute top-4 right-4 z-10">
                     {!inStock && (
                       <Badge variant="destructive" className="rounded-full px-3 py-1 font-bold text-[10px] uppercase tracking-widest shadow-xl border-2 border-background">
-                        Sold Out
+                        Agotado
                       </Badge>
                     )}
                     {lowStock && inStock && (
                       <Badge className="bg-destructive text-destructive-foreground rounded-full px-3 py-1 font-bold text-[10px] uppercase tracking-widest shadow-xl border-2 border-background">
-                        Last {p.stock}
+                        Últimas {p.stock}
                       </Badge>
                     )}
                   </div>
@@ -114,7 +114,7 @@ export default function ProductGrid({
                       </div>
                       <div className="text-right">
                         <div className="text-3xl font-bold text-foreground">${p.price}</div>
-                        <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mt-1">USD Tax Inc.</p>
+                        <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Impuestos incluidos</p>
                       </div>
                     </div>
                     {p.description && (
@@ -133,7 +133,7 @@ export default function ProductGrid({
                       {loadingId === p.id ? (
                         <div className="flex items-center gap-2">
                           <Loader2 className="size-4 animate-spin" />
-                          <span>Processing</span>
+                          <span>Procesando</span>
                         </div>
                       ) : (
                         <div className="flex items-center gap-2">
@@ -145,7 +145,7 @@ export default function ProductGrid({
                     <Button variant="outline" asChild className="h-14 px-10 rounded-xl font-bold border-2 border-border hover:bg-muted transition-all">
                       <Link href={`/products/${p.id}`}>
                         <Eye className="mr-2 size-4" />
-                        View Details
+                        Ver detalles
                       </Link>
                     </Button>
                   </div>
@@ -176,7 +176,7 @@ export default function ProductGrid({
               {p.image ? (
                 <Image
                   src={p.image}
-                  alt={p.title || 'Product image'}
+                  alt={p.title || 'Imagen del producto'}
                   fill
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                   className="object-cover transition-transform duration-1000 group-hover:scale-110"
@@ -191,12 +191,12 @@ export default function ProductGrid({
               <div className="absolute top-4 right-4 flex flex-col gap-2 z-10">
                 {!inStock && (
                     <Badge variant="destructive" className="rounded-full px-3 py-1 font-bold text-[10px] uppercase tracking-widest shadow-xl border-2 border-background">
-                    Sold Out
+                    Agotado
                     </Badge>
                 )}
                 {lowStock && inStock && (
                     <Badge className="bg-destructive text-destructive-foreground rounded-full px-3 py-1 font-bold text-[10px] uppercase tracking-widest shadow-xl border-2 border-background">
-                    Last {p.stock}
+                    Últimas {p.stock}
                     </Badge>
                 )}
               </div>
@@ -204,7 +204,7 @@ export default function ProductGrid({
               {/* View Overlay */}
               <div className="absolute inset-0 bg-foreground/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center backdrop-blur-[1px]">
                 <div className="px-6 py-3 bg-background text-foreground border border-foreground/10 rounded-full font-bold text-[10px] uppercase tracking-widest translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
-                    View Product →
+                    Ver producto →
                 </div>
               </div>
             </Link>
@@ -242,7 +242,7 @@ export default function ProductGrid({
                     {loadingId === p.id ? (
                     <div className="flex items-center gap-2">
                         <Loader2 className="size-4 animate-spin" />
-                        <span>Processing</span>
+                        <span>Procesando</span>
                     </div>
                     ) : (
                     <div className="flex items-center gap-2">

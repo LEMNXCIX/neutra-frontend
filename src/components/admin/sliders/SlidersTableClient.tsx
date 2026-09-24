@@ -117,15 +117,15 @@ function SliderFormFields({
   return (
     <div className="space-y-4">
       <div>
-        <label htmlFor={`${prefix}-slider-title`} className="text-sm font-medium">Title *</label>
+        <label htmlFor={`${prefix}-slider-title`} className="text-sm font-medium">Título *</label>
         <Input id={`${prefix}-slider-title`} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Título del slider" />
       </div>
       <div>
-        <label htmlFor={`${prefix}-slider-desc`} className="text-sm font-medium">Description</label>
+        <label htmlFor={`${prefix}-slider-desc`} className="text-sm font-medium">Descripción</label>
         <Input id={`${prefix}-slider-desc`} value={form.desc} onChange={(e) => setForm({ ...form, desc: e.target.value })} placeholder="Descripción opcional" />
       </div>
       <div>
-        <label htmlFor={`${prefix}-slider-image`} className="text-sm font-medium">Image</label>
+        <label htmlFor={`${prefix}-slider-image`} className="text-sm font-medium">Imagen</label>
         <Input id={`${prefix}-slider-image`} type="file" accept="image/*" onChange={(e) => onImageUpload(e, isEdit)} />
         {imagePreview && (
           <div className="mt-2 relative w-full h-32 rounded overflow-hidden">
@@ -135,7 +135,7 @@ function SliderFormFields({
       </div>
       <div className="flex items-center gap-2">
         <Switch id={`${prefix}-slider-active`} checked={form.active} onCheckedChange={(checked) => setForm({ ...form, active: checked })} />
-        <label htmlFor={`${prefix}-slider-active`} className="text-sm font-medium">Active</label>
+        <label htmlFor={`${prefix}-slider-active`} className="text-sm font-medium">Activo</label>
       </div>
     </div>
   );
@@ -187,9 +187,9 @@ function StatsSection({ stats }: { stats: Stats }) {
   return (
     <>
       <div className="hidden md:grid md:grid-cols-4 gap-4">
-        <StatCard icon={ImageIcon} title="Total de Sliders" value={stats.totalSliders} color="bg-purple-500" />
-        <StatCard icon={CheckCircle2} title="Sliders Activos" value={stats.activeSliders} color="bg-green-500" />
-        <StatCard icon={XCircle} title="Sliders Inactivos" value={stats.inactiveSliders} color="bg-red-500" />
+        <StatCard icon={ImageIcon} title="Total de carruseles" value={stats.totalSliders} color="bg-purple-500" />
+        <StatCard icon={CheckCircle2} title="Carruseles activos" value={stats.activeSliders} color="bg-green-500" />
+        <StatCard icon={XCircle} title="Carruseles inactivos" value={stats.inactiveSliders} color="bg-red-500" />
         <StatCard icon={Upload} title="Con Imágenes" value={stats.withImages} color="bg-blue-500" />
       </div>
       <Accordion type="single" collapsible className="w-full md:hidden">
@@ -197,14 +197,14 @@ function StatsSection({ stats }: { stats: Stats }) {
           <AccordionTrigger className="px-4 hover:no-underline">
             <div className="flex items-center gap-3">
               <ImageIcon className="size-5 text-muted-foreground" />
-              <span className="font-medium">Slider Statistics</span>
+              <span className="font-medium">Estadísticas de carruseles</span>
             </div>
           </AccordionTrigger>
           <AccordionContent className="px-4 pb-4 pt-2">
             <div className="grid grid-cols-1 gap-4">
-              <StatCard icon={ImageIcon} title="Total de Sliders" value={stats.totalSliders} color="bg-purple-500" />
-              <StatCard icon={CheckCircle2} title="Sliders Activos" value={stats.activeSliders} color="bg-green-500" />
-              <StatCard icon={XCircle} title="Sliders Inactivos" value={stats.inactiveSliders} color="bg-red-500" />
+              <StatCard icon={ImageIcon} title="Total de carruseles" value={stats.totalSliders} color="bg-purple-500" />
+              <StatCard icon={CheckCircle2} title="Carruseles activos" value={stats.activeSliders} color="bg-green-500" />
+              <StatCard icon={XCircle} title="Carruseles inactivos" value={stats.inactiveSliders} color="bg-red-500" />
               <StatCard icon={Upload} title="Con Imágenes" value={stats.withImages} color="bg-blue-500" />
             </div>
           </AccordionContent>
@@ -226,12 +226,12 @@ function FilterBar({ statusFilter, searchQuery, onFilterChange, onSearch }: {
         <div className="flex flex-wrap gap-3">
           <Select value={statusFilter} onValueChange={onFilterChange}>
             <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Todos los Estados" />
+              <SelectValue placeholder="Todos los estados" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Statuses</SelectItem>
-              <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="inactive">Inactive</SelectItem>
+              <SelectItem value="all">Todos los estados</SelectItem>
+              <SelectItem value="active">Activo</SelectItem>
+              <SelectItem value="inactive">Inactivo</SelectItem>
             </SelectContent>
           </Select>
           <div className="flex gap-2 flex-1">
@@ -253,7 +253,7 @@ function FilterBar({ statusFilter, searchQuery, onFilterChange, onSearch }: {
                 onSearch(input?.value || "");
               }}
             >
-              Search
+              Buscar
             </Button>
           </div>
         </div>
@@ -278,18 +278,18 @@ function DesktopSlidersTable({ sliders, isSuperAdmin, isDeleting, onEdit, onDele
           <TableHeader>
             <TableRow>
               <TableHead className="w-[120px]">ID</TableHead>
-              <TableHead className="w-[120px]">Image</TableHead>
-              {isSuperAdmin && <TableHead className="w-[120px]">Tenant</TableHead>}
-              <TableHead className="w-[220px]">Title</TableHead>
-              <TableHead className="w-[100px]">Active</TableHead>
-              <TableHead className="w-[150px]">Actions</TableHead>
+              <TableHead className="w-[120px]">Imagen</TableHead>
+              {isSuperAdmin && <TableHead className="w-[120px]">Organización</TableHead>}
+              <TableHead className="w-[220px]">Título</TableHead>
+              <TableHead className="w-[100px]">Activo</TableHead>
+              <TableHead className="w-[150px]">Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {sliders.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                  No sliders found
+                  No se encontraron carruseles
                 </TableCell>
               </TableRow>
             ) : (
@@ -329,11 +329,11 @@ function DesktopSlidersTable({ sliders, isSuperAdmin, isDeleting, onEdit, onDele
                   <TableCell>
                     {s.active ? (
                       <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100 border-none shadow-none text-[10px] font-bold uppercase tracking-wider">
-                        Active
+                        Activo
                       </Badge>
                     ) : (
                       <Badge variant="secondary" className="bg-muted text-muted-foreground hover:bg-muted border-none shadow-none text-[10px] font-bold uppercase tracking-wider">
-                        Inactive
+                        Inactivo
                       </Badge>
                     )}
                   </TableCell>
@@ -356,16 +356,16 @@ function DesktopSlidersTable({ sliders, isSuperAdmin, isDeleting, onEdit, onDele
       {pagination.totalItems > 0 && (
         <div className="flex flex-col sm:flex-row items-center justify-between px-4 py-3 border-t gap-3">
           <div className="text-sm text-muted-foreground">
-            Showing {(pagination.currentPage - 1) * pagination.itemsPerPage + 1} to{" "}
-            {Math.min(pagination.currentPage * pagination.itemsPerPage, pagination.totalItems)} of {pagination.totalItems} results
+            Mostrando {(pagination.currentPage - 1) * pagination.itemsPerPage + 1} a{" "}
+            {Math.min(pagination.currentPage * pagination.itemsPerPage, pagination.totalItems)} de {pagination.totalItems} resultados
           </div>
           <div className="flex gap-2">
             <Button variant="outline" size="sm" onClick={() => onPageChange(pagination.currentPage - 1)} disabled={pagination.currentPage === 1}>
-              <ChevronLeft className="size-4 mr-1" /> Previous
+              <ChevronLeft className="size-4 mr-1" /> Anterior
             </Button>
             <div className="hidden sm:flex items-center gap-1">
               <span className="text-sm text-muted-foreground px-2">
-                Page {pagination.currentPage} of {pagination.totalPages}
+                Página {pagination.currentPage} de {pagination.totalPages}
               </span>
             </div>
             <Button
@@ -374,7 +374,7 @@ function DesktopSlidersTable({ sliders, isSuperAdmin, isDeleting, onEdit, onDele
               onClick={() => onPageChange(pagination.currentPage + 1)}
               disabled={pagination.currentPage === pagination.totalPages || pagination.totalPages === 0}
             >
-              Next <ChevronRight className="size-4 ml-1" />
+              Siguiente <ChevronRight className="size-4 ml-1" />
             </Button>
           </div>
         </div>
@@ -414,20 +414,20 @@ function MobileSlidersCards({ sliders, onEdit, onDelete, pagination, onPageChang
                 </div>
                 {s.active ? (
                   <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100 rounded-full font-bold text-[10px] uppercase tracking-wider">
-                    Active
+                    Activo
                   </Badge>
                 ) : (
                   <Badge variant="secondary" className="bg-muted text-muted-foreground hover:bg-muted rounded-full font-bold text-[10px] uppercase tracking-wider">
-                    Inactive
+                    Inactivo
                   </Badge>
                 )}
               </div>
               <div className="flex gap-2 pt-2 border-t border-border/50">
                 <Button size="sm" variant="outline" className="flex-1 font-semibold h-10" onClick={() => onEdit(s)}>
-                  <Edit className="size-4 mr-2" /> Edit
+                  <Edit className="size-4 mr-2" /> Editar
                 </Button>
                 <Button size="sm" variant="outline" className="flex-1 font-semibold h-10 text-rose-600 border-rose-100 hover:bg-rose-50" onClick={() => onDelete(s.id)}>
-                  <Trash2 className="size-4 mr-2" /> Delete
+                  <Trash2 className="size-4 mr-2" /> Eliminar
                 </Button>
               </div>
             </div>
@@ -441,7 +441,7 @@ function MobileSlidersCards({ sliders, onEdit, onDelete, pagination, onPageChang
               <ChevronLeft className="size-4" />
             </Button>
             <span className="text-sm text-muted-foreground">
-              Page {pagination.currentPage} of {pagination.totalPages}
+              Página {pagination.currentPage} de {pagination.totalPages}
             </span>
             <Button
               variant="outline"
@@ -473,15 +473,15 @@ function CreateSliderDialog({ open, form, imagePreview, isCreating, onOpenChange
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Add New Slider</DialogTitle>
+          <DialogTitle>Agregar carrusel</DialogTitle>
         </DialogHeader>
         <SliderFormFields form={form} setForm={onFormChange} imagePreview={imagePreview} prefix="create" onImageUpload={onImageUpload} />
         <DialogFooter>
           <Button variant="outline" onClick={() => { onOpenChange(false); onImagePreviewChange(""); }}>
-            Cancel
+            Cancelar
           </Button>
           <Button onClick={onCreate} disabled={isCreating}>
-            {isCreating ? <><Spinner className="mr-2" /> Creating…</> : "Crear Slider"}
+            {isCreating ? <><Spinner className="mr-2" /> Creando…</> : "Crear carrusel"}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -504,15 +504,15 @@ function EditSliderDialog({ open, form, imagePreview, isEditing, onOpenChange, o
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Edit Slider</DialogTitle>
+          <DialogTitle>Editar carrusel</DialogTitle>
         </DialogHeader>
         <SliderFormFields form={form} setForm={onFormChange} imagePreview={imagePreview} prefix="edit" onImageUpload={onImageUpload} />
         <DialogFooter>
           <Button variant="outline" onClick={() => { onOpenChange(false); onImagePreviewChange(""); }}>
-            Cancel
+            Cancelar
           </Button>
           <Button onClick={onSave} disabled={isEditing}>
-            {isEditing ? <><Spinner className="mr-2" /> Saving…</> : "Guardar Cambios"}
+            {isEditing ? <><Spinner className="mr-2" /> Guardando…</> : "Guardar cambios"}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -528,20 +528,20 @@ function PageHeader({ isSuperAdmin, tenantFilter, onTenantFilterChange, onAddCli
 }) {
   return (
     <div className="flex justify-between items-center">
-      <h2 className="text-xl font-medium">Sliders Management</h2>
+      <h2 className="text-xl font-medium">Gestión de carruseles</h2>
       <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
         {isSuperAdmin && (
           <Select value={tenantFilter} onValueChange={onTenantFilterChange}>
             <SelectTrigger className="w-full sm:w-[150px]">
-              <SelectValue placeholder="Todos los Tenants" />
+              <SelectValue placeholder="Todos los tenants" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Tenants</SelectItem>
+              <SelectItem value="all">Todos los tenants</SelectItem>
             </SelectContent>
           </Select>
         )}
         <Button onClick={onAddClick}>
-          <Plus className="size-4 mr-2" /> Add Slider
+          <Plus className="size-4 mr-2" /> Agregar carrusel
         </Button>
       </div>
     </div>
@@ -676,7 +676,7 @@ function SlidersTableClientInner({
         toast.error(data?.error || "Error al crear el slider");
         return;
       }
-      toast.success("Slider creado");
+      toast.success("Carrusel creado");
       dispatch({ type: "SET_CREATE_OPEN", payload: false });
       dispatch({ type: "SET_FORM", payload: { title: "", desc: "", active: true, img: "" } });
       dispatch({ type: "SET_IMAGE_PREVIEW", payload: "" });
@@ -706,7 +706,7 @@ function SlidersTableClientInner({
                 toast.error("Error al eliminar");
                 return;
             }
-            toast.success("Slider eliminado");
+            toast.success("Carrusel eliminado");
             router.refresh();
         } catch {
             toast.error("Error de red");
@@ -754,7 +754,7 @@ function SlidersTableClientInner({
         toast.error(data?.error || "Error al actualizar");
         return;
       }
-      toast.success("Slider actualizado");
+      toast.success("Carrusel actualizado");
       dispatch({ type: "SET_EDIT_OPEN", payload: false });
       editingRef.current = null;
       dispatch({ type: "SET_FORM", payload: { title: "", desc: "", active: true, img: "" } });

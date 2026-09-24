@@ -13,13 +13,13 @@ describe('PrintReceiptButton', () => {
     it('renders the receipt label', () => {
         const { getByRole } = render(<PrintReceiptButton />);
         expect(
-            getByRole('button', { name: /download receipt/i }),
+            getByRole('button', { name: /descargar recibo/i }),
         ).toBeInTheDocument();
     });
 
     it('calls window.print on click', async () => {
         const { getByRole } = render(<PrintReceiptButton />);
-        await userEvent.click(getByRole('button', { name: /download receipt/i }));
+        await userEvent.click(getByRole('button', { name: /descargar recibo/i }));
         expect(printSpy).toHaveBeenCalled();
     });
 });

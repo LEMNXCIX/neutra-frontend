@@ -129,15 +129,15 @@ return (
 variant="outline"
 className="rounded-full px-4 py-1 border-primary/20 bg-primary/5 text-primary font-bold uppercase tracking-widest text-[10px]"
 >
-Curated Selection
+Selección curada
 </Badge>
 <h1 className="text-5xl md:text-6xl font-black tracking-tight text-foreground leading-none">
-Our{" "}
-<span className="text-primary">Collection</span>
+Nuestra{" "}
+<span className="text-primary">colección</span>
 </h1>
 <p className="text-muted-foreground text-lg font-medium max-w-lg">
-Discover {products.length} handpicked pieces
-designed for modern, minimalist living.
+Descubrí {products.length} piezas seleccionadas
+para una vida moderna y minimalista.
 </p>
 </div>
 
@@ -170,7 +170,7 @@ designed for modern, minimalist living.
 {activeFiltersCount > 0 && (
 <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 mt-8">
 <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-Active:
+Activos:
 </span>
 {search && (
 <Badge
@@ -212,7 +212,7 @@ size="sm"
 onClick={clearFilters}
 className="h-8 text-xs font-bold uppercase tracking-widest hover:text-primary rounded-full"
 >
-Clear all
+Limpiar todo
 </Button>
 </div>
 )}
@@ -230,7 +230,7 @@ className="w-full h-12 rounded-xl font-bold"
       onClick={() => dispatch({ type: "TOGGLE_SHOW_FILTERS" })}
 >
 <Filter className="size-4 mr-2 text-primary" />
-Refine Search
+Refinar búsqueda
 {activeFiltersCount > 0 && (
 <Badge
 variant="default"
@@ -254,12 +254,12 @@ htmlFor="product-search"
 className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2"
 >
 <Search className="size-4 text-primary" />
-Keywords
+Palabras clave
 </label>
 <div className="relative group">
 <Input
 id="product-search"
-placeholder="What are you looking for?"
+placeholder="¿Qué estás buscando?"
 defaultValue={search}
 onChange={(e) =>
 handleSearch(e.target.value)
@@ -279,7 +279,7 @@ htmlFor="product-category"
 className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2"
 >
 <SlidersHorizontal className="size-4 text-purple-500" />
-Category
+Categoría
 </label>
 <Select
 value={category || "all"}
@@ -293,7 +293,7 @@ className="h-12 border-border/50 rounded-xl hover:border-purple-500/50 transitio
 </SelectTrigger>
 <SelectContent className="rounded-xl border-border/50">
 <SelectItem value="all">
-Everything
+Todo
 </SelectItem>
       {state.categories.map((c) => (
 <SelectItem key={c.id} value={c.id}>
@@ -309,7 +309,7 @@ Everything
 <div className="p-4 bg-primary/5 rounded-xl w-full border border-primary/10 flex items-center justify-between group hover:bg-primary/10 transition-colors">
 <div>
 <p className="text-[10px] font-bold text-primary uppercase tracking-widest mb-1">
-Items Found
+Productos encontrados
 </p>
 <p className="text-3xl font-black text-primary leading-none">
 {products.length}
@@ -329,16 +329,16 @@ Items Found
 <Package className="size-12 text-muted-foreground" />
 </div>
 <h3 className="text-2xl font-semibold mb-2">
-No products found
+No se encontraron productos
 </h3>
 <p className="text-muted-foreground text-center mb-6 max-w-md">
 {search || category !== "all"
-? "Try adjusting your filters or search terms"
+? "Probá ajustando los filtros o términos de búsqueda"
 : "No hay productos disponibles por el momento"}
 </p>
 {activeFiltersCount > 0 && (
 <Button onClick={clearFilters} variant="outline">
-Clear Filters
+Limpiar filtros
 </Button>
 )}
 </div>

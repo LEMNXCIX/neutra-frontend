@@ -10,7 +10,7 @@ export function PrintReceiptButton() {
             onClick={() => window.print()}
         >
             <Download className="size-5 mr-3" strokeWidth={2} />
-            Download Receipt
+            Descargar recibo
         </Button>
     );
 }

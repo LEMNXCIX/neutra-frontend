@@ -69,7 +69,7 @@ function CartItemCard({
             <div>
               <h3 className="font-bold text-xl mb-1 tracking-tight group-hover:text-primary transition-colors">{item.name}</h3>
               <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest">
-                ${(item.price || 0).toFixed(2)} / unit
+                ${(item.price || 0).toFixed(2)} / unidad
               </p>
             </div>
             <div className="flex items-center justify-between mt-4">
@@ -118,7 +118,7 @@ function CouponCard({
     <Card className="border-border bg-card rounded-xl shadow-sm">
       <CardHeader className="pb-4">
         <CardTitle className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-muted-foreground">
-          <Tag className="size-4" /> Promotion Code
+          <Tag className="size-4" /> Código de promoción
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -132,7 +132,7 @@ function CouponCard({
           />
           {!coupon ? (
             <Button onClick={onApply} disabled={applyingCoupon || !code.trim()} className="h-11 px-6 rounded-xl font-black uppercase text-xs tracking-widest">
-              {applyingCoupon ? <Loader2 className="size-4 animate-spin" /> : "Apply"}
+              {applyingCoupon ? <Loader2 className="size-4 animate-spin" /> : "Aplicar"}
             </Button>
           ) : (
             <Button variant="outline" onClick={onRemove} className="h-11 rounded-xl font-black uppercase text-xs border-2">Vaciar</Button>
@@ -145,9 +145,9 @@ function CouponCard({
                 {coupon.type === "percent" ? <Percent size={14} strokeWidth={3} /> : <DollarSign size={14} strokeWidth={3} />}
               </div>
               <div>
-                <p className="font-black text-xs text-emerald-700 uppercase tracking-widest">{coupon.code} Applied</p>
+                <p className="font-black text-xs text-emerald-700 uppercase tracking-widest">{coupon.code} aplicado</p>
                 <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-tight">
-                  {coupon.type === "percent" ? `${coupon.value}% Discount Applied` : `$${coupon.value.toFixed(2)} Off Total`}
+                  {coupon.type === "percent" ? `${coupon.value}% de descuento aplicado` : `$${coupon.value.toFixed(2)} de descuento total`}
                 </p>
               </div>
             </div>
@@ -182,7 +182,7 @@ function OrderSummaryCard({
       <div className="h-2 bg-primary w-full" />
       <CardHeader className="pb-6">
         <CardTitle className="flex items-center gap-2 text-xs font-black uppercase tracking-widest opacity-60">
-          <CreditCard className="size-4" /> Final Summary
+          <CreditCard className="size-4" /> Resumen final
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -193,19 +193,19 @@ function OrderSummaryCard({
           </div>
           {discount > 0 && (
             <div className="flex justify-between text-xs font-black uppercase tracking-widest text-emerald-400">
-              <span className="flex items-center gap-1"><Tag className="size-3" /> Adjustment</span>
+              <span className="flex items-center gap-1"><Tag className="size-3" /> Ajuste</span>
               <span>-${discount.toFixed(2)}</span>
             </div>
           )}
           <div className="h-px bg-border" />
           <div className="flex justify-between items-end">
-            <span className="text-xs font-black uppercase tracking-widest opacity-60 mb-1">Total Amount</span>
+            <span className="text-xs font-black uppercase tracking-widest opacity-60 mb-1">Total</span>
             <span className="text-4xl font-black italic tracking-tighter">${total.toFixed(2)}</span>
           </div>
           {savings > 0 && (
             <div className="pt-2">
               <div className="bg-white/10 rounded-lg px-3 py-2 text-center">
-                <p className="text-[10px] font-black uppercase tracking-widest text-emerald-400">Total Saved: ${savings.toFixed(2)}</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-emerald-400">Total ahorrado: ${savings.toFixed(2)}</p>
               </div>
             </div>
           )}
@@ -218,7 +218,7 @@ function OrderSummaryCard({
           disabled={placing || loading || addressEmpty}
           size="lg"
         >
-          {placing ? <><Loader2 className="size-5 animate-spin mr-3" /> Processing</> : <>Process Order →</>}
+          {placing ? <><Loader2 className="size-5 animate-spin mr-3" /> Procesando</> : <>Realizar pedido →</>}
         </Button>
       </CardFooter>
     </Card>
@@ -302,7 +302,7 @@ export default function CartClient() {
             if (coupon) removeCoupon();
 
             setCode("");
-            toast.success("Order placed successfully! 🎉");
+            toast.success("¡Pedido realizado correctamente! 🎉");
 
             const orderId = data?.order?.id;
             router.push(orderId ? `/orders/${orderId}` : "/profile");
@@ -329,15 +329,14 @@ export default function CartClient() {
                             <ShoppingBag className="size-12 text-muted-foreground" />
                         </div>
                         <h2 className="text-2xl font-bold mb-2">
-                            Your cart is empty
+                            Tu carrito está vacío
                         </h2>
                         <p className="text-muted-foreground mb-6">
-                            Looks like you haven&apos;t added anything to your
-                            cart yet
+                            Parece que todavía no agregaste productos a tu carrito
                         </p>
                         <Button size="lg" onClick={() => router.push("/")}>
                             <ShoppingBag className="mr-2 size-5" />
-                            Start Shopping
+                            Comenzar a comprar
                         </Button>
                     </CardContent>
                 </Card>
@@ -351,14 +350,14 @@ export default function CartClient() {
                 <div className="mb-12">
                     <h1 className="text-5xl font-black uppercase tracking-tighter italic mb-3 flex items-center gap-4 text-foreground">
                         <ShoppingCart className="size-10" strokeWidth={2.5} />
-                        Your <span className="text-primary">Carrito</span>
+                        Tu <span className="text-primary">carrito</span>
                     </h1>
                     <p className="text-muted-foreground font-bold uppercase tracking-widest text-xs">
-                        Review your{" "}
+                        Revisá tu{" "}
                         {items.length === 1
-                            ? "selection"
-                            : `${items.length} selections`}{" "}
-                        before processing
+                            ? "selección"
+                            : `${items.length} selecciones`}{" "}
+                        antes de continuar
                     </p>
                 </div>
 
@@ -387,7 +386,7 @@ export default function CartClient() {
             <Card className="border-border bg-card rounded-xl shadow-sm">
               <CardHeader className="pb-4">
                 <CardTitle className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-muted-foreground">
-                  <MapPin className="size-4" /> Delivery Target
+                  <MapPin className="size-4" /> Dirección de envío
                 </CardTitle>
               </CardHeader>
               <CardContent>

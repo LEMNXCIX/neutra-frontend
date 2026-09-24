@@ -112,22 +112,22 @@ const CategoryFormFields = ({
 }) => (
   <div className="space-y-4">
     <div>
-      <label htmlFor={`${prefix}-name`} className="text-sm font-medium">Name</label>
+      <label htmlFor={`${prefix}-name`} className="text-sm font-medium">Nombre</label>
       <Input id={`${prefix}-name`} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Nombre de la categoría" />
     </div>
     <div>
-      <label htmlFor={`${prefix}-description`} className="text-sm font-medium">Description</label>
+      <label htmlFor={`${prefix}-description`} className="text-sm font-medium">Descripción</label>
       <Input id={`${prefix}-description`} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Descripción opcional" />
     </div>
     <div>
-      <label htmlFor={`${prefix}-type`} className="text-sm font-medium">Type</label>
+      <label htmlFor={`${prefix}-type`} className="text-sm font-medium">Tipo</label>
       <Select value={form.type} onValueChange={(value) => setForm({ ...form, type: value })}>
         <SelectTrigger id={`${prefix}-type`}>
           <SelectValue placeholder="Seleccionar tipo" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="PRODUCT">Product</SelectItem>
-          <SelectItem value="SERVICE">Service</SelectItem>
+          <SelectItem value="PRODUCT">Producto</SelectItem>
+          <SelectItem value="SERVICE">Servicio</SelectItem>
         </SelectContent>
       </Select>
     </div>
@@ -202,7 +202,7 @@ const CategoriesMobileStats = ({ stats }: { stats: Stats }) => (
         <div className="flex items-center gap-3">
           <Folder className="size-5 text-muted-foreground" />
           <span className="font-medium">
-            Category Statistics
+            Estadísticas de categorías
           </span>
         </div>
       </AccordionTrigger>
@@ -270,18 +270,18 @@ const CategoriesSearchBar = ({
             onSearch(input?.value || "");
           }}
         >
-          Search
+          Buscar
         </Button>
 
         <div className="w-[180px]">
           <Select value={typeFilter} onValueChange={onTypeFilterChange}>
             <SelectTrigger>
-              <SelectValue placeholder="Todos los Tipos" />
+              <SelectValue placeholder="Todos los tipos" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Types</SelectItem>
-              <SelectItem value="PRODUCT">Product</SelectItem>
-              <SelectItem value="SERVICE">Service</SelectItem>
+              <SelectItem value="all">Todos los tipos</SelectItem>
+              <SelectItem value="PRODUCT">Producto</SelectItem>
+              <SelectItem value="SERVICE">Servicio</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -293,11 +293,11 @@ const CategoriesSearchBar = ({
               onValueChange={onTenantFilterChange}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Todos los Tenants" />
+                <SelectValue placeholder="Todos los tenants" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">
-                  All Tenants
+                  Todos los tenants
                 </SelectItem>
               </SelectContent>
             </Select>
@@ -332,24 +332,24 @@ const CategoriesDesktopTable = ({
           <TableRow>
             <TableHead className="w-[120px]">ID</TableHead>
             <TableHead className="w-[200px]">
-              Name
+              Nombre
             </TableHead>
             <TableHead className="w-[300px]">
-              Description
+              Descripción
             </TableHead>
             <TableHead className="w-[100px]">
-              Type
+              Tipo
             </TableHead>
             {isSuperAdmin && (
               <TableHead className="w-[100px]">
-                Tenant
+                Organización
               </TableHead>
             )}
             <TableHead className="w-[100px]">
-              Products
+              Productos
             </TableHead>
             <TableHead className="w-[150px]">
-              Actions
+              Acciones
             </TableHead>
           </TableRow>
         </TableHeader>
@@ -360,7 +360,7 @@ const CategoriesDesktopTable = ({
                 colSpan={5}
                 className="text-center py-8 text-muted-foreground"
               >
-                No categories found
+                No se encontraron categorías
               </TableCell>
             </TableRow>
           ) : (
@@ -412,7 +412,7 @@ const CategoriesDesktopTable = ({
                       </span>
                     </div>
                     <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                      Assets
+                      Productos
                     </span>
                   </div>
                 </TableCell>
@@ -455,17 +455,17 @@ const CategoriesDesktopTable = ({
     {pagination.totalItems > 0 && (
       <div className="flex flex-col sm:flex-row items-center justify-between px-4 py-3 border-t gap-3">
         <div className="text-sm text-muted-foreground">
-          Showing{" "}
+          Mostrando{" "}
           {(pagination.currentPage - 1) *
             pagination.itemsPerPage +
             1}{" "}
-          to{" "}
+          a{" "}
           {Math.min(
             pagination.currentPage *
               pagination.itemsPerPage,
             pagination.totalItems,
           )}{" "}
-          of {pagination.totalItems} results
+          de {pagination.totalItems} resultados
         </div>
         <div className="flex gap-2">
           <Button
@@ -477,11 +477,11 @@ const CategoriesDesktopTable = ({
             disabled={pagination.currentPage === 1}
           >
             <ChevronLeft className="size-4 mr-1" />
-            Previous
+            Anterior
           </Button>
           <div className="hidden sm:flex items-center gap-1">
             <span className="text-sm text-muted-foreground px-2">
-              Page {pagination.currentPage} of{" "}
+              Página {pagination.currentPage} de{" "}
               {pagination.totalPages}
             </span>
           </div>
@@ -496,7 +496,7 @@ const CategoriesDesktopTable = ({
               pagination.totalPages || pagination.totalPages === 0
             }
           >
-            Next
+            Siguiente
             <ChevronRight className="size-4 ml-1" />
           </Button>
         </div>
@@ -559,7 +559,7 @@ const CategoriesMobileCards = ({
                 </span>
               </div>
               <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                Assets
+                Productos
               </span>
             </div>
             <div className="flex gap-2">
@@ -604,7 +604,7 @@ const CategoriesMobileCards = ({
             <ChevronLeft className="size-4" />
           </Button>
           <span className="text-sm text-muted-foreground">
-            Page {pagination.currentPage} of{" "}
+            Página {pagination.currentPage} de{" "}
             {pagination.totalPages}
           </span>
           <Button
@@ -644,7 +644,7 @@ const CreateCategoryDialog = ({
   <Dialog open={open} onOpenChange={onOpenChange}>
     <DialogContent className="max-w-md">
       <DialogHeader>
-        <DialogTitle>Add New Category</DialogTitle>
+        <DialogTitle>Agregar categoría</DialogTitle>
       </DialogHeader>
       <CategoryFormFields form={form} setForm={setForm} prefix="create-category" />
       <DialogFooter>
@@ -652,12 +652,12 @@ const CreateCategoryDialog = ({
           variant="outline"
           onClick={() => onOpenChange(false)}
         >
-          Cancel
+          Cancelar
         </Button>
         <Button onClick={onSubmit} disabled={isSubmitting}>
           {isSubmitting ? (
             <>
-              <Spinner className="mr-2" /> Creating…
+              <Spinner className="mr-2" /> Creando…
             </>
           ) : (
             "Crear Categoría"
@@ -686,7 +686,7 @@ const EditCategoryDialog = ({
   <Dialog open={open} onOpenChange={onOpenChange}>
     <DialogContent className="max-w-md">
       <DialogHeader>
-        <DialogTitle>Edit Category</DialogTitle>
+        <DialogTitle>Editar categoría</DialogTitle>
       </DialogHeader>
       <CategoryFormFields form={form} setForm={setForm} prefix="edit-category" />
       <DialogFooter>
@@ -694,12 +694,12 @@ const EditCategoryDialog = ({
           variant="outline"
           onClick={() => onOpenChange(false)}
         >
-          Cancel
+          Cancelar
         </Button>
         <Button onClick={onSubmit} disabled={isSubmitting}>
           {isSubmitting ? (
             <>
-              <Spinner className="mr-2" /> Saving…
+              <Spinner className="mr-2" /> Guardando…
             </>
           ) : (
             "Guardar Cambios"
@@ -857,10 +857,10 @@ function CategoriesTableClientInner({
   return (
     <div className="w-full space-y-6" suppressHydrationWarning>
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-medium">Categories Management</h2>
+        <h2 className="text-xl font-medium">Gestión de categorías</h2>
         <Button onClick={() => dispatch({ type: "SET_CREATE_OPEN", payload: true })}>
           <Plus className="size-4 mr-2" />
-          Add Category
+          Agregar categoría
         </Button>
       </div>
 

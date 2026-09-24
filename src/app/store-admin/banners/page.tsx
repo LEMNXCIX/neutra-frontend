@@ -3,7 +3,7 @@ import BannersTableClient from "@/components/admin/banners/BannersTableClient";
 import { validateAdminAccess } from "@/lib/server-auth";
 import { api } from '@/lib/api-client';
 
-export const metadata = { title: "Banners" };
+export const metadata = { title: "Anuncios" };
 
 export const dynamic = "force-dynamic";
 
@@ -75,7 +75,7 @@ export default async function BannersPage() {
                     className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative"
                     role="alert"
                 >
-                    <strong className="font-bold">Fetch Error: </strong>
+                    <strong className="font-bold">Error al cargar: </strong>
                     <span className="block sm:inline">{data.error}</span>
                 </div>
             )}

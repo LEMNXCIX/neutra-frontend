@@ -188,22 +188,22 @@ return (
 <Dialog open={open} onOpenChange={onOpenChange}>
 <DialogContent className="max-w-md">
 <DialogHeader>
-<DialogTitle>Edit User</DialogTitle>
+<DialogTitle>Editar usuario</DialogTitle>
 </DialogHeader>
 <div className="space-y-4">
 <div>
-<label htmlFor="edit-user-name" className="text-sm font-medium">Name</label>
+<label htmlFor="edit-user-name" className="text-sm font-medium">Nombre</label>
 <Input id="edit-user-name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Nombre del usuario" />
 </div>
 <div>
-<label htmlFor="edit-user-email" className="text-sm font-medium">Email</label>
+<label htmlFor="edit-user-email" className="text-sm font-medium">Correo electrónico</label>
 <Input id="edit-user-email" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="user@example.com" />
 </div>
 {showTenant && (
 <div>
-<label htmlFor="edit-user-tenant" className="text-sm font-medium">Tenant</label>
+<label htmlFor="edit-user-tenant" className="text-sm font-medium">Organización</label>
 <Select value={form.tenantId} onValueChange={(val) => setForm({ ...form, tenantId: val })} disabled={isLoadingTenants}>
-<SelectTrigger id="edit-user-tenant"><SelectValue placeholder="Seleccionar Tenant" /></SelectTrigger>
+<SelectTrigger id="edit-user-tenant"><SelectValue placeholder="Seleccionar organización" /></SelectTrigger>
 <SelectContent>
 {tenants.map((t) => (<SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>))}
 </SelectContent>
@@ -212,9 +212,9 @@ return (
 )}
 </div>
 <DialogFooter>
-<Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSaving}>Cancel</Button>
+<Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSaving}>Cancelar</Button>
 <Button onClick={onSave} disabled={isSaving}>
-{isSaving ? (<><Spinner className="mr-2" /> Saving…</>) : "Guardar Cambios"}
+{isSaving ? (<><Spinner className="mr-2" /> Guardando…</>) : "Guardar Cambios"}
 </Button>
 </DialogFooter>
 </DialogContent>
@@ -256,7 +256,7 @@ return (
 <AccordionTrigger className="px-4 hover:no-underline">
 <div className="flex items-center gap-3">
 <Users className="size-5 text-muted-foreground" />
-<span className="font-medium">User Statistics</span>
+<span className="font-medium">Estadísticas de usuarios</span>
 </div>
 </AccordionTrigger>
 <AccordionContent className="px-4 pb-4 pt-2">
@@ -306,15 +306,15 @@ value={roleFilter}
 onValueChange={onRoleFilterChange}
 >
 <SelectTrigger className="w-[180px]">
-<SelectValue placeholder="Todos los Roles" />
+<SelectValue placeholder="Todos los roles" />
 </SelectTrigger>
 <SelectContent>
-<SelectItem value="all">All Roles</SelectItem>
+<SelectItem value="all">Todos los roles</SelectItem>
 <SelectItem value="admin">
-Administrators
+Administradores
 </SelectItem>
 <SelectItem value="user">
-Regular Users
+Usuarios regulares
 </SelectItem>
 </SelectContent>
 </Select>
@@ -338,7 +338,7 @@ const input = document.querySelector(
 onSearch(input?.value || "");
 }}
 >
-Search
+Buscar
 </Button>
 </div>
 </div>
@@ -376,21 +376,21 @@ return (
 Avatar
 </TableHead>
 <TableHead className="w-[200px]">
-Name
+Nombre
 </TableHead>
 <TableHead className="w-[250px]">
-Email
+Correo electrónico
 </TableHead>
 {showTenant && (
 <TableHead className="w-[150px]">
-Tenant
+Organización
 </TableHead>
 )}
 <TableHead className="w-[120px]">
-Role
+Rol
 </TableHead>
 <TableHead className="w-[200px]">
-Actions
+Acciones
 </TableHead>
 </TableRow>
 </TableHeader>
@@ -401,7 +401,7 @@ Actions
 colSpan={5}
 className="text-center py-8 text-muted-foreground"
 >
-No users found
+No se encontraron usuarios
 </TableCell>
 </TableRow>
 ) : (
@@ -442,7 +442,7 @@ variant="secondary"
 className="text-[10px] font-semibold uppercase tracking-wider"
 >
 {u.tenant?.name ||
-"GLOBAL NODE"}
+"Nodo global"}
 </Badge>
 </TableCell>
 )}
@@ -453,7 +453,7 @@ getRoleColor(u.role?.name),
 "text-[10px] font-bold uppercase tracking-wider border-none shadow-none",
 )}
 >
-{u.role?.name || "NO_ROLE"}
+{u.role?.name || "Sin rol"}
 </Badge>
 </TableCell>
 <TableCell className="text-right">
@@ -486,7 +486,7 @@ onClick={() => onOpenRoleDialog(u)}
 {pagination.totalItems > 0 && (
 <div className="flex flex-col sm:flex-row items-center justify-between px-4 py-3 border-t gap-3">
 <div className="text-sm text-muted-foreground">
-Showing {startItem} to {endItem} of{" "}
+Mostrando {startItem} a {endItem} de{" "}
 {pagination.totalItems} results
 </div>
 <div className="flex gap-2">
@@ -499,7 +499,7 @@ onPageChange(pagination.currentPage - 1)
 disabled={pagination.currentPage === 1}
 >
 <ChevronLeft className="size-4 mr-1" />
-Previous
+Anterior
 </Button>
 <div className="hidden sm:flex items-center gap-1">
 {Array.from(
@@ -549,7 +549,7 @@ className="min-w-[2.5rem]"
 )}
 </div>
 <div className="sm:hidden text-sm text-muted-foreground px-2">
-Page {pagination.currentPage} of{" "}
+Página {pagination.currentPage} de{" "}
 {pagination.totalPages}
 </div>
 <Button
@@ -564,7 +564,7 @@ pagination.totalPages ||
 pagination.totalPages === 0
 }
 >
-Next
+Siguiente
 <ChevronRight className="size-4 ml-1" />
 </Button>
 </div>
@@ -620,7 +620,7 @@ getRoleColor(u.role?.name),
 "text-[9px] font-bold uppercase tracking-wider",
 )}
 >
-{u.role?.name || "NO_ROLE"}
+{u.role?.name || "Sin rol"}
 </Badge>
 {showTenant && (
 <Badge
@@ -628,7 +628,7 @@ variant="secondary"
 className="text-[9px] font-bold uppercase tracking-wider"
 >
 {u.tenant?.name ||
-"GLOBAL NODE"}
+"Nodo global"}
 </Badge>
 )}
 </div>
@@ -642,7 +642,7 @@ variant="outline"
 className="w-full h-10 font-semibold text-xs"
 onClick={() => onOpenEdit(u)}
 >
-<Edit size={14} className="mr-2" /> Edit
+<Edit size={14} className="mr-2" /> Editar
 </Button>
 <Button
 size="sm"
@@ -650,7 +650,7 @@ variant="outline"
 onClick={() => onOpenRoleDialog(u)}
 className="w-full h-10 font-semibold text-xs"
 >
-<UserCog size={14} className="mr-2" /> Role
+<UserCog size={14} className="mr-2" /> Rol
 </Button>
 </div>
 </CardContent>
@@ -671,7 +671,7 @@ disabled={pagination.currentPage === 1}
 <ChevronLeft className="size-4" />
 </Button>
 <span className="text-sm text-muted-foreground">
-Page {pagination.currentPage} of{" "}
+Página {pagination.currentPage} de{" "}
 {pagination.totalPages}
 </span>
 <Button
@@ -826,7 +826,7 @@ if (!isMounted) return null;
 return (
 <div className="w-full space-y-6" suppressHydrationWarning>
 <div className="flex justify-between items-center">
-<h2 className="text-xl font-medium">Users Management</h2>
+<h2 className="text-xl font-medium">Gestión de usuarios</h2>
 </div>
 
 <UsersDesktopStats stats={stats} />

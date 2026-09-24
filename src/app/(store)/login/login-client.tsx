@@ -66,7 +66,7 @@ export function LoginForm() {
                         Bienvenido de Nuevo
                     </h1>
                     <p className="text-muted-foreground font-medium text-sm">
-                        Secure access to your account
+                        Acceso seguro a tu cuenta
                     </p>
                 </div>
             </div>
@@ -76,7 +76,7 @@ export function LoginForm() {
                 <CardHeader className="space-y-1 pb-6 pt-8">
                     <CardTitle className="text-xl font-bold flex items-center gap-2">
                         <LogIn className="size-5 text-primary" />
-                        Sign In
+                        Iniciar sesión
                     </CardTitle>
                     <CardDescription className="text-sm font-medium">
                         Ingresá tus credenciales para continuar
@@ -111,13 +111,13 @@ export function LoginForm() {
                                     htmlFor="password"
                                     className="text-xs font-semibold text-foreground ml-1"
                                 >
-                                    Password
+                                    Contraseña
                                 </Label>
                                 <Link
                                     href="/forgot-password"
                                     className="text-xs font-semibold text-primary hover:underline underline-offset-4"
                                 >
-                                    Forgot?
+                                    ¿Te olvidaste?
                                 </Link>
                             </div>
                             <div className="relative group">
@@ -156,11 +156,11 @@ export function LoginForm() {
                             {loading ? (
                                 <>
                                     <Loader2 className="mr-2 size-4 animate-spin" />
-                                    Authenticating…
+                                    Autenticando…
                                 </>
                             ) : (
                                 <>
-                                    Sign In{" "}
+                                    Iniciar sesión{" "}
                                     <ArrowRight className="ml-2 size-4" />
                                 </>
                             )}
@@ -169,7 +169,7 @@ export function LoginForm() {
                         <div className="relative py-2">
                             <Separator className="bg-border" />
                             <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-card px-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                                OR
+                                O
                             </span>
                         </div>
 
@@ -190,7 +190,7 @@ export function LoginForm() {
             </Card>
 
             <p className="text-center text-[10px] font-medium text-muted-foreground opacity-60">
-                SECURED BY XCIX CRYPTOGRAPHY • 2026
+                PROTEGIDO POR XCIX CRYPTOGRAPHY • 2026
             </p>
         </div>
     );
