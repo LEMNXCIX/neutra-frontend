@@ -49,7 +49,11 @@ export async function POST(req: NextRequest) {
         const headers: Record<string, string> = {};
 
         if (setCookieHeader) {
-            headers["Set-Cookie"] = setCookieHeader;
+            // Browsers reject Domain=.localhost; keep the auth cookie host-only.
+            headers["Set-Cookie"] = setCookieHeader.replace(
+                /;\s*Domain=(?:\.)?localhost/gi,
+                "",
+            );
         }
 
         if (!response.ok) {
