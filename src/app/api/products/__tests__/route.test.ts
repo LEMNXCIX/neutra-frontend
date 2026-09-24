@@ -1,14 +1,11 @@
-import { describe, it, expect, vi } from 'vitest';
+import { beforeEach, describe, it, expect, vi } from 'vitest';
 
-const { createGetHandler, createPostHandler } = vi.hoisted(() => ({
+const routeMocks = vi.hoisted(() => ({
     createGetHandler: vi.fn(() => async () => ({})),
     createPostHandler: vi.fn(),
 }));
 
-vi.mock('@/lib/api-route-handler', () => ({
-    createGetHandler,
-    createPostHandler,
-}));
+vi.mock('@/lib/api-route-handler', () => routeMocks);
 
 vi.mock('next/server', () => ({
     NextResponse: {
@@ -16,7 +13,13 @@ vi.mock('next/server', () => ({
     },
 }));
 
-const { GET } = await import('@/app/api/products/route');
+let GET: typeof import('../route').GET;
+const { createGetHandler, createPostHandler } = routeMocks;
+
+beforeEach(async () => {
+    vi.resetModules();
+    ({ GET } = await import('../route'));
+});
 
 describe('products API route factory usage', () => {
     it('GET handler is created via createGetHandler with /products', () => {

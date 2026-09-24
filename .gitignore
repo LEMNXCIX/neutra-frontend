@@ -51,3 +51,5 @@ next-env.d.ts
 # Backup/temp files created by server-side writes
 /src/data/*.bak
 /src/data/*.tmp
+# Local Pi runtime state
+.atl/

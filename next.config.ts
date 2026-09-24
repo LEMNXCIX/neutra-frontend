@@ -1,6 +1,15 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  allowedDevOrigins: [
+    '192.168.68.100',
+    '192.168.68.100.nip.io',
+    // Tenant URLs use <slug>.<lan-ip>.nip.io during local development.
+    '*.192.168.68.100.nip.io',
+  ],
+  turbopack: {
+    root: __dirname,
+  },
   // Use a unique build directory per port during development to avoid conflicts
   distDir: process.env.NODE_ENV === 'development' && process.env.PORT
     ? `.next-${process.env.PORT}`

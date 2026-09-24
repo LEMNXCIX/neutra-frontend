@@ -1,4 +1,4 @@
-FROM node:20-alpine AS builder
+FROM node:22-alpine AS builder
 WORKDIR /app
 
 # Install dependencies
@@ -10,14 +10,15 @@ COPY . ./
 RUN npm run build
 
 # ---------- Runtime image ----------
-FROM node:20-alpine
+FROM node:22-alpine
 WORKDIR /app
 
 # Copy built assets from builder
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/next.config.mjs ./next.config.mjs
+COPY --from=builder /app/next.config.ts ./next.config.ts
 COPY --from=builder /app/package*.json ./
+RUN npm ci --omit=dev
 
 # Expose the Next.js default port
 EXPOSE 3000
