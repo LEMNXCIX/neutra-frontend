@@ -5,7 +5,7 @@ import { Permission } from "@/types/permission.types";
 import { api } from '@/lib/api-client';
 import { validateAdminAccess } from '@/lib/server-auth';
 
-export const metadata = { title: "Booking Roles" };
+export const metadata = { title: "Roles de reservas" };
 
 export const dynamic = "force-dynamic";
 

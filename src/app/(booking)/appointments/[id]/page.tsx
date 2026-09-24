@@ -5,8 +5,8 @@ import { api } from '@/lib/api-client';
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-    title: "Appointment Details",
-    description: "View your appointment details",
+    title: "Detalles de la cita",
+    description: "Mirá los detalles de tu cita",
 };
 import {
     Card,
@@ -29,6 +29,10 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { AppointmentDetailActions } from "@/components/booking/appointment-detail-actions";
+import {
+    APPOINTMENT_STATUS_LABELS,
+    type AppointmentStatus,
+} from "@/services/booking.service";
 
 export const dynamic = "force-dynamic";
 
@@ -66,12 +70,16 @@ const getStatusVariant = (
         PENDING: "outline",
         CONFIRMED: "default",
         IN_PROGRESS: "secondary",
+        NEEDS_REVIEW: "outline",
         COMPLETED: "secondary",
         CANCELLED: "destructive",
         NO_SHOW: "outline",
     };
     return variants[status] || "outline";
 };
+
+const getStatusLabel = (status: AppointmentStatus): string =>
+    APPOINTMENT_STATUS_LABELS[status] || status;
 
 export default async function AppointmentDetailPage(props: {
     params: Promise<{ id: string }>;
@@ -90,14 +98,14 @@ export default async function AppointmentDetailPage(props: {
                     className="flex items-center gap-2 text-primary hover:underline mb-8"
                 >
                     <ArrowLeft className="size-4" />
-                    Back to My Appointments
+                    Volver a mis citas
                 </Link>
                 <Alert variant="destructive">
                     <AlertCircle className="size-4" />
                     <AlertDescription>
                         {error === "forbidden"
-                            ? "You do not have permission to view this appointment"
-                            : "Failed to load appointment details"}
+                            ? "No tenés permiso para ver esta cita"
+                            : "No se pudieron cargar los detalles de la cita"}
                     </AlertDescription>
                 </Alert>
             </div>
@@ -113,7 +121,7 @@ export default async function AppointmentDetailPage(props: {
                     className="flex items-center gap-2 text-primary hover:underline mb-8"
                 >
                     <ArrowLeft className="size-4" />
-                    Back to My Appointments
+                    Volver a mis citas
                 </Link>
 
                 <div className="grid gap-8">
@@ -130,10 +138,7 @@ export default async function AppointmentDetailPage(props: {
                                             )}
                                             className="text-xs uppercase tracking-wider"
                                         >
-                                            {appointment.status.replace(
-                                                "_",
-                                                " ",
-                                            )}
+                                            {getStatusLabel(appointment.status)}
                                         </Badge>
                                         <span className="text-xs text-muted-foreground">
                                             #{appointment.id.split("-")[0]}
@@ -141,11 +146,11 @@ export default async function AppointmentDetailPage(props: {
                                     </div>
                                     <CardTitle className="text-3xl font-bold tracking-tight text-foreground">
                                         {appointment.service?.name ||
-                                            "Service Appointment"}
+                                            "Cita de servicio"}
                                     </CardTitle>
                                     <CardDescription className="text-lg">
-                                        Professional session scheduled with our
-                                        expert team
+                                        Sesión profesional agendada con nuestro
+                                        equipo de expertos
                                     </CardDescription>
                                 </div>
                             </div>
@@ -158,12 +163,12 @@ export default async function AppointmentDetailPage(props: {
                                     </div>
                                     <div>
                                         <p className="text-sm font-medium text-muted-foreground">
-                                            Date
+                                            Fecha
                                         </p>
                                         <p className="text-lg font-semibold">
                                             {new Date(
                                                 appointment.startTime,
-                                            ).toLocaleDateString("en-US", {
+                                            ).toLocaleDateString("es-ES", {
                                                 weekday: "long",
                                                 month: "long",
                                                 day: "numeric",
@@ -179,7 +184,7 @@ export default async function AppointmentDetailPage(props: {
                                     </div>
                                     <div>
                                         <p className="text-sm font-medium text-muted-foreground">
-                                            Time & Duration
+                                            Hora y duración
                                         </p>
                                         <p className="text-lg font-semibold">
                                             {new Date(
@@ -192,7 +197,7 @@ export default async function AppointmentDetailPage(props: {
                                                 (
                                                 {appointment.service
                                                     ?.duration || 30}{" "}
-                                                mins)
+                                                min)
                                             </span>
                                         </p>
                                     </div>
@@ -206,11 +211,11 @@ export default async function AppointmentDetailPage(props: {
                                     </div>
                                     <div>
                                         <p className="text-sm font-medium text-muted-foreground">
-                                            Professional
+                                            Profesional
                                         </p>
                                         <p className="text-lg font-semibold">
                                             {appointment.staff?.name ||
-                                                "Assigned Staff"}
+                                                "Personal asignado"}
                                         </p>
                                     </div>
                                 </div>
@@ -221,7 +226,7 @@ export default async function AppointmentDetailPage(props: {
                                     </div>
                                     <div>
                                         <p className="text-sm font-medium text-muted-foreground">
-                                            Service Price
+                                            Precio del servicio
                                         </p>
                                         <p className="text-lg font-semibold">
                                             $
@@ -241,29 +246,31 @@ export default async function AppointmentDetailPage(props: {
                             <CardHeader>
                                 <CardTitle className="text-lg flex items-center gap-2">
                                     <FileText className="size-5 text-primary" />
-                                    Appointment Details
+                                    Detalles de la cita
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 <div className="p-4 rounded-lg bg-muted/50">
                                     <p className="text-sm font-medium mb-1">
-                                        Status Information
+                                        Información del estado
                                     </p>
                                     <p className="text-sm text-muted-foreground leading-relaxed">
                                         {appointment.status === "PENDING" &&
-                                            "Your appointment is pending confirmation. You'll receive an email once we've reviewed it."}
+                                            "Tu cita está pendiente de confirmación. Te enviaremos un correo cuando la revisemos."}
                                         {appointment.status === "CONFIRMED" &&
-                                            "Great! Your appointment is confirmed and we're looking forward to seeing you."}
+                                            "¡Tu cita está confirmada! Esperamos verte pronto."}
                                         {appointment.status === "CANCELLED" &&
-                                            "This appointment has been cancelled."}
+                                            "Esta cita fue cancelada."}
                                         {appointment.status === "COMPLETED" &&
-                                            "This session has been completed. We hope you enjoyed your service!"}
+                                            "La sesión se completó. ¡Esperamos que hayas enjoyed el servicio!"}
+                                        {appointment.status === "NEEDS_REVIEW" &&
+                                            "Tu cita está pendiente de actualización."}
                                     </p>
                                 </div>
                                 {appointment.notes && (
                                     <div>
                                         <p className="text-sm font-medium mb-1">
-                                            Your Notes
+                                            Tus notas
                                         </p>
                                         <p className="text-sm text-muted-foreground bg-muted/30 p-4 rounded-lg italic">
                                             "{appointment.notes}"
@@ -278,18 +285,18 @@ export default async function AppointmentDetailPage(props: {
                             <CardHeader>
                                 <CardTitle className="text-lg flex items-center gap-2">
                                     <MapPin className="size-5 text-primary" />
-                                    Location
+                                    Ubicación
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-6">
                                 <div className="p-4 rounded-lg bg-muted/50">
                                     <p className="text-sm font-medium mb-1 tracking-tight">
-                                        Arrival Info
+                                        Información de llegada
                                     </p>
                                     <p className="text-sm text-muted-foreground">
-                                        Please arrive 5-10 minutes early to your
-                                        appointment to ensure a smooth check-in
-                                        process.
+                                        Llegá 5-10 minutos antes a tu cita para
+                                        que el registro se realice sin
+                                        demoras.
                                     </p>
                                 </div>
 

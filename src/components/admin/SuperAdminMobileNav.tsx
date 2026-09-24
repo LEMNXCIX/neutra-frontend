@@ -20,10 +20,12 @@ import {
     Building,
     CalendarDays,
     Zap,
+    Gift,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const ICON_MAP: Record<string, any> = {
+const ICON_MAP: Record<string, LucideIcon> = {
     LayoutDashboard,
     Package,
     ShoppingCart,
@@ -38,6 +40,7 @@ const ICON_MAP: Record<string, any> = {
     Building,
     CalendarDays,
     Zap,
+    Gift,
 };
 
 interface SuperAdminMobileNavProps {

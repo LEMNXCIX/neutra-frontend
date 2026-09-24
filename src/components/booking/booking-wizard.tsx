@@ -5,6 +5,7 @@ import React, {
     useCallback,
     useEffect,
     useMemo,
+    useState,
     useSyncExternalStore,
 } from "react";
 import { useRouter } from "next/navigation";
@@ -46,6 +47,7 @@ import {
     CalendarOff,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { filterFutureSlots, isFutureSlot } from "@/lib/appointment-time";
 import { EmptyState } from "@/components/ui/empty-state";
 import {
     AvailabilityCalendar,
@@ -144,10 +146,10 @@ function bookingWizardReducer(
 }
 
 const BOOKING_STEPS = [
-    { number: 1, label: "SERVICE", icon: <Scissors className="size-5" /> },
-    { number: 2, label: "EXPERT", icon: <User className="size-5" /> },
-    { number: 3, label: "SCHEDULE", icon: <Clock className="size-5" /> },
-    { number: 4, label: "REVIEW", icon: <Check className="size-5" /> },
+    { number: 1, label: "SERVICIO", icon: <Scissors className="size-5" /> },
+    { number: 2, label: "PROFESIONAL", icon: <User className="size-5" /> },
+    { number: 3, label: "AGENDA", icon: <Clock className="size-5" /> },
+    { number: 4, label: "REVISAR", icon: <Check className="size-5" /> },
 ];
 
 const emptySubscribe = () => () => {};
@@ -169,17 +171,17 @@ function ServiceStep({
         <div className="space-y-8">
             <div className="space-y-2">
                 <h2 className="text-3xl font-bold tracking-tight text-foreground">
-                    Select Service
+                    Elegí un servicio
                 </h2>
                 <p className="text-muted-foreground font-medium text-sm">
-                    Choose the session that best fits your needs
+                    Elegí la sesión que mejor se adapte a tus necesidades
                 </p>
             </div>
             {services.length === 0 ? (
                 <EmptyState
                     icon={Info}
-                    title="Registry empty"
-                    description="No services are currently available for booking."
+                    title="Sin servicios registrados"
+                    description="No hay servicios disponibles para reservar."
                 />
             ) : (
                 Object.entries(
@@ -281,10 +283,10 @@ function StaffStep({
         <div className="space-y-8">
             <div className="space-y-2">
                 <h2 className="text-3xl font-bold tracking-tight text-foreground">
-                    Expert Match
+                    Profesional asignado
                 </h2>
                 <p className="text-muted-foreground font-medium text-sm">
-                    Select your assigned professional
+                    Elegí el profesional asignado
                 </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -355,7 +357,7 @@ function StaffStep({
                     onClick={() => dispatch({ type: "SET_STEP", payload: 1 })}
                     className="font-semibold text-xs h-10 px-4"
                 >
-                    <ChevronLeft className="size-4 mr-2" /> Change Service
+                    <ChevronLeft className="size-4 mr-2" /> Cambiar servicio
                 </Button>
             </div>
         </div>
@@ -367,6 +369,7 @@ interface ScheduleStepProps {
     selectedDate: string;
     selectedTime: string;
     availableSlots: string[];
+    currentInstant: Date;
     loadingAvailability: boolean;
     selectedStaff: Staff | null;
     dispatch: DispatchFn;
@@ -377,6 +380,7 @@ function ScheduleStep({
     selectedDate,
     selectedTime,
     availableSlots,
+    currentInstant,
     loadingAvailability,
     selectedStaff,
     dispatch,
@@ -384,6 +388,10 @@ function ScheduleStep({
     const workingDays = useMemo(
         () => workingWeekdays(selectedStaff?.workingHours),
         [selectedStaff],
+    );
+    const selectableSlots = useMemo(
+        () => filterFutureSlots(selectedDate, availableSlots, currentInstant),
+        [availableSlots, currentInstant, selectedDate],
     );
     const isDayOff =
         selectedDate &&
@@ -394,17 +402,17 @@ function ScheduleStep({
         <div className="space-y-8">
             <div className="space-y-2">
                 <h2 className="text-3xl font-bold tracking-tight text-foreground">
-                    Schedule
+                    Agenda
                 </h2>
                 <p className="text-muted-foreground font-medium text-sm">
-                    Pick your preferred temporal window
+                    Elegí el horario que prefieras
                 </p>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <Card className="t-card border-none shadow-xl overflow-hidden">
                     <CardHeader className="bg-muted/30 border-b border-border/50">
                         <CardTitle className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                            Calendar Target
+                            Fecha objetivo
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="pt-6 pb-8">
@@ -436,7 +444,7 @@ function ScheduleStep({
                                 <div className="flex flex-col items-center justify-center py-10 gap-3">
                                     <Loader2 className="size-8 animate-spin text-primary" />
                                     <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                                        Querying availability…
+                                        Consultando disponibilidad…
                                     </p>
                                 </div>
                             ) : isDayOff ? (
@@ -449,7 +457,7 @@ function ScheduleStep({
                                         Elige otro día en el calendario
                                     </p>
                                 </div>
-                            ) : availableSlots.length === 0 ? (
+                            ) : selectableSlots.length === 0 ? (
                                 <div className="text-center py-10 space-y-2">
                                     <AlertCircle className="size-8 mx-auto text-rose-500 opacity-50" />
                                     <p className="text-[10px] font-bold uppercase tracking-widest text-rose-500">
@@ -458,7 +466,7 @@ function ScheduleStep({
                                 </div>
                             ) : (
                                 <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-                                    {availableSlots.map((time) => {
+                                    {selectableSlots.map((time) => {
                                         return (
                                             <Button
                                                 key={time}
@@ -496,7 +504,7 @@ function ScheduleStep({
                     onClick={() => dispatch({ type: "SET_STEP", payload: 2 })}
                     className="font-semibold text-xs h-10"
                 >
-                    <ChevronLeft className="size-4 mr-2" /> Back to Expert
+                    <ChevronLeft className="size-4 mr-2" /> Volver al profesional
                 </Button>
                 {selectedDate && selectedTime && (
                     <Button
@@ -505,7 +513,7 @@ function ScheduleStep({
                         }
                         className="rounded-xl font-bold h-12 px-8 shadow-lg shadow-primary/20 hover:-translate-y-0.5 transition-all"
                     >
-                        Review Details <ArrowRight className="ml-2 size-4" />
+                        Revisar detalles <ArrowRight className="ml-2 size-4" />
                     </Button>
                 )}
             </div>
@@ -550,10 +558,10 @@ function ReviewStep({
         <div className="space-y-8">
             <div className="space-y-2">
                 <h2 className="text-3xl font-bold tracking-tight text-foreground">
-                    Review Details
+                    Revisar detalles
                 </h2>
                 <p className="text-muted-foreground font-medium text-sm">
-                    Validate your reservation details
+                    Revisá los datos de tu reserva
                 </p>
             </div>
 
@@ -562,14 +570,14 @@ function ReviewStep({
                     <Card className="t-card border-none shadow-xl overflow-hidden">
                         <CardHeader className="bg-muted/30 border-b border-border/50 p-6">
                             <CardTitle className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                                Reservation Summary
+                                Resumen de la reserva
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="p-8 space-y-8">
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                                 <div className="space-y-1">
                                     <p className="text-[10px] font-bold text-primary uppercase tracking-widest">
-                                        Service
+                                        Servicio
                                     </p>
                                     <p className="text-lg font-bold text-foreground">
                                         {selectedService?.name}
@@ -577,7 +585,7 @@ function ReviewStep({
                                 </div>
                                 <div className="space-y-1">
                                     <p className="text-[10px] font-bold text-primary uppercase tracking-widest">
-                                        Expert
+                                        Profesional
                                     </p>
                                     <p className="text-lg font-bold text-foreground">
                                         {selectedStaff?.name}
@@ -585,12 +593,12 @@ function ReviewStep({
                                 </div>
                                 <div className="space-y-1">
                                     <p className="text-[10px] font-bold text-primary uppercase tracking-widest">
-                                        Date
+                                        Fecha
                                     </p>
                                     <p className="text-lg font-bold text-foreground">
                                         {new Date(
                                             selectedDate,
-                                        ).toLocaleDateString("en-US", {
+                                        ).toLocaleDateString("es-ES", {
                                             weekday: "long",
                                             month: "long",
                                             day: "numeric",
@@ -599,7 +607,7 @@ function ReviewStep({
                                 </div>
                                 <div className="space-y-1">
                                     <p className="text-[10px] font-bold text-primary uppercase tracking-widest">
-                                        Time
+                                        Hora
                                     </p>
                                     <p className="text-lg font-bold text-foreground">
                                         {selectedTime}
@@ -611,7 +619,7 @@ function ReviewStep({
 
                             <div className="space-y-3">
                                 <Label className="text-xs font-semibold ml-1">
-                                    Additional Notes
+                                    Notas adicionales
                                 </Label>
                                 <Textarea
                                     value={notes}
@@ -635,7 +643,7 @@ function ReviewStep({
                         <Card className="t-card border-none shadow-lg p-6">
                             <div className="space-y-4">
                                 <div className="flex items-center gap-2 text-primary font-bold text-[10px] uppercase tracking-widest">
-                                    <Tag size={12} /> Discount Code
+                                    <Tag size={12} /> Código de descuento
                                 </div>
                                 <div className="flex gap-2">
                                     <Input
@@ -664,7 +672,7 @@ function ReviewStep({
                                         ) : couponResult ? (
                                             "Activo"
                                         ) : (
-                                            "Apply"
+                                            "Aplicar"
                                         )}
                                     </Button>
                                 </div>
@@ -680,19 +688,19 @@ function ReviewStep({
                     <Card className="t-card border-none bg-card text-foreground shadow-2xl overflow-hidden p-8 space-y-8">
                         <div className="space-y-4">
                             <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest opacity-70">
-                                <span>Standard Rate</span>
+                                <span>Tarifa estándar</span>
                                 <span>${selectedService?.price}</span>
                             </div>
                             {couponResult?.discountAmount && (
                                 <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest text-emerald-600 dark:text-emerald-400">
-                                    <span>Coupon Applied</span>
+                                    <span>Cupón aplicado</span>
                                     <span>-${couponResult.discountAmount}</span>
                                 </div>
                             )}
                             <div className="h-px bg-border" />
                             <div className="flex flex-col gap-1">
                                 <span className="text-[10px] font-bold uppercase tracking-widest opacity-70">
-                                    Total Fee
+                                    Total a pagar
                                 </span>
                                 <span className="text-5xl font-bold tracking-tighter">
                                     ${" "}
@@ -713,7 +721,7 @@ function ReviewStep({
                             {submitting ? (
                                 <>
                                     <Loader2 className="animate-spin mr-2 size-5" />
-                                    Booking…
+                                    Reservando…
                                 </>
                             ) : (
                                 "Confirmar Reserva"
@@ -730,7 +738,7 @@ function ReviewStep({
                             disabled={submitting}
                             className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors"
                         >
-                            ← Modify Schedule
+                            ← Modificar agenda
                         </button>
                     </div>
                 </div>
@@ -750,6 +758,7 @@ export function BookingWizard({
         () => false,
     );
     const today = useMemo(() => new Date().toISOString().split("T")[0], []);
+    const [currentInstant, setCurrentInstant] = useState(() => new Date());
     const router = useRouter();
     const user = useAuthStore((state) => state.user);
     const { isFeatureEnabled } = useFeatures();
@@ -791,6 +800,23 @@ export function BookingWizard({
         validatingCoupon,
         couponError,
     } = state;
+
+    useEffect(() => {
+        const interval = window.setInterval(
+            () => setCurrentInstant(new Date()),
+            30_000,
+        );
+        return () => window.clearInterval(interval);
+    }, []);
+
+    useEffect(() => {
+        if (
+            selectedTime &&
+            !isFutureSlot(selectedDate, selectedTime, currentInstant)
+        ) {
+            dispatch({ type: "SET_SELECTED_TIME", payload: "" });
+        }
+    }, [currentInstant, dispatch, selectedDate, selectedTime]);
 
     const checkAvailability = useCallback(async () => {
         if (
@@ -864,6 +890,18 @@ export function BookingWizard({
         }
         if (!user) {
             router.push(`/login?redirect=/book`);
+            return;
+        }
+
+        const now = new Date();
+        if (!isFutureSlot(state.selectedDate, state.selectedTime, now)) {
+            setCurrentInstant(now);
+            dispatch({ type: "SET_SELECTED_TIME", payload: "" });
+            dispatch({
+                type: "SET_ERROR",
+                payload: "El horario seleccionado ya no está disponible",
+            });
+            dispatch({ type: "SET_STEP", payload: 3 });
             return;
         }
 
@@ -978,6 +1016,7 @@ export function BookingWizard({
                     selectedDate={selectedDate}
                     selectedTime={selectedTime}
                     availableSlots={availableSlots}
+                    currentInstant={currentInstant}
                     loadingAvailability={loadingAvailability}
                     selectedStaff={selectedStaff}
                     dispatch={dispatch}

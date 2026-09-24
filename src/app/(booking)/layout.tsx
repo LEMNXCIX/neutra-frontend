@@ -4,8 +4,8 @@ import { getTenantBrandingFromHeaders, getTenantNameFromHeaders } from '@/lib/se
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Bookings",
-  description: "Book appointments and services",
+  title: "Reservas",
+  description: "Reservá citas y servicios",
 };
 
 export default async function BookingLayout({
@@ -27,7 +27,7 @@ export default async function BookingLayout({
                 </main>
                 <footer className="border-t border-border py-6 px-6">
                     <p className="text-[10px] text-muted-foreground text-center font-semibold uppercase tracking-widest">
-                        &copy; {new Date().getFullYear()} {tenantName || "XCIX Platforms"}. All Rights Reserved.
+                        &copy; {new Date().getFullYear()} {tenantName || "XCIX Platforms"}. Todos los derechos reservados.
                     </p>
                 </footer>
             </div>

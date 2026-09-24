@@ -4,7 +4,7 @@ import SlidersTableClient from "@/components/admin/sliders/SlidersTableClient";
 import { validateAdminAccess } from "@/lib/server-auth";
 import { api } from '@/lib/api-client';
 
-export const metadata = { title: "Sliders" };
+export const metadata = { title: "Carruseles" };
 
 export const dynamic = 'force-dynamic';
 

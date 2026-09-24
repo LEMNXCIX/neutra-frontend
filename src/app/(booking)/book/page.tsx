@@ -40,11 +40,11 @@ export default async function BookPage(props: {
             <div className="container mx-auto px-4 py-12 max-w-4xl">
                 <div className="mb-8">
                     <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-2 text-foreground">
-                        Book an{" "}
-                        <span className="text-primary">Cita</span>
+                        Reservar una{" "}
+                        <span className="text-primary">cita</span>
                     </h1>
                     <p className="text-muted-foreground text-lg">
-                        Complete the steps below to schedule your appointment
+                        Completá los pasos para programar tu cita
                     </p>
                 </div>
 

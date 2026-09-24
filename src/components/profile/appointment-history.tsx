@@ -1,7 +1,11 @@
 "use client";
 
 import React from "react";
-import { Appointment } from "@/services/booking.service";
+import {
+    APPOINTMENT_STATUS_LABELS,
+    Appointment,
+    type AppointmentStatus,
+} from "@/services/booking.service";
 import {
     Card,
     CardContent,
@@ -28,6 +32,8 @@ const getStatusColor = (status: string) => {
             return "bg-blue-500 text-white";
         case "PENDING":
             return "bg-yellow-500 text-white";
+        case "NEEDS_REVIEW":
+            return "bg-amber-500 text-white";
         case "CANCELLED":
             return "bg-red-500 text-white";
         case "COMPLETED":
@@ -36,6 +42,9 @@ const getStatusColor = (status: string) => {
             return "bg-gray-500 text-white";
     }
 };
+
+const getStatusLabel = (status: AppointmentStatus): string =>
+    APPOINTMENT_STATUS_LABELS[status] || status;
 
 export function AppointmentHistory({
     initialAppointments,
@@ -51,11 +60,11 @@ export function AppointmentHistory({
                     </div>
                     <div className="space-y-2">
                         <h3 className="text-2xl font-bold tracking-tight">
-                            No appointments yet
+                            Todavía no tenés citas
                         </h3>
                         <p className="text-muted-foreground font-medium">
-                            Your scheduled services will appear here once you
-                            make a booking.
+                            Tus servicios agendados aparecerán aquí cuando
+                            reserves una cita.
                         </p>
                     </div>
                     <Button
@@ -73,7 +82,7 @@ export function AppointmentHistory({
     return (
         <div className="space-y-8">
             <h2 className="text-3xl font-bold tracking-tight flex items-center gap-3">
-                <Calendar className="size-8 text-primary" /> Scheduled Services
+                <Calendar className="size-8 text-primary" /> Servicios agendados
             </h2>
             <div className="space-y-6">
                 {initialAppointments.map((a) => (
@@ -93,13 +102,13 @@ export function AppointmentHistory({
                                         </CardTitle>
                                         <CardDescription className="flex items-center gap-2 mt-1 font-medium">
                                             <UserIcon className="size-3 text-primary" />{" "}
-                                            with {a.staff?.name || "Personal"}
+                                            con {a.staff?.name || "el personal"}
                                         </CardDescription>
                                     </div>
                                     <Badge
                                         className={`${getStatusColor(a.status)} rounded-full px-4 py-1 text-[10px] font-bold uppercase tracking-widest border-none shadow-sm`}
                                     >
-                                        {a.status}
+                                        {getStatusLabel(a.status)}
                                     </Badge>
                                 </div>
                             </div>
@@ -110,7 +119,7 @@ export function AppointmentHistory({
                                     <Calendar className="size-5 text-primary" />
                                     <div className="space-y-0.5">
                                         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-                                            Date
+                                            Fecha
                                         </p>
                                         <p className="text-base font-bold">
                                             {new Date(
@@ -125,7 +134,7 @@ export function AppointmentHistory({
                                     <Clock className="size-5 text-primary" />
                                     <div className="space-y-0.5">
                                         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-                                            Time
+                                            Hora
                                         </p>
                                         <p className="text-base font-bold">
                                             {new Date(
@@ -139,7 +148,8 @@ export function AppointmentHistory({
                                 </div>
                             </div>
                             <div className="flex gap-3 justify-end pt-4 border-t border-border/50">
-                                {a.status === "PENDING" && (
+                                {(a.status === "PENDING" ||
+                                    a.status === "CONFIRMED") && (
                                     <CancelAppointmentDialog
                                         appointmentId={a.id}
                                         onAppointmentCancelled={() =>
@@ -151,7 +161,7 @@ export function AppointmentHistory({
                                                 size="lg"
                                                 className="rounded-xl font-bold text-destructive hover:bg-destructive/5 px-8"
                                             >
-                                                Cancel Appointment
+                                                Cancelar cita
                                             </Button>
                                         }
                                     />
@@ -166,7 +176,7 @@ export function AppointmentHistory({
                                         href={`/appointments/${a.id}`}
                                         className="flex items-center gap-2"
                                     >
-                                        <Eye className="size-4" /> View Details
+                                        <Eye className="size-4" /> Ver detalles
                                     </Link>
                                 </Button>
                             </div>

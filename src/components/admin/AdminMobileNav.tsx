@@ -22,10 +22,12 @@ import {
     Building,
     Palette,
     Clock,
+    Gift,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const ICON_MAP: Record<string, any> = {
+const ICON_MAP: Record<string, LucideIcon> = {
     LayoutDashboard,
     Package,
     ShoppingCart,
@@ -40,6 +42,7 @@ const ICON_MAP: Record<string, any> = {
     Building,
     Palette,
     Clock,
+    Gift,
 };
 
 interface AdminMobileNavProps {
@@ -58,14 +61,8 @@ export default function AdminMobileNav({ items }: AdminMobileNavProps) {
         }
 
         // Feature checks
-        if (item.label === "Cupones") {
-            return isFeatureEnabled("COUPONS");
-        }
-        if (item.label === "Banners") {
-            return isFeatureEnabled("BANNERS");
-        }
-        if (item.label === "Pedidos") {
-            return isFeatureEnabled("ORDERS");
+        if (item.requiredFeature) {
+            return isFeatureEnabled(item.requiredFeature);
         }
         return true;
     });

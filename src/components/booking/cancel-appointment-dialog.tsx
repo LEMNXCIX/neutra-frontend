@@ -48,13 +48,13 @@ export function CancelAppointmentDialog({
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                {trigger || <Button variant="destructive">Cancel Appointment</Button>}
+                {trigger || <Button variant="destructive">Cancelar cita</Button>}
             </DialogTrigger>
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
-                    <DialogTitle>Cancel Appointment</DialogTitle>
+                    <DialogTitle>Cancelar cita</DialogTitle>
                     <DialogDescription>
-                        Are you sure you want to cancel this appointment? This action cannot be undone.
+                        ¿Seguro que querés cancelar esta cita? Esta acción no se puede deshacer.
                     </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
@@ -67,11 +67,11 @@ export function CancelAppointmentDialog({
                 </div>
                 <DialogFooter>
                     <Button variant="outline" onClick={() => setOpen(false)} disabled={loading}>
-                        Keep Appointment
+                        Mantener cita
                     </Button>
                     <Button variant="destructive" onClick={handleCancel} disabled={loading}>
                         {loading && <Loader2 className="mr-2 size-4 animate-spin" />}
-                        Confirm Cancellation
+                        Confirmar cancelación
                     </Button>
                 </DialogFooter>
             </DialogContent>

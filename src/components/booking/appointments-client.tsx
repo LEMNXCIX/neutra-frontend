@@ -1,7 +1,11 @@
 "use client";
 
 import React, { useState } from "react";
-import { Appointment, Staff } from "@/services/booking.service";
+import {
+    APPOINTMENT_STATUS_LABELS,
+    Appointment,
+    Staff,
+} from "@/services/booking.service";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -32,12 +36,16 @@ const getStatusVariant = (
         PENDING: "outline",
         CONFIRMED: "default",
         IN_PROGRESS: "secondary",
+        NEEDS_REVIEW: "outline",
         COMPLETED: "secondary",
         CANCELLED: "destructive",
         NO_SHOW: "outline",
     };
     return variants[status] || "outline";
 };
+
+const getStatusLabel = (status: Appointment["status"]): string =>
+    APPOINTMENT_STATUS_LABELS[status] || status;
 
 interface AppointmentsClientProps {
     initialUserAppointments: Appointment[];
@@ -66,32 +74,32 @@ const AppointmentCard = ({
           className="space-y-1 group flex-1"
         >
           <CardTitle className="text-xl group-hover:text-primary transition-colors">
-            {appointment.service?.name || "Service"}
+            {appointment.service?.name || "Servicio"}
           </CardTitle>
           <div className="flex items-center gap-2 text-sm text-muted-foreground group-hover:text-foreground transition-colors">
             {type === "user" ? (
               <>
                 <Briefcase className="size-4" />
                 <span>
-                  Staff:{" "}
-                  {appointment.staff?.name || "Any"}
+                  Profesional:{" "}
+                  {appointment.staff?.name || "Cualquiera"}
                 </span>
               </>
             ) : (
               <>
                 <UserIcon className="size-4" />
                 <span>
-                  Client:{" "}
+                  Cliente:{" "}
                   {appointment.user?.name ||
                     appointment.userId ||
-                    "Unknown"}
+                    "Desconocido"}
                 </span>
               </>
             )}
           </div>
         </Link>
         <Badge variant={getStatusVariant(appointment.status)}>
-          {appointment.status.replace("_", " ")}
+          {getStatusLabel(appointment.status)}
         </Badge>
       </div>
     </CardHeader>
@@ -101,12 +109,12 @@ const AppointmentCard = ({
           <Calendar className="size-4 text-muted-foreground" />
           <div>
             <p className="text-xs text-muted-foreground">
-              Date
+              Fecha
             </p>
             <p className="font-medium">
               {new Date(
                 appointment.startTime,
-              ).toLocaleDateString("en-US", {
+              ).toLocaleDateString("es-ES", {
                 weekday: "short",
                 month: "short",
                 day: "numeric",
@@ -119,7 +127,7 @@ const AppointmentCard = ({
           <Clock className="size-4 text-muted-foreground" />
           <div>
             <p className="text-xs text-muted-foreground">
-              Time
+              Hora
             </p>
             <p className="font-medium">
               {new Date(
@@ -138,7 +146,7 @@ const AppointmentCard = ({
           <FileText className="size-4 text-muted-foreground mt-0.5" />
           <div>
             <p className="text-xs text-muted-foreground mb-1">
-              Notes
+              Notas
             </p>
             <p className="text-sm line-clamp-2">
               {appointment.notes}
@@ -147,9 +155,10 @@ const AppointmentCard = ({
         </div>
       )}
 
-      {appointment.status === "PENDING" && (
-        <div className="mt-4 pt-4 border-t flex flex-wrap gap-2">
-          {type === "user" ? (
+      {type === "user" ? (
+        (appointment.status === "PENDING" ||
+          appointment.status === "CONFIRMED") && (
+          <div className="mt-4 pt-4 border-t flex flex-wrap gap-2">
             <CancelAppointmentDialog
               appointmentId={appointment.id}
               onAppointmentCancelled={onUserCancelled}
@@ -159,15 +168,75 @@ const AppointmentCard = ({
                   size="sm"
                   className="w-full sm:w-auto"
                 >
-                  Cancel Appointment
+                  Cancelar cita
                 </Button>
               }
             />
-          ) : (
+          </div>
+        )
+      ) : (
+        <div className="mt-4 pt-4 border-t flex flex-wrap gap-2">
+          {appointment.status === "PENDING" && (
+            <StatusUpdateDialog
+              appointmentId={appointment.id}
+              currentStatus={appointment.status}
+              newStatus="CONFIRMED"
+              onStatusUpdated={onStaffUpdated}
+              trigger={
+                <Button
+                  variant="default"
+                  size="sm"
+                  className="flex-1 sm:flex-none"
+                >
+                  <CheckCircle2 className="size-4 mr-2" />
+                  Aprobar
+                </Button>
+              }
+            />
+          )}
+          {appointment.status === "CONFIRMED" && (
+            <StatusUpdateDialog
+              appointmentId={appointment.id}
+              currentStatus={appointment.status}
+              newStatus="IN_PROGRESS"
+              reason="Appointment started by staff"
+              onStatusUpdated={onStaffUpdated}
+              trigger={
+                <Button
+                  variant="default"
+                  size="sm"
+                  className="flex-1 sm:flex-none"
+                >
+                  Iniciar
+                </Button>
+              }
+            />
+          )}
+          {appointment.status === "IN_PROGRESS" && (
+            <StatusUpdateDialog
+              appointmentId={appointment.id}
+              currentStatus={appointment.status}
+              newStatus="COMPLETED"
+              reason="Appointment completed by staff"
+              onStatusUpdated={onStaffUpdated}
+              trigger={
+                <Button
+                  variant="default"
+                  size="sm"
+                  className="flex-1 sm:flex-none"
+                >
+                  Completar
+                </Button>
+              }
+            />
+          )}
+          {appointment.status === "NEEDS_REVIEW" && (
             <>
               <StatusUpdateDialog
                 appointmentId={appointment.id}
-                newStatus="CONFIRMED"
+                currentStatus={appointment.status}
+                newStatus="COMPLETED"
+                reason="Resolved as completed by staff"
                 onStatusUpdated={onStaffUpdated}
                 trigger={
                   <Button
@@ -175,14 +244,15 @@ const AppointmentCard = ({
                     size="sm"
                     className="flex-1 sm:flex-none"
                   >
-                    <CheckCircle2 className="size-4 mr-2" />
-                    Aprobar
+                    Completar
                   </Button>
                 }
               />
               <StatusUpdateDialog
                 appointmentId={appointment.id}
-                newStatus="CANCELLED"
+                currentStatus={appointment.status}
+                newStatus="NO_SHOW"
+                reason="Resolved as no-show by staff"
                 onStatusUpdated={onStaffUpdated}
                 trigger={
                   <Button
@@ -191,11 +261,46 @@ const AppointmentCard = ({
                     className="flex-1 sm:flex-none"
                   >
                     <XCircle className="size-4 mr-2" />
-                    Rechazar
+                    No asistió
+                  </Button>
+                }
+              />
+              <StatusUpdateDialog
+                appointmentId={appointment.id}
+                currentStatus={appointment.status}
+                newStatus="CANCELLED"
+                reason="Cancelled by staff"
+                onStatusUpdated={onStaffUpdated}
+                trigger={
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    className="flex-1 sm:flex-none"
+                  >
+                    <XCircle className="size-4 mr-2" />
+                    Cancelar
                   </Button>
                 }
               />
             </>
+          )}
+          {(appointment.status === "PENDING" || appointment.status === "CONFIRMED") && (
+            <StatusUpdateDialog
+              appointmentId={appointment.id}
+              currentStatus={appointment.status}
+              newStatus="CANCELLED"
+              onStatusUpdated={onStaffUpdated}
+              trigger={
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="flex-1 sm:flex-none"
+                >
+                  <XCircle className="size-4 mr-2" />
+                  Rechazar
+                </Button>
+              }
+            />
           )}
         </div>
       )}
@@ -246,8 +351,8 @@ export function AppointmentsClient({
                 <Alert className="mb-6 border-green-500/50 bg-green-50 dark:bg-green-950">
                     <CheckCircle2 className="size-4 text-green-600" />
                     <AlertDescription className="text-green-800 dark:text-green-200">
-                        Appointment booked successfully! You'll receive a
-                        confirmation email shortly.
+                        ¡Cita reservada correctamente! Pronto recibirás un
+                        correo de confirmación.
                     </AlertDescription>
                 </Alert>
             )}
@@ -265,11 +370,11 @@ export function AppointmentsClient({
                     <TabsList className="grid w-full grid-cols-2 max-w-[400px]">
                         <TabsTrigger value="assigned" className="gap-2">
                             <Briefcase className="size-4" />
-                            My Schedule
+                            Mi agenda
                         </TabsTrigger>
                         <TabsTrigger value="my-bookings" className="gap-2">
                             <Calendar className="size-4" />
-                            My Bookings
+                            Mis reservas
                         </TabsTrigger>
                     </TabsList>
 
@@ -279,11 +384,11 @@ export function AppointmentsClient({
                                 <CardContent className="pt-6">
                                     <Briefcase className="size-8 text-muted-foreground mx-auto mb-4" />
                                     <p className="text-lg font-medium">
-                                        No assigned bookings yet
+                                        Todavía no tenés reservas asignadas
                                     </p>
                                     <p className="text-muted-foreground">
-                                        You'll see customer bookings here when
-                                        they scheduled with you.
+                                        Aquí verás las reservas de los clientes
+                                        cuando te agenden.
                                     </p>
                                 </CardContent>
                             </Card>
@@ -306,7 +411,7 @@ export function AppointmentsClient({
                                 <CardContent className="pt-6">
                                     <Calendar className="size-8 text-muted-foreground mx-auto mb-4" />
                                     <p className="text-lg font-medium">
-                                        No personal bookings
+                                        No tenés reservas propias
                                     </p>
                                     <Button
                                         asChild
@@ -314,7 +419,7 @@ export function AppointmentsClient({
                                         className="mt-4"
                                     >
                                         <Link href="/services">
-                                            Book a Service
+                                            Reservar un servicio
                                         </Link>
                                     </Button>
                                 </CardContent>
@@ -341,10 +446,10 @@ export function AppointmentsClient({
                         </div>
                         <div>
                             <p className="text-lg font-medium mb-2">
-                                No appointments yet
+                                Todavía no tenés citas
                             </p>
                             <p className="text-muted-foreground mb-6">
-                                Book your first appointment to get started
+                                Reservá tu primera cita para comenzar
                             </p>
                         </div>
                         <Button asChild size="lg">

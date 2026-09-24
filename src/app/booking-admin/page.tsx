@@ -1,5 +1,10 @@
 import Link from "next/link";
 import { api } from "@/lib/api-client";
+import {
+    APPOINTMENT_STATUS_LABELS,
+    type Appointment,
+} from "@/services/booking.service";
+import AttentionQueue from "@/components/admin/appointments/AttentionQueue";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -18,6 +23,7 @@ const STATUS_STYLES: Record<string, string> = {
     PENDING: "bg-yellow-500/15 text-yellow-600",
     CONFIRMED: "bg-emerald-500/15 text-emerald-600",
     IN_PROGRESS: "bg-blue-500/15 text-blue-600",
+    NEEDS_REVIEW: "bg-amber-500/15 text-amber-600",
     COMPLETED: "bg-muted text-muted-foreground",
     CANCELLED: "bg-red-500/15 text-red-600",
     NO_SHOW: "bg-muted text-muted-foreground",
@@ -28,8 +34,8 @@ export default async function BookingDashboardPage() {
     // doesn't blank the dashboard.
     const [appointments, staff, services] = await Promise.all([
         api
-            .get<{ data: any[] }>(`/appointments?page=1&limit=100`)
-            .then((d) => d?.data || [])
+            .get<Appointment[]>(`/appointments?page=1&limit=100`)
+            .then((data) => (Array.isArray(data) ? data : []))
             .catch(() => []),
         api.get<any[]>(`/staff?activeOnly=true`).catch(() => []),
         api.get<any[]>(`/services?activeOnly=true`).catch(() => []),
@@ -41,7 +47,8 @@ export default async function BookingDashboardPage() {
             (a) =>
                 new Date(a.startTime) >= now &&
                 a.status !== "CANCELLED" &&
-                a.status !== "NO_SHOW",
+                a.status !== "NO_SHOW" &&
+                a.status !== "NEEDS_REVIEW",
         )
         .sort(
             (a, b) =>
@@ -53,10 +60,10 @@ export default async function BookingDashboardPage() {
     const confirmed = appointments.filter((a) => a.status === "CONFIRMED").length;
 
     const stats = [
-        { label: "Pendiente", value: pending, icon: Clock, href: "/admin/appointments?status=PENDING" },
+        { label: "Pendientes", value: pending, icon: Clock, href: "/admin/appointments?status=PENDING" },
         { label: "Confirmadas", value: confirmed, icon: CalendarDays, href: "/admin/appointments?status=CONFIRMED" },
-        { label: "Personal", value: staff.length, icon: Users, href: "/admin/staff" },
-        { label: "Services", value: services.length, icon: Scissors, href: "/admin/services" },
+        { label: "Equipo", value: staff.length, icon: Users, href: "/admin/staff" },
+        { label: "Servicios", value: services.length, icon: Scissors, href: "/admin/services" },
     ];
 
     return (
@@ -64,7 +71,7 @@ export default async function BookingDashboardPage() {
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight">
-                        Booking Dashboard
+                        Panel de reservas
                     </h1>
                     <p className="text-sm text-muted-foreground mt-1">
                         Resumen de tu operación.
@@ -99,6 +106,8 @@ export default async function BookingDashboardPage() {
                     </Link>
                 ))}
             </div>
+
+            <AttentionQueue />
 
             {/* Upcoming appointments */}
             <Card>
@@ -154,7 +163,7 @@ export default async function BookingDashboardPage() {
                                     <Badge
                                         className={`border-none ${STATUS_STYLES[a.status] || ""}`}
                                     >
-                                        {a.status}
+                                        {APPOINTMENT_STATUS_LABELS[a.status] || a.status}
                                     </Badge>
                                 </div>
                             ))}

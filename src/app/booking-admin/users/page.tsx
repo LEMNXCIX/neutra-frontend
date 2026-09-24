@@ -3,7 +3,7 @@ import UsersTableClient from "@/components/admin/users/UsersTableClient";
 import { User } from "@/types/user.types";
 import { api } from '@/lib/api-client';
 
-export const metadata = { title: "Booking Users" };
+export const metadata = { title: "Usuarios de reservas" };
 
 export const dynamic = "force-dynamic";
 

@@ -19,7 +19,9 @@ import {
     ArrowLeft,
     Palette,
     Clock,
+    Gift,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
@@ -27,7 +29,7 @@ import { NavItem } from "@/config/admin-navigation";
 import { useFeatures } from "@/hooks/useFeatures";
 import { useAuthStore } from "@/store/auth-store";
 
-const ICON_MAP: Record<string, any> = {
+const ICON_MAP: Record<string, LucideIcon> = {
     LayoutDashboard,
     Package,
     ShoppingCart,
@@ -42,6 +44,7 @@ const ICON_MAP: Record<string, any> = {
     MessageSquare,
     Palette,
     Clock,
+    Gift,
 };
 
 interface AdminSidebarProps {
@@ -65,10 +68,7 @@ export default function AdminSidebar({ items }: AdminSidebarProps) {
 
         // Feature checks (dynamic)
         if (item.requiredFeature) {
-            const key = item.requiredFeature;
-            console.log(key);
-            console.log(isFeatureEnabled(key));
-            return isFeatureEnabled(key) || isFeatureEnabled(key.toLowerCase());
+            return isFeatureEnabled(item.requiredFeature);
         }
 
         return true;
@@ -86,10 +86,10 @@ export default function AdminSidebar({ items }: AdminSidebarProps) {
                 {sidebarOpen ? (
                     <div className="flex flex-col leading-none">
                         <h2 className="text-sm font-bold uppercase tracking-widest text-foreground">
-                            Console
+                            Consola
                         </h2>
                         <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mt-0.5">
-                            Control Center
+                            Centro de control
                         </span>
                     </div>
                 ) : (

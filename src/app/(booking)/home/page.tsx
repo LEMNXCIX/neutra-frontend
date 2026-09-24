@@ -64,7 +64,7 @@ export default async function BookingHomePage() {
                     </h1>
                     <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed font-medium">
                         {cms?.bookingHeroSubtitle ??
-                            "Professional services with easy online scheduling. Pick a service, choose your slot, and you're set."}
+                            "Reservá servicios profesionales de forma simple y online. Elegí un servicio, seleccioná un horario y listo."}
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                         <Button
@@ -102,7 +102,7 @@ export default async function BookingHomePage() {
                         <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-3 text-foreground">
                             {cms?.servicesTitle ?? (
                                 <>
-                                    Our <span className="text-primary">Services</span>
+                                    Nuestros <span className="text-primary">servicios</span>
                                 </>
                             )}
                         </h2>

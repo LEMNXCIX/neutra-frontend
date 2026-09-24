@@ -2,7 +2,7 @@ import React, { Suspense } from "react";
 import CategoriesTableClient from "@/components/admin/categories/CategoriesTableClient";
 import { api } from '@/lib/api-client';
 
-export const metadata = { title: "Booking Categories" };
+export const metadata = { title: "Categorías de reservas" };
 
 export const dynamic = "force-dynamic";
 

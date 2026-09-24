@@ -9,6 +9,9 @@ export interface Coupon {
     type: CouponType;
     value: number;
     description?: string;
+    isReward?: boolean;
+    ownerId?: string | null;
+    sourceCouponId?: string;
     minPurchaseAmount?: number;
     maxDiscountAmount?: number;
     usageLimit?: number;

@@ -9,8 +9,8 @@ import { TenantThemeProvider } from "@/providers/tenant-theme-provider";
 import { getTenantBrandingFromHeaders } from "@/lib/server-theme";
 
 export const metadata: Metadata = {
-  title: "Booking Admin",
-  description: "Booking administration dashboard",
+  title: "Administración de reservas",
+  description: "Panel de administración de reservas",
 };
 
 export default async function AdminLayout({

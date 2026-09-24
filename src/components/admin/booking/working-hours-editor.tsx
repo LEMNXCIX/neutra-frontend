@@ -62,16 +62,16 @@ export function WorkingHoursEditor({
         onChange({ ...value, [day]: ranges });
 
     return (
-        <div className="space-y-2">
+        <div className="min-w-0 space-y-2">
             {DAYS.map(({ key, label }) => {
                 const ranges = value[key] || null;
                 const works = !!ranges?.length;
                 return (
                     <div
                         key={key}
-                        className="flex items-start gap-3 p-3 rounded-xl border border-border/50 bg-muted/20"
+                        className="grid min-w-0 grid-cols-1 gap-3 rounded-xl border border-border/50 bg-muted/20 p-3 sm:grid-cols-[4rem_minmax(0,1fr)] sm:items-start"
                     >
-                        <div className="flex items-center gap-2 pt-1 w-16 shrink-0">
+                        <div className="flex items-center gap-2 sm:w-16 sm:shrink-0 sm:pt-1">
                             <Switch
                                 checked={works}
                                 onCheckedChange={(checked) =>
@@ -88,11 +88,11 @@ export function WorkingHoursEditor({
                             </span>
                         </div>
                         {works && ranges && (
-                            <div className="flex-1 space-y-2">
+                            <div className="min-w-0 space-y-2">
                                 {ranges.map((range, i) => (
                                     <div
                                         key={i}
-                                        className="flex items-center gap-2"
+                                        className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_auto] items-center gap-2 sm:max-w-[270px]"
                                     >
                                         <Input
                                             type="time"
@@ -105,7 +105,7 @@ export function WorkingHoursEditor({
                                                 };
                                                 setDay(key, next);
                                             }}
-                                            className="h-8 w-[110px] text-sm"
+                                            className="h-8 w-full min-w-0 px-2 text-sm"
                                         />
                                         <span className="text-xs text-muted-foreground">
                                             a
@@ -121,13 +121,13 @@ export function WorkingHoursEditor({
                                                 };
                                                 setDay(key, next);
                                             }}
-                                            className="h-8 w-[110px] text-sm"
+                                            className="h-8 w-full min-w-0 px-2 text-sm"
                                         />
                                         <Button
                                             type="button"
                                             variant="ghost"
                                             size="icon"
-                                            className="size-7 shrink-0"
+                                            className="size-8 shrink-0 sm:size-7"
                                             onClick={() => {
                                                 const next = ranges.filter(
                                                     (_, j) => j !== i,
@@ -146,7 +146,7 @@ export function WorkingHoursEditor({
                                     type="button"
                                     variant="outline"
                                     size="sm"
-                                    className="h-7 text-xs"
+                                    className="h-8 w-full text-xs sm:h-7 sm:w-auto"
                                     onClick={() =>
                                         setDay(key, [
                                             ...ranges,
@@ -203,10 +203,10 @@ export function HolidaysEditor({
                     </span>
                 )}
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center">
                 <Input
                     type="date"
-                    className="h-9 w-[160px] text-sm"
+                    className="h-9 w-full text-sm sm:w-[160px]"
                     onChange={(e) => {
                         const date = e.target.value;
                         if (date && !value.includes(date)) {

@@ -14,6 +14,7 @@ const FEATURE_CATALOG = [
     'EMAIL_NOTIFICATIONS',
     'BANNERS',
     'SLIDES',
+    'LOYALTY',
     'WHATSAPP_API',
 ];
 
@@ -35,6 +36,17 @@ describe('admin navigation feature keys', () => {
             }
         });
     }
+
+    it('gates booking loyalty while keeping the super-admin entry unconditional', () => {
+        expect(
+            BOOKING_ADMIN_NAV.find((item) => item.href === '/admin/loyalty')
+                ?.requiredFeature,
+        ).toBe('LOYALTY');
+        expect(
+            SUPER_ADMIN_NAV.find((item) => item.href === '/admin/loyalty')
+                ?.requiredFeature,
+        ).toBeUndefined();
+    });
 
     it('orders/appointments no longer depend on removed features', () => {
         for (const nav of [STORE_ADMIN_NAV, BOOKING_ADMIN_NAV]) {

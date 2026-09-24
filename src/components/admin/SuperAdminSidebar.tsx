@@ -21,13 +21,15 @@ import {
     CalendarDays,
     ArrowLeft,
     Zap,
+    Gift,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { NavItem } from "@/config/admin-navigation";
 
-const ICON_MAP: Record<string, any> = {
+const ICON_MAP: Record<string, LucideIcon> = {
     LayoutDashboard,
     Package,
     ShoppingCart,
@@ -42,6 +44,7 @@ const ICON_MAP: Record<string, any> = {
     Building,
     CalendarDays,
     Zap,
+    Gift,
 };
 
 interface SuperAdminSidebarProps {
