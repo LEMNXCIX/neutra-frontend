@@ -7,7 +7,7 @@
   },
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build --turbopack",
+    "build": "NODE_ENV=production next build --turbopack",
     "start": "next start",
     "lint": "oxlint src",
     "test-local": "node tests/test-session.js && node tests/test-orders.js && node tests/test-auth-login-route.js",
