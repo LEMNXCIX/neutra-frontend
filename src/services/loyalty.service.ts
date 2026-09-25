@@ -1,92 +1,193 @@
 import { api } from "@/lib/api-client";
-import type { Coupon } from "@/types/coupon.types";
+import type { Coupon, CouponType } from "@/types/coupon.types";
 
-export type LoyaltyStatus =
+export type LoyaltyCampaignStatus =
+    | "DRAFT"
+    | "ACTIVE"
+    | "ENDED"
+    | "ARCHIVED";
+
+export type LoyaltyCampaignSource = "BOOKING" | "STORE" | "ALL";
+export type LoyaltyCampaignMetric = "COUNT" | "SPEND";
+export type LoyaltyCustomerStatus =
+    | "NOT_STARTED"
     | "IN_PROGRESS"
     | "READY"
     | "CLAIMED"
-    | "NOT_CONFIGURED";
+    | "EXPIRED";
+export type LoyaltyCampaignLifecycleAction = "activate" | "end" | "archive";
 
-export interface LoyaltyConfig {
-    targetPoints: number;
-    rewardCouponId: string | null;
+export interface LoyaltyCampaignRewardDefinition {
+    type: CouponType;
+    value: number;
+    description?: string | null;
+    minPurchaseAmount?: number | null;
+    maxDiscountAmount?: number | null;
+    applicableProducts: string[];
+    applicableCategories: string[];
+    applicableServices: string[];
 }
 
-export interface LoyaltySummary {
-    points: number;
-    targetPoints: number;
-    remaining: number;
-    status: LoyaltyStatus;
-    coupon?: Coupon | null;
+export interface CreateLoyaltyCampaignInput {
+    name: string;
+    description?: string | null;
+    source: LoyaltyCampaignSource;
+    metric: LoyaltyCampaignMetric;
+    targetValue: string;
+    startsAt: string;
+    endsAt: string;
+    claimUntil: string;
+    reward: LoyaltyCampaignRewardDefinition;
+    rewardValidDays: number;
+    maxClaims?: number | null;
 }
 
-export interface LoyaltyClaim {
+export type UpdateLoyaltyCampaignInput = Partial<CreateLoyaltyCampaignInput>;
+
+export interface LoyaltyCampaign {
     id: string;
-    milestone: number;
-    couponId: string;
-    status: LoyaltyStatus;
+    tenantId: string;
+    name: string;
+    description?: string | null;
+    source: LoyaltyCampaignSource;
+    metric: LoyaltyCampaignMetric;
+    targetValue: string;
+    status: LoyaltyCampaignStatus;
+    startsAt: string;
+    endsAt: string;
+    claimUntil: string;
+    reward?: LoyaltyCampaignRewardDefinition;
+    rewardValidDays?: number;
+    maxClaims?: number | null;
+    claimedCount: number;
     createdAt: string;
     updatedAt: string;
-    coupon?: Coupon | null;
 }
 
-export interface LoyaltyStats {
-    totalPoints: number;
+export interface LoyaltyCampaignClaimMetadata {
+    id: string;
+    campaignId: string;
+    couponId: string;
+    status: "CLAIMED";
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface LoyaltyCampaignClaim extends LoyaltyCampaignClaimMetadata {
+    coupon: Coupon;
+}
+
+export interface LoyaltyCustomerCampaignSummary {
+    campaignId: string;
+    name: string;
+    source: LoyaltyCampaignSource;
+    startsAt: string;
+    endsAt: string;
+    claimUntil: string;
+    metric: LoyaltyCampaignMetric;
+    progressValue: string;
+    targetValue: string;
+    remainingValue: string;
+    lifecycleStatus: LoyaltyCampaignStatus;
+    customerStatus: LoyaltyCustomerStatus;
+    claim?: LoyaltyCampaignClaimMetadata;
+    coupon?: Coupon;
+}
+
+export interface LoyaltyCampaignStats {
+    campaignCount: number;
+    activeCampaignCount: number;
+    endedCampaignCount: number;
+    archivedCampaignCount: number;
     totalClaims: number;
-    activeCustomers: number;
 }
 
-export interface LoyaltyAdminSummary {
+export interface LoyaltyTenantSummary {
     tenantId: string;
     name: string;
     slug: string;
     type: string;
     active: boolean;
-    config: LoyaltyConfig;
-    stats: LoyaltyStats;
-    recentLedger: unknown[];
-    recentClaims: unknown[];
+    campaigns: LoyaltyCampaign[];
+    stats: LoyaltyCampaignStats;
 }
 
-export type LoyaltyTenantOverview = LoyaltyAdminSummary;
+export type LoyaltyTenantOverview = LoyaltyTenantSummary;
 
-function tenantConfigEndpoint(tenantId: string): string {
-    return `/loyalty/admin/tenants/${encodeURIComponent(tenantId)}/config`;
+function campaignEndpoint(
+    campaignId: string,
+    action?: LoyaltyCampaignLifecycleAction,
+): string {
+    const suffix = action ? `/${action}` : "";
+    return `/loyalty/admin/campaigns/${encodeURIComponent(campaignId)}${suffix}`;
 }
 
 export const loyaltyService = {
-    getMySummary(): Promise<LoyaltySummary> {
-        return api.get<LoyaltySummary>("/loyalty/me");
+    getMyCampaigns(): Promise<LoyaltyCustomerCampaignSummary[]> {
+        return api.get<LoyaltyCustomerCampaignSummary[]>("/loyalty/me");
     },
 
-    claimReward(): Promise<LoyaltyClaim> {
-        return api.post<LoyaltyClaim>("/loyalty/me/claim");
+    getMyCampaignSummary(
+        campaignId: string,
+    ): Promise<LoyaltyCustomerCampaignSummary> {
+        return api.get<LoyaltyCustomerCampaignSummary>(
+            `/loyalty/me/campaigns/${encodeURIComponent(campaignId)}`,
+        );
     },
 
-    getAdminSummary(): Promise<LoyaltyAdminSummary> {
-        return api.get<LoyaltyAdminSummary>("/loyalty/admin/summary");
+    claimReward(campaignId: string): Promise<LoyaltyCampaignClaim> {
+        return api.post<LoyaltyCampaignClaim>(
+            `/loyalty/me/campaigns/${encodeURIComponent(campaignId)}/claim`,
+        );
     },
 
-    getAdminConfig(): Promise<LoyaltyConfig> {
-        return api.get<LoyaltyConfig>("/loyalty/admin/config");
+    getAdminSummary(): Promise<LoyaltyTenantSummary> {
+        return api.get<LoyaltyTenantSummary>("/loyalty/admin/summary");
     },
 
-    updateAdminConfig(config: LoyaltyConfig): Promise<LoyaltyConfig> {
-        return api.put<LoyaltyConfig>("/loyalty/admin/config", config);
+    getAdminCampaigns(): Promise<LoyaltyCampaign[]> {
+        return api.get<LoyaltyCampaign[]>("/loyalty/admin/campaigns");
+    },
+
+    getAdminCampaign(campaignId: string): Promise<LoyaltyCampaign> {
+        return api.get<LoyaltyCampaign>(campaignEndpoint(campaignId));
+    },
+
+    createCampaign(campaign: CreateLoyaltyCampaignInput): Promise<LoyaltyCampaign> {
+        return api.post<LoyaltyCampaign>("/loyalty/admin/campaigns", campaign);
+    },
+
+    updateCampaign(
+        campaignId: string,
+        campaign: UpdateLoyaltyCampaignInput,
+    ): Promise<LoyaltyCampaign> {
+        return api.patch<LoyaltyCampaign>(
+            campaignEndpoint(campaignId),
+            campaign,
+        );
+    },
+
+    deleteCampaign(campaignId: string): Promise<null> {
+        return api.delete<null>(campaignEndpoint(campaignId));
+    },
+
+    activateCampaign(campaignId: string): Promise<LoyaltyCampaign> {
+        return api.post<LoyaltyCampaign>(
+            campaignEndpoint(campaignId, "activate"),
+        );
+    },
+
+    endCampaign(campaignId: string): Promise<LoyaltyCampaign> {
+        return api.post<LoyaltyCampaign>(campaignEndpoint(campaignId, "end"));
+    },
+
+    archiveCampaign(campaignId: string): Promise<LoyaltyCampaign> {
+        return api.post<LoyaltyCampaign>(
+            campaignEndpoint(campaignId, "archive"),
+        );
     },
 
     getAdminTenants(): Promise<LoyaltyTenantOverview[]> {
         return api.get<LoyaltyTenantOverview[]>("/loyalty/admin/tenants");
-    },
-
-    getTenantConfig(tenantId: string): Promise<LoyaltyConfig> {
-        return api.get<LoyaltyConfig>(tenantConfigEndpoint(tenantId));
-    },
-
-    updateTenantConfig(
-        tenantId: string,
-        config: LoyaltyConfig,
-    ): Promise<LoyaltyConfig> {
-        return api.put<LoyaltyConfig>(tenantConfigEndpoint(tenantId), config);
     },
 };

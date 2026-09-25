@@ -61,8 +61,14 @@ export default function AdminMobileNav({ items }: AdminMobileNavProps) {
         }
 
         // Feature checks
-        if (item.requiredFeature) {
-            return isFeatureEnabled(item.requiredFeature);
+        const requiredFeatures = [
+            ...(item.requiredFeature ? [item.requiredFeature] : []),
+            ...(item.requiredFeatures ?? []),
+        ];
+        if (requiredFeatures.length > 0) {
+            return requiredFeatures.every((feature) =>
+                isFeatureEnabled(feature),
+            );
         }
         return true;
     });

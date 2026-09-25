@@ -3,7 +3,7 @@ import { TenantLoyaltyClient } from "@/components/admin/loyalty/TenantLoyaltyCli
 
 export const metadata: Metadata = {
     title: "Fidelización | Administración de reservas",
-    description: "Administra el programa de fidelización de la organización",
+    description: "Administra las campañas de fidelización de la organización",
 };
 
 export default function BookingLoyaltyPage() {

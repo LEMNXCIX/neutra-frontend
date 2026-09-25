@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Building2, Gift, RefreshCw } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,26 +9,27 @@ import {
     CardContent,
     CardDescription,
     CardHeader,
-    CardTitle,
 } from "@/components/ui/card";
-import { LoyaltyConfigForm } from "@/components/admin/loyalty/LoyaltyConfigForm";
 import {
     loyaltyService,
-    type LoyaltyConfig,
+    type LoyaltyCampaignStatus,
     type LoyaltyTenantOverview,
 } from "@/services/loyalty.service";
+
+const STATUS_COPY: Record<
+    LoyaltyCampaignStatus,
+    { label: string; variant: "default" | "secondary" | "outline" }
+> = {
+    DRAFT: { label: "Borrador", variant: "secondary" },
+    ACTIVE: { label: "Activa", variant: "default" },
+    ENDED: { label: "Finalizada", variant: "outline" },
+    ARCHIVED: { label: "Archivada", variant: "secondary" },
+};
 
 export function SuperAdminLoyaltyClient() {
     const [tenants, setTenants] = useState<LoyaltyTenantOverview[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [loadError, setLoadError] = useState<string | null>(null);
-    const [selectedTenantId, setSelectedTenantId] = useState("");
-    const [config, setConfig] = useState<LoyaltyConfig | null>(null);
-    const [isConfigLoading, setIsConfigLoading] = useState(false);
-    const [isSaving, setIsSaving] = useState(false);
-    const [configError, setConfigError] = useState<string | null>(null);
-    const [success, setSuccess] = useState<string | null>(null);
-    const selectedTenantIdRef = useRef("");
 
     const loadTenants = useCallback(async () => {
         setIsLoading(true);
@@ -46,69 +47,6 @@ export function SuperAdminLoyaltyClient() {
         void loadTenants();
     }, [loadTenants]);
 
-    const loadTenantConfig = useCallback(async (tenantId: string) => {
-        if (!tenantId) return;
-
-        selectedTenantIdRef.current = tenantId;
-        setIsConfigLoading(true);
-        setConfigError(null);
-        setSuccess(null);
-        setConfig(null);
-        try {
-            const nextConfig = await loyaltyService.getTenantConfig(tenantId);
-            if (selectedTenantIdRef.current === tenantId) {
-                setConfig(nextConfig);
-            }
-        } catch {
-            if (selectedTenantIdRef.current === tenantId) {
-                setConfigError("No pudimos cargar la configuración de esta organización.");
-            }
-        } finally {
-            if (selectedTenantIdRef.current === tenantId) {
-                setIsConfigLoading(false);
-            }
-        }
-    }, []);
-
-    const selectTenant = (tenantId: string) => {
-        if (!tenantId) {
-            selectedTenantIdRef.current = "";
-            setConfig(null);
-            setConfigError(null);
-            setSuccess(null);
-            setIsConfigLoading(false);
-        }
-        setSelectedTenantId(tenantId);
-        if (tenantId) void loadTenantConfig(tenantId);
-    };
-
-    const saveConfig = async (nextConfig: LoyaltyConfig) => {
-        if (!selectedTenantId) return;
-
-        setIsSaving(true);
-        setConfigError(null);
-        setSuccess(null);
-        try {
-            const savedConfig = await loyaltyService.updateTenantConfig(
-                selectedTenantId,
-                nextConfig,
-            );
-            setConfig(savedConfig);
-            setTenants((current) =>
-                current.map((tenant) =>
-                    tenant.tenantId === selectedTenantId
-                        ? { ...tenant, config: savedConfig }
-                        : tenant,
-                ),
-            );
-            setSuccess("Configuración guardada correctamente.");
-        } catch {
-            setConfigError("No pudimos guardar la configuración.");
-        } finally {
-            setIsSaving(false);
-        }
-    };
-
     return (
         <div className="space-y-6">
             <div>
@@ -117,7 +55,7 @@ export function SuperAdminLoyaltyClient() {
                     Fidelización global
                 </h1>
                 <p className="mt-2 text-muted-foreground">
-                    Consulta todas las organizaciones y configura sus recompensas.
+                    Consulta las campañas de todas las organizaciones sin modificar su configuración.
                 </p>
             </div>
 
@@ -141,128 +79,92 @@ export function SuperAdminLoyaltyClient() {
                         </Button>
                     </CardContent>
                 </Card>
+            ) : tenants.length === 0 ? (
+                <Card>
+                    <CardContent>
+                        <p className="text-sm text-muted-foreground">
+                            No hay organizaciones para mostrar.
+                        </p>
+                    </CardContent>
+                </Card>
             ) : (
-                <>
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Organizaciones</CardTitle>
-                            <CardDescription>
-                                El estado se muestra para todas las organizaciones, sin aplicar
-                                filtros de funciones.
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            {tenants.length === 0 ? (
-                                <p className="text-sm text-muted-foreground">
-                                    No hay organizaciones para mostrar.
-                                </p>
-                            ) : (
-                                <div role="list" className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                                    {tenants.map((tenant) => (
-                                        <Card key={tenant.tenantId} role="listitem">
-                                            <CardContent className="space-y-4">
-                                                <div className="flex items-start justify-between gap-3">
-                                                    <div>
-                                                        <h3 className="flex items-center gap-2 font-semibold">
-                                                            <Building2 className="size-4" aria-hidden="true" />
-                                                            {tenant.name}
-                                                        </h3>
-                                                        <p className="text-sm text-muted-foreground">
-                                                            {tenant.slug} · {tenant.type}
-                                                        </p>
-                                                    </div>
-                                                    <Badge variant={tenant.active ? "default" : "secondary"}>
-                                                        {tenant.active ? "Activo" : "Inactivo"}
-                                                    </Badge>
-                                                </div>
-                                                <div className="grid grid-cols-3 gap-2 text-center text-xs">
-                                                    <div>
-                                                        <p className="text-lg font-bold">
-                                                            {tenant.stats.totalPoints.toLocaleString("es")}
-                                                        </p>
-                                                        <p className="text-muted-foreground">Puntos</p>
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-lg font-bold">
-                                                            {tenant.stats.totalClaims.toLocaleString("es")}
-                                                        </p>
-                                                        <p className="text-muted-foreground">Premios</p>
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-lg font-bold">
-                                                            {tenant.stats.activeCustomers.toLocaleString("es")}
-                                                        </p>
-                                                        <p className="text-muted-foreground">Clientes</p>
-                                                    </div>
-                                                </div>
-                                            </CardContent>
-                                        </Card>
-                                    ))}
-                                </div>
-                            )}
-                        </CardContent>
-                    </Card>
-
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Configuración por organización</CardTitle>
-                            <CardDescription>
-                                Selecciona una organización para cargar y guardar su configuración.
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-6">
-                            <div className="space-y-2">
-                                <label htmlFor="loyalty-tenant" className="text-sm font-medium">
-                                    Organización
-                                </label>
-                                <select
-                                    id="loyalty-tenant"
-                                    value={selectedTenantId}
-                                    onChange={(event) => selectTenant(event.target.value)}
-                                    disabled={isLoading}
-                                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50 md:max-w-md"
-                                >
-                                    <option value="">Selecciona una organización</option>
-                                    {tenants.map((tenant) => (
-                                        <option key={tenant.tenantId} value={tenant.tenantId}>
+                <div role="list" className="space-y-6">
+                    {tenants.map((tenant) => (
+                        <Card key={tenant.tenantId} role="listitem">
+                            <CardHeader>
+                                <div className="flex flex-wrap items-start justify-between gap-3">
+                                    <div>
+                                        <h3 className="flex items-center gap-2 text-xl font-semibold">
+                                            <Building2 className="size-5" aria-hidden="true" />
                                             {tenant.name}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            {isConfigLoading ? (
-                                <p role="status" className="text-sm text-muted-foreground">
-                                    Cargando la configuración…
-                                </p>
-                            ) : configError && !config ? (
-                                <div role="alert" className="space-y-3">
-                                    <p className="text-sm text-destructive">{configError}</p>
-                                    <Button
-                                        variant="outline"
-                                        onClick={() => void loadTenantConfig(selectedTenantId)}
-                                    >
-                                        <RefreshCw className="mr-2 size-4" aria-hidden="true" />
-                                        Reintentar
-                                    </Button>
+                                        </h3>
+                                        <CardDescription>
+                                            {tenant.slug} · {tenant.type}
+                                        </CardDescription>
+                                    </div>
+                                    <Badge variant={tenant.active ? "default" : "secondary"}>
+                                        {tenant.active ? "Activa" : "Inactiva"}
+                                    </Badge>
                                 </div>
-                            ) : config ? (
-                                <LoyaltyConfigForm
-                                    value={config}
-                                    onChange={setConfig}
-                                    onSave={saveConfig}
-                                    isSaving={isSaving}
-                                    error={configError}
-                                    success={success}
-                                />
-                            ) : (
-                                <p className="text-sm text-muted-foreground">
-                                    Todavía no has seleccionado una organización.
-                                </p>
-                            )}
-                        </CardContent>
-                    </Card>
-                </>
+                            </CardHeader>
+                            <CardContent className="space-y-5">
+                                <div className="grid grid-cols-2 gap-3 text-center sm:grid-cols-5">
+                                    {[
+                                        ["Campañas", tenant.stats.campaignCount],
+                                        ["Activas", tenant.stats.activeCampaignCount],
+                                        ["Finalizadas", tenant.stats.endedCampaignCount],
+                                        ["Archivadas", tenant.stats.archivedCampaignCount],
+                                        ["Reclamos", tenant.stats.totalClaims],
+                                    ].map(([label, value]) => (
+                                        <div key={String(label)} className="rounded-md bg-muted/30 p-3">
+                                            <p className="text-xl font-bold">
+                                                {Number(value).toLocaleString("es")}
+                                            </p>
+                                            <p className="text-xs text-muted-foreground">{label}</p>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {tenant.campaigns.length === 0 ? (
+                                    <p className="text-sm text-muted-foreground">
+                                        Esta organización no tiene campañas.
+                                    </p>
+                                ) : (
+                                    <div className="space-y-3">
+                                        {tenant.campaigns.map((campaign) => {
+                                            const status = STATUS_COPY[campaign.status];
+                                            return (
+                                                <div
+                                                    key={campaign.id}
+                                                    className="flex flex-wrap items-start justify-between gap-3 rounded-md border p-3"
+                                                >
+                                                    <div>
+                                                        <h4 className="font-medium">{campaign.name}</h4>
+                                                        <p className="text-sm text-muted-foreground">
+                                                            {campaign.metric === "COUNT"
+                                                                ? `${campaign.targetValue} completados`
+                                                                : `${campaign.targetValue} de gasto`}
+                                                            {" · "}
+                                                            {campaign.source}
+                                                        </p>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-sm text-muted-foreground">
+                                                            {campaign.claimedCount} reclamos
+                                                        </span>
+                                                        <Badge variant={status.variant}>
+                                                            {status.label}
+                                                        </Badge>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
+                    ))}
+                </div>
             )}
         </div>
     );

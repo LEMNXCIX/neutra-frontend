@@ -13,104 +13,187 @@ import {
 import { useFeatures } from "@/hooks/useFeatures";
 import {
     loyaltyService,
-    type LoyaltySummary,
+    type LoyaltyCampaignSource,
+    type LoyaltyCustomerCampaignSummary,
 } from "@/services/loyalty.service";
 
 const STATUS_COPY = {
-    IN_PROGRESS: "Tu próxima recompensa está más cerca.",
+    NOT_STARTED: "La campaña todavía no ha comenzado.",
+    IN_PROGRESS: "Tu recompensa está en progreso.",
     READY: "Tu recompensa está lista para reclamar.",
     CLAIMED: "Has reclamado tu recompensa.",
-    NOT_CONFIGURED: "El programa de puntos aún no está configurado.",
+    EXPIRED: "La recompensa expiró y ya no se puede reclamar.",
 } as const;
+
+const SOURCE_COPY: Record<LoyaltyCampaignSource, string> = {
+    BOOKING: "Reservas",
+    STORE: "Tienda",
+    ALL: "Reservas y tienda",
+};
+
+function decimalToCents(value: string): bigint {
+    const [whole, fraction = ""] = value.split(".");
+    return (
+        BigInt(whole || "0") * BigInt(100) +
+        BigInt(fraction.padEnd(2, "0").slice(0, 2))
+    );
+}
+
+function progressPercentage(
+    progressValue: string,
+    targetValue: string,
+): number {
+    const target = decimalToCents(targetValue);
+    if (target <= BigInt(0)) return 0;
+    const progress = decimalToCents(progressValue);
+    return Number(
+        (progress * BigInt(100)) / target > BigInt(100)
+            ? BigInt(100)
+            : (progress * BigInt(100)) / target,
+    );
+}
+
+function formatCount(value: string): string {
+    return BigInt(value.split(".")[0] || "0").toLocaleString("es");
+}
+
+function formatDecimal(value: string): string {
+    const [whole, fraction = ""] = value.split(".");
+    return `${BigInt(whole || "0").toLocaleString("es")},${fraction
+        .padEnd(2, "0")
+        .slice(0, 2)}`;
+}
+
+function campaignPriority(
+    summary: LoyaltyCustomerCampaignSummary,
+): number {
+    if (summary.lifecycleStatus === "ACTIVE") return 0;
+    if (summary.customerStatus === "READY") return 1;
+    if (summary.customerStatus === "CLAIMED") return 2;
+    if (summary.lifecycleStatus === "ENDED") return 3;
+    if (summary.customerStatus === "EXPIRED") return 4;
+    return 5;
+}
+
+function formatDate(value: string): string {
+    return new Intl.DateTimeFormat("es", {
+        dateStyle: "medium",
+        timeZone: "UTC",
+    }).format(new Date(value));
+}
 
 export function LoyaltyCard() {
     const { isFeatureEnabled } = useFeatures();
-    const enabled = isFeatureEnabled("LOYALTY");
-    const [summary, setSummary] = useState<LoyaltySummary | null>(null);
+    const enabled =
+        isFeatureEnabled("LOYALTY") && isFeatureEnabled("COUPONS");
+    const [summaries, setSummaries] = useState<
+        LoyaltyCustomerCampaignSummary[]
+    >([]);
+    const [selectedCampaignId, setSelectedCampaignId] = useState("");
     const [isLoading, setIsLoading] = useState(enabled);
-    const [isClaiming, setIsClaiming] = useState(false);
+    const [claimingCampaignId, setClaimingCampaignId] = useState<string | null>(
+        null,
+    );
     const [error, setError] = useState<string | null>(null);
     const [copied, setCopied] = useState(false);
-    const claimingRef = useRef(false);
-    const claimedRef = useRef(false);
+    const claimingRef = useRef<string | null>(null);
 
-    const loadSummary = useCallback(async () => {
+    const loadSummaries = useCallback(async () => {
         setIsLoading(true);
         setError(null);
         try {
-            const nextSummary = await loyaltyService.getMySummary();
-            setSummary(nextSummary);
-            if (nextSummary.status === "CLAIMED") {
-                claimedRef.current = true;
-            }
+            const nextSummaries = await loyaltyService.getMyCampaigns();
+            setSummaries((current) => {
+                const previous = new Map(
+                    current.map((summary) => [summary.campaignId, summary]),
+                );
+                return nextSummaries
+                    .filter(
+                        (summary) => summary.lifecycleStatus !== "DRAFT",
+                    )
+                    .map((summary) => {
+                        const prior = previous.get(summary.campaignId);
+                        if (summary.customerStatus !== "CLAIMED") return summary;
+                        return {
+                            ...summary,
+                            claim: summary.claim ?? prior?.claim,
+                            coupon: summary.coupon ?? prior?.coupon,
+                        };
+                    });
+            });
+            return true;
         } catch {
-            setError("No pudimos cargar tu programa de fidelización.");
+            setError("No pudimos cargar tus campañas de fidelización.");
+            return false;
         } finally {
             setIsLoading(false);
         }
     }, []);
 
     useEffect(() => {
-        if (enabled) {
-            void loadSummary();
-        }
-    }, [enabled, loadSummary]);
+        if (enabled) void loadSummaries();
+    }, [enabled, loadSummaries]);
 
-    if (!enabled || summary?.status === "NOT_CONFIGURED") return null;
+    if (!enabled) return null;
 
-    const targetPoints = summary?.targetPoints ?? 0;
-    const progress =
-        targetPoints > 0
-            ? Math.min(100, Math.round(((summary?.points ?? 0) / targetPoints) * 100))
-            : 0;
-    const couponCode = summary?.coupon?.code;
+    const visibleCampaigns = [...summaries].sort(
+        (left, right) => campaignPriority(left) - campaignPriority(right),
+    );
+    const selectedCampaign =
+        visibleCampaigns.find(
+            (summary) => summary.campaignId === selectedCampaignId,
+        ) ?? visibleCampaigns[0];
+    const progress = selectedCampaign
+        ? progressPercentage(
+              selectedCampaign.progressValue,
+              selectedCampaign.targetValue,
+          )
+        : 0;
 
     const claimReward = async () => {
-        if (claimingRef.current || claimedRef.current) return;
+        if (!selectedCampaign || claimingRef.current) return;
+        const campaignId = selectedCampaign.campaignId;
 
-        claimingRef.current = true;
-        setIsClaiming(true);
+        claimingRef.current = campaignId;
+        setClaimingCampaignId(campaignId);
         setError(null);
         setCopied(false);
 
         try {
-            const claim = await loyaltyService.claimReward();
-            claimedRef.current = true;
-            setSummary((current) =>
-                current
-                    ? {
-                          ...current,
-                          status: "CLAIMED",
-                          coupon: claim.coupon ?? current.coupon,
-                      }
-                    : current,
+            const claim = await loyaltyService.claimReward(campaignId);
+            const { coupon, ...claimMetadata } = claim;
+            setSummaries((current) =>
+                current.map((summary) =>
+                    summary.campaignId === campaignId
+                        ? {
+                              ...summary,
+                              customerStatus: "CLAIMED",
+                              claim: claimMetadata,
+                              coupon,
+                          }
+                        : summary,
+                ),
             );
-
-            try {
-                const refreshedSummary = await loyaltyService.getMySummary();
-                setSummary({
-                    ...refreshedSummary,
-                    status: "CLAIMED",
-                    coupon: refreshedSummary.coupon ?? claim.coupon,
-                });
-            } catch {
+            setSelectedCampaignId(campaignId);
+            const refreshed = await loadSummaries();
+            if (!refreshed) {
                 setError(
-                    "La recompensa se obtuvo, pero no pudimos actualizar el resumen.",
+                    "La recompensa se obtuvo, pero no pudimos actualizar las campañas.",
                 );
             }
         } catch {
             setError("No pudimos reclamar la recompensa. Inténtalo de nuevo.");
         } finally {
-            claimingRef.current = false;
-            setIsClaiming(false);
+            claimingRef.current = null;
+            setClaimingCampaignId(null);
         }
     };
 
     const copyCoupon = async () => {
-        if (!couponCode) return;
+        if (!selectedCampaign?.coupon?.code) return;
 
         try {
-            await navigator.clipboard.writeText(couponCode);
+            await navigator.clipboard.writeText(selectedCampaign.coupon.code);
             setCopied(true);
         } catch {
             setError("No pudimos copiar el código. Cópialo manualmente.");
@@ -133,7 +216,7 @@ export function LoyaltyCard() {
                             Programa de fidelización
                         </CardTitle>
                         <CardDescription>
-                            Acumula puntos con tus reservas y recibe recompensas.
+                            Completa objetivos o acumula gasto para recibir recompensas.
                         </CardDescription>
                     </div>
                 </div>
@@ -141,69 +224,136 @@ export function LoyaltyCard() {
             <CardContent className="space-y-5">
                 {isLoading ? (
                     <p role="status" className="text-sm text-muted-foreground">
-                        Cargando tus puntos…
+                        Cargando tus campañas…
                     </p>
-                ) : error && !summary ? (
-                    <div role="alert" className="space-y-3">
-                        <p className="text-sm text-destructive">{error}</p>
-                        <Button variant="outline" onClick={loadSummary}>
+                ) : visibleCampaigns.length === 0 ? (
+                    <div className="space-y-4">
+                        <p className="text-sm text-muted-foreground">
+                            No hay campañas de fidelización disponibles en este momento.
+                        </p>
+                        {error && (
+                            <p role="alert" className="text-sm text-destructive">
+                                {error}
+                            </p>
+                        )}
+                        <Button variant="outline" onClick={loadSummaries}>
                             <RefreshCw className="mr-2 size-4" aria-hidden="true" />
                             Reintentar
                         </Button>
                     </div>
-                ) : summary ? (
+                ) : selectedCampaign ? (
                     <>
-                        <div className="flex flex-wrap items-end justify-between gap-3">
-                            <div>
-                                <p className="text-4xl font-bold tracking-tight">
-                                    {summary.points.toLocaleString("es")}
-                                </p>
-                                <p className="text-sm text-muted-foreground">
-                                    de {targetPoints.toLocaleString("es")} puntos
-                                </p>
+                        {visibleCampaigns.length > 1 && (
+                            <div className="space-y-2">
+                                <label
+                                    htmlFor="loyalty-campaign"
+                                    className="text-sm font-medium"
+                                >
+                                    Campaña
+                                </label>
+                                <select
+                                    id="loyalty-campaign"
+                                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50"
+                                    value={selectedCampaign.campaignId}
+                                    onChange={(event) => {
+                                        setSelectedCampaignId(event.target.value);
+                                        setCopied(false);
+                                    }}
+                                    disabled={claimingCampaignId !== null}
+                                >
+                                    {visibleCampaigns.map((summary) => (
+                                        <option
+                                            key={summary.campaignId}
+                                            value={summary.campaignId}
+                                        >
+                                            {summary.name}
+                                        </option>
+                                    ))}
+                                </select>
                             </div>
-                            <p className="text-sm font-medium text-primary">
-                                {summary.status === "IN_PROGRESS"
-                                    ? `Te faltan ${summary.remaining.toLocaleString("es")} puntos`
-                                    : STATUS_COPY[summary.status]}
+                        )}
+
+                        <div className="space-y-1">
+                            <p className="text-lg font-semibold">
+                                {selectedCampaign.name}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                                {`${SOURCE_COPY[selectedCampaign.source]} · Del ${formatDate(selectedCampaign.startsAt)} al ${formatDate(selectedCampaign.endsAt)} · Reclamable hasta ${formatDate(selectedCampaign.claimUntil)}`}
                             </p>
                         </div>
 
-                        {targetPoints > 0 && (
-                            <div
-                                role="progressbar"
-                                aria-label="Progreso hacia la recompensa"
-                                aria-valuemin={0}
-                                aria-valuemax={100}
-                                aria-valuenow={progress}
-                                className="h-2 overflow-hidden rounded-full bg-muted"
-                            >
-                                <div
-                                    className="h-full rounded-full bg-primary transition-[width]"
-                                    style={{ width: `${progress}%` }}
-                                />
+                        <div className="flex flex-wrap items-end justify-between gap-3">
+                            <div>
+                                <p className="text-4xl font-bold tracking-tight">
+                                    {selectedCampaign.metric === "COUNT"
+                                        ? formatCount(selectedCampaign.progressValue)
+                                        : formatDecimal(selectedCampaign.progressValue)}
+                                </p>
+                                <p className="text-sm text-muted-foreground">
+                                    {selectedCampaign.metric === "COUNT"
+                                        ? `de ${formatCount(selectedCampaign.targetValue)} completados`
+                                        : `de ${formatDecimal(selectedCampaign.targetValue)} de gasto neto`}
+                                </p>
                             </div>
-                        )}
+                            <p className="max-w-sm text-sm font-medium text-primary">
+                                {selectedCampaign.customerStatus === "IN_PROGRESS"
+                                    ? selectedCampaign.metric === "COUNT"
+                                        ? `Te faltan ${formatCount(selectedCampaign.remainingValue)} completados`
+                                        : `Te faltan ${formatDecimal(selectedCampaign.remainingValue)} de gasto neto`
+                                    : STATUS_COPY[selectedCampaign.customerStatus]}
+                            </p>
+                        </div>
 
-                        {summary.status === "READY" && (
+                        <div
+                            role="progressbar"
+                            aria-label="Progreso hacia la recompensa"
+                            aria-valuemin={0}
+                            aria-valuemax={100}
+                            aria-valuenow={progress}
+                            className="h-2 overflow-hidden rounded-full bg-muted"
+                        >
+                            <div
+                                className="h-full rounded-full bg-primary transition-[width]"
+                                style={{ width: `${progress}%` }}
+                            />
+                        </div>
+
+                        {selectedCampaign.customerStatus === "READY" && (
                             <Button
                                 onClick={claimReward}
-                                disabled={isClaiming}
+                                disabled={claimingCampaignId !== null}
                                 className="w-full sm:w-auto"
                             >
                                 <Gift className="mr-2 size-4" aria-hidden="true" />
-                                {isClaiming ? "Reclamando…" : "Reclamar recompensa"}
+                                {claimingCampaignId === selectedCampaign.campaignId
+                                    ? "Reclamando…"
+                                    : "Reclamar recompensa"}
                             </Button>
                         )}
 
-                        {couponCode && (
+                        {selectedCampaign.claim && (
+                            <div className="rounded-lg border bg-muted/30 p-4">
+                                <p className="text-sm font-medium">
+                                    Recompensa reclamada
+                                </p>
+                                <dl className="mt-2 grid gap-1 text-xs text-muted-foreground sm:grid-cols-2">
+                                    <div>Reclamo: {selectedCampaign.claim.id}</div>
+                                    <div>Cupón: {selectedCampaign.claim.couponId}</div>
+                                    <div>
+                                        Fecha: {formatDate(selectedCampaign.claim.createdAt)}
+                                    </div>
+                                </dl>
+                            </div>
+                        )}
+
+                        {selectedCampaign.coupon?.code && (
                             <div className="rounded-lg border bg-muted/30 p-4">
                                 <p className="text-sm font-medium">
                                     Tu código de recompensa
                                 </p>
                                 <div className="mt-2 flex flex-wrap items-center gap-3">
                                     <code className="rounded bg-background px-3 py-2 text-base font-semibold">
-                                        {couponCode}
+                                        {selectedCampaign.coupon.code}
                                     </code>
                                     <Button
                                         type="button"

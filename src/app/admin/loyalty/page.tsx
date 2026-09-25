@@ -3,7 +3,7 @@ import { SuperAdminLoyaltyClient } from "@/components/admin/loyalty/SuperAdminLo
 
 export const metadata: Metadata = {
     title: "Fidelización global | Superadministración",
-    description: "Administra la fidelización de todas las organizaciones",
+    description: "Consulta las campañas de fidelización de todas las organizaciones",
 };
 
 export default function AdminLoyaltyPage() {

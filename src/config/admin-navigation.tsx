@@ -6,6 +6,7 @@ export interface NavItem {
     exact?: boolean;
     adminOnly?: boolean;
     requiredFeature?: string;
+    requiredFeatures?: string[];
 }
 
 export const STORE_ADMIN_NAV: NavItem[] = [
@@ -28,7 +29,7 @@ export const BOOKING_ADMIN_NAV: NavItem[] = [
     { href: "/admin/hours", label: "Horario", icon: "Clock" },
     { href: "/admin/appointments", label: "Citas", icon: "CalendarDays" },
     { href: "/admin/services", label: "Servicios", icon: "Scissors" },
-    { href: "/admin/loyalty", label: "Fidelización", icon: "Gift", requiredFeature: 'LOYALTY' },
+    { href: "/admin/loyalty", label: "Fidelización", icon: "Gift", requiredFeatures: ["LOYALTY", "COUPONS"] },
     { href: "/admin/categories", label: "Categorías", icon: "LayoutList" },
     { href: "/admin/staff", label: "Personal", icon: "UserCog" },
     { href: "/admin/banners", label: "Anuncios", icon: "Megaphone", requiredFeature: 'BANNERS' },
