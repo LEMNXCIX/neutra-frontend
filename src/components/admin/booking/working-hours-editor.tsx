@@ -7,49 +7,12 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Plus, X } from "lucide-react";
 
-export type TimeRange = { start: string; end: string };
-export type WorkingHours = { [day: string]: TimeRange[] | null };
+import {
+    WORKING_DAYS,
+    type TimeRange,
+    type WorkingHours,
+} from "@/components/admin/booking/working-hours-utils";
 
-const DAYS: Array<{ key: string; label: string }> = [
-    { key: "monday", label: "Lun" },
-    { key: "tuesday", label: "Mar" },
-    { key: "wednesday", label: "Mié" },
-    { key: "thursday", label: "Jue" },
-    { key: "friday", label: "Vie" },
-    { key: "saturday", label: "Sáb" },
-    { key: "sunday", label: "Dom" },
-];
-
-export const DEFAULT_WORKING_HOURS: WorkingHours = {
-    monday: [{ start: "09:00", end: "12:00" }, { start: "13:00", end: "17:00" }],
-    tuesday: [{ start: "09:00", end: "12:00" }, { start: "13:00", end: "17:00" }],
-    wednesday: [{ start: "09:00", end: "12:00" }, { start: "13:00", end: "17:00" }],
-    thursday: [{ start: "09:00", end: "12:00" }, { start: "13:00", end: "17:00" }],
-    friday: [{ start: "09:00", end: "12:00" }, { start: "13:00", end: "17:00" }],
-    saturday: null,
-    sunday: null,
-};
-
-const isRange = (v: unknown): v is TimeRange =>
-    !!v && typeof v === "object" && typeof (v as TimeRange).start === "string";
-
-/** Accepts legacy {monday: {start,end}} and multi-range {monday: [{start,end}]}. */
-export function normalizeWorkingHours(raw: unknown): WorkingHours {
-    const result: WorkingHours = {};
-    for (const { key } of DAYS) {
-        const value = (raw as WorkingHours)?.[key];
-        if (!value) {
-            result[key] = null;
-        } else if (Array.isArray(value)) {
-            result[key] = value.filter(isRange);
-        } else if (isRange(value)) {
-            result[key] = [value];
-        } else {
-            result[key] = null;
-        }
-    }
-    return result;
-}
 
 export function WorkingHoursEditor({
     value,
@@ -63,7 +26,7 @@ export function WorkingHoursEditor({
 
     return (
         <div className="min-w-0 space-y-2">
-            {DAYS.map(({ key, label }) => {
+            {WORKING_DAYS.map(({ key, label }) => {
                 const ranges = value[key] || null;
                 const works = !!ranges?.length;
                 return (
@@ -91,7 +54,7 @@ export function WorkingHoursEditor({
                             <div className="min-w-0 space-y-2">
                                 {ranges.map((range, i) => (
                                     <div
-                                        key={i}
+                                        key={`${range.start}-${range.end}`}
                                         className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_auto] items-center gap-2 sm:max-w-[270px]"
                                     >
                                         <Input
@@ -126,7 +89,7 @@ export function WorkingHoursEditor({
                                         <Button
                                             type="button"
                                             variant="ghost"
-                                            size="icon"
+                                            size="icon" aria-label="Eliminar rango horario"
                                             className="size-8 shrink-0 sm:size-7"
                                             onClick={() => {
                                                 const next = ranges.filter(
@@ -188,6 +151,7 @@ export function HolidaysEditor({
                         {date}
                         <button
                             type="button"
+                            aria-label="Eliminar feriado"
                             className="p-0.5 rounded-full hover:bg-destructive/10 text-destructive"
                             onClick={() =>
                                 onChange(value.filter((d) => d !== date))

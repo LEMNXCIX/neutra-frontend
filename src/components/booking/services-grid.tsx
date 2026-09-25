@@ -95,7 +95,7 @@ export function ServicesGrid({ services }: ServicesGridProps) {
                                 <CardFooter className="p-8 pt-0">
                                     <Button
                                         onClick={() => handleBookService(service.id)}
-                                        className="w-full h-12 rounded-xl font-bold text-sm shadow-lg shadow-primary/10 transition-all hover:opacity-90 active:scale-95"
+                                        className="w-full h-12 rounded-xl font-bold text-sm shadow-lg shadow-primary/10 transition-[color,background-color,border-color,box-shadow,opacity,transform] hover:opacity-90 active:scale-95"
                                         size="lg"
                                         disabled={!service.active}
                                     >

@@ -49,10 +49,8 @@ import {
 import { cn } from "@/lib/utils";
 import { filterFutureSlots, isFutureSlot } from "@/lib/appointment-time";
 import { EmptyState } from "@/components/ui/empty-state";
-import {
-    AvailabilityCalendar,
-    workingWeekdays,
-} from "@/components/booking/availability-calendar";
+import { AvailabilityCalendar } from "@/components/booking/availability-calendar";
+import { workingWeekdays } from "@/components/booking/working-weekdays";
 
 interface BookingWizardProps {
     initialServices: Service[];
@@ -207,7 +205,7 @@ function ServiceStep({
                                 <Card
                                     key={s.id}
                                     className={cn(
-                                        "cursor-pointer group transition-all duration-300 t-card",
+                                        "cursor-pointer group transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-300 t-card",
                                         selectedService?.id === s.id
                                             ? "ring-2 ring-primary border-primary bg-primary/5"
                                             : "border-border/50 hover:border-primary/20",
@@ -301,7 +299,7 @@ function StaffStep({
                         <Card
                             key={member.id}
                             className={cn(
-                                "cursor-pointer group transition-all duration-300 t-card overflow-hidden",
+                                "cursor-pointer group transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-300 t-card overflow-hidden",
                                 selectedStaff?.id === member.id
                                     ? "ring-2 ring-primary border-primary bg-primary/5"
                                     : "border-border/50 hover:border-primary/20",
@@ -318,7 +316,7 @@ function StaffStep({
                                 <div className="flex items-center gap-5">
                                     <div
                                         className={cn(
-                                            "size-14 rounded-xl flex items-center justify-center transition-all duration-500",
+                                            "size-14 rounded-xl flex items-center justify-center transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-500",
                                             selectedStaff?.id === member.id
                                                 ? "bg-primary text-primary-foreground"
                                                 : "bg-muted",
@@ -482,7 +480,7 @@ function ScheduleStep({
                                                     })
                                                 }
                                                 className={cn(
-                                                    "h-10 rounded-lg text-xs font-semibold transition-all",
+                                                    "h-10 rounded-lg text-xs font-semibold transition-[color,background-color,border-color,box-shadow,opacity,transform]",
                                                     selectedTime === time
                                                         ? "shadow-md scale-105"
                                                         : "border-border/50 hover:border-primary/30",
@@ -511,7 +509,7 @@ function ScheduleStep({
                         onClick={() =>
                             dispatch({ type: "SET_STEP", payload: 4 })
                         }
-                        className="rounded-xl font-bold h-12 px-8 shadow-lg shadow-primary/20 hover:-translate-y-0.5 transition-all"
+                        className="rounded-xl font-bold h-12 px-8 shadow-lg shadow-primary/20 hover:-translate-y-0.5 transition-[color,background-color,border-color,box-shadow,opacity,transform]"
                     >
                         Revisar detalles <ArrowRight className="ml-2 size-4" />
                     </Button>
@@ -598,7 +596,7 @@ function ReviewStep({
                                     <p className="text-lg font-bold text-foreground">
                                         {new Date(
                                             selectedDate,
-                                        ).toLocaleDateString("es-ES", {
+                                        ).toLocaleDateString("es-ES", { timeZone: "UTC",
                                             weekday: "long",
                                             month: "long",
                                             day: "numeric",
@@ -631,7 +629,7 @@ function ReviewStep({
                                     }
                                     rows={4}
                                     placeholder="Contanos cualquier cosa que debamos saber..."
-                                    className="rounded-xl border-border focus:border-primary transition-all bg-muted/10 font-medium"
+                                    className="rounded-xl border-border focus:border-primary transition-[color,background-color,border-color,box-shadow,opacity,transform] bg-muted/10 font-medium"
                                 />
                             </div>
                         </CardContent>
@@ -714,7 +712,7 @@ function ReviewStep({
                         </div>
 
                         <Button
-                            className="w-full h-14 bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl font-bold shadow-lg transition-all hover:-translate-y-0.5 active:scale-95"
+                            className="w-full h-14 bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl font-bold shadow-lg transition-[color,background-color,border-color,box-shadow,opacity,transform] hover:-translate-y-0.5 active:scale-95"
                             onClick={handleSubmit}
                             disabled={submitting}
                         >
@@ -951,7 +949,7 @@ export function BookingWizard({
                             >
                                 <div
                                     className={cn(
-                                        "size-12 rounded-full flex items-center justify-center transition-all duration-500 border-2",
+                                        "size-12 rounded-full flex items-center justify-center transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-500 border-2",
                                         isCurrent
                                             ? "bg-primary text-primary-foreground border-primary shadow-lg scale-110"
                                             : isDone

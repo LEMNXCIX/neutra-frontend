@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import Logo from "@/components/logo";
+import { UserAccountSummary } from "@/components/shared/UserAccountSummary";
 
 type NavItem = { label: string; href: string };
 
@@ -56,8 +57,8 @@ function MobileMenuSheet({ isOpen, setIsOpen, navItems, tenantName, tenantLogo, 
       <SheetTrigger asChild>
         <Button
           variant="ghost"
-          size="icon"
-          className="size-10 hover:bg-foreground hover:text-background transition-all"
+          size="icon" aria-label="Abrir menú de navegación"
+          className="size-10 hover:bg-foreground hover:text-background transition-[color,background-color,border-color,box-shadow,opacity,transform]"
         >
           <Menu className="stroke-[3px]" />
         </Button>
@@ -97,7 +98,7 @@ function MobileMenuSheet({ isOpen, setIsOpen, navItems, tenantName, tenantLogo, 
                   onClick={() =>
                     setIsOpen(false)
                   }
-                  className="flex items-center justify-between p-4 bg-card border border-border shadow-sm hover:shadow-md hover:border-primary/20 transition-all rounded-xl group"
+                  className="flex items-center justify-between p-4 bg-card border border-border shadow-sm hover:shadow-md hover:border-primary/20 transition-[color,background-color,border-color,box-shadow,opacity,transform] rounded-xl group"
                 >
                   <span className="font-bold text-lg">
                     {item.label}
@@ -117,26 +118,7 @@ function MobileMenuSheet({ isOpen, setIsOpen, navItems, tenantName, tenantLogo, 
             </span>
             {user ? (
               <div className="space-y-6">
-                <div className="flex items-center gap-4 p-5 bg-card border border-border shadow-sm rounded-xl">
-                  <Avatar className="size-12 border border-border">
-                    <AvatarImage
-                      src={user.avatar}
-                    />
-                    <AvatarFallback className="bg-primary/10 text-primary font-bold text-lg">
-                      {user.name
-                        .slice(0, 2)
-                        .toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="min-w-0">
-                    <p className="font-bold truncate">
-                      {user.name}
-                    </p>
-                    <p className="text-xs text-muted-foreground truncate font-medium">
-                      {user.email}
-                    </p>
-                  </div>
-                </div>
+                <UserAccountSummary user={user} />
 
                 <div className="grid gap-3">
                   <Button
@@ -313,7 +295,7 @@ export function BookingNavbar({ tenantName, tenantLogo }: { tenantName?: string 
                         {user ? (
                             <DropdownMenu>
                                 <DropdownMenuTrigger className="ml-2 outline-none">
-                                    <Avatar className="size-9 border border-border hover:border-primary/50 transition-all cursor-pointer shadow-sm">
+                                    <Avatar className="size-9 border border-border hover:border-primary/50 transition-[color,background-color,border-color,box-shadow,opacity,transform] cursor-pointer shadow-sm">
                                         <AvatarImage
                                             src={user.avatar}
                                             alt={user.name}

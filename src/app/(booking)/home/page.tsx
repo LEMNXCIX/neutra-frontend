@@ -69,7 +69,7 @@ export default async function BookingHomePage() {
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                         <Button
                             size="lg"
-                            className="h-14 px-10 text-base font-bold rounded-xl shadow-lg shadow-primary/20 hover:-translate-y-0.5 transition-all"
+                            className="h-14 px-10 text-base font-bold rounded-xl shadow-lg shadow-primary/20 hover:-translate-y-0.5 transition-[color,background-color,border-color,box-shadow,opacity,transform]"
                             asChild
                         >
                             <Link href={cms?.bookingCtaHref ?? "/book"}>

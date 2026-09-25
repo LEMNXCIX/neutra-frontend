@@ -4,9 +4,15 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { normalizeWorkingHours, type WorkingHours } from "@/components/admin/booking/working-hours-editor";
-
-const WEEKDAYS = ["D", "L", "M", "M", "J", "V", "S"];
+const WEEKDAYS = [
+    { id: "sunday", label: "D" },
+    { id: "monday", label: "L" },
+    { id: "tuesday", label: "M" },
+    { id: "wednesday", label: "M" },
+    { id: "thursday", label: "J" },
+    { id: "friday", label: "V" },
+    { id: "saturday", label: "S" },
+];
 const MONTHS = [
     "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
     "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre",
@@ -14,17 +20,6 @@ const MONTHS = [
 
 const toISODate = (d: Date) =>
     `${d.getFullYear()}-${`${d.getMonth() + 1}`.padStart(2, "0")}-${`${d.getDate()}`.padStart(2, "0")}`;
-
-/** Weekdays (0=Sun..6=Sat) the staff member works, from their workingHours. */
-export function workingWeekdays(workingHours: unknown): Set<number> {
-    const normalized: WorkingHours = normalizeWorkingHours(workingHours);
-    const days = new Set<number>();
-    const keys = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
-    keys.forEach((key, index) => {
-        if (normalized[key]?.length) days.add(index);
-    });
-    return days;
-}
 
 export function AvailabilityCalendar({
     value,
@@ -53,12 +48,11 @@ export function AvailabilityCalendar({
     const firstDay = new Date(view.year, view.month, 1).getDay();
     const daysInMonth = new Date(view.year, view.month + 1, 0).getDate();
 
-    const cells: Array<{ date: Date; iso: string } | null> = [];
-    for (let i = 0; i < firstDay; i++) cells.push(null);
-    for (let d = 1; d <= daysInMonth; d++) {
-        const date = new Date(view.year, view.month, d);
-        cells.push({ date, iso: toISODate(date) });
-    }
+    const dates = Array.from({ length: daysInMonth }, (_, index) => {
+        const day = index + 1;
+        const date = new Date(view.year, view.month, day);
+        return { date, iso: toISODate(date) };
+    });
 
     return (
         <div className="space-y-3">
@@ -66,7 +60,7 @@ export function AvailabilityCalendar({
                 <Button
                     type="button"
                     variant="ghost"
-                    size="icon"
+                    size="icon" aria-label="Mes anterior"
                     className="size-8"
                     onClick={() => shiftMonth(-1)}
                 >
@@ -78,7 +72,7 @@ export function AvailabilityCalendar({
                 <Button
                     type="button"
                     variant="ghost"
-                    size="icon"
+                    size="icon" aria-label="Mes siguiente"
                     className="size-8"
                     onClick={() => shiftMonth(1)}
                 >
@@ -86,16 +80,15 @@ export function AvailabilityCalendar({
                 </Button>
             </div>
             <div className="grid grid-cols-7 gap-1 text-center">
-                {WEEKDAYS.map((d, i) => (
+                {WEEKDAYS.map(({ id, label }) => (
                     <span
-                        key={i}
+                        key={id}
                         className="text-[10px] font-bold uppercase text-muted-foreground py-1"
                     >
-                        {d}
+                        {label}
                     </span>
                 ))}
-                {cells.map((cell, i) => {
-                    if (!cell) return <span key={`empty-${i}`} />;
+                {dates.map((cell, index) => {
                     const iso = cell.iso;
                     const isPast = iso < minDate;
                     const isWorking = workingDays.size === 0 || workingDays.has(cell.date.getDay());
@@ -104,6 +97,7 @@ export function AvailabilityCalendar({
                     return (
                         <button
                             key={iso}
+                            style={index === 0 ? { gridColumnStart: firstDay + 1 } : undefined}
                             type="button"
                             disabled={disabled}
                             onClick={() => onChange(iso)}

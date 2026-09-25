@@ -48,13 +48,14 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { WorkingHoursEditor } from "@/components/admin/booking/working-hours-editor";
 import {
     DEFAULT_WORKING_HOURS,
-    WorkingHoursEditor,
     normalizeWorkingHours,
     type WorkingHours,
-} from "@/components/admin/booking/working-hours-editor";
+} from "@/components/admin/booking/working-hours-utils";
 import { Clock } from "lucide-react";
+import { AdminEntityHeader } from "@/components/admin/shared/AdminEntityHeader";
 
 interface Props {
     staff: Staff[];
@@ -80,6 +81,8 @@ function ServiceAssignmentDialog({
     isSaving: boolean;
     onSave: () => void;
 }) {
+    const selectedServiceIdSet = new Set(selectedServiceIds);
+
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[500px]">
@@ -106,7 +109,7 @@ function ServiceAssignmentDialog({
                                     key={service.id}
                                     type="button"
                                     tabIndex={0}
-                                    className={`flex items-center justify-between p-3 border rounded-lg transition-colors cursor-pointer hover:bg-accent/50 ${selectedServiceIds.includes(service.id) ? "bg-primary/5 border-primary/30" : ""}`}
+                                    className={`flex items-center justify-between p-3 border rounded-lg transition-colors cursor-pointer hover:bg-accent/50 ${selectedServiceIdSet.has(service.id) ? "bg-primary/5 border-primary/30" : ""}`}
                                     onClick={() => onToggleService(service.id)}
                                     onKeyDown={(e) => {
                                         if (
@@ -129,11 +132,9 @@ function ServiceAssignmentDialog({
                                         </div>
                                     </div>
                                     <div
-                                        className={`size-6 rounded-full border-2 flex items-center justify-center transition-all ${selectedServiceIds.includes(service.id) ? "bg-primary border-primary text-primary-foreground" : "border-muted-foreground/30"}`}
+                                        className={`size-6 rounded-full border-2 flex items-center justify-center transition-[color,background-color,border-color,box-shadow,opacity,transform] ${selectedServiceIdSet.has(service.id) ? "bg-primary border-primary text-primary-foreground" : "border-muted-foreground/30"}`}
                                     >
-                                        {selectedServiceIds.includes(
-                                            service.id,
-                                        ) && <Check className="size-3.5" />}
+                                        {selectedServiceIdSet.has(service.id) && <Check className="size-3.5" />}
                                     </div>
                                 </button>
                             ))}
@@ -170,35 +171,15 @@ function StaffHeader({
     onCreate: () => void;
 }) {
     return (
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
-                <h1 className="text-3xl font-bold tracking-tight">
-                    Gestión del equipo
-                </h1>
-                <p className="text-muted-foreground mt-1">
-                    Miembros del equipo disponibles para recibir reservas.
-                </p>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-                {isSuperAdmin && (
-                    <Select
-                        value={tenantFilter}
-                        onValueChange={onTenantFilterChange}
-                    >
-                        <SelectTrigger className="w-full sm:w-[180px]">
-                            <SelectValue placeholder="Todos los tenants" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">Todos los tenants</SelectItem>
-                        </SelectContent>
-                    </Select>
-                )}
-                <Button onClick={onCreate} className="w-full sm:w-auto">
-                    <Plus className="size-4 mr-2" />
-                    Agregar miembro
-                </Button>
-            </div>
-        </div>
+        <AdminEntityHeader
+            title="Gestión del equipo"
+            description="Miembros del equipo disponibles para recibir reservas."
+            createLabel="Agregar miembro"
+            isSuperAdmin={isSuperAdmin}
+            tenantFilter={tenantFilter}
+            onTenantFilterChange={onTenantFilterChange}
+            onCreate={onCreate}
+        />
     );
 }
 
@@ -239,7 +220,7 @@ function StaffCardsGrid({
             {staff.map((member) => (
                 <Card
                     key={member.id}
-                    className="min-w-0 overflow-hidden group hover:border-primary/50 transition-all active:scale-[0.98]"
+                    className="min-w-0 overflow-hidden group hover:border-primary/50 transition-[color,background-color,border-color,box-shadow,opacity,transform] active:scale-[0.98]"
                 >
                     <CardHeader className="flex flex-row items-start gap-4">
                         <Avatar className="size-14 border-2 border-background group-hover:border-primary/20 transition-colors">

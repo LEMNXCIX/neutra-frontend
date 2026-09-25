@@ -81,51 +81,8 @@ const getStatusVariant = (
 const getStatusLabel = (status: AppointmentStatus): string =>
     APPOINTMENT_STATUS_LABELS[status] || status;
 
-export default async function AppointmentDetailPage(props: {
-    params: Promise<{ id: string }>;
-}) {
-    const { id } = await props.params;
-    const { appointment, error } = await getAppointmentData(id);
-
-    if (error === "unauthorized") redirect("/login");
-    if (error === "not_found") notFound();
-
-    if (error || !appointment) {
-        return (
-            <div className="container mx-auto px-4 py-12 max-w-2xl">
-                <Link
-                    href="/appointments"
-                    className="flex items-center gap-2 text-primary hover:underline mb-8"
-                >
-                    <ArrowLeft className="size-4" />
-                    Volver a mis citas
-                </Link>
-                <Alert variant="destructive">
-                    <AlertCircle className="size-4" />
-                    <AlertDescription>
-                        {error === "forbidden"
-                            ? "No tenés permiso para ver esta cita"
-                            : "No se pudieron cargar los detalles de la cita"}
-                    </AlertDescription>
-                </Alert>
-            </div>
-        );
-    }
-
+function AppointmentHeaderCard({ appointment }: { appointment: any }) {
     return (
-        <div className="min-h-screen bg-background">
-            <div className="container mx-auto px-4 py-12 max-w-3xl">
-                {/* Navigation */}
-                <Link
-                    href="/appointments"
-                    className="flex items-center gap-2 text-primary hover:underline mb-8"
-                >
-                    <ArrowLeft className="size-4" />
-                    Volver a mis citas
-                </Link>
-
-                <div className="grid gap-8">
-                    {/* Header Card */}
                     <Card className="overflow-hidden border-none shadow-xl bg-card/50 backdrop-blur-sm">
                         <div className="bg-primary h-2" />
                         <CardHeader className="pb-8">
@@ -189,7 +146,7 @@ export default async function AppointmentDetailPage(props: {
                                         <p className="text-lg font-semibold">
                                             {new Date(
                                                 appointment.startTime,
-                                            ).toLocaleTimeString([], {
+                                            ).toLocaleTimeString("es-ES", { timeZone: "UTC",
                                                 hour: "2-digit",
                                                 minute: "2-digit",
                                             })}
@@ -239,7 +196,11 @@ export default async function AppointmentDetailPage(props: {
                         </CardContent>
                     </Card>
 
-                    {/* Details Grid */}
+    );
+}
+
+function AppointmentDetails({ appointment }: { appointment: any }) {
+    return (
                     <div className="grid md:grid-cols-2 gap-8">
                         {/* More Info */}
                         <Card className="border-none shadow-lg bg-card/50 backdrop-blur-sm">
@@ -307,6 +268,56 @@ export default async function AppointmentDetailPage(props: {
                             </CardContent>
                         </Card>
                     </div>
+    );
+}
+
+export default async function AppointmentDetailPage(props: {
+    params: Promise<{ id: string }>;
+}) {
+    const { id } = await props.params;
+    const { appointment, error } = await getAppointmentData(id);
+
+    if (error === "unauthorized") redirect("/login");
+    if (error === "not_found") notFound();
+
+    if (error || !appointment) {
+        return (
+            <div className="container mx-auto px-4 py-12 max-w-2xl">
+                <Link
+                    href="/appointments"
+                    className="flex items-center gap-2 text-primary hover:underline mb-8"
+                >
+                    <ArrowLeft className="size-4" />
+                    Volver a mis citas
+                </Link>
+                <Alert variant="destructive">
+                    <AlertCircle className="size-4" />
+                    <AlertDescription>
+                        {error === "forbidden"
+                            ? "No tenés permiso para ver esta cita"
+                            : "No se pudieron cargar los detalles de la cita"}
+                    </AlertDescription>
+                </Alert>
+            </div>
+        );
+    }
+
+    return (
+        <div className="min-h-screen bg-background">
+            <div className="container mx-auto px-4 py-12 max-w-3xl">
+                {/* Navigation */}
+                <Link
+                    href="/appointments"
+                    className="flex items-center gap-2 text-primary hover:underline mb-8"
+                >
+                    <ArrowLeft className="size-4" />
+                    Volver a mis citas
+                </Link>
+
+                <div className="grid gap-8">
+                    {/* Header Card */}
+                    <AppointmentHeaderCard appointment={appointment} />
+                    <AppointmentDetails appointment={appointment} />
                 </div>
             </div>
         </div>

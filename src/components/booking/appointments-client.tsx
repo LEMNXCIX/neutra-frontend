@@ -55,18 +55,8 @@ interface AppointmentsClientProps {
     success?: string | null;
 }
 
-const AppointmentCard = ({
-  appointment,
-  type,
-  onUserCancelled,
-  onStaffUpdated,
-}: {
-  appointment: Appointment;
-  type: "user" | "staff";
-  onUserCancelled: () => void;
-  onStaffUpdated: () => void;
-}) => (
-  <Card className="hover:shadow-lg transition-all duration-300">
+function AppointmentCardHeader({ appointment, type }: { appointment: Appointment; type: "user" | "staff" }) {
+    return (
     <CardHeader className="pb-3">
       <div className="flex justify-between items-start">
         <Link
@@ -103,6 +93,21 @@ const AppointmentCard = ({
         </Badge>
       </div>
     </CardHeader>
+    );
+}
+
+function AppointmentCardBody({
+    appointment,
+    type,
+    onUserCancelled,
+    onStaffUpdated,
+}: {
+    appointment: Appointment;
+    type: "user" | "staff";
+    onUserCancelled: () => void;
+    onStaffUpdated: () => void;
+}) {
+    return (
     <CardContent>
       <div className="grid grid-cols-2 gap-4 mb-4">
         <div className="flex items-center gap-2 text-sm">
@@ -114,7 +119,7 @@ const AppointmentCard = ({
             <p className="font-medium">
               {new Date(
                 appointment.startTime,
-              ).toLocaleDateString("es-ES", {
+              ).toLocaleDateString("es-ES", { timeZone: "UTC",
                 weekday: "short",
                 month: "short",
                 day: "numeric",
@@ -132,7 +137,7 @@ const AppointmentCard = ({
             <p className="font-medium">
               {new Date(
                 appointment.startTime,
-              ).toLocaleTimeString([], {
+              ).toLocaleTimeString("es-ES", { timeZone: "UTC",
                 hour: "2-digit",
                 minute: "2-digit",
               })}
@@ -305,6 +310,28 @@ const AppointmentCard = ({
         </div>
       )}
     </CardContent>
+    );
+}
+
+const AppointmentCard = ({
+  appointment,
+  type,
+  onUserCancelled,
+  onStaffUpdated,
+}: {
+  appointment: Appointment;
+  type: "user" | "staff";
+  onUserCancelled: () => void;
+  onStaffUpdated: () => void;
+}) => (
+  <Card className="hover:shadow-lg transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-300">
+    <AppointmentCardHeader appointment={appointment} type={type} />
+    <AppointmentCardBody
+      appointment={appointment}
+      type={type}
+      onUserCancelled={onUserCancelled}
+      onStaffUpdated={onStaffUpdated}
+    />
   </Card>
 );
 

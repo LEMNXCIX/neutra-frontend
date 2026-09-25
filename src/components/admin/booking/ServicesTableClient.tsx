@@ -3,7 +3,7 @@
 import React, { useReducer, useEffect, useCallback, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
-import { Plus, Edit, Trash2, Clock, DollarSign, Tag } from "lucide-react";
+import { Edit, Trash2, Clock, DollarSign, Tag } from "lucide-react";
 import { bookingService, Service } from "@/services/booking.service";
 import { categoriesService } from "@/services/categories.service";
 import { Category } from "@/types/category.types";
@@ -44,6 +44,7 @@ import { Badge } from "@/components/ui/badge";
 import { Spinner } from "@/components/ui/spinner";
 import { Label } from "@/components/ui/label";
 import { useConfirm } from "@/hooks/use-confirm";
+import { AdminEntityHeader } from "@/components/admin/shared/AdminEntityHeader";
 
 type ServicesState = {
   services: Service[];
@@ -220,35 +221,15 @@ function ServicesHeader({
   onCreate: () => void;
 }) {
   return (
-    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">
-          Servicios
-        </h1>
-        <p className="text-muted-foreground mt-1">
-          Gestioná los servicios ofrecidos por tu sistema de reservas.
-        </p>
-      </div>
-      <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-        {isSuperAdmin && (
-          <Select
-            value={tenantFilter}
-            onValueChange={onTenantFilterChange}
-          >
-            <SelectTrigger className="w-full sm:w-[180px]">
-              <SelectValue placeholder="Todos los tenants" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos los tenants</SelectItem>
-            </SelectContent>
-          </Select>
-        )}
-        <Button onClick={onCreate} className="w-full sm:w-auto">
-          <Plus className="size-4 mr-2" />
-          Agregar servicio
-        </Button>
-      </div>
-    </div>
+    <AdminEntityHeader
+      title="Servicios"
+      description="Gestioná los servicios ofrecidos por tu sistema de reservas."
+      createLabel="Agregar servicio"
+      isSuperAdmin={isSuperAdmin}
+      tenantFilter={tenantFilter}
+      onTenantFilterChange={onTenantFilterChange}
+      onCreate={onCreate}
+    />
   );
 }
 
@@ -473,7 +454,7 @@ function ServicesDesktopTable({
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                       <Button
-                        size="icon"
+                        size="icon" aria-label="Editar servicio"
                         variant="ghost"
                         className="size-8"
                         onClick={() =>
@@ -483,7 +464,7 @@ function ServicesDesktopTable({
                         <Edit className="size-4 text-muted-foreground" />
                       </Button>
                       <Button
-                        size="icon"
+                        size="icon" aria-label="Eliminar servicio"
                         variant="ghost"
                         className="size-8"
                         onClick={() =>
