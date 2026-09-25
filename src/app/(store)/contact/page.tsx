@@ -78,7 +78,7 @@ export default async function ContactPage() {
                                     {cms?.phone ?? "+1 (555) 800-XCIX"}
                                 </p>
                                 <p className="text-[11px] font-medium text-muted-foreground mt-1">
-                                    Lun - Vie • 9AM - 6PM
+                                    Lun - Vie • 9:00 - 18:00
                                 </p>
                             </div>
                         </div>
@@ -93,7 +93,7 @@ export default async function ContactPage() {
                                 </h3>
                                 <p className="font-bold text-base">
                                     {cms?.address ??
-                                        "123 Design Avenue, Metropolis, NY 10012"}
+                                        "123 Avenida del Diseño, Metrópolis, NY 10012"}
                                 </p>
                                 <button
                                     type="button"
@@ -129,7 +129,7 @@ export default async function ContactPage() {
                                 type="text"
                                 id="name"
                                 placeholder="Juan Pérez"
-                                className="h-12 border-muted-foreground/20 focus:border-primary transition-all"
+                                className="h-12 border-muted-foreground/20 focus:border-primary transition-[color,background-color,border-color,box-shadow,opacity,transform]"
                             />
                         </div>
                         <div className="space-y-2">
@@ -143,7 +143,7 @@ export default async function ContactPage() {
                                 type="email"
                                 id="email"
                                 placeholder="juan@ejemplo.com"
-                                className="h-12 border-muted-foreground/20 focus:border-primary transition-all"
+                                className="h-12 border-muted-foreground/20 focus:border-primary transition-[color,background-color,border-color,box-shadow,opacity,transform]"
                             />
                         </div>
                         <div className="space-y-2">
@@ -156,13 +156,13 @@ export default async function ContactPage() {
                             <Textarea
                                 id="message"
                                 rows={5}
-                                className="border-muted-foreground/20 focus:border-primary transition-all resize-none"
+                                className="border-muted-foreground/20 focus:border-primary transition-[color,background-color,border-color,box-shadow,opacity,transform] resize-none"
                                 placeholder="¿Cómo podemos ayudarte?"
                             />
                         </div>
                         <Button
                             type="button"
-                            className="w-full h-14 text-sm font-bold shadow-lg shadow-primary/20 hover:-translate-y-0.5 transition-all"
+                            className="w-full h-14 text-sm font-bold shadow-lg shadow-primary/20 hover:-translate-y-0.5 transition-[color,background-color,border-color,box-shadow,opacity,transform]"
                         >
                             <Send size={16} className="mr-2" /> Enviar Mensaje
                         </Button>

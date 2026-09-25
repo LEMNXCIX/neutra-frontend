@@ -19,7 +19,9 @@ import {
     ArrowLeft,
     Palette,
     Clock,
+    Gift,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
@@ -27,7 +29,7 @@ import { NavItem } from "@/config/admin-navigation";
 import { useFeatures } from "@/hooks/useFeatures";
 import { useAuthStore } from "@/store/auth-store";
 
-const ICON_MAP: Record<string, any> = {
+const ICON_MAP: Record<string, LucideIcon> = {
     LayoutDashboard,
     Package,
     ShoppingCart,
@@ -42,6 +44,7 @@ const ICON_MAP: Record<string, any> = {
     MessageSquare,
     Palette,
     Clock,
+    Gift,
 };
 
 interface AdminSidebarProps {
@@ -64,11 +67,14 @@ export default function AdminSidebar({ items }: AdminSidebarProps) {
         }
 
         // Feature checks (dynamic)
-        if (item.requiredFeature) {
-            const key = item.requiredFeature;
-            console.log(key);
-            console.log(isFeatureEnabled(key));
-            return isFeatureEnabled(key) || isFeatureEnabled(key.toLowerCase());
+        const requiredFeatures = [
+            ...(item.requiredFeature ? [item.requiredFeature] : []),
+            ...(item.requiredFeatures ?? []),
+        ];
+        if (requiredFeatures.length > 0) {
+            return requiredFeatures.every((feature) =>
+                isFeatureEnabled(feature),
+            );
         }
 
         return true;
@@ -77,7 +83,7 @@ export default function AdminSidebar({ items }: AdminSidebarProps) {
     return (
         <aside
             className={cn(
-                "hidden md:flex flex-col border-r border-border bg-background transition-all duration-300 ease-in-out",
+                "hidden md:flex flex-col border-r border-border bg-background transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-300 ease-in-out",
                 sidebarOpen ? "w-64" : "w-20",
             )}
         >
@@ -86,10 +92,10 @@ export default function AdminSidebar({ items }: AdminSidebarProps) {
                 {sidebarOpen ? (
                     <div className="flex flex-col leading-none">
                         <h2 className="text-sm font-bold uppercase tracking-widest text-foreground">
-                            Console
+                            Consola
                         </h2>
                         <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mt-0.5">
-                            Control Center
+                            Centro de control
                         </span>
                     </div>
                 ) : (
@@ -114,7 +120,7 @@ export default function AdminSidebar({ items }: AdminSidebarProps) {
                                     <Button
                                         variant={isActive ? "default" : "ghost"}
                                         className={cn(
-                                            "w-full justify-start gap-3 h-10 rounded-md transition-all font-medium text-xs tracking-tight",
+                                            "w-full justify-start gap-3 h-10 rounded-md transition-[color,background-color,border-color,box-shadow,opacity,transform] font-medium text-xs tracking-tight",
                                             isActive
                                                 ? "bg-primary text-primary-foreground shadow-sm"
                                                 : "text-muted-foreground hover:bg-muted hover:text-foreground",
@@ -144,7 +150,7 @@ export default function AdminSidebar({ items }: AdminSidebarProps) {
             <div className="p-4 border-t border-border/50">
                 <Link
                     href="/"
-                    className="group flex items-center gap-3 px-3 py-2 text-xs font-medium text-muted-foreground hover:text-foreground transition-all"
+                    className="group flex items-center gap-3 px-3 py-2 text-xs font-medium text-muted-foreground hover:text-foreground transition-[color,background-color,border-color,box-shadow,opacity,transform]"
                 >
                     <ArrowLeft
                         size={14}

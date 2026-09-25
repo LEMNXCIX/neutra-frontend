@@ -63,7 +63,7 @@ export default function BannerBar() {
                         {b.ctaUrl ? (
                             <Button
                                 asChild
-                                className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 font-black uppercase tracking-widest text-[10px] shadow-2xl h-11 px-8 rounded-lg transition-all active:scale-95"
+                                className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 font-black uppercase tracking-widest text-[10px] shadow-2xl h-11 px-8 rounded-lg transition-[color,background-color,border-color,box-shadow,opacity,transform] active:scale-95"
                                 size="sm"
                             >
                                 <Link href={b.ctaUrl}>
@@ -79,7 +79,7 @@ export default function BannerBar() {
                         <button
                             type="button"
                             onClick={() => setVisibleId(null)}
-                            className="size-10 flex items-center justify-center rounded-full hover:bg-primary-foreground/10 transition-all active:scale-90"
+                            className="size-10 flex items-center justify-center rounded-full hover:bg-primary-foreground/10 transition-[color,background-color,border-color,box-shadow,opacity,transform] active:scale-90"
                             aria-label="Cerrar aviso"
                         >
                             <X className="size-5 opacity-40 hover:opacity-100" />

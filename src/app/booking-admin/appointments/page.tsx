@@ -3,7 +3,7 @@ import AppointmentsTableClient from "@/components/admin/appointments/Appointment
 import { Appointment } from "@/services/booking.service";
 import { api } from '@/lib/api-client';
 
-export const metadata = { title: "Appointments" };
+export const metadata = { title: "Citas" };
 
 export const dynamic = "force-dynamic";
 
@@ -24,8 +24,12 @@ async function getAppointments(
 
         // getWithMeta keeps meta.pagination — the backend now returns real
         // pagination when page/limit are sent.
-        const result = await api.getWithMeta<{ data: any[] }>(`/appointments?${params.toString()}`);
-        const appointments: Appointment[] = result?.data?.data || [];
+        const result = await api.getWithMeta<Appointment[]>(
+            `/appointments?${params.toString()}`,
+        );
+        const appointments: Appointment[] = Array.isArray(result?.data)
+            ? result.data
+            : [];
 
         const stats = {
             totalAppointments: appointments.length,
@@ -44,19 +48,25 @@ async function getAppointments(
             ),
         };
 
-        // If backend provides pagination info, use it
-        const pagination = result?.meta?.pagination
-            ? {
-                  ...result.meta.pagination,
-                  totalItemsPerPage:
-                      result.meta.pagination.limit || limit,
+        // Map the backend page metadata to the table's pagination shape.
+        const paginationMeta = result?.meta?.pagination as
+            | {
+                  page?: number;
+                  limit?: number;
+                  total?: number;
+                  totalPages?: number;
               }
-            : {
-                  currentPage: page,
-                  totalPages: Math.ceil(appointments.length / limit),
-                  totalItems: appointments.length,
-                  totalItemsPerPage: limit,
-              };
+            | undefined;
+        const resolvedLimit = paginationMeta?.limit ?? limit;
+        const resolvedTotal = paginationMeta?.total ?? appointments.length;
+        const pagination = {
+            currentPage: paginationMeta?.page ?? page,
+            totalPages:
+                paginationMeta?.totalPages ??
+                Math.ceil(resolvedTotal / resolvedLimit),
+            totalItems: resolvedTotal,
+            totalItemsPerPage: resolvedLimit,
+        };
 
         return {
             appointments,

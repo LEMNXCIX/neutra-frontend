@@ -25,14 +25,14 @@ export function ServicesGrid({ services }: ServicesGridProps) {
             <EmptyState 
                 icon={CalendarSearch}
                 title="No se encontraron servicios"
-                description="We couldn't find any services available at the moment. Please check back later."
+                description="No hay servicios disponibles en este momento. Volvé a intentarlo más tarde."
             />
         );
     }
 
     // Group services by category
     const groupedServices = services.reduce((acc, service) => {
-        const categoryName = service.category?.name || 'Uncategorized';
+        const categoryName = service.category?.name || 'Sin categoría';
         if (!acc[categoryName]) acc[categoryName] = [];
         acc[categoryName].push(service);
         return acc;
@@ -48,7 +48,7 @@ export function ServicesGrid({ services }: ServicesGridProps) {
                 >
                     <div className="flex items-center gap-6">
                         <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground whitespace-nowrap">
-                            {categoryName} Catalog
+                            Catálogo de {categoryName}
                         </h2>
                         <div className="h-px flex-1 bg-border/50" />
                         <Badge variant="secondary" className="size-8 flex items-center justify-center font-bold rounded-full">
@@ -67,10 +67,10 @@ export function ServicesGrid({ services }: ServicesGridProps) {
                                 <CardHeader className="p-8 space-y-6">
                                     <div className="flex items-start justify-between">
                                         <Badge variant="secondary" className="font-bold uppercase tracking-wider text-[9px] px-3 py-1 rounded-full">
-                                            {service.duration} MIN SESSION
+                                            SESIÓN DE {service.duration} MIN
                                         </Badge>
                                         {!service.active && (
-                                            <Badge variant="destructive" className="font-bold uppercase tracking-wider text-[9px] rounded-full">INACTIVE</Badge>
+                                            <Badge variant="destructive" className="font-bold uppercase tracking-wider text-[9px] rounded-full">INACTIVO</Badge>
                                         )}
                                     </div>
                                     <div className="space-y-3">
@@ -87,7 +87,7 @@ export function ServicesGrid({ services }: ServicesGridProps) {
                                 
                                 <CardContent className="flex-1 flex items-end px-8 pt-4 pb-8">
                                     <div className="flex items-baseline gap-2">
-                                        <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Rate</p>
+                                        <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Tarifa</p>
                                         <span className="text-4xl font-bold tracking-tighter text-foreground">${service.price}</span>
                                     </div>
                                 </CardContent>
@@ -95,11 +95,11 @@ export function ServicesGrid({ services }: ServicesGridProps) {
                                 <CardFooter className="p-8 pt-0">
                                     <Button
                                         onClick={() => handleBookService(service.id)}
-                                        className="w-full h-12 rounded-xl font-bold text-sm shadow-lg shadow-primary/10 transition-all hover:opacity-90 active:scale-95"
+                                        className="w-full h-12 rounded-xl font-bold text-sm shadow-lg shadow-primary/10 transition-[color,background-color,border-color,box-shadow,opacity,transform] hover:opacity-90 active:scale-95"
                                         size="lg"
                                         disabled={!service.active}
                                     >
-                                        Book Now
+                                        Reservar ahora
                                     </Button>
                                 </CardFooter>
                             </Card>

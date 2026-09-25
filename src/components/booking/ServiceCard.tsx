@@ -57,7 +57,7 @@ export default function ServiceCard({ service, onBook }: ServiceCardProps) {
                     onClick={() => onBook?.(service)}
                     className="px-4 py-2 bg-primary text-primary-foreground text-sm font-medium rounded-md hover:bg-primary/90 transition-colors"
                 >
-                    Book Now
+                    Reservar ahora
                 </button>
             </div>
         </div>

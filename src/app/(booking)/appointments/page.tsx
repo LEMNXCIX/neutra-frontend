@@ -6,7 +6,7 @@ import { api } from '@/lib/api-client';
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-    title: "My Appointments",
+    title: "Mis citas",
     description: "Ver y gestionar tus citas",
 };
 
@@ -66,7 +66,7 @@ export default async function AppointmentsPage(props: {
                 {/* Header */}
                 <div className="mb-8">
                     <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-2 text-foreground">
-                        My <span className="text-primary">Citas</span>
+                        Mis <span className="text-primary">citas</span>
                     </h1>
                     <p className="text-muted-foreground text-lg">
                         {data.isStaff

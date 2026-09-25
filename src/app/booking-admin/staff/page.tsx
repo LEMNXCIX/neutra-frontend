@@ -2,7 +2,7 @@ import React, { Suspense } from "react";
 import StaffTableClient from "@/components/admin/booking/StaffTableClient";
 import { api } from '@/lib/api-client';
 
-export const metadata = { title: "Booking Staff" };
+export const metadata = { title: "Personal de reservas" };
 
 export const dynamic = "force-dynamic";
 

@@ -20,7 +20,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
 
         // Validate quantity against stock if available
         if (product.stock !== undefined && qty > product.stock) {
-            toast.error(`Only ${product.stock} items available in stock`);
+            toast.error(`Solo hay ${product.stock} unidades disponibles`);
             return;
         }
 
@@ -41,7 +41,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                     htmlFor="product-quantity"
                     className="absolute -top-2 left-4 bg-foreground text-background px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest z-10 rounded-full"
                 >
-                    Quantity
+                    Cantidad
                 </label>
                 <input
                     id="product-quantity"
@@ -49,20 +49,28 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                     min={1}
                     max={product.stock}
                     value={qty}
-                    onChange={(e) => setQty(Number(e.target.value))}
-                    className="w-full h-16 bg-background border-2 border-border text-foreground px-6 font-bold text-2xl outline-none focus:border-foreground transition-all rounded-xl"
+                    onChange={(e) => {
+                        const rawValue = e.target.value;
+                        if (!rawValue) {
+                            setQty(1);
+                            return;
+                        }
+                        const value = Number(rawValue);
+                        setQty(Number.isFinite(value) && value > 0 ? Math.floor(value) : 1);
+                    }}
+                    className="w-full h-16 bg-background border-2 border-border text-foreground px-6 font-bold text-2xl outline-none focus:border-foreground transition-[color,background-color,border-color,box-shadow,opacity,transform] rounded-xl"
                 />
             </div>
 
             <Button
                 onClick={handleAdd}
                 disabled={loading}
-                className="h-16 px-12 bg-foreground text-background hover:bg-foreground/90 font-bold uppercase tracking-widest text-[11px] rounded-xl transition-all active:scale-[0.98] group border-none shadow-xl shadow-foreground/10"
+                className="h-16 px-12 bg-foreground text-background hover:bg-foreground/90 font-bold uppercase tracking-widest text-[11px] rounded-xl transition-[color,background-color,border-color,box-shadow,opacity,transform] active:scale-[0.98] group border-none shadow-xl shadow-foreground/10"
             >
                 {loading ? (
                     <div className="flex items-center gap-3">
                         <Loader2 className="size-5 animate-spin" />
-                        <span>Processing</span>
+                        <span>Procesando</span>
                     </div>
                 ) : (
                     <div className="flex items-center gap-3">

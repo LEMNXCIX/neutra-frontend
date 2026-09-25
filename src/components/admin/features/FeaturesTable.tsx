@@ -6,8 +6,6 @@ import {
     Table,
     TableBody,
     TableCell,
-    TableHead,
-    TableHeader,
     TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
@@ -25,6 +23,7 @@ import {
 import { FeatureDialog } from "./FeatureDialog";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
+import { AdminTableHeader } from "@/components/admin/shared/AdminTableHeader";
 
 const EMPTY_FEATURES: PlatformFeature[] = [];
 
@@ -151,7 +150,7 @@ export function FeaturesTable({ initialFeatures = EMPTY_FEATURES }: FeaturesTabl
                         </div>
                         <Button
                             variant="outline"
-                            size="icon"
+                            size="icon" aria-label="Actualizar funciones"
                             onClick={loadFeatures}
                         >
                             <RefreshCw
@@ -162,17 +161,14 @@ export function FeaturesTable({ initialFeatures = EMPTY_FEATURES }: FeaturesTabl
 
                     <div className="rounded-md border overflow-x-auto">
                         <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Name</TableHead>
-                                    <TableHead>Key</TableHead>
-                                    <TableHead>Category</TableHead>
-                                    <TableHead>Price</TableHead>
-                                    <TableHead className="text-right">
-                                        Actions
-                                    </TableHead>
-                                </TableRow>
-                            </TableHeader>
+                            <AdminTableHeader
+                                columns={[
+                                    { label: "Name" },
+                                    { label: "Key" },
+                                    { label: "Category" },
+                                    { label: "Price" },
+                                ]}
+                            />
                             <TableBody>
                                 {state.loading && state.features.length === 0 ? (
                                     <TableRow>
@@ -230,7 +226,7 @@ export function FeaturesTable({ initialFeatures = EMPTY_FEATURES }: FeaturesTabl
                                                 <div className="flex justify-end gap-2">
                                                     <Button
                                                         variant="ghost"
-                                                        size="icon"
+                                                        size="icon" aria-label="Editar función"
                                                         onClick={() =>
                                                             openEdit(feature)
                                                         }
@@ -239,7 +235,7 @@ export function FeaturesTable({ initialFeatures = EMPTY_FEATURES }: FeaturesTabl
                                                     </Button>
                                                     <Button
                                                         variant="ghost"
-                                                        size="icon"
+                                                        size="icon" aria-label="Eliminar función"
                                                         className="text-destructive"
                                                         onClick={() =>
                                                             handleDelete(

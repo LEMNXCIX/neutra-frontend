@@ -23,7 +23,7 @@ import {
     AlertCircle,
     ArrowRight,
 } from "lucide-react";
-import Logo from "@/components/logo";
+import { AuthBrandHeader } from "@/components/auth/AuthBrandHeader";
 
 export function LoginForm() {
     const login = useAuthStore((state) => state.login);
@@ -57,26 +57,17 @@ export function LoginForm() {
 
     return (
         <div className="w-full max-w-[440px] space-y-8">
-            <div className="text-center space-y-4">
-                <div className="inline-flex items-center justify-center size-16 rounded-xl bg-primary/10 text-primary mb-2 transition-transform hover:scale-110 duration-500 shadow-sm">
-                    <Logo size={36} />
-                </div>
-                <div className="space-y-1">
-                    <h1 className="text-3xl font-bold tracking-tight text-foreground">
-                        Bienvenido de Nuevo
-                    </h1>
-                    <p className="text-muted-foreground font-medium text-sm">
-                        Secure access to your account
-                    </p>
-                </div>
-            </div>
+            <AuthBrandHeader
+                title="Bienvenido de Nuevo"
+                subtitle="Acceso seguro a tu cuenta"
+            />
 
             <Card className="t-card border-none shadow-2xl relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-full h-1.5 bg-primary" />
                 <CardHeader className="space-y-1 pb-6 pt-8">
                     <CardTitle className="text-xl font-bold flex items-center gap-2">
                         <LogIn className="size-5 text-primary" />
-                        Sign In
+                        Iniciar sesión
                     </CardTitle>
                     <CardDescription className="text-sm font-medium">
                         Ingresá tus credenciales para continuar
@@ -99,7 +90,7 @@ export function LoginForm() {
                                     placeholder="juan@ejemplo.com"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-all focus:border-primary"
+                                    className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform] focus:border-primary"
                                     disabled={loading}
                                 />
                             </div>
@@ -111,13 +102,13 @@ export function LoginForm() {
                                     htmlFor="password"
                                     className="text-xs font-semibold text-foreground ml-1"
                                 >
-                                    Password
+                                    Contraseña
                                 </Label>
                                 <Link
                                     href="/forgot-password"
                                     className="text-xs font-semibold text-primary hover:underline underline-offset-4"
                                 >
-                                    Forgot?
+                                    ¿Te olvidaste?
                                 </Link>
                             </div>
                             <div className="relative group">
@@ -130,7 +121,7 @@ export function LoginForm() {
                                     onChange={(e) =>
                                         setPassword(e.target.value)
                                     }
-                                    className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-all focus:border-primary"
+                                    className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform] focus:border-primary"
                                     disabled={loading}
                                 />
                             </div>
@@ -150,17 +141,17 @@ export function LoginForm() {
 
                         <Button
                             type="submit"
-                            className="w-full h-12 text-sm font-bold shadow-lg shadow-primary/20 hover:-translate-y-0.5 transition-all rounded-xl"
+                            className="w-full h-12 text-sm font-bold shadow-lg shadow-primary/20 hover:-translate-y-0.5 transition-[color,background-color,border-color,box-shadow,opacity,transform] rounded-xl"
                             disabled={loading}
                         >
                             {loading ? (
                                 <>
                                     <Loader2 className="mr-2 size-4 animate-spin" />
-                                    Authenticating…
+                                    Autenticando…
                                 </>
                             ) : (
                                 <>
-                                    Sign In{" "}
+                                    Iniciar sesión{" "}
                                     <ArrowRight className="ml-2 size-4" />
                                 </>
                             )}
@@ -169,7 +160,7 @@ export function LoginForm() {
                         <div className="relative py-2">
                             <Separator className="bg-border" />
                             <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-card px-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                                OR
+                                O
                             </span>
                         </div>
 
@@ -179,7 +170,7 @@ export function LoginForm() {
                             </p>
                             <Button
                                 variant="outline"
-                                className="w-full h-12 rounded-xl border-border font-bold text-xs transition-all hover:bg-muted"
+                                className="w-full h-12 rounded-xl border-border font-bold text-xs transition-[color,background-color,border-color,box-shadow,opacity,transform] hover:bg-muted"
                                 asChild
                             >
                                 <Link href="/register">Crear Nueva Cuenta</Link>
@@ -190,7 +181,7 @@ export function LoginForm() {
             </Card>
 
             <p className="text-center text-[10px] font-medium text-muted-foreground opacity-60">
-                SECURED BY XCIX CRYPTOGRAPHY • 2026
+                PROTEGIDO POR XCIX CRYPTOGRAPHY • 2026
             </p>
         </div>
     );

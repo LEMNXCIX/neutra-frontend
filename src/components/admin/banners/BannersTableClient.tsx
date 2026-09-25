@@ -1,4 +1,9 @@
 "use client";
+import { TablePagination, MobileTablePagination } from "@/components/admin/shared/TablePagination";
+
+import { AdminStatCard as StatCard } from "@/components/admin/shared/AdminStatCard";
+import { FilterSelect } from "@/components/admin/shared/FilterSelect";
+
 
 import React, { useRef, useState, useReducer, useCallback, useSyncExternalStore, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -37,8 +42,6 @@ import {
     Flag,
     CheckCircle2,
     XCircle,
-    ChevronLeft,
-    ChevronRight,
 } from "lucide-react";
 import {
     Accordion,
@@ -55,7 +58,7 @@ import { bannersService } from "@/services/banners.service";
 const formatDateTime = (date?: Date | string) => {
     if (!date) return "—";
     try {
-        return new Date(date).toLocaleString();
+        return new Date(date).toLocaleString("es-ES", { timeZone: "UTC" });
     } catch {
         return String(date);
     }
@@ -81,31 +84,6 @@ type Props = {
     isSuperAdmin?: boolean;
 };
 
-const StatCard = ({
-  icon: Icon,
-  title,
-  value,
-  color,
-}: {
-  icon: React.ElementType;
-  title: string;
-  value: string | number;
-  color: string;
-}) => (
-  <Card>
-    <CardContent className="pt-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm text-muted-foreground">{title}</p>
-          <p className="text-2xl font-bold mt-1">{value}</p>
-        </div>
-        <div className={`p-3 rounded-full ${color}`}>
-          <Icon className="size-6 text-white" />
-        </div>
-      </div>
-    </CardContent>
-  </Card>
-);
 
 type BannerForm = { title: string; subtitle: string; cta: string; ctaUrl: string; startsAt: string; endsAt: string; active: boolean };
 
@@ -120,32 +98,32 @@ const BannerFormFields = ({
 }) => (
   <div className="space-y-4">
     <div>
-      <label htmlFor={`${prefix}-title`} className="text-sm font-medium">Title *</label>
+      <label htmlFor={`${prefix}-title`} className="text-sm font-medium">Título *</label>
       <Input id={`${prefix}-title`} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Título del banner" />
     </div>
     <div>
-      <label htmlFor={`${prefix}-subtitle`} className="text-sm font-medium">Subtitle</label>
+      <label htmlFor={`${prefix}-subtitle`} className="text-sm font-medium">Subtítulo</label>
       <Input id={`${prefix}-subtitle`} value={form.subtitle} onChange={(e) => setForm({ ...form, subtitle: e.target.value })} placeholder="Subtítulo opcional" />
     </div>
     <div>
-      <label htmlFor={`${prefix}-cta`} className="text-sm font-medium">CTA Text</label>
+      <label htmlFor={`${prefix}-cta`} className="text-sm font-medium">Texto del botón</label>
       <Input id={`${prefix}-cta`} value={form.cta} onChange={(e) => setForm({ ...form, cta: e.target.value })} placeholder="Texto del botón de acción" />
     </div>
     <div>
-      <label htmlFor={`${prefix}-cta-url`} className="text-sm font-medium">CTA URL</label>
+      <label htmlFor={`${prefix}-cta-url`} className="text-sm font-medium">URL del botón</label>
       <Input id={`${prefix}-cta-url`} value={form.ctaUrl} onChange={(e) => setForm({ ...form, ctaUrl: e.target.value })} placeholder="/path or https://..." />
     </div>
     <div>
-      <label htmlFor={`${prefix}-starts-at`} className="text-sm font-medium">Starts At</label>
+      <label htmlFor={`${prefix}-starts-at`} className="text-sm font-medium">Comienza el</label>
       <Input id={`${prefix}-starts-at`} type="datetime-local" value={form.startsAt} onChange={(e) => setForm({ ...form, startsAt: e.target.value })} />
     </div>
     <div>
-      <label htmlFor={`${prefix}-ends-at`} className="text-sm font-medium">Ends At</label>
+      <label htmlFor={`${prefix}-ends-at`} className="text-sm font-medium">Termina el</label>
       <Input id={`${prefix}-ends-at`} type="datetime-local" value={form.endsAt} onChange={(e) => setForm({ ...form, endsAt: e.target.value })} />
     </div>
     <div className="flex items-center gap-2">
       <Switch id={`${prefix}-active`} checked={form.active} onCheckedChange={(checked: boolean) => setForm({ ...form, active: checked })} />
-      <label htmlFor={`${prefix}-active`} className="text-sm font-medium">Active</label>
+      <label htmlFor={`${prefix}-active`} className="text-sm font-medium">Activo</label>
     </div>
   </div>
 );
@@ -190,9 +168,9 @@ function StatsSection({ stats }: { stats: Stats }) {
   return (
     <>
       <div className="hidden md:grid md:grid-cols-3 gap-4">
-        <StatCard icon={Flag} title="Total de Banners" value={stats.totalBanners} color="bg-blue-500" />
-        <StatCard icon={CheckCircle2} title="Banners Activos" value={stats.activeBanners} color="bg-green-500" />
-        <StatCard icon={XCircle} title="Banners Inactivos" value={stats.inactiveBanners} color="bg-red-500" />
+        <StatCard icon={Flag} title="Total de anuncios" value={stats.totalBanners} color="bg-blue-500" />
+        <StatCard icon={CheckCircle2} title="Anuncios activos" value={stats.activeBanners} color="bg-green-500" />
+        <StatCard icon={XCircle} title="Anuncios inactivos" value={stats.inactiveBanners} color="bg-red-500" />
       </div>
 
       <Accordion type="single" collapsible className="w-full md:hidden">
@@ -200,14 +178,14 @@ function StatsSection({ stats }: { stats: Stats }) {
           <AccordionTrigger className="px-4 hover:no-underline">
             <div className="flex items-center gap-3">
               <Flag className="size-5 text-muted-foreground" />
-              <span className="font-medium">Banner Statistics</span>
+              <span className="font-medium">Estadísticas de anuncios</span>
             </div>
           </AccordionTrigger>
           <AccordionContent className="px-4 pb-4 pt-2">
             <div className="grid grid-cols-1 gap-4">
-              <StatCard icon={Flag} title="Total de Banners" value={stats.totalBanners} color="bg-blue-500" />
-              <StatCard icon={CheckCircle2} title="Banners Activos" value={stats.activeBanners} color="bg-green-500" />
-              <StatCard icon={XCircle} title="Banners Inactivos" value={stats.inactiveBanners} color="bg-red-500" />
+              <StatCard icon={Flag} title="Total de anuncios" value={stats.totalBanners} color="bg-blue-500" />
+              <StatCard icon={CheckCircle2} title="Anuncios activos" value={stats.activeBanners} color="bg-green-500" />
+              <StatCard icon={XCircle} title="Anuncios inactivos" value={stats.inactiveBanners} color="bg-red-500" />
             </div>
           </AccordionContent>
         </AccordionItem>
@@ -231,16 +209,17 @@ function FilterBar({
     <Card>
       <CardContent className="pt-6">
         <div className="flex flex-wrap gap-3">
-          <Select value={statusFilter} onValueChange={onFilterChange}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Todos los Estados" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Statuses</SelectItem>
-              <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="inactive">Inactive</SelectItem>
-            </SelectContent>
-          </Select>
+          <FilterSelect
+            value={statusFilter}
+            onValueChange={onFilterChange}
+            placeholder="Todos los estados"
+            triggerClassName="w-[180px]"
+            options={[
+              { value: "all", label: "Todos los estados" },
+              { value: "active", label: "Activo" },
+              { value: "inactive", label: "Inactivo" },
+            ]}
+          />
 
           <div className="flex gap-2 flex-1">
             <Input
@@ -261,7 +240,7 @@ function FilterBar({
                 onSearch(input?.value || "");
               }}
             >
-              Search
+              Buscar
             </Button>
           </div>
         </div>
@@ -294,19 +273,19 @@ function DesktopBannersTable({
           <TableHeader>
             <TableRow>
               <TableHead className="w-[120px]">ID</TableHead>
-              <TableHead className="w-[200px]">Title</TableHead>
-              {isSuperAdmin && <TableHead className="w-[120px]">Tenant</TableHead>}
-              <TableHead className="w-[100px]">Active</TableHead>
-              <TableHead className="w-[250px]">Period</TableHead>
+              <TableHead className="w-[200px]">Título</TableHead>
+              {isSuperAdmin && <TableHead className="w-[120px]">Organización</TableHead>}
+              <TableHead className="w-[100px]">Activo</TableHead>
+              <TableHead className="w-[250px]">Período</TableHead>
               <TableHead className="w-[150px]">CTA</TableHead>
-              <TableHead className="w-[150px]">Actions</TableHead>
+              <TableHead className="w-[150px]">Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {banners.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                  No banners found
+                  No se encontraron anuncios
                 </TableCell>
               </TableRow>
             ) : (
@@ -335,11 +314,11 @@ function DesktopBannersTable({
                   <TableCell>
                     {b.active ? (
                       <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100 rounded-full font-bold text-[10px] uppercase tracking-wider">
-                        Active
+                        Activo
                       </Badge>
                     ) : (
                       <Badge variant="secondary" className="bg-muted text-muted-foreground hover:bg-muted rounded-full font-bold text-[10px] uppercase tracking-wider">
-                        Inactive
+                        Inactivo
                       </Badge>
                     )}
                   </TableCell>
@@ -364,11 +343,11 @@ function DesktopBannersTable({
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button size="icon" variant="ghost" className="size-8 rounded-full hover:bg-primary/5 hover:text-primary" onClick={() => onEdit(b)}>
+                      <Button size="icon" aria-label="Editar banner" variant="ghost" className="size-8 rounded-full hover:bg-primary/5 hover:text-primary" onClick={() => onEdit(b)}>
                         <Edit className="size-4" />
                       </Button>
                       <Button
-                        size="icon"
+                        size="icon" aria-label="Eliminar banner"
                         variant="ghost"
                         className="size-8 rounded-full hover:bg-destructive hover:bg-destructive/10"
                         onClick={() => onDelete(b.id)}
@@ -385,35 +364,7 @@ function DesktopBannersTable({
         </Table>
       </div>
 
-      {pagination.totalItems > 0 && (
-        <div className="flex flex-col sm:flex-row items-center justify-between px-4 py-3 border-t gap-3">
-          <div className="text-sm text-muted-foreground">
-            Showing {(pagination.currentPage - 1) * pagination.itemsPerPage + 1} to{" "}
-            {Math.min(pagination.currentPage * pagination.itemsPerPage, pagination.totalItems)} of{" "}
-            {pagination.totalItems} results
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={() => onPageChange(pagination.currentPage - 1)} disabled={pagination.currentPage === 1}>
-              <ChevronLeft className="size-4 mr-1" />
-              Previous
-            </Button>
-            <div className="hidden sm:flex items-center gap-1">
-              <span className="text-sm text-muted-foreground px-2">
-                Page {pagination.currentPage} of {pagination.totalPages}
-              </span>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onPageChange(pagination.currentPage + 1)}
-              disabled={pagination.currentPage === pagination.totalPages || pagination.totalPages === 0}
-            >
-              Next
-              <ChevronRight className="size-4 ml-1" />
-            </Button>
-          </div>
-        </div>
-      )}
+      <TablePagination pagination={pagination} onPageChange={onPageChange} />
     </Card>
   );
 }
@@ -445,20 +396,20 @@ function MobileBannersCards({
                 <p className="text-xs text-muted-foreground font-mono mt-1">{b.id}</p>
               </div>
               {b.active ? (
-                <Badge className="bg-green-500">Active</Badge>
+                <Badge className="bg-green-500">Activo</Badge>
               ) : (
-                <Badge variant="secondary">Inactive</Badge>
+                <Badge variant="secondary">Inactivo</Badge>
               )}
             </div>
             <div className="text-xs text-muted-foreground space-y-1">
-              <div>Starts: {formatDateTime(b.startsAt)}</div>
-              <div>Ends: {formatDateTime(b.endsAt)}</div>
+              <div>Comienza: {formatDateTime(b.startsAt)}</div>
+              <div>Termina: {formatDateTime(b.endsAt)}</div>
               {b.cta && <div className="font-medium">CTA: {b.cta}</div>}
             </div>
             <div className="flex gap-2">
               <Button size="sm" className="flex-1" onClick={() => onEdit(b)}>
                 <Edit className="size-4 mr-1" />
-                Edit
+                Editar
               </Button>
               <Button size="sm" variant="destructive" onClick={() => onDelete(b.id)} disabled={isDeleting === b.id}>
                 <Trash2 className="size-4" />
@@ -468,26 +419,7 @@ function MobileBannersCards({
         </Card>
       ))}
 
-      {pagination.totalItems > 0 && (
-        <Card className="lg:hidden">
-          <div className="flex items-center justify-between px-4 py-3">
-            <Button variant="outline" size="sm" onClick={() => onPageChange(pagination.currentPage - 1)} disabled={pagination.currentPage === 1}>
-              <ChevronLeft className="size-4" />
-            </Button>
-            <span className="text-sm text-muted-foreground">
-              Page {pagination.currentPage} of {pagination.totalPages}
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onPageChange(pagination.currentPage + 1)}
-              disabled={pagination.currentPage === pagination.totalPages || pagination.totalPages === 0}
-            >
-              <ChevronRight className="size-4" />
-            </Button>
-          </div>
-        </Card>
-      )}
+      <MobileTablePagination pagination={pagination} onPageChange={onPageChange} />
     </div>
   );
 }
@@ -511,13 +443,13 @@ function CreateBannerDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Add New Banner</DialogTitle>
+          <DialogTitle>Agregar anuncio</DialogTitle>
         </DialogHeader>
         <BannerFormFields form={form} setForm={onFormChange} prefix="create-banner" />
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
           <Button onClick={onCreate} disabled={isCreating}>
-            {isCreating ? <><Spinner className="mr-2" /> Creating…</> : "Crear Banner"}
+            {isCreating ? <><Spinner className="mr-2" /> Creando…</> : "Crear Banner"}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -544,13 +476,13 @@ function EditBannerDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Edit Banner</DialogTitle>
+          <DialogTitle>Editar anuncio</DialogTitle>
         </DialogHeader>
         <BannerFormFields form={form} setForm={onFormChange} prefix="edit-banner" />
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
           <Button onClick={onSave} disabled={isEditing}>
-            {isEditing ? <><Spinner className="mr-2" /> Saving…</> : "Guardar Cambios"}
+            {isEditing ? <><Spinner className="mr-2" /> Guardando…</> : "Guardar Cambios"}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -748,21 +680,21 @@ active: true,
   return (
     <div className="w-full space-y-6" suppressHydrationWarning>
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-medium">Banners Management</h2>
+        <h2 className="text-xl font-medium">Gestión de anuncios</h2>
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
           {isSuperAdmin && (
             <Select value={tenantFilter} onValueChange={handleTenantFilterChange}>
               <SelectTrigger className="w-full sm:w-[150px]">
-                <SelectValue placeholder="Todos los Tenants" />
+                <SelectValue placeholder="Todos los tenants" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Tenants</SelectItem>
+                <SelectItem value="all">Todos los tenants</SelectItem>
               </SelectContent>
             </Select>
           )}
           <Button onClick={() => dispatch({ type: "SET_CREATE_OPEN", payload: true })}>
             <Plus className="size-4 mr-2" />
-            Add Banner
+            Agregar anuncio
           </Button>
         </div>
       </div>

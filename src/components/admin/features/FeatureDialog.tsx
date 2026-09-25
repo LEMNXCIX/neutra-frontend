@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     Dialog,
     DialogContent,
@@ -43,6 +43,18 @@ export function FeatureDialog({
         category: feature?.category || "General",
         price: feature?.price || 0,
     });
+
+    useEffect(() => {
+        if (!open) return;
+
+        setFormData({
+            name: feature?.name || "",
+            key: feature?.key || "",
+            description: feature?.description || "",
+            category: feature?.category || "General",
+            price: feature?.price ?? 0,
+        });
+    }, [open, feature]);
 
     const handleSubmit = async () => {
         if (!formData.name || !formData.key) {

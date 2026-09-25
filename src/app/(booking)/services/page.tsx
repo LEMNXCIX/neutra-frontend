@@ -6,7 +6,7 @@ import { api } from '@/lib/api-client';
 import { getHomeContent } from '@/lib/strapi';
 
 export const metadata: Metadata = {
-  title: "Services",
+  title: "Servicios",
   description: "Explora los servicios disponibles para reservar",
 };
 
@@ -29,11 +29,11 @@ export default async function ServicesPage() {
             <div className="container mx-auto px-4 py-12 max-w-7xl">
                 {/* Header */}
                 <div className="mb-12 text-center">
-                    <Badge variant="outline" className="mb-4">Professional Services</Badge>
+                    <Badge variant="outline" className="mb-4">Servicios profesionales</Badge>
                     <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4 text-foreground">
                         {cms?.servicesTitle ?? (
                             <>
-                                Our <span className="text-primary">Services</span>
+                                Nuestros <span className="text-primary">servicios</span>
                             </>
                         )}
                     </h1>

@@ -1,3 +1,4 @@
+import { readJsonResponse } from "@/lib/response";
 /**
  * API Routes for Authentication - Logout
  */
@@ -27,7 +28,7 @@ async function handleLogout(req: NextRequest, method: "GET" | "POST") {
             cache: "no-store",
         });
 
-        const data = await response.json();
+        const data = await readJsonResponse(response);
         const duration = Date.now() - startTime;
 
         // Get all Set-Cookie headers from backend

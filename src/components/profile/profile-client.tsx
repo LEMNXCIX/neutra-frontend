@@ -36,6 +36,7 @@ import { Order } from "@/types/order.types";
 import { Appointment } from "@/services/booking.service";
 import { OrderHistory } from "./order-history";
 import { AppointmentHistory } from "./appointment-history";
+import { LoyaltyCard } from "@/components/booking/loyalty-card";
 
 type ProfileEditState = {
   editOpen: boolean;
@@ -141,7 +142,7 @@ export function ProfileClient({
       const data = await res.json();
       if (data.success) {
         updateUser({ ...data.data, avatar: data.data.profilePic });
-        toast.success("Profile updated! 🎉");
+        toast.success("¡Perfil actualizado! 🎉");
         dispatch({ type: "SET_EDIT_OPEN", payload: false });
       }
     } catch (_error) {
@@ -176,8 +177,9 @@ export function ProfileClient({
               )}
               <button
                 type="button"
+                aria-label="Cambiar foto de perfil"
                 onClick={openEditProfile}
-                className="absolute bottom-1 right-1 z-20 p-2.5 bg-background border border-border rounded-full shadow-lg hover:scale-110 active:scale-90 transition-all hover:border-primary/50"
+                className="absolute bottom-1 right-1 z-20 p-2.5 bg-background border border-border rounded-full shadow-lg hover:scale-110 active:scale-90 transition-[color,background-color,border-color,box-shadow,opacity,transform] hover:border-primary/50"
               >
                 <Camera className="size-4 text-foreground" />
               </button>
@@ -192,7 +194,7 @@ export function ProfileClient({
                   {user.isAdmin && (
                     <Badge className="bg-foreground text-background font-bold text-[10px] tracking-widest px-4 py-1.5 rounded-full shadow-lg border-none">
                       <Shield className="size-3 mr-2" />{" "}
-                      ADMINISTRATOR
+                      ADMINISTRADOR
                     </Badge>
                   )}
                 </div>
@@ -205,10 +207,10 @@ export function ProfileClient({
               <div className="flex flex-wrap gap-4 pt-4">
                 <div className="px-6 py-3 bg-muted/40 rounded-xl border border-border/50">
                   <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1 opacity-70">
-                    Registration Date
+                    Fecha de registro
                   </p>
                   <p className="text-sm font-bold text-foreground">
-                    February 2026
+                    Febrero de 2026
                   </p>
                 </div>
               </div>
@@ -218,9 +220,9 @@ export function ProfileClient({
               <Button
                 onClick={openEditProfile}
                 size="lg"
-                className="h-14 px-10 rounded-xl font-bold bg-foreground text-background hover:bg-foreground/90 shadow-xl shadow-foreground/10 transition-all hover:-translate-y-1"
+                className="h-14 px-10 rounded-xl font-bold bg-foreground text-background hover:bg-foreground/90 shadow-xl shadow-foreground/10 transition-[color,background-color,border-color,box-shadow,opacity,transform] hover:-translate-y-1"
               >
-                <Edit className="size-4 mr-2" /> Edit Profile
+                <Edit className="size-4 mr-2" /> Editar perfil
               </Button>
               <Button
                 variant="outline"
@@ -229,14 +231,16 @@ export function ProfileClient({
                   await logout();
                   router.push("/login");
                 }}
-                className="h-14 px-10 rounded-xl font-bold border-2 border-border hover:bg-destructive hover:text-destructive-foreground hover:border-destructive transition-all"
+                className="h-14 px-10 rounded-xl font-bold border-2 border-border hover:bg-destructive hover:text-destructive-foreground hover:border-destructive transition-[color,background-color,border-color,box-shadow,opacity,transform]"
               >
-                <LogOut className="size-4 mr-2" /> Sign Out
+                <LogOut className="size-4 mr-2" /> Cerrar sesión
               </Button>
             </div>
           </div>
         </CardContent>
       </Card>
+
+      <LoyaltyCard />
 
       {/* Content History */}
       {!isNeutral && (
@@ -256,13 +260,13 @@ export function ProfileClient({
         <DialogContent className="max-w-md rounded-xl p-0 overflow-hidden border-none shadow-2xl">
           <DialogHeader className="p-8 pb-0">
             <DialogTitle className="text-xl font-bold">
-              Edit Profile
+              Editar perfil
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-6 p-8">
             <div className="flex flex-col items-center gap-4">
               <div className="relative group">
-                <Avatar className="size-24 border-2 border-border shadow-md group-hover:border-primary/30 transition-all">
+                <Avatar className="size-24 border-2 border-border shadow-md group-hover:border-primary/30 transition-[color,background-color,border-color,box-shadow,opacity,transform]">
                   <AvatarImage
                     src={editState.avatarPreview || user.avatar}
                   />
@@ -272,10 +276,11 @@ export function ProfileClient({
                 </Avatar>
                 <button
                   type="button"
+                  aria-label="Subir imagen de avatar"
                   onClick={() =>
                     fileInputRef.current?.click()
                   }
-                  className="absolute bottom-0 right-0 p-2 bg-primary text-primary-foreground rounded-full shadow-lg hover:scale-110 active:scale-95 transition-all"
+                  className="absolute bottom-0 right-0 p-2 bg-primary text-primary-foreground rounded-full shadow-lg hover:scale-110 active:scale-95 transition-[color,background-color,border-color,box-shadow,opacity,transform]"
                 >
                   <Camera className="size-4" />
                 </button>
@@ -292,7 +297,7 @@ export function ProfileClient({
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label className="text-xs font-semibold ml-1">
-                  Full Name
+                  Nombre completo
                 </Label>
                 <Input
                   value={editState.profileForm.name}
@@ -302,12 +307,12 @@ export function ProfileClient({
                       name: e.target.value,
                     }})
                   }
-                  className="h-12 rounded-xl border-border focus:border-primary transition-all"
+                  className="h-12 rounded-xl border-border focus:border-primary transition-[color,background-color,border-color,box-shadow,opacity,transform]"
                 />
               </div>
               <div className="space-y-2">
                 <Label className="text-xs font-semibold ml-1">
-                  Email Address
+                  Correo electrónico
                 </Label>
                 <Input
                   type="email"
@@ -318,7 +323,7 @@ export function ProfileClient({
                       email: e.target.value,
                     }})
                   }
-                  className="h-12 rounded-xl border-border focus:border-primary transition-all"
+                  className="h-12 rounded-xl border-border focus:border-primary transition-[color,background-color,border-color,box-shadow,opacity,transform]"
                 />
               </div>
             </div>
@@ -329,14 +334,14 @@ export function ProfileClient({
               onClick={() => dispatch({ type: "SET_EDIT_OPEN", payload: false })}
               className="rounded-xl font-semibold h-12 flex-1"
             >
-              Cancel
+              Cancelar
             </Button>
             <Button
               onClick={saveProfile}
               disabled={editState.isSaving}
               className="rounded-xl font-bold h-12 flex-1 shadow-lg shadow-primary/20"
             >
-              {editState.isSaving ? "Guardando..." : "Guardar Cambios"}
+              {editState.isSaving ? "Guardando..." : "Guardar cambios"}
             </Button>
           </DialogFooter>
         </DialogContent>

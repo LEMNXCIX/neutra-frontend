@@ -3,7 +3,7 @@ import SlidersTableClient from "@/components/admin/sliders/SlidersTableClient";
 import { api } from '@/lib/api-client';
 import { validateAdminAccess } from "@/lib/server-auth";
 
-export const metadata = { title: "Sliders" };
+export const metadata = { title: "Carruseles" };
 
 export const dynamic = "force-dynamic";
 

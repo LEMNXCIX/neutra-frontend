@@ -1,4 +1,7 @@
 "use client";
+import { AdminStatCard as StatCard } from "@/components/admin/shared/AdminStatCard";
+import { AdminCardActions } from "@/components/admin/shared/AdminCardActions";
+
 
 import React, { useReducer, useRef, useSyncExternalStore, Suspense } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
@@ -84,31 +87,6 @@ console.error("Error al actualizar permisos:", err);
 }
 };
 
-const StatCard = ({
-icon: Icon,
-title,
-value,
-color,
-}: {
-icon: React.ElementType;
-title: string;
-value: string | number;
-color: string;
-}) => (
-<Card>
-<CardContent className="pt-6">
-<div className="flex items-center justify-between">
-<div>
-<p className="text-sm text-muted-foreground">{title}</p>
-<p className="text-2xl font-bold mt-1">{value}</p>
-</div>
-<div className={`p-3 rounded-full ${color}`}>
-<Icon className="size-6" />
-</div>
-</div>
-</CardContent>
-</Card>
-);
 
 function RoleFormFields({
 form,
@@ -129,35 +107,37 @@ onSearchChange: (value: string) => void;
 togglePermission: (id: string) => void;
 prefix: string;
 }) {
+const selectedPermissionIds = new Set(form.permissionIds);
+
 return (
 <div className="space-y-4">
 <div className="space-y-2">
-<Label htmlFor={`${prefix}-name`}>Role Name*</Label>
-<Input id={`${prefix}-name`} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g., EDITOR" />
+<Label htmlFor={`${prefix}-name`}>Nombre del rol *</Label>
+<Input id={`${prefix}-name`} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Ej.: EDITOR" />
 </div>
 <div className="space-y-2">
-<Label htmlFor={`${prefix}-description`}>Description</Label>
+<Label htmlFor={`${prefix}-description`}>Descripción</Label>
 <Input id={`${prefix}-description`} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Descripción del rol" />
 </div>
 <div className="space-y-2">
-<Label htmlFor={`${prefix}-level`}>Level</Label>
+<Label htmlFor={`${prefix}-level`}>Nivel</Label>
 <Input id={`${prefix}-level`} type="number" value={form.level} onChange={(e) => setForm({ ...form, level: parseInt(e.target.value) || 1 })} min={1} />
 </div>
 <div className="space-y-2">
-<Label>Permissions</Label>
+<Label>Permisos</Label>
 <div className="relative">
 <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
 <Input placeholder="Buscar permisos..." className="pl-9 mb-2" value={rolePermissionSearch} onChange={(e) => onSearchChange(e.target.value)} />
 </div>
 <div className="mt-2 space-y-2 max-h-60 overflow-y-auto border rounded-md p-3">
 {isSearchingPerms ? (
-<div className="text-center py-4 text-sm text-muted-foreground">Searching…</div>
+<div className="text-center py-4 text-sm text-muted-foreground">Buscando…</div>
 ) : availablePermissions.length === 0 ? (
 <div className="text-center py-4 text-sm text-muted-foreground">No se encontraron permisos</div>
 ) : (
 availablePermissions.map((permission) => (
 <div key={permission.id} className="flex items-center gap-2">
-<Checkbox id={`${prefix}-${permission.id}`} checked={form.permissionIds.includes(permission.id)} onCheckedChange={() => togglePermission(permission.id)} />
+<Checkbox id={`${prefix}-${permission.id}`} checked={selectedPermissionIds.has(permission.id)} onCheckedChange={() => togglePermission(permission.id)} />
 <label htmlFor={`${prefix}-${permission.id}`} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
 {permission.name}
 {permission.description && (<span className="text-xs text-muted-foreground ml-2">({permission.description})</span>)}
@@ -183,11 +163,11 @@ prefix: string;
 return (
 <div className="space-y-4">
 <div>
-<Label htmlFor={`${prefix}-perm-name`}>Permission Name*</Label>
-<Input id={`${prefix}-perm-name`} value={permForm.name} onChange={(e) => setPermForm({ ...permForm, name: e.target.value })} placeholder="e.g., users:read, products:write" />
+<Label htmlFor={`${prefix}-perm-name`}>Nombre del permiso *</Label>
+<Input id={`${prefix}-perm-name`} value={permForm.name} onChange={(e) => setPermForm({ ...permForm, name: e.target.value })} placeholder="Ej.: users:read, products:write" />
 </div>
 <div>
-<Label htmlFor={`${prefix}-perm-description`}>Description</Label>
+<Label htmlFor={`${prefix}-perm-description`}>Descripción</Label>
 <Input id={`${prefix}-perm-description`} value={permForm.description} onChange={(e) => setPermForm({ ...permForm, description: e.target.value })} placeholder="Descripción del permiso" />
 </div>
 </div>
@@ -328,19 +308,19 @@ return (
 <TableHeader>
 <TableRow>
 <TableHead className="w-[200px]">
-Name
+Nombre
 </TableHead>
 <TableHead className="w-[300px]">
-Description
+Descripción
 </TableHead>
 <TableHead className="w-[100px]">
-Level
+Nivel
 </TableHead>
 <TableHead className="w-[150px]">
-Permissions
+Permisos
 </TableHead>
 <TableHead className="w-[150px]">
-Actions
+Acciones
 </TableHead>
 </TableRow>
 </TableHeader>
@@ -351,7 +331,7 @@ Actions
 colSpan={5}
 className="text-center py-8 text-muted-foreground"
 >
-No roles found
+No se encontraron roles
 </TableCell>
 </TableRow>
 ) : (
@@ -381,7 +361,7 @@ className="group hover:bg-muted/50 transition-colors border-b border-border/50"
 variant="secondary"
 className="text-[10px] font-bold uppercase tracking-wider"
 >
-Level {role.level || 0}
+Nivel {role.level || 0}
 </Badge>
 </TableCell>
 <TableCell>
@@ -391,13 +371,13 @@ className="bg-muted text-foreground font-bold text-[10px] rounded-full px-3 py-1
 >
 {role.permissions
 ?.length || 0}{" "}
-PERMISSIONS
+PERMISOS
 </Badge>
 </TableCell>
 <TableCell className="text-right">
 <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
 <Button
-size="icon"
+size="icon" aria-label="Editar rol"
 variant="ghost"
 className="size-8 rounded-full hover:bg-primary/5 hover:text-primary"
 onClick={() =>
@@ -407,7 +387,7 @@ openEdit(role)
 <Edit className="size-4" />
 </Button>
 <Button
-size="icon"
+size="icon" aria-label="Eliminar rol"
 variant="ghost"
 className="size-8 rounded-full hover:bg-destructive/5 hover:text-destructive"
 onClick={() =>
@@ -439,17 +419,17 @@ role.id ? (
 {rolePagination.totalItems > 0 && (
 <div className="flex flex-col sm:flex-row items-center justify-between px-4 py-3 border-t gap-3">
 <div className="text-sm text-muted-foreground">
-Showing{" "}
+Mostrando{" "}
 {(rolePagination.currentPage - 1) *
 rolePagination.itemsPerPage +
 1}{" "}
-to{" "}
+a{" "}
 {Math.min(
 rolePagination.currentPage *
 rolePagination.itemsPerPage,
 rolePagination.totalItems,
 )}{" "}
-of {rolePagination.totalItems} results
+de {rolePagination.totalItems} resultados
 </div>
 <div className="flex gap-2">
 <Button
@@ -475,7 +455,7 @@ rolePagination.currentPage === 1
 }
 >
 <ChevronLeft className="size-4 mr-1" />
-Previous
+Anterior
 </Button>
 <div className="hidden sm:flex items-center gap-1">
 {Array.from(
@@ -544,7 +524,7 @@ className="min-w-[2.5rem]"
 )}
 </div>
 <div className="sm:hidden text-sm text-muted-foreground px-2">
-Page {rolePagination.currentPage} of{" "}
+Página {rolePagination.currentPage} de{" "}
 {rolePagination.totalPages}
 </div>
 <Button
@@ -570,7 +550,7 @@ rolePagination.currentPage ===
 rolePagination.totalPages
 }
 >
-Next
+Siguiente
 <ChevronRight className="size-4 ml-1" />
 </Button>
 </div>
@@ -602,7 +582,7 @@ return (
 {roles.length === 0 ? (
 <Card>
 <CardContent className="py-8 text-center text-muted-foreground">
-No roles found
+No se encontraron roles
 </CardContent>
 </Card>
 ) : (
@@ -622,7 +602,7 @@ roles.map((role) => (
 variant="outline"
 className="ml-2"
 >
-Level {role.level || 0}
+Nivel {role.level || 0}
 </Badge>
 </div>
 
@@ -630,39 +610,15 @@ Level {role.level || 0}
 <Shield className="size-4 text-muted-foreground" />
 <Badge variant="secondary">
 {role.permissions?.length || 0}{" "}
-permissions
+permisos
 </Badge>
 </div>
 
-<div className="flex gap-2 pt-2 border-t">
-<Button
-size="sm"
-variant="outline"
-className="flex-1"
-onClick={() => openEdit(role)}
->
-<Edit className="size-4 mr-2" />
-Edit
-</Button>
-<Button
-size="sm"
-variant="outline"
-className="flex-1"
-onClick={() =>
-handleDelete(role.id)
-}
-disabled={
-isDeletingRole === role.id
-}
->
-{isDeletingRole === role.id ? (
-<Spinner className="size-4 mr-2" />
-) : (
-<Trash2 className="size-4 mr-2" />
-)}
-Delete
-</Button>
-</div>
+<AdminCardActions
+  onEdit={() => openEdit(role)}
+  onDelete={() => handleDelete(role.id)}
+  isDeleting={isDeletingRole === role.id}
+/>
 </CardContent>
 </Card>
 ))
@@ -696,7 +652,7 @@ rolePagination.currentPage === 1
 <ChevronLeft className="size-4" />
 </Button>
 <span className="text-sm text-muted-foreground">
-Page {rolePagination.currentPage} of{" "}
+Página {rolePagination.currentPage} de{" "}
 {rolePagination.totalPages}
 </span>
 <Button
@@ -755,13 +711,13 @@ return (
 <TableHeader>
 <TableRow>
 <TableHead className="w-[250px]">
-Name
+Nombre
 </TableHead>
 <TableHead className="w-[400px]">
-Description
+Descripción
 </TableHead>
 <TableHead className="w-[150px]">
-Actions
+Acciones
 </TableHead>
 </TableRow>
 </TableHeader>
@@ -772,7 +728,7 @@ Actions
 colSpan={3}
 className="text-center py-8 text-muted-foreground"
 >
-No permissions found
+No se encontraron permisos
 </TableCell>
 </TableRow>
 ) : (
@@ -833,17 +789,17 @@ permission.id ? (
 {permissionPagination.totalItems > 0 && (
 <div className="flex flex-col sm:flex-row items-center justify-between px-4 py-3 border-t gap-3">
 <div className="text-sm text-muted-foreground">
-Showing{" "}
+Mostrando{" "}
 {(permissionPagination.currentPage - 1) *
 permissionPagination.itemsPerPage +
 1}{" "}
-to{" "}
+a{" "}
 {Math.min(
 permissionPagination.currentPage *
 permissionPagination.itemsPerPage,
 permissionPagination.totalItems,
 )}{" "}
-of {permissionPagination.totalItems} results
+de {permissionPagination.totalItems} resultados
 </div>
 <div className="flex gap-2">
 <Button
@@ -869,7 +825,7 @@ permissionPagination.currentPage === 1
 }
 >
 <ChevronLeft className="size-4 mr-1" />
-Previous
+Anterior
 </Button>
 <div className="hidden sm:flex items-center gap-1">
 {Array.from(
@@ -938,7 +894,7 @@ className="min-w-[2.5rem]"
 )}
 </div>
 <div className="sm:hidden text-sm text-muted-foreground px-2">
-Page {permissionPagination.currentPage}{" "}
+Página {permissionPagination.currentPage}{" "}
 of {permissionPagination.totalPages}
 </div>
 <Button
@@ -964,7 +920,7 @@ permissionPagination.currentPage ===
 permissionPagination.totalPages
 }
 >
-Next
+Siguiente
 <ChevronRight className="size-4 ml-1" />
 </Button>
 </div>
@@ -996,7 +952,7 @@ return (
 {permissions.length === 0 ? (
 <Card>
 <CardContent className="py-8 text-center text-muted-foreground">
-No permissions found
+No se encontraron permisos
 </CardContent>
 </Card>
 ) : (
@@ -1018,37 +974,11 @@ className="overflow-hidden"
 </p>
 </div>
 
-<div className="flex gap-2 pt-2 border-t">
-<Button
-size="sm"
-variant="outline"
-className="flex-1"
-onClick={() => openPermEdit(permission)}
->
-<Edit className="size-4 mr-2" />
-Edit
-</Button>
-<Button
-size="sm"
-variant="outline"
-className="flex-1"
-onClick={() =>
-handlePermDelete(
-permission.id,
-)
-}
-disabled={
-isDeletingPerm === permission.id
-}
->
-{isDeletingPerm === permission.id ? (
-<Spinner className="size-4 mr-2" />
-) : (
-<Trash2 className="size-4 mr-2" />
-)}
-Delete
-</Button>
-</div>
+<AdminCardActions
+  onEdit={() => openPermEdit(permission)}
+  onDelete={() => handlePermDelete(permission.id)}
+  isDeleting={isDeletingPerm === permission.id}
+/>
 </CardContent>
 </Card>
 ))
@@ -1082,7 +1012,7 @@ permissionPagination.currentPage === 1
 <ChevronLeft className="size-4" />
 </Button>
 <span className="text-sm text-muted-foreground">
-Page {permissionPagination.currentPage}{" "}
+Página {permissionPagination.currentPage}{" "}
 of {permissionPagination.totalPages}
 </span>
 <Button
@@ -1134,7 +1064,7 @@ return (
 <Dialog open={dialogState.createOpen} onOpenChange={(v) => dispatch({ type: "SET_CREATE_OPEN", payload: v })}>
 <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
 <DialogHeader>
-<DialogTitle>Create New Role</DialogTitle>
+<DialogTitle>Crear rol</DialogTitle>
 </DialogHeader>
 <RoleFormFields
 form={dialogState.form}
@@ -1151,7 +1081,7 @@ prefix="create"
 variant="outline"
 onClick={() => dispatch({ type: "SET_CREATE_OPEN", payload: false })}
 >
-Cancel
+Cancelar
 </Button>
 <Button
 onClick={handleCreate}
@@ -1188,7 +1118,7 @@ return (
 <Dialog open={dialogState.editOpen} onOpenChange={(v) => dispatch({ type: "SET_EDIT_OPEN", payload: v })}>
 <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
 <DialogHeader>
-<DialogTitle>Edit Role</DialogTitle>
+<DialogTitle>Editar rol</DialogTitle>
 </DialogHeader>
 <RoleFormFields
 form={dialogState.form}
@@ -1205,7 +1135,7 @@ prefix="edit"
 variant="outline"
 onClick={() => dispatch({ type: "SET_EDIT_OPEN", payload: false })}
 >
-Cancel
+Cancelar
 </Button>
 <Button onClick={handleUpdate} disabled={dialogState.isEditingRole}>
 {dialogState.isEditingRole ? (
@@ -1235,7 +1165,7 @@ return (
 <Dialog open={permState.permCreateOpen} onOpenChange={(v) => permDispatch({ type: "SET_PERM_CREATE_OPEN", payload: v })}>
 <DialogContent className="sm:max-w-md">
 <DialogHeader>
-<DialogTitle>Create New Permission</DialogTitle>
+<DialogTitle>Crear permiso</DialogTitle>
 </DialogHeader>
 <PermissionFormFields permForm={permState.permForm} setPermForm={(f) => permDispatch({ type: "SET_PERM_FORM", payload: f })} prefix="create" />
 <DialogFooter>
@@ -1243,7 +1173,7 @@ return (
 variant="outline"
 onClick={() => permDispatch({ type: "SET_PERM_CREATE_OPEN", payload: false })}
 >
-Cancel
+Cancelar
 </Button>
 <Button
 onClick={handlePermCreate}
@@ -1276,7 +1206,7 @@ return (
 <Dialog open={permState.permEditOpen} onOpenChange={(v) => permDispatch({ type: "SET_PERM_EDIT_OPEN", payload: v })}>
 <DialogContent className="sm:max-w-md">
 <DialogHeader>
-<DialogTitle>Edit Permission</DialogTitle>
+<DialogTitle>Editar permiso</DialogTitle>
 </DialogHeader>
 <PermissionFormFields permForm={permState.permForm} setPermForm={(f) => permDispatch({ type: "SET_PERM_FORM", payload: f })} prefix="edit" />
 <DialogFooter>
@@ -1284,7 +1214,7 @@ return (
 variant="outline"
 onClick={() => permDispatch({ type: "SET_PERM_EDIT_OPEN", payload: false })}
 >
-Cancel
+Cancelar
 </Button>
 <Button
 onClick={handlePermUpdate}
@@ -1504,21 +1434,21 @@ const permProps = { permissions, openPermEdit, handlePermDelete, isDeletingPerm:
 return (
 <div className="w-full space-y-6" suppressHydrationWarning>
 <div className="flex justify-between items-center">
-<h2 className="text-xl font-medium">Roles & Permissions Management</h2>
+<h2 className="text-xl font-medium">Gestión de roles y permisos</h2>
 </div>
 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-<StatCard icon={Shield} title="Total de Roles" value={stats.totalRoles} color="bg-primary/10 text-primary" />
-<StatCard icon={Key} title="Total de Permisos" value={stats.totalPermissions} color="bg-muted text-muted-foreground" />
+<StatCard iconClassName="size-6" icon={Shield} title="Total de roles" value={stats.totalRoles} color="bg-primary/10 text-primary" />
+<StatCard iconClassName="size-6" icon={Key} title="Total de permisos" value={stats.totalPermissions} color="bg-muted text-muted-foreground" />
 </div>
 <Tabs defaultValue="roles" className="w-full">
 <TabsList className="grid w-full max-w-md grid-cols-2">
 <TabsTrigger value="roles">Roles</TabsTrigger>
-<TabsTrigger value="permissions">Permissions</TabsTrigger>
+<TabsTrigger value="permissions">Permisos</TabsTrigger>
 </TabsList>
 <TabsContent value="roles" className="space-y-4">
 <div className="flex flex-col sm:flex-row justify-between gap-4 mb-4">
 <SearchBar placeholder="Buscar roles..." searchKey="roleSearch" onSearch={(term) => handleSearch(term, "role")} searchParams={searchParams} />
-<Button onClick={openCreate}><Plus className="size-4 mr-2" />Create Role</Button>
+<Button onClick={openCreate}><Plus className="size-4 mr-2" />Crear rol</Button>
 </div>
 <RolesDesktopTable {...roleProps} />
 <RolesMobileCards {...roleProps} />
@@ -1526,7 +1456,7 @@ return (
 <TabsContent value="permissions" className="space-y-4">
 <div className="flex flex-col sm:flex-row justify-between gap-4 mb-4">
 <SearchBar placeholder="Buscar permisos..." searchKey="permissionSearch" onSearch={(term) => handleSearch(term, "permission")} searchParams={searchParams} />
-<Button onClick={openPermCreate}><Plus className="size-4 mr-2" />Create Permission</Button>
+<Button onClick={openPermCreate}><Plus className="size-4 mr-2" />Crear permiso</Button>
 </div>
 <PermissionsDesktopTable {...permProps} />
 <PermissionsMobileCards {...permProps} />

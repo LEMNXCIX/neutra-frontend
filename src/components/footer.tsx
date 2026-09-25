@@ -2,25 +2,20 @@
 
 import Link from "next/link";
 import React from "react";
-import {
-  Facebook,
-  Twitter,
-  Instagram,
-  Linkedin,
-  Mail,
-  ArrowRight,
-} from "lucide-react";
+import { Mail, ArrowRight } from "lucide-react";
 import { Category } from "@/types/category.types";
 import Logo from "@/components/logo";
 
 const EMPTY_CATEGORIES: Category[] = [];
 
-const SOCIAL_ICONS: Record<string, any> = {
-    facebook: Facebook,
-    twitter: Twitter,
-    instagram: Instagram,
-    linkedin: Linkedin,
+const SOCIAL_LABELS: Record<string, string> = {
+    facebook: "f",
+    twitter: "t",
+    instagram: "ig",
+    linkedin: "in",
 };
+
+const DEFAULT_SOCIAL_LABELS = ["f", "t", "ig", "in"];
 
 export default function Footer({ minimal = false, tenantName, tenantLogo, footerDescription, socialLinks, initialCategories = EMPTY_CATEGORIES }: { minimal?: boolean; tenantName?: string | null; tenantLogo?: string | null; footerDescription?: string | null; socialLinks?: any[] | null; initialCategories?: Category[] }) {
   const categories = initialCategories.filter((c) => c.active).slice(0, 5);
@@ -54,23 +49,22 @@ export default function Footer({ minimal = false, tenantName, tenantLogo, footer
                                       { platform: "linkedin", url: "" },
                                   ]
                             ).map((social: any, i: number) => {
-                                const icon = SOCIAL_ICONS[social.platform] ?? [
-                                    Facebook,
-                                    Twitter,
-                                    Instagram,
-                                    Linkedin,
-                                ][i % 4];
-                                const Icon = icon;
+                                const label = SOCIAL_LABELS[social.platform] ?? DEFAULT_SOCIAL_LABELS[i % 4];
                                 return (
                                     <a
                                         href={social.url || "#"}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         key={social.platform + i}
-                                        className="size-10 rounded-full bg-muted/50 border border-transparent hover:border-primary/20 hover:bg-background hover:text-primary transition-all duration-300 flex items-center justify-center group"
+                                        className="size-10 rounded-full bg-muted/50 border border-transparent hover:border-primary/20 hover:bg-background hover:text-primary transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-300 flex items-center justify-center group"
                                         aria-label={social.platform}
                                     >
-                                        <Icon className="size-4 transition-transform group-hover:scale-110" />
+                                        <span
+                                            aria-hidden="true"
+                                            className="size-4 flex items-center justify-center text-xs font-bold leading-none transition-transform group-hover:scale-110"
+                                        >
+                                            {label}
+                                        </span>
                                     </a>
                                 );
                             })}
@@ -87,9 +81,9 @@ export default function Footer({ minimal = false, tenantName, tenantLogo, footer
                                 <li>
                                     <Link
                                         href="/products"
-                                        className="text-sm font-medium text-muted-foreground hover:text-primary transition-all flex items-center group"
+                                        className="text-sm font-medium text-muted-foreground hover:text-primary transition-[color,background-color,border-color,box-shadow,opacity,transform] flex items-center group"
                                     >
-                                        <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-all" />
+                                        <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-[color,background-color,border-color,box-shadow,opacity,transform]" />
                                         Todo el Inventario
                                     </Link>
                                 </li>
@@ -97,9 +91,9 @@ export default function Footer({ minimal = false, tenantName, tenantLogo, footer
                                     <li key={category.id}>
                                         <Link
                                             href={`/products?category=${encodeURIComponent(category.id)}`}
-                                            className="text-sm font-medium text-muted-foreground hover:text-primary transition-all flex items-center group"
+                                            className="text-sm font-medium text-muted-foreground hover:text-primary transition-[color,background-color,border-color,box-shadow,opacity,transform] flex items-center group"
                                         >
-                                            <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-all" />
+                                            <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-[color,background-color,border-color,box-shadow,opacity,transform]" />
                                             {category.name}
                                         </Link>
                                     </li>
@@ -117,9 +111,9 @@ export default function Footer({ minimal = false, tenantName, tenantLogo, footer
                             <li>
                                 <Link
                                     href="/contact"
-                                    className="text-sm font-medium text-muted-foreground hover:text-primary transition-all flex items-center group"
+                                    className="text-sm font-medium text-muted-foreground hover:text-primary transition-[color,background-color,border-color,box-shadow,opacity,transform] flex items-center group"
                                 >
-                                    <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-all" />
+                                    <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-[color,background-color,border-color,box-shadow,opacity,transform]" />
                                     Centro de Ayuda
                                 </Link>
                             </li>
@@ -128,27 +122,27 @@ export default function Footer({ minimal = false, tenantName, tenantLogo, footer
                                     <li>
                                         <Link
                                             href="/shipping"
-                                            className="text-sm font-medium text-muted-foreground hover:text-primary transition-all flex items-center group"
+                                            className="text-sm font-medium text-muted-foreground hover:text-primary transition-[color,background-color,border-color,box-shadow,opacity,transform] flex items-center group"
                                         >
-                                            <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-all" />
+                                            <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-[color,background-color,border-color,box-shadow,opacity,transform]" />
                                             Información de Envíos
                                         </Link>
                                     </li>
                                     <li>
                                         <Link
                                             href="/returns"
-                                            className="text-sm font-medium text-muted-foreground hover:text-primary transition-all flex items-center group"
+                                            className="text-sm font-medium text-muted-foreground hover:text-primary transition-[color,background-color,border-color,box-shadow,opacity,transform] flex items-center group"
                                         >
-                                            <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-all" />
+                                            <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-[color,background-color,border-color,box-shadow,opacity,transform]" />
                                             Devoluciones y RMA
                                         </Link>
                                     </li>
                                     <li>
                                         <Link
                                             href="/faq"
-                                            className="text-sm font-medium text-muted-foreground hover:text-primary transition-all flex items-center group"
+                                            className="text-sm font-medium text-muted-foreground hover:text-primary transition-[color,background-color,border-color,box-shadow,opacity,transform] flex items-center group"
                                         >
-                                            <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-all" />
+                                            <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-[color,background-color,border-color,box-shadow,opacity,transform]" />
                                             Preguntas Frecuentes
                                         </Link>
                                     </li>
@@ -166,36 +160,36 @@ export default function Footer({ minimal = false, tenantName, tenantLogo, footer
                             <li>
                                 <Link
                                     href="/about"
-                                    className="text-sm font-medium text-muted-foreground hover:text-primary transition-all flex items-center group"
+                                    className="text-sm font-medium text-muted-foreground hover:text-primary transition-[color,background-color,border-color,box-shadow,opacity,transform] flex items-center group"
                                 >
-                                    <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-all" />
+                                    <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-[color,background-color,border-color,box-shadow,opacity,transform]" />
                                     Nuestra Historia
                                 </Link>
                             </li>
                             <li>
                                 <Link
                                     href="/careers"
-                                    className="text-sm font-medium text-muted-foreground hover:text-primary transition-all flex items-center group"
+                                    className="text-sm font-medium text-muted-foreground hover:text-primary transition-[color,background-color,border-color,box-shadow,opacity,transform] flex items-center group"
                                 >
-                                    <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-all" />
+                                    <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-[color,background-color,border-color,box-shadow,opacity,transform]" />
                                     Únete a la Red
                                 </Link>
                             </li>
                             <li>
                                 <Link
                                     href="/privacy"
-                                    className="text-sm font-medium text-muted-foreground hover:text-primary transition-all flex items-center group"
+                                    className="text-sm font-medium text-muted-foreground hover:text-primary transition-[color,background-color,border-color,box-shadow,opacity,transform] flex items-center group"
                                 >
-                                    <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-all" />
+                                    <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-[color,background-color,border-color,box-shadow,opacity,transform]" />
                                     Política de Privacidad
                                 </Link>
                             </li>
                             <li>
                                 <Link
                                     href="/terms"
-                                    className="text-sm font-medium text-muted-foreground hover:text-primary transition-all flex items-center group"
+                                    className="text-sm font-medium text-muted-foreground hover:text-primary transition-[color,background-color,border-color,box-shadow,opacity,transform] flex items-center group"
                                 >
-                                    <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-all" />
+                                    <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-[color,background-color,border-color,box-shadow,opacity,transform]" />
                                     Términos de Servicio
                                 </Link>
                             </li>
@@ -206,13 +200,13 @@ export default function Footer({ minimal = false, tenantName, tenantLogo, footer
                 {/* Bottom Bar */}
                 <div className="border-t border-border pt-10 flex flex-col md:flex-row justify-between items-center gap-6">
         <p className="text-[11px] font-medium text-muted-foreground" suppressHydrationWarning>
-          &copy; {new Date().getFullYear()} XCIX Platforms. All
-                        rights reserved.
+          &copy; {new Date().getFullYear()} XCIX Platforms. Todos
+                        los derechos reservados.
                     </p>
                     <div className="flex items-center gap-8">
                         <a
                             href="mailto:support@xcix.com"
-                            className="text-[11px] font-semibold text-foreground hover:text-primary transition-all flex items-center gap-2"
+                            className="text-[11px] font-semibold text-foreground hover:text-primary transition-[color,background-color,border-color,box-shadow,opacity,transform] flex items-center gap-2"
                         >
                             <Mail className="size-3.5" />
                             support@xcix.com

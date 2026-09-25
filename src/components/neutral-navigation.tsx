@@ -38,21 +38,26 @@ export function NeutralNavigation() {
     };
 
     useEffect(() => {
-        if (isAdmin) {
-            const fetchTenants = async () => {
-                try {
-                    const data = await tenantService.getAll();
-                    setTenants(data || []);
-                } catch (error) {
-                    console.error("Error fetching tenants:", error);
-                }
-            };
-            fetchTenants();
-        }
+        if (!isAdmin) return;
+
+        let cancelled = false;
+        const fetchTenants = async () => {
+            try {
+                const data = await tenantService.getAll();
+                if (!cancelled) setTenants(data || []);
+            } catch (error) {
+                console.error("Error fetching tenants:", error);
+            }
+        };
+        void fetchTenants();
+
+        return () => {
+            cancelled = true;
+        };
     }, [isAdmin]);
 
     return (
-        <nav className="border-b border-border bg-background/80 backdrop-blur-md sticky top-0 z-50 transition-all duration-300">
+        <nav className="border-b border-border bg-background/80 backdrop-blur-md sticky top-0 z-50 transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-300">
             <div className="container mx-auto p-4 flex justify-between items-center h-20">
                 <div className="flex items-center gap-10">
                     <div
@@ -80,19 +85,19 @@ export function NeutralNavigation() {
                                 className="flex items-center gap-2 text-xs font-semibold hover:text-primary transition-colors text-foreground uppercase tracking-wider"
                             >
                                 <LayoutDashboard size={14} />
-                                Control Center
+                                Centro de control
                             </a>
                             <div className="h-4 w-px bg-border" />
                             <div className="flex items-center gap-3">
                                 <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest">
-                                    Network:
+                                    Red:
                                 </span>
                                 <div className="flex gap-2">
                                     {tenants.map((tenant) => (
                                         <a
                                             key={tenant.id}
                                             href={getTenantUrl(tenant.slug)}
-                                            className="px-3 py-1 text-[10px] font-semibold border border-border rounded-full hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all text-foreground"
+                                            className="px-3 py-1 text-[10px] font-semibold border border-border rounded-full hover:bg-primary hover:text-primary-foreground hover:border-primary transition-[color,background-color,border-color,box-shadow,opacity,transform] text-foreground"
                                         >
                                             {tenant.name}
                                         </a>
@@ -109,7 +114,7 @@ export function NeutralNavigation() {
                                 className="flex items-center gap-2 text-xs font-semibold hover:text-primary transition-colors text-foreground uppercase tracking-wider"
                             >
                                 <Building2 size={16} />
-                                Launch Instance
+                                Crear instancia
                             </Link>
                         </div>
                     )}
@@ -131,13 +136,13 @@ export function NeutralNavigation() {
                                     href="/login"
                                     className="text-xs font-semibold hover:text-primary transition-colors flex items-center gap-2 text-foreground uppercase tracking-wider"
                                 >
-                                    <LogIn size={14} /> Access
+                                    <LogIn size={14} /> Acceder
                                 </Link>
                                 <Link
                                     href="/register"
-                                    className="px-5 py-2 bg-primary text-primary-foreground text-xs font-bold rounded-lg hover:opacity-90 transition-all uppercase tracking-wider shadow-sm"
+                                    className="px-5 py-2 bg-primary text-primary-foreground text-xs font-bold rounded-lg hover:opacity-90 transition-[color,background-color,border-color,box-shadow,opacity,transform] uppercase tracking-wider shadow-sm"
                                 >
-                                    Join Network
+                                    Unite a la red
                                 </Link>
                             </>
                         )}
@@ -152,7 +157,7 @@ export function NeutralNavigation() {
                             <SheetTrigger asChild>
                                 <Button
                                     variant="ghost"
-                                    size="icon"
+                                    size="icon" aria-label="Abrir menú de navegación"
                                     className="text-foreground"
                                 >
                                     <Menu size={24} />
@@ -195,7 +200,7 @@ export function NeutralNavigation() {
                                                         <LayoutDashboard
                                                             size={18}
                                                         />
-                                                        Dashboard
+                                                        Panel
                                                     </a>
                                                 </nav>
                                                 <div className="pt-2 space-y-3">
@@ -254,7 +259,7 @@ export function NeutralNavigation() {
                                                             }
                                                             className="py-2 text-sm font-medium hover:text-primary transition-colors text-foreground"
                                                         >
-                                                            Login
+                                                            Iniciar sesión
                                                         </Link>
                                                         <Link
                                                             href="/register"
@@ -265,7 +270,7 @@ export function NeutralNavigation() {
                                                             }
                                                             className="py-2 text-sm font-medium hover:text-primary transition-colors text-foreground"
                                                         >
-                                                            Register
+                                                            Registrarse
                                                         </Link>
                                                     </>
                                                 )}

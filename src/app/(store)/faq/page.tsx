@@ -103,7 +103,7 @@ export default async function FAQPage() {
                     </p>
                     <Button
                         size="lg"
-                        className="h-14 px-10 rounded-xl font-bold shadow-xl shadow-primary/10 transition-all hover:-translate-y-0.5"
+                        className="h-14 px-10 rounded-xl font-bold shadow-xl shadow-primary/10 transition-[color,background-color,border-color,box-shadow,opacity,transform] hover:-translate-y-0.5"
                         asChild
                     >
                         <Link href="/contact">Contactá a Soporte →</Link>

@@ -3,8 +3,8 @@ import { apiClient } from '@/lib/api-client';
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Approve Appointment",
-  description: "Processing appointment approval",
+  title: "Aprobar cita",
+  description: "Procesando la aprobación de la cita",
 };
 
 export default async function AppointmentApprovePage({

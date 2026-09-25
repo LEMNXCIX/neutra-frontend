@@ -1,4 +1,9 @@
 "use client";
+import { TablePagination, MobileTablePagination } from "@/components/admin/shared/TablePagination";
+
+import { AdminStatCard as StatCard } from "@/components/admin/shared/AdminStatCard";
+import { FilterSelect } from "@/components/admin/shared/FilterSelect";
+
 
 import React, { Suspense, useRef, useReducer } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -41,8 +46,6 @@ import {
     Package,
     DollarSign,
     AlertTriangle,
-    ChevronLeft,
-    ChevronRight,
 } from "lucide-react";
 import {
     Accordion,
@@ -60,18 +63,18 @@ const getStockBadge = (stock: number) => {
                 variant="destructive"
                 className="rounded-full shadow-none border-none bg-destructive/10 text-destructive hover:bg-destructive/10"
             >
-                Out of Stock
+                Sin stock
             </Badge>
         );
     if (stock < 10)
         return (
             <Badge className="rounded-full shadow-none border-none bg-accent text-accent-foreground hover:bg-accent">
-                Low Stock
+                Stock bajo
             </Badge>
         );
     return (
         <Badge className="rounded-full shadow-none border-none bg-primary/10 text-primary hover:bg-primary/10">
-            In Stock
+            En stock
         </Badge>
     );
 };
@@ -97,31 +100,6 @@ type Props = {
     isSuperAdmin?: boolean;
 };
 
-const StatCard = ({
-  icon: Icon,
-  title,
-  value,
-  color,
-}: {
-  icon: React.ElementType;
-  title: string;
-  value: string | number;
-  color: string;
-}) => (
-  <Card>
-    <CardContent className="pt-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm text-muted-foreground">{title}</p>
-          <p className="text-2xl font-bold mt-1">{value}</p>
-        </div>
-        <div className={`p-3 rounded-full ${color}`}>
-          <Icon className="size-6" />
-        </div>
-      </div>
-    </CardContent>
-  </Card>
-);
 
 function ProductFormFields({
   form,
@@ -144,12 +122,12 @@ function ProductFormFields({
   return (
     <div className="space-y-4">
       <div>
-        <label htmlFor={`${prefix}-product-name`} className="text-sm font-medium">Name</label>
+        <label htmlFor={`${prefix}-product-name`} className="text-sm font-medium">Nombre</label>
         <Input id={`${prefix}-product-name`} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Nombre del producto" />
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label htmlFor={`${prefix}-product-price`} className="text-sm font-medium">Price</label>
+          <label htmlFor={`${prefix}-product-price`} className="text-sm font-medium">Precio</label>
           <Input id={`${prefix}-product-price`} type="number" min="0" step="0.01" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} placeholder="0.00" />
         </div>
         <div>
@@ -158,7 +136,7 @@ function ProductFormFields({
         </div>
       </div>
       <div>
-        <label htmlFor={`${prefix}-product-category`} className="text-sm font-medium">Category</label>
+        <label htmlFor={`${prefix}-product-category`} className="text-sm font-medium">Categoría</label>
         <Select value={form.category} onValueChange={(val) => setForm({ ...form, category: val })}>
           <SelectTrigger id={`${prefix}-product-category`}><SelectValue placeholder="Seleccionar categoría" /></SelectTrigger>
           <SelectContent>
@@ -169,7 +147,7 @@ function ProductFormFields({
         </Select>
       </div>
       <div>
-        <label htmlFor={`${prefix}-product-image`} className="text-sm font-medium">Image</label>
+        <label htmlFor={`${prefix}-product-image`} className="text-sm font-medium">Imagen</label>
         <div className="mt-2 flex items-center gap-3">
           {preview && (
             <div className="relative">
@@ -256,31 +234,31 @@ function ProductsDesktopTable({
           <TableHeader>
             <TableRow>
               <TableHead className="w-[80px]">
-                Image
+                Imagen
               </TableHead>
               <TableHead className="w-[120px]">ID</TableHead>
               <TableHead className="w-[200px]">
-                Name
+                Nombre
               </TableHead>
               <TableHead className="w-[120px]">
-                Category
+                Categoría
               </TableHead>
               {isSuperAdmin && (
                 <TableHead className="w-[100px]">
-                  Tenant
+                  Organización
                 </TableHead>
               )}
               <TableHead className="w-[100px]">
-                Price
+                Precio
               </TableHead>
               <TableHead className="w-[80px]">
                 Stock
               </TableHead>
               <TableHead className="w-[120px]">
-                Status
+                Estado
               </TableHead>
               <TableHead className="w-[150px]">
-                Actions
+                Acciones
               </TableHead>
             </TableRow>
           </TableHeader>
@@ -291,7 +269,7 @@ function ProductsDesktopTable({
                   colSpan={8}
                   className="text-center py-8 text-muted-foreground"
                 >
-                  No products found
+                  No se encontraron productos
                 </TableCell>
               </TableRow>
             ) : (
@@ -368,7 +346,7 @@ function ProductsDesktopTable({
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       <Button
-                        size="icon"
+                        size="icon" aria-label="Editar producto"
                         variant="ghost"
                         className="size-8 rounded-full hover:bg-primary/5 hover:text-primary"
                         onClick={() => openEdit(p)}
@@ -376,7 +354,7 @@ function ProductsDesktopTable({
                         <Edit className="size-4" />
                       </Button>
                       <Button
-                        size="icon"
+                        size="icon" aria-label="Eliminar producto"
                         variant="ghost"
                         className="size-8 rounded-full hover:bg-destructive/5 hover:text-destructive"
                         onClick={() =>
@@ -394,57 +372,7 @@ function ProductsDesktopTable({
         </Table>
       </div>
 
-      {pagination.totalItems > 0 && (
-        <div className="flex flex-col sm:flex-row items-center justify-between px-4 py-3 border-t gap-3">
-          <div className="text-sm text-muted-foreground">
-            Showing{" "}
-            {(pagination.currentPage - 1) *
-              pagination.itemsPerPage +
-              1}{" "}
-            to{" "}
-            {Math.min(
-              pagination.currentPage *
-                pagination.itemsPerPage,
-              pagination.totalItems,
-            )}{" "}
-            of {pagination.totalItems} results
-          </div>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() =>
-                handlePageChange(pagination.currentPage - 1)
-              }
-              disabled={pagination.currentPage === 1}
-            >
-              <ChevronLeft className="size-4 mr-1" />
-              Previous
-            </Button>
-            <div className="hidden sm:flex items-center gap-1">
-              <span className="text-sm text-muted-foreground px-2">
-                Page {pagination.currentPage} of{" "}
-                {pagination.totalPages}
-              </span>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() =>
-                handlePageChange(pagination.currentPage + 1)
-              }
-              disabled={
-                pagination.currentPage ===
-                  pagination.totalPages ||
-                pagination.totalPages === 0
-              }
-            >
-              Next
-              <ChevronRight className="size-4 ml-1" />
-            </Button>
-          </div>
-        </div>
-      )}
+      <TablePagination pagination={pagination} onPageChange={handlePageChange} />
     </Card>
   );
 }
@@ -509,7 +437,7 @@ function ProductsMobileCards({
                 onClick={() => openEdit(p)}
               >
                 <Edit className="size-4 mr-2" />
-                Edit
+                Editar
               </Button>
               <Button
                 size="sm"
@@ -523,47 +451,14 @@ function ProductsMobileCards({
                 ) : (
                   <Trash2 className="size-4 mr-2" />
                 )}
-                Delete
+                Eliminar
               </Button>
             </div>
           </CardContent>
         </Card>
       ))}
 
-      {pagination.totalItems > 0 && (
-        <Card className="lg:hidden sm:col-span-2">
-          <div className="flex items-center justify-between px-4 py-3">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() =>
-                handlePageChange(pagination.currentPage - 1)
-              }
-              disabled={pagination.currentPage === 1}
-            >
-              <ChevronLeft className="size-4" />
-            </Button>
-            <span className="text-sm text-muted-foreground">
-              Page {pagination.currentPage} of{" "}
-              {pagination.totalPages}
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() =>
-                handlePageChange(pagination.currentPage + 1)
-              }
-              disabled={
-                pagination.currentPage ===
-                  pagination.totalPages ||
-                pagination.totalPages === 0
-              }
-            >
-              <ChevronRight className="size-4" />
-            </Button>
-          </div>
-        </Card>
-      )}
+      <MobileTablePagination pagination={pagination} onPageChange={handlePageChange} />
     </div>
   );
 }
@@ -585,7 +480,7 @@ function CreateProductDialog({
     <Dialog open={dialogState.createOpen} onOpenChange={(v) => dispatch({ type: "SET_CREATE_OPEN", payload: v })}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Add New Product</DialogTitle>
+          <DialogTitle>Agregar producto</DialogTitle>
         </DialogHeader>
         <ProductFormFields form={dialogState.form} setForm={(f: ProductsDialogState["form"]) => dispatch({ type: "SET_FORM", payload: f })} preview={dialogState.preview} setPreview={(p: string | null) => dispatch({ type: "SET_PREVIEW", payload: p })} categories={categories} prefix="create" onImageUpload={handleImageUpload} />
         <DialogFooter>
@@ -594,12 +489,12 @@ function CreateProductDialog({
             onClick={() => dispatch({ type: "SET_CREATE_OPEN", payload: false })}
             disabled={dialogState.isCreating}
           >
-            Cancel
+            Cancelar
           </Button>
           <Button onClick={createProduct} disabled={dialogState.isCreating}>
             {dialogState.isCreating ? (
               <>
-                <Spinner className="mr-2" /> Creating…
+                <Spinner className="mr-2" /> Creando…
               </>
             ) : (
               "Crear Producto"
@@ -630,7 +525,7 @@ function EditProductDialog({
     <Dialog open={dialogState.editOpen} onOpenChange={(v) => dispatch({ type: "SET_EDIT_OPEN", payload: v })}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Edit Product</DialogTitle>
+          <DialogTitle>Editar producto</DialogTitle>
         </DialogHeader>
         <ProductFormFields form={dialogState.form} setForm={(f: ProductsDialogState["form"]) => dispatch({ type: "SET_FORM", payload: f })} preview={dialogState.preview} setPreview={(p: string | null) => dispatch({ type: "SET_PREVIEW", payload: p })} categories={categories} prefix="edit" onImageUpload={handleImageUpload} />
         <DialogFooter>
@@ -639,12 +534,12 @@ function EditProductDialog({
             onClick={() => dispatch({ type: "SET_EDIT_OPEN", payload: false })}
             disabled={dialogState.isEditing}
           >
-            Cancel
+            Cancelar
           </Button>
           <Button onClick={saveEdit} disabled={dialogState.isEditing}>
             {dialogState.isEditing ? (
               <>
-                <Spinner className="mr-2" /> Saving…
+                <Spinner className="mr-2" /> Guardando…
               </>
             ) : (
               "Guardar Cambios"
@@ -660,19 +555,19 @@ function ProductsStats({ stats }: { stats: Stats }) {
   return (
     <>
       <div className="hidden md:grid md:grid-cols-3 gap-4">
-        <StatCard
+        <StatCard iconClassName="size-6"
           icon={Package}
           title="Total de Productos"
           value={stats.totalProducts}
           color="bg-primary/10 text-primary"
         />
-        <StatCard
+        <StatCard iconClassName="size-6"
           icon={DollarSign}
           title="Valor Total del Inventario"
           value={`$${stats.totalValue.toFixed(2)}`}
           color="bg-accent text-accent-foreground"
         />
-        <StatCard
+        <StatCard iconClassName="size-6"
           icon={AlertTriangle}
           title="Productos con Poco Stock"
           value={stats.lowStockCount}
@@ -686,25 +581,25 @@ function ProductsStats({ stats }: { stats: Stats }) {
             <div className="flex items-center gap-3">
               <Package className="size-5 text-muted-foreground" />
               <span className="font-medium">
-                Product Statistics
+                Estadísticas de productos
               </span>
             </div>
           </AccordionTrigger>
           <AccordionContent className="px-4 pb-4 pt-2">
             <div className="grid grid-cols-1 gap-4">
-              <StatCard
+              <StatCard iconClassName="size-6"
                 icon={Package}
                 title="Total de Productos"
                 value={stats.totalProducts}
                 color="bg-primary/10 text-primary"
               />
-              <StatCard
+              <StatCard iconClassName="size-6"
                 icon={DollarSign}
                 title="Valor Total del Inventario"
                 value={`$${stats.totalValue.toFixed(2)}`}
                 color="bg-accent text-accent-foreground"
               />
-              <StatCard
+              <StatCard iconClassName="size-6"
                 icon={AlertTriangle}
                 title="Productos con Poco Stock"
                 value={stats.lowStockCount}
@@ -750,7 +645,7 @@ function ProductsFilters({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">
-                All Categories
+                Todas las categorías
               </SelectItem>
               {(Array.isArray(categories)
                 ? categories
@@ -765,19 +660,12 @@ function ProductsFilters({
 
           {isSuperAdmin && (
             <div className="w-[180px]">
-              <Select
+              <FilterSelect
                 value={tenantFilter}
                 onValueChange={handleTenantFilterChange}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Todos los Tenants" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">
-                    All Tenants
-                  </SelectItem>
-                </SelectContent>
-              </Select>
+                placeholder="Todos los tenants"
+                options={[{ value: "all", label: "Todos los tenants" }]}
+              />
             </div>
           )}
 
@@ -800,7 +688,7 @@ function ProductsFilters({
                 handleSearch(input?.value || "");
               }}
             >
-              Search
+              Buscar
             </Button>
           </div>
         </div>
@@ -1030,10 +918,10 @@ function ProductsTableClientInner({
   return (
         <div className="w-full space-y-6">
             <div className="flex justify-between items-center">
-                <h2 className="text-xl font-medium">Products Management</h2>
+                <h2 className="text-xl font-medium">Gestión de productos</h2>
                 <Button onClick={() => dispatch({ type: "SET_CREATE_OPEN", payload: true })}>
                     <Plus className="size-4 mr-2" />
-                    Add Product
+                    Agregar producto
                 </Button>
             </div>
 

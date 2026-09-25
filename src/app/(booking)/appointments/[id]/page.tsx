@@ -5,8 +5,8 @@ import { api } from '@/lib/api-client';
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-    title: "Appointment Details",
-    description: "View your appointment details",
+    title: "Detalles de la cita",
+    description: "Mirá los detalles de tu cita",
 };
 import {
     Card,
@@ -29,6 +29,10 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { AppointmentDetailActions } from "@/components/booking/appointment-detail-actions";
+import {
+    APPOINTMENT_STATUS_LABELS,
+    type AppointmentStatus,
+} from "@/services/booking.service";
 
 export const dynamic = "force-dynamic";
 
@@ -66,12 +70,206 @@ const getStatusVariant = (
         PENDING: "outline",
         CONFIRMED: "default",
         IN_PROGRESS: "secondary",
+        NEEDS_REVIEW: "outline",
         COMPLETED: "secondary",
         CANCELLED: "destructive",
         NO_SHOW: "outline",
     };
     return variants[status] || "outline";
 };
+
+const getStatusLabel = (status: AppointmentStatus): string =>
+    APPOINTMENT_STATUS_LABELS[status] || status;
+
+function AppointmentHeaderCard({ appointment }: { appointment: any }) {
+    return (
+                    <Card className="overflow-hidden border-none shadow-xl bg-card/50 backdrop-blur-sm">
+                        <div className="bg-primary h-2" />
+                        <CardHeader className="pb-8">
+                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                <div className="space-y-1">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <Badge
+                                            variant={getStatusVariant(
+                                                appointment.status,
+                                            )}
+                                            className="text-xs uppercase tracking-wider"
+                                        >
+                                            {getStatusLabel(appointment.status)}
+                                        </Badge>
+                                        <span className="text-xs text-muted-foreground">
+                                            #{appointment.id.split("-")[0]}
+                                        </span>
+                                    </div>
+                                    <CardTitle className="text-3xl font-bold tracking-tight text-foreground">
+                                        {appointment.service?.name ||
+                                            "Cita de servicio"}
+                                    </CardTitle>
+                                    <CardDescription className="text-lg">
+                                        Sesión profesional agendada con nuestro
+                                        equipo de expertos
+                                    </CardDescription>
+                                </div>
+                            </div>
+                        </CardHeader>
+                        <CardContent className="grid md:grid-cols-2 gap-8 border-t pt-8">
+                            <div className="space-y-6">
+                                <div className="flex items-start gap-4">
+                                    <div className="mt-1 bg-primary/10 p-2 rounded-full">
+                                        <Calendar className="size-5 text-primary" />
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-medium text-muted-foreground">
+                                            Fecha
+                                        </p>
+                                        <p className="text-lg font-semibold">
+                                            {new Date(
+                                                appointment.startTime,
+                                            ).toLocaleDateString("es-ES", {
+                                                weekday: "long",
+                                                month: "long",
+                                                day: "numeric",
+                                                year: "numeric",
+                                            })}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-start gap-4">
+                                    <div className="mt-1 bg-primary/10 p-2 rounded-full">
+                                        <Clock className="size-5 text-primary" />
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-medium text-muted-foreground">
+                                            Hora y duración
+                                        </p>
+                                        <p className="text-lg font-semibold">
+                                            {new Date(
+                                                appointment.startTime,
+                                            ).toLocaleTimeString("es-ES", { timeZone: "UTC",
+                                                hour: "2-digit",
+                                                minute: "2-digit",
+                                            })}
+                                            <span className="text-muted-foreground font-normal ml-2 text-base">
+                                                (
+                                                {appointment.service
+                                                    ?.duration || 30}{" "}
+                                                min)
+                                            </span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="space-y-6">
+                                <div className="flex items-start gap-4">
+                                    <div className="mt-1 bg-primary/10 p-2 rounded-full">
+                                        <User className="size-5 text-primary" />
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-medium text-muted-foreground">
+                                            Profesional
+                                        </p>
+                                        <p className="text-lg font-semibold">
+                                            {appointment.staff?.name ||
+                                                "Personal asignado"}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-start gap-4">
+                                    <div className="mt-1 bg-primary/10 p-2 rounded-full">
+                                        <CreditCard className="size-5 text-primary" />
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-medium text-muted-foreground">
+                                            Precio del servicio
+                                        </p>
+                                        <p className="text-lg font-semibold">
+                                            $
+                                            {appointment.service?.price ||
+                                                "0.00"}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+    );
+}
+
+function AppointmentDetails({ appointment }: { appointment: any }) {
+    return (
+                    <div className="grid md:grid-cols-2 gap-8">
+                        {/* More Info */}
+                        <Card className="border-none shadow-lg bg-card/50 backdrop-blur-sm">
+                            <CardHeader>
+                                <CardTitle className="text-lg flex items-center gap-2">
+                                    <FileText className="size-5 text-primary" />
+                                    Detalles de la cita
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <div className="p-4 rounded-lg bg-muted/50">
+                                    <p className="text-sm font-medium mb-1">
+                                        Información del estado
+                                    </p>
+                                    <p className="text-sm text-muted-foreground leading-relaxed">
+                                        {appointment.status === "PENDING" &&
+                                            "Tu cita está pendiente de confirmación. Te enviaremos un correo cuando la revisemos."}
+                                        {appointment.status === "CONFIRMED" &&
+                                            "¡Tu cita está confirmada! Esperamos verte pronto."}
+                                        {appointment.status === "CANCELLED" &&
+                                            "Esta cita fue cancelada."}
+                                        {appointment.status === "COMPLETED" &&
+                                            "La sesión se completó. ¡Esperamos que hayas enjoyed el servicio!"}
+                                        {appointment.status === "NEEDS_REVIEW" &&
+                                            "Tu cita está pendiente de actualización."}
+                                    </p>
+                                </div>
+                                {appointment.notes && (
+                                    <div>
+                                        <p className="text-sm font-medium mb-1">
+                                            Tus notas
+                                        </p>
+                                        <p className="text-sm text-muted-foreground bg-muted/30 p-4 rounded-lg italic">
+                                            "{appointment.notes}"
+                                        </p>
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
+
+                        {/* Location/Action Card */}
+                        <Card className="border-none shadow-lg bg-card/50 backdrop-blur-sm">
+                            <CardHeader>
+                                <CardTitle className="text-lg flex items-center gap-2">
+                                    <MapPin className="size-5 text-primary" />
+                                    Ubicación
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-6">
+                                <div className="p-4 rounded-lg bg-muted/50">
+                                    <p className="text-sm font-medium mb-1 tracking-tight">
+                                        Información de llegada
+                                    </p>
+                                    <p className="text-sm text-muted-foreground">
+                                        Llegá 5-10 minutos antes a tu cita para
+                                        que el registro se realice sin
+                                        demoras.
+                                    </p>
+                                </div>
+
+                                <AppointmentDetailActions
+                                    appointmentId={appointment.id}
+                                    status={appointment.status}
+                                />
+                            </CardContent>
+                        </Card>
+                    </div>
+    );
+}
 
 export default async function AppointmentDetailPage(props: {
     params: Promise<{ id: string }>;
@@ -90,14 +288,14 @@ export default async function AppointmentDetailPage(props: {
                     className="flex items-center gap-2 text-primary hover:underline mb-8"
                 >
                     <ArrowLeft className="size-4" />
-                    Back to My Appointments
+                    Volver a mis citas
                 </Link>
                 <Alert variant="destructive">
                     <AlertCircle className="size-4" />
                     <AlertDescription>
                         {error === "forbidden"
-                            ? "You do not have permission to view this appointment"
-                            : "Failed to load appointment details"}
+                            ? "No tenés permiso para ver esta cita"
+                            : "No se pudieron cargar los detalles de la cita"}
                     </AlertDescription>
                 </Alert>
             </div>
@@ -113,193 +311,13 @@ export default async function AppointmentDetailPage(props: {
                     className="flex items-center gap-2 text-primary hover:underline mb-8"
                 >
                     <ArrowLeft className="size-4" />
-                    Back to My Appointments
+                    Volver a mis citas
                 </Link>
 
                 <div className="grid gap-8">
                     {/* Header Card */}
-                    <Card className="overflow-hidden border-none shadow-xl bg-card/50 backdrop-blur-sm">
-                        <div className="bg-primary h-2" />
-                        <CardHeader className="pb-8">
-                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                                <div className="space-y-1">
-                                    <div className="flex items-center gap-2 mb-2">
-                                        <Badge
-                                            variant={getStatusVariant(
-                                                appointment.status,
-                                            )}
-                                            className="text-xs uppercase tracking-wider"
-                                        >
-                                            {appointment.status.replace(
-                                                "_",
-                                                " ",
-                                            )}
-                                        </Badge>
-                                        <span className="text-xs text-muted-foreground">
-                                            #{appointment.id.split("-")[0]}
-                                        </span>
-                                    </div>
-                                    <CardTitle className="text-3xl font-bold tracking-tight text-foreground">
-                                        {appointment.service?.name ||
-                                            "Service Appointment"}
-                                    </CardTitle>
-                                    <CardDescription className="text-lg">
-                                        Professional session scheduled with our
-                                        expert team
-                                    </CardDescription>
-                                </div>
-                            </div>
-                        </CardHeader>
-                        <CardContent className="grid md:grid-cols-2 gap-8 border-t pt-8">
-                            <div className="space-y-6">
-                                <div className="flex items-start gap-4">
-                                    <div className="mt-1 bg-primary/10 p-2 rounded-full">
-                                        <Calendar className="size-5 text-primary" />
-                                    </div>
-                                    <div>
-                                        <p className="text-sm font-medium text-muted-foreground">
-                                            Date
-                                        </p>
-                                        <p className="text-lg font-semibold">
-                                            {new Date(
-                                                appointment.startTime,
-                                            ).toLocaleDateString("en-US", {
-                                                weekday: "long",
-                                                month: "long",
-                                                day: "numeric",
-                                                year: "numeric",
-                                            })}
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <div className="flex items-start gap-4">
-                                    <div className="mt-1 bg-primary/10 p-2 rounded-full">
-                                        <Clock className="size-5 text-primary" />
-                                    </div>
-                                    <div>
-                                        <p className="text-sm font-medium text-muted-foreground">
-                                            Time & Duration
-                                        </p>
-                                        <p className="text-lg font-semibold">
-                                            {new Date(
-                                                appointment.startTime,
-                                            ).toLocaleTimeString([], {
-                                                hour: "2-digit",
-                                                minute: "2-digit",
-                                            })}
-                                            <span className="text-muted-foreground font-normal ml-2 text-base">
-                                                (
-                                                {appointment.service
-                                                    ?.duration || 30}{" "}
-                                                mins)
-                                            </span>
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="space-y-6">
-                                <div className="flex items-start gap-4">
-                                    <div className="mt-1 bg-primary/10 p-2 rounded-full">
-                                        <User className="size-5 text-primary" />
-                                    </div>
-                                    <div>
-                                        <p className="text-sm font-medium text-muted-foreground">
-                                            Professional
-                                        </p>
-                                        <p className="text-lg font-semibold">
-                                            {appointment.staff?.name ||
-                                                "Assigned Staff"}
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <div className="flex items-start gap-4">
-                                    <div className="mt-1 bg-primary/10 p-2 rounded-full">
-                                        <CreditCard className="size-5 text-primary" />
-                                    </div>
-                                    <div>
-                                        <p className="text-sm font-medium text-muted-foreground">
-                                            Service Price
-                                        </p>
-                                        <p className="text-lg font-semibold">
-                                            $
-                                            {appointment.service?.price ||
-                                                "0.00"}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    {/* Details Grid */}
-                    <div className="grid md:grid-cols-2 gap-8">
-                        {/* More Info */}
-                        <Card className="border-none shadow-lg bg-card/50 backdrop-blur-sm">
-                            <CardHeader>
-                                <CardTitle className="text-lg flex items-center gap-2">
-                                    <FileText className="size-5 text-primary" />
-                                    Appointment Details
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <div className="p-4 rounded-lg bg-muted/50">
-                                    <p className="text-sm font-medium mb-1">
-                                        Status Information
-                                    </p>
-                                    <p className="text-sm text-muted-foreground leading-relaxed">
-                                        {appointment.status === "PENDING" &&
-                                            "Your appointment is pending confirmation. You'll receive an email once we've reviewed it."}
-                                        {appointment.status === "CONFIRMED" &&
-                                            "Great! Your appointment is confirmed and we're looking forward to seeing you."}
-                                        {appointment.status === "CANCELLED" &&
-                                            "This appointment has been cancelled."}
-                                        {appointment.status === "COMPLETED" &&
-                                            "This session has been completed. We hope you enjoyed your service!"}
-                                    </p>
-                                </div>
-                                {appointment.notes && (
-                                    <div>
-                                        <p className="text-sm font-medium mb-1">
-                                            Your Notes
-                                        </p>
-                                        <p className="text-sm text-muted-foreground bg-muted/30 p-4 rounded-lg italic">
-                                            "{appointment.notes}"
-                                        </p>
-                                    </div>
-                                )}
-                            </CardContent>
-                        </Card>
-
-                        {/* Location/Action Card */}
-                        <Card className="border-none shadow-lg bg-card/50 backdrop-blur-sm">
-                            <CardHeader>
-                                <CardTitle className="text-lg flex items-center gap-2">
-                                    <MapPin className="size-5 text-primary" />
-                                    Location
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-6">
-                                <div className="p-4 rounded-lg bg-muted/50">
-                                    <p className="text-sm font-medium mb-1 tracking-tight">
-                                        Arrival Info
-                                    </p>
-                                    <p className="text-sm text-muted-foreground">
-                                        Please arrive 5-10 minutes early to your
-                                        appointment to ensure a smooth check-in
-                                        process.
-                                    </p>
-                                </div>
-
-                                <AppointmentDetailActions
-                                    appointmentId={appointment.id}
-                                    status={appointment.status}
-                                />
-                            </CardContent>
-                        </Card>
-                    </div>
+                    <AppointmentHeaderCard appointment={appointment} />
+                    <AppointmentDetails appointment={appointment} />
                 </div>
             </div>
         </div>

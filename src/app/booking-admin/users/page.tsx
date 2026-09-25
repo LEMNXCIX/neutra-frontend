@@ -3,7 +3,7 @@ import UsersTableClient from "@/components/admin/users/UsersTableClient";
 import { User } from "@/types/user.types";
 import { api } from '@/lib/api-client';
 
-export const metadata = { title: "Booking Users" };
+export const metadata = { title: "Usuarios de reservas" };
 
 export const dynamic = "force-dynamic";
 
@@ -148,10 +148,12 @@ export default async function UsersPage({ searchParams }: Props) {
         typeof resolvedSearchParams.search === "string"
             ? resolvedSearchParams.search
             : "";
-    const role =
+    const roleParam =
         typeof resolvedSearchParams.role === "string"
             ? resolvedSearchParams.role
             : "all";
+    const role =
+        roleParam === "admin" || roleParam === "user" ? roleParam : "all";
 
     const data = await getUsers(search, role, page, limit);
 
@@ -161,6 +163,7 @@ export default async function UsersPage({ searchParams }: Props) {
                 users={data.users}
                 stats={data.stats}
                 pagination={data.pagination}
+                initialRoleFilter={role}
             />
         </Suspense>
     );

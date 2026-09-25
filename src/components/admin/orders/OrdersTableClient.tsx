@@ -1,4 +1,6 @@
 "use client";
+import { AdminStatCard as StatCard } from "@/components/admin/shared/AdminStatCard";
+
 
 import React, { Suspense, useReducer, useSyncExternalStore } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -75,31 +77,6 @@ type Props = {
     initialStatuses?: { value: string; label: string }[];
 };
 
-const StatCard = ({
-    icon: Icon,
-    title,
-    value,
-    color,
-}: {
-    icon: React.ElementType;
-    title: string;
-    value: string | number;
-    color: string;
-}) => (
-    <Card>
-        <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <p className="text-sm text-muted-foreground">{title}</p>
-                    <p className="text-2xl font-bold mt-1">{value}</p>
-                </div>
-                <div className={`p-3 rounded-full ${color}`}>
-                    <Icon className="size-6 text-white" />
-                </div>
-            </div>
-        </CardContent>
-    </Card>
-);
 
 function OrderDetailsDialog({
     order,
@@ -130,13 +107,13 @@ function OrderDetailsDialog({
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
                 <DialogHeader>
-                    <DialogTitle>Order Details - {order.id}</DialogTitle>
+                    <DialogTitle>Detalles del pedido - {order.id}</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4">
                     <div className="grid grid-cols-2 gap-4 p-4 bg-muted/50 rounded-lg">
                         <div>
                             <p className="text-sm text-muted-foreground">
-                                User
+                                Usuario
                             </p>
                             <p className="font-medium">
                                 {order.user?.name || order.userId}
@@ -149,15 +126,15 @@ function OrderDetailsDialog({
                         </div>
                         <div>
                             <p className="text-sm text-muted-foreground">
-                                Date
+                                Fecha
                             </p>
                             <p className="font-medium">
-                                {new Date(order.createdAt).toLocaleString()}
+                                {new Date(order.createdAt).toLocaleString("es-ES", { timeZone: "UTC" })}
                             </p>
                         </div>
                         <div>
                             <p className="text-sm text-muted-foreground">
-                                Status
+                                Estado
                             </p>
                             <Badge className={getStatusColor(order.status)}>
                                 {order.status}
@@ -176,7 +153,7 @@ function OrderDetailsDialog({
                     {order.address && (
                         <div>
                             <h3 className="font-semibold mb-2">
-                                Shipping Address
+                                Dirección de envío
                             </h3>
                             <p className="text-sm p-3 bg-muted/50 rounded">
                                 {order.address}
@@ -186,7 +163,7 @@ function OrderDetailsDialog({
 
                     <div>
                         <h3 className="font-semibold mb-2">
-                            Update Order Status
+                            Actualizar estado del pedido
                         </h3>
                         <Select
                             value={order.status}
@@ -210,7 +187,7 @@ function OrderDetailsDialog({
 
                     <div>
                         <h3 className="font-semibold mb-2 flex items-center gap-2">
-                            <Truck className="size-4" /> Tracking Number
+                            <Truck className="size-4" /> Número de seguimiento
                         </h3>
                         <div className="flex gap-2">
                             <Input
@@ -236,17 +213,17 @@ function OrderDetailsDialog({
                     </div>
 
                     <div>
-                        <h3 className="font-semibold mb-2">Order Items</h3>
+                        <h3 className="font-semibold mb-2">Artículos del pedido</h3>
                         <div className="border rounded-lg overflow-hidden">
                             <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead>Product</TableHead>
+                                        <TableHead>Producto</TableHead>
                                         <TableHead className="text-center">
-                                            Qty
+                                            Cantidad
                                         </TableHead>
                                         <TableHead className="text-right">
-                                            Price
+                                            Precio
                                         </TableHead>
                                         <TableHead className="text-right">
                                             Subtotal
@@ -282,10 +259,10 @@ function OrderDetailsDialog({
                     {order.coupon && (
                         <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
                             <h3 className="font-semibold mb-1 text-green-900 dark:text-green-100">
-                                Coupon Applied
+                                Cupón aplicado
                             </h3>
                             <p className="text-sm text-green-700 dark:text-green-300">
-                                Code:{" "}
+                                Código:{" "}
                                 <span className="font-mono font-bold">
                                     {order.coupon.code}
                                 </span>{" "}
@@ -293,10 +270,10 @@ function OrderDetailsDialog({
                                 {order.coupon.type === "percent"
                                     ? `${order.coupon.value}%`
                                     : `$${order.coupon.value}`}{" "}
-                                off)
+                                de descuento)
                             </p>
                             <p className="text-sm text-green-700 dark:text-green-300">
-                                Discount:{" "}
+                                Descuento:{" "}
                                 <span className="font-bold">
                                     -${order.coupon.discount.toFixed(2)}
                                 </span>
@@ -310,7 +287,7 @@ function OrderDetailsDialog({
                         variant="outline"
                         onClick={() => onOpenChange(false)}
                     >
-                        Close
+                        Cerrar
                     </Button>
                 </DialogFooter>
             </DialogContent>
@@ -406,7 +383,7 @@ function OrdersFilters({
                             <SelectValue placeholder="Todos los Estados" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="all">All Statuses</SelectItem>
+                            <SelectItem value="all">Todos los estados</SelectItem>
                             {statuses.map((s) => (
                                 <SelectItem key={s.value} value={s.value}>
                                     {s.label}
@@ -434,7 +411,7 @@ function OrdersFilters({
                                 onSearch(input?.value || "");
                             }}
                         >
-                            Search
+                            Buscar
                         </Button>
                     </div>
                 </div>
@@ -475,13 +452,13 @@ function OrdersDesktopTable({
                         <TableHeader>
                             <TableRow>
                                 <TableHead>ID</TableHead>
-                                <TableHead>User</TableHead>
-                                <TableHead>Items</TableHead>
+                                <TableHead>Usuario</TableHead>
+                                <TableHead>Artículos</TableHead>
                                 <TableHead>Total</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead>Tracking</TableHead>
-                                <TableHead>Date</TableHead>
-                                <TableHead>Actions</TableHead>
+                                <TableHead>Estado</TableHead>
+                                <TableHead>Seguimiento</TableHead>
+                                <TableHead>Fecha</TableHead>
+                                <TableHead>Acciones</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -491,7 +468,7 @@ function OrdersDesktopTable({
                                         colSpan={8}
                                         className="text-center py-8 text-muted-foreground"
                                     >
-                                        No orders found
+                                        No se encontraron pedidos
                                     </TableCell>
                                 </TableRow>
                             ) : (
@@ -523,7 +500,7 @@ function OrdersDesktopTable({
                                                     variant="secondary"
                                                     className="text-[10px] font-bold bg-muted/50 border-none shadow-none"
                                                 >
-                                                    {o.items?.length || 0} ITEMS
+                                                    {o.items?.length || 0} ARTÍCULOS
                                                 </Badge>
                                             </TableCell>
                                             <TableCell className="font-bold text-sm text-foreground">
@@ -549,7 +526,7 @@ function OrdersDesktopTable({
                                                             <div className="flex items-center gap-2">
                                                                 <Spinner className="size-3" />
                                                                 <span className="text-[10px] font-semibold uppercase">
-                                                                    Syncing…
+                                                                    Sincronizando…
                                                                 </span>
                                                             </div>
                                                         ) : (
@@ -584,7 +561,7 @@ function OrdersDesktopTable({
                                             <TableCell className="text-muted-foreground font-semibold text-[10px]">
                                                 {new Date(
                                                     o.createdAt,
-                                                ).toLocaleDateString("en-US", {
+                                                ).toLocaleDateString("es-ES", { timeZone: "UTC",
                                                     month: "short",
                                                     day: "numeric",
                                                     year: "numeric",
@@ -594,13 +571,13 @@ function OrdersDesktopTable({
                                                 <Button
                                                     size="sm"
                                                     variant="ghost"
-                                                    className="h-8 px-3 rounded-full hover:bg-primary/10 hover:text-primary transition-all font-bold text-[10px] uppercase tracking-wider opacity-0 group-hover:opacity-100"
+                                                    className="h-8 px-3 rounded-full hover:bg-primary/10 hover:text-primary transition-[color,background-color,border-color,box-shadow,opacity,transform] font-bold text-[10px] uppercase tracking-wider opacity-0 group-hover:opacity-100"
                                                     onClick={() =>
                                                         openOrderDetails(o)
                                                     }
                                                 >
                                                     <Eye className="size-3 mr-1.5" />
-                                                    View
+                                                    Ver
                                                 </Button>
                                             </TableCell>
                                         </TableRow>
@@ -614,16 +591,16 @@ function OrdersDesktopTable({
             {pagination.totalItems > 0 && (
                 <div className="flex flex-col sm:flex-row items-center justify-between px-4 py-3 border-t gap-3">
                     <div className="text-sm text-muted-foreground">
-                        Showing{" "}
+                        Mostrando{" "}
                         {(pagination.currentPage - 1) *
                             pagination.itemsPerPage +
                             1}{" "}
-                        to{" "}
+                        a{" "}
                         {Math.min(
                             pagination.currentPage * pagination.itemsPerPage,
                             pagination.totalItems,
                         )}{" "}
-                        of {pagination.totalItems} results
+                        de {pagination.totalItems} resultados
                     </div>
                     <div className="flex gap-2">
                         <Button
@@ -641,11 +618,11 @@ function OrdersDesktopTable({
                             }}
                             disabled={pagination.currentPage === 1}
                         >
-                            Previous
+                            Anterior
                         </Button>
                         <div className="hidden sm:flex items-center gap-1">
                             <span className="text-sm text-muted-foreground px-2">
-                                Page {pagination.currentPage} of{" "}
+                                Página {pagination.currentPage} de{" "}
                                 {pagination.totalPages}
                             </span>
                         </div>
@@ -668,7 +645,7 @@ function OrdersDesktopTable({
                                 pagination.totalPages === 0
                             }
                         >
-                            Next
+                            Siguiente
                         </Button>
                     </div>
                 </div>
@@ -691,7 +668,7 @@ function OrdersMobileCards({
                     <CardContent className="p-12 text-center">
                         <ShoppingCart className="size-12 mx-auto text-muted-foreground/30 mb-4" />
                         <p className="text-sm font-medium text-muted-foreground">
-                            No transactions found
+                            No se encontraron transacciones
                         </p>
                     </CardContent>
                 </Card>
@@ -739,18 +716,18 @@ function OrdersMobileCards({
                                     </div>
                                     <div className="space-y-1">
                                         <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
-                                            Date
+                                            Fecha
                                         </p>
                                         <p className="font-medium text-sm">
                                             {new Date(
                                                 o.createdAt,
-                                            ).toLocaleDateString()}
+                                            ).toLocaleDateString("es-ES", { timeZone: "UTC" })}
                                         </p>
                                     </div>
                                 </div>
                                 <div className="space-y-1 pt-2">
                                     <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
-                                        Tracking
+                                        Seguimiento
                                     </p>
                                     <p className="text-xs font-mono font-medium truncate bg-muted/50 p-2 rounded-md border border-border/50">
                                         {o.trackingNumber || "Sin información de seguimiento"}
@@ -764,8 +741,8 @@ function OrdersMobileCards({
                                     className="w-full h-10 rounded-lg font-semibold text-xs"
                                     onClick={() => openOrderDetails(o)}
                                 >
-                                    <Eye size={14} className="mr-2" /> Inspect
-                                    Details
+                                    <Eye size={14} className="mr-2" /> Ver
+                                    detalles
                                 </Button>
                             </div>
                         </Card>
@@ -905,7 +882,7 @@ function OrdersTableClientInner({
 
     return (
         <div className="w-full space-y-6" suppressHydrationWarning>
-            <h2 className="text-xl font-medium">Orders Management</h2>
+            <h2 className="text-xl font-medium">Gestión de pedidos</h2>
 
             <OrdersStats stats={stats} />
 

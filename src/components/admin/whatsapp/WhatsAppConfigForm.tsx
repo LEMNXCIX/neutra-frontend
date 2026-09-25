@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useSyncExternalStore } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -29,10 +29,12 @@ const defaultConfig: Partial<WhatsAppConfig> = {
 	phoneNumberId: "",
 	businessAccountId: "",
 	accessToken: "",
-	webhookVerifyToken:
-		process.env.NEXT_PUBLIC_WHATSAPP_VERIFY_TOKEN ||
-		"neutra_whatsapp_verify_token",
+	webhookVerifyToken: "",
 };
+
+const emptySubscribe = () => () => {};
+const getClientOrigin = () => window.location.origin;
+const getServerOrigin = () => "";
 
 export function WhatsAppConfigForm({ initialConfig }: WhatsAppConfigFormProps) {
 	// A missing config (404) is a valid state: show the empty form, not a spinner.
@@ -40,6 +42,11 @@ export function WhatsAppConfigForm({ initialConfig }: WhatsAppConfigFormProps) {
 	const [isSaving, setIsSaving] = useState(false);
 	const [config, setConfig] = useState<Partial<WhatsAppConfig>>(
 		initialConfig ? { ...defaultConfig, ...initialConfig } : defaultConfig,
+	);
+	const callbackOrigin = useSyncExternalStore(
+		emptySubscribe,
+		getClientOrigin,
+		getServerOrigin,
 	);
 
 	const loadConfig = async () => {
@@ -94,8 +101,8 @@ export function WhatsAppConfigForm({ initialConfig }: WhatsAppConfigFormProps) {
                         <div>
                             <CardTitle>WhatsApp Business API</CardTitle>
                             <CardDescription>
-                                Configure your WhatsApp integration for
-                                notifications and bot.
+                                Configurá tu integración de WhatsApp para
+                                notificaciones y bots.
                             </CardDescription>
                         </div>
                     </div>
@@ -105,7 +112,7 @@ export function WhatsAppConfigForm({ initialConfig }: WhatsAppConfigFormProps) {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-4 bg-muted/20 rounded-lg">
                         <div className="flex flex-col gap-2">
                             <Label className="text-base">
-                                Integration Status
+                                Estado de la integración
                             </Label>
                             <div className="flex items-center gap-2">
                                 <Switch
@@ -120,7 +127,7 @@ export function WhatsAppConfigForm({ initialConfig }: WhatsAppConfigFormProps) {
                             </div>
                         </div>
                         <div className="flex flex-col gap-2">
-                            <Label className="text-base">Notifications</Label>
+                            <Label className="text-base">Notificaciones</Label>
                             <div className="flex items-center gap-2">
                                 <Switch
                                     checked={config.notificationsEnabled}
@@ -140,7 +147,7 @@ export function WhatsAppConfigForm({ initialConfig }: WhatsAppConfigFormProps) {
                         </div>
                         <div className="flex flex-col gap-2">
                             <Label className="text-base">
-                                Bot / Auto-Reply
+                                Bot / Respuesta automática
                             </Label>
                             <div className="flex items-center gap-2">
                                 <Switch
@@ -158,10 +165,10 @@ export function WhatsAppConfigForm({ initialConfig }: WhatsAppConfigFormProps) {
 
                     {/* API Credentials */}
                     <div className="space-y-4">
-                        <h3 className="text-lg font-medium">API Credentials</h3>
+                        <h3 className="text-lg font-medium">Credenciales de la API</h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label>Phone Number ID</Label>
+                                <Label>ID del número de teléfono</Label>
                                 <Input
                                     value={config.phoneNumberId || ""}
                                     onChange={(e) =>
@@ -170,11 +177,11 @@ export function WhatsAppConfigForm({ initialConfig }: WhatsAppConfigFormProps) {
                                             phoneNumberId: e.target.value,
                                         })
                                     }
-                                    placeholder="e.g. 1045..."
+                                    placeholder="Ej. 1045..."
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label>Business Account ID</Label>
+                                <Label>ID de la cuenta comercial</Label>
                                 <Input
                                     value={config.businessAccountId || ""}
                                     onChange={(e) =>
@@ -183,13 +190,13 @@ export function WhatsAppConfigForm({ initialConfig }: WhatsAppConfigFormProps) {
                                             businessAccountId: e.target.value,
                                         })
                                     }
-                                    placeholder="e.g. 1015..."
+                                    placeholder="Ej. 1015..."
                                 />
                             </div>
                         </div>
 
                         <div className="space-y-2">
-                            <Label>Access Token (Permanent)</Label>
+                            <Label>Token de acceso (permanente)</Label>
                             <Input
                                 type="password"
                                 value={config.accessToken || ""}
@@ -202,8 +209,8 @@ export function WhatsAppConfigForm({ initialConfig }: WhatsAppConfigFormProps) {
                                 placeholder="****************"
                             />
                             <p className="text-xs text-muted-foreground">
-                                Only update if generating a new token. Old token
-                                is masked.
+                                Actualizalo solo si generás un token nuevo. El
+                                token anterior está oculto.
                             </p>
                         </div>
                     </div>
@@ -211,10 +218,10 @@ export function WhatsAppConfigForm({ initialConfig }: WhatsAppConfigFormProps) {
                     {/* Webhook Config */}
                     <div className="space-y-4 pt-4 border-t">
                         <h3 className="text-lg font-medium">
-                            Webhook Configuration
+                            Configuración del webhook
                         </h3>
                         <div className="space-y-2">
-                            <Label>Verify Token</Label>
+                            <Label>Token de verificación</Label>
                             <div className="flex gap-2">
                                 <Input
                                     value={config.webhookVerifyToken || ""}
@@ -231,19 +238,19 @@ export function WhatsAppConfigForm({ initialConfig }: WhatsAppConfigFormProps) {
                                         toast.success("Copiado al portapapeles");
                                     }}
                                 >
-                                    Copy
+                                    Copiar
                                 </Button>
                             </div>
                             <p className="text-xs text-muted-foreground">
-                                Use this token in your Meta App Dashboard &gt;
-                                WhatsApp &gt; Configuration &gt; Webhook
+                                Usá este token en el panel de Meta: WhatsApp &gt;
+                                Configuración &gt; Webhook
                             </p>
                         </div>
                         <div className="space-y-2">
-                            <Label>Callback URL</Label>
+                            <Label>URL de callback</Label>
                             <div className="flex gap-2">
                                 <Input
-                                    value={`${typeof window !== "undefined" ? window.location.origin : ""}/api/webhooks/whatsapp`}
+                                    value={`${callbackOrigin}/api/webhooks/whatsapp`}
                                     readOnly
                                     className="bg-muted"
                                 />
@@ -257,7 +264,7 @@ export function WhatsAppConfigForm({ initialConfig }: WhatsAppConfigFormProps) {
                                         toast.success("Copiado al portapapeles");
                                     }}
                                 >
-                                    Copy
+                                    Copiar
                                 </Button>
                             </div>
                         </div>
@@ -271,12 +278,12 @@ export function WhatsAppConfigForm({ initialConfig }: WhatsAppConfigFormProps) {
                         >
                             {isSaving ? (
                                 <>
-                                    <Spinner className="mr-2" /> Saving…
+                                    <Spinner className="mr-2" /> Guardando…
                                 </>
                             ) : (
                                 <>
-                                    <Save className="mr-2 size-4" /> Save
-                                    Configuration
+                                    <Save className="mr-2 size-4" /> Guardar
+                                    configuración
                                 </>
                             )}
                         </Button>

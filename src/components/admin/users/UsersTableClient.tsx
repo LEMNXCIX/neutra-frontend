@@ -1,6 +1,10 @@
 "use client";
+import { MobileTablePagination } from "@/components/admin/shared/TablePagination";
 
-import React, { Suspense, useRef, useReducer, useCallback, useSyncExternalStore } from "react";
+import { AdminStatCard as StatCard } from "@/components/admin/shared/AdminStatCard";
+
+
+import React, { Suspense, useRef, useReducer, useCallback, useState, useSyncExternalStore } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { usersService } from "@/services/users.service";
@@ -47,8 +51,6 @@ Edit,
 UserCircle,
 Shield,
 Users,
-ChevronLeft,
-ChevronRight,
 UserCog,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -95,33 +97,9 @@ users: User[];
 stats: Stats;
 pagination: PaginationProps;
 showTenant?: boolean;
+initialRoleFilter?: "all" | "admin" | "user";
 };
 
-const StatCard = ({
-icon: Icon,
-title,
-value,
-color,
-}: {
-icon: React.ElementType;
-title: string;
-value: string | number;
-color: string;
-}) => (
-<Card>
-<CardContent className="pt-6">
-<div className="flex items-center justify-between">
-<div>
-<p className="text-sm text-muted-foreground">{title}</p>
-<p className="text-2xl font-bold mt-1">{value}</p>
-</div>
-<div className={`p-3 rounded-full ${color}`}>
-<Icon className="size-6" />
-</div>
-</div>
-</CardContent>
-</Card>
-);
 
 type UsersDialogState = {
 editOpen: boolean;
@@ -188,22 +166,22 @@ return (
 <Dialog open={open} onOpenChange={onOpenChange}>
 <DialogContent className="max-w-md">
 <DialogHeader>
-<DialogTitle>Edit User</DialogTitle>
+<DialogTitle>Editar usuario</DialogTitle>
 </DialogHeader>
 <div className="space-y-4">
 <div>
-<label htmlFor="edit-user-name" className="text-sm font-medium">Name</label>
+<label htmlFor="edit-user-name" className="text-sm font-medium">Nombre</label>
 <Input id="edit-user-name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Nombre del usuario" />
 </div>
 <div>
-<label htmlFor="edit-user-email" className="text-sm font-medium">Email</label>
+<label htmlFor="edit-user-email" className="text-sm font-medium">Correo electrónico</label>
 <Input id="edit-user-email" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="user@example.com" />
 </div>
 {showTenant && (
 <div>
-<label htmlFor="edit-user-tenant" className="text-sm font-medium">Tenant</label>
+<label htmlFor="edit-user-tenant" className="text-sm font-medium">Organización</label>
 <Select value={form.tenantId} onValueChange={(val) => setForm({ ...form, tenantId: val })} disabled={isLoadingTenants}>
-<SelectTrigger id="edit-user-tenant"><SelectValue placeholder="Seleccionar Tenant" /></SelectTrigger>
+<SelectTrigger id="edit-user-tenant"><SelectValue placeholder="Seleccionar organización" /></SelectTrigger>
 <SelectContent>
 {tenants.map((t) => (<SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>))}
 </SelectContent>
@@ -212,9 +190,9 @@ return (
 )}
 </div>
 <DialogFooter>
-<Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSaving}>Cancel</Button>
+<Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSaving}>Cancelar</Button>
 <Button onClick={onSave} disabled={isSaving}>
-{isSaving ? (<><Spinner className="mr-2" /> Saving…</>) : "Guardar Cambios"}
+{isSaving ? (<><Spinner className="mr-2" /> Guardando…</>) : "Guardar Cambios"}
 </Button>
 </DialogFooter>
 </DialogContent>
@@ -227,19 +205,19 @@ const emptySubscribe = () => () => {};
 function UsersDesktopStats({ stats }: { stats: Stats }) {
 return (
 <div className="hidden lg:grid lg:grid-cols-3 gap-4">
-<StatCard
+<StatCard iconClassName="size-6"
 icon={Users}
 title="Total de Usuarios"
 value={stats.totalUsers}
 color="bg-primary/10 text-primary"
 />
-<StatCard
+<StatCard iconClassName="size-6"
 icon={Shield}
 title="Administradores"
 value={stats.adminUsers}
 color="bg-accent text-accent-foreground"
 />
-<StatCard
+<StatCard iconClassName="size-6"
 icon={UserCircle}
 title="Usuarios Regulares"
 value={stats.regularUsers}
@@ -256,24 +234,24 @@ return (
 <AccordionTrigger className="px-4 hover:no-underline">
 <div className="flex items-center gap-3">
 <Users className="size-5 text-muted-foreground" />
-<span className="font-medium">User Statistics</span>
+<span className="font-medium">Estadísticas de usuarios</span>
 </div>
 </AccordionTrigger>
 <AccordionContent className="px-4 pb-4 pt-2">
 <div className="grid grid-cols-1 gap-4">
-<StatCard
+<StatCard iconClassName="size-6"
 icon={Users}
 title="Total de Usuarios"
 value={stats.totalUsers}
 color="bg-primary/10 text-primary"
 />
-<StatCard
+<StatCard iconClassName="size-6"
 icon={Shield}
 title="Administradores"
 value={stats.adminUsers}
 color="bg-accent text-accent-foreground"
 />
-<StatCard
+<StatCard iconClassName="size-6"
 icon={UserCircle}
 title="Usuarios Regulares"
 value={stats.regularUsers}
@@ -306,15 +284,15 @@ value={roleFilter}
 onValueChange={onRoleFilterChange}
 >
 <SelectTrigger className="w-[180px]">
-<SelectValue placeholder="Todos los Roles" />
+<SelectValue placeholder="Todos los roles" />
 </SelectTrigger>
 <SelectContent>
-<SelectItem value="all">All Roles</SelectItem>
+<SelectItem value="all">Todos los roles</SelectItem>
 <SelectItem value="admin">
-Administrators
+Administradores
 </SelectItem>
 <SelectItem value="user">
-Regular Users
+Usuarios regulares
 </SelectItem>
 </SelectContent>
 </Select>
@@ -338,7 +316,7 @@ const input = document.querySelector(
 onSearch(input?.value || "");
 }}
 >
-Search
+Buscar
 </Button>
 </div>
 </div>
@@ -351,8 +329,6 @@ function UsersDesktopTable({
 users,
 showTenant,
 pagination,
-startItem,
-endItem,
 onPageChange,
 onOpenEdit,
 onOpenRoleDialog,
@@ -360,8 +336,6 @@ onOpenRoleDialog,
 users: User[];
 showTenant: boolean;
 pagination: PaginationProps;
-startItem: number;
-endItem: number;
 onPageChange: (page: number) => void;
 onOpenEdit: (u: User) => void;
 onOpenRoleDialog: (u: User) => void;
@@ -376,21 +350,21 @@ return (
 Avatar
 </TableHead>
 <TableHead className="w-[200px]">
-Name
+Nombre
 </TableHead>
 <TableHead className="w-[250px]">
-Email
+Correo electrónico
 </TableHead>
 {showTenant && (
 <TableHead className="w-[150px]">
-Tenant
+Organización
 </TableHead>
 )}
 <TableHead className="w-[120px]">
-Role
+Rol
 </TableHead>
 <TableHead className="w-[200px]">
-Actions
+Acciones
 </TableHead>
 </TableRow>
 </TableHeader>
@@ -401,7 +375,7 @@ Actions
 colSpan={5}
 className="text-center py-8 text-muted-foreground"
 >
-No users found
+No se encontraron usuarios
 </TableCell>
 </TableRow>
 ) : (
@@ -411,7 +385,7 @@ key={u.id}
 className="group hover:bg-muted/50 transition-colors border-b border-border/50"
 >
 <TableCell className="py-4">
-<Avatar className="size-10 border border-border group-hover:border-primary/20 transition-all">
+<Avatar className="size-10 border border-border group-hover:border-primary/20 transition-[color,background-color,border-color,box-shadow,opacity,transform]">
 <AvatarImage
 src={
 u.profilePic ||
@@ -442,7 +416,7 @@ variant="secondary"
 className="text-[10px] font-semibold uppercase tracking-wider"
 >
 {u.tenant?.name ||
-"GLOBAL NODE"}
+"Nodo global"}
 </Badge>
 </TableCell>
 )}
@@ -453,13 +427,13 @@ getRoleColor(u.role?.name),
 "text-[10px] font-bold uppercase tracking-wider border-none shadow-none",
 )}
 >
-{u.role?.name || "NO_ROLE"}
+{u.role?.name || "Sin rol"}
 </Badge>
 </TableCell>
 <TableCell className="text-right">
 <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
 <Button
-size="icon"
+size="icon" aria-label="Editar usuario"
 variant="ghost"
 className="size-8 rounded-full hover:bg-primary/5 hover:text-primary"
 onClick={() => onOpenEdit(u)}
@@ -467,7 +441,7 @@ onClick={() => onOpenEdit(u)}
 <Edit className="size-4" />
 </Button>
 <Button
-size="icon"
+size="icon" aria-label="Gestionar rol del usuario"
 variant="ghost"
 className="size-8 rounded-full hover:bg-primary/5 hover:text-primary"
 onClick={() => onOpenRoleDialog(u)}
@@ -483,93 +457,7 @@ onClick={() => onOpenRoleDialog(u)}
 </Table>
 </div>
 
-{pagination.totalItems > 0 && (
-<div className="flex flex-col sm:flex-row items-center justify-between px-4 py-3 border-t gap-3">
-<div className="text-sm text-muted-foreground">
-Showing {startItem} to {endItem} of{" "}
-{pagination.totalItems} results
-</div>
-<div className="flex gap-2">
-<Button
-variant="outline"
-size="sm"
-onClick={() =>
-onPageChange(pagination.currentPage - 1)
-}
-disabled={pagination.currentPage === 1}
->
-<ChevronLeft className="size-4 mr-1" />
-Previous
-</Button>
-<div className="hidden sm:flex items-center gap-1">
-{Array.from(
-{
-length: Math.min(
-5,
-pagination.totalPages,
-),
-},
-(_, i) => {
-let pageNum;
-if (pagination.totalPages <= 5) {
-pageNum = i + 1;
-} else if (
-pagination.currentPage <= 3
-) {
-pageNum = i + 1;
-} else if (
-pagination.currentPage >=
-pagination.totalPages - 2
-) {
-pageNum =
-pagination.totalPages - 4 + i;
-} else {
-pageNum =
-pagination.currentPage - 2 + i;
-}
-return (
-<Button
-key={pageNum}
-variant={
-pagination.currentPage ===
-pageNum
-? "default"
-: "outline"
-}
-size="sm"
-onClick={() =>
-onPageChange(pageNum)
-}
-className="min-w-[2.5rem]"
->
-{pageNum}
-</Button>
-);
-},
-)}
-</div>
-<div className="sm:hidden text-sm text-muted-foreground px-2">
-Page {pagination.currentPage} of{" "}
-{pagination.totalPages}
-</div>
-<Button
-variant="outline"
-size="sm"
-onClick={() =>
-onPageChange(pagination.currentPage + 1)
-}
-disabled={
-pagination.currentPage ===
-pagination.totalPages ||
-pagination.totalPages === 0
-}
->
-Next
-<ChevronRight className="size-4 ml-1" />
-</Button>
-</div>
-</div>
-)}
+<MobileTablePagination pagination={pagination} onPageChange={onPageChange} />
 </Card>
 );
 }
@@ -620,7 +508,7 @@ getRoleColor(u.role?.name),
 "text-[9px] font-bold uppercase tracking-wider",
 )}
 >
-{u.role?.name || "NO_ROLE"}
+{u.role?.name || "Sin rol"}
 </Badge>
 {showTenant && (
 <Badge
@@ -628,7 +516,7 @@ variant="secondary"
 className="text-[9px] font-bold uppercase tracking-wider"
 >
 {u.tenant?.name ||
-"GLOBAL NODE"}
+"Nodo global"}
 </Badge>
 )}
 </div>
@@ -642,7 +530,7 @@ variant="outline"
 className="w-full h-10 font-semibold text-xs"
 onClick={() => onOpenEdit(u)}
 >
-<Edit size={14} className="mr-2" /> Edit
+<Edit size={14} className="mr-2" /> Editar
 </Button>
 <Button
 size="sm"
@@ -650,47 +538,14 @@ variant="outline"
 onClick={() => onOpenRoleDialog(u)}
 className="w-full h-10 font-semibold text-xs"
 >
-<UserCog size={14} className="mr-2" /> Role
+<UserCog size={14} className="mr-2" /> Rol
 </Button>
 </div>
 </CardContent>
 </Card>
 ))}
 
-{pagination.totalItems > 0 && (
-<Card className="lg:hidden">
-<div className="flex items-center justify-between px-4 py-3">
-<Button
-variant="outline"
-size="sm"
-onClick={() =>
-onPageChange(pagination.currentPage - 1)
-}
-disabled={pagination.currentPage === 1}
->
-<ChevronLeft className="size-4" />
-</Button>
-<span className="text-sm text-muted-foreground">
-Page {pagination.currentPage} of{" "}
-{pagination.totalPages}
-</span>
-<Button
-variant="outline"
-size="sm"
-onClick={() =>
-onPageChange(pagination.currentPage + 1)
-}
-disabled={
-pagination.currentPage ===
-pagination.totalPages ||
-pagination.totalPages === 0
-}
->
-<ChevronRight className="size-4" />
-</Button>
-</div>
-</Card>
-)}
+<MobileTablePagination pagination={pagination} onPageChange={onPageChange} />
 </div>
 );
 }
@@ -708,6 +563,7 @@ users,
 stats,
 pagination,
 showTenant = false,
+initialRoleFilter,
 }: Props) {
 const isMounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
 const router = useRouter();
@@ -743,7 +599,7 @@ dispatch({ type: "SET_IS_LOADING_TENANTS", payload: false });
 	};
 
 	const searchQuery = searchParams.get("search") || "";
-	const roleFilter = searchParams.get("role") || "all";
+	const [roleFilter, setRoleFilter] = useState(initialRoleFilter ?? "all");
 
 	const handleSearch = (term: string) => {
 const params = new URLSearchParams(searchParams);
@@ -757,6 +613,8 @@ router.push(`?${params.toString()}`);
 };
 
 const handleRoleFilterChange = (newFilter: string) => {
+const nextFilter = newFilter === "admin" || newFilter === "user" ? newFilter : "all";
+setRoleFilter(nextFilter);
 const params = new URLSearchParams(searchParams);
 if (newFilter && newFilter !== "all") {
 params.set("role", newFilter);
@@ -812,21 +670,12 @@ dispatch({ type: "SET_IS_SAVING", payload: false });
 }
 };
 
-const startItem =
-users.length > 0
-? (pagination.currentPage - 1) * pagination.itemsPerPage + 1
-: 0;
-const endItem = Math.min(
-pagination.currentPage * pagination.itemsPerPage,
-pagination.totalItems,
-);
-
 if (!isMounted) return null;
 
 return (
 <div className="w-full space-y-6" suppressHydrationWarning>
 <div className="flex justify-between items-center">
-<h2 className="text-xl font-medium">Users Management</h2>
+<h2 className="text-xl font-medium">Gestión de usuarios</h2>
 </div>
 
 <UsersDesktopStats stats={stats} />
@@ -841,8 +690,6 @@ onSearch={handleSearch}
 users={users}
 showTenant={showTenant}
 pagination={pagination}
-startItem={startItem}
-endItem={endItem}
 onPageChange={handlePageChange}
 onOpenEdit={openEdit}
 onOpenRoleDialog={openRoleDialog}

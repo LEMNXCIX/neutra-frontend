@@ -3,7 +3,7 @@
 import React, { useReducer, useEffect, useCallback, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
-import { Plus, Edit, Trash2, Clock, DollarSign, Tag } from "lucide-react";
+import { Edit, Trash2, Clock, DollarSign, Tag } from "lucide-react";
 import { bookingService, Service } from "@/services/booking.service";
 import { categoriesService } from "@/services/categories.service";
 import { Category } from "@/types/category.types";
@@ -44,6 +44,7 @@ import { Badge } from "@/components/ui/badge";
 import { Spinner } from "@/components/ui/spinner";
 import { Label } from "@/components/ui/label";
 import { useConfirm } from "@/hooks/use-confirm";
+import { AdminEntityHeader } from "@/components/admin/shared/AdminEntityHeader";
 
 type ServicesState = {
   services: Service[];
@@ -116,17 +117,17 @@ function ServiceFormFields({
   return (
     <>
       <div className="grid gap-2">
-        <Label htmlFor="name">Service Name *</Label>
+        <Label htmlFor="name">Nombre del servicio *</Label>
         <Input
           id="name"
           required
           value={formData.name}
           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          placeholder="e.g. Consultation"
+          placeholder="Ej. Consulta"
         />
       </div>
       <div className="grid gap-2">
-        <Label htmlFor="description">Description (Optional)</Label>
+        <Label htmlFor="description">Descripción (opcional)</Label>
         <Textarea
           id="description"
           value={formData.description}
@@ -137,7 +138,7 @@ function ServiceFormFields({
       </div>
       <div className="grid grid-cols-2 gap-4">
         <div className="grid gap-2">
-          <Label htmlFor="duration">Duration (min) *</Label>
+          <Label htmlFor="duration">Duración (min) *</Label>
           <div className="relative">
             <Clock className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
             <Input
@@ -152,7 +153,7 @@ function ServiceFormFields({
           </div>
         </div>
         <div className="grid gap-2">
-          <Label htmlFor="price">Price ($) *</Label>
+          <Label htmlFor="price">Precio ($) *</Label>
           <div className="relative">
             <DollarSign className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
             <Input
@@ -169,7 +170,7 @@ function ServiceFormFields({
         </div>
       </div>
       <div className="grid gap-2">
-        <Label htmlFor="categoryId">Category (Optional)</Label>
+        <Label htmlFor="categoryId">Categoría (opcional)</Label>
         <Select
           value={formData.categoryId || "none"}
           onValueChange={(value) => setFormData({ ...formData, categoryId: value === "none" ? "" : value })}
@@ -181,7 +182,7 @@ function ServiceFormFields({
             </div>
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="none">None (Uncategorized)</SelectItem>
+            <SelectItem value="none">Sin categoría</SelectItem>
             {(Array.isArray(categories) ? categories : []).map((cat) => (
               <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
             ))}
@@ -193,7 +194,7 @@ function ServiceFormFields({
       </div>
       <div className="flex items-center justify-between p-3 border rounded-lg bg-muted/20">
         <div className="space-y-0.5">
-          <Label htmlFor="active" className="text-sm font-medium">Active Status</Label>
+          <Label htmlFor="active" className="text-sm font-medium">Estado</Label>
           <p className="text-xs text-muted-foreground">Mostrar este servicio a los clientes</p>
         </div>
         <Switch
@@ -220,35 +221,15 @@ function ServicesHeader({
   onCreate: () => void;
 }) {
   return (
-    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">
-          Services
-        </h1>
-        <p className="text-muted-foreground mt-1">
-          Manage the services offered by your booking system.
-        </p>
-      </div>
-      <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-        {isSuperAdmin && (
-          <Select
-            value={tenantFilter}
-            onValueChange={onTenantFilterChange}
-          >
-            <SelectTrigger className="w-full sm:w-[180px]">
-              <SelectValue placeholder="Todos los Tenants" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Tenants</SelectItem>
-            </SelectContent>
-          </Select>
-        )}
-        <Button onClick={onCreate} className="w-full sm:w-auto">
-          <Plus className="size-4 mr-2" />
-          Add Service
-        </Button>
-      </div>
-    </div>
+    <AdminEntityHeader
+      title="Servicios"
+      description="Gestioná los servicios ofrecidos por tu sistema de reservas."
+      createLabel="Agregar servicio"
+      isSuperAdmin={isSuperAdmin}
+      tenantFilter={tenantFilter}
+      onTenantFilterChange={onTenantFilterChange}
+      onCreate={onCreate}
+    />
   );
 }
 
@@ -266,8 +247,7 @@ function ServicesMobileCards({
       {services.length === 0 ? (
         <Card>
           <CardContent className="p-8 text-center text-muted-foreground">
-            No services found. Create your first service to get
-            started.
+            No se encontraron servicios. Creá tu primer servicio para comenzar.
           </CardContent>
         </Card>
       ) : (
@@ -293,7 +273,7 @@ function ServicesMobileCards({
                         variant="outline"
                         className="font-normal text-xs text-muted-foreground"
                       >
-                        Uncategorized
+                        Sin categoría
                       </Badge>
                     )}
                     <Badge
@@ -333,7 +313,7 @@ function ServicesMobileCards({
                 className="w-full"
                 onClick={() => onEdit(service)}
               >
-                <Edit className="size-4 mr-2" /> Edit
+                <Edit className="size-4 mr-2" /> Editar
               </Button>
               <Button
                 size="sm"
@@ -341,7 +321,7 @@ function ServicesMobileCards({
                 className="w-full text-destructive border-destructive/20 hover:bg-destructive/10"
                 onClick={() => onDelete(service.id)}
               >
-                <Trash2 className="size-4 mr-2" /> Delete
+                <Trash2 className="size-4 mr-2" /> Eliminar
               </Button>
             </div>
           </Card>
@@ -369,27 +349,27 @@ function ServicesDesktopTable({
           <TableHeader>
             <TableRow className="bg-muted/50 hover:bg-muted/50">
               <TableHead className="font-semibold">
-                Service Details
+                Detalles del servicio
               </TableHead>
               <TableHead className="font-semibold">
-                Category
+                Categoría
               </TableHead>
               {isSuperAdmin && (
                 <TableHead className="font-semibold">
-                  Tenant
+                  Organización
                 </TableHead>
               )}
               <TableHead className="font-semibold">
-                Duration
+                Duración
               </TableHead>
               <TableHead className="font-semibold">
-                Price
+                Precio
               </TableHead>
               <TableHead className="font-semibold">
-                Status
+                Estado
               </TableHead>
               <TableHead className="text-right font-semibold">
-                Actions
+                Acciones
               </TableHead>
             </TableRow>
           </TableHeader>
@@ -400,8 +380,7 @@ function ServicesDesktopTable({
                   colSpan={6}
                   className="h-32 text-center text-muted-foreground"
                 >
-                  No services found. Create your first
-                  service to get started.
+                  No se encontraron servicios. Creá tu primer servicio para comenzar.
                 </TableCell>
               </TableRow>
             ) : (
@@ -433,7 +412,7 @@ function ServicesDesktopTable({
                       </Badge>
                     ) : (
                       <span className="text-muted-foreground italic text-xs">
-                        Uncategorized
+                        Sin categoría
                       </span>
                     )}
                   </TableCell>
@@ -475,7 +454,7 @@ function ServicesDesktopTable({
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                       <Button
-                        size="icon"
+                        size="icon" aria-label="Editar servicio"
                         variant="ghost"
                         className="size-8"
                         onClick={() =>
@@ -485,7 +464,7 @@ function ServicesDesktopTable({
                         <Edit className="size-4 text-muted-foreground" />
                       </Button>
                       <Button
-                        size="icon"
+                        size="icon" aria-label="Eliminar servicio"
                         variant="ghost"
                         className="size-8"
                         onClick={() =>
@@ -551,7 +530,7 @@ function ServicesFormDialog({
               onClick={() => onOpenChange(false)}
               disabled={isSaving}
             >
-              Cancel
+              Cancelar
             </Button>
             <Button type="submit" disabled={isSaving}>
               {isSaving
@@ -693,7 +672,9 @@ dispatch({ type: "SET_FORM_DATA", payload: {
 
             if (response.ok) {
       toast.success(
-        `Service ${editingService ? "updated" : "created"} successfully`,
+        editingService
+          ? "Servicio actualizado correctamente"
+          : "Servicio creado correctamente",
       );
       dispatch({ type: "SET_DIALOG_OPEN", payload: false });
       await loadServices();
@@ -701,7 +682,9 @@ dispatch({ type: "SET_FORM_DATA", payload: {
       const errorData = await response.json();
       toast.error(
         errorData.message ||
-        `Failed to ${editingService ? "update" : "create"} service`,
+        editingService
+          ? "No se pudo actualizar el servicio"
+          : "No se pudo crear el servicio",
       );
     }
   } catch (err) {
@@ -749,7 +732,7 @@ dispatch({ type: "SET_FORM_DATA", payload: {
             <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
                 <Spinner className="size-8 text-primary" />
                 <p className="text-muted-foreground animate-pulse">
-                    Loading services…
+                    Cargando servicios…
                 </p>
             </div>
         );

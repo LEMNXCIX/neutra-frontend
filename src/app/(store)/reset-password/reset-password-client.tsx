@@ -79,26 +79,24 @@ function ResetPasswordForm() {
                         <AlertCircle className="size-8" />
                     </div>
                     <CardTitle className="text-2xl font-bold tracking-tight">
-                        Invalid Link
+                        Enlace inválido
                     </CardTitle>
                     <CardDescription className="text-sm font-medium mt-1">
-                        Security Token Mismatch
+                        Token de seguridad incorrecto
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="text-center px-8 pb-6">
                     <p className="text-sm font-medium leading-relaxed text-muted-foreground">
-                        The recovery token provided is either invalid, expired,
-                        or has already been utilized. Please request a new link
-                        to continue.
+                        El token de recuperación es inválido, venció o ya fue utilizado. Solicitá un nuevo enlace para continuar.
                     </p>
                 </CardContent>
                 <CardFooter className="justify-center border-t border-border/50 p-8 bg-muted/10">
                     <Button
                         variant="outline"
-                        className="w-full h-12 rounded-xl border-border font-bold text-xs transition-all hover:bg-muted"
+                        className="w-full h-12 rounded-xl border-border font-bold text-xs transition-[color,background-color,border-color,box-shadow,opacity,transform] hover:bg-muted"
                         asChild
                     >
-                        <Link href="/forgot-password">Request New Link →</Link>
+                        <Link href="/forgot-password">Solicitar un nuevo enlace →</Link>
                     </Button>
                 </CardFooter>
             </Card>
@@ -114,23 +112,22 @@ function ResetPasswordForm() {
                         <CheckCircle2 className="size-8" />
                     </div>
                     <CardTitle className="text-2xl font-bold tracking-tight">
-                        Access Restored
+                        Acceso restablecido
                     </CardTitle>
                     <CardDescription className="text-sm font-medium mt-1">
-                        Security Protocol Confirmed
+                        Protocolo de seguridad confirmado
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="text-center px-8 pb-10">
                     <p className="text-sm text-muted-foreground font-medium leading-relaxed mb-8">
-                        Your password has been successfully updated. You will be
-                        redirected to the login portal shortly.
+                        Tu contraseña se actualizó correctamente. Serás redirigido al inicio de sesión en unos instantes.
                     </p>
                     <Button
-                        className="w-full h-12 rounded-xl font-bold text-sm shadow-lg shadow-primary/20 transition-all hover:-translate-y-0.5"
+                        className="w-full h-12 rounded-xl font-bold text-sm shadow-lg shadow-primary/20 transition-[color,background-color,border-color,box-shadow,opacity,transform] hover:-translate-y-0.5"
                         asChild
                     >
                         <Link href="/login">
-                            Sign In Now <ArrowRight className="ml-2 size-4" />
+                            Iniciar sesión <ArrowRight className="ml-2 size-4" />
                         </Link>
                     </Button>
                 </CardContent>
@@ -143,10 +140,10 @@ function ResetPasswordForm() {
             <div className="absolute top-0 left-0 w-full h-1.5 bg-primary" />
             <CardHeader className="space-y-1 pb-6 pt-8 px-8">
                 <CardTitle className="text-xl font-bold tracking-tight">
-                    Set New Password
+                    Definir nueva contraseña
                 </CardTitle>
                 <CardDescription className="text-sm font-medium">
-                    Configure a secure password for your account
+                    Configurá una contraseña segura para tu cuenta
                 </CardDescription>
             </CardHeader>
             <CardContent className="px-8 pb-8">
@@ -156,7 +153,7 @@ function ResetPasswordForm() {
                             htmlFor="password"
                             className="text-xs font-semibold text-foreground ml-1"
                         >
-                            New Password
+                            Nueva contraseña
                         </Label>
                         <div className="relative group">
                             <Lock className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
@@ -164,7 +161,7 @@ function ResetPasswordForm() {
                                 id="password"
                                 type="password"
                                 required
-                                className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-all focus:border-primary"
+                                className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform] focus:border-primary"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                             />
@@ -175,7 +172,7 @@ function ResetPasswordForm() {
                             htmlFor="confirm-password"
                             className="text-xs font-semibold text-foreground ml-1"
                         >
-                            Confirm Password
+                            Confirmar contraseña
                         </Label>
                         <div className="relative group">
                             <Lock className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
@@ -183,7 +180,7 @@ function ResetPasswordForm() {
                                 id="confirm-password"
                                 type="password"
                                 required
-                                className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-all focus:border-primary"
+                                className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform] focus:border-primary"
                                 value={confirmPassword}
                                 onChange={(e) =>
                                     setConfirmPassword(e.target.value)
@@ -193,14 +190,14 @@ function ResetPasswordForm() {
                     </div>
                     <Button
                         type="submit"
-                        className="w-full h-12 text-sm font-bold shadow-lg shadow-primary/20 hover:-translate-y-0.5 transition-all rounded-xl mt-4"
+                        className="w-full h-12 text-sm font-bold shadow-lg shadow-primary/20 hover:-translate-y-0.5 transition-[color,background-color,border-color,box-shadow,opacity,transform] rounded-xl mt-4"
                         disabled={loading}
                     >
                         {loading ? (
                             <Spinner className="mr-2 size-4" />
                         ) : (
                             <>
-                                Update Password{" "}
+                                Actualizar contraseña{" "}
                                 <ArrowRight className="ml-2 size-4" />
                             </>
                         )}
@@ -213,7 +210,7 @@ function ResetPasswordForm() {
                     className="flex items-center text-xs font-semibold text-muted-foreground hover:text-primary transition-colors"
                 >
                     <ArrowLeft className="mr-2 size-4" />
-                    Back to Sign In
+                    Volver al inicio de sesión
                 </Link>
             </CardFooter>
         </Card>

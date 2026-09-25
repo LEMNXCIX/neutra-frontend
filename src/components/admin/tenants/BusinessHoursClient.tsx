@@ -16,12 +16,14 @@ import type { Tenant } from "@/types/tenant";
 import { toast } from "sonner";
 import { Clock } from "lucide-react";
 import {
-    DEFAULT_WORKING_HOURS,
     HolidaysEditor,
     WorkingHoursEditor,
+} from "@/components/admin/booking/working-hours-editor";
+import {
+    DEFAULT_WORKING_HOURS,
     normalizeWorkingHours,
     type WorkingHours,
-} from "@/components/admin/booking/working-hours-editor";
+} from "@/components/admin/booking/working-hours-utils";
 
 export function BusinessHoursClient() {
     const { tenantId } = useTenantStore();
@@ -53,7 +55,7 @@ export function BusinessHoursClient() {
             );
             setHolidays(current?.config?.settings?.holidays ?? []);
         } catch {
-            toast.error("Error al cargar la configuración del tenant");
+            toast.error("Error al cargar la configuración de la organización");
         } finally {
             setLoading(false);
         }
@@ -89,7 +91,7 @@ export function BusinessHoursClient() {
         return (
             <div className="flex flex-col items-center justify-center gap-3 py-20 text-center">
                 <Clock className="size-10 text-muted-foreground" />
-                <p className="font-semibold">Sin contexto de tenant</p>
+                <p className="font-semibold">Sin contexto de organización</p>
             </div>
         );
     }
@@ -105,7 +107,7 @@ export function BusinessHoursClient() {
     if (!tenant) {
         return (
             <div className="py-20 text-center text-sm text-muted-foreground">
-                Tenant not found.
+                Organización no encontrada.
             </div>
         );
     }
@@ -119,13 +121,13 @@ export function BusinessHoursClient() {
                     </h1>
                     <p className="text-sm text-muted-foreground">
                         Limita la disponibilidad de todos los miembros del
-                        staff.
+                        personal.
                     </p>
                 </div>
                 <Button onClick={handleSave} disabled={saving}>
                     {saving ? (
                         <>
-                            <Spinner className="mr-2 size-4" /> Saving…
+                            <Spinner className="mr-2 size-4" /> Guardando…
                         </>
                     ) : (
                         "Guardar cambios"
@@ -135,10 +137,10 @@ export function BusinessHoursClient() {
 
             <Card>
                 <CardHeader>
-                    <CardTitle>Business Hours</CardTitle>
+                    <CardTitle>Horario de atención</CardTitle>
                     <CardDescription>
-                        Los slots de reserva se generan en la intersección de
-                        este horario con el del staff asignado.
+                        Los horarios de reserva se generan al combinar este
+                        horario con el del personal asignado.
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -165,7 +167,7 @@ export function BusinessHoursClient() {
                 <Button onClick={handleSave} disabled={saving}>
                     {saving ? (
                         <>
-                            <Spinner className="mr-2 size-4" /> Saving…
+                            <Spinner className="mr-2 size-4" /> Guardando…
                         </>
                     ) : (
                         "Guardar cambios"

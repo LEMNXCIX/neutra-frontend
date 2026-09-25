@@ -17,7 +17,7 @@ import { toast } from "sonner";
 import { authService } from "@/services/auth.service";
 import { Spinner } from "@/components/ui/spinner";
 import { Mail, ArrowLeft, CheckCircle2, ArrowRight } from "lucide-react";
-import Logo from "@/components/logo";
+import { AuthBrandHeader } from "@/components/auth/AuthBrandHeader";
 
 export function ForgotPasswordPageClient() {
     const [email, setEmail] = useState("");
@@ -50,27 +50,26 @@ export function ForgotPasswordPageClient() {
                             <CheckCircle2 className="size-8" />
                         </div>
                         <CardTitle className="text-2xl font-bold tracking-tight">
-                            Email Sent
+                            Correo enviado
                         </CardTitle>
                         <CardDescription className="text-sm font-medium mt-1">
-                            Check your inbox for reset instructions
+                            Revisá tu bandeja de entrada para ver las instrucciones
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="text-center px-8 pb-8 space-y-6">
                         <p className="text-sm text-muted-foreground font-medium leading-relaxed">
-                            We've sent a recovery link to{" "}
+                            Enviamos un enlace de recuperación a{" "}
                             <span className="font-bold text-foreground">
                                 {email}
                             </span>
-                            . If an account is associated with this address,
-                            you'll receive instructions shortly.
+                            . Si hay una cuenta asociada a esta dirección, recibirás las instrucciones en breve.
                         </p>
                         <Button
                             variant="outline"
-                            className="w-full h-12 rounded-xl border-border font-bold text-xs transition-all hover:bg-muted"
+                            className="w-full h-12 rounded-xl border-border font-bold text-xs transition-[color,background-color,border-color,box-shadow,opacity,transform] hover:bg-muted"
                             onClick={() => setSubmitted(false)}
                         >
-                            Try Different Email
+                            Probar con otro correo
                         </Button>
                     </CardContent>
                     <CardFooter className="justify-center border-t border-border/50 p-6 bg-muted/10">
@@ -79,7 +78,7 @@ export function ForgotPasswordPageClient() {
                             className="flex items-center text-xs font-semibold text-muted-foreground hover:text-primary transition-colors"
                         >
                             <ArrowLeft className="mr-2 size-4" />
-                            Return to Sign In
+                            Volver al inicio de sesión
                         </Link>
                     </CardFooter>
                 </Card>
@@ -91,28 +90,19 @@ export function ForgotPasswordPageClient() {
         <div className="min-h-[70vh] flex items-center justify-center p-6 animate-slide-up py-20">
             <div className="w-full max-w-[440px] space-y-8">
                 {/* Logo Section */}
-                <div className="text-center space-y-4">
-                    <div className="inline-flex items-center justify-center size-16 rounded-xl bg-primary/10 text-primary mb-2 transition-transform hover:scale-110 duration-500 shadow-sm">
-                        <Logo size={36} />
-                    </div>
-                    <div className="space-y-1">
-                        <h1 className="text-3xl font-bold tracking-tight text-foreground">
-                            Recover Account
-                        </h1>
-                        <p className="text-muted-foreground font-medium text-sm">
-                            Reset your security credentials
-                        </p>
-                    </div>
-                </div>
+                <AuthBrandHeader
+                    title="Recuperar cuenta"
+                    subtitle="Restablecé tus credenciales de seguridad"
+                />
 
                 <Card className="t-card border-none shadow-2xl relative overflow-hidden">
                     <div className="absolute top-0 left-0 w-full h-1.5 bg-primary" />
                     <CardHeader className="space-y-1 pb-6 pt-8 px-8">
                         <CardTitle className="text-xl font-bold">
-                            Password Reset
+                            Restablecer contraseña
                         </CardTitle>
                         <CardDescription className="text-sm font-medium">
-                            Enter your email to receive a recovery link
+                            Ingresá tu correo para recibir un enlace de recuperación
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="px-8 pb-8">
@@ -131,7 +121,7 @@ export function ForgotPasswordPageClient() {
                                         type="email"
                                         placeholder="juan@ejemplo.com"
                                         required
-                                        className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-all focus:border-primary"
+                                        className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform] focus:border-primary"
                                         value={email}
                                         onChange={(e) =>
                                             setEmail(e.target.value)
@@ -141,14 +131,14 @@ export function ForgotPasswordPageClient() {
                             </div>
                             <Button
                                 type="submit"
-                                className="w-full h-12 text-sm font-bold shadow-lg shadow-primary/20 hover:-translate-y-0.5 transition-all rounded-xl"
+                                className="w-full h-12 text-sm font-bold shadow-lg shadow-primary/20 hover:-translate-y-0.5 transition-[color,background-color,border-color,box-shadow,opacity,transform] rounded-xl"
                                 disabled={loading}
                             >
                                 {loading ? (
                                     <Spinner className="mr-2 size-4" />
                                 ) : (
                                     <>
-                                        Send Reset Link{" "}
+                                        Enviar enlace{" "}
                                         <ArrowRight className="ml-2 size-4" />
                                     </>
                                 )}
@@ -161,7 +151,7 @@ export function ForgotPasswordPageClient() {
                             className="flex items-center text-xs font-semibold text-muted-foreground hover:text-primary transition-colors"
                         >
                             <ArrowLeft className="mr-2 size-4" />
-                            Back to Sign In
+                            Volver al inicio de sesión
                         </Link>
                     </CardFooter>
                 </Card>

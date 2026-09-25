@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import Logo from "@/components/logo";
+import { UserAccountSummary } from "@/components/shared/UserAccountSummary";
 
 type NavItem = { label: string; href: string };
 
@@ -56,8 +57,8 @@ function MobileMenuSheet({ isOpen, setIsOpen, navItems, tenantName, tenantLogo, 
       <SheetTrigger asChild>
         <Button
           variant="ghost"
-          size="icon"
-          className="size-10 hover:bg-foreground hover:text-background transition-all"
+          size="icon" aria-label="Abrir menú de navegación"
+          className="size-10 hover:bg-foreground hover:text-background transition-[color,background-color,border-color,box-shadow,opacity,transform]"
         >
           <Menu className="stroke-[3px]" />
         </Button>
@@ -77,7 +78,7 @@ function MobileMenuSheet({ isOpen, setIsOpen, navItems, tenantName, tenantLogo, 
               </SheetTitle>
               {!tenantName && (
                 <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mt-0.5">
-                  Booking Node
+                  Módulo de reservas
                 </p>
               )}
             </div>
@@ -87,7 +88,7 @@ function MobileMenuSheet({ isOpen, setIsOpen, navItems, tenantName, tenantLogo, 
         <div className="flex-1 overflow-y-auto p-8 space-y-10">
           <nav className="flex flex-col gap-3">
             <span className="text-[10px] font-bold text-primary uppercase tracking-widest px-1">
-              Navigation
+              Navegación
             </span>
             <div className="grid gap-2">
               {navItems.map((item) => (
@@ -97,7 +98,7 @@ function MobileMenuSheet({ isOpen, setIsOpen, navItems, tenantName, tenantLogo, 
                   onClick={() =>
                     setIsOpen(false)
                   }
-                  className="flex items-center justify-between p-4 bg-card border border-border shadow-sm hover:shadow-md hover:border-primary/20 transition-all rounded-xl group"
+                  className="flex items-center justify-between p-4 bg-card border border-border shadow-sm hover:shadow-md hover:border-primary/20 transition-[color,background-color,border-color,box-shadow,opacity,transform] rounded-xl group"
                 >
                   <span className="font-bold text-lg">
                     {item.label}
@@ -113,30 +114,11 @@ function MobileMenuSheet({ isOpen, setIsOpen, navItems, tenantName, tenantLogo, 
 
           <div className="space-y-6 pt-10 border-t border-border">
             <span className="text-[10px] font-bold text-primary uppercase tracking-widest px-1">
-              Account
+              Cuenta
             </span>
             {user ? (
               <div className="space-y-6">
-                <div className="flex items-center gap-4 p-5 bg-card border border-border shadow-sm rounded-xl">
-                  <Avatar className="size-12 border border-border">
-                    <AvatarImage
-                      src={user.avatar}
-                    />
-                    <AvatarFallback className="bg-primary/10 text-primary font-bold text-lg">
-                      {user.name
-                        .slice(0, 2)
-                        .toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="min-w-0">
-                    <p className="font-bold truncate">
-                      {user.name}
-                    </p>
-                    <p className="text-xs text-muted-foreground truncate font-medium">
-                      {user.email}
-                    </p>
-                  </div>
-                </div>
+                <UserAccountSummary user={user} />
 
                 <div className="grid gap-3">
                   <Button
@@ -150,7 +132,7 @@ function MobileMenuSheet({ isOpen, setIsOpen, navItems, tenantName, tenantLogo, 
                     }}
                   >
                     <span>
-                      My Appointments
+                      Mis citas
                     </span>
                     <Calendar
                       size={18}
@@ -168,7 +150,7 @@ function MobileMenuSheet({ isOpen, setIsOpen, navItems, tenantName, tenantLogo, 
                     }}
                   >
                     <span>
-                      Personal Dashboard
+                      Panel personal
                     </span>
                     <User
                       size={18}
@@ -184,7 +166,7 @@ function MobileMenuSheet({ isOpen, setIsOpen, navItems, tenantName, tenantLogo, 
                       router.push("/");
                     }}
                   >
-                    Sign Out
+                    Cerrar sesión
                   </Button>
                 </div>
               </div>
@@ -197,7 +179,7 @@ function MobileMenuSheet({ isOpen, setIsOpen, navItems, tenantName, tenantLogo, 
                     router.push("/login");
                   }}
                 >
-                  Sign In
+                  Iniciar sesión
                 </Button>
                 <Button
                   variant="outline"
@@ -207,7 +189,7 @@ function MobileMenuSheet({ isOpen, setIsOpen, navItems, tenantName, tenantLogo, 
                     router.push("/book");
                   }}
                 >
-                  Explore Services
+                  Explorar servicios
                 </Button>
               </div>
             )}
@@ -218,7 +200,7 @@ function MobileMenuSheet({ isOpen, setIsOpen, navItems, tenantName, tenantLogo, 
           <p className="text-[10px] text-muted-foreground text-center font-semibold uppercase tracking-widest leading-relaxed">
             &copy; 2026 XCIX Platforms.
             <br />
-            All Rights Reserved.
+            Todos los derechos reservados.
           </p>
         </div>
       </SheetContent>
@@ -238,14 +220,14 @@ export function BookingNavbar({ tenantName, tenantLogo }: { tenantName?: string 
     };
 
     const navItems = [
-        { label: "Services", href: "/services" },
+        { label: "Servicios", href: "/services" },
         { label: "Reservar Ahora", href: "/book" },
     ];
 
     if (user) {
-        navItems.push({ label: "My Appointments", href: "/appointments" });
+        navItems.push({ label: "Mis citas", href: "/appointments" });
         if (user.isAdmin) {
-            navItems.push({ label: "Admin", href: "/admin" });
+            navItems.push({ label: "Administración", href: "/admin" });
         }
     }
 
@@ -276,7 +258,7 @@ export function BookingNavbar({ tenantName, tenantLogo }: { tenantName?: string 
                             </span>
                             {!tenantName && (
                                 <span className="text-[9px] font-medium text-muted-foreground uppercase tracking-widest">
-                                    Booking Node
+                                    Módulo de reservas
                                 </span>
                             )}
                         </Link>
@@ -313,7 +295,7 @@ export function BookingNavbar({ tenantName, tenantLogo }: { tenantName?: string 
                         {user ? (
                             <DropdownMenu>
                                 <DropdownMenuTrigger className="ml-2 outline-none">
-                                    <Avatar className="size-9 border border-border hover:border-primary/50 transition-all cursor-pointer shadow-sm">
+                                    <Avatar className="size-9 border border-border hover:border-primary/50 transition-[color,background-color,border-color,box-shadow,opacity,transform] cursor-pointer shadow-sm">
                                         <AvatarImage
                                             src={user.avatar}
                                             alt={user.name}
@@ -331,7 +313,7 @@ export function BookingNavbar({ tenantName, tenantLogo }: { tenantName?: string 
                                 >
                                     <DropdownMenuLabel className="p-4 mb-1">
                                         <p className="text-[10px] font-bold uppercase tracking-widest text-primary mb-1">
-                                            Identity Profile
+                                            Perfil de identidad
                                         </p>
                                         <p className="font-bold text-sm">
                                             {user.name}
@@ -349,7 +331,7 @@ export function BookingNavbar({ tenantName, tenantLogo }: { tenantName?: string 
                                                 size={16}
                                                 className="opacity-70"
                                             />{" "}
-                                            Appointments
+                                            Citas
                                         </Link>
                                     </DropdownMenuItem>
                                     <DropdownMenuItem
@@ -364,7 +346,7 @@ export function BookingNavbar({ tenantName, tenantLogo }: { tenantName?: string 
                                                 size={16}
                                                 className="opacity-70"
                                             />{" "}
-                                            My Profile
+                                            Mi perfil
                                         </Link>
                                     </DropdownMenuItem>
                                     <DropdownMenuSeparator className="mx-2 bg-border/50" />
@@ -376,7 +358,7 @@ export function BookingNavbar({ tenantName, tenantLogo }: { tenantName?: string 
                                         }}
                                     >
                                         <span className="font-bold text-sm">
-                                            De-authenticate
+                                            Cerrar sesión
                                         </span>
                                     </DropdownMenuItem>
                                 </DropdownMenuContent>
@@ -388,13 +370,13 @@ export function BookingNavbar({ tenantName, tenantLogo }: { tenantName?: string 
                                     onClick={() => router.push("/login")}
                                     className="font-semibold text-xs"
                                 >
-                                    Sign In
+                                    Iniciar sesión
                                 </Button>
                                 <Button
                                     onClick={() => router.push("/book")}
                                     className="rounded-full px-6 font-bold text-xs shadow-md shadow-primary/20 h-10"
                                 >
-                                    Book Session
+                                    Reservar sesión
                                 </Button>
                             </div>
                         )}

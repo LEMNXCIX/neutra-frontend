@@ -17,16 +17,16 @@ describe('BrandingEditor', () => {
     it('renders the live preview and field labels', () => {
         render(<BrandingEditor value={{ primaryColor: '#7c3aed' }} onChange={vi.fn()} />);
 
-        expect(screen.getByText('Live Preview')).toBeInTheDocument();
+        expect(screen.getByText('Vista previa en vivo')).toBeInTheDocument();
         expect(screen.getByText('Color Primario')).toBeInTheDocument();
-        expect(screen.getByText('Logo URL')).toBeInTheDocument();
+        expect(screen.getByText('URL del logo')).toBeInTheDocument();
     });
 
     it('emits the changed token via onChange', async () => {
         const onChange = vi.fn();
         render(<BrandingEditor value={{}} onChange={onChange} />);
 
-        const hexInputs = screen.getAllByPlaceholderText('site default');
+        const hexInputs = screen.getAllByPlaceholderText('valor predeterminado del sitio');
         const { fireEvent } = await import('@testing-library/dom');
         fireEvent.change(hexInputs[0], { target: { value: '#7c3aed' } });
 
@@ -37,7 +37,7 @@ describe('BrandingEditor', () => {
         const onChange = vi.fn();
         render(<BrandingEditor value={{ primaryColor: '#7c3aed' }} onChange={onChange} />);
 
-        await userEvent.click(screen.getByText('reset'));
+        await userEvent.click(screen.getByText('restablecer'));
 
         expect(onChange).toHaveBeenCalledWith({});
     });
@@ -57,7 +57,7 @@ describe('BrandingEditor', () => {
     it('shows the reset link only for configured tokens', () => {
         render(<BrandingEditor value={{ primaryColor: '#7c3aed' }} onChange={vi.fn()} />);
 
-        expect(screen.getByText('reset')).toBeInTheDocument();
-        expect(screen.queryByText('site default')).not.toBeInTheDocument();
+        expect(screen.getByText('restablecer')).toBeInTheDocument();
+        expect(screen.queryByText('valor predeterminado del sitio')).not.toBeInTheDocument();
     });
 });

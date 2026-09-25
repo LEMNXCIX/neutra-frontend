@@ -5,9 +5,9 @@ import { getHomeContent } from "@/lib/strapi";
 import { StoreHomeClient } from "./store-client";
 
 export const metadata: Metadata = {
-    title: "Home",
+    title: "Inicio",
     description:
-        "Welcome to our store — shop curated collections and featured products",
+        "Bienvenido a nuestra tienda: explorá colecciones y productos destacados",
 };
 
 async function fetchSliders(): Promise<any[]> {

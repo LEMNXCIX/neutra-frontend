@@ -70,9 +70,9 @@ export function AppearanceClient() {
         return (
             <div className="flex flex-col items-center justify-center gap-3 py-20 text-center">
                 <Palette className="size-10 text-muted-foreground" />
-                <p className="font-semibold">No tenant context</p>
+                <p className="font-semibold">Sin contexto de organización</p>
                 <p className="text-sm text-muted-foreground">
-                    Appearance can only be edited from a tenant admin.
+                    La apariencia solo se puede editar desde la administración de una organización.
                 </p>
             </div>
         );
@@ -89,7 +89,7 @@ export function AppearanceClient() {
     if (!tenant) {
         return (
             <div className="py-20 text-center text-sm text-muted-foreground">
-                Tenant not found.
+                Organización no encontrada.
             </div>
         );
     }
@@ -99,17 +99,17 @@ export function AppearanceClient() {
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight">
-                        Appearance
+                        Apariencia
                     </h1>
                     <p className="text-sm text-muted-foreground">
-                        Customize colors, fonts and assets for{" "}
+                        Personalizá colores, fuentes y recursos de{" "}
                         <span className="font-medium">{tenant.name}</span>
                     </p>
                 </div>
                 <Button onClick={handleSave} disabled={saving}>
                     {saving ? (
                         <>
-                            <Spinner className="mr-2 size-4" /> Saving…
+                            <Spinner className="mr-2 size-4" /> Guardando…
                         </>
                     ) : (
                         "Guardar cambios"
@@ -119,9 +119,9 @@ export function AppearanceClient() {
 
             <Card>
                 <CardHeader>
-                    <CardTitle>Branding</CardTitle>
+                    <CardTitle>Identidad visual</CardTitle>
                     <CardDescription>
-                        Changes are previewed live and applied after saving.
+                        Los cambios se muestran en vivo y se aplican al guardar.
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -137,7 +137,7 @@ export function AppearanceClient() {
                 <Button onClick={handleSave} disabled={saving}>
                     {saving ? (
                         <>
-                            <Spinner className="mr-2 size-4" /> Saving…
+                            <Spinner className="mr-2 size-4" /> Guardando…
                         </>
                     ) : (
                         "Guardar cambios"

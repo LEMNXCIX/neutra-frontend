@@ -48,13 +48,14 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { WorkingHoursEditor } from "@/components/admin/booking/working-hours-editor";
 import {
     DEFAULT_WORKING_HOURS,
-    WorkingHoursEditor,
     normalizeWorkingHours,
     type WorkingHours,
-} from "@/components/admin/booking/working-hours-editor";
+} from "@/components/admin/booking/working-hours-utils";
 import { Clock } from "lucide-react";
+import { AdminEntityHeader } from "@/components/admin/shared/AdminEntityHeader";
 
 interface Props {
     staff: Staff[];
@@ -80,23 +81,25 @@ function ServiceAssignmentDialog({
     isSaving: boolean;
     onSave: () => void;
 }) {
+    const selectedServiceIdSet = new Set(selectedServiceIds);
+
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[500px]">
                 <DialogHeader>
                     <DialogTitle>
-                        Assign Services to {editingStaff?.name}
+                        Asignar servicios a {editingStaff?.name}
                     </DialogTitle>
                     <DialogDescription>
-                        Select the services this staff member is qualified to
-                        perform.
+                        Seleccioná los servicios que este miembro del equipo
+                        puede realizar.
                     </DialogDescription>
                 </DialogHeader>
                 <div className="py-4 h-[400px] overflow-y-auto">
                     {allServices.length === 0 ? (
                         <div className="text-center py-8">
                             <p className="text-muted-foreground">
-                                No services found. Create some services first.
+                                No se encontraron servicios. Creá algunos servicios primero.
                             </p>
                         </div>
                     ) : (
@@ -106,7 +109,7 @@ function ServiceAssignmentDialog({
                                     key={service.id}
                                     type="button"
                                     tabIndex={0}
-                                    className={`flex items-center justify-between p-3 border rounded-lg transition-colors cursor-pointer hover:bg-accent/50 ${selectedServiceIds.includes(service.id) ? "bg-primary/5 border-primary/30" : ""}`}
+                                    className={`flex items-center justify-between p-3 border rounded-lg transition-colors cursor-pointer hover:bg-accent/50 ${selectedServiceIdSet.has(service.id) ? "bg-primary/5 border-primary/30" : ""}`}
                                     onClick={() => onToggleService(service.id)}
                                     onKeyDown={(e) => {
                                         if (
@@ -129,11 +132,9 @@ function ServiceAssignmentDialog({
                                         </div>
                                     </div>
                                     <div
-                                        className={`size-6 rounded-full border-2 flex items-center justify-center transition-all ${selectedServiceIds.includes(service.id) ? "bg-primary border-primary text-primary-foreground" : "border-muted-foreground/30"}`}
+                                        className={`size-6 rounded-full border-2 flex items-center justify-center transition-[color,background-color,border-color,box-shadow,opacity,transform] ${selectedServiceIdSet.has(service.id) ? "bg-primary border-primary text-primary-foreground" : "border-muted-foreground/30"}`}
                                     >
-                                        {selectedServiceIds.includes(
-                                            service.id,
-                                        ) && <Check className="size-3.5" />}
+                                        {selectedServiceIdSet.has(service.id) && <Check className="size-3.5" />}
                                     </div>
                                 </button>
                             ))}
@@ -147,7 +148,7 @@ function ServiceAssignmentDialog({
                         onClick={() => onOpenChange(false)}
                         disabled={isSaving}
                     >
-                        Cancel
+                        Cancelar
                     </Button>
                     <Button type="button" onClick={onSave} disabled={isSaving}>
                         {isSaving ? "Guardando..." : "Guardar Asignaciones"}
@@ -170,35 +171,15 @@ function StaffHeader({
     onCreate: () => void;
 }) {
     return (
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
-                <h1 className="text-3xl font-bold tracking-tight">
-                    Staff Management
-                </h1>
-                <p className="text-muted-foreground mt-1">
-                    Professional staff members available for bookings.
-                </p>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-                {isSuperAdmin && (
-                    <Select
-                        value={tenantFilter}
-                        onValueChange={onTenantFilterChange}
-                    >
-                        <SelectTrigger className="w-full sm:w-[180px]">
-                            <SelectValue placeholder="Todos los Tenants" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">All Tenants</SelectItem>
-                        </SelectContent>
-                    </Select>
-                )}
-                <Button onClick={onCreate} className="w-full sm:w-auto">
-                    <Plus className="size-4 mr-2" />
-                    Add Staff Member
-                </Button>
-            </div>
-        </div>
+        <AdminEntityHeader
+            title="Gestión del equipo"
+            description="Miembros del equipo disponibles para recibir reservas."
+            createLabel="Agregar miembro"
+            isSuperAdmin={isSuperAdmin}
+            tenantFilter={tenantFilter}
+            onTenantFilterChange={onTenantFilterChange}
+            onCreate={onCreate}
+        />
     );
 }
 
@@ -210,12 +191,12 @@ function StaffEmptyState({ onCreate }: { onCreate: () => void }) {
             </div>
             <CardTitle>No se encontraron miembros del equipo</CardTitle>
             <CardDescription className="max-w-[400px] mt-2">
-                Add your first staff member to start managing appointments and
-                services.
+                Agregá tu primer miembro para empezar a gestionar citas y
+                servicios.
             </CardDescription>
             <Button variant="outline" className="mt-6" onClick={onCreate}>
                 <Plus className="size-4 mr-2" />
-                Add Staff Member
+                Agregar miembro
             </Button>
         </Card>
     );
@@ -239,7 +220,7 @@ function StaffCardsGrid({
             {staff.map((member) => (
                 <Card
                     key={member.id}
-                    className="overflow-hidden group hover:border-primary/50 transition-all active:scale-[0.98]"
+                    className="min-w-0 overflow-hidden group hover:border-primary/50 transition-[color,background-color,border-color,box-shadow,opacity,transform] active:scale-[0.98]"
                 >
                     <CardHeader className="flex flex-row items-start gap-4">
                         <Avatar className="size-14 border-2 border-background group-hover:border-primary/20 transition-colors">
@@ -267,7 +248,7 @@ function StaffCardsGrid({
                                 </Badge>
                             </div>
                             <CardDescription className="line-clamp-1">
-                                Staff Member{" "}
+                                Miembro del equipo{" "}
                                 {isSuperAdmin && (
                                     <span className="text-[10px] font-mono opacity-50 ml-1">
                                         ({member.tenant?.name || member.tenantId})
@@ -299,31 +280,34 @@ function StaffCardsGrid({
                             )}
                         </div>
                     </CardContent>
-                    <CardFooter className="bg-muted/30 pt-4 flex justify-between gap-2">
-                        <div className="flex gap-2">
+                    <CardFooter className="flex flex-wrap items-center gap-2 bg-muted/30 pt-4">
+                        <div className="grid min-w-0 flex-1 grid-cols-2 gap-2">
                             <Button
                                 variant="ghost"
                                 size="sm"
-                                className="hover:bg-background"
+                                className="min-w-0 w-full justify-start px-2 hover:bg-background"
                                 onClick={() => onEdit(member)}
                             >
-                                <Edit className="size-4 mr-2" />
-                                Profile
+                                <Edit className="size-4 shrink-0" />
+                                <span className="truncate">Perfil</span>
                             </Button>
                             <Button
                                 variant="ghost"
                                 size="sm"
-                                className="hover:bg-background"
+                                className="min-w-0 w-full justify-start px-2 hover:bg-background"
                                 onClick={() => onServiceAssignment(member)}
                             >
-                                <Scissors className="size-4 mr-2" />
-                                Services ({member.serviceIds?.length || 0})
+                                <Scissors className="size-4 shrink-0" />
+                                <span className="truncate">
+                                    Servicios ({member.serviceIds?.length || 0})
+                                </span>
                             </Button>
                         </div>
                         <Button
                             variant="ghost"
-                            size="sm"
-                            className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                            size="icon-sm"
+                            aria-label={`Eliminar ${member.name}`}
+                            className="shrink-0 text-destructive hover:bg-destructive/10 hover:text-destructive"
                             onClick={() => onDelete(member.id)}
                         >
                             <Trash2 className="size-4" />
@@ -372,7 +356,7 @@ function StaffFormDialog({
                 <form onSubmit={onSubmit} className="space-y-5 pt-4">
                     <div className="grid gap-2">
                         <Label htmlFor="user">
-                            Link Registered User (Optional)
+                            Vincular usuario registrado (opcional)
                         </Label>
                         <Select
                             value={formData.userId}
@@ -393,7 +377,7 @@ function StaffFormDialog({
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="none">
-                                    None (Individual Staff)
+                                    Ninguno (personal individual)
                                 </SelectItem>
                                 {allUsers.map((user) => (
                                     <SelectItem key={user.id} value={user.id}>
@@ -404,7 +388,7 @@ function StaffFormDialog({
                         </Select>
                     </div>
                     <div className="grid gap-2">
-                        <Label htmlFor="name">Full Name *</Label>
+                        <Label htmlFor="name">Nombre completo *</Label>
                         <Input
                             id="name"
                             required
@@ -415,12 +399,12 @@ function StaffFormDialog({
                                     name: e.target.value,
                                 })
                             }
-                            placeholder="e.g. Jane Doe"
+                            placeholder="Ej. Jane Doe"
                         />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div className="grid gap-2">
-                            <Label htmlFor="email">Email Address</Label>
+                            <Label htmlFor="email">Correo electrónico</Label>
                             <Input
                                 id="email"
                                 type="email"
@@ -435,7 +419,7 @@ function StaffFormDialog({
                             />
                         </div>
                         <div className="grid gap-2">
-                            <Label htmlFor="phone">Phone Number</Label>
+                            <Label htmlFor="phone">Número de teléfono</Label>
                             <Input
                                 id="phone"
                                 type="tel"
@@ -451,7 +435,7 @@ function StaffFormDialog({
                         </div>
                     </div>
                     <div className="grid gap-2">
-                        <Label htmlFor="bio">Professional Bio</Label>
+                        <Label htmlFor="bio">Biografía profesional</Label>
                         <Textarea
                             id="bio"
                             value={formData.bio}
@@ -482,10 +466,10 @@ function StaffFormDialog({
                                 htmlFor="active"
                                 className="text-sm font-medium"
                             >
-                                Active Status
+                                Estado
                             </Label>
                             <p className="text-xs text-muted-foreground">
-                                Enable bookings for this member
+                                Habilitar reservas para este miembro
                             </p>
                         </div>
                         <Switch
@@ -506,7 +490,7 @@ function StaffFormDialog({
                             onClick={() => onDialogOpenChange(false)}
                             disabled={isSaving}
                         >
-                            Cancel
+                            Cancelar
                         </Button>
                         <Button type="submit" disabled={isSaving}>
                             {isSaving
@@ -780,7 +764,9 @@ function useStaffTable(
 
             if (response.ok) {
                 toast.success(
-                    `Staff member ${editingStaff ? "updated" : "added"} successfully`,
+                    editingStaff
+                        ? "Miembro del equipo actualizado correctamente"
+                        : "Miembro del equipo agregado correctamente",
                 );
                 dispatch({ type: "SET_DIALOG_OPEN", payload: false });
                 await loadStaff();
@@ -788,7 +774,9 @@ function useStaffTable(
                 const errorData = await response.json();
                 toast.error(
                     errorData.message ||
-                        `Failed to ${editingStaff ? "update" : "add"} staff member`,
+                        editingStaff
+                            ? "No se pudo actualizar el miembro del equipo"
+                            : "No se pudo agregar el miembro del equipo",
                 );
             }
         } catch (err) {
@@ -893,7 +881,7 @@ function StaffTableClientInner({
             <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
                 <Spinner className="size-8 text-primary" />
                 <p className="text-muted-foreground animate-pulse">
-                    Loading staff members…
+                    Cargando miembros del equipo…
                 </p>
             </div>
         );

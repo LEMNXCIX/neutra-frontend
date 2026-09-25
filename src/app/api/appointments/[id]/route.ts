@@ -1,3 +1,4 @@
+import { readJsonResponse } from "@/lib/response";
 import { NextRequest, NextResponse } from 'next/server';
 import { getProxyHeaders } from '@/lib/proxy';
 
@@ -15,7 +16,7 @@ export async function GET(
 			cache: 'no-store',
 		});
 
-        const data = await response.json();
+        const data = await readJsonResponse(response);
         return NextResponse.json(data, { status: response.status });
     } catch (error: any) {
         console.error('Error fetching appointment detail:', error);
@@ -41,7 +42,7 @@ export async function DELETE(
 			cache: 'no-store',
 		});
 
-        const data = await response.json();
+        const data = await readJsonResponse(response);
         return NextResponse.json(data, { status: response.status });
     } catch (error: any) {
         console.error('Error deleting appointment:', error);

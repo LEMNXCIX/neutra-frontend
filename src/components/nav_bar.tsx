@@ -1,4 +1,6 @@
 "use client";
+import { readJsonResponse } from "@/lib/response";
+
 import React, { useReducer, useEffect, useRef } from "react";
 import Image from "next/image";
 import { useCart } from "@/hooks/use-cart";
@@ -40,6 +42,7 @@ import { ScrollArea } from "./ui/scroll-area";
 import { Card } from "./ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Category } from "@/types/category.types";
+import { UserAccountSummary } from "@/components/shared/UserAccountSummary";
 import {
     Sheet,
     SheetContent,
@@ -124,7 +127,7 @@ function DesktopMenuItems({ categories }: { categories: Category[] }) {
                         <ul className="grid w-[400px] gap-2 p-6 md:w-[500px] md:grid-cols-2 lg:w-[600px] bg-card border border-border shadow-xl rounded-xl">
                             <div className="col-span-full border-b border-border pb-3 mb-2">
                                 <p className="text-[10px] font-bold uppercase tracking-widest text-primary">
-                                    Catalog Categories
+                                    Categorías del catálogo
                                 </p>
                             </div>
                             {categories.map(
@@ -172,7 +175,7 @@ function DesktopSearchWithResults({
             className="hidden lg:flex items-center gap-3 relative"
             ref={searchRef}
         >
-            <div role="search" className="w-64">
+            <search className="w-64">
                 <div className="relative group">
                     <input
                         placeholder="Buscar en el catálogo..."
@@ -205,7 +208,7 @@ function DesktopSearchWithResults({
                                 payload: true,
                             })
                         }
-                        className="w-full h-10 bg-muted/50 border border-transparent focus:border-primary/30 focus:bg-background px-4 pr-10 text-sm font-medium outline-none transition-all rounded-full"
+                        className="w-full h-10 bg-muted/50 border border-transparent focus:border-primary/30 focus:bg-background px-4 pr-10 text-sm font-medium outline-none transition-[color,background-color,border-color,box-shadow,opacity,transform] rounded-full"
                     />
                     <div className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors">
                         {isSearching ? (
@@ -215,7 +218,7 @@ function DesktopSearchWithResults({
                         )}
                     </div>
                 </div>
-            </div>
+            </search>
 
             {showResults && searchResults.length > 0 && (
                 <Card className="absolute top-full mt-3 w-[400px] border border-border shadow-2xl rounded-xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
@@ -223,7 +226,7 @@ function DesktopSearchWithResults({
                         <div className="p-3 space-y-1">
                             <div className="px-4 py-2 border-b border-border mb-2">
                                 <p className="text-[10px] font-bold uppercase tracking-widest text-primary">
-                                    Search Results
+                                    Resultados de búsqueda
                                 </p>
                             </div>
                             {(Array.isArray(searchResults)
@@ -233,7 +236,7 @@ function DesktopSearchWithResults({
                                 <Link
                                     key={product.id}
                                     href={`/products/${product.id}`}
-                                    className="flex items-center gap-4 p-3 hover:bg-muted transition-all rounded-xl group"
+                                    className="flex items-center gap-4 p-3 hover:bg-muted transition-[color,background-color,border-color,box-shadow,opacity,transform] rounded-xl group"
                                     onClick={() => {
                                         dispatch({
                                             type: "SET_SHOW_RESULTS",
@@ -273,7 +276,7 @@ function DesktopSearchWithResults({
                                             variant="destructive"
                                             className="text-[9px] rounded-full px-2"
                                         >
-                                            Out
+                                            Agotado
                                         </Badge>
                                     )}
                                 </Link>
@@ -294,9 +297,9 @@ function DesktopSearchWithResults({
                                             payload: "",
                                         });
                                     }}
-                                    className="w-full text-xs font-bold text-primary hover:bg-primary/5 transition-all rounded-xl p-3 text-center"
+                                    className="w-full text-xs font-bold text-primary hover:bg-primary/5 transition-[color,background-color,border-color,box-shadow,opacity,transform] rounded-xl p-3 text-center"
                                 >
-                                    View all results{" "}
+                                    Ver todos los resultados{" "}
                                     <ArrowRight className="inline size-3.5" />
                                 </button>
                             </div>
@@ -320,7 +323,7 @@ function UserMenuDropdown({
     return (
         <DropdownMenu>
             <DropdownMenuTrigger className="ml-1 outline-none">
-                <Avatar className="size-9 border border-border hover:border-primary/50 transition-all cursor-pointer shadow-sm">
+                <Avatar className="size-9 border border-border hover:border-primary/50 transition-[color,background-color,border-color,box-shadow,opacity,transform] cursor-pointer shadow-sm">
                     <AvatarImage
                         src={
                             user.avatar ||
@@ -411,7 +414,7 @@ function MobileMenuSheet({
                 <SheetTrigger asChild>
                     <Button
                         variant="ghost"
-                        size="icon"
+                        size="icon" aria-label="Abrir menú de navegación"
                         className="size-10 hover:bg-muted rounded-full"
                     >
                         <Menu className="size-5" />
@@ -432,7 +435,7 @@ function MobileMenuSheet({
                                 </SheetTitle>
                                 {!minimal && !tenantName && (
                                     <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mt-0.5">
-                                        Platform Core
+                                        Núcleo de la plataforma
                                     </p>
                                 )}
                             </div>
@@ -447,7 +450,7 @@ function MobileMenuSheet({
                                         <span className="text-[10px] font-bold text-primary uppercase tracking-widest px-1">
                                             Buscar en el Catálogo
                                         </span>
-                                        <div role="search">
+                                        <search>
                                             <div className="relative group">
                                                 <input
                                                     placeholder="¿Qué estás buscando?"
@@ -476,18 +479,18 @@ function MobileMenuSheet({
                                                             });
                                                         }
                                                     }}
-                                                    className="w-full h-14 bg-muted/50 border border-transparent focus:border-primary/30 focus:bg-background px-5 pr-12 text-sm font-medium outline-none transition-all rounded-xl"
+                                                    className="w-full h-14 bg-muted/50 border border-transparent focus:border-primary/30 focus:bg-background px-5 pr-12 text-sm font-medium outline-none transition-[color,background-color,border-color,box-shadow,opacity,transform] rounded-xl"
                                                 />
                                                 <div className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary">
                                                     <Search size={20} />
                                                 </div>
                                             </div>
-                                        </div>
+                                        </search>
                                     </div>
 
                                     <div className="space-y-4">
                                         <span className="text-[10px] font-bold text-primary uppercase tracking-widest px-1">
-                                            Explore
+                                            Explorar
                                         </span>
                                         <div className="grid gap-3">
                                             <Link
@@ -498,7 +501,7 @@ function MobileMenuSheet({
                                                         payload: false,
                                                     })
                                                 }
-                                                className="flex items-center justify-between p-5 bg-card border border-border shadow-sm hover:shadow-md hover:border-primary/20 transition-all rounded-xl group"
+                                                className="flex items-center justify-between p-5 bg-card border border-border shadow-sm hover:shadow-md hover:border-primary/20 transition-[color,background-color,border-color,box-shadow,opacity,transform] rounded-xl group"
                                             >
                                                 <span className="font-bold text-lg">
                                                     Catálogo de Productos
@@ -524,10 +527,10 @@ function MobileMenuSheet({
                                                                     payload: false,
                                                                 })
                                                             }
-                                                            className="flex flex-col gap-2 p-4 bg-muted/30 hover:bg-muted border border-transparent hover:border-border transition-all rounded-xl"
+                                                            className="flex flex-col gap-2 p-4 bg-muted/30 hover:bg-muted border border-transparent hover:border-border transition-[color,background-color,border-color,box-shadow,opacity,transform] rounded-xl"
                                                         >
                                                             <span className="text-[10px] font-bold text-primary/60 uppercase tracking-wider">
-                                                                Section
+                                                                Sección
                                                             </span>
                                                             <span className="font-semibold text-sm truncate">
                                                                 {c.name}
@@ -548,24 +551,7 @@ function MobileMenuSheet({
                             </span>
                             {user ? (
                                 <div className="space-y-6">
-                                    <div className="flex items-center gap-4 p-5 bg-card border border-border shadow-sm rounded-xl">
-                                        <Avatar className="size-12 border border-border">
-                                            <AvatarImage src={user.avatar} />
-                                            <AvatarFallback className="bg-primary/10 text-primary font-bold text-lg">
-                                                {user.name
-                                                    .slice(0, 2)
-                                                    .toUpperCase()}
-                                            </AvatarFallback>
-                                        </Avatar>
-                                        <div className="min-w-0">
-                                            <p className="font-bold truncate">
-                                                {user.name}
-                                            </p>
-                                            <p className="text-xs text-muted-foreground truncate font-medium">
-                                                {user.email}
-                                            </p>
-                                        </div>
-                                    </div>
+                                    <UserAccountSummary user={user} />
 
                                     <div className="grid gap-3">
                                         <Button
@@ -579,7 +565,7 @@ function MobileMenuSheet({
                                                 router.push("/profile");
                                             }}
                                         >
-                                            <span>Dashboard</span>
+                                            <span>Panel</span>
                                             <User
                                                 size={18}
                                                 className="opacity-60"
@@ -597,7 +583,7 @@ function MobileMenuSheet({
                                                     router.push("/admin");
                                                 }}
                                             >
-                                                <span>Control Center</span>
+                                                <span>Centro de control</span>
                                                 <LayoutDashboard
                                                     size={18}
                                                     className="opacity-60"
@@ -656,7 +642,7 @@ function MobileMenuSheet({
                         <p className="text-[10px] text-muted-foreground text-center font-semibold uppercase tracking-widest leading-relaxed">
                             &copy; 2026 XCIX Platforms.
                             <br />
-                            All Rights Reserved.
+                            Todos los derechos reservados.
                         </p>
                     </div>
                 </SheetContent>
@@ -713,7 +699,7 @@ export function Navigation({
                     `/api/products?search=${encodeURIComponent(state.query)}&pageSize=5`,
                     { signal: controller.signal },
                 );
-                const data = await res.json();
+                const data = await readJsonResponse(res);
                 const list = data.data?.products || data.products || [];
                 dispatch({ type: "SET_SEARCH_RESULTS", payload: list });
                 dispatch({ type: "SET_SHOW_RESULTS", payload: true });
@@ -754,7 +740,7 @@ export function Navigation({
         <NavigationMenu
             viewport={false}
             className={cn(
-                "fixed inset-x-0 top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border transition-all duration-300",
+                "fixed inset-x-0 top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-300",
                 minimal ? "h-24" : "h-20",
             )}
         >
@@ -786,7 +772,7 @@ export function Navigation({
                                 </span>
                                 {!minimal && !tenantName && (
                                     <span className="text-[9px] font-medium text-muted-foreground uppercase tracking-widest">
-                                        Platform Core
+                                        Núcleo de la plataforma
                                     </span>
                                 )}
                             </div>
@@ -815,18 +801,18 @@ export function Navigation({
                         {user?.isAdmin && (
                             <Link
                                 href="/admin"
-                                className="p-2.5 hover:bg-muted transition-all rounded-full group"
+                                className="p-2.5 hover:bg-muted transition-[color,background-color,border-color,box-shadow,opacity,transform] rounded-full group"
                             >
-                                <LayoutDashboard className="size-5 opacity-70 group-hover:opacity-100 group-hover:text-primary transition-all" />
+                                <LayoutDashboard className="size-5 opacity-70 group-hover:opacity-100 group-hover:text-primary transition-[color,background-color,border-color,box-shadow,opacity,transform]" />
                             </Link>
                         )}
 
                         {!minimal && (
                             <Link
                                 href="/cart"
-                                className="relative p-2.5 hover:bg-muted transition-all rounded-full group"
+                                className="relative p-2.5 hover:bg-muted transition-[color,background-color,border-color,box-shadow,opacity,transform] rounded-full group"
                             >
-                                <ShoppingBagIcon className="size-5 opacity-70 group-hover:opacity-100 group-hover:text-primary transition-all" />
+                                <ShoppingBagIcon className="size-5 opacity-70 group-hover:opacity-100 group-hover:text-primary transition-[color,background-color,border-color,box-shadow,opacity,transform]" />
                                 {count > 0 && (
                                     <span className="absolute top-1 right-1 inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px] font-bold size-4.5 border-2 border-background">
                                         {count}

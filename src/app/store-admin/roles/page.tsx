@@ -6,7 +6,7 @@ import { Role } from "@/types/role.types";
 import { api } from '@/lib/api-client';
 import { validateAdminAccess } from '@/lib/server-auth';
 
-export const metadata = { title: "Store Roles" };
+export const metadata = { title: "Roles de tienda" };
 
 export const dynamic = "force-dynamic";
 

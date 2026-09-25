@@ -1,4 +1,6 @@
 "use client";
+import { readJsonResponse } from "@/lib/response";
+
 
 import React, { Suspense, useReducer, useSyncExternalStore } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -48,7 +50,11 @@ import {
     Tag,
     Trash2,
 } from "lucide-react";
-import { Appointment } from "@/services/booking.service";
+import {
+    Appointment,
+    type AppointmentStatus,
+} from "@/services/booking.service";
+import { StatusUpdateDialog } from "@/components/booking/status-update-dialog";
 import { Spinner } from "@/components/ui/spinner";
 import { format } from "date-fns";
 import { useConfirm } from "@/hooks/use-confirm";
@@ -61,7 +67,7 @@ const getStatusBadge = (status: Appointment["status"]) => {
                     variant="secondary"
                     className="bg-amber-100 text-amber-700 hover:bg-amber-100 border-none shadow-none"
                 >
-                    Pending
+                    Pendiente
                 </Badge>
             );
         case "CONFIRMED":
@@ -70,7 +76,7 @@ const getStatusBadge = (status: Appointment["status"]) => {
                     variant="secondary"
                     className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100 border-none shadow-none"
                 >
-                    Confirmed
+                    Confirmada
                 </Badge>
             );
         case "IN_PROGRESS":
@@ -79,7 +85,16 @@ const getStatusBadge = (status: Appointment["status"]) => {
                     variant="secondary"
                     className="bg-blue-100 text-blue-700 hover:bg-blue-100 border-none shadow-none"
                 >
-                    In Progress
+                    En curso
+                </Badge>
+            );
+        case "NEEDS_REVIEW":
+            return (
+                <Badge
+                    variant="secondary"
+                    className="bg-amber-100 text-amber-700 hover:bg-amber-100 border-none shadow-none"
+                >
+                    Requiere revisión
                 </Badge>
             );
         case "COMPLETED":
@@ -88,7 +103,7 @@ const getStatusBadge = (status: Appointment["status"]) => {
                     variant="secondary"
                     className="bg-purple-100 text-purple-700 hover:bg-purple-100 border-none shadow-none"
                 >
-                    Completed
+                    Completada
                 </Badge>
             );
         case "CANCELLED":
@@ -97,7 +112,7 @@ const getStatusBadge = (status: Appointment["status"]) => {
                     variant="destructive"
                     className="bg-rose-100 text-rose-700 hover:bg-rose-100 border-none shadow-none"
                 >
-                    Cancelled
+                    Cancelada
                 </Badge>
             );
         case "NO_SHOW":
@@ -106,13 +121,35 @@ const getStatusBadge = (status: Appointment["status"]) => {
                     variant="secondary"
                     className="bg-muted text-muted-foreground hover:bg-muted border-none shadow-none"
                 >
-                    No Show
+                    No asistió
                 </Badge>
             );
         default:
             return <Badge variant="outline">{status}</Badge>;
     }
 };
+
+type StatusAction = {
+    status: AppointmentStatus;
+    label: string;
+    variant: "default" | "destructive";
+};
+
+const STATUS_ACTIONS: Record<AppointmentStatus, StatusAction[]> = {
+    PENDING: [],
+    CONFIRMED: [{ status: "IN_PROGRESS", label: "Iniciar", variant: "default" }],
+    IN_PROGRESS: [{ status: "COMPLETED", label: "Completar", variant: "default" }],
+    NEEDS_REVIEW: [
+        { status: "COMPLETED", label: "Marcar completada", variant: "default" },
+        { status: "NO_SHOW", label: "Marcar no asistió", variant: "destructive" },
+    ],
+    COMPLETED: [],
+    CANCELLED: [],
+    NO_SHOW: [],
+};
+
+const getStatusActions = (status: AppointmentStatus): StatusAction[] =>
+    STATUS_ACTIONS[status] || [];
 
 type Stats = {
     totalAppointments: number;
@@ -166,21 +203,63 @@ const StatCard = ({
   </Card>
 );
 
+function AppointmentStatusActions({
+  appointment,
+  onStatusUpdated,
+}: {
+  appointment: Appointment;
+  onStatusUpdated: () => void | Promise<void>;
+}) {
+  const actions = getStatusActions(appointment.status);
+  if (actions.length === 0) return null;
+
+  return (
+    <div className="flex w-full min-w-0 flex-wrap gap-2 sm:w-auto">
+      {actions.map((action) => (
+        <StatusUpdateDialog
+          key={action.status}
+          appointmentId={appointment.id}
+          currentStatus={appointment.status}
+          newStatus={action.status}
+          reason={`Resolved from booking admin as ${action.status}`}
+          onStatusUpdated={onStatusUpdated}
+          trigger={
+            <Button
+              type="button"
+              size="sm"
+              variant={action.variant}
+              className="w-full sm:w-auto"
+            >
+              {action.label}
+            </Button>
+          }
+        />
+      ))}
+    </div>
+  );
+}
+
 function AppointmentDetailsDialog({
   appointment,
   open,
   onOpenChange,
   onConfirm,
+  onCancel,
   onDelete,
+  onStatusUpdated,
   isConfirming,
+  isCancelling,
   isDeleting,
 }: {
   appointment: Appointment | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onConfirm: (id: string) => void;
+  onCancel: (id: string) => void;
   onDelete: (id: string) => void;
+  onStatusUpdated: () => void;
   isConfirming: string | null;
+  isCancelling: string | null;
   isDeleting: string | null;
 }) {
   if (!appointment) return null;
@@ -191,14 +270,14 @@ function AppointmentDetailsDialog({
         <DialogHeader>
           <DialogTitle className="text-xl font-bold flex items-center gap-2">
             <Clock className="size-5 text-blue-500" />
-            Appointment Details
+            Detalles de la cita
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-6 pt-4">
           <div className="grid grid-cols-2 gap-x-4 gap-y-6">
             <div className="space-y-1">
               <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Status
+                Estado
               </p>
               <div>
                 {getStatusBadge(appointment.status)}
@@ -206,7 +285,7 @@ function AppointmentDetailsDialog({
             </div>
             <div className="space-y-1">
               <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Created At
+                Creada el
               </p>
               <p className="font-medium">
                 {format(
@@ -217,7 +296,7 @@ function AppointmentDetailsDialog({
             </div>
             <div className="col-span-2 space-y-1">
               <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Client Information
+                Información del cliente
               </p>
               <div className="p-3 border rounded-lg bg-muted/30">
                 <p className="font-bold flex items-center gap-2">
@@ -234,14 +313,14 @@ function AppointmentDetailsDialog({
             </div>
             <div className="space-y-1">
               <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Service
+                Servicio
               </p>
               <p className="font-medium flex items-center gap-2">
                 <Scissors className="size-4 text-muted-foreground" />
                 {appointment.service?.name}
               </p>
               <p className="text-xs text-muted-foreground">
-                {appointment.service?.duration} minutes - ${appointment.service?.price}
+                {appointment.service?.duration} min - ${appointment.service?.price}
               </p>
               {appointment.discountAmount > 0 && (
                 <div className="mt-2 p-2 bg-green-50 rounded border border-green-100 dark:bg-green-900/20 dark:border-green-800">
@@ -253,7 +332,7 @@ function AppointmentDetailsDialog({
                   </div>
                   <div className="flex justify-between items-center text-sm text-green-600 dark:text-green-400 font-medium">
                     <span className="flex items-center gap-1">
-                      <Tag className="size-3" /> Discount{" "}
+                      <Tag className="size-3" /> Descuento{" "}
                       {appointment.coupon ? `(${appointment.coupon.code})` : ""}:
                     </span>
                     <span>
@@ -272,7 +351,7 @@ function AppointmentDetailsDialog({
             </div>
             <div className="space-y-1">
               <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Staff Member
+                Miembro del equipo
               </p>
               <p className="font-medium">
                 {appointment.staff?.name}
@@ -280,7 +359,7 @@ function AppointmentDetailsDialog({
             </div>
             <div className="col-span-2 space-y-1">
               <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Schedule
+                Agenda
               </p>
               <div className="p-3 border rounded-lg bg-blue-50/10 border-blue-500/20">
                 <p className="font-bold text-blue-600 dark:text-blue-400">
@@ -298,7 +377,7 @@ function AppointmentDetailsDialog({
             {appointment.notes && (
               <div className="col-span-2 space-y-1">
                 <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  Notes
+                  Notas
                 </p>
                 <p className="text-sm p-3 bg-muted/50 rounded-lg italic">
                   "{appointment.notes}"
@@ -307,30 +386,53 @@ function AppointmentDetailsDialog({
             )}
           </div>
         </div>
-        <DialogFooter className="mt-8">
+        <DialogFooter className="mt-8 flex w-full min-w-0 flex-col gap-2 sm:flex-row sm:flex-wrap sm:justify-end">
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
-            className="bg-background border-muted hover:bg-muted"
+            className="w-full border-muted bg-background hover:bg-muted sm:w-auto"
           >
-            Close
+            Cerrar
           </Button>
           {appointment.status === "PENDING" && (
             <Button
-              className="bg-green-600 hover:bg-green-700 text-white font-semibold"
+              className="w-full bg-green-600 font-semibold text-white hover:bg-green-700 sm:w-auto"
               onClick={() => onConfirm(appointment.id)}
               disabled={isConfirming === appointment.id}
             >
               {isConfirming === appointment.id ? (
                 <>
-                  <Spinner className="mr-2" /> Confirming…
+                  <Spinner className="mr-2" /> Confirmando…
                 </>
               ) : (
                 <>
                   <CheckCircle2 className="size-4 mr-2" />
-                  Confirm Appointment
+                  Confirmar cita
                 </>
               )}
+            </Button>
+          )}
+
+          <AppointmentStatusActions
+            appointment={appointment}
+            onStatusUpdated={onStatusUpdated}
+          />
+
+          {(appointment.status === "PENDING" ||
+            appointment.status === "CONFIRMED" ||
+            appointment.status === "NEEDS_REVIEW") && (
+            <Button
+              variant="outline"
+              onClick={() => onCancel(appointment.id)}
+              disabled={isCancelling === appointment.id}
+              className="w-full border-rose-200 text-rose-600 hover:bg-rose-50 sm:w-auto"
+            >
+              {isCancelling === appointment.id ? (
+                <Spinner className="mr-2" />
+              ) : (
+                <XCircle className="size-4 mr-2" />
+              )}
+              Cancelar
             </Button>
           )}
 
@@ -338,14 +440,14 @@ function AppointmentDetailsDialog({
             variant="destructive"
             onClick={() => onDelete(appointment.id)}
             disabled={isDeleting === appointment?.id}
-            className="bg-red-600 hover:bg-red-700"
+            className="w-full bg-red-600 hover:bg-red-700 sm:w-auto"
           >
             {isDeleting === appointment?.id ? (
               <Spinner className="mr-2" />
             ) : (
               <Trash2 className="size-4 mr-2" />
             )}
-            Delete
+            Eliminar
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -397,6 +499,7 @@ function AppointmentsMobileCards({
   isDeleting,
   handleCancel,
   handleDelete,
+  onStatusUpdated,
 }: {
   appointments: Appointment[];
   dispatch: React.Dispatch<AppointmentsDialogAction>;
@@ -404,6 +507,7 @@ function AppointmentsMobileCards({
   isDeleting: string | null;
   handleCancel: (id: string) => void;
   handleDelete: (id: string) => void;
+  onStatusUpdated: () => void;
 }) {
   return (
     <div className="grid grid-cols-1 gap-4 md:hidden">
@@ -412,7 +516,7 @@ function AppointmentsMobileCards({
           <CardContent className="p-12 text-center">
             <CalendarX className="size-12 mx-auto text-muted-foreground/30 mb-4" />
             <p className="text-sm font-medium text-muted-foreground">
-              No appointments found
+              No se encontraron citas
             </p>
           </CardContent>
         </Card>
@@ -466,7 +570,7 @@ function AppointmentsMobileCards({
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
-                    Service
+                    Servicio
                   </p>
                   <div className="flex items-center gap-2">
                     <Scissors
@@ -480,7 +584,7 @@ function AppointmentsMobileCards({
                 </div>
                 <div className="space-y-1">
                   <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
-                    Staff
+                    Personal
                   </p>
                   <div className="flex items-center gap-2">
                     <User
@@ -503,10 +607,17 @@ function AppointmentsMobileCards({
                   dispatch({ type: "SET_DETAILS_OPEN", payload: true });
                 }}
               >
-                <Eye size={14} className="mr-2" /> View
+                <Eye size={14} className="mr-2" /> Ver
               </Button>
-              {appointment.status !== "CANCELLED" &&
-              appointment.status !== "COMPLETED" ? (
+              <div className="col-span-2">
+                <AppointmentStatusActions
+                  appointment={appointment}
+                  onStatusUpdated={onStatusUpdated}
+                />
+              </div>
+              {(appointment.status === "PENDING" ||
+                appointment.status === "CONFIRMED" ||
+                appointment.status === "NEEDS_REVIEW") ? (
                 <Button
                   variant="outline"
                   className="w-full h-10 border-rose-200 text-rose-600 rounded-lg font-semibold text-xs hover:bg-rose-50 hover:border-rose-300"
@@ -525,7 +636,7 @@ function AppointmentsMobileCards({
                         size={14}
                         className="mr-2"
                       />{" "}
-                      Cancel
+                      Cancelar
                     </>
                   )}
                 </Button>
@@ -546,7 +657,7 @@ function AppointmentsMobileCards({
                         size={14}
                         className="mr-2"
                       />{" "}
-                      Delete
+                      Eliminar
                     </>
                   )}
                 </Button>
@@ -567,6 +678,7 @@ function AppointmentsDesktopTable({
   isDeleting,
   handleCancel,
   handleDelete,
+  onStatusUpdated,
 }: {
   appointments: Appointment[];
   isSuperAdmin: boolean;
@@ -575,6 +687,7 @@ function AppointmentsDesktopTable({
   isDeleting: string | null;
   handleCancel: (id: string) => void;
   handleDelete: (id: string) => void;
+  onStatusUpdated: () => void;
 }) {
   return (
     <Card className="t-card border-none shadow-xl overflow-hidden hidden md:block">
@@ -583,30 +696,30 @@ function AppointmentsDesktopTable({
           <TableHeader className="bg-muted/50">
             <TableRow className="hover:bg-transparent border-b border-border/50">
               <TableHead className="w-[180px] text-[10px] font-bold uppercase tracking-wider text-muted-foreground py-4">
-                Date & Time
+                Fecha y hora
               </TableHead>
               <TableHead className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                Client
+                Cliente
               </TableHead>
               <TableHead className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                Service
+                Servicio
               </TableHead>
               <TableHead className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                Staff
+                Personal
               </TableHead>
               {isSuperAdmin && (
                 <TableHead className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                  Tenant
+                  Organización
                 </TableHead>
               )}
               <TableHead className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                Price
+                Precio
               </TableHead>
               <TableHead className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                Status
+                Estado
               </TableHead>
               <TableHead className="text-right text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                Actions
+                Acciones
               </TableHead>
             </TableRow>
           </TableHeader>
@@ -617,7 +730,7 @@ function AppointmentsDesktopTable({
                   colSpan={isSuperAdmin ? 8 : 7}
                   className="h-32 text-center text-muted-foreground font-medium"
                 >
-                  No appointments found in the system
+                  No se encontraron citas en el sistema
                 </TableCell>
               </TableRow>
             ) : (
@@ -736,9 +849,9 @@ function AppointmentsDesktopTable({
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       <Button
-                        size="icon"
+                        size="icon" aria-label="Ver detalles de la cita"
                         variant="ghost"
-                        className="size-8 rounded-full hover:bg-primary/10 hover:text-primary transition-all"
+                        className="size-8 rounded-full hover:bg-primary/10 hover:text-primary transition-[color,background-color,border-color,box-shadow,opacity,transform]"
                         onClick={() => {
                           dispatch({ type: "SET_SELECTED_APPOINTMENT", payload: appointment });
                           dispatch({ type: "SET_DETAILS_OPEN", payload: true });
@@ -746,14 +859,17 @@ function AppointmentsDesktopTable({
                       >
                         <Eye className="size-4" />
                       </Button>
-                      {appointment.status !==
-                        "CANCELLED" &&
-                      appointment.status !==
-                        "COMPLETED" ? (
+                      <AppointmentStatusActions
+                        appointment={appointment}
+                        onStatusUpdated={onStatusUpdated}
+                      />
+                      {(appointment.status === "PENDING" ||
+                        appointment.status === "CONFIRMED" ||
+                        appointment.status === "NEEDS_REVIEW") ? (
                         <Button
-                          size="icon"
+                          size="icon" aria-label="Cancelar cita"
                           variant="ghost"
-                          className="size-8 rounded-full text-rose-500 hover:text-rose-600 hover:bg-rose-50 transition-all"
+                          className="size-8 rounded-full text-rose-500 hover:text-rose-600 hover:bg-rose-50 transition-[color,background-color,border-color,box-shadow,opacity,transform]"
                           disabled={
                             isCancelling ===
                             appointment.id
@@ -773,9 +889,9 @@ function AppointmentsDesktopTable({
                         </Button>
                       ) : (
                         <Button
-                          size="icon"
+                          size="icon" aria-label="Eliminar cita"
                           variant="ghost"
-                          className="size-8 rounded-full text-muted-foreground hover:text-rose-600 hover:bg-rose-50 transition-all"
+                          className="size-8 rounded-full text-muted-foreground hover:text-rose-600 hover:bg-rose-50 transition-[color,background-color,border-color,box-shadow,opacity,transform]"
                           disabled={
                             isDeleting ===
                             appointment.id
@@ -822,13 +938,13 @@ function AppointmentsPagination({
     <Card className="border-none shadow-sm">
       <div className="p-4 flex flex-col sm:flex-row justify-between items-center gap-4 bg-muted/20 rounded-lg">
         <p className="text-sm text-muted-foreground order-2 sm:order-1">
-          Showing{" "}
+          Mostrando{" "}
           <span className="font-medium text-foreground">
             {(pagination.currentPage - 1) *
               pagination.totalItemsPerPage +
               1}
           </span>{" "}
-          to{" "}
+          a{" "}
           <span className="font-medium text-foreground">
             {Math.min(
               pagination.currentPage *
@@ -836,11 +952,11 @@ function AppointmentsPagination({
               pagination.totalItems,
             )}
           </span>{" "}
-          of{" "}
+          de{" "}
           <span className="font-medium text-foreground">
             {pagination.totalItems}
           </span>{" "}
-          appointments
+          citas
         </p>
         <div className="flex gap-2 order-1 sm:order-2">
           <Button
@@ -852,43 +968,26 @@ function AppointmentsPagination({
             disabled={pagination.currentPage === 1}
             className="bg-background"
           >
-            Previous
+            Anterior
           </Button>
           <div className="flex items-center gap-1">
-            {Array.from(
-              {
-                length: Math.min(
-                  pagination.totalPages,
-                  5,
-                ),
-              },
-              (_, i) => {
-                const pageNum = i + 1;
-                return (
-                  <Button
-                    key={pageNum}
-                    variant={
-                      pagination.currentPage ===
-                      pageNum
-                        ? "default"
-                        : "outline"
-                    }
-                    size="sm"
-                    onClick={() =>
-                      handlePageChange(pageNum)
-                    }
-                    className={
-                      pagination.currentPage ===
-                      pageNum
-                        ? ""
-                        : "bg-background"
-                    }
-                  >
-                    {pageNum}
-                  </Button>
-                );
-              },
-            )}
+            {[1, 2, 3, 4, 5]
+              .filter((pageNum) => pageNum <= pagination.totalPages)
+              .map((pageNum) => (
+                <Button
+                  key={`page-${pageNum}`}
+                  variant={
+                    pagination.currentPage === pageNum ? "default" : "outline"
+                  }
+                  size="sm"
+                  onClick={() => handlePageChange(pageNum)}
+                  className={
+                    pagination.currentPage === pageNum ? "" : "bg-background"
+                  }
+                >
+                  {pageNum}
+                </Button>
+              ))}
           </div>
           <Button
             variant="outline"
@@ -903,7 +1002,7 @@ function AppointmentsPagination({
             }
             className="bg-background"
           >
-            Next
+            Siguiente
           </Button>
         </div>
       </div>
@@ -945,26 +1044,29 @@ function AppointmentsFiltersBar({
             onValueChange={handleStatusFilterChange}
           >
             <SelectTrigger className="bg-background border-muted-foreground/20 text-foreground">
-              <SelectValue placeholder="Todos los Estados" />
+              <SelectValue placeholder="Todos los estados" />
             </SelectTrigger>
             <SelectContent className="bg-background border-muted">
               <SelectItem value="all">
-                All Statuses
+                Todos los estados
               </SelectItem>
-              <SelectItem value="PENDING">Pending</SelectItem>
+              <SelectItem value="PENDING">Pendiente</SelectItem>
               <SelectItem value="CONFIRMED">
-                Confirmed
+                Confirmada
               </SelectItem>
               <SelectItem value="IN_PROGRESS">
-                In Progress
+                En curso
+              </SelectItem>
+              <SelectItem value="NEEDS_REVIEW">
+                Requiere revisión
               </SelectItem>
               <SelectItem value="COMPLETED">
-                Completed
+                Completada
               </SelectItem>
               <SelectItem value="CANCELLED">
-                Cancelled
+                Cancelada
               </SelectItem>
-              <SelectItem value="NO_SHOW">No Show</SelectItem>
+              <SelectItem value="NO_SHOW">No asistió</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -975,11 +1077,11 @@ function AppointmentsFiltersBar({
               onValueChange={handleTenantFilterChange}
             >
               <SelectTrigger className="bg-background border-muted-foreground/20 text-foreground">
-                <SelectValue placeholder="Todos los Tenants" />
+                <SelectValue placeholder="Todos las organizaciones" />
               </SelectTrigger>
               <SelectContent className="bg-background border-muted">
                 <SelectItem value="all">
-                  All Tenants
+                  Todas las organizaciones
                 </SelectItem>
               </SelectContent>
             </Select>
@@ -1081,7 +1183,7 @@ function AppointmentsTableClientInner({
         body: JSON.stringify({ reason: "Cancelled by administrator" }),
       });
 
-      const data = await response.json();
+      const data = await readJsonResponse(response);
       if (data.success) {
         toast.success("Cita cancelada correctamente");
         router.refresh();
@@ -1105,7 +1207,7 @@ function AppointmentsTableClientInner({
         body: JSON.stringify({ status: "CONFIRMED" }),
       });
 
-      const data = await response.json();
+      const data = await readJsonResponse(response);
       if (data.success) {
         toast.success("Cita confirmada correctamente");
         router.refresh();
@@ -1118,6 +1220,11 @@ function AppointmentsTableClientInner({
     } finally {
       dispatch({ type: "SET_IS_CONFIRMING", payload: null });
     }
+    };
+
+    const handleStatusUpdated = () => {
+        router.refresh();
+        dispatch({ type: "SET_DETAILS_OPEN", payload: false });
     };
 
     const handleDelete = async (id: string) => {
@@ -1139,7 +1246,7 @@ function AppointmentsTableClientInner({
         headers: { "Content-Type": "application/json" },
       });
 
-      const data = await response.json();
+      const data = await readJsonResponse(response);
       if (data.success) {
         toast.success("Cita eliminada correctamente");
         router.refresh();
@@ -1160,7 +1267,7 @@ function AppointmentsTableClientInner({
     <div className="space-y-6" suppressHydrationWarning>
             <div className="flex justify-between items-center">
                 <h1 className="text-2xl font-bold tracking-tight">
-                    Appointments Management
+                    Gestión de citas
                 </h1>
             </div>
 
@@ -1171,7 +1278,7 @@ function AppointmentsTableClientInner({
                     title="Total de Citas"
                     value={stats?.totalAppointments || 0}
                     color="bg-blue-500"
-                    description="Across all statuses"
+                    description="En todos los estados"
                 />
                 <StatCard
                     icon={Clock}
@@ -1216,6 +1323,7 @@ function AppointmentsTableClientInner({
           isDeleting={dialogState.isDeleting}
           handleCancel={handleCancel}
           handleDelete={handleDelete}
+          onStatusUpdated={handleStatusUpdated}
         />
 
         <AppointmentsDesktopTable
@@ -1226,6 +1334,7 @@ function AppointmentsTableClientInner({
           isDeleting={dialogState.isDeleting}
           handleCancel={handleCancel}
           handleDelete={handleDelete}
+          onStatusUpdated={handleStatusUpdated}
         />
 
         {pagination.totalItems > 0 && (
@@ -1240,8 +1349,11 @@ function AppointmentsTableClientInner({
         open={dialogState.detailsOpen}
         onOpenChange={(open) => dispatch({ type: "SET_DETAILS_OPEN", payload: open })}
         onConfirm={handleConfirm}
+        onCancel={handleCancel}
         onDelete={handleDelete}
+        onStatusUpdated={handleStatusUpdated}
         isConfirming={dialogState.isConfirming}
+        isCancelling={dialogState.isCancelling}
         isDeleting={dialogState.isDeleting}
       />
       <ConfirmDialog />

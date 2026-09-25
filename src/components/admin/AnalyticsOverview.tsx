@@ -65,7 +65,7 @@ const StatCard = ({
   variant?: ColorVariant;
   trend?: 'up' | 'down';
 }) => (
-  <Card className="group relative overflow-hidden border-border bg-card transition-all duration-300 hover:shadow-2xl hover:shadow-primary/5 hover:translate-y-[-2px]">
+  <Card className="group relative overflow-hidden border-border bg-card transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-300 hover:shadow-2xl hover:shadow-primary/5 hover:translate-y-[-2px]">
     <div className={cn("absolute top-0 left-0 w-1 h-full opacity-0 group-hover:opacity-100 transition-opacity", COLOR_VARIANTS[variant].bar)} />
     <CardContent className="pt-6">
       <div className="flex items-start justify-between">
@@ -204,11 +204,11 @@ export default function AnalyticsOverview() {
 
   return (
     <div className="space-y-6" suppressHydrationWarning>
-      <h2 className="text-2xl font-bold">Analytics Overview</h2>
+      <h2 className="text-2xl font-bold">Resumen de analíticas</h2>
 
       {/* Primary Metrics */}
       <div>
-        <h3 className="text-lg font-semibold mb-4 text-muted-foreground">Primary Metrics</h3>
+        <h3 className="text-lg font-semibold mb-4 text-muted-foreground">Métricas principales</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {isFeatureEnabled("ORDERS") && (
             <>
@@ -216,7 +216,7 @@ export default function AnalyticsOverview() {
                 icon={ShoppingCart}
                 title="Total de Pedidos"
                 value={stats.orders.total}
-                subtitle={`$${stats.orders.revenue.toFixed(2)} revenue`}
+                subtitle={`$${stats.orders.revenue.toFixed(2)} en ingresos`}
                 variant="primary"
                 trend="up"
               />
@@ -224,7 +224,7 @@ export default function AnalyticsOverview() {
                 icon={DollarSign}
                 title="Ingresos Totales"
                 value={`$${stats.orders.revenue.toFixed(2)}`}
-                subtitle={`Avg: $${stats.orders.avgOrderValue.toFixed(2)}/order`}
+                subtitle={`Promedio: $${stats.orders.avgOrderValue.toFixed(2)} por pedido`}
                 variant="primary"
                 trend="up"
               />
@@ -234,14 +234,14 @@ export default function AnalyticsOverview() {
             icon={Users}
             title="Total de Usuarios"
             value={stats.users.total}
-            subtitle={`${stats.users.admins} admins, ${stats.users.regular} users`}
+            subtitle={`${stats.users.admins} administradores, ${stats.users.regular} usuarios`}
             variant="accent"
           />
           <StatCard
             icon={Package}
             title="Total de Productos"
             value={stats.products.total}
-            subtitle={`$${stats.products.totalValue.toFixed(2)} inventory value`}
+            subtitle={`$${stats.products.totalValue.toFixed(2)} de valor en inventario`}
             variant="muted"
           />
         </div>
@@ -249,7 +249,7 @@ export default function AnalyticsOverview() {
 
       {/* Inventory & Stock */}
       <div>
-        <h3 className="text-lg font-semibold mb-4 text-muted-foreground">Inventory Status</h3>
+        <h3 className="text-lg font-semibold mb-4 text-muted-foreground">Estado del inventario</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <StatCard
             icon={AlertTriangle}
@@ -269,7 +269,7 @@ export default function AnalyticsOverview() {
             icon={Package}
             title="Total de Categorías"
             value={stats.categories.total}
-            subtitle={`Avg ${stats.categories.avgProducts.toFixed(1)} products/category`}
+            subtitle={`Promedio de ${stats.categories.avgProducts.toFixed(1)} productos por categoría`}
             variant="primary"
           />
         </div>
@@ -277,7 +277,7 @@ export default function AnalyticsOverview() {
 
       {/* Marketing & Promotions */}
       <div>
-        <h3 className="text-lg font-semibold mb-4 text-muted-foreground">Marketing & Promotions</h3>
+        <h3 className="text-lg font-semibold mb-4 text-muted-foreground">Marketing y promociones</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {isFeatureEnabled("COUPONS") && (
             <>
@@ -285,7 +285,7 @@ export default function AnalyticsOverview() {
                 icon={Ticket}
                 title="Cupones"
                 value={stats.coupons.total}
-                subtitle={`${stats.coupons.active} active, ${stats.coupons.used} used`}
+                subtitle={`${stats.coupons.active} activos, ${stats.coupons.used} usados`}
                 variant="primary"
               />
               <StatCard
@@ -299,17 +299,17 @@ export default function AnalyticsOverview() {
           )}
           <StatCard
             icon={ImageIcon}
-            title="Sliders"
+            title="Carruseles"
             value={stats.sliders.total}
-            subtitle={`${stats.sliders.active} active, ${stats.sliders.withImages} with images`}
+            subtitle={`${stats.sliders.active} activos, ${stats.sliders.withImages} con imagen`}
             variant="accent"
           />
           {isFeatureEnabled("BANNERS") && (
             <StatCard
               icon={Ticket}
-              title="Banners"
+              title="Anuncios"
               value={stats.banners.total}
-              subtitle={`${stats.banners.active} active`}
+              subtitle={`${stats.banners.active} activos`}
               variant="muted"
             />
           )}
@@ -318,7 +318,7 @@ export default function AnalyticsOverview() {
 
       {/* User Management */}
       <div>
-        <h3 className="text-lg font-semibold mb-4 text-muted-foreground">User Management</h3>
+        <h3 className="text-lg font-semibold mb-4 text-muted-foreground">Gestión de usuarios</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <StatCard
             icon={Shield}

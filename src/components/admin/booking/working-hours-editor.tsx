@@ -7,49 +7,12 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Plus, X } from "lucide-react";
 
-export type TimeRange = { start: string; end: string };
-export type WorkingHours = { [day: string]: TimeRange[] | null };
+import {
+    WORKING_DAYS,
+    type TimeRange,
+    type WorkingHours,
+} from "@/components/admin/booking/working-hours-utils";
 
-const DAYS: Array<{ key: string; label: string }> = [
-    { key: "monday", label: "Lun" },
-    { key: "tuesday", label: "Mar" },
-    { key: "wednesday", label: "Mié" },
-    { key: "thursday", label: "Jue" },
-    { key: "friday", label: "Vie" },
-    { key: "saturday", label: "Sáb" },
-    { key: "sunday", label: "Dom" },
-];
-
-export const DEFAULT_WORKING_HOURS: WorkingHours = {
-    monday: [{ start: "09:00", end: "12:00" }, { start: "13:00", end: "17:00" }],
-    tuesday: [{ start: "09:00", end: "12:00" }, { start: "13:00", end: "17:00" }],
-    wednesday: [{ start: "09:00", end: "12:00" }, { start: "13:00", end: "17:00" }],
-    thursday: [{ start: "09:00", end: "12:00" }, { start: "13:00", end: "17:00" }],
-    friday: [{ start: "09:00", end: "12:00" }, { start: "13:00", end: "17:00" }],
-    saturday: null,
-    sunday: null,
-};
-
-const isRange = (v: unknown): v is TimeRange =>
-    !!v && typeof v === "object" && typeof (v as TimeRange).start === "string";
-
-/** Accepts legacy {monday: {start,end}} and multi-range {monday: [{start,end}]}. */
-export function normalizeWorkingHours(raw: unknown): WorkingHours {
-    const result: WorkingHours = {};
-    for (const { key } of DAYS) {
-        const value = (raw as WorkingHours)?.[key];
-        if (!value) {
-            result[key] = null;
-        } else if (Array.isArray(value)) {
-            result[key] = value.filter(isRange);
-        } else if (isRange(value)) {
-            result[key] = [value];
-        } else {
-            result[key] = null;
-        }
-    }
-    return result;
-}
 
 export function WorkingHoursEditor({
     value,
@@ -62,16 +25,16 @@ export function WorkingHoursEditor({
         onChange({ ...value, [day]: ranges });
 
     return (
-        <div className="space-y-2">
-            {DAYS.map(({ key, label }) => {
+        <div className="min-w-0 space-y-2">
+            {WORKING_DAYS.map(({ key, label }) => {
                 const ranges = value[key] || null;
                 const works = !!ranges?.length;
                 return (
                     <div
                         key={key}
-                        className="flex items-start gap-3 p-3 rounded-xl border border-border/50 bg-muted/20"
+                        className="grid min-w-0 grid-cols-1 gap-3 rounded-xl border border-border/50 bg-muted/20 p-3 sm:grid-cols-[4rem_minmax(0,1fr)] sm:items-start"
                     >
-                        <div className="flex items-center gap-2 pt-1 w-16 shrink-0">
+                        <div className="flex items-center gap-2 sm:w-16 sm:shrink-0 sm:pt-1">
                             <Switch
                                 checked={works}
                                 onCheckedChange={(checked) =>
@@ -88,11 +51,11 @@ export function WorkingHoursEditor({
                             </span>
                         </div>
                         {works && ranges && (
-                            <div className="flex-1 space-y-2">
+                            <div className="min-w-0 space-y-2">
                                 {ranges.map((range, i) => (
                                     <div
-                                        key={i}
-                                        className="flex items-center gap-2"
+                                        key={`${range.start}-${range.end}`}
+                                        className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_auto] items-center gap-2 sm:max-w-[270px]"
                                     >
                                         <Input
                                             type="time"
@@ -105,7 +68,7 @@ export function WorkingHoursEditor({
                                                 };
                                                 setDay(key, next);
                                             }}
-                                            className="h-8 w-[110px] text-sm"
+                                            className="h-8 w-full min-w-0 px-2 text-sm"
                                         />
                                         <span className="text-xs text-muted-foreground">
                                             a
@@ -121,13 +84,13 @@ export function WorkingHoursEditor({
                                                 };
                                                 setDay(key, next);
                                             }}
-                                            className="h-8 w-[110px] text-sm"
+                                            className="h-8 w-full min-w-0 px-2 text-sm"
                                         />
                                         <Button
                                             type="button"
                                             variant="ghost"
-                                            size="icon"
-                                            className="size-7 shrink-0"
+                                            size="icon" aria-label="Eliminar rango horario"
+                                            className="size-8 shrink-0 sm:size-7"
                                             onClick={() => {
                                                 const next = ranges.filter(
                                                     (_, j) => j !== i,
@@ -146,7 +109,7 @@ export function WorkingHoursEditor({
                                     type="button"
                                     variant="outline"
                                     size="sm"
-                                    className="h-7 text-xs"
+                                    className="h-8 w-full text-xs sm:h-7 sm:w-auto"
                                     onClick={() =>
                                         setDay(key, [
                                             ...ranges,
@@ -188,6 +151,7 @@ export function HolidaysEditor({
                         {date}
                         <button
                             type="button"
+                            aria-label="Eliminar feriado"
                             className="p-0.5 rounded-full hover:bg-destructive/10 text-destructive"
                             onClick={() =>
                                 onChange(value.filter((d) => d !== date))
@@ -203,10 +167,10 @@ export function HolidaysEditor({
                     </span>
                 )}
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center">
                 <Input
                     type="date"
-                    className="h-9 w-[160px] text-sm"
+                    className="h-9 w-full text-sm sm:w-[160px]"
                     onChange={(e) => {
                         const date = e.target.value;
                         if (date && !value.includes(date)) {

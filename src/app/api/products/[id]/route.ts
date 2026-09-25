@@ -1,3 +1,4 @@
+import { readJsonResponse } from "@/lib/response";
 import { NextRequest, NextResponse } from "next/server";
 
 const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4001/api";
@@ -23,7 +24,7 @@ export async function GET(
       cache: "no-store",
     });
 
-    const data = await response.json();
+    const data = await readJsonResponse(response);
 
     return NextResponse.json(data, { status: response.status });
   } catch (error) {
@@ -58,7 +59,7 @@ export async function PUT(
       cache: "no-store",
     });
 
-    const data = await response.json();
+    const data = await readJsonResponse(response);
     return NextResponse.json(data, { status: response.status });
   } catch (error) {
     console.error("Error updating product in backend:", error);
@@ -89,7 +90,7 @@ export async function DELETE(
       cache: "no-store",
     });
 
-    const data = await response.json();
+    const data = await readJsonResponse(response);
     return NextResponse.json(data, { status: response.status });
   } catch (error) {
     console.error("Error deleting product in backend:", error);

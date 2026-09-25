@@ -1,3 +1,4 @@
+import { readJsonResponse } from "@/lib/response";
 import { NextRequest, NextResponse } from 'next/server';
 import { getProxyHeaders } from '@/lib/proxy';
 
@@ -14,7 +15,7 @@ export async function GET(
     cache: 'no-store',
   });
 
-        const data = await response.json();
+        const data = await readJsonResponse(response);
         return NextResponse.json(data, { status: response.status });
     } catch (error) {
         console.error(`Error fetching feature ${id}:`, error);
@@ -43,7 +44,7 @@ export async function PUT(
     cache: 'no-store',
   });
 
-        const data = await response.json();
+        const data = await readJsonResponse(response);
         return NextResponse.json(data, { status: response.status });
     } catch (error) {
         console.error(`Error updating feature ${id}:`, error);
@@ -71,7 +72,7 @@ export async function DELETE(
             return new NextResponse(null, { status: 204 });
         }
 
-        const data = await response.json();
+        const data = await readJsonResponse(response);
         return NextResponse.json(data, { status: response.status });
     } catch (error) {
         console.error(`Error deleting feature ${id}:`, error);

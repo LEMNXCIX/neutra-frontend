@@ -48,11 +48,11 @@ export function OrderHistory({ initialOrders }: OrderHistoryProps) {
                     </div>
                     <div className="space-y-2">
                         <h3 className="text-2xl font-bold tracking-tight">
-                            No orders yet
+                            Todavía no tenés pedidos
                         </h3>
                         <p className="text-muted-foreground font-medium">
-                            Your purchase history will appear here once you
-                            place an order.
+                            Tu historial de compras aparecerá aquí cuando
+                            realices un pedido.
                         </p>
                     </div>
                     <Button
@@ -70,13 +70,13 @@ export function OrderHistory({ initialOrders }: OrderHistoryProps) {
     return (
         <div className="space-y-8">
             <h2 className="text-3xl font-bold tracking-tight flex items-center gap-3">
-                <ShoppingBag className="size-8 text-primary" /> Purchase History
+                <ShoppingBag className="size-8 text-primary" /> Historial de compras
             </h2>
             <div className="space-y-6">
                 {orders.map((o) => (
                     <Card
                         key={o.id}
-                        className="overflow-hidden border-none shadow-lg rounded-[2rem] bg-background group hover:shadow-2xl transition-all duration-300"
+                        className="overflow-hidden border-none shadow-lg rounded-[2rem] bg-background group hover:shadow-2xl transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-300"
                     >
                         <CardHeader className="bg-muted/30 p-8 border-b border-border/50">
                             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -86,13 +86,13 @@ export function OrderHistory({ initialOrders }: OrderHistoryProps) {
                                     </div>
                                     <div>
                                         <CardTitle className="text-xl font-bold tracking-tight">
-                                            Order #
+                                            Pedido n.º
                                             {o.id.slice(-6).toUpperCase()}
                                         </CardTitle>
                                         <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
                                             {new Date(
                                                 o.createdAt,
-                                            ).toLocaleDateString(undefined, {
+                                            ).toLocaleDateString("es-ES", { timeZone: "UTC",
                                                 dateStyle: "long",
                                             })}
                                         </p>
@@ -105,7 +105,7 @@ export function OrderHistory({ initialOrders }: OrderHistoryProps) {
                                 </div>
                                 <div className="text-right">
                                     <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">
-                                        Total Amount
+                                        Total del pedido
                                     </p>
                                     <span className="font-bold text-3xl tracking-tight text-foreground">
                                         ${o.total.toFixed(2)}
@@ -117,13 +117,12 @@ export function OrderHistory({ initialOrders }: OrderHistoryProps) {
                             <div className="flex flex-wrap gap-8 text-sm font-medium">
                                 <span className="flex items-center gap-2 text-muted-foreground">
                                     <Calendar className="size-4 text-primary" />{" "}
-                                    {new Date(o.createdAt).toLocaleDateString()}
+                                    {new Date(o.createdAt).toLocaleDateString("es-ES", { timeZone: "UTC" })}
                                 </span>
                                 <span className="flex items-center gap-2 text-muted-foreground">
                                     <Package className="size-4 text-primary" />{" "}
                                     {o.items.length}{" "}
-                                    {o.items.length === 1 ? "item" : "items"}{" "}
-                                    included
+                                    {o.items.length === 1 ? "artículo" : "artículos"} incluidos
                                 </span>
                             </div>
                             <div className="flex gap-3">
@@ -151,14 +150,14 @@ export function OrderHistory({ initialOrders }: OrderHistoryProps) {
                                         href={`/orders/${o.id}`}
                                         className="flex items-center gap-2"
                                     >
-                                        <Eye className="size-4" /> Full Details
+                                        <Eye className="size-4" /> Ver detalles
                                     </a>
                                 </Button>
                             </div>
                             {expanded === o.id && (
                                 <div className="pt-8 border-t border-border/50 space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
                                     <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4">
-                                        Order Items
+                                        Artículos del pedido
                                     </p>
                                     {o.items.map((it) => (
                                         <div
@@ -168,10 +167,10 @@ export function OrderHistory({ initialOrders }: OrderHistoryProps) {
                                             <div className="space-y-1">
                                                 <p className="font-bold text-foreground">
                                                     {it.product?.name ||
-                                                        "Product"}
+                                                        "Producto"}
                                                 </p>
                                                 <p className="text-xs text-muted-foreground font-medium">
-                                                    Quantity: {it.amount}
+                                                    Cantidad: {it.amount}
                                                 </p>
                                             </div>
                                             <span className="font-bold text-lg tracking-tight">
@@ -184,7 +183,7 @@ export function OrderHistory({ initialOrders }: OrderHistoryProps) {
                                     ))}
                                     <div className="pt-4 mt-4 border-t border-dashed border-border flex justify-between items-center px-4">
                                         <span className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
-                                            Order Total
+                                            Total del pedido
                                         </span>
                                         <span className="font-bold text-2xl tracking-tight text-primary">
                                             ${o.total.toFixed(2)}

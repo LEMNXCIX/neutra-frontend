@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useReducer, useRef } from "react";
+import React, { useCallback, useReducer } from "react";
 import { logService, LogEntry } from "@/services/log.service";
 import { Tenant } from "@/types/tenant";
 import { Badge } from "@/components/ui/badge";
@@ -227,7 +227,7 @@ function LogsFiltersSection({
           </label>
           <select
             id="log-level"
-            className="w-full h-10 bg-background border border-border rounded-lg px-3 py-1 font-medium text-xs focus:border-primary outline-none transition-all shadow-sm cursor-pointer"
+            className="w-full h-10 bg-background border border-border rounded-lg px-3 py-1 font-medium text-xs focus:border-primary outline-none transition-[color,background-color,border-color,box-shadow,opacity,transform] shadow-sm cursor-pointer"
             value={filters.level}
             onChange={(e) =>
               updateFilters({ level: e.target.value })
@@ -249,7 +249,7 @@ function LogsFiltersSection({
           </label>
           <select
             id="log-tenant"
-            className="w-full h-10 bg-background border border-border rounded-lg px-3 py-1 font-medium text-xs focus:border-primary outline-none transition-all shadow-sm cursor-pointer"
+            className="w-full h-10 bg-background border border-border rounded-lg px-3 py-1 font-medium text-xs focus:border-primary outline-none transition-[color,background-color,border-color,box-shadow,opacity,transform] shadow-sm cursor-pointer"
             value={filters.tenantId}
             onChange={(e) =>
               updateFilters({ tenantId: e.target.value })
@@ -274,7 +274,7 @@ function LogsFiltersSection({
           <input
             id="log-start-date"
             type="date"
-            className="w-full h-10 bg-background border border-border rounded-lg px-3 py-1 font-medium text-xs focus:border-primary outline-none transition-all shadow-sm"
+            className="w-full h-10 bg-background border border-border rounded-lg px-3 py-1 font-medium text-xs focus:border-primary outline-none transition-[color,background-color,border-color,box-shadow,opacity,transform] shadow-sm"
             value={filters.startDate}
             onChange={(e) =>
               updateFilters({
@@ -294,7 +294,7 @@ function LogsFiltersSection({
           <input
             id="log-end-date"
             type="date"
-            className="w-full h-10 bg-background border border-border rounded-lg px-3 py-1 font-medium text-xs focus:border-primary outline-none transition-all shadow-sm"
+            className="w-full h-10 bg-background border border-border rounded-lg px-3 py-1 font-medium text-xs focus:border-primary outline-none transition-[color,background-color,border-color,box-shadow,opacity,transform] shadow-sm"
             value={filters.endDate}
             onChange={(e) =>
               updateFilters({
@@ -313,7 +313,7 @@ function LogsFiltersSection({
           </label>
           <select
             id="log-limit"
-            className="w-full h-10 bg-background border border-border rounded-lg px-3 py-1 font-medium text-xs focus:border-primary outline-none transition-all shadow-sm cursor-pointer"
+            className="w-full h-10 bg-background border border-border rounded-lg px-3 py-1 font-medium text-xs focus:border-primary outline-none transition-[color,background-color,border-color,box-shadow,opacity,transform] shadow-sm cursor-pointer"
             value={filters.take}
             onChange={(e) =>
               updateFilters({ take: Number(e.target.value) })
@@ -335,11 +335,12 @@ function LogsFiltersSection({
           placeholder="Buscar por Trace ID, URL o contenido del mensaje..."
           value={searchTerm}
           onChange={(e) => dispatch({ type: "SET_SEARCH_TERM", payload: e.target.value })}
-          className="w-full h-12 pl-11 pr-4 bg-muted/30 border border-transparent focus:border-primary/30 focus:bg-background rounded-xl font-medium text-sm transition-all outline-none"
+          className="w-full h-12 pl-11 pr-4 bg-muted/30 border border-transparent focus:border-primary/30 focus:bg-background rounded-xl font-medium text-sm transition-[color,background-color,border-color,box-shadow,opacity,transform] outline-none"
         />
         {searchTerm && (
           <button
             type="button"
+            aria-label="Limpiar búsqueda"
             onClick={() => dispatch({ type: "SET_SEARCH_TERM", payload: "" })}
             className="absolute right-4 top-1/2 -translate-y-1/2 size-6 flex items-center justify-center rounded-full bg-muted hover:bg-border transition-colors"
           >
@@ -496,7 +497,7 @@ function LogsDataTable({
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="size-8 rounded-full p-0 opacity-0 group-hover:opacity-100 hover:bg-primary/10 hover:text-primary transition-all"
+                      className="size-8 rounded-full p-0 opacity-0 group-hover:opacity-100 hover:bg-primary/10 hover:text-primary transition-[color,background-color,border-color,box-shadow,opacity,transform]"
                     >
                       <ArrowRight className="size-4" />
                     </Button>
@@ -577,11 +578,8 @@ export function LogsClient({
       take: 50,
     },
   }));
-  const filtersRef = useRef(state.filters);
-  filtersRef.current = state.filters;
-
-  const loadLogs = useCallback(async (overrideFilters?: typeof state.filters) => {
-    const f = overrideFilters || filtersRef.current;
+  const loadLogs = useCallback(async (filters: typeof state.filters) => {
+    const f = filters;
     dispatch({ type: "SET_LOADING", payload: true });
     try {
       const response = await logService.getAll(f);
@@ -638,9 +636,9 @@ export function LogsClient({
                 </div>
                 <div className="flex w-full md:w-auto gap-4">
                     <Button
-                        onClick={() => loadLogs()}
+                        onClick={() => loadLogs(state.filters)}
           disabled={state.loading}
-          className="h-11 px-6 rounded-xl font-bold shadow-md shadow-primary/10 transition-all hover:-translate-y-0.5"
+          className="h-11 px-6 rounded-xl font-bold shadow-md shadow-primary/10 transition-[color,background-color,border-color,box-shadow,opacity,transform] hover:-translate-y-0.5"
         >
           <RefreshCcw
             className={`size-4 mr-2 ${state.loading ? "animate-spin" : ""}`}
@@ -820,7 +818,7 @@ function PayloadBoard({
             </div>
             <div
                 className={cn(
-                    "rounded-xl overflow-hidden border transition-all",
+                    "rounded-xl overflow-hidden border transition-[color,background-color,border-color,box-shadow,opacity,transform]",
                     isCritical
                         ? "border-rose-500/30 shadow-lg shadow-rose-500/5"
                         : "border-border/50 shadow-sm",

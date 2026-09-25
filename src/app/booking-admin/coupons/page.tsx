@@ -5,8 +5,8 @@ import { api } from '@/lib/api-client';
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-    title: "Coupons Management | Booking Admin",
-    description: "Manage discount coupons for appointments",
+    title: "Gestión de cupones | Administración de reservas",
+    description: "Administrá cupones de descuento para citas",
 };
 
 const PER_PAGE = 10;
@@ -113,7 +113,7 @@ export default async function CouponsPage({ searchParams }: Props) {
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
-                <h1 className="text-3xl font-bold tracking-tight">Coupons</h1>
+                <h1 className="text-3xl font-bold tracking-tight">Cupones</h1>
             </div>
             <Suspense fallback={null}>
                 <CouponsTableClient

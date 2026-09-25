@@ -3,8 +3,8 @@ import { apiClient } from '@/lib/api-client';
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Reject Appointment",
-  description: "Processing appointment rejection",
+  title: "Rechazar cita",
+  description: "Procesando el rechazo de la cita",
 };
 
 export default async function AppointmentRejectPage({
