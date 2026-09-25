@@ -1,4 +1,6 @@
 "use client";
+import { AdminStatCard as StatCard } from "@/components/admin/shared/AdminStatCard";
+
 
 import React, { Suspense, useReducer, useSyncExternalStore } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -75,31 +77,6 @@ type Props = {
     initialStatuses?: { value: string; label: string }[];
 };
 
-const StatCard = ({
-    icon: Icon,
-    title,
-    value,
-    color,
-}: {
-    icon: React.ElementType;
-    title: string;
-    value: string | number;
-    color: string;
-}) => (
-    <Card>
-        <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <p className="text-sm text-muted-foreground">{title}</p>
-                    <p className="text-2xl font-bold mt-1">{value}</p>
-                </div>
-                <div className={`p-3 rounded-full ${color}`}>
-                    <Icon className="size-6 text-white" />
-                </div>
-            </div>
-        </CardContent>
-    </Card>
-);
 
 function OrderDetailsDialog({
     order,
@@ -152,7 +129,7 @@ function OrderDetailsDialog({
                                 Fecha
                             </p>
                             <p className="font-medium">
-                                {new Date(order.createdAt).toLocaleString()}
+                                {new Date(order.createdAt).toLocaleString("es-ES", { timeZone: "UTC" })}
                             </p>
                         </div>
                         <div>
@@ -584,7 +561,7 @@ function OrdersDesktopTable({
                                             <TableCell className="text-muted-foreground font-semibold text-[10px]">
                                                 {new Date(
                                                     o.createdAt,
-                                                ).toLocaleDateString("es-ES", {
+                                                ).toLocaleDateString("es-ES", { timeZone: "UTC",
                                                     month: "short",
                                                     day: "numeric",
                                                     year: "numeric",
@@ -594,7 +571,7 @@ function OrdersDesktopTable({
                                                 <Button
                                                     size="sm"
                                                     variant="ghost"
-                                                    className="h-8 px-3 rounded-full hover:bg-primary/10 hover:text-primary transition-all font-bold text-[10px] uppercase tracking-wider opacity-0 group-hover:opacity-100"
+                                                    className="h-8 px-3 rounded-full hover:bg-primary/10 hover:text-primary transition-[color,background-color,border-color,box-shadow,opacity,transform] font-bold text-[10px] uppercase tracking-wider opacity-0 group-hover:opacity-100"
                                                     onClick={() =>
                                                         openOrderDetails(o)
                                                     }
@@ -744,7 +721,7 @@ function OrdersMobileCards({
                                         <p className="font-medium text-sm">
                                             {new Date(
                                                 o.createdAt,
-                                            ).toLocaleDateString()}
+                                            ).toLocaleDateString("es-ES", { timeZone: "UTC" })}
                                         </p>
                                     </div>
                                 </div>

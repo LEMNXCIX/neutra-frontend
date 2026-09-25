@@ -73,7 +73,7 @@ export default function SuperAdminSidebar({ items }: SuperAdminSidebarProps) {
                     </span>
                 )}
                 <Button
-                    size="icon"
+                    size="icon" aria-label="Alternar menú"
                     variant="ghost"
                     onClick={() => setSidebarOpen(!sidebarOpen)}
                     className="size-8 hover:bg-muted transition-colors rounded-md"

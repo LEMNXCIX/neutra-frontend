@@ -142,7 +142,7 @@ export default async function BookingDashboardPage() {
                                             <p className="text-sm font-semibold truncate">
                                                 {new Date(
                                                     a.startTime,
-                                                ).toLocaleDateString(undefined, {
+                                                ).toLocaleDateString("es-ES", { timeZone: "UTC",
                                                     weekday: "short",
                                                     day: "numeric",
                                                     month: "short",
@@ -150,7 +150,7 @@ export default async function BookingDashboardPage() {
                                                 ·{" "}
                                                 {new Date(
                                                     a.startTime,
-                                                ).toLocaleTimeString(undefined, {
+                                                ).toLocaleTimeString("es-ES", { timeZone: "UTC",
                                                     hour: "2-digit",
                                                     minute: "2-digit",
                                                 })}

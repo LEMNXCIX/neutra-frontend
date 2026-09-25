@@ -40,141 +40,17 @@ const STATUS_COPY: Record<
     ARCHIVED: { label: "Archivada", variant: "secondary" },
 };
 
+const DATE_FORMATTER = new Intl.DateTimeFormat("es", {
+    dateStyle: "medium",
+    timeZone: "UTC",
+});
+
 function formatDate(value: string): string {
-    return new Intl.DateTimeFormat("es", { dateStyle: "medium" }).format(
-        new Date(value),
-    );
+    return DATE_FORMATTER.format(new Date(value));
 }
 
-export function TenantLoyaltyClient() {
-    const { isFeatureEnabled } = useFeatures();
-    const enabled =
-        isFeatureEnabled("LOYALTY") && isFeatureEnabled("COUPONS");
-    const [summary, setSummary] = useState<LoyaltyTenantSummary | null>(null);
-    const [campaigns, setCampaigns] = useState<LoyaltyCampaign[]>([]);
-    const [editingCampaign, setEditingCampaign] =
-        useState<LoyaltyCampaign | null>(null);
-    const [isLoading, setIsLoading] = useState(enabled);
-    const [isSaving, setIsSaving] = useState(false);
-    const [pendingAction, setPendingAction] = useState<string | null>(null);
-    const [loadError, setLoadError] = useState<string | null>(null);
-    const [saveError, setSaveError] = useState<string | null>(null);
-    const [success, setSuccess] = useState<string | null>(null);
-
-    const loadData = useCallback(async () => {
-        setIsLoading(true);
-        setLoadError(null);
-        try {
-            const [nextSummary, nextCampaigns] = await Promise.all([
-                loyaltyService.getAdminSummary(),
-                loyaltyService.getAdminCampaigns(),
-            ]);
-            setSummary(nextSummary);
-            setCampaigns(nextCampaigns);
-            return true;
-        } catch {
-            setLoadError("No pudimos cargar las campañas de fidelización.");
-            return false;
-        } finally {
-            setIsLoading(false);
-        }
-    }, []);
-
-    useEffect(() => {
-        if (enabled) void loadData();
-    }, [enabled, loadData]);
-
-    if (!enabled) return null;
-
-    const saveCampaign = async (input: CreateLoyaltyCampaignInput) => {
-        setIsSaving(true);
-        setSaveError(null);
-        setSuccess(null);
-        try {
-            if (editingCampaign) {
-                await loyaltyService.updateCampaign(editingCampaign.id, input);
-                setSuccess("Borrador actualizado correctamente.");
-            } else {
-                await loyaltyService.createCampaign(input);
-                setSuccess("Campaña creada como borrador.");
-            }
-            setEditingCampaign(null);
-            await loadData();
-        } catch {
-            setSaveError("No pudimos guardar la campaña.");
-        } finally {
-            setIsSaving(false);
-        }
-    };
-
-    const runLifecycleAction = async (
-        campaign: LoyaltyCampaign,
-        action: "activate" | "end" | "archive" | "delete",
-    ) => {
-        const actionKey = `${campaign.id}:${action}`;
-        if (pendingAction) return;
-
-        setPendingAction(actionKey);
-        setSaveError(null);
-        setSuccess(null);
-        try {
-            if (action === "activate") {
-                await loyaltyService.activateCampaign(campaign.id);
-            } else if (action === "end") {
-                await loyaltyService.endCampaign(campaign.id);
-            } else if (action === "archive") {
-                await loyaltyService.archiveCampaign(campaign.id);
-            } else {
-                await loyaltyService.deleteCampaign(campaign.id);
-            }
-            setSuccess(
-                action === "delete"
-                    ? "Campaña eliminada correctamente."
-                    : "Campaña actualizada correctamente.",
-            );
-            if (editingCampaign?.id === campaign.id) setEditingCampaign(null);
-            await loadData();
-        } catch {
-            setSaveError("No pudimos completar la acción de la campaña.");
-        } finally {
-            setPendingAction(null);
-        }
-    };
-
+function LoyaltySummaryCards({ summary }: { summary: LoyaltyTenantSummary }) {
     return (
-        <div className="space-y-6">
-            <div>
-                <h1 className="flex items-center gap-3 text-3xl font-bold tracking-tight">
-                    <Gift className="size-7 text-primary" aria-hidden="true" />
-                    Fidelización
-                </h1>
-                <p className="mt-2 text-muted-foreground">
-                    Gestiona las campañas y recompensas de esta organización.
-                </p>
-            </div>
-
-            {isLoading ? (
-                <Card>
-                    <CardContent>
-                        <p role="status" className="text-sm text-muted-foreground">
-                            Cargando las campañas…
-                        </p>
-                    </CardContent>
-                </Card>
-            ) : loadError ? (
-                <Card>
-                    <CardContent className="space-y-4">
-                        <p role="alert" className="text-sm text-destructive">
-                            {loadError}
-                        </p>
-                        <Button variant="outline" onClick={loadData}>
-                            <RefreshCw className="mr-2 size-4" aria-hidden="true" />
-                            Reintentar
-                        </Button>
-                    </CardContent>
-                </Card>
-            ) : summary ? (
-                <>
                     <div className="grid gap-4 md:grid-cols-5">
                         {[
                             ["Campañas", summary.stats.campaignCount],
@@ -196,6 +72,28 @@ export function TenantLoyaltyClient() {
                         ))}
                     </div>
 
+
+    );
+}
+
+function LoyaltyCampaignEditor({
+    editingCampaign,
+    setEditingCampaign,
+    tenantType,
+    onSave,
+    isSaving,
+    error,
+    success,
+}: {
+    editingCampaign: LoyaltyCampaign | null;
+    setEditingCampaign: (campaign: LoyaltyCampaign | null) => void;
+    tenantType: string;
+    onSave: (input: CreateLoyaltyCampaignInput) => Promise<void>;
+    isSaving: boolean;
+    error: string | null;
+    success: string | null;
+}) {
+    return (
                     <Card>
                         <CardHeader className="border-b">
                             <div className="flex flex-wrap items-center justify-between gap-3">
@@ -221,16 +119,35 @@ export function TenantLoyaltyClient() {
                             <LoyaltyCampaignForm
                                 key={editingCampaign?.id ?? "new"}
                                 campaign={editingCampaign}
-                                tenantType={summary.type}
-                                onSave={saveCampaign}
+                                tenantType={tenantType}
+                                onSave={onSave}
                                 onCancel={() => setEditingCampaign(null)}
                                 isSaving={isSaving}
-                                error={saveError}
+                                error={error}
                                 success={success}
                             />
                         </CardContent>
                     </Card>
 
+
+    );
+}
+
+function LoyaltyCampaignList({
+    campaigns,
+    pendingAction,
+    setEditingCampaign,
+    runLifecycleAction,
+}: {
+    campaigns: LoyaltyCampaign[];
+    pendingAction: string | null;
+    setEditingCampaign: (campaign: LoyaltyCampaign) => void;
+    runLifecycleAction: (
+        campaign: LoyaltyCampaign,
+        action: "activate" | "end" | "archive" | "delete",
+    ) => Promise<void>;
+}) {
+    return (
                     <Card>
                         <CardHeader>
                             <CardTitle>Campañas</CardTitle>
@@ -371,6 +288,156 @@ export function TenantLoyaltyClient() {
                             )}
                         </CardContent>
                     </Card>
+    );
+}
+
+export function TenantLoyaltyClient() {
+    const { isFeatureEnabled } = useFeatures();
+    const enabled =
+        isFeatureEnabled("LOYALTY") && isFeatureEnabled("COUPONS");
+    const [summary, setSummary] = useState<LoyaltyTenantSummary | null>(null);
+    const [campaigns, setCampaigns] = useState<LoyaltyCampaign[]>([]);
+    const [editingCampaign, setEditingCampaign] =
+        useState<LoyaltyCampaign | null>(null);
+    const [isLoading, setIsLoading] = useState(enabled);
+    const [isSaving, setIsSaving] = useState(false);
+    const [pendingAction, setPendingAction] = useState<string | null>(null);
+    const [loadError, setLoadError] = useState<string | null>(null);
+    const [saveError, setSaveError] = useState<string | null>(null);
+    const [success, setSuccess] = useState<string | null>(null);
+
+    const loadData = useCallback(async () => {
+        setIsLoading(true);
+        setLoadError(null);
+        try {
+            const [nextSummary, nextCampaigns] = await Promise.all([
+                loyaltyService.getAdminSummary(),
+                loyaltyService.getAdminCampaigns(),
+            ]);
+            setSummary(nextSummary);
+            setCampaigns(nextCampaigns);
+            return true;
+        } catch {
+            setLoadError("No pudimos cargar las campañas de fidelización.");
+            return false;
+        } finally {
+            setIsLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        if (enabled) void loadData();
+    }, [enabled, loadData]);
+
+    if (!enabled) return null;
+
+    const saveCampaign = async (input: CreateLoyaltyCampaignInput) => {
+        setIsSaving(true);
+        setSaveError(null);
+        setSuccess(null);
+        try {
+            if (editingCampaign) {
+                await loyaltyService.updateCampaign(editingCampaign.id, input);
+                setSuccess("Borrador actualizado correctamente.");
+            } else {
+                await loyaltyService.createCampaign(input);
+                setSuccess("Campaña creada como borrador.");
+            }
+            setEditingCampaign(null);
+            await loadData();
+        } catch {
+            setSaveError("No pudimos guardar la campaña.");
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const runLifecycleAction = async (
+        campaign: LoyaltyCampaign,
+        action: "activate" | "end" | "archive" | "delete",
+    ) => {
+        const actionKey = `${campaign.id}:${action}`;
+        if (pendingAction) return;
+
+        setPendingAction(actionKey);
+        setSaveError(null);
+        setSuccess(null);
+        try {
+            if (action === "activate") {
+                await loyaltyService.activateCampaign(campaign.id);
+            } else if (action === "end") {
+                await loyaltyService.endCampaign(campaign.id);
+            } else if (action === "archive") {
+                await loyaltyService.archiveCampaign(campaign.id);
+            } else {
+                await loyaltyService.deleteCampaign(campaign.id);
+            }
+            setSuccess(
+                action === "delete"
+                    ? "Campaña eliminada correctamente."
+                    : "Campaña actualizada correctamente.",
+            );
+            if (editingCampaign?.id === campaign.id) setEditingCampaign(null);
+            await loadData();
+        } catch {
+            setSaveError("No pudimos completar la acción de la campaña.");
+        } finally {
+            setPendingAction(null);
+        }
+    };
+
+    return (
+        <div className="space-y-6">
+            <div>
+                <h1 className="flex items-center gap-3 text-3xl font-bold tracking-tight">
+                    <Gift className="size-7 text-primary" aria-hidden="true" />
+                    Fidelización
+                </h1>
+                <p className="mt-2 text-muted-foreground">
+                    Gestiona las campañas y recompensas de esta organización.
+                </p>
+            </div>
+
+            {isLoading ? (
+                <Card>
+                    <CardContent>
+                        <p role="status" className="text-sm text-muted-foreground">
+                            Cargando las campañas…
+                        </p>
+                    </CardContent>
+                </Card>
+            ) : loadError ? (
+                <Card>
+                    <CardContent className="space-y-4">
+                        <p role="alert" className="text-sm text-destructive">
+                            {loadError}
+                        </p>
+                        <Button variant="outline" onClick={loadData}>
+                            <RefreshCw className="mr-2 size-4" aria-hidden="true" />
+                            Reintentar
+                        </Button>
+                    </CardContent>
+                </Card>
+            ) : summary ? (
+                <>
+                    <LoyaltySummaryCards summary={summary} />
+
+                    <LoyaltyCampaignEditor
+                        editingCampaign={editingCampaign}
+                        setEditingCampaign={setEditingCampaign}
+                        tenantType={summary.type}
+                        onSave={saveCampaign}
+                        isSaving={isSaving}
+                        error={saveError}
+                        success={success}
+                    />
+
+                    <LoyaltyCampaignList
+                        campaigns={campaigns}
+                        pendingAction={pendingAction}
+                        setEditingCampaign={setEditingCampaign}
+                        runLifecycleAction={runLifecycleAction}
+                    />
                 </>
             ) : null}
         </div>

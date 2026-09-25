@@ -146,19 +146,7 @@ function sourceIsSupported(
     return !tenantType || tenantType === "HYBRID" || tenantType === source;
 }
 
-export function LoyaltyCampaignForm({
-    campaign,
-    tenantType,
-    onSave,
-    onCancel,
-    isSaving,
-    error,
-    success,
-}: LoyaltyCampaignFormProps) {
-    const [value, setValue] = useState<FormValue>(() =>
-        initialValue(campaign, tenantType),
-    );
-
+function validateCampaignForm(value: FormValue, tenantType?: string) {
     const startsAt = Date.parse(`${value.startsAt}T00:00:00.000Z`);
     const endsAt = Date.parse(`${value.endsAt}T00:00:00.000Z`);
     const claimUntil = Date.parse(`${value.claimUntil}T00:00:00.000Z`);
@@ -184,41 +172,26 @@ export function LoyaltyCampaignForm({
         validInteger(value.rewardValidDays, true) &&
         validInteger(value.maxClaims, false);
 
-    const update = <Key extends keyof FormValue>(
-        key: Key,
-        nextValue: FormValue[Key],
-    ) => setValue((current) => ({ ...current, [key]: nextValue }));
+    return { valid, rewardValue };
+}
 
-    const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
-        if (!valid || isSaving) return;
+type UpdateFormValue = <Key extends keyof FormValue>(
+    key: Key,
+    nextValue: FormValue[Key],
+) => void;
 
-        await onSave({
-            name: value.name.trim(),
-            description: value.description.trim() || null,
-            source: value.source,
-            metric: value.metric,
-            targetValue: value.targetValue.trim(),
-            startsAt: `${value.startsAt}T00:00:00.000Z`,
-            endsAt: `${value.endsAt}T00:00:00.000Z`,
-            claimUntil: `${value.claimUntil}T00:00:00.000Z`,
-            reward: {
-                type: value.rewardType,
-                value: rewardValue,
-                description: value.rewardDescription.trim() || null,
-                minPurchaseAmount: optionalNumber(value.minPurchaseAmount),
-                maxDiscountAmount: optionalNumber(value.maxDiscountAmount),
-                applicableProducts: parseIds(value.applicableProducts),
-                applicableCategories: parseIds(value.applicableCategories),
-                applicableServices: parseIds(value.applicableServices),
-            },
-            rewardValidDays: Number(value.rewardValidDays),
-            maxClaims: optionalNumber(value.maxClaims),
-        });
-    };
-
+function CampaignBasicsFields({
+    value,
+    update,
+    isSaving,
+    tenantType,
+}: {
+    value: FormValue;
+    update: UpdateFormValue;
+    isSaving: boolean;
+    tenantType?: string;
+}) {
     return (
-        <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid gap-5 md:grid-cols-2">
                 <div className="space-y-2 md:col-span-2">
                     <Label htmlFor="campaign-name">Nombre</Label>
@@ -382,7 +355,19 @@ export function LoyaltyCampaignForm({
                     />
                 </div>
             </div>
+    );
+}
 
+function CampaignRewardFields({
+    value,
+    update,
+    isSaving,
+}: {
+    value: FormValue;
+    update: UpdateFormValue;
+    isSaving: boolean;
+}) {
+    return (
             <fieldset className="space-y-5 rounded-lg border p-5">
                 <legend className="px-1 font-semibold">Definición de recompensa</legend>
                 <div className="grid gap-5 md:grid-cols-2">
@@ -495,6 +480,71 @@ export function LoyaltyCampaignForm({
                     </div>
                 </div>
             </fieldset>
+    );
+}
+
+export function LoyaltyCampaignForm({
+    campaign,
+    tenantType,
+    onSave,
+    onCancel,
+    isSaving,
+    error,
+    success,
+}: LoyaltyCampaignFormProps) {
+    const [value, setValue] = useState<FormValue>(() =>
+        initialValue(campaign, tenantType),
+    );
+
+    const { valid, rewardValue } = validateCampaignForm(value, tenantType);
+
+    const update = <Key extends keyof FormValue>(
+        key: Key,
+        nextValue: FormValue[Key],
+    ) => setValue((current) => ({ ...current, [key]: nextValue }));
+
+    const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        if (!valid || isSaving) return;
+
+        await onSave({
+            name: value.name.trim(),
+            description: value.description.trim() || null,
+            source: value.source,
+            metric: value.metric,
+            targetValue: value.targetValue.trim(),
+            startsAt: `${value.startsAt}T00:00:00.000Z`,
+            endsAt: `${value.endsAt}T00:00:00.000Z`,
+            claimUntil: `${value.claimUntil}T00:00:00.000Z`,
+            reward: {
+                type: value.rewardType,
+                value: rewardValue,
+                description: value.rewardDescription.trim() || null,
+                minPurchaseAmount: optionalNumber(value.minPurchaseAmount),
+                maxDiscountAmount: optionalNumber(value.maxDiscountAmount),
+                applicableProducts: parseIds(value.applicableProducts),
+                applicableCategories: parseIds(value.applicableCategories),
+                applicableServices: parseIds(value.applicableServices),
+            },
+            rewardValidDays: Number(value.rewardValidDays),
+            maxClaims: optionalNumber(value.maxClaims),
+        });
+    };
+
+    return (
+        <form onSubmit={handleSubmit} className="space-y-6">
+            <CampaignBasicsFields
+                value={value}
+                update={update}
+                isSaving={isSaving}
+                tenantType={tenantType}
+            />
+
+            <CampaignRewardFields
+                value={value}
+                update={update}
+                isSaving={isSaving}
+            />
 
             {error && (
                 <p role="alert" className="text-sm text-destructive">

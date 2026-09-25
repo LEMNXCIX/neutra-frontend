@@ -145,10 +145,12 @@ export default async function UsersPage({ searchParams }: Props) {
         typeof resolvedSearchParams.search === "string"
             ? resolvedSearchParams.search
             : "";
-    const role =
+    const roleParam =
         typeof resolvedSearchParams.role === "string"
             ? resolvedSearchParams.role
             : "all";
+    const role =
+        roleParam === "admin" || roleParam === "user" ? roleParam : "all";
 
     const data = await getUsers(search, role, page, limit);
 
@@ -159,6 +161,7 @@ export default async function UsersPage({ searchParams }: Props) {
                 stats={data.stats}
                 pagination={data.pagination}
                 showTenant={true}
+                initialRoleFilter={role}
             />
         </Suspense>
     );

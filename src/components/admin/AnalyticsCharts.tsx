@@ -61,7 +61,7 @@ function TrendCard({
 }) {
   return (
     <Card
-      className="overflow-hidden border-none shadow-lg hover:shadow-xl transition-all"
+      className="overflow-hidden border-none shadow-lg hover:shadow-xl transition-[color,background-color,border-color,box-shadow,opacity,transform]"
       style={{
         background:
           `linear-gradient(135deg, color-mix(in srgb, var(${colorVar}) 6%, transparent), color-mix(in srgb, var(${colorVar}) 14%, transparent))`,
@@ -257,83 +257,107 @@ type AnalyticsChartsProps = {
   initialOrders?: Order[];
 };
 
+function getAnalyticsData(orders: Order[]) {
+const ordersByDate = new Map<string, { count: number; revenue: number }>();
+for (const ord of orders) {
+  const d = ord.date || new Date().toISOString().slice(0, 10);
+  const cur = ordersByDate.get(d) || { count: 0, revenue: 0 };
+  cur.count += 1;
+  cur.revenue += Number(ord.total || 0);
+  ordersByDate.set(d, cur);
+}
+
+const sortedDates = Array.from(ordersByDate.keys())
+  .sort((a, b) => a.localeCompare(b))
+  .slice(-30);
+
+const last7Days = sortedDates.slice(-7);
+const prev7Days = sortedDates.slice(-14, -7);
+
+const last7Revenue = last7Days.reduce(
+  (sum, d) => sum + (ordersByDate.get(d)?.revenue || 0),
+  0,
+);
+const prev7Revenue = prev7Days.reduce(
+  (sum, d) => sum + (ordersByDate.get(d)?.revenue || 0),
+  0,
+);
+const revenueTrend =
+  prev7Revenue > 0
+    ? ((last7Revenue - prev7Revenue) / prev7Revenue) * 100
+    : 0;
+
+const last7Orders = last7Days.reduce(
+  (sum, d) => sum + (ordersByDate.get(d)?.count || 0),
+  0,
+);
+const prev7Orders = prev7Days.reduce(
+  (sum, d) => sum + (ordersByDate.get(d)?.count || 0),
+  0,
+);
+const ordersTrend =
+  prev7Orders > 0 ? ((last7Orders - prev7Orders) / prev7Orders) * 100 : 0;
+
+const productSales = new Map<
+  string,
+  { name: string; qty: number; revenue: number }
+>();
+for (const ord of orders) {
+  for (const item of ord.items || []) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const productId = (item as any).productId || item.id;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const qty = (item as any).amount || item.qty || 0;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const price = (item as any).price || 0;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const name =
+      (item as any).product?.name || item.name || "Producto desconocido";
+
+    const current = productSales.get(productId) || {
+      name,
+      qty: 0,
+      revenue: 0,
+    };
+    current.qty += qty;
+    current.revenue += qty * price;
+    productSales.set(productId, current);
+  }
+}
+const topProducts = Array.from(productSales.values())
+  .sort((a, b) => b.revenue - a.revenue)
+  .slice(0, 8);
+
+const recentOrders = orders
+  .toSorted((a, b) => (b.date || "").localeCompare(a.date || ""))
+  .slice(0, 6);
+
+    return {
+        ordersByDate,
+        last7Days,
+        last7Revenue,
+        revenueTrend,
+        last7Orders,
+        ordersTrend,
+        topProducts,
+        recentOrders,
+    };
+}
+
 export default function AnalyticsCharts({ initialOrders }: AnalyticsChartsProps = {}) {
   const orders = initialOrders || [];
   const loading = !initialOrders;
 
-  const ordersByDate = new Map<string, { count: number; revenue: number }>();
-  for (const ord of orders) {
-    const d = ord.date || new Date().toISOString().slice(0, 10);
-    const cur = ordersByDate.get(d) || { count: 0, revenue: 0 };
-    cur.count += 1;
-    cur.revenue += Number(ord.total || 0);
-    ordersByDate.set(d, cur);
-  }
-
-  const sortedDates = Array.from(ordersByDate.keys())
-    .sort((a, b) => a.localeCompare(b))
-    .slice(-30);
-
-  const last7Days = sortedDates.slice(-7);
-  const prev7Days = sortedDates.slice(-14, -7);
-
-  const last7Revenue = last7Days.reduce(
-    (sum, d) => sum + (ordersByDate.get(d)?.revenue || 0),
-    0,
-  );
-  const prev7Revenue = prev7Days.reduce(
-    (sum, d) => sum + (ordersByDate.get(d)?.revenue || 0),
-    0,
-  );
-  const revenueTrend =
-    prev7Revenue > 0
-      ? ((last7Revenue - prev7Revenue) / prev7Revenue) * 100
-      : 0;
-
-  const last7Orders = last7Days.reduce(
-    (sum, d) => sum + (ordersByDate.get(d)?.count || 0),
-    0,
-  );
-  const prev7Orders = prev7Days.reduce(
-    (sum, d) => sum + (ordersByDate.get(d)?.count || 0),
-    0,
-  );
-  const ordersTrend =
-    prev7Orders > 0 ? ((last7Orders - prev7Orders) / prev7Orders) * 100 : 0;
-
-  const productSales = new Map<
-    string,
-    { name: string; qty: number; revenue: number }
-  >();
-  for (const ord of orders) {
-    for (const item of ord.items || []) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const productId = (item as any).productId || item.id;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const qty = (item as any).amount || item.qty || 0;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const price = (item as any).price || 0;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const name =
-        (item as any).product?.name || item.name || "Producto desconocido";
-
-      const current = productSales.get(productId) || {
-        name,
-        qty: 0,
-        revenue: 0,
-      };
-      current.qty += qty;
-      current.revenue += qty * price;
-      productSales.set(productId, current);
-    }
-  }
-  const topProducts = Array.from(productSales.values())
-    .sort((a, b) => b.revenue - a.revenue)
-    .slice(0, 8);
-
-  const recentOrders = orders
-    .toSorted((a, b) => (b.date || "").localeCompare(a.date || ""))
-    .slice(0, 6);
+  const {
+    ordersByDate,
+    last7Days,
+    last7Revenue,
+    revenueTrend,
+    last7Orders,
+    ordersTrend,
+    topProducts,
+    recentOrders,
+  } = getAnalyticsData(orders);
 
   if (loading) {
     return (

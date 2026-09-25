@@ -88,9 +88,10 @@ export function SuperAdminLoyaltyClient() {
                     </CardContent>
                 </Card>
             ) : (
-                <div role="list" className="space-y-6">
+                <ul className="space-y-6 list-none">
                     {tenants.map((tenant) => (
-                        <Card key={tenant.tenantId} role="listitem">
+                        <li key={tenant.tenantId}>
+                            <Card>
                             <CardHeader>
                                 <div className="flex flex-wrap items-start justify-between gap-3">
                                     <div>
@@ -162,9 +163,10 @@ export function SuperAdminLoyaltyClient() {
                                     </div>
                                 )}
                             </CardContent>
-                        </Card>
+                            </Card>
+                        </li>
                     ))}
-                </div>
+                </ul>
             )}
         </div>
     );

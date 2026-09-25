@@ -1,4 +1,8 @@
 "use client";
+import { TablePagination, MobileTablePagination } from "@/components/admin/shared/TablePagination";
+
+import { AdminStatCard as StatCard } from "@/components/admin/shared/AdminStatCard";
+
 
 import React, { Suspense, useState, useRef, useReducer } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -48,8 +52,6 @@ CheckCircle2,
 XCircle,
 Clock,
 Zap,
-ChevronLeft,
-ChevronRight,
 Percent,
 DollarSign,
 } from "lucide-react";
@@ -191,7 +193,7 @@ return false;
 function formatDate(date?: Date | string) {
 if (!date) return "—";
 try {
-return new Date(date).toLocaleDateString() + " " + new Date(date).toLocaleTimeString();
+return new Date(date).toLocaleDateString("es-ES", { timeZone: "UTC" }) + " " + new Date(date).toLocaleTimeString("es-ES", { timeZone: "UTC" });
 } catch {
 return String(date);
 }
@@ -211,23 +213,6 @@ const searchParams = useSearchParams();
 return <>{children(searchParams)}</>;
 }
 
-function StatCard({ icon: Icon, title, value, color }: { icon: React.ElementType; title: string; value: string | number; color: string }) {
-return (
-<Card>
-<CardContent className="pt-6">
-<div className="flex items-center justify-between">
-<div>
-<p className="text-sm text-muted-foreground">{title}</p>
-<p className="text-2xl font-bold mt-1">{value}</p>
-</div>
-<div className={`p-3 rounded-full ${color}`}>
-<Icon className="size-6 text-white" />
-</div>
-</div>
-</CardContent>
-</Card>
-);
-}
 
 function CouponsStatsSection({ stats }: { stats: Stats }) {
 return (
@@ -422,38 +407,7 @@ return (
 </Table>
 </div>
 
-{pagination.totalItems > 0 && (
-<div className="flex flex-col sm:flex-row items-center justify-between px-4 py-3 border-t gap-3">
-<div className="text-sm text-muted-foreground">
-Mostrando {((pagination.currentPage - 1) * pagination.itemsPerPage) + 1} a {Math.min(pagination.currentPage * pagination.itemsPerPage, pagination.totalItems)} de {pagination.totalItems} resultados
-</div>
-<div className="flex gap-2">
-<Button
-variant="outline"
-size="sm"
-onClick={() => onPageChange(pagination.currentPage - 1)}
-disabled={pagination.currentPage === 1}
->
-<ChevronLeft className="size-4 mr-1" />
-Anterior
-</Button>
-<div className="hidden sm:flex items-center gap-1">
-<span className="text-sm text-muted-foreground px-2">
-Página {pagination.currentPage} de {pagination.totalPages}
-</span>
-</div>
-<Button
-variant="outline"
-size="sm"
-onClick={() => onPageChange(pagination.currentPage + 1)}
-disabled={pagination.currentPage === pagination.totalPages || pagination.totalPages === 0}
->
-Siguiente
-<ChevronRight className="size-4 ml-1" />
-</Button>
-</div>
-</div>
-)}
+<TablePagination pagination={pagination} onPageChange={onPageChange} />
 </Card>
 );
 }
@@ -520,31 +474,7 @@ Editar
 );
 })}
 
-{pagination.totalItems > 0 && (
-<Card className="lg:hidden">
-<div className="flex items-center justify-between px-4 py-3">
-<Button
-variant="outline"
-size="sm"
-onClick={() => onPageChange(pagination.currentPage - 1)}
-disabled={pagination.currentPage === 1}
->
-<ChevronLeft className="size-4" />
-</Button>
-<span className="text-sm text-muted-foreground">
-Página {pagination.currentPage} de {pagination.totalPages}
-</span>
-<Button
-variant="outline"
-size="sm"
-onClick={() => onPageChange(pagination.currentPage + 1)}
-disabled={pagination.currentPage === pagination.totalPages || pagination.totalPages === 0}
->
-<ChevronRight className="size-4" />
-</Button>
-</div>
-</Card>
-)}
+<MobileTablePagination pagination={pagination} onPageChange={onPageChange} />
 </div>
 );
 }
@@ -663,6 +593,41 @@ onCheckedChange={(checked) => onFormChange({ ...form, active: checked })}
 );
 }
 
+function CouponDialogFrame({
+  open,
+  onOpenChange,
+  title,
+  children,
+  actionLabel,
+  loading,
+  onAction,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  title: string;
+  children: React.ReactNode;
+  actionLabel: string;
+  loading: boolean;
+  onAction: () => void;
+}) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+        </DialogHeader>
+        {children}
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
+          <Button onClick={onAction} disabled={loading}>
+            {loading ? <><Spinner className="mr-2" /> Guardando…</> : actionLabel}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function CreateCouponDialog({
 open,
 onOpenChange,
@@ -679,20 +644,16 @@ isCreating: boolean;
 onCreate: () => void;
 }) {
 return (
-<Dialog open={open} onOpenChange={onOpenChange}>
-<DialogContent className="max-w-md">
-<DialogHeader>
-<DialogTitle>Agregar cupón</DialogTitle>
-</DialogHeader>
-<CouponFormFields form={form} onFormChange={onFormChange} />
-<DialogFooter>
-<Button variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
-<Button onClick={onCreate} disabled={isCreating}>
-{isCreating ? <><Spinner className="mr-2" /> Creando…</> : "Crear cupón"}
-</Button>
-</DialogFooter>
-</DialogContent>
-</Dialog>
+<CouponDialogFrame
+  open={open}
+  onOpenChange={onOpenChange}
+  title="Agregar cupón"
+  actionLabel="Crear cupón"
+  loading={isCreating}
+  onAction={onCreate}
+>
+  <CouponFormFields form={form} onFormChange={onFormChange} />
+</CouponDialogFrame>
 );
 }
 
@@ -712,20 +673,16 @@ isEditing: boolean;
 onSave: () => void;
 }) {
 return (
-<Dialog open={open} onOpenChange={onOpenChange}>
-<DialogContent className="max-w-md">
-<DialogHeader>
-<DialogTitle>Editar cupón</DialogTitle>
-</DialogHeader>
-<CouponFormFields form={form} onFormChange={onFormChange} />
-<DialogFooter>
-<Button variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
-<Button onClick={onSave} disabled={isEditing}>
-{isEditing ? <><Spinner className="mr-2" /> Guardando…</> : "Guardar cambios"}
-</Button>
-</DialogFooter>
-</DialogContent>
-</Dialog>
+<CouponDialogFrame
+  open={open}
+  onOpenChange={onOpenChange}
+  title="Editar cupón"
+  actionLabel="Guardar cambios"
+  loading={isEditing}
+  onAction={onSave}
+>
+  <CouponFormFields form={form} onFormChange={onFormChange} />
+</CouponDialogFrame>
 );
 }
 

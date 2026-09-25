@@ -24,11 +24,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { BrandingEditor } from "./BrandingEditor";
 import { Clock } from "lucide-react";
 import {
-    DEFAULT_WORKING_HOURS,
     HolidaysEditor,
     WorkingHoursEditor,
-    normalizeWorkingHours,
 } from "@/components/admin/booking/working-hours-editor";
+import {
+    DEFAULT_WORKING_HOURS,
+    normalizeWorkingHours,
+} from "@/components/admin/booking/working-hours-utils";
 
 interface TenantFormProps {
     tenant?: Tenant | null;

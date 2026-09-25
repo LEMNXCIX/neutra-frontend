@@ -1,6 +1,10 @@
 "use client";
+import { MobileTablePagination } from "@/components/admin/shared/TablePagination";
 
-import React, { Suspense, useRef, useReducer, useCallback, useSyncExternalStore } from "react";
+import { AdminStatCard as StatCard } from "@/components/admin/shared/AdminStatCard";
+
+
+import React, { Suspense, useRef, useReducer, useCallback, useState, useSyncExternalStore } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { usersService } from "@/services/users.service";
@@ -47,8 +51,6 @@ Edit,
 UserCircle,
 Shield,
 Users,
-ChevronLeft,
-ChevronRight,
 UserCog,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -95,33 +97,9 @@ users: User[];
 stats: Stats;
 pagination: PaginationProps;
 showTenant?: boolean;
+initialRoleFilter?: "all" | "admin" | "user";
 };
 
-const StatCard = ({
-icon: Icon,
-title,
-value,
-color,
-}: {
-icon: React.ElementType;
-title: string;
-value: string | number;
-color: string;
-}) => (
-<Card>
-<CardContent className="pt-6">
-<div className="flex items-center justify-between">
-<div>
-<p className="text-sm text-muted-foreground">{title}</p>
-<p className="text-2xl font-bold mt-1">{value}</p>
-</div>
-<div className={`p-3 rounded-full ${color}`}>
-<Icon className="size-6" />
-</div>
-</div>
-</CardContent>
-</Card>
-);
 
 type UsersDialogState = {
 editOpen: boolean;
@@ -227,19 +205,19 @@ const emptySubscribe = () => () => {};
 function UsersDesktopStats({ stats }: { stats: Stats }) {
 return (
 <div className="hidden lg:grid lg:grid-cols-3 gap-4">
-<StatCard
+<StatCard iconClassName="size-6"
 icon={Users}
 title="Total de Usuarios"
 value={stats.totalUsers}
 color="bg-primary/10 text-primary"
 />
-<StatCard
+<StatCard iconClassName="size-6"
 icon={Shield}
 title="Administradores"
 value={stats.adminUsers}
 color="bg-accent text-accent-foreground"
 />
-<StatCard
+<StatCard iconClassName="size-6"
 icon={UserCircle}
 title="Usuarios Regulares"
 value={stats.regularUsers}
@@ -261,19 +239,19 @@ return (
 </AccordionTrigger>
 <AccordionContent className="px-4 pb-4 pt-2">
 <div className="grid grid-cols-1 gap-4">
-<StatCard
+<StatCard iconClassName="size-6"
 icon={Users}
 title="Total de Usuarios"
 value={stats.totalUsers}
 color="bg-primary/10 text-primary"
 />
-<StatCard
+<StatCard iconClassName="size-6"
 icon={Shield}
 title="Administradores"
 value={stats.adminUsers}
 color="bg-accent text-accent-foreground"
 />
-<StatCard
+<StatCard iconClassName="size-6"
 icon={UserCircle}
 title="Usuarios Regulares"
 value={stats.regularUsers}
@@ -351,8 +329,6 @@ function UsersDesktopTable({
 users,
 showTenant,
 pagination,
-startItem,
-endItem,
 onPageChange,
 onOpenEdit,
 onOpenRoleDialog,
@@ -360,8 +336,6 @@ onOpenRoleDialog,
 users: User[];
 showTenant: boolean;
 pagination: PaginationProps;
-startItem: number;
-endItem: number;
 onPageChange: (page: number) => void;
 onOpenEdit: (u: User) => void;
 onOpenRoleDialog: (u: User) => void;
@@ -411,7 +385,7 @@ key={u.id}
 className="group hover:bg-muted/50 transition-colors border-b border-border/50"
 >
 <TableCell className="py-4">
-<Avatar className="size-10 border border-border group-hover:border-primary/20 transition-all">
+<Avatar className="size-10 border border-border group-hover:border-primary/20 transition-[color,background-color,border-color,box-shadow,opacity,transform]">
 <AvatarImage
 src={
 u.profilePic ||
@@ -459,7 +433,7 @@ getRoleColor(u.role?.name),
 <TableCell className="text-right">
 <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
 <Button
-size="icon"
+size="icon" aria-label="Editar usuario"
 variant="ghost"
 className="size-8 rounded-full hover:bg-primary/5 hover:text-primary"
 onClick={() => onOpenEdit(u)}
@@ -467,7 +441,7 @@ onClick={() => onOpenEdit(u)}
 <Edit className="size-4" />
 </Button>
 <Button
-size="icon"
+size="icon" aria-label="Gestionar rol del usuario"
 variant="ghost"
 className="size-8 rounded-full hover:bg-primary/5 hover:text-primary"
 onClick={() => onOpenRoleDialog(u)}
@@ -483,93 +457,7 @@ onClick={() => onOpenRoleDialog(u)}
 </Table>
 </div>
 
-{pagination.totalItems > 0 && (
-<div className="flex flex-col sm:flex-row items-center justify-between px-4 py-3 border-t gap-3">
-<div className="text-sm text-muted-foreground">
-Mostrando {startItem} a {endItem} de{" "}
-{pagination.totalItems} results
-</div>
-<div className="flex gap-2">
-<Button
-variant="outline"
-size="sm"
-onClick={() =>
-onPageChange(pagination.currentPage - 1)
-}
-disabled={pagination.currentPage === 1}
->
-<ChevronLeft className="size-4 mr-1" />
-Anterior
-</Button>
-<div className="hidden sm:flex items-center gap-1">
-{Array.from(
-{
-length: Math.min(
-5,
-pagination.totalPages,
-),
-},
-(_, i) => {
-let pageNum;
-if (pagination.totalPages <= 5) {
-pageNum = i + 1;
-} else if (
-pagination.currentPage <= 3
-) {
-pageNum = i + 1;
-} else if (
-pagination.currentPage >=
-pagination.totalPages - 2
-) {
-pageNum =
-pagination.totalPages - 4 + i;
-} else {
-pageNum =
-pagination.currentPage - 2 + i;
-}
-return (
-<Button
-key={pageNum}
-variant={
-pagination.currentPage ===
-pageNum
-? "default"
-: "outline"
-}
-size="sm"
-onClick={() =>
-onPageChange(pageNum)
-}
-className="min-w-[2.5rem]"
->
-{pageNum}
-</Button>
-);
-},
-)}
-</div>
-<div className="sm:hidden text-sm text-muted-foreground px-2">
-Página {pagination.currentPage} de{" "}
-{pagination.totalPages}
-</div>
-<Button
-variant="outline"
-size="sm"
-onClick={() =>
-onPageChange(pagination.currentPage + 1)
-}
-disabled={
-pagination.currentPage ===
-pagination.totalPages ||
-pagination.totalPages === 0
-}
->
-Siguiente
-<ChevronRight className="size-4 ml-1" />
-</Button>
-</div>
-</div>
-)}
+<MobileTablePagination pagination={pagination} onPageChange={onPageChange} />
 </Card>
 );
 }
@@ -657,40 +545,7 @@ className="w-full h-10 font-semibold text-xs"
 </Card>
 ))}
 
-{pagination.totalItems > 0 && (
-<Card className="lg:hidden">
-<div className="flex items-center justify-between px-4 py-3">
-<Button
-variant="outline"
-size="sm"
-onClick={() =>
-onPageChange(pagination.currentPage - 1)
-}
-disabled={pagination.currentPage === 1}
->
-<ChevronLeft className="size-4" />
-</Button>
-<span className="text-sm text-muted-foreground">
-Página {pagination.currentPage} de{" "}
-{pagination.totalPages}
-</span>
-<Button
-variant="outline"
-size="sm"
-onClick={() =>
-onPageChange(pagination.currentPage + 1)
-}
-disabled={
-pagination.currentPage ===
-pagination.totalPages ||
-pagination.totalPages === 0
-}
->
-<ChevronRight className="size-4" />
-</Button>
-</div>
-</Card>
-)}
+<MobileTablePagination pagination={pagination} onPageChange={onPageChange} />
 </div>
 );
 }
@@ -708,6 +563,7 @@ users,
 stats,
 pagination,
 showTenant = false,
+initialRoleFilter,
 }: Props) {
 const isMounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
 const router = useRouter();
@@ -743,7 +599,7 @@ dispatch({ type: "SET_IS_LOADING_TENANTS", payload: false });
 	};
 
 	const searchQuery = searchParams.get("search") || "";
-	const roleFilter = searchParams.get("role") || "all";
+	const [roleFilter, setRoleFilter] = useState(initialRoleFilter ?? "all");
 
 	const handleSearch = (term: string) => {
 const params = new URLSearchParams(searchParams);
@@ -757,6 +613,8 @@ router.push(`?${params.toString()}`);
 };
 
 const handleRoleFilterChange = (newFilter: string) => {
+const nextFilter = newFilter === "admin" || newFilter === "user" ? newFilter : "all";
+setRoleFilter(nextFilter);
 const params = new URLSearchParams(searchParams);
 if (newFilter && newFilter !== "all") {
 params.set("role", newFilter);
@@ -812,15 +670,6 @@ dispatch({ type: "SET_IS_SAVING", payload: false });
 }
 };
 
-const startItem =
-users.length > 0
-? (pagination.currentPage - 1) * pagination.itemsPerPage + 1
-: 0;
-const endItem = Math.min(
-pagination.currentPage * pagination.itemsPerPage,
-pagination.totalItems,
-);
-
 if (!isMounted) return null;
 
 return (
@@ -841,8 +690,6 @@ onSearch={handleSearch}
 users={users}
 showTenant={showTenant}
 pagination={pagination}
-startItem={startItem}
-endItem={endItem}
 onPageChange={handlePageChange}
 onOpenEdit={openEdit}
 onOpenRoleDialog={openRoleDialog}

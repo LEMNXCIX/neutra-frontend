@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useSyncExternalStore } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -29,10 +29,12 @@ const defaultConfig: Partial<WhatsAppConfig> = {
 	phoneNumberId: "",
 	businessAccountId: "",
 	accessToken: "",
-	webhookVerifyToken:
-		process.env.NEXT_PUBLIC_WHATSAPP_VERIFY_TOKEN ||
-		"neutra_whatsapp_verify_token",
+	webhookVerifyToken: "",
 };
+
+const emptySubscribe = () => () => {};
+const getClientOrigin = () => window.location.origin;
+const getServerOrigin = () => "";
 
 export function WhatsAppConfigForm({ initialConfig }: WhatsAppConfigFormProps) {
 	// A missing config (404) is a valid state: show the empty form, not a spinner.
@@ -40,6 +42,11 @@ export function WhatsAppConfigForm({ initialConfig }: WhatsAppConfigFormProps) {
 	const [isSaving, setIsSaving] = useState(false);
 	const [config, setConfig] = useState<Partial<WhatsAppConfig>>(
 		initialConfig ? { ...defaultConfig, ...initialConfig } : defaultConfig,
+	);
+	const callbackOrigin = useSyncExternalStore(
+		emptySubscribe,
+		getClientOrigin,
+		getServerOrigin,
 	);
 
 	const loadConfig = async () => {
@@ -243,7 +250,7 @@ export function WhatsAppConfigForm({ initialConfig }: WhatsAppConfigFormProps) {
                             <Label>URL de callback</Label>
                             <div className="flex gap-2">
                                 <Input
-                                    value={`${typeof window !== "undefined" ? window.location.origin : ""}/api/webhooks/whatsapp`}
+                                    value={`${callbackOrigin}/api/webhooks/whatsapp`}
                                     readOnly
                                     className="bg-muted"
                                 />

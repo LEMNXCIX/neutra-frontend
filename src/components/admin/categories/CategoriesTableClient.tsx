@@ -1,4 +1,9 @@
 "use client";
+import { TablePagination, MobileTablePagination } from "@/components/admin/shared/TablePagination";
+
+import { AdminStatCard as StatCard } from "@/components/admin/shared/AdminStatCard";
+import { FilterSelect } from "@/components/admin/shared/FilterSelect";
+
 
 import React, { Suspense, useRef, useReducer, useSyncExternalStore } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -36,8 +41,6 @@ import {
   Folder,
   Package,
   TrendingUp,
-  ChevronLeft,
-  ChevronRight,
 } from "lucide-react";
 import {
   Accordion,
@@ -75,31 +78,6 @@ type Props = {
   isSuperAdmin?: boolean;
 };
 
-const StatCard = ({
-  icon: Icon,
-  title,
-  value,
-  color,
-}: {
-  icon: React.ElementType;
-  title: string;
-  value: string | number;
-  color: string;
-}) => (
-  <Card>
-    <CardContent className="pt-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm text-muted-foreground">{title}</p>
-          <p className="text-2xl font-bold mt-1">{value}</p>
-        </div>
-        <div className={`p-3 rounded-full ${color}`}>
-          <Icon className="size-6" />
-        </div>
-      </div>
-    </CardContent>
-  </Card>
-);
 
 const CategoryFormFields = ({
   form,
@@ -174,19 +152,19 @@ const emptySubscribe = () => () => {};
 
 const CategoriesDesktopStats = ({ stats }: { stats: Stats }) => (
   <div className="hidden md:grid md:grid-cols-3 gap-4">
-    <StatCard
+    <StatCard iconClassName="size-6"
       icon={Folder}
       title="Total de Categorías"
       value={stats.totalCategories}
       color="bg-primary/10 text-primary"
     />
-    <StatCard
+    <StatCard iconClassName="size-6"
       icon={Package}
       title="Total de Productos"
       value={stats.totalProducts}
       color="bg-accent text-accent-foreground"
     />
-    <StatCard
+    <StatCard iconClassName="size-6"
       icon={TrendingUp}
       title="Prom. Productos/Categoría"
       value={stats.averageProductsPerCategory}
@@ -208,19 +186,19 @@ const CategoriesMobileStats = ({ stats }: { stats: Stats }) => (
       </AccordionTrigger>
       <AccordionContent className="px-4 pb-4 pt-2">
         <div className="grid grid-cols-1 gap-4">
-          <StatCard
+          <StatCard iconClassName="size-6"
             icon={Folder}
             title="Total de Categorías"
             value={stats.totalCategories}
             color="bg-primary/10 text-primary"
           />
-          <StatCard
+          <StatCard iconClassName="size-6"
             icon={Package}
             title="Total de Productos"
             value={stats.totalProducts}
             color="bg-accent text-accent-foreground"
           />
-          <StatCard
+          <StatCard iconClassName="size-6"
             icon={TrendingUp}
             title="Prom. Productos/Categoría"
             value={stats.averageProductsPerCategory}
@@ -288,19 +266,12 @@ const CategoriesSearchBar = ({
 
         {isSuperAdmin && (
           <div className="w-[180px]">
-            <Select
+            <FilterSelect
               value={tenantFilter}
               onValueChange={onTenantFilterChange}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Todos los tenants" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">
-                  Todos los tenants
-                </SelectItem>
-              </SelectContent>
-            </Select>
+              placeholder="Todos los tenants"
+              options={[{ value: "all", label: "Todos los tenants" }]}
+            />
           </div>
         )}
       </div>
@@ -419,7 +390,7 @@ const CategoriesDesktopTable = ({
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     <Button
-                      size="icon"
+                      size="icon" aria-label="Editar categoría"
                       variant="ghost"
                       className="size-8 rounded-full hover:bg-primary/5 hover:text-primary"
                       onClick={() => onEdit(c)}
@@ -427,7 +398,7 @@ const CategoriesDesktopTable = ({
                       <Edit className="size-4" />
                     </Button>
                     <Button
-                      size="icon"
+                      size="icon" aria-label="Eliminar categoría"
                       variant="ghost"
                       className="size-8 rounded-full hover:bg-destructive/5 hover:text-destructive"
                       onClick={() =>
@@ -452,56 +423,7 @@ const CategoriesDesktopTable = ({
       </Table>
     </div>
 
-    {pagination.totalItems > 0 && (
-      <div className="flex flex-col sm:flex-row items-center justify-between px-4 py-3 border-t gap-3">
-        <div className="text-sm text-muted-foreground">
-          Mostrando{" "}
-          {(pagination.currentPage - 1) *
-            pagination.itemsPerPage +
-            1}{" "}
-          a{" "}
-          {Math.min(
-            pagination.currentPage *
-              pagination.itemsPerPage,
-            pagination.totalItems,
-          )}{" "}
-          de {pagination.totalItems} resultados
-        </div>
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() =>
-              onPageChange(pagination.currentPage - 1)
-            }
-            disabled={pagination.currentPage === 1}
-          >
-            <ChevronLeft className="size-4 mr-1" />
-            Anterior
-          </Button>
-          <div className="hidden sm:flex items-center gap-1">
-            <span className="text-sm text-muted-foreground px-2">
-              Página {pagination.currentPage} de{" "}
-              {pagination.totalPages}
-            </span>
-          </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() =>
-              onPageChange(pagination.currentPage + 1)
-            }
-            disabled={
-              pagination.currentPage ===
-              pagination.totalPages || pagination.totalPages === 0
-            }
-          >
-            Siguiente
-            <ChevronRight className="size-4 ml-1" />
-          </Button>
-        </div>
-      </div>
-    )}
+    <TablePagination pagination={pagination} onPageChange={onPageChange} />
   </Card>
 );
 
@@ -564,7 +486,7 @@ const CategoriesMobileCards = ({
             </div>
             <div className="flex gap-2">
               <Button
-                size="icon"
+                size="icon" aria-label="Editar categoría"
                 variant="outline"
                 className="size-10 rounded-lg"
                 onClick={() => onEdit(c)}
@@ -572,7 +494,7 @@ const CategoriesMobileCards = ({
                 <Edit className="size-4" />
               </Button>
               <Button
-                size="icon"
+                size="icon" aria-label="Eliminar categoría"
                 variant="outline"
                 className="size-10 border-destructive/20 text-destructive rounded-lg hover:bg-destructive/10"
                 onClick={() => onDelete(c.id)}
@@ -590,39 +512,7 @@ const CategoriesMobileCards = ({
       </Card>
     ))}
 
-    {pagination.totalItems > 0 && (
-      <Card className="md:hidden">
-        <div className="flex items-center justify-between px-4 py-3">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() =>
-              onPageChange(pagination.currentPage - 1)
-            }
-            disabled={pagination.currentPage === 1}
-          >
-            <ChevronLeft className="size-4" />
-          </Button>
-          <span className="text-sm text-muted-foreground">
-            Página {pagination.currentPage} de{" "}
-            {pagination.totalPages}
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() =>
-              onPageChange(pagination.currentPage + 1)
-            }
-            disabled={
-              pagination.currentPage ===
-              pagination.totalPages || pagination.totalPages === 0
-            }
-          >
-            <ChevronRight className="size-4" />
-          </Button>
-        </div>
-      </Card>
-    )}
+    <MobileTablePagination pagination={pagination} onPageChange={onPageChange} />
   </div>
 );
 

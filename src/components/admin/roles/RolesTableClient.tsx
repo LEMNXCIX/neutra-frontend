@@ -1,4 +1,7 @@
 "use client";
+import { AdminStatCard as StatCard } from "@/components/admin/shared/AdminStatCard";
+import { AdminCardActions } from "@/components/admin/shared/AdminCardActions";
+
 
 import React, { useReducer, useRef, useSyncExternalStore, Suspense } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
@@ -84,31 +87,6 @@ console.error("Error al actualizar permisos:", err);
 }
 };
 
-const StatCard = ({
-icon: Icon,
-title,
-value,
-color,
-}: {
-icon: React.ElementType;
-title: string;
-value: string | number;
-color: string;
-}) => (
-<Card>
-<CardContent className="pt-6">
-<div className="flex items-center justify-between">
-<div>
-<p className="text-sm text-muted-foreground">{title}</p>
-<p className="text-2xl font-bold mt-1">{value}</p>
-</div>
-<div className={`p-3 rounded-full ${color}`}>
-<Icon className="size-6" />
-</div>
-</div>
-</CardContent>
-</Card>
-);
 
 function RoleFormFields({
 form,
@@ -129,6 +107,8 @@ onSearchChange: (value: string) => void;
 togglePermission: (id: string) => void;
 prefix: string;
 }) {
+const selectedPermissionIds = new Set(form.permissionIds);
+
 return (
 <div className="space-y-4">
 <div className="space-y-2">
@@ -157,7 +137,7 @@ return (
 ) : (
 availablePermissions.map((permission) => (
 <div key={permission.id} className="flex items-center gap-2">
-<Checkbox id={`${prefix}-${permission.id}`} checked={form.permissionIds.includes(permission.id)} onCheckedChange={() => togglePermission(permission.id)} />
+<Checkbox id={`${prefix}-${permission.id}`} checked={selectedPermissionIds.has(permission.id)} onCheckedChange={() => togglePermission(permission.id)} />
 <label htmlFor={`${prefix}-${permission.id}`} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
 {permission.name}
 {permission.description && (<span className="text-xs text-muted-foreground ml-2">({permission.description})</span>)}
@@ -397,7 +377,7 @@ PERMISOS
 <TableCell className="text-right">
 <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
 <Button
-size="icon"
+size="icon" aria-label="Editar rol"
 variant="ghost"
 className="size-8 rounded-full hover:bg-primary/5 hover:text-primary"
 onClick={() =>
@@ -407,7 +387,7 @@ openEdit(role)
 <Edit className="size-4" />
 </Button>
 <Button
-size="icon"
+size="icon" aria-label="Eliminar rol"
 variant="ghost"
 className="size-8 rounded-full hover:bg-destructive/5 hover:text-destructive"
 onClick={() =>
@@ -634,35 +614,11 @@ permisos
 </Badge>
 </div>
 
-<div className="flex gap-2 pt-2 border-t">
-<Button
-size="sm"
-variant="outline"
-className="flex-1"
-onClick={() => openEdit(role)}
->
-<Edit className="size-4 mr-2" />
-Editar
-</Button>
-<Button
-size="sm"
-variant="outline"
-className="flex-1"
-onClick={() =>
-handleDelete(role.id)
-}
-disabled={
-isDeletingRole === role.id
-}
->
-{isDeletingRole === role.id ? (
-<Spinner className="size-4 mr-2" />
-) : (
-<Trash2 className="size-4 mr-2" />
-)}
-Eliminar
-</Button>
-</div>
+<AdminCardActions
+  onEdit={() => openEdit(role)}
+  onDelete={() => handleDelete(role.id)}
+  isDeleting={isDeletingRole === role.id}
+/>
 </CardContent>
 </Card>
 ))
@@ -1018,37 +974,11 @@ className="overflow-hidden"
 </p>
 </div>
 
-<div className="flex gap-2 pt-2 border-t">
-<Button
-size="sm"
-variant="outline"
-className="flex-1"
-onClick={() => openPermEdit(permission)}
->
-<Edit className="size-4 mr-2" />
-Editar
-</Button>
-<Button
-size="sm"
-variant="outline"
-className="flex-1"
-onClick={() =>
-handlePermDelete(
-permission.id,
-)
-}
-disabled={
-isDeletingPerm === permission.id
-}
->
-{isDeletingPerm === permission.id ? (
-<Spinner className="size-4 mr-2" />
-) : (
-<Trash2 className="size-4 mr-2" />
-)}
-Eliminar
-</Button>
-</div>
+<AdminCardActions
+  onEdit={() => openPermEdit(permission)}
+  onDelete={() => handlePermDelete(permission.id)}
+  isDeleting={isDeletingPerm === permission.id}
+/>
 </CardContent>
 </Card>
 ))
@@ -1507,8 +1437,8 @@ return (
 <h2 className="text-xl font-medium">Gestión de roles y permisos</h2>
 </div>
 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-<StatCard icon={Shield} title="Total de roles" value={stats.totalRoles} color="bg-primary/10 text-primary" />
-<StatCard icon={Key} title="Total de permisos" value={stats.totalPermissions} color="bg-muted text-muted-foreground" />
+<StatCard iconClassName="size-6" icon={Shield} title="Total de roles" value={stats.totalRoles} color="bg-primary/10 text-primary" />
+<StatCard iconClassName="size-6" icon={Key} title="Total de permisos" value={stats.totalPermissions} color="bg-muted text-muted-foreground" />
 </div>
 <Tabs defaultValue="roles" className="w-full">
 <TabsList className="grid w-full max-w-md grid-cols-2">

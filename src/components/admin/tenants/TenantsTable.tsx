@@ -12,8 +12,6 @@ import {
     Table,
     TableBody,
     TableCell,
-    TableHead,
-    TableHeader,
     TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
@@ -34,6 +32,7 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { useConfirm } from "@/hooks/use-confirm";
+import { AdminTableHeader } from "@/components/admin/shared/AdminTableHeader";
 
 const EMPTY_TENANTS: Tenant[] = [];
 const EMPTY_PLATFORM_FEATURES: any[] = [];
@@ -81,7 +80,7 @@ function TenantRow({
                 <div className="flex justify-end gap-2">
                     <Button
                         variant="ghost"
-                        size="icon"
+                        size="icon" aria-label="Gestionar funciones"
                         onClick={() => onFeatures(tenant)}
                         title="Gestionar Funciones"
                     >
@@ -89,14 +88,14 @@ function TenantRow({
                     </Button>
                     <Button
                         variant="ghost"
-                        size="icon"
+                        size="icon" aria-label="Editar tenant"
                         onClick={() => onEdit(tenant)}
                     >
                         <Edit className="size-4" />
                     </Button>
                     <Button
                         variant="ghost"
-                        size="icon"
+                        size="icon" aria-label="Eliminar tenant"
                         onClick={() => onDelete(tenant)}
                         className="text-destructive hover:text-destructive"
                     >
@@ -132,7 +131,7 @@ function TenantCard({
                     <div className="flex gap-2">
                         <Button
                             variant="ghost"
-                            size="icon"
+                            size="icon" aria-label="Gestionar funciones"
                             onClick={() => onFeatures(tenant)}
                             title="Gestionar Funciones"
                         >
@@ -140,14 +139,14 @@ function TenantCard({
                         </Button>
                         <Button
                             variant="ghost"
-                            size="icon"
+                            size="icon" aria-label="Editar tenant"
                             onClick={() => onEdit(tenant)}
                         >
                             <Edit className="size-4" />
                         </Button>
                         <Button
                             variant="ghost"
-                            size="icon"
+                            size="icon" aria-label="Eliminar tenant"
                             onClick={() => onDelete(tenant)}
                             className="text-destructive hover:text-destructive"
                         >
@@ -329,7 +328,7 @@ export function TenantsTable({
                         </div>
                         <Button
                             variant="outline"
-                            size="icon"
+                            size="icon" aria-label="Actualizar tenants"
                             onClick={loadTenants}
                         >
                             <RefreshCw
@@ -341,17 +340,14 @@ export function TenantsTable({
                     {/* Desktop Table View */}
                     <div className="hidden md:block rounded-md border overflow-x-auto">
                         <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Name</TableHead>
-                                    <TableHead>Slug</TableHead>
-                                    <TableHead>Type</TableHead>
-                                    <TableHead>Created</TableHead>
-                                    <TableHead className="text-right">
-                                        Actions
-                                    </TableHead>
-                                </TableRow>
-                            </TableHeader>
+                            <AdminTableHeader
+                                columns={[
+                                    { label: "Name" },
+                                    { label: "Slug" },
+                                    { label: "Type" },
+                                    { label: "Created" },
+                                ]}
+                            />
                             <TableBody>
                                 {state.loading && state.tenants.length === 0 ? (
                                     <TableRow>

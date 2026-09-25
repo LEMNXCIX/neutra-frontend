@@ -83,7 +83,7 @@ export default function AdminSidebar({ items }: AdminSidebarProps) {
     return (
         <aside
             className={cn(
-                "hidden md:flex flex-col border-r border-border bg-background transition-all duration-300 ease-in-out",
+                "hidden md:flex flex-col border-r border-border bg-background transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-300 ease-in-out",
                 sidebarOpen ? "w-64" : "w-20",
             )}
         >
@@ -120,7 +120,7 @@ export default function AdminSidebar({ items }: AdminSidebarProps) {
                                     <Button
                                         variant={isActive ? "default" : "ghost"}
                                         className={cn(
-                                            "w-full justify-start gap-3 h-10 rounded-md transition-all font-medium text-xs tracking-tight",
+                                            "w-full justify-start gap-3 h-10 rounded-md transition-[color,background-color,border-color,box-shadow,opacity,transform] font-medium text-xs tracking-tight",
                                             isActive
                                                 ? "bg-primary text-primary-foreground shadow-sm"
                                                 : "text-muted-foreground hover:bg-muted hover:text-foreground",
@@ -150,7 +150,7 @@ export default function AdminSidebar({ items }: AdminSidebarProps) {
             <div className="p-4 border-t border-border/50">
                 <Link
                     href="/"
-                    className="group flex items-center gap-3 px-3 py-2 text-xs font-medium text-muted-foreground hover:text-foreground transition-all"
+                    className="group flex items-center gap-3 px-3 py-2 text-xs font-medium text-muted-foreground hover:text-foreground transition-[color,background-color,border-color,box-shadow,opacity,transform]"
                 >
                     <ArrowLeft
                         size={14}

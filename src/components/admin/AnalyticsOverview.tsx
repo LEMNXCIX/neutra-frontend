@@ -65,7 +65,7 @@ const StatCard = ({
   variant?: ColorVariant;
   trend?: 'up' | 'down';
 }) => (
-  <Card className="group relative overflow-hidden border-border bg-card transition-all duration-300 hover:shadow-2xl hover:shadow-primary/5 hover:translate-y-[-2px]">
+  <Card className="group relative overflow-hidden border-border bg-card transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-300 hover:shadow-2xl hover:shadow-primary/5 hover:translate-y-[-2px]">
     <div className={cn("absolute top-0 left-0 w-1 h-full opacity-0 group-hover:opacity-100 transition-opacity", COLOR_VARIANTS[variant].bar)} />
     <CardContent className="pt-6">
       <div className="flex items-start justify-between">

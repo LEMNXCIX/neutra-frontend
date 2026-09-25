@@ -16,12 +16,14 @@ import type { Tenant } from "@/types/tenant";
 import { toast } from "sonner";
 import { Clock } from "lucide-react";
 import {
-    DEFAULT_WORKING_HOURS,
     HolidaysEditor,
     WorkingHoursEditor,
+} from "@/components/admin/booking/working-hours-editor";
+import {
+    DEFAULT_WORKING_HOURS,
     normalizeWorkingHours,
     type WorkingHours,
-} from "@/components/admin/booking/working-hours-editor";
+} from "@/components/admin/booking/working-hours-utils";
 
 export function BusinessHoursClient() {
     const { tenantId } = useTenantStore();

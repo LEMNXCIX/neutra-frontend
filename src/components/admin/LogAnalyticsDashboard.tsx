@@ -72,7 +72,7 @@ function LogAnalyticsStats({
                 />
                 <MetricCard
                     label="Rendimiento"
-                    value={stats.totalRequests.toLocaleString()}
+                    value={stats.totalRequests.toLocaleString("es-ES")}
                     subtext="Eventos procesados en total"
                 />
             </div>
@@ -96,7 +96,7 @@ function LogAnalyticsStats({
                                         <span>
                                             {new Date(
                                                 day.date,
-                                            ).toLocaleDateString()}
+                                            ).toLocaleDateString("es-ES", { timeZone: "UTC" })}
                                         </span>
                                         <span className="text-foreground">
                                             {day.total} REQS /{" "}
@@ -107,11 +107,11 @@ function LogAnalyticsStats({
                                     </div>
                                     <div className="h-4 w-full bg-muted rounded-full relative overflow-hidden">
                                         <div
-                                            className="h-full bg-primary/40 rounded-full transition-all duration-1000"
+                                            className="h-full bg-primary/40 rounded-full transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-1000"
                                             style={{ width: `${barWidth}%` }}
                                         />
                                         <div
-                                            className="absolute top-0 left-0 h-full bg-rose-500 transition-all duration-1000"
+                                            className="absolute top-0 left-0 h-full bg-rose-500 transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-1000"
                                             style={{
                                                 width: `${(day.errors / maxVal) * 100}%`,
                                             }}
@@ -133,9 +133,9 @@ function LogAnalyticsStats({
                                 System stable / No errors detected
                             </div>
                         ) : (
-                            stats.topFailedEndpoints.map((endpoint, i) => (
+                            stats.topFailedEndpoints.map((endpoint) => (
                                 <div
-                                    key={`${endpoint.url}-${i}`}
+                                    key={`${endpoint.method}-${endpoint.url}`}
                                     className="p-4 flex justify-between items-center hover:bg-muted/30 transition-colors"
                                 >
                                     <div className="space-y-1">
@@ -217,7 +217,8 @@ export default function LogAnalyticsDashboard() {
                 </h3>
                 <div className="flex gap-4">
                     <select
-                        className="bg-background border border-border rounded-lg px-4 py-1.5 font-semibold text-[10px] outline-none focus:border-primary transition-all shadow-sm"
+                        aria-label="Período de análisis"
+                        className="bg-background border border-border rounded-lg px-4 py-1.5 font-semibold text-[10px] outline-none focus:border-primary transition-[color,background-color,border-color,box-shadow,opacity,transform] shadow-sm"
                         value={timeframe}
                         onChange={(e) => handleTimeframeChange(e.target.value)}
                     >
@@ -226,6 +227,7 @@ export default function LogAnalyticsDashboard() {
                     </select>
                     <button
                         type="button"
+                        aria-label="Actualizar métricas"
                         onClick={handleRefresh}
                         className="hover:rotate-180 transition-transform duration-500 p-1.5 bg-muted rounded-lg text-muted-foreground hover:text-foreground"
                     >
@@ -282,7 +284,7 @@ function MetricCard({
                 ) : (
                     <Zap
                         size={20}
-                        className="text-primary opacity-20 group-hover:opacity-100 transition-all"
+                        className="text-primary opacity-20 group-hover:opacity-100 transition-[color,background-color,border-color,box-shadow,opacity,transform]"
                     />
                 )}
             </div>

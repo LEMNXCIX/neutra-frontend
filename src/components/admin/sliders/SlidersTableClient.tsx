@@ -1,4 +1,9 @@
 "use client";
+import { TablePagination, MobileTablePagination } from "@/components/admin/shared/TablePagination";
+
+import { AdminStatCard as StatCard } from "@/components/admin/shared/AdminStatCard";
+import { FilterSelect } from "@/components/admin/shared/FilterSelect";
+
 
 import React, { useRef, useState, useCallback, useSyncExternalStore, useReducer, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -39,8 +44,6 @@ import {
     ImageIcon,
     CheckCircle2,
     XCircle,
-    ChevronLeft,
-    ChevronRight,
     Upload,
 } from "lucide-react";
 import {
@@ -74,31 +77,6 @@ type Props = {
     isSuperAdmin?: boolean;
 };
 
-const StatCard = ({
-  icon: Icon,
-  title,
-  value,
-  color,
-}: {
-  icon: React.ElementType;
-  title: string;
-  value: string | number;
-  color: string;
-}) => (
-  <Card>
-    <CardContent className="pt-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm text-muted-foreground">{title}</p>
-          <p className="text-2xl font-bold mt-1">{value}</p>
-        </div>
-        <div className={`p-3 rounded-full ${color}`}>
-          <Icon className="size-6 text-white" />
-        </div>
-      </div>
-    </CardContent>
-  </Card>
-);
 
 function SliderFormFields({
   form,
@@ -224,16 +202,17 @@ function FilterBar({ statusFilter, searchQuery, onFilterChange, onSearch }: {
     <Card>
       <CardContent className="pt-6">
         <div className="flex flex-wrap gap-3">
-          <Select value={statusFilter} onValueChange={onFilterChange}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Todos los estados" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos los estados</SelectItem>
-              <SelectItem value="active">Activo</SelectItem>
-              <SelectItem value="inactive">Inactivo</SelectItem>
-            </SelectContent>
-          </Select>
+          <FilterSelect
+            value={statusFilter}
+            onValueChange={onFilterChange}
+            placeholder="Todos los estados"
+            triggerClassName="w-[180px]"
+            options={[
+              { value: "all", label: "Todos los estados" },
+              { value: "active", label: "Activo" },
+              { value: "inactive", label: "Inactivo" },
+            ]}
+          />
           <div className="flex gap-2 flex-1">
             <Input
               placeholder="Buscar por título, ID o descripción..."
@@ -339,10 +318,10 @@ function DesktopSlidersTable({ sliders, isSuperAdmin, isDeleting, onEdit, onDele
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button size="icon" variant="ghost" className="size-8 rounded-full hover:bg-primary/5 hover:text-primary" onClick={() => onEdit(s)} disabled={isDeleting === s.id}>
+                      <Button size="icon" aria-label="Editar slider" variant="ghost" className="size-8 rounded-full hover:bg-primary/5 hover:text-primary" onClick={() => onEdit(s)} disabled={isDeleting === s.id}>
                         {isDeleting === s.id ? <Spinner className="size-4" /> : <Edit className="size-4" />}
                       </Button>
-                      <Button size="icon" variant="ghost" className="size-8 rounded-full hover:text-destructive hover:bg-destructive/10" onClick={() => onDelete(s.id)} disabled={isDeleting === s.id}>
+                      <Button size="icon" aria-label="Eliminar slider" variant="ghost" className="size-8 rounded-full hover:text-destructive hover:bg-destructive/10" onClick={() => onDelete(s.id)} disabled={isDeleting === s.id}>
                         {isDeleting === s.id ? <Spinner className="size-4" /> : <Trash2 className="size-4" />}
                       </Button>
                     </div>
@@ -353,32 +332,7 @@ function DesktopSlidersTable({ sliders, isSuperAdmin, isDeleting, onEdit, onDele
           </TableBody>
         </Table>
       </div>
-      {pagination.totalItems > 0 && (
-        <div className="flex flex-col sm:flex-row items-center justify-between px-4 py-3 border-t gap-3">
-          <div className="text-sm text-muted-foreground">
-            Mostrando {(pagination.currentPage - 1) * pagination.itemsPerPage + 1} a{" "}
-            {Math.min(pagination.currentPage * pagination.itemsPerPage, pagination.totalItems)} de {pagination.totalItems} resultados
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={() => onPageChange(pagination.currentPage - 1)} disabled={pagination.currentPage === 1}>
-              <ChevronLeft className="size-4 mr-1" /> Anterior
-            </Button>
-            <div className="hidden sm:flex items-center gap-1">
-              <span className="text-sm text-muted-foreground px-2">
-                Página {pagination.currentPage} de {pagination.totalPages}
-              </span>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onPageChange(pagination.currentPage + 1)}
-              disabled={pagination.currentPage === pagination.totalPages || pagination.totalPages === 0}
-            >
-              Siguiente <ChevronRight className="size-4 ml-1" />
-            </Button>
-          </div>
-        </div>
-      )}
+      <TablePagination pagination={pagination} onPageChange={onPageChange} />
     </Card>
   );
 }
@@ -434,26 +388,7 @@ function MobileSlidersCards({ sliders, onEdit, onDelete, pagination, onPageChang
           </CardContent>
         </Card>
       ))}
-      {pagination.totalItems > 0 && (
-        <Card className="lg:hidden">
-          <div className="flex items-center justify-between px-4 py-3">
-            <Button variant="outline" size="sm" onClick={() => onPageChange(pagination.currentPage - 1)} disabled={pagination.currentPage === 1}>
-              <ChevronLeft className="size-4" />
-            </Button>
-            <span className="text-sm text-muted-foreground">
-              Página {pagination.currentPage} de {pagination.totalPages}
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onPageChange(pagination.currentPage + 1)}
-              disabled={pagination.currentPage === pagination.totalPages || pagination.totalPages === 0}
-            >
-              <ChevronRight className="size-4" />
-            </Button>
-          </div>
-        </Card>
-      )}
+      <MobileTablePagination pagination={pagination} onPageChange={onPageChange} />
     </div>
   );
 }
