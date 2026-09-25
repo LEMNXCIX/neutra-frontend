@@ -23,7 +23,7 @@ import {
     AlertCircle,
     ArrowRight,
 } from "lucide-react";
-import Logo from "@/components/logo";
+import { AuthBrandHeader } from "@/components/auth/AuthBrandHeader";
 
 export function LoginForm() {
     const login = useAuthStore((state) => state.login);
@@ -57,19 +57,10 @@ export function LoginForm() {
 
     return (
         <div className="w-full max-w-[440px] space-y-8">
-            <div className="text-center space-y-4">
-                <div className="inline-flex items-center justify-center size-16 rounded-xl bg-primary/10 text-primary mb-2 transition-transform hover:scale-110 duration-500 shadow-sm">
-                    <Logo size={36} />
-                </div>
-                <div className="space-y-1">
-                    <h1 className="text-3xl font-bold tracking-tight text-foreground">
-                        Bienvenido de Nuevo
-                    </h1>
-                    <p className="text-muted-foreground font-medium text-sm">
-                        Acceso seguro a tu cuenta
-                    </p>
-                </div>
-            </div>
+            <AuthBrandHeader
+                title="Bienvenido de Nuevo"
+                subtitle="Acceso seguro a tu cuenta"
+            />
 
             <Card className="t-card border-none shadow-2xl relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-full h-1.5 bg-primary" />
@@ -99,7 +90,7 @@ export function LoginForm() {
                                     placeholder="juan@ejemplo.com"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-all focus:border-primary"
+                                    className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform] focus:border-primary"
                                     disabled={loading}
                                 />
                             </div>
@@ -130,7 +121,7 @@ export function LoginForm() {
                                     onChange={(e) =>
                                         setPassword(e.target.value)
                                     }
-                                    className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-all focus:border-primary"
+                                    className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform] focus:border-primary"
                                     disabled={loading}
                                 />
                             </div>
@@ -150,7 +141,7 @@ export function LoginForm() {
 
                         <Button
                             type="submit"
-                            className="w-full h-12 text-sm font-bold shadow-lg shadow-primary/20 hover:-translate-y-0.5 transition-all rounded-xl"
+                            className="w-full h-12 text-sm font-bold shadow-lg shadow-primary/20 hover:-translate-y-0.5 transition-[color,background-color,border-color,box-shadow,opacity,transform] rounded-xl"
                             disabled={loading}
                         >
                             {loading ? (
@@ -179,7 +170,7 @@ export function LoginForm() {
                             </p>
                             <Button
                                 variant="outline"
-                                className="w-full h-12 rounded-xl border-border font-bold text-xs transition-all hover:bg-muted"
+                                className="w-full h-12 rounded-xl border-border font-bold text-xs transition-[color,background-color,border-color,box-shadow,opacity,transform] hover:bg-muted"
                                 asChild
                             >
                                 <Link href="/register">Crear Nueva Cuenta</Link>

@@ -93,7 +93,7 @@ function ResetPasswordForm() {
                 <CardFooter className="justify-center border-t border-border/50 p-8 bg-muted/10">
                     <Button
                         variant="outline"
-                        className="w-full h-12 rounded-xl border-border font-bold text-xs transition-all hover:bg-muted"
+                        className="w-full h-12 rounded-xl border-border font-bold text-xs transition-[color,background-color,border-color,box-shadow,opacity,transform] hover:bg-muted"
                         asChild
                     >
                         <Link href="/forgot-password">Solicitar un nuevo enlace →</Link>
@@ -123,7 +123,7 @@ function ResetPasswordForm() {
                         Tu contraseña se actualizó correctamente. Serás redirigido al inicio de sesión en unos instantes.
                     </p>
                     <Button
-                        className="w-full h-12 rounded-xl font-bold text-sm shadow-lg shadow-primary/20 transition-all hover:-translate-y-0.5"
+                        className="w-full h-12 rounded-xl font-bold text-sm shadow-lg shadow-primary/20 transition-[color,background-color,border-color,box-shadow,opacity,transform] hover:-translate-y-0.5"
                         asChild
                     >
                         <Link href="/login">
@@ -161,7 +161,7 @@ function ResetPasswordForm() {
                                 id="password"
                                 type="password"
                                 required
-                                className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-all focus:border-primary"
+                                className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform] focus:border-primary"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                             />
@@ -180,7 +180,7 @@ function ResetPasswordForm() {
                                 id="confirm-password"
                                 type="password"
                                 required
-                                className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-all focus:border-primary"
+                                className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform] focus:border-primary"
                                 value={confirmPassword}
                                 onChange={(e) =>
                                     setConfirmPassword(e.target.value)
@@ -190,7 +190,7 @@ function ResetPasswordForm() {
                     </div>
                     <Button
                         type="submit"
-                        className="w-full h-12 text-sm font-bold shadow-lg shadow-primary/20 hover:-translate-y-0.5 transition-all rounded-xl mt-4"
+                        className="w-full h-12 text-sm font-bold shadow-lg shadow-primary/20 hover:-translate-y-0.5 transition-[color,background-color,border-color,box-shadow,opacity,transform] rounded-xl mt-4"
                         disabled={loading}
                     >
                         {loading ? (

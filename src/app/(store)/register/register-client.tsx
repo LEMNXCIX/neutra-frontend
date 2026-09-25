@@ -25,7 +25,7 @@ import {
   CheckCircle2,
   ArrowRight,
 } from "lucide-react";
-import Logo from "@/components/logo";
+import { AuthBrandHeader } from "@/components/auth/AuthBrandHeader";
 import { cn } from "@/lib/utils";
 
 const getPasswordStrength = (pass: string) => {
@@ -112,19 +112,10 @@ export function RegisterPageClient() {
         <main className="min-h-[80vh] flex items-center justify-center p-6 animate-slide-up py-20">
             <div className="w-full max-w-[480px] space-y-8">
                 {/* Logo/Brand Section */}
-                <div className="text-center space-y-4">
-                    <div className="inline-flex items-center justify-center size-16 rounded-xl bg-primary/10 text-primary mb-2 transition-transform hover:scale-110 duration-500 shadow-sm">
-                        <Logo size={36} />
-                    </div>
-                    <div className="space-y-1">
-                        <h1 className="text-3xl font-bold tracking-tight text-foreground">
-                            Unite a la red
-                        </h1>
-                        <p className="text-muted-foreground font-medium text-sm">
-                            Inicializá tu perfil profesional hoy
-                        </p>
-                    </div>
-                </div>
+                <AuthBrandHeader
+                    title="Unite a la red"
+                    subtitle="Inicializá tu perfil profesional hoy"
+                />
 
                 {/* Register Card */}
                 <Card className="t-card border-none shadow-2xl relative overflow-hidden">
@@ -157,7 +148,7 @@ export function RegisterPageClient() {
                   onChange={(e) =>
                     dispatch({ type: "SET_FIELD", field: "name", value: e.target.value })
                   }
-                                        className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-all focus:border-primary"
+                                        className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform] focus:border-primary"
                                         disabled={loading}
                                     />
                                 </div>
@@ -181,7 +172,7 @@ export function RegisterPageClient() {
                   onChange={(e) =>
                     dispatch({ type: "SET_FIELD", field: "email", value: e.target.value })
                   }
-                                        className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-all focus:border-primary"
+                                        className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform] focus:border-primary"
                                         disabled={loading}
                                     />
                                 </div>
@@ -205,7 +196,7 @@ export function RegisterPageClient() {
                   onChange={(e) =>
                     dispatch({ type: "SET_FIELD", field: "password", value: e.target.value })
                   }
-                                        className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-all focus:border-primary"
+                                        className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform] focus:border-primary"
                                         disabled={loading}
                                     />
                                 </div>
@@ -217,7 +208,7 @@ export function RegisterPageClient() {
                                                 <div
                                                     key={level}
                                                     className={cn(
-                                                        "h-1 flex-1 rounded-full transition-all duration-500",
+                                                        "h-1 flex-1 rounded-full transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-500",
                                                         level <=
                                                             passwordStrength.strength
                                                             ? passwordStrength.color
@@ -263,7 +254,7 @@ export function RegisterPageClient() {
                   onChange={(e) =>
                     dispatch({ type: "SET_FIELD", field: "confirmPassword", value: e.target.value })
                   }
-                                        className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-all focus:border-primary"
+                                        className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform] focus:border-primary"
                                         disabled={loading}
                                     />
                                 </div>
@@ -304,7 +295,7 @@ export function RegisterPageClient() {
                             {/* Submit Button */}
                             <Button
                                 type="submit"
-                                className="w-full h-12 text-sm font-bold shadow-lg shadow-primary/20 hover:-translate-y-0.5 transition-all rounded-xl"
+                                className="w-full h-12 text-sm font-bold shadow-lg shadow-primary/20 hover:-translate-y-0.5 transition-[color,background-color,border-color,box-shadow,opacity,transform] rounded-xl"
                                 disabled={loading}
                             >
                                 {loading ? (
@@ -335,7 +326,7 @@ export function RegisterPageClient() {
                                 </p>
                                 <Button
                                     variant="outline"
-                                    className="w-full h-12 rounded-xl border-border font-bold text-xs transition-all hover:bg-muted"
+                                    className="w-full h-12 rounded-xl border-border font-bold text-xs transition-[color,background-color,border-color,box-shadow,opacity,transform] hover:bg-muted"
                                     asChild
                                 >
                                     <Link href="/login">Identificar Sesión</Link>

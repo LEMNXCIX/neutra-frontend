@@ -76,7 +76,7 @@ export function OrderHistory({ initialOrders }: OrderHistoryProps) {
                 {orders.map((o) => (
                     <Card
                         key={o.id}
-                        className="overflow-hidden border-none shadow-lg rounded-[2rem] bg-background group hover:shadow-2xl transition-all duration-300"
+                        className="overflow-hidden border-none shadow-lg rounded-[2rem] bg-background group hover:shadow-2xl transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-300"
                     >
                         <CardHeader className="bg-muted/30 p-8 border-b border-border/50">
                             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -92,7 +92,7 @@ export function OrderHistory({ initialOrders }: OrderHistoryProps) {
                                         <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
                                             {new Date(
                                                 o.createdAt,
-                                            ).toLocaleDateString(undefined, {
+                                            ).toLocaleDateString("es-ES", { timeZone: "UTC",
                                                 dateStyle: "long",
                                             })}
                                         </p>
@@ -117,7 +117,7 @@ export function OrderHistory({ initialOrders }: OrderHistoryProps) {
                             <div className="flex flex-wrap gap-8 text-sm font-medium">
                                 <span className="flex items-center gap-2 text-muted-foreground">
                                     <Calendar className="size-4 text-primary" />{" "}
-                                    {new Date(o.createdAt).toLocaleDateString()}
+                                    {new Date(o.createdAt).toLocaleDateString("es-ES", { timeZone: "UTC" })}
                                 </span>
                                 <span className="flex items-center gap-2 text-muted-foreground">
                                     <Package className="size-4 text-primary" />{" "}

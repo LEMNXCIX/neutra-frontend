@@ -177,8 +177,9 @@ export function ProfileClient({
               )}
               <button
                 type="button"
+                aria-label="Cambiar foto de perfil"
                 onClick={openEditProfile}
-                className="absolute bottom-1 right-1 z-20 p-2.5 bg-background border border-border rounded-full shadow-lg hover:scale-110 active:scale-90 transition-all hover:border-primary/50"
+                className="absolute bottom-1 right-1 z-20 p-2.5 bg-background border border-border rounded-full shadow-lg hover:scale-110 active:scale-90 transition-[color,background-color,border-color,box-shadow,opacity,transform] hover:border-primary/50"
               >
                 <Camera className="size-4 text-foreground" />
               </button>
@@ -219,7 +220,7 @@ export function ProfileClient({
               <Button
                 onClick={openEditProfile}
                 size="lg"
-                className="h-14 px-10 rounded-xl font-bold bg-foreground text-background hover:bg-foreground/90 shadow-xl shadow-foreground/10 transition-all hover:-translate-y-1"
+                className="h-14 px-10 rounded-xl font-bold bg-foreground text-background hover:bg-foreground/90 shadow-xl shadow-foreground/10 transition-[color,background-color,border-color,box-shadow,opacity,transform] hover:-translate-y-1"
               >
                 <Edit className="size-4 mr-2" /> Editar perfil
               </Button>
@@ -230,7 +231,7 @@ export function ProfileClient({
                   await logout();
                   router.push("/login");
                 }}
-                className="h-14 px-10 rounded-xl font-bold border-2 border-border hover:bg-destructive hover:text-destructive-foreground hover:border-destructive transition-all"
+                className="h-14 px-10 rounded-xl font-bold border-2 border-border hover:bg-destructive hover:text-destructive-foreground hover:border-destructive transition-[color,background-color,border-color,box-shadow,opacity,transform]"
               >
                 <LogOut className="size-4 mr-2" /> Cerrar sesión
               </Button>
@@ -265,7 +266,7 @@ export function ProfileClient({
           <div className="space-y-6 p-8">
             <div className="flex flex-col items-center gap-4">
               <div className="relative group">
-                <Avatar className="size-24 border-2 border-border shadow-md group-hover:border-primary/30 transition-all">
+                <Avatar className="size-24 border-2 border-border shadow-md group-hover:border-primary/30 transition-[color,background-color,border-color,box-shadow,opacity,transform]">
                   <AvatarImage
                     src={editState.avatarPreview || user.avatar}
                   />
@@ -275,10 +276,11 @@ export function ProfileClient({
                 </Avatar>
                 <button
                   type="button"
+                  aria-label="Subir imagen de avatar"
                   onClick={() =>
                     fileInputRef.current?.click()
                   }
-                  className="absolute bottom-0 right-0 p-2 bg-primary text-primary-foreground rounded-full shadow-lg hover:scale-110 active:scale-95 transition-all"
+                  className="absolute bottom-0 right-0 p-2 bg-primary text-primary-foreground rounded-full shadow-lg hover:scale-110 active:scale-95 transition-[color,background-color,border-color,box-shadow,opacity,transform]"
                 >
                   <Camera className="size-4" />
                 </button>
@@ -305,7 +307,7 @@ export function ProfileClient({
                       name: e.target.value,
                     }})
                   }
-                  className="h-12 rounded-xl border-border focus:border-primary transition-all"
+                  className="h-12 rounded-xl border-border focus:border-primary transition-[color,background-color,border-color,box-shadow,opacity,transform]"
                 />
               </div>
               <div className="space-y-2">
@@ -321,7 +323,7 @@ export function ProfileClient({
                       email: e.target.value,
                     }})
                   }
-                  className="h-12 rounded-xl border-border focus:border-primary transition-all"
+                  className="h-12 rounded-xl border-border focus:border-primary transition-[color,background-color,border-color,box-shadow,opacity,transform]"
                 />
               </div>
             </div>

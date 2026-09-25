@@ -88,7 +88,7 @@ export function AppointmentHistory({
                 {initialAppointments.map((a) => (
                     <Card
                         key={a.id}
-                        className="overflow-hidden border-none shadow-lg rounded-[2rem] bg-background group hover:shadow-2xl transition-all duration-300"
+                        className="overflow-hidden border-none shadow-lg rounded-[2rem] bg-background group hover:shadow-2xl transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-300"
                     >
                         <CardHeader className="bg-muted/30 p-8 border-b border-border/50">
                             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -124,7 +124,7 @@ export function AppointmentHistory({
                                         <p className="text-base font-bold">
                                             {new Date(
                                                 a.startTime,
-                                            ).toLocaleDateString(undefined, {
+                                            ).toLocaleDateString("es-ES", { timeZone: "UTC",
                                                 dateStyle: "long",
                                             })}
                                         </p>
@@ -139,7 +139,7 @@ export function AppointmentHistory({
                                         <p className="text-base font-bold">
                                             {new Date(
                                                 a.startTime,
-                                            ).toLocaleTimeString([], {
+                                            ).toLocaleTimeString("es-ES", { timeZone: "UTC",
                                                 hour: "2-digit",
                                                 minute: "2-digit",
                                             })}

@@ -17,7 +17,7 @@ import { toast } from "sonner";
 import { authService } from "@/services/auth.service";
 import { Spinner } from "@/components/ui/spinner";
 import { Mail, ArrowLeft, CheckCircle2, ArrowRight } from "lucide-react";
-import Logo from "@/components/logo";
+import { AuthBrandHeader } from "@/components/auth/AuthBrandHeader";
 
 export function ForgotPasswordPageClient() {
     const [email, setEmail] = useState("");
@@ -66,7 +66,7 @@ export function ForgotPasswordPageClient() {
                         </p>
                         <Button
                             variant="outline"
-                            className="w-full h-12 rounded-xl border-border font-bold text-xs transition-all hover:bg-muted"
+                            className="w-full h-12 rounded-xl border-border font-bold text-xs transition-[color,background-color,border-color,box-shadow,opacity,transform] hover:bg-muted"
                             onClick={() => setSubmitted(false)}
                         >
                             Probar con otro correo
@@ -90,19 +90,10 @@ export function ForgotPasswordPageClient() {
         <div className="min-h-[70vh] flex items-center justify-center p-6 animate-slide-up py-20">
             <div className="w-full max-w-[440px] space-y-8">
                 {/* Logo Section */}
-                <div className="text-center space-y-4">
-                    <div className="inline-flex items-center justify-center size-16 rounded-xl bg-primary/10 text-primary mb-2 transition-transform hover:scale-110 duration-500 shadow-sm">
-                        <Logo size={36} />
-                    </div>
-                    <div className="space-y-1">
-                        <h1 className="text-3xl font-bold tracking-tight text-foreground">
-                            Recuperar cuenta
-                        </h1>
-                        <p className="text-muted-foreground font-medium text-sm">
-                            Restablecé tus credenciales de seguridad
-                        </p>
-                    </div>
-                </div>
+                <AuthBrandHeader
+                    title="Recuperar cuenta"
+                    subtitle="Restablecé tus credenciales de seguridad"
+                />
 
                 <Card className="t-card border-none shadow-2xl relative overflow-hidden">
                     <div className="absolute top-0 left-0 w-full h-1.5 bg-primary" />
@@ -130,7 +121,7 @@ export function ForgotPasswordPageClient() {
                                         type="email"
                                         placeholder="juan@ejemplo.com"
                                         required
-                                        className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-all focus:border-primary"
+                                        className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform] focus:border-primary"
                                         value={email}
                                         onChange={(e) =>
                                             setEmail(e.target.value)
@@ -140,7 +131,7 @@ export function ForgotPasswordPageClient() {
                             </div>
                             <Button
                                 type="submit"
-                                className="w-full h-12 text-sm font-bold shadow-lg shadow-primary/20 hover:-translate-y-0.5 transition-all rounded-xl"
+                                className="w-full h-12 text-sm font-bold shadow-lg shadow-primary/20 hover:-translate-y-0.5 transition-[color,background-color,border-color,box-shadow,opacity,transform] rounded-xl"
                                 disabled={loading}
                             >
                                 {loading ? (
