@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/hooks/use-cart";
 import { useFeatures } from "@/hooks/useFeatures";
@@ -29,8 +29,29 @@ import {
     DollarSign,
     ShoppingCart,
     Package,
+    Gift,
 } from "lucide-react";
 import Image from "@/components/ui/image";
+import type { ContextCoupon } from "@/store/cart-store";
+
+function getBackendMessage(value: unknown, fallback: string): string {
+    if (typeof value === "string" && value.trim()) return value.trim();
+    if (Array.isArray(value)) {
+        for (const entry of value) {
+            const message = getBackendMessage(entry, "");
+            if (message) return message;
+        }
+        return fallback;
+    }
+    if (!value || typeof value !== "object") return fallback;
+
+    const record = value as Record<string, unknown>;
+    for (const key of ["errors", "error", "message", "messages", "data", "body", "response"]) {
+        const message = getBackendMessage(record[key], "");
+        if (message) return message;
+    }
+    return fallback;
+}
 
 type CartItem = {
   id: string;
@@ -99,19 +120,21 @@ function CartItemCard({
   );
 }
 
-function CouponCard({
+export function CouponCard({
   code,
   onCodeChange,
   onApply,
   onRemove,
   coupon,
+  discount,
   applyingCoupon,
 }: {
   code: string;
   onCodeChange: (v: string) => void;
   onApply: () => void;
   onRemove: () => void;
-  coupon: { code: string; type: string; value: number } | null;
+  coupon: ContextCoupon;
+  discount: number;
   applyingCoupon: boolean;
 }) {
   return (
@@ -139,15 +162,26 @@ function CouponCard({
           )}
         </div>
         {coupon && (
-          <div className="p-4 rounded-xl bg-emerald-500/10 border-2 border-emerald-500/20 animate-in zoom-in-95">
+          <div
+            className="p-4 rounded-xl bg-emerald-500/10 border-2 border-emerald-500/20 animate-in zoom-in-95"
+            aria-label={coupon.isReward ? "Cupón de recompensa aplicado" : "Cupón aplicado"}
+          >
             <div className="flex items-center gap-3">
               <div className="p-2 bg-emerald-500 text-white rounded-lg">
                 {coupon.type === "percent" ? <Percent size={14} strokeWidth={3} /> : <DollarSign size={14} strokeWidth={3} />}
               </div>
               <div>
+                {coupon.isReward && (
+                  <p className="mb-1 flex items-center gap-1 text-[10px] font-black text-primary uppercase tracking-widest">
+                    <Gift size={12} strokeWidth={3} aria-hidden="true" />
+                    Recompensa de fidelización
+                  </p>
+                )}
                 <p className="font-black text-xs text-emerald-700 uppercase tracking-widest">{coupon.code} aplicado</p>
                 <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-tight">
-                  {coupon.type === "percent" ? `${coupon.value}% de descuento aplicado` : `$${coupon.value.toFixed(2)} de descuento total`}
+                  {coupon.type === "percent"
+                    ? `${coupon.value}% de descuento aplicado · $${discount.toFixed(2)}`
+                    : `$${discount.toFixed(2)} de descuento total`}
                 </p>
               </div>
             </div>
@@ -253,8 +287,8 @@ export default function CartClient() {
         }
         setApplyingCoupon(true);
         try {
-            await applyCoupon(code);
-            setCode("");
+            const result = await applyCoupon(code);
+            if (result.success) setCode("");
         } finally {
             setApplyingCoupon(false);
         }
@@ -292,7 +326,9 @@ export default function CartClient() {
 
             const data = await res.json().catch(() => ({}));
             if (!res.ok) {
-                toast.error(data?.error || "Error al realizar el pedido");
+                toast.error(
+                    getBackendMessage(data, "Error al realizar el pedido"),
+                );
                 setPlacing(false);
                 return;
             }
@@ -307,17 +343,13 @@ export default function CartClient() {
             const orderId = data?.order?.id;
             router.push(orderId ? `/orders/${orderId}` : "/profile");
         } catch (err: unknown) {
-            const msg =
-                err && typeof err === "object" && "message" in err
-                    ? String((err as { message?: unknown }).message)
-                    : String(err);
-            toast.error(msg || "Error inesperado");
+            toast.error(getBackendMessage(err, "Error inesperado"));
         } finally {
             setPlacing(false);
         }
     };
 
-    const total = Math.max(0, subtotal - discount);
+    const total = Math.max(0, Math.round((subtotal - discount) * 100) / 100);
     const savings = discount;
 
     if (!items || items.length === 0)
@@ -379,6 +411,7 @@ export default function CartClient() {
                 onApply={handleApplyCoupon}
                 onRemove={handleRemoveCoupon}
                 coupon={coupon}
+                discount={discount}
                 applyingCoupon={applyingCoupon}
               />
             )}

@@ -5,6 +5,13 @@ import { toast } from "sonner";
 import { useCartStore } from "@/store/cart-store";
 import { useAuthStore } from "@/store/auth-store";
 
+function couponErrorMessage(reason?: string): string {
+  if (!reason || reason === "invalid" || reason === "Failed to validate coupon") {
+    return "Código de cupón inválido";
+  }
+  return reason;
+}
+
 export function useCart() {
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
@@ -34,35 +41,37 @@ export function useCart() {
   const addItem = async (id: string, name: string, quantity?: number) => {
     const result = await store.addItem(id, name, quantity);
     if (result.needsLogin) {
-      toast.error("Please log in to add items to your cart");
+      toast.error("Iniciá sesión para agregar productos al carrito");
       router.push("/login");
       return;
     }
     if (!result.success) {
-      toast.error(result.reason || "Failed to add to cart");
+      toast.error(result.reason || "No se pudo agregar el producto al carrito");
       return;
     }
     const qty = quantity ?? 1;
     toast.success(
-      qty > 1 ? `Added ${qty} items to cart` : "Added to cart",
+      qty > 1
+        ? `Se agregaron ${qty} productos al carrito`
+        : "Se agregó el producto al carrito",
     );
   };
 
   const removeItem = async (id: string) => {
     await store.removeItem(id);
-    toast("Removed from cart");
+    toast("Producto eliminado del carrito");
   };
 
   const updateQuantity = async (id: string, newQty: number) => {
     if (newQty < 1) {
-      toast.error("Quantity must be at least 1");
+      toast.error("La cantidad debe ser al menos 1");
       return;
     }
 
     const item = store.items.find((i) => i.id === id);
     const product = store.productMap[id];
     if (product?.stock !== undefined && newQty > product.stock) {
-      toast.error(`Only ${product.stock} items available in stock`);
+      toast.error(`Solo hay ${product.stock} unidades disponibles`);
       return;
     }
     if (!item) return;
@@ -73,16 +82,16 @@ export function useCart() {
   const applyCoupon = async (code: string) => {
     const result = await store.applyCoupon(code);
     if (result.success) {
-      toast.success("Coupon applied!");
+      toast.success("Cupón aplicado");
     } else {
-      toast.error("Invalid coupon code");
+      toast.error(couponErrorMessage(result.reason));
     }
     return result;
   };
 
   const removeCoupon = () => {
     store.removeCoupon();
-    toast("Coupon removed");
+    toast("Cupón eliminado");
   };
 
   return {

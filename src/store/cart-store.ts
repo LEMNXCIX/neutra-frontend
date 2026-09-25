@@ -7,7 +7,7 @@ import { useAuthStore } from "@/store/auth-store";
 import { useTenantStore } from "@/store/tenant-store";
 import { ApiError } from "@/lib/api-client";
 import { Product } from "@/types/product.types";
-import { CouponType } from "@/types/coupon.types";
+import { CouponType, type Coupon } from "@/types/coupon.types";
 
 export type MappedCartItem = {
   id: string;
@@ -23,6 +23,7 @@ export type ContextCoupon = {
   code: string;
   type: "amount" | "percent";
   value: number;
+  isReward?: boolean;
 } | null;
 
 type CartState = {
@@ -44,6 +45,115 @@ type CartActions = {
   removeCoupon: () => void;
 };
 
+type CartPricingState = Pick<CartState, "items" | "productMap">;
+
+type CouponValidationOutcome =
+  | { success: true; coupon: NonNullable<ContextCoupon>; discount: number }
+  | { success: false; reason: string };
+
+function roundCurrency(value: number): number {
+  return Math.round(value * 100) / 100;
+}
+
+function getCartPricing(state: CartPricingState) {
+  const productIds = state.items.map((item) => item.id);
+  const categoryIds = new Set<string>();
+
+  state.items.forEach((item) => {
+    const product = state.productMap[item.id];
+    product?.categories?.forEach((category) => categoryIds.add(category.id));
+  });
+
+  const rawSubtotal = state.items.reduce((sum, item) => {
+    const price = state.productMap[item.id]?.price ?? item.price ?? 0;
+    return sum + price * item.amount;
+  }, 0);
+  const subtotal = roundCurrency(Math.max(0, Number.isFinite(rawSubtotal) ? rawSubtotal : 0));
+
+  return {
+    subtotal,
+    productIds,
+    categoryIds: Array.from(categoryIds),
+  };
+}
+
+function normalizeDiscount(value: number | undefined, subtotal: number): number | null {
+  if (typeof value !== "number" || !Number.isFinite(value)) return null;
+  return roundCurrency(Math.min(subtotal, Math.max(0, value)));
+}
+
+function toContextCoupon(coupon: Coupon, previous?: ContextCoupon): NonNullable<ContextCoupon> {
+  const isReward = coupon.isReward ?? previous?.isReward;
+  return {
+    code: coupon.code,
+    type: coupon.type === CouponType.PERCENT ? "percent" : "amount",
+    value: coupon.value,
+    ...(isReward === undefined ? {} : { isReward }),
+  };
+}
+
+function extractErrorMessage(value: unknown): string | undefined {
+  if (typeof value === "string") return value.trim() || undefined;
+  if (Array.isArray(value)) {
+    for (const entry of value) {
+      const message = extractErrorMessage(entry);
+      if (message) return message;
+    }
+    return undefined;
+  }
+  if (!value || typeof value !== "object") return undefined;
+
+  const record = value as Record<string, unknown>;
+  for (const key of ["errors", "error", "message", "messages", "data", "body", "response"]) {
+    const message = extractErrorMessage(record[key]);
+    if (message) return message;
+  }
+  return undefined;
+}
+
+function getValidationErrorMessage(error: unknown, fallback: string): string {
+  if (error instanceof ApiError) {
+    return extractErrorMessage(error.errors) ?? (error.message || fallback);
+  }
+  return extractErrorMessage(error) ?? fallback;
+}
+
+async function validateCoupon(
+  state: CartPricingState,
+  code: string,
+  previous?: ContextCoupon,
+): Promise<CouponValidationOutcome> {
+  const { subtotal, productIds, categoryIds } = getCartPricing(state);
+  try {
+    const result = await couponsService.validate(
+      code,
+      subtotal,
+      productIds,
+      categoryIds,
+    );
+
+    if (!result.valid || !result.coupon) {
+      return { success: false, reason: result.message || "invalid" };
+    }
+
+    const discount = normalizeDiscount(result.discountAmount, subtotal);
+    if (discount === null) {
+      return { success: false, reason: result.message || "invalid" };
+    }
+
+    return {
+      success: true,
+      coupon: toContextCoupon(result.coupon, previous),
+      discount,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      reason: getValidationErrorMessage(error, "Failed to validate coupon"),
+    };
+  }
+}
+
 export const useCartStore = create<CartState & CartActions>()((set, get) => ({
   items: [],
   loading: false,
@@ -57,7 +167,7 @@ export const useCartStore = create<CartState & CartActions>()((set, get) => ({
     const moduleType = useTenantStore.getState().moduleType;
 
     if (!user || moduleType?.toUpperCase() !== "STORE") {
-      set({ items: [], loading: false });
+      set({ items: [], loading: false, coupon: null, discount: 0 });
       return;
     }
 
@@ -83,7 +193,32 @@ export const useCartStore = create<CartState & CartActions>()((set, get) => ({
           stock: item.stock,
         }));
 
-      set({ items: mappedItems, loading: false });
+      set({ items: mappedItems });
+
+      const appliedCoupon = get().coupon;
+      if (appliedCoupon) {
+        const validation = await validateCoupon(
+          get(),
+          appliedCoupon.code,
+          appliedCoupon,
+        );
+
+        if (get().coupon?.code !== appliedCoupon.code) {
+          set({ loading: false });
+          return;
+        }
+
+        if (validation.success) {
+          set({
+            coupon: validation.coupon,
+            discount: validation.discount,
+          });
+        } else {
+          set({ coupon: null, discount: 0 });
+        }
+      }
+
+      set({ loading: false });
     } catch (err) {
       const errorMsg =
         err instanceof ApiError ? err.message : "Failed to fetch cart";
@@ -108,7 +243,7 @@ export const useCartStore = create<CartState & CartActions>()((set, get) => ({
     }
   },
 
-  addItem: async (id, name, quantity = 1) => {
+  addItem: async (id, _name, quantity = 1) => {
     const user = useAuthStore.getState().user;
     if (!user) {
       return { success: false, needsLogin: true };
@@ -184,63 +319,20 @@ export const useCartStore = create<CartState & CartActions>()((set, get) => ({
   },
 
   applyCoupon: async (code) => {
-    set({ loading: true });
-    const state = get();
-    try {
-      const productIds = state.items.map((i) => i.id);
-      const categoryIds = new Set<string>();
-      state.items.forEach((item) => {
-        const product = state.productMap[item.id];
-        if (product?.categories) {
-          product.categories.forEach((c) => categoryIds.add(c.id));
-        }
-      });
+    set({ coupon: null, discount: 0, loading: true, error: null });
+    const outcome = await validateCoupon(get(), code);
 
-      const subtotal = state.items.reduce((s, it) => {
-        const price = state.productMap[it.id]?.price ?? it.price ?? 0;
-        return s + price * it.amount;
-      }, 0);
-
-      const result = await couponsService.validate(
-        code,
-        subtotal,
-        productIds,
-        Array.from(categoryIds),
-      );
-
-      if (result.coupon) {
-        const couponType =
-          result.coupon.type === CouponType.PERCENT
-            ? "percent"
-            : "amount";
-
-        let discountAmount = 0;
-        if (couponType === "amount") {
-          discountAmount = result.coupon.value;
-        } else if (couponType === "percent") {
-          discountAmount = (subtotal * result.coupon.value) / 100;
-        }
-
-        set({
-          coupon: {
-            code: result.coupon.code,
-            type: couponType,
-            value: result.coupon.value,
-          },
-          discount: discountAmount,
-          loading: false,
-        });
-        return { success: true };
-      }
-
-      set({ loading: false });
-      return { success: false, reason: "invalid" };
-    } catch (err) {
-      const message =
-        err instanceof ApiError ? err.message : "Failed to validate coupon";
-      set({ loading: false });
-      return { success: false, reason: message };
+    if (!outcome.success) {
+      set({ coupon: null, discount: 0, loading: false });
+      return { success: false, reason: outcome.reason };
     }
+
+    set({
+      coupon: outcome.coupon,
+      discount: outcome.discount,
+      loading: false,
+    });
+    return { success: true };
   },
 
   removeCoupon: () => {
