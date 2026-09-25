@@ -1,3 +1,4 @@
+import { readJsonResponse } from "@/lib/response";
 import { NextRequest, NextResponse } from "next/server";
 import { getProxyHeaders } from "@/lib/proxy";
 
@@ -17,7 +18,7 @@ export async function GET(req: NextRequest) {
             cache: "no-store",
         });
 
-        const data = await response.json();
+        const data = await readJsonResponse(response);
 
         return NextResponse.json(data, { status: response.status });
     } catch (error) {
@@ -45,7 +46,7 @@ export async function PUT(req: NextRequest) {
             cache: "no-store",
         });
 
-        const validateData = await validateResponse.json();
+        const validateData = await readJsonResponse(validateResponse);
 
         if (!validateData.success || !validateData.data?.user?.id) {
             return NextResponse.json(
@@ -67,7 +68,7 @@ export async function PUT(req: NextRequest) {
             cache: "no-store",
         });
 
-        const data = await response.json();
+        const data = await readJsonResponse(response);
 
         return NextResponse.json(data, { status: response.status });
     } catch (error) {

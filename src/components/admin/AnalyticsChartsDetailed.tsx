@@ -1,4 +1,6 @@
 "use client";
+import { readJsonResponse } from "@/lib/response";
+
 import React, { use, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -103,7 +105,7 @@ function TimelineCard({
                             const percentage = (value / maxDisplayValue) * 100;
                             const formattedDate = new Date(
                                 date,
-                            ).toLocaleDateString("es-ES", {
+                            ).toLocaleDateString("es-ES", { timeZone: "UTC",
                                 month: "short",
                                 day: "numeric",
                             });
@@ -123,7 +125,7 @@ function TimelineCard({
                                     </div>
                                     <div className="h-2 bg-muted rounded-full overflow-hidden">
                                         <div
-                                            className="h-full rounded-full transition-all duration-500"
+                                            className="h-full rounded-full transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-500"
                                             style={{
                                                 width: `${percentage}%`,
                                                 backgroundColor: `var(${colorVar})`,
@@ -210,7 +212,7 @@ function TopProductsCard({
                                     </div>
                                     <div className="h-3 bg-muted rounded-full overflow-hidden">
                                         <div
-                                            className={`h-full bg-gradient-to-r ${topProductColors[idx % topProductColors.length]} rounded-full transition-all duration-500`}
+                                            className={`h-full bg-gradient-to-r ${topProductColors[idx % topProductColors.length]} rounded-full transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-500`}
                                             style={{ width: `${percentage}%` }}
                                         />
                                     </div>
@@ -249,7 +251,7 @@ function fetchAnalytics(
     return fetch(`/api/order?${query.toString()}`, {
         credentials: "same-origin",
     })
-        .then((res) => res.json().catch(() => ({})))
+        .then((res) => readJsonResponse(res).catch(() => ({})))
         .then((json) => ({
             stats: json.success ? json.stats : null,
             orders: json.success ? json.orders || [] : [],
@@ -272,6 +274,7 @@ export default function AnalyticsChartsDetailed() {
                     Analíticas de pedidos
                 </h2>
                 <select
+                    aria-label="Rango de análisis de pedidos"
                     className="bg-background border border-border rounded-lg px-4 py-1.5 text-sm"
                     value={range}
                     onChange={(e) => handleRangeChange(e.target.value)}

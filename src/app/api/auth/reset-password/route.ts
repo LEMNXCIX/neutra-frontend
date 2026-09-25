@@ -1,3 +1,4 @@
+import { readJsonResponse } from "@/lib/response";
 import { NextRequest, NextResponse } from "next/server";
 import { getProxyHeaders } from "@/lib/proxy";
 
@@ -27,7 +28,7 @@ export async function POST(req: NextRequest) {
             cache: "no-store",
         });
 
-        const data = await response.json();
+        const data = await readJsonResponse(response);
 
         return NextResponse.json(data, {
             status: response.status,

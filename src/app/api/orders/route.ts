@@ -1,3 +1,4 @@
+import { readJsonResponse } from "@/lib/response";
 import { NextRequest, NextResponse } from "next/server";
 
 const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4001/api";
@@ -19,7 +20,7 @@ export async function GET(req: NextRequest) {
       cache: "no-store",
     });
 
-    const data = await response.json();
+    const data = await readJsonResponse(response);
 
     return NextResponse.json(data, { status: response.status });
   } catch (error) {
@@ -49,7 +50,7 @@ export async function POST(req: NextRequest) {
       cache: "no-store",
     });
 
-    const data = await response.json();
+    const data = await readJsonResponse(response);
 
     return NextResponse.json(data, { status: response.status });
   } catch (error) {

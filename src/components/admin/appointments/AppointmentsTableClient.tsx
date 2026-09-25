@@ -1,4 +1,6 @@
 "use client";
+import { readJsonResponse } from "@/lib/response";
+
 
 import React, { Suspense, useReducer, useSyncExternalStore } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -847,9 +849,9 @@ function AppointmentsDesktopTable({
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       <Button
-                        size="icon"
+                        size="icon" aria-label="Ver detalles de la cita"
                         variant="ghost"
-                        className="size-8 rounded-full hover:bg-primary/10 hover:text-primary transition-all"
+                        className="size-8 rounded-full hover:bg-primary/10 hover:text-primary transition-[color,background-color,border-color,box-shadow,opacity,transform]"
                         onClick={() => {
                           dispatch({ type: "SET_SELECTED_APPOINTMENT", payload: appointment });
                           dispatch({ type: "SET_DETAILS_OPEN", payload: true });
@@ -865,9 +867,9 @@ function AppointmentsDesktopTable({
                         appointment.status === "CONFIRMED" ||
                         appointment.status === "NEEDS_REVIEW") ? (
                         <Button
-                          size="icon"
+                          size="icon" aria-label="Cancelar cita"
                           variant="ghost"
-                          className="size-8 rounded-full text-rose-500 hover:text-rose-600 hover:bg-rose-50 transition-all"
+                          className="size-8 rounded-full text-rose-500 hover:text-rose-600 hover:bg-rose-50 transition-[color,background-color,border-color,box-shadow,opacity,transform]"
                           disabled={
                             isCancelling ===
                             appointment.id
@@ -887,9 +889,9 @@ function AppointmentsDesktopTable({
                         </Button>
                       ) : (
                         <Button
-                          size="icon"
+                          size="icon" aria-label="Eliminar cita"
                           variant="ghost"
-                          className="size-8 rounded-full text-muted-foreground hover:text-rose-600 hover:bg-rose-50 transition-all"
+                          className="size-8 rounded-full text-muted-foreground hover:text-rose-600 hover:bg-rose-50 transition-[color,background-color,border-color,box-shadow,opacity,transform]"
                           disabled={
                             isDeleting ===
                             appointment.id
@@ -969,40 +971,23 @@ function AppointmentsPagination({
             Anterior
           </Button>
           <div className="flex items-center gap-1">
-            {Array.from(
-              {
-                length: Math.min(
-                  pagination.totalPages,
-                  5,
-                ),
-              },
-              (_, i) => {
-                const pageNum = i + 1;
-                return (
-                  <Button
-                    key={pageNum}
-                    variant={
-                      pagination.currentPage ===
-                      pageNum
-                        ? "default"
-                        : "outline"
-                    }
-                    size="sm"
-                    onClick={() =>
-                      handlePageChange(pageNum)
-                    }
-                    className={
-                      pagination.currentPage ===
-                      pageNum
-                        ? ""
-                        : "bg-background"
-                    }
-                  >
-                    {pageNum}
-                  </Button>
-                );
-              },
-            )}
+            {[1, 2, 3, 4, 5]
+              .filter((pageNum) => pageNum <= pagination.totalPages)
+              .map((pageNum) => (
+                <Button
+                  key={`page-${pageNum}`}
+                  variant={
+                    pagination.currentPage === pageNum ? "default" : "outline"
+                  }
+                  size="sm"
+                  onClick={() => handlePageChange(pageNum)}
+                  className={
+                    pagination.currentPage === pageNum ? "" : "bg-background"
+                  }
+                >
+                  {pageNum}
+                </Button>
+              ))}
           </div>
           <Button
             variant="outline"
@@ -1198,7 +1183,7 @@ function AppointmentsTableClientInner({
         body: JSON.stringify({ reason: "Cancelled by administrator" }),
       });
 
-      const data = await response.json();
+      const data = await readJsonResponse(response);
       if (data.success) {
         toast.success("Cita cancelada correctamente");
         router.refresh();
@@ -1222,7 +1207,7 @@ function AppointmentsTableClientInner({
         body: JSON.stringify({ status: "CONFIRMED" }),
       });
 
-      const data = await response.json();
+      const data = await readJsonResponse(response);
       if (data.success) {
         toast.success("Cita confirmada correctamente");
         router.refresh();
@@ -1261,7 +1246,7 @@ function AppointmentsTableClientInner({
         headers: { "Content-Type": "application/json" },
       });
 
-      const data = await response.json();
+      const data = await readJsonResponse(response);
       if (data.success) {
         toast.success("Cita eliminada correctamente");
         router.refresh();
