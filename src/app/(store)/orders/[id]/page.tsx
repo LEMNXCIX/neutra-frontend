@@ -58,7 +58,7 @@ function OrderItemsSection({ items }: { items: OrderItem[] }) {
           return (
             <Card
               key={item.id}
-              className="group border-none shadow-lg hover:shadow-2xl transition-all duration-500 rounded-xl overflow-hidden bg-background"
+              className="group border-none shadow-lg hover:shadow-2xl transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-500 rounded-xl overflow-hidden bg-background"
             >
               <CardContent className="p-8">
                 <div className="flex items-center justify-between gap-6">
@@ -142,7 +142,7 @@ function OrderPricingSummary({ subtotal, discount, couponCode, total }: { subtot
 function OrderInfoGrid({ address, trackingNumber }: { address: string; trackingNumber?: string }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-      <Card className="border-none shadow-xl rounded-[2rem] bg-background group hover:shadow-2xl transition-all duration-500">
+      <Card className="border-none shadow-xl rounded-[2rem] bg-background group hover:shadow-2xl transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-500">
         <CardHeader className="pb-4">
           <CardTitle className="text-[10px] font-bold uppercase tracking-widest text-primary flex items-center gap-3">
             <div className="size-8 bg-primary/10 rounded-xl flex items-center justify-center">
@@ -158,7 +158,7 @@ function OrderInfoGrid({ address, trackingNumber }: { address: string; trackingN
         </CardContent>
       </Card>
 
-      <Card className="border-none shadow-xl rounded-[2rem] bg-background group hover:shadow-2xl transition-all duration-500">
+      <Card className="border-none shadow-xl rounded-[2rem] bg-background group hover:shadow-2xl transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-500">
         <CardHeader className="pb-4">
           <CardTitle className="text-[10px] font-bold uppercase tracking-widest text-purple-600 flex items-center gap-3">
             <div className="size-8 bg-purple-600/10 rounded-xl flex items-center justify-center">
@@ -175,7 +175,7 @@ function OrderInfoGrid({ address, trackingNumber }: { address: string; trackingN
               </div>
               <Button
                 variant="outline"
-                className="w-full h-12 rounded-xl font-bold uppercase text-[10px] tracking-widest border-2 hover:bg-foreground hover:text-background transition-all"
+                className="w-full h-12 rounded-xl font-bold uppercase text-[10px] tracking-widest border-2 hover:bg-foreground hover:text-background transition-[color,background-color,border-color,box-shadow,opacity,transform]"
               >
                 Copiar número
               </Button>
@@ -236,7 +236,7 @@ function OrderTimeline({ orderDate, status }: { orderDate: string; status: strin
             >
               <div
                 className={cn(
-                  "size-5 rounded-full mt-1 border-4 transition-all duration-700",
+                  "size-5 rounded-full mt-1 border-4 transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-700",
                   step.active
                     ? "bg-primary border-primary/20 scale-125 shadow-lg shadow-primary/20"
                     : "bg-background border-muted",
@@ -278,7 +278,7 @@ function OrderHelpCard() {
       </div>
       <Button
         variant="outline"
-        className="w-full h-14 rounded-xl border-2 font-bold uppercase tracking-widest text-[10px] hover:bg-foreground hover:text-background transition-all"
+        className="w-full h-14 rounded-xl border-2 font-bold uppercase tracking-widest text-[10px] hover:bg-foreground hover:text-background transition-[color,background-color,border-color,box-shadow,opacity,transform]"
         asChild
       >
         <Link href="/contact">Contactar Soporte</Link>
@@ -355,7 +355,7 @@ export default async function OrderPage(props: {
                     qty: item.amount,
                     price: item.price,
                 })) || [],
-            date: new Date(rawOrder.createdAt).toLocaleDateString("es-ES"),
+            date: new Date(rawOrder.createdAt).toLocaleDateString("es-ES", { timeZone: "UTC" }),
             couponCode: rawOrder.couponId,
             discount: rawOrder.discountAmount,
 };
@@ -379,7 +379,7 @@ const currentStatus =
                             <Button
                                 variant="ghost"
                                 asChild
-                                className="group font-bold uppercase tracking-widest text-[10px] p-0 h-auto hover:bg-transparent rounded-xl transition-all"
+                                className="group font-bold uppercase tracking-widest text-[10px] p-0 h-auto hover:bg-transparent rounded-xl transition-[color,background-color,border-color,box-shadow,opacity,transform]"
                             >
                                 <Link
                                     href="/profile"

@@ -74,7 +74,7 @@ function CartItemCard({
 }) {
   const itemTotal = (item.price || 0) * item.amount;
   return (
-    <Card className="group relative overflow-hidden border-border bg-card transition-all duration-500 hover:shadow-2xl hover:shadow-primary/5 rounded-xl">
+    <Card className="group relative overflow-hidden border-border bg-card transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-500 hover:shadow-2xl hover:shadow-primary/5 rounded-xl">
       <CardContent className="p-6">
         <div className="flex flex-col sm:flex-row gap-6">
           <div className="flex-shrink-0 w-full sm:w-32 h-32 bg-muted rounded-xl overflow-hidden border border-border/50 group-hover:scale-105 transition-transform duration-500">
@@ -95,11 +95,11 @@ function CartItemCard({
             </div>
             <div className="flex items-center justify-between mt-4">
               <div className="flex items-center bg-muted/50 rounded-full p-1 border border-border/50">
-                <Button variant="ghost" size="icon" className="size-8 rounded-full hover:bg-background shadow-sm" onClick={() => onQuantityChange(item.id, item.amount - 1)} disabled={loading || item.amount <= 1}>
+                <Button variant="ghost" size="icon" aria-label="Disminuir cantidad" className="size-8 rounded-full hover:bg-background shadow-sm" onClick={() => onQuantityChange(item.id, item.amount - 1)} disabled={loading || item.amount <= 1}>
                   <Minus className="size-3" />
                 </Button>
                 <div className="w-10 text-center font-black text-sm">{item.amount}</div>
-                <Button variant="ghost" size="icon" className="size-8 rounded-full hover:bg-background shadow-sm" onClick={() => onQuantityChange(item.id, item.amount + 1)} disabled={loading}>
+                <Button variant="ghost" size="icon" aria-label="Aumentar cantidad" className="size-8 rounded-full hover:bg-background shadow-sm" onClick={() => onQuantityChange(item.id, item.amount + 1)} disabled={loading}>
                   <Plus className="size-3" />
                 </Button>
               </div>
@@ -110,7 +110,7 @@ function CartItemCard({
             </div>
           </div>
           <div className="absolute top-4 right-4">
-            <Button variant="ghost" size="icon" onClick={() => onRemove(item.id)} disabled={loading} className="size-8 rounded-full text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition-all">
+            <Button variant="ghost" size="icon" aria-label="Eliminar producto" onClick={() => onRemove(item.id)} disabled={loading} className="size-8 rounded-full text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition-[color,background-color,border-color,box-shadow,opacity,transform]">
               {loading ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
             </Button>
           </div>
@@ -247,7 +247,7 @@ function OrderSummaryCard({
       </CardContent>
       <CardFooter className="pb-8">
         <Button
-          className="w-full h-14 text-sm font-black uppercase tracking-[0.2em] bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl transition-all hover:scale-105 active:scale-95"
+          className="w-full h-14 text-sm font-black uppercase tracking-[0.2em] bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl transition-[color,background-color,border-color,box-shadow,opacity,transform] hover:scale-105 active:scale-95"
           onClick={onPlaceOrder}
           disabled={placing || loading || addressEmpty}
           size="lg"

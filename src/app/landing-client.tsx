@@ -26,17 +26,22 @@ export function LandingPageClient() {
   const isAdmin = user?.isAdmin;
 
   useEffect(() => {
-    if (isAdmin) {
-      const fetchTenants = async () => {
-        try {
-          const data = await tenantService.getAll();
-          setTenants(data || []);
-        } catch (error) {
-          console.error("Error fetching tenants:", error);
-        }
-      };
-      fetchTenants();
-    }
+    if (!isAdmin) return;
+
+    let cancelled = false;
+    const fetchTenants = async () => {
+      try {
+        const data = await tenantService.getAll();
+        if (!cancelled) setTenants(data || []);
+      } catch (error) {
+        console.error("Error fetching tenants:", error);
+      }
+    };
+    void fetchTenants();
+
+    return () => {
+      cancelled = true;
+    };
   }, [isAdmin]);
 
     if (!isMounted) return null;
@@ -76,7 +81,7 @@ export function LandingPageClient() {
                                         key={tenant.id}
                                         href={getTenantUrl(tenant.slug)}
                                         className={cn(
-                                            "flex items-center justify-center gap-3 px-8 py-4 font-semibold text-sm transition-all rounded-xl shadow-sm hover:shadow-md hover:-translate-y-0.5",
+                                            "flex items-center justify-center gap-3 px-8 py-4 font-semibold text-sm transition-[color,background-color,border-color,box-shadow,opacity,transform] rounded-xl shadow-sm hover:shadow-md hover:-translate-y-0.5",
                                             tenant.type === "STORE"
                                                 ? "bg-foreground text-background"
                                                 : "bg-background text-foreground border border-border",
@@ -92,7 +97,7 @@ export function LandingPageClient() {
                                 ))}
                             <Link
                                 href="/onboarding/tenant"
-                                className="flex items-center justify-center gap-3 px-8 py-4 font-semibold text-sm bg-primary text-primary-foreground hover:opacity-90 transition-all rounded-xl shadow-md hover:-translate-y-0.5"
+                                className="flex items-center justify-center gap-3 px-8 py-4 font-semibold text-sm bg-primary text-primary-foreground hover:opacity-90 transition-[color,background-color,border-color,box-shadow,opacity,transform] rounded-xl shadow-md hover:-translate-y-0.5"
                             >
                                 <PlusCircle className="size-4" />
                                 <span>Crear nueva instancia</span>

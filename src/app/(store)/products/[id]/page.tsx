@@ -77,7 +77,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
                     <Button
                         variant="ghost"
                         asChild
-                        className="group font-bold uppercase tracking-widest text-[10px] hover:bg-muted rounded-xl transition-all"
+                        className="group font-bold uppercase tracking-widest text-[10px] hover:bg-muted rounded-xl transition-[color,background-color,border-color,box-shadow,opacity,transform]"
                     >
                         <Link
                             href="/products"
@@ -164,10 +164,10 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
                             ].map((item) => (
                                 <Card
                                     key={item.label}
-                                    className="p-6 text-center border-none bg-background shadow-lg rounded-xl hover:shadow-xl transition-all group"
+                                    className="p-6 text-center border-none bg-background shadow-lg rounded-xl hover:shadow-xl transition-[color,background-color,border-color,box-shadow,opacity,transform] group"
                                 >
                                     <div
-                                        className={`size-12 ${item.bg} ${item.color} rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500`}
+                                        className={`size-12 ${item.bg} ${item.color} rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 group-hover:rotate-3 transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-500`}
                                     >
                                         <item.icon className="size-6" />
                                     </div>

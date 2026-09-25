@@ -49,33 +49,8 @@ const DEFAULT_FEATURES = [
     { icon: Heart, title: "Calidad Garantizada", c1: "from-rose-500", c2: "to-orange-500", desc: "Artesanía premium garantizada" },
 ];
 
-export function StoreHomeClient({
-    initialSliders,
-    initialProducts,
-    tenantName,
-    cms,
-}: {
-    initialSliders?: any[];
-    initialProducts?: any[];
-    tenantName?: string | null;
-    cms?: HomeCms | null;
-}) {
-    const { isFeatureEnabled } = useFeatures();
-    const brandName = tenantName || "XCIX";
-    const features = (cms?.features?.length ? cms.features : DEFAULT_FEATURES).map(
-        (f: any, i: number) => ({
-            ...DEFAULT_FEATURES[i % DEFAULT_FEATURES.length],
-            icon: FEATURE_ICONS[f.icon] ?? DEFAULT_FEATURES[i % DEFAULT_FEATURES.length].icon,
-            title: f.title ?? DEFAULT_FEATURES[i % DEFAULT_FEATURES.length].title,
-            desc: f.description ?? DEFAULT_FEATURES[i % DEFAULT_FEATURES.length].desc,
-        })
-    );
-
+function StoreHero({ cms, initialSliders, showBanners }: { cms?: HomeCms | null; initialSliders?: any[]; showBanners: boolean }) {
     return (
-        <div className="min-h-screen bg-gradient-to-b from-background via-muted/20 to-background">
-            {isFeatureEnabled("BANNERS") && <BannerBar />}
-
-            {/* HERO */}
             <section className="relative overflow-hidden py-24 md:py-32">
                 <div className="absolute inset-0 bg-gradient-to-b from-muted/20 via-transparent to-transparent" />
 
@@ -101,7 +76,7 @@ export function StoreHomeClient({
                             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                                 <Button
                                     size="lg"
-                                    className="h-14 px-10 text-base font-bold rounded-xl shadow-lg shadow-primary/20 hover:-translate-y-0.5 transition-all"
+                                    className="h-14 px-10 text-base font-bold rounded-xl shadow-lg shadow-primary/20 hover:-translate-y-0.5 transition-[color,background-color,border-color,box-shadow,opacity,transform]"
                                     asChild
                                 >
                                     <Link href={cms?.heroCtaHref ?? "/products"}>
@@ -117,7 +92,7 @@ export function StoreHomeClient({
                             <div className="relative">
                                 <div className="hidden lg:block absolute inset-0 -m-6 bg-primary/5 rounded-[3rem] blur-3xl -z-10" />
                                 <div className="relative bg-background rounded-xl overflow-hidden shadow-2xl border border-border/50">
-                                    {isFeatureEnabled("BANNERS") && (
+                                    {showBanners && (
                                         <PromoSlider
                                             initialSlides={initialSliders}
                                         />
@@ -129,7 +104,13 @@ export function StoreHomeClient({
                 </div>
             </section>
 
-            {/* FEATURED PRODUCTS */}
+
+    );
+}
+
+function StoreFeaturedProducts({ initialProducts }: { initialProducts?: any[] }) {
+    return (
+        <>
             {initialProducts && initialProducts.length > 0 && (
             <section className="py-24 border-t border-border/50">
                 <div className="max-w-7xl mx-auto px-6">
@@ -179,8 +160,12 @@ export function StoreHomeClient({
                 </div>
             </section>
             )}
+        </>
+    );
+}
 
-            {/* FEATURES */}
+function StoreFeatures({ brandName, cms, features }: { brandName: string; cms?: HomeCms | null; features: any[] }) {
+    return (
             <section className="py-24 bg-muted/30 border-y border-border/50">
                 <div className="max-w-7xl mx-auto px-6">
                     <div className="text-center mb-20 max-w-2xl mx-auto space-y-4">
@@ -203,7 +188,7 @@ export function StoreHomeClient({
                         {features.map((f) => (
                             <Card
                                 key={f.title}
-                                className="t-card border-none shadow-md hover:shadow-xl hover:-translate-y-2 transition-all duration-300 group bg-background/60 backdrop-blur-xl"
+                                className="t-card border-none shadow-md hover:shadow-xl hover:-translate-y-2 transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-300 group bg-background/60 backdrop-blur-xl"
                             >
                                 <CardContent className="p-10 text-center space-y-6">
                                     <div
@@ -226,7 +211,12 @@ export function StoreHomeClient({
                 </div>
             </section>
 
-            {/* CTA */}
+
+    );
+}
+
+function StoreCta({ cms }: { cms?: HomeCms | null }) {
+    return (
             <section className="relative py-32 md:py-48 overflow-hidden bg-foreground text-background">
                 <div className="absolute inset-0 opacity-10">
                     <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_center,_var(--primary)_0%,_transparent_70%)]" />
@@ -253,7 +243,7 @@ export function StoreHomeClient({
                         <Button
                             size="lg"
                             className="h-16 px-12 text-xl font-bold bg-background text-foreground hover:bg-background/90
-                   shadow-2xl transition-all hover:-translate-y-1"
+                   shadow-2xl transition-[color,background-color,border-color,box-shadow,opacity,transform] hover:-translate-y-1"
                             asChild
                         >
                             <Link
@@ -269,7 +259,7 @@ export function StoreHomeClient({
                             size="lg"
                             variant="outline"
                             className="h-16 px-12 text-xl font-bold bg-transparent border-2 border-background text-background
-                   hover:bg-background hover:text-foreground transition-all"
+                   hover:bg-background hover:text-foreground transition-[color,background-color,border-color,box-shadow,opacity,transform]"
                             asChild
                         >
                             <Link href={cms?.ctaSecondaryHref ?? "/products"}>
@@ -280,7 +270,12 @@ export function StoreHomeClient({
                 </div>
             </section>
 
-            {/* NEWSLETTER */}
+
+    );
+}
+
+function StoreNewsletter({ cms }: { cms?: HomeCms | null }) {
+    return (
             <section className="py-24 relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-purple-600/5" />
                 <div className="absolute -top-40 -right-40 size-96 bg-primary/20 rounded-full blur-3xl animate-pulse" />
@@ -309,11 +304,11 @@ export function StoreHomeClient({
                                     placeholder="tu@correo.com"
                                     className="flex-1 h-16 px-8 rounded-xl bg-background border border-border/50
                      focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10
-                     font-medium transition-all shadow-inner text-lg"
+                     font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform] shadow-inner text-lg"
                                 />
                                 <Button
                                     size="lg"
-                                    className="h-16 px-10 font-bold bg-primary hover:bg-primary/90 shadow-xl shadow-primary/20 hover:-translate-y-1 hover:scale-105 rounded-xl transition-all text-lg"
+                                    className="h-16 px-10 font-bold bg-primary hover:bg-primary/90 shadow-xl shadow-primary/20 hover:-translate-y-1 hover:scale-105 rounded-xl transition-[color,background-color,border-color,box-shadow,opacity,transform] text-lg"
                                 >
                                     <Zap className="mr-2 size-5" />
                                     Suscribirme
@@ -334,6 +329,46 @@ export function StoreHomeClient({
                     </Card>
                 </div>
             </section>
+
+    );
+}
+
+export function StoreHomeClient({
+    initialSliders,
+    initialProducts,
+    tenantName,
+    cms,
+}: {
+    initialSliders?: any[];
+    initialProducts?: any[];
+    tenantName?: string | null;
+    cms?: HomeCms | null;
+}) {
+    const { isFeatureEnabled } = useFeatures();
+    const brandName = tenantName || "XCIX";
+    const features = (cms?.features?.length ? cms.features : DEFAULT_FEATURES).map(
+        (f: any, i: number) => ({
+            ...DEFAULT_FEATURES[i % DEFAULT_FEATURES.length],
+            icon: FEATURE_ICONS[f.icon] ?? DEFAULT_FEATURES[i % DEFAULT_FEATURES.length].icon,
+            title: f.title ?? DEFAULT_FEATURES[i % DEFAULT_FEATURES.length].title,
+            desc: f.description ?? DEFAULT_FEATURES[i % DEFAULT_FEATURES.length].desc,
+        })
+    );
+
+    return (
+        <div className="min-h-screen bg-gradient-to-b from-background via-muted/20 to-background">
+            {isFeatureEnabled("BANNERS") && <BannerBar />}
+
+            {/* HERO */}
+            <StoreHero
+                cms={cms}
+                initialSliders={initialSliders}
+                showBanners={isFeatureEnabled("BANNERS")}
+            />
+            <StoreFeaturedProducts initialProducts={initialProducts} />
+            <StoreFeatures brandName={brandName} cms={cms} features={features} />
+            <StoreCta cms={cms} />
+            <StoreNewsletter cms={cms} />
         </div>
     );
 }

@@ -56,7 +56,7 @@ export default function Footer({ minimal = false, tenantName, tenantLogo, footer
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         key={social.platform + i}
-                                        className="size-10 rounded-full bg-muted/50 border border-transparent hover:border-primary/20 hover:bg-background hover:text-primary transition-all duration-300 flex items-center justify-center group"
+                                        className="size-10 rounded-full bg-muted/50 border border-transparent hover:border-primary/20 hover:bg-background hover:text-primary transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-300 flex items-center justify-center group"
                                         aria-label={social.platform}
                                     >
                                         <span
@@ -81,9 +81,9 @@ export default function Footer({ minimal = false, tenantName, tenantLogo, footer
                                 <li>
                                     <Link
                                         href="/products"
-                                        className="text-sm font-medium text-muted-foreground hover:text-primary transition-all flex items-center group"
+                                        className="text-sm font-medium text-muted-foreground hover:text-primary transition-[color,background-color,border-color,box-shadow,opacity,transform] flex items-center group"
                                     >
-                                        <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-all" />
+                                        <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-[color,background-color,border-color,box-shadow,opacity,transform]" />
                                         Todo el Inventario
                                     </Link>
                                 </li>
@@ -91,9 +91,9 @@ export default function Footer({ minimal = false, tenantName, tenantLogo, footer
                                     <li key={category.id}>
                                         <Link
                                             href={`/products?category=${encodeURIComponent(category.id)}`}
-                                            className="text-sm font-medium text-muted-foreground hover:text-primary transition-all flex items-center group"
+                                            className="text-sm font-medium text-muted-foreground hover:text-primary transition-[color,background-color,border-color,box-shadow,opacity,transform] flex items-center group"
                                         >
-                                            <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-all" />
+                                            <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-[color,background-color,border-color,box-shadow,opacity,transform]" />
                                             {category.name}
                                         </Link>
                                     </li>
@@ -111,9 +111,9 @@ export default function Footer({ minimal = false, tenantName, tenantLogo, footer
                             <li>
                                 <Link
                                     href="/contact"
-                                    className="text-sm font-medium text-muted-foreground hover:text-primary transition-all flex items-center group"
+                                    className="text-sm font-medium text-muted-foreground hover:text-primary transition-[color,background-color,border-color,box-shadow,opacity,transform] flex items-center group"
                                 >
-                                    <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-all" />
+                                    <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-[color,background-color,border-color,box-shadow,opacity,transform]" />
                                     Centro de Ayuda
                                 </Link>
                             </li>
@@ -122,27 +122,27 @@ export default function Footer({ minimal = false, tenantName, tenantLogo, footer
                                     <li>
                                         <Link
                                             href="/shipping"
-                                            className="text-sm font-medium text-muted-foreground hover:text-primary transition-all flex items-center group"
+                                            className="text-sm font-medium text-muted-foreground hover:text-primary transition-[color,background-color,border-color,box-shadow,opacity,transform] flex items-center group"
                                         >
-                                            <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-all" />
+                                            <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-[color,background-color,border-color,box-shadow,opacity,transform]" />
                                             Información de Envíos
                                         </Link>
                                     </li>
                                     <li>
                                         <Link
                                             href="/returns"
-                                            className="text-sm font-medium text-muted-foreground hover:text-primary transition-all flex items-center group"
+                                            className="text-sm font-medium text-muted-foreground hover:text-primary transition-[color,background-color,border-color,box-shadow,opacity,transform] flex items-center group"
                                         >
-                                            <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-all" />
+                                            <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-[color,background-color,border-color,box-shadow,opacity,transform]" />
                                             Devoluciones y RMA
                                         </Link>
                                     </li>
                                     <li>
                                         <Link
                                             href="/faq"
-                                            className="text-sm font-medium text-muted-foreground hover:text-primary transition-all flex items-center group"
+                                            className="text-sm font-medium text-muted-foreground hover:text-primary transition-[color,background-color,border-color,box-shadow,opacity,transform] flex items-center group"
                                         >
-                                            <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-all" />
+                                            <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-[color,background-color,border-color,box-shadow,opacity,transform]" />
                                             Preguntas Frecuentes
                                         </Link>
                                     </li>
@@ -160,36 +160,36 @@ export default function Footer({ minimal = false, tenantName, tenantLogo, footer
                             <li>
                                 <Link
                                     href="/about"
-                                    className="text-sm font-medium text-muted-foreground hover:text-primary transition-all flex items-center group"
+                                    className="text-sm font-medium text-muted-foreground hover:text-primary transition-[color,background-color,border-color,box-shadow,opacity,transform] flex items-center group"
                                 >
-                                    <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-all" />
+                                    <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-[color,background-color,border-color,box-shadow,opacity,transform]" />
                                     Nuestra Historia
                                 </Link>
                             </li>
                             <li>
                                 <Link
                                     href="/careers"
-                                    className="text-sm font-medium text-muted-foreground hover:text-primary transition-all flex items-center group"
+                                    className="text-sm font-medium text-muted-foreground hover:text-primary transition-[color,background-color,border-color,box-shadow,opacity,transform] flex items-center group"
                                 >
-                                    <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-all" />
+                                    <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-[color,background-color,border-color,box-shadow,opacity,transform]" />
                                     Únete a la Red
                                 </Link>
                             </li>
                             <li>
                                 <Link
                                     href="/privacy"
-                                    className="text-sm font-medium text-muted-foreground hover:text-primary transition-all flex items-center group"
+                                    className="text-sm font-medium text-muted-foreground hover:text-primary transition-[color,background-color,border-color,box-shadow,opacity,transform] flex items-center group"
                                 >
-                                    <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-all" />
+                                    <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-[color,background-color,border-color,box-shadow,opacity,transform]" />
                                     Política de Privacidad
                                 </Link>
                             </li>
                             <li>
                                 <Link
                                     href="/terms"
-                                    className="text-sm font-medium text-muted-foreground hover:text-primary transition-all flex items-center group"
+                                    className="text-sm font-medium text-muted-foreground hover:text-primary transition-[color,background-color,border-color,box-shadow,opacity,transform] flex items-center group"
                                 >
-                                    <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-all" />
+                                    <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-[color,background-color,border-color,box-shadow,opacity,transform]" />
                                     Términos de Servicio
                                 </Link>
                             </li>
@@ -206,7 +206,7 @@ export default function Footer({ minimal = false, tenantName, tenantLogo, footer
                     <div className="flex items-center gap-8">
                         <a
                             href="mailto:support@xcix.com"
-                            className="text-[11px] font-semibold text-foreground hover:text-primary transition-all flex items-center gap-2"
+                            className="text-[11px] font-semibold text-foreground hover:text-primary transition-[color,background-color,border-color,box-shadow,opacity,transform] flex items-center gap-2"
                         >
                             <Mail className="size-3.5" />
                             support@xcix.com

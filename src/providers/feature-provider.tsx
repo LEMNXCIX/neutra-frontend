@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, ReactNode, useCallback } from "react";
+import React, { useState, useEffect, ReactNode, useCallback, useMemo } from "react";
 import { tenantService } from "@/services/tenant.service";
 import { FeatureContext } from "@/providers/feature-context";
 import { TenantFeatures } from "@/types/tenant";
@@ -42,25 +42,21 @@ export function FeatureProvider({ children }: { children: ReactNode }) {
         fetchFeatures();
     }, [fetchFeatures]);
 
-    const isFeatureEnabled = (featureName: string): boolean => {
-        // Default to false if not found
-        // If features object has the key, return value.
-        // We can also check explicit false vs undefined.
-        // For now, truthy check.
+    const isFeatureEnabled = useCallback((featureName: string): boolean => {
         return !!features[featureName];
-    };
+    }, [features]);
 
-    const refreshFeatures = async () => {
+    const refreshFeatures = useCallback(async () => {
         await fetchFeatures();
-    };
+    }, [fetchFeatures]);
 
-    const value = {
+    const value = useMemo(() => ({
         features,
         isLoading,
         error,
         isFeatureEnabled,
         refreshFeatures,
-    };
+    }), [features, isLoading, error, isFeatureEnabled, refreshFeatures]);
 
     return (
         <FeatureContext.Provider value={value}>

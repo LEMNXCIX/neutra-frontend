@@ -91,7 +91,7 @@ export default function PromoSlider({ initialSlides }: PromoSliderProps) {
                     return (
                         <div
                             key={slide.id}
-                            className={`absolute inset-0 transition-all duration-700 ease-out transform
+                            className={`absolute inset-0 transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-700 ease-out transform
                 ${
                     isActive
                         ? "opacity-100 translate-x-0 scale-100"
@@ -121,7 +121,7 @@ export default function PromoSlider({ initialSlides }: PromoSliderProps) {
             {/* Texto con animación de entrada */}
             <div
                 key={slides[currentIndex].id}
-                className="absolute bottom-6 sm:bottom-10 left-4 sm:left-8 text-white transition-all duration-700 ease-out animate-slide-up delay-100"
+                className="absolute bottom-6 sm:bottom-10 left-4 sm:left-8 text-white transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-700 ease-out animate-slide-up delay-100"
             >
                 <div className="overflow-hidden ">
                     <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight">
@@ -139,7 +139,7 @@ export default function PromoSlider({ initialSlides }: PromoSliderProps) {
             <button
                 type="button"
                 onClick={prev}
-                className="absolute left-3 top-1/2 -translate-y-1/2 bg-background/70 p-2 rounded-full backdrop-blur-sm shadow-md hover:scale-110 transition-all duration-300 opacity-0 group-hover:opacity-100"
+                className="absolute left-3 top-1/2 -translate-y-1/2 bg-background/70 p-2 rounded-full backdrop-blur-sm shadow-md hover:scale-110 transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-300 opacity-0 group-hover:opacity-100"
                 aria-label="Diapositiva anterior"
             >
                 <ChevronLeft className="text-foreground size-6" />
@@ -148,7 +148,7 @@ export default function PromoSlider({ initialSlides }: PromoSliderProps) {
             <button
                 type="button"
                 onClick={next}
-                className="absolute right-3 top-1/2 -translate-y-1/2 bg-background/70 p-2 rounded-full backdrop-blur-sm shadow-md hover:scale-110 transition-all duration-300 opacity-0 group-hover:opacity-100"
+                className="absolute right-3 top-1/2 -translate-y-1/2 bg-background/70 p-2 rounded-full backdrop-blur-sm shadow-md hover:scale-110 transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-300 opacity-0 group-hover:opacity-100"
                 aria-label="Siguiente diapositiva"
             >
                 <ChevronRight className="text-foreground size-6" />
@@ -161,7 +161,7 @@ export default function PromoSlider({ initialSlides }: PromoSliderProps) {
                         type="button"
                         key={slide.id}
                         onClick={() => setCurrentIndex(index)}
-                        className={`h-2.5 w-2.5 rounded-full transition-all duration-300 ${
+                        className={`h-2.5 w-2.5 rounded-full transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-300 ${
                             index === currentIndex
                                 ? "bg-white scale-125 shadow-md"
                                 : "bg-white/50 hover:bg-white/80"

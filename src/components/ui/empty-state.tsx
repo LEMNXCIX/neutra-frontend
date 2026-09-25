@@ -37,7 +37,7 @@ export function EmptyState({
       {action ? (
         action
       ) : actionLabel && actionHref ? (
-        <Button asChild size="lg" className="h-12 px-10 rounded-full font-bold shadow-xl shadow-primary/10 hover:shadow-primary/20 transition-all hover:scale-105 active:scale-95">
+        <Button asChild size="lg" className="h-12 px-10 rounded-full font-bold shadow-xl shadow-primary/10 hover:shadow-primary/20 transition-[color,background-color,border-color,box-shadow,opacity,transform] hover:scale-105 active:scale-95">
           <Link href={actionHref}>{actionLabel}</Link>
         </Button>
       ) : null}

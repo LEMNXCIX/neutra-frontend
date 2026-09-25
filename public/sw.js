@@ -1,10 +1,10 @@
 // Minimal Service Worker to satisfy PWA installation requirements
-self.addEventListener('install', (event) => {
+self.addEventListener('install', () => {
     // console.log('Service Worker installing...');
     self.skipWaiting();
 });
 
-self.addEventListener('activate', (event) => {
+self.addEventListener('activate', () => {
     // console.log('Service Worker activating...');
 });
 

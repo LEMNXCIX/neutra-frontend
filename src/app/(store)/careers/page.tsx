@@ -114,7 +114,7 @@ export default async function CareersPage() {
                         </p>
                         <a
                             href="mailto:careers@xcix.com"
-                            className="text-xl font-bold tracking-tight text-foreground hover:text-primary transition-all border-b-2 border-primary/20 hover:border-primary pb-1"
+                            className="text-xl font-bold tracking-tight text-foreground hover:text-primary transition-[color,background-color,border-color,box-shadow,opacity,transform] border-b-2 border-primary/20 hover:border-primary pb-1"
                         >
                             careers@xcix.com
                         </a>

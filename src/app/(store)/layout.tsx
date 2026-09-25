@@ -34,7 +34,7 @@ export default async function StoreLayout({
         <TenantThemeProvider branding={branding}>
             <div
                 id="root-content"
-                className="transition-all duration-300 ease-in-out"
+                className="transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-300 ease-in-out"
                 style={{
                     marginLeft: 'var(--sidebar-width, 0px)',
                 } as React.CSSProperties}
