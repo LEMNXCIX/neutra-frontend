@@ -418,7 +418,7 @@ function LogsDataTable({
                   <div className="flex flex-col items-center justify-center gap-3 animate-pulse">
                     <div className="size-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
                     <span className="text-sm font-semibold text-muted-foreground">
-                      Loading Records…
+                      Cargando registros…
                     </span>
                   </div>
                 </TableCell>
@@ -432,7 +432,7 @@ function LogsDataTable({
                   <div className="flex flex-col items-center justify-center gap-2 opacity-40">
                     <Database className="size-12 mb-2" />
                     <p className="font-semibold text-sm">
-                      No entries match your search
+                      Ningún registro coincide con tu búsqueda
                     </p>
                   </div>
                 </TableCell>
@@ -627,11 +627,10 @@ export function LogsClient({
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-border pb-8">
                 <div>
                     <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground mb-2">
-                        System Logs
+                        Registros del sistema
                     </h1>
                     <p className="text-muted-foreground font-medium text-sm flex items-center gap-2">
-                        <Activity className="size-4 text-primary" /> Real-time
-                        technical observability and system health
+                        <Activity className="size-4 text-primary" /> Observabilidad técnica y salud del sistema en tiempo real
                     </p>
                 </div>
                 <div className="flex w-full md:w-auto gap-4">

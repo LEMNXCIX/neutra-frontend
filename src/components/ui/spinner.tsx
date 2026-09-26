@@ -8,7 +8,7 @@ function Spinner({ className, size, ...props }: SpinnerProps) {
   return (
     <Loader2
       role="status"
-      aria-label="Loading"
+      aria-label="Cargando"
       size={size}
       className={cn("size-4 animate-spin", className)}
       {...props}

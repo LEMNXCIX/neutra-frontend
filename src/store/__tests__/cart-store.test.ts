@@ -110,7 +110,7 @@ describe('cart-store.fetchCart', () => {
         loginAsStoreUser();
         mockCart.get.mockRejectedValue(new Error('boom'));
         await useCartStore.getState().fetchCart();
-        expect(useCartStore.getState().error).toBe('Failed to fetch cart');
+        expect(useCartStore.getState().error).toBe('Error al obtener el carrito');
     });
 });
 

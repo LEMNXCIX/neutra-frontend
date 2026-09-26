@@ -20,7 +20,7 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json(
-        { ok: false, reason: "no tenantId in payload" },
+        { ok: false, reason: "falta tenantId en el payload" },
         { status: 400 }
     );
 }

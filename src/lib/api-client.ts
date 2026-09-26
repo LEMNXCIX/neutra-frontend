@@ -174,7 +174,7 @@ export async function apiClient<T = unknown>(
         }
 
         // Unknown error
-        throw new ApiError('An unexpected error occurred', 500);
+        throw new ApiError('Ocurrió un error inesperado', 500);
     }
 }
 

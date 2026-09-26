@@ -209,7 +209,7 @@ describe("AttentionQueue", () => {
             expect(mockUpdateStatus).toHaveBeenCalledWith(
                 "appointment-1",
                 "COMPLETED",
-                "Resolved as completed from the booking admin attention queue",
+                "Resuelta como completada desde la cola de atención de reservas",
             );
         });
         expect(onRefresh).toHaveBeenCalledTimes(1);

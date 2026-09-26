@@ -18,7 +18,7 @@ export function TenantFeaturesDialog({ open, onOpenChange, tenantId, tenantName 
                 <DialogHeader className="mb-4">
                     <DialogTitle>Manage Features for {tenantName}</DialogTitle>
                     <DialogDescription>
-                        Enable or disable features for this tenant. Pricing is shown for each feature.
+                        Activa o desactiva las funcionalidades de este tenant. El precio se muestra para cada funcionalidad.
                     </DialogDescription>
                 </DialogHeader>
 

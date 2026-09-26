@@ -26,7 +26,7 @@ export default async function AdminPage() {
             Control Center
           </h2>
           <p className="text-muted-foreground font-medium uppercase tracking-widest text-[10px] mt-4">
-            Global system monitoring and tenant management
+            Monitoreo global del sistema y gestión de tenants
           </p>
         </div>
       </div>
@@ -36,7 +36,7 @@ export default async function AdminPage() {
           <header className="flex items-center gap-4">
             <div className="h-px flex-1 bg-border" />
             <h3 className="font-semibold uppercase tracking-[0.3em] text-[10px] text-muted-foreground">
-              System Vitals
+              Indicadores del sistema
             </h3>
             <div className="h-px flex-1 bg-border" />
           </header>
@@ -47,8 +47,7 @@ export default async function AdminPage() {
             Quick Actions
           </h3>
           <p className="text-muted-foreground font-medium mb-6">
-            Select a module from the sidebar to manage tenants
-            and global settings.
+            Selecciona un módulo del menú lateral para gestionar los tenants y la configuración global.
           </p>
         </section>
       </div>

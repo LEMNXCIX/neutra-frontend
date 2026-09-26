@@ -47,7 +47,7 @@ export default async function GlobalAppointmentsPage({
     return (
         <div className="space-y-6">
             <h2 className="text-4xl font-black uppercase tracking-tighter text-foreground">
-                Global Appointments
+                Citas globales
             </h2>
             <Suspense fallback={null}>
                 <AppointmentsTableClient

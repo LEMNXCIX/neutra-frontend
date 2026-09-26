@@ -97,7 +97,7 @@ export async function GET(req: NextRequest) {
         logger.error(logger.withError(logContext, error, duration), `API Error: ${error.message}`);
         
         return NextResponse.json(
-            { success: false, message: "Failed to fetch analytics", meta: { traceId: logContext.traceId } },
+            { success: false, message: "Error al obtener las analíticas", meta: { traceId: logContext.traceId } },
             { status: 500 }
         );
     }

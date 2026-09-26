@@ -305,7 +305,7 @@ export function TenantsTable({
                 </h2>
                 <Button onClick={openCreate}>
                     <Plus className="size-4 mr-2" />
-                    New Tenant
+                    Nuevo tenant
                 </Button>
             </div>
 
@@ -342,7 +342,7 @@ export function TenantsTable({
                         <Table>
                             <AdminTableHeader
                                 columns={[
-                                    { label: "Name" },
+                                    { label: "Nombre" },
                                     { label: "Slug" },
                                     { label: "Type" },
                                     { label: "Created" },
@@ -355,7 +355,7 @@ export function TenantsTable({
                                             colSpan={5}
                                             className="text-center py-8"
                                         >
-                                            Loading…
+                                            Cargando…
                                         </TableCell>
                                     </TableRow>
                                 ) : filteredTenants.length === 0 ? (
@@ -364,7 +364,7 @@ export function TenantsTable({
                                             colSpan={5}
                                             className="text-center py-8 text-muted-foreground"
                                         >
-                                            No tenants found
+                                            No se encontraron tenants
                                         </TableCell>
                                     </TableRow>
                                 ) : (
@@ -385,10 +385,10 @@ export function TenantsTable({
                     {/* Mobile Card View */}
                     <div className="md:hidden space-y-4">
                         {state.loading && state.tenants.length === 0 ? (
-                            <div className="text-center py-8">Loading…</div>
+                            <div className="text-center py-8">Cargando…</div>
                         ) : filteredTenants.length === 0 ? (
                             <div className="text-center py-8 text-muted-foreground">
-                                No tenants found
+                                No se encontraron tenants
                             </div>
                         ) : (
                             filteredTenants.map((tenant) => (

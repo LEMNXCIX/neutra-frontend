@@ -60,7 +60,7 @@ async function getBanners() {
                 totalItems: 0,
                 itemsPerPage: 10,
             },
-            error: err.message || "Exception during banner fetch",
+            error: err.message || "Excepción al obtener los banners",
         };
     }
 }

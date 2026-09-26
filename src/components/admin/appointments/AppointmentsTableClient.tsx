@@ -1180,7 +1180,7 @@ function AppointmentsTableClientInner({
       const response = await fetch(`/api/appointments/${id}/cancel`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ reason: "Cancelled by administrator" }),
+        body: JSON.stringify({ reason: "Cancelada por el administrador" }),
       });
 
       const data = await readJsonResponse(response);

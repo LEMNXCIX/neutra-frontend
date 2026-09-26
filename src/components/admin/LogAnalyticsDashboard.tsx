@@ -54,7 +54,7 @@ function LogAnalyticsStats({
             <div className="flex justify-between items-center border-b border-border pb-4">
                 <h3 className="font-bold uppercase tracking-widest text-xs flex items-center gap-2">
                     <TrendingUp size={16} className="text-primary" />{" "}
-                    Operational Health
+                    Salud operativa
                 </h3>
             </div>
 
@@ -125,12 +125,12 @@ function LogAnalyticsStats({
 
                 <div className="space-y-6">
                     <h4 className="font-bold uppercase tracking-widest text-xs flex items-center gap-2 text-muted-foreground">
-                        <AlertCircle size={14} /> Critical Failure Points
+                        <AlertCircle size={14} /> Puntos críticos de falla
                     </h4>
                     <div className="t-card overflow-hidden divide-y divide-border/50 border-none shadow-xl">
                         {stats.topFailedEndpoints.length === 0 ? (
                             <div className="p-12 text-center text-muted-foreground font-medium text-sm italic">
-                                System stable / No errors detected
+                                Sistema estable / No se detectaron errores
                             </div>
                         ) : (
                             stats.topFailedEndpoints.map((endpoint) => (
@@ -213,7 +213,7 @@ export default function LogAnalyticsDashboard() {
             <div className="flex justify-between items-center border-b border-border pb-4">
                 <h3 className="font-bold uppercase tracking-widest text-xs flex items-center gap-2">
                     <TrendingUp size={16} className="text-primary" />{" "}
-                    Operational Health
+                    Salud operativa
                 </h3>
                 <div className="flex gap-4">
                     <select
@@ -222,8 +222,8 @@ export default function LogAnalyticsDashboard() {
                         value={timeframe}
                         onChange={(e) => handleTimeframeChange(e.target.value)}
                     >
-                        <option value="last_24h">Last 24 Hours</option>
-                        <option value="last_7_days">Last 7 Days</option>
+                        <option value="last_24h">Últimas 24 horas</option>
+                        <option value="last_7_days">Últimos 7 días</option>
                     </select>
                     <button
                         type="button"

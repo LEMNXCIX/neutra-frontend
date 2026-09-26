@@ -187,7 +187,7 @@ export default function TenantFeaturesClient({
                         Feature Configuration
                     </h1>
                     <p className="text-muted-foreground">
-                        Manage active features for your tenant
+                        Gestiona las funcionalidades activas de tu tenant
                     </p>
                 </div>
                 {activeId && (
@@ -201,7 +201,7 @@ export default function TenantFeaturesClient({
                             </>
                         ) : (
                             <>
-                                <Save className="mr-2 size-4" /> Save Changes
+                                <Save className="mr-2 size-4" /> Guardar cambios
                             </>
                         )}
                     </Button>
@@ -214,10 +214,10 @@ export default function TenantFeaturesClient({
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <Building className="size-5" />
-                            Select Tenant
+                            Seleccionar tenant
                         </CardTitle>
                         <CardDescription>
-                            Choose a tenant to configure features
+                            Elige un tenant para configurar sus funcionalidades
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -250,7 +250,7 @@ export default function TenantFeaturesClient({
                     </div>
                 ) : availableFeatures.length === 0 ? (
                     <div className="text-center text-muted-foreground py-8">
-                        No features definition found.
+                        No se encontró ninguna definición de funcionalidades.
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 gap-6">
@@ -261,7 +261,7 @@ export default function TenantFeaturesClient({
                                     Available Features
                                 </CardTitle>
                                 <CardDescription>
-                                    Enable or disable platform capabilities
+                                    Activa o desactiva las funcionalidades de la plataforma
                                 </CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-6">
@@ -310,7 +310,7 @@ export default function TenantFeaturesClient({
                 !contextTenantId &&
                 !activeTenantId && (
                     <div className="flex justify-center items-center h-40 border-2 border-dashed rounded-lg text-muted-foreground">
-                        Please select a tenant to configure features
+                        Selecciona un tenant para configurar sus funcionalidades
                     </div>
                 )
             )}

@@ -318,7 +318,7 @@ function StoreNewsletter({ cms }: { cms?: HomeCms | null }) {
                             <div className="flex flex-col sm:flex-row items-center justify-center gap-6 pt-6 text-base text-muted-foreground font-medium">
                                 <span className="flex items-center gap-2">
                                     <Shield className="size-5 text-emerald-500" />
-                                    Sin spam. Cancelá cuando quieras
+                                    Sin spam. Cancela cuando quieras
                                 </span>
                                 <span className="hidden sm:block opacity-20 text-foreground">
                                     |

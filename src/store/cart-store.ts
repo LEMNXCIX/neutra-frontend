@@ -221,7 +221,7 @@ export const useCartStore = create<CartState & CartActions>()((set, get) => ({
       set({ loading: false });
     } catch (err) {
       const errorMsg =
-        err instanceof ApiError ? err.message : "Failed to fetch cart";
+        err instanceof ApiError ? err.message : "Error al obtener el carrito";
       set({ error: errorMsg, loading: false });
       console.error("Cart fetch error:", err);
     }

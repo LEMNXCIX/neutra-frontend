@@ -21,7 +21,7 @@ export default async function FeaturesPage() {
             <div>
                 <h1 className="text-3xl font-bold tracking-tight">Platform Features</h1>
                 <p className="text-muted-foreground">
-                    Manage and price the features available across all tenants.
+                    Gestiona y define el precio de las funcionalidades disponibles para todos los tenants.
                 </p>
             </div>
 

@@ -113,7 +113,7 @@ export default async function ContactPage() {
                             Enviar Mensaje
                         </CardTitle>
                         <p className="text-sm text-muted-foreground">
-                            Completá el formulario y te responderemos a la
+                            Completa el formulario y te responderemos a la
                             brevedad.
                         </p>
                     </CardHeader>

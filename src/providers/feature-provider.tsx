@@ -32,7 +32,7 @@ export function FeatureProvider({ children }: { children: ReactNode }) {
             setError(null);
         } catch (err: any) {
             console.error("Failed to fetch tenant features:", err);
-            setError(err.message || "Failed to load features");
+            setError(err.message || "Error al cargar las funcionalidades");
         } finally {
             setIsLoading(false);
         }

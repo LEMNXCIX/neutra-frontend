@@ -272,7 +272,7 @@ async function request<T = unknown>(
             );
         }
 
-        throw new BackendApiError('Unknown error occurred');
+        throw new BackendApiError('Ocurrió un error desconocido');
     }
 }
 

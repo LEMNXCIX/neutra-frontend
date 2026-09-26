@@ -44,7 +44,7 @@ export default async function BookPage(props: {
                         <span className="text-primary">cita</span>
                     </h1>
                     <p className="text-muted-foreground text-lg">
-                        Completá los pasos para programar tu cita
+                        Completa los pasos para programar tu cita
                     </p>
                 </div>
 

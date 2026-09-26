@@ -30,7 +30,7 @@ const handleError = (error: unknown) => {
     }
 
     const message =
-        error instanceof Error ? error.message : "An unexpected error occurred";
+        error instanceof Error ? error.message : "Ocurrió un error inesperado";
     toast.error(message);
 
     return {

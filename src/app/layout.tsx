@@ -16,8 +16,8 @@ const geist = Geist({
 });
 
 export const metadata: Metadata = {
-    title: "XCIX - Your Business Platform",
-    description: "E-Commerce and Booking solutions in one platform",
+    title: "XCIX - Tu plataforma de negocios",
+    description: "Comercio electrónico y reservas en una sola plataforma",
     appleWebApp: {
         capable: true,
         statusBarStyle: "default",

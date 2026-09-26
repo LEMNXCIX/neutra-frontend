@@ -148,7 +148,7 @@ export function FeatureDialog({
                                     category: e.target.value,
                                 }))
                             }
-                            placeholder="e.g. Analytics, Marketing, Support"
+                            placeholder="Ej.: Analítica, Marketing, Soporte"
                         />
                     </div>
 
@@ -194,15 +194,15 @@ export function FeatureDialog({
                         variant="outline"
                         onClick={() => onOpenChange(false)}
                     >
-                        Cancel
+                        Cancelar
                     </Button>
                     <Button onClick={handleSubmit} disabled={isSaving}>
                         {isSaving ? (
                             <>
-                                <Spinner className="mr-2" /> Saving…
+                                <Spinner className="mr-2" /> Guardando…
                             </>
                         ) : (
-                            "Save"
+                            "Guardar"
                         )}
                     </Button>
                 </DialogFooter>

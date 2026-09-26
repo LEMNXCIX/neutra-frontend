@@ -26,7 +26,7 @@ export default async function GlobalProductsPage({
     return (
         <div className="space-y-6">
             <h2 className="text-4xl font-black uppercase tracking-tighter text-foreground">
-                Global Products
+                Productos globales
             </h2>
             <Suspense fallback={null}>
                 <ProductsTableClient

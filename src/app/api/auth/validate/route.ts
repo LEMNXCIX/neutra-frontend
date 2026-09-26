@@ -56,7 +56,7 @@ export async function GET(req: NextRequest) {
         logger.error(logger.withError(logContext, error, duration), `Auth Error: ${error.message}`);
         const status = error.statusCode || error.status || 500;
         return NextResponse.json(
-            { success: false, error: error.message || "Failed to validate session" },
+            { success: false, error: error.message || "Error al validar la sesión" },
             { status }
         );
     }

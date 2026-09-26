@@ -122,7 +122,7 @@ function GeneralTabContent({
                     </SelectTrigger>
                     <SelectContent>
                         <SelectItem value={TenantType.STORE}>
-                            Store (E-commerce)
+                            Tienda (comercio electrónico)
                         </SelectItem>
                         <SelectItem value={TenantType.BOOKING}>
                             Booking (Services)
@@ -140,7 +140,7 @@ function GeneralTabContent({
                         onClick={() => setActiveTab("branding")}
                         className="font-bold"
                     >
-                        Next Step: Branding →
+                        Siguiente paso: Marca →
                     </Button>
                 </div>
             )}
@@ -172,14 +172,14 @@ function BrandingTabContent({
                         variant="outline"
                         onClick={() => setActiveTab("general")}
                     >
-                        ← Back
+                        ← Volver
                     </Button>
                     <Button
                         type="button"
                         onClick={() => setActiveTab("settings")}
                         className="font-bold"
                     >
-                        Next Step: Settings →
+                        Siguiente paso: Configuración →
                     </Button>
                 </div>
             )}
@@ -312,14 +312,14 @@ function SettingsTabContent({
                         variant="outline"
                         onClick={() => setActiveTab("branding")}
                     >
-                        ← Back
+                        ← Volver
                     </Button>
                     <Button
                         type="button"
                         onClick={() => setActiveTab("features")}
                         className="font-bold"
                     >
-                        Next Step: Features →
+                        Siguiente paso: Funcionalidades →
                     </Button>
                 </div>
             )}
@@ -374,7 +374,7 @@ function FeaturesTabContent({
                     variant="outline"
                     onClick={() => setActiveTab("settings")}
                 >
-                    ← Back
+                    ← Volver
                 </Button>
             </div>
         </TabsContent>
@@ -519,7 +519,7 @@ export function TenantForm({
                         disabled={isSaving}
                         className="rounded-xl"
                     >
-                        Cancel
+                        Cancelar
                     </Button>
                 )}
                 <Button

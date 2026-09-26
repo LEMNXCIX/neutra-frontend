@@ -128,11 +128,11 @@ export function FeaturesTable({ initialFeatures = EMPTY_FEATURES }: FeaturesTabl
             <div className="flex justify-between items-center">
                 <h2 className="text-xl font-medium flex items-center gap-2">
                     <Zap className="size-5 text-yellow-500" />
-                    Platform Features
+                    Funcionalidades de la plataforma
                 </h2>
                 <Button onClick={openCreate}>
                     <Plus className="size-4 mr-2" />
-                    New Feature
+                    Nueva funcionalidad
                 </Button>
             </div>
 
@@ -163,10 +163,10 @@ export function FeaturesTable({ initialFeatures = EMPTY_FEATURES }: FeaturesTabl
                         <Table>
                             <AdminTableHeader
                                 columns={[
-                                    { label: "Name" },
+                                    { label: "Nombre" },
                                     { label: "Key" },
                                     { label: "Category" },
-                                    { label: "Price" },
+                                    { label: "Precio" },
                                 ]}
                             />
                             <TableBody>
@@ -176,7 +176,7 @@ export function FeaturesTable({ initialFeatures = EMPTY_FEATURES }: FeaturesTabl
                                             colSpan={5}
                                             className="text-center py-8"
                                         >
-                                            Loading…
+                                            Cargando…
                                         </TableCell>
                                     </TableRow>
                                 ) : filteredFeatures.length === 0 ? (
@@ -185,7 +185,7 @@ export function FeaturesTable({ initialFeatures = EMPTY_FEATURES }: FeaturesTabl
                                             colSpan={5}
                                             className="text-center py-8 text-muted-foreground"
                                         >
-                                            No features found
+                                            No se encontraron funcionalidades
                                         </TableCell>
                                     </TableRow>
                                 ) : (

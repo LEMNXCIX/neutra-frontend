@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
   } catch (error) {
     console.error("Error validating session:", error);
     return NextResponse.json(
-      { error: "Failed to validate session" },
+      { error: "Error al validar la sesión" },
       { status: 401 }
     );
   }

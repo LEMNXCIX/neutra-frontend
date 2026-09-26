@@ -26,7 +26,7 @@ export default async function GlobalCategoriesPage({
     return (
         <div className="space-y-6">
             <h2 className="text-4xl font-black uppercase tracking-tighter text-foreground">
-                Global Categories
+                Categorías globales
             </h2>
             <Suspense fallback={null}>
                 <CategoriesTableClient
