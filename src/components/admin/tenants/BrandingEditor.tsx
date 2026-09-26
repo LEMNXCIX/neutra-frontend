@@ -472,7 +472,11 @@ export function BrandingEditor({
                 </div>
             </div>
 
-            <div>
+            {/* Sticky: en un grid de dos columnas ambas celdas miden lo mismo,
+                asi que sin esto el preview se iba con el scroll y editar la
+                tipografia (abajo en la columna izquierda) obligaba a volver
+                arriba. top-24 deja libre el navbar de administracion. */}
+            <div className="lg:sticky lg:top-24 lg:self-start">
                 <CardHeader className="px-0 pt-0">
                     <CardTitle className="text-base">Vista previa en vivo</CardTitle>
                 </CardHeader>
