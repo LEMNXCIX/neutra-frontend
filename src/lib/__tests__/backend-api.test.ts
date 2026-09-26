@@ -147,3 +147,43 @@ describe('backendFetch url contract', () => {
         expect(fetch).not.toHaveBeenCalled();
     });
 });
+
+describe('backendFetch original origin contract', () => {
+    it('forwards x-original-origin from the Origin header', async () => {
+        mockHeaders.mockResolvedValue(
+            new Headers({ origin: 'https://booking1.neunetra.com' }),
+        );
+
+        await backendFetch('/appointments');
+
+        expect(requestHeadersOf()['x-original-origin']).toBe('https://booking1.neunetra.com');
+    });
+
+    it('falls back to the referer origin when Origin is absent', async () => {
+        mockHeaders.mockResolvedValue(
+            new Headers({ referer: 'https://default.neunetra.com/store?page=2' }),
+        );
+
+        await backendFetch('/services');
+
+        expect(requestHeadersOf()['x-original-origin']).toBe('https://default.neunetra.com');
+    });
+
+    it('reconstructs from host and forwarded proto when both are absent', async () => {
+        mockHeaders.mockResolvedValue(
+            new Headers({ host: 'booking1.localhost:3001', 'x-forwarded-proto': 'https' }),
+        );
+
+        await backendFetch('/services');
+
+        expect(requestHeadersOf()['x-original-origin']).toBe('https://booking1.localhost:3001');
+    });
+
+    it('omits the header when the request carries no host information', async () => {
+        mockHeaders.mockResolvedValue(new Headers());
+
+        await backendFetch('/services');
+
+        expect(requestHeadersOf()['x-original-origin']).toBeUndefined();
+    });
+});

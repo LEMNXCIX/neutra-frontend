@@ -20,6 +20,32 @@ const TOKEN_COOKIE_NAME = 'token';
 const SENSITIVE_HEADERS = new Set(['cookie', 'authorization', 'set-cookie']);
 
 /**
+ * Derive the public origin of the incoming request so the backend can build
+ * absolute links (receipts, password-reset URLs) against the tenant host rather
+ * than against its own internal address. Lives here, next to the tenant
+ * forwarding, so every BFF call carries it instead of only the routes that
+ * happened to remember getProxyHeaders.
+ */
+const resolveOriginalOrigin = (h: Headers): string | null => {
+    const origin = h.get('origin');
+    if (origin && origin !== 'null') return origin;
+
+    const referer = h.get('referer');
+    if (referer) {
+        try {
+            return new URL(referer).origin;
+        } catch {
+            // Malformed referer: fall through to host-based reconstruction.
+        }
+    }
+
+    const host = h.get('host');
+    if (!host) return null;
+    const proto = h.get('x-forwarded-proto') || 'http';
+    return `${proto}://${host}`;
+};
+
+/**
  * Redact credential-bearing headers so request/response logging can never leak a
  * JWT. Explicit opt-in via LOG_HEADERS is not enough of a guard on its own: a
  * single log line is enough to persist a session in a log aggregator.
@@ -143,6 +169,11 @@ async function request<T = unknown>(
                 const defaultTenantId = process.env.NEXT_PUBLIC_DEFAULT_TENANT || 'default-tenant-00000000-0000-0000-0000-000000000001';
                 if (tenantId && tenantId !== defaultTenantId) {
                     requestHeaders['x-tenant-id'] = tenantId;
+                }
+
+                const originalOrigin = resolveOriginalOrigin(h);
+                if (originalOrigin) {
+                    requestHeaders['x-original-origin'] = originalOrigin;
                 }
             }
         } catch (_e) {

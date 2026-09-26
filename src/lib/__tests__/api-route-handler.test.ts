@@ -144,3 +144,44 @@ describe('createRouteHandler', () => {
         expect(res.status).toBe(204);
     });
 });
+
+describe('createRouteHandler passThroughStatus', () => {
+    it('forwards the backend status instead of the declared default', async () => {
+        mockBackendFetch.mockResolvedValue({ success: true, statusCode: 202, data: {} });
+        const handler = createRouteHandler({
+            method: 'POST',
+            endpoint: '/orders',
+            successStatus: 201,
+            passThroughStatus: true,
+        });
+
+        const res = await handler(makeReq('http://localhost/api/orders'));
+
+        expect(res.status).toBe(202);
+    });
+
+    it('returns a body-less response for a backend 204', async () => {
+        mockBackendFetch.mockResolvedValue({ success: true, statusCode: 204 });
+        const handler = createRouteHandler({
+            method: 'DELETE',
+            endpoint: (req, params) => `/products/${params?.id}`,
+            passThroughStatus: true,
+        });
+
+        const res = await handler(makeReq('http://localhost/api/products/7'), {
+            params: Promise.resolve({ id: '7' }),
+        });
+
+        expect(res.status).toBe(204);
+        expect(await res.text()).toBe('');
+    });
+
+    it('still uses the declared status when passThroughStatus is off', async () => {
+        mockBackendFetch.mockResolvedValue({ success: true, statusCode: 202, data: {} });
+        const handler = createPostHandler('/orders');
+
+        const res = await handler(makeReq('http://localhost/api/orders'));
+
+        expect(res.status).toBe(201);
+    });
+});

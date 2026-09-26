@@ -25,6 +25,14 @@ export interface RouteConfig {
     successStatus?: number;
     /** Whether to include query params in the endpoint (for GET requests) */
     includeQueryParams?: boolean;
+    /**
+     * Forward the status the backend actually returned instead of the declared
+     * `successStatus`. Use it when the BFF must not rewrite the backend's answer:
+     * 201/202 from a POST, or 204 from a DELETE. Without it a successful response
+     * is flattened to 200 (or 201 for POST), which loses information the caller
+     * may depend on.
+     */
+    passThroughStatus?: boolean;
 }
 
 export interface RouteContext {
@@ -187,10 +195,14 @@ export function createRouteHandler(config: RouteConfig) {
             );
             logger.info(successContext, `API Response: Success`);
 
-            // Return successful response (204 must be body-less)
-            const successStatus = getSuccessStatus(config);
-            if (successStatus === 204) {
-                return new NextResponse(null, { status: 204 });
+            // Return successful response (204/304 must be body-less)
+            const declaredStatus = getSuccessStatus(config);
+            const successStatus = config.passThroughStatus
+                ? result.statusCode ?? declaredStatus
+                : declaredStatus;
+
+            if (successStatus === 204 || successStatus === 304) {
+                return new NextResponse(null, { status: successStatus });
             }
             return NextResponse.json(result, {
                 status: successStatus
