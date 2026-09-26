@@ -34,6 +34,11 @@ const CODE_MESSAGES: Record<string, string> = {
     AUTH_PERMISSION_DENIED: "No tenés permisos para realizar esta acción.",
     AUTH_ACCOUNT_INACTIVE: "Tu cuenta está desactivada. Contactá a soporte.",
     AUTH_USER_ALREADY_EXISTS: "Ya existe una cuenta con ese correo.",
+    // AUTH_FORBIDDEN used to cover all three of these plus two more, so the
+    // only copy available was "you do not have permission", which points the
+    // user at the wrong remedy.
+    AUTH_RESOURCE_NOT_OWNED: "Solo podés ver tus propios recursos.",
+    AUTH_SUPER_ADMIN_REQUIRED: "Esta acción es solo para super administradores.",
 
     // VALIDATION
     VALIDATION_MISSING_REQUIRED_FIELDS: "Completá los campos obligatorios.",
@@ -59,6 +64,8 @@ const CODE_MESSAGES: Record<string, string> = {
     TENANT_SLUG_EXISTS: "Ese identificador de organización ya está en uso.",
     TENANT_FEATURE_NOT_ENABLED: "Tu organización no tiene esta funcionalidad habilitada.",
     TENANT_TYPE_NOT_ALLOWED: "Tu organización no permite esta operación.",
+    TENANT_MEMBERSHIP_REQUIRED:
+        "Tu cuenta no pertenece a esta organización. Pedí que te agreguen.",
 
     // BUSINESS
     BUSINESS_CART_EMPTY: "Tu carrito está vacío.",
