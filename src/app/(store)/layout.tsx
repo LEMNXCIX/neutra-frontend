@@ -2,7 +2,6 @@ import { headers } from "next/headers";
 import { Navigation as NavBar } from "@/components/nav_bar";
 import { NeutralNavigation } from "@/components/neutral-navigation";
 import FooterWrapper from "@/components/footer-wrapper";
-import { TenantThemeProvider } from "@/providers/tenant-theme-provider";
 import {
     getTenantBrandingFromHeaders,
     getTenantNameFromHeaders,
@@ -31,45 +30,43 @@ export default async function StoreLayout({
     ]);
 
     return (
-        <TenantThemeProvider branding={branding}>
-            <div
-                id="root-content"
-                className="transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-300 ease-in-out"
-                style={{
-                    marginLeft: 'var(--sidebar-width, 0px)',
-                } as React.CSSProperties}
-            >
-                <div className="print:hidden">
-                    {isSuperAdmin ? (
-                        <NeutralNavigation />
-                    ) : (
-                        <NavBar
-                            tenantName={tenantName}
-                            tenantLogo={branding?.tenantLogo}
-                        />
-                    )}
-                </div>
-                <div
-                    className={
-                        isSuperAdmin
-                            ? "print:pt-0"
-                            : "pt-16 print:pt-0"
-                    }
-                >
-                    {children}
-                </div>
-                <div className="print:hidden">
-                <FooterWrapper
-                    minimal={isSuperAdmin}
-                    tenantName={
-                        isSuperAdmin ? "Neutra SuperAdmin" : tenantName
-                    }
-                    tenantLogo={branding?.tenantLogo}
-                    footerDescription={cms?.footerDescription}
-                    socialLinks={cms?.socialLinks}
-                />
-                </div>
+        <div
+            id="root-content"
+            className="transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-300 ease-in-out"
+            style={{
+                marginLeft: 'var(--sidebar-width, 0px)',
+            } as React.CSSProperties}
+        >
+            <div className="print:hidden">
+                {isSuperAdmin ? (
+                    <NeutralNavigation />
+                ) : (
+                    <NavBar
+                        tenantName={tenantName}
+                        tenantLogo={branding?.tenantLogo}
+                    />
+                )}
             </div>
-        </TenantThemeProvider>
+            <div
+                className={
+                    isSuperAdmin
+                        ? "print:pt-0"
+                        : "pt-16 print:pt-0"
+                }
+            >
+                {children}
+            </div>
+            <div className="print:hidden">
+            <FooterWrapper
+                minimal={isSuperAdmin}
+                tenantName={
+                    isSuperAdmin ? "Neutra SuperAdmin" : tenantName
+                }
+                tenantLogo={branding?.tenantLogo}
+                footerDescription={cms?.footerDescription}
+                socialLinks={cms?.socialLinks}
+            />
+            </div>
+        </div>
     );
 }

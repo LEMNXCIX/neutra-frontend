@@ -9,6 +9,8 @@ import { QueryProvider } from "@/providers/query-provider";
 import { FeatureProvider } from "@/providers/feature-provider";
 import { SWRegistration } from "@/components/sw-registration";
 import { ProgressBar } from "@/components/ui/progress-bar";
+import { TenantThemeProvider } from "@/providers/tenant-theme-provider";
+import { getTenantBrandingFromHeaders } from "@/lib/server-theme";
 
 const geist = Geist({
     subsets: ["latin"],
@@ -41,11 +43,17 @@ export const viewport = {
     viewportFit: "cover",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
+    // Tenant branding is applied here, once, rather than in each surface
+    // layout. A root-level not-found.tsx renders inside the root layout only,
+    // so when the provider lived in the (store) and (booking) groups the 404
+    // fell back to the globals.css palette on a tenant with custom colors.
+    const branding = await getTenantBrandingFromHeaders();
+
     return (
         <html lang="es" suppressHydrationWarning>
             <body className={`${geist.variable} font-sans antialiased`}>
@@ -55,17 +63,19 @@ export default function RootLayout({
                     enableSystem
                     disableTransitionOnChange
                 >
-                    <FeatureProvider>
-                        <SWRegistration />
-                        <Suspense fallback={null}>
-                            <ProgressBar />
-                        </Suspense>
-                        <AuthInitializer />
-                        <QueryProvider>
-                            {children}
-                            <Toaster richColors />
-                        </QueryProvider>
-                    </FeatureProvider>
+                    <TenantThemeProvider branding={branding}>
+                        <FeatureProvider>
+                            <SWRegistration />
+                            <Suspense fallback={null}>
+                                <ProgressBar />
+                            </Suspense>
+                            <AuthInitializer />
+                            <QueryProvider>
+                                {children}
+                                <Toaster richColors />
+                            </QueryProvider>
+                        </FeatureProvider>
+                    </TenantThemeProvider>
                 </ThemeProvider>
             </body>
         </html>

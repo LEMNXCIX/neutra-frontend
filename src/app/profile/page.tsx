@@ -4,8 +4,6 @@ import { redirect } from "next/navigation";
 import { ProfileClient } from "@/components/profile/profile-client";
 import { authService } from "@/services/auth.service";
 import { api } from '@/lib/api-client';
-import { TenantThemeProvider } from "@/providers/tenant-theme-provider";
-import { getTenantBrandingFromHeaders } from "@/lib/server-theme";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -53,35 +51,30 @@ async function getData() {
 }
 
 export default async function ProfilePage() {
-    const [data, branding] = await Promise.all([
-        getData(),
-        getTenantBrandingFromHeaders(),
-    ]);
+    const data = await getData();
 
     if (!data) {
         redirect("/login?redirect=/profile");
     }
 
     return (
-        <TenantThemeProvider branding={branding}>
-            <main className={`min-h-screen py-16 px-4 ${data.isNeutral ? 'bg-gradient-to-b from-background to-muted/20' : 'bg-background'}`}>
-                <div className="max-w-6xl mx-auto space-y-12">
-                    <div className={data.isNeutral ? "text-center space-y-4" : "space-y-2"}>
-                        <h1 className={`font-bold tracking-tight text-foreground ${data.isNeutral ? "text-5xl md:text-7xl" : "text-4xl"}`}>
-                            {data.isNeutral ? "Perfil de Usuario" : "Resumen de la Cuenta"}
-                        </h1>
-                        <p className="text-muted-foreground text-lg font-medium">
-                            {data.isNeutral ? "Gestiona tu seguridad y preferencias globales" : "Revisa tu actividad reciente y la configuración de tu cuenta"}
-                        </p>
-                    </div>
-
-                    <ProfileClient
-                        initialOrders={data.orders}
-                        initialAppointments={data.appointments}
-                        isNeutral={data.isNeutral}
-                    />
+        <main className={`min-h-screen py-16 px-4 ${data.isNeutral ? 'bg-gradient-to-b from-background to-muted/20' : 'bg-background'}`}>
+            <div className="max-w-6xl mx-auto space-y-12">
+                <div className={data.isNeutral ? "text-center space-y-4" : "space-y-2"}>
+                    <h1 className={`font-bold tracking-tight text-foreground ${data.isNeutral ? "text-5xl md:text-7xl" : "text-4xl"}`}>
+                        {data.isNeutral ? "Perfil de Usuario" : "Resumen de la Cuenta"}
+                    </h1>
+                    <p className="text-muted-foreground text-lg font-medium">
+                        {data.isNeutral ? "Gestiona tu seguridad y preferencias globales" : "Revisa tu actividad reciente y la configuración de tu cuenta"}
+                    </p>
                 </div>
-            </main>
-        </TenantThemeProvider>
+
+                <ProfileClient
+                    initialOrders={data.orders}
+                    initialAppointments={data.appointments}
+                    isNeutral={data.isNeutral}
+                />
+            </div>
+        </main>
     );
 }

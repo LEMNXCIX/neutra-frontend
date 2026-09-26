@@ -48,6 +48,30 @@ describe('applyTenantTheme', () => {
             document.documentElement.style.getPropertyValue('--primary'),
         ).toBe('');
     });
+
+    it('is a no-op when there is no tenant palette, so the root layout is safe to mount', () => {
+        applyTenantTheme(null);
+        applyTenantTheme(undefined);
+        applyTenantTheme({});
+
+        for (const cssVar of ALL_THEME_VARS) {
+            expect(
+                document.documentElement.style.getPropertyValue(cssVar),
+                `${cssVar} must stay owned by globals.css without tenant branding`,
+            ).toBe('');
+        }
+    });
+
+    it('does not pin derived surface tokens for a font-only tenant', () => {
+        applyTenantTheme({ fontFamily: 'Poppins' });
+
+        expect(
+            document.documentElement.style.getPropertyValue('--card'),
+        ).toBe('');
+        expect(
+            document.documentElement.style.getPropertyValue('--font-tenant-font'),
+        ).toContain('Poppins');
+    });
 });
 
 describe('clearTenantTheme', () => {
