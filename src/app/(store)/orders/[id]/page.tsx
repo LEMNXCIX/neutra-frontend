@@ -270,10 +270,10 @@ function OrderHelpCard() {
     <Card className="border-none shadow-xl rounded-[2rem] bg-gradient-to-br from-primary/5 to-purple-600/5 p-10 text-center space-y-8">
       <div className="space-y-3">
         <p className="text-[10px] font-bold uppercase tracking-widest text-primary">
-          ¿Necesitás ayuda?
+          ¿Necesitas ayuda?
         </p>
         <p className="text-base font-medium leading-relaxed text-muted-foreground">
-          ¿Tenés dudas sobre tu pedido o necesitás solicitar una devolución?
+          ¿Tienes dudas sobre tu pedido o necesitas solicitar una devolución?
         </p>
       </div>
       <Button

@@ -4,7 +4,7 @@ import { LoginPageClient } from "./login-client";
 
 export const metadata: Metadata = {
     title: "Iniciar Sesión",
-    description: "Iniciá sesión en tu cuenta",
+    description: "Inicia sesión en tu cuenta",
 };
 
 export default function LoginPage() {

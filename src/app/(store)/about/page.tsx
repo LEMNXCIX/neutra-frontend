@@ -9,7 +9,7 @@ export async function generateMetadata(): Promise<Metadata> {
     const cms = await getCmsPage("about-pages");
     return {
         title: cms?.title ?? "Sobre Nosotros",
-        description: cms?.subtitle ?? "Conocé nuestra misión, visión y equipo",
+        description: cms?.subtitle ?? "Conoce nuestra misión, visión y equipo",
     };
 }
 

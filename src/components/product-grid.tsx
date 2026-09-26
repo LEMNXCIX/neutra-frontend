@@ -43,7 +43,7 @@ export default function ProductGrid({
       <EmptyState
         icon={PackageOpen}
         title="No se encontraron productos"
-        description="No encontramos productos que coincidan con tu búsqueda. Probá ajustar los filtros."
+        description="No encontramos productos que coincidan con tu búsqueda. Prueba ajustar los filtros."
         actionLabel="Limpiar filtros"
         actionHref="/products"
       />

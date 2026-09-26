@@ -169,10 +169,10 @@ function ServiceStep({
         <div className="space-y-8">
             <div className="space-y-2">
                 <h2 className="text-3xl font-bold tracking-tight text-foreground">
-                    Elegí un servicio
+                    Elige un servicio
                 </h2>
                 <p className="text-muted-foreground font-medium text-sm">
-                    Elegí la sesión que mejor se adapte a tus necesidades
+                    Elige la sesión que mejor se adapte a tus necesidades
                 </p>
             </div>
             {services.length === 0 ? (
@@ -284,7 +284,7 @@ function StaffStep({
                     Profesional asignado
                 </h2>
                 <p className="text-muted-foreground font-medium text-sm">
-                    Elegí el profesional asignado
+                    Elige el profesional asignado
                 </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -403,7 +403,7 @@ function ScheduleStep({
                     Agenda
                 </h2>
                 <p className="text-muted-foreground font-medium text-sm">
-                    Elegí el horario que prefieras
+                    Elige el horario que prefieras
                 </p>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -559,7 +559,7 @@ function ReviewStep({
                     Revisar detalles
                 </h2>
                 <p className="text-muted-foreground font-medium text-sm">
-                    Revisá los datos de tu reserva
+                    Revisa los datos de tu reserva
                 </p>
             </div>
 
@@ -628,7 +628,7 @@ function ReviewStep({
                                         })
                                     }
                                     rows={4}
-                                    placeholder="Contanos cualquier cosa que debamos saber..."
+                                    placeholder="Cuéntanos cualquier cosa que debamos saber..."
                                     className="rounded-xl border-border focus:border-primary transition-[color,background-color,border-color,box-shadow,opacity,transform] bg-muted/10 font-medium"
                                 />
                             </div>

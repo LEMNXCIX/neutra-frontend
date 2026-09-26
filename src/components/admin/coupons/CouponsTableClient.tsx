@@ -915,7 +915,7 @@ setIsCreating(false);
 const deleteCoupon = async (id: string) => {
 const confirmed = await confirm({
 title: "Eliminar cupón",
-description: "¿Seguro que querés eliminar este cupón? Esta acción no se puede deshacer.",
+description: "¿Seguro que quieres eliminar este cupón? Esta acción no se puede deshacer.",
 confirmText: "Eliminar",
 variant: "destructive",
 });

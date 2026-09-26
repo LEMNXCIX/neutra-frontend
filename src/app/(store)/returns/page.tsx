@@ -11,15 +11,15 @@ export async function generateMetadata(): Promise<Metadata> {
     return {
         title: cms?.title ?? "Devoluciones y Reembolsos",
         description:
-            cms?.subtitle ?? "Conocé nuestra política de devoluciones y reembolsos",
+            cms?.subtitle ?? "Conoce nuestra política de devoluciones y reembolsos",
     };
 }
 
 const DEFAULT_STEPS = [
-    "Accedé a tu panel de perfil.",
-    "Seleccioná el número de pedido correspondiente.",
-    "Iniciá el proceso de RMA para generar la etiqueta de envío.",
-    "Empaquetá bien el producto y despachalo por un punto autorizado.",
+    "Accede a tu panel de perfil.",
+    "Selecciona el número de pedido correspondiente.",
+    "Inicia el proceso de RMA para generar la etiqueta de envío.",
+    "Empaqueta bien el producto y despachalo por un punto autorizado.",
 ];
 
 const DEFAULT_POLICIES = [
@@ -36,7 +36,7 @@ export default async function ReturnsPage() {
         title: "Logística Inversa",
         highlight: "Devoluciones",
         subtitle:
-            "Nos aseguramos de que estés satisfecho. Si un producto no cumple tus expectativas, tenés 30 días desde la entrega para devolverlo.",
+            "Nos aseguramos de que estés satisfecho. Si un producto no cumple tus expectativas, tienes 30 días desde la entrega para devolverlo.",
     });
     const steps = cms?.steps?.length
         ? cms.steps.map((x: any) => x.text)

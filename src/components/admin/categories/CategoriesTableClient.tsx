@@ -695,7 +695,7 @@ function CategoriesTableClientInner({
     const confirmed = await confirm({
       title: "Eliminar Categoría",
       description:
-        "¿Seguro que querés eliminar esta categoría? Esta acción no se puede deshacer.",
+        "¿Seguro que quieres eliminar esta categoría? Esta acción no se puede deshacer.",
       confirmText: "Eliminar",
       variant: "destructive",
     });

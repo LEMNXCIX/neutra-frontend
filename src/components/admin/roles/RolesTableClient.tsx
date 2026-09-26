@@ -1346,7 +1346,7 @@ dispatch({ type: "SET_IS_EDITING_ROLE", payload: false });
 };
 
 const handleDelete = async (id: string) => {
-const confirmed = await confirm({ title: "Eliminar Rol", description: "¿Seguro que querés eliminar este rol?", confirmText: "Eliminar", variant: "destructive" });
+const confirmed = await confirm({ title: "Eliminar Rol", description: "¿Seguro que quieres eliminar este rol?", confirmText: "Eliminar", variant: "destructive" });
 if (!confirmed) return;
 if (!confirmed) return;
 dispatch({ type: "SET_IS_DELETING_ROLE", payload: id });
@@ -1410,7 +1410,7 @@ permDispatch({ type: "SET_IS_EDITING_PERM", payload: false });
 };
 
 const handlePermDelete = async (id: string) => {
-const confirmed = await confirm({ title: "Eliminar Permiso", description: "¿Seguro que querés eliminar este permiso?", confirmText: "Eliminar", variant: "destructive" });
+const confirmed = await confirm({ title: "Eliminar Permiso", description: "¿Seguro que quieres eliminar este permiso?", confirmText: "Eliminar", variant: "destructive" });
 if (!confirmed) return;
 permDispatch({ type: "SET_IS_DELETING_PERM", payload: id });
 try {

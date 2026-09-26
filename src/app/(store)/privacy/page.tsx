@@ -16,7 +16,7 @@ const FALLBACK_HTML = `
 <p>Recopilamos los datos brindados durante el registro, la sesión y la compra. Esto incluye identificadores, direcciones de correo y tokens de transacción seguros.</p>
 <p>Los datos recopilados se utilizan para optimizar la logística, facilitar la comunicación sobre el estado de tus pedidos y fortalecer la integridad de la red contra operaciones fraudulentas.</p>
 <p>Implementamos protocolos de encriptación avanzados para proteger tu identidad. La integridad de los datos es un componente central de nuestra arquitectura.</p>
-<p>Utilizamos cookies temporales para mejorar el rendimiento de la sesión y analizar patrones de tráfico. Vos mantenés el control sobre estos parámetros desde la configuración de tu navegador.</p>
+<p>Utilizamos cookies temporales para mejorar el rendimiento de la sesión y analizar patrones de tráfico. Tú mantienes el control sobre estos parámetros desde la configuración de tu navegador.</p>
 `;
 
 export default async function PrivacyPage() {

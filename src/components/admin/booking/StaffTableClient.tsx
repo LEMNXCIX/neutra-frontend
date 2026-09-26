@@ -91,7 +91,7 @@ function ServiceAssignmentDialog({
                         Asignar servicios a {editingStaff?.name}
                     </DialogTitle>
                     <DialogDescription>
-                        Seleccioná los servicios que este miembro del equipo
+                        Selecciona los servicios que este miembro del equipo
                         puede realizar.
                     </DialogDescription>
                 </DialogHeader>
@@ -99,7 +99,7 @@ function ServiceAssignmentDialog({
                     {allServices.length === 0 ? (
                         <div className="text-center py-8">
                             <p className="text-muted-foreground">
-                                No se encontraron servicios. Creá algunos servicios primero.
+                                No se encontraron servicios. Crea algunos servicios primero.
                             </p>
                         </div>
                     ) : (
@@ -349,8 +349,8 @@ function StaffFormDialog({
                     </DialogTitle>
                     <DialogDescription>
                         {editingStaff
-                            ? "Actualizá la información profesional de este miembro del equipo."
-                            : "Creá un nuevo perfil profesional para tu equipo."}
+                            ? "Actualiza la información profesional de este miembro del equipo."
+                            : "Crea un nuevo perfil profesional para tu equipo."}
                     </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={onSubmit} className="space-y-5 pt-4">
@@ -373,7 +373,7 @@ function StaffFormDialog({
                             }}
                         >
                             <SelectTrigger>
-                                <SelectValue placeholder="Seleccioná un usuario para vincular..." />
+                                <SelectValue placeholder="Selecciona un usuario para vincular..." />
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="none">
@@ -445,7 +445,7 @@ function StaffFormDialog({
                                     bio: e.target.value,
                                 })
                             }
-                            placeholder="Describí brevemente su especialidad..."
+                            placeholder="Describe brevemente su especialidad..."
                             rows={3}
                         />
                     </div>
@@ -794,7 +794,7 @@ function useStaffTable(
         const confirmed = await confirm({
             title: "Eliminar Miembro",
             description:
-                "¿Seguro que querés eliminar a este miembro del equipo? Esta acción no se puede deshacer.",
+                "¿Seguro que quieres eliminar a este miembro del equipo? Esta acción no se puede deshacer.",
             confirmText: "Eliminar",
             variant: "destructive",
         });

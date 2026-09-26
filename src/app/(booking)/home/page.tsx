@@ -64,7 +64,7 @@ export default async function BookingHomePage() {
                     </h1>
                     <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed font-medium">
                         {cms?.bookingHeroSubtitle ??
-                            "Reservá servicios profesionales de forma simple y online. Elegí un servicio, seleccioná un horario y listo."}
+                            "Reserva servicios profesionales de forma simple y online. Elige un servicio, selecciona un horario y listo."}
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                         <Button

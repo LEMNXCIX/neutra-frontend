@@ -92,7 +92,7 @@ export function FeaturesTable({ initialFeatures = EMPTY_FEATURES }: FeaturesTabl
     const handleDelete = async (id: string) => {
         if (
             !confirm(
-                "¿Seguro que querés eliminar esta función? Podría afectar a los tenants que la usan.",
+                "¿Seguro que quieres eliminar esta función? Podría afectar a los tenants que la usan.",
             )
         )
             return;

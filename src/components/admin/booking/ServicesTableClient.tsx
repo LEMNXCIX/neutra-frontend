@@ -132,7 +132,7 @@ function ServiceFormFields({
           id="description"
           value={formData.description}
           onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-          placeholder="Describí qué incluye este servicio..."
+          placeholder="Describe qué incluye este servicio..."
           rows={3}
         />
       </div>
@@ -178,7 +178,7 @@ function ServiceFormFields({
           <SelectTrigger id="categoryId" className="w-full">
             <div className="flex items-center">
               <Tag className="size-4 mr-2 text-muted-foreground" />
-              <SelectValue placeholder="Seleccioná una categoría" />
+              <SelectValue placeholder="Selecciona una categoría" />
             </div>
           </SelectTrigger>
           <SelectContent>
@@ -223,7 +223,7 @@ function ServicesHeader({
   return (
     <AdminEntityHeader
       title="Servicios"
-      description="Gestioná los servicios ofrecidos por tu sistema de reservas."
+      description="Gestiona los servicios ofrecidos por tu sistema de reservas."
       createLabel="Agregar servicio"
       isSuperAdmin={isSuperAdmin}
       tenantFilter={tenantFilter}
@@ -247,7 +247,7 @@ function ServicesMobileCards({
       {services.length === 0 ? (
         <Card>
           <CardContent className="p-8 text-center text-muted-foreground">
-            No se encontraron servicios. Creá tu primer servicio para comenzar.
+            No se encontraron servicios. Crea tu primer servicio para comenzar.
           </CardContent>
         </Card>
       ) : (
@@ -380,7 +380,7 @@ function ServicesDesktopTable({
                   colSpan={6}
                   className="h-32 text-center text-muted-foreground"
                 >
-                  No se encontraron servicios. Creá tu primer servicio para comenzar.
+                  No se encontraron servicios. Crea tu primer servicio para comenzar.
                 </TableCell>
               </TableRow>
             ) : (
@@ -517,8 +517,8 @@ function ServicesFormDialog({
           </DialogTitle>
           <DialogDescription>
             {editingService
-              ? "Modificá los detalles del servicio abajo."
-              : "Definí los detalles del servicio que querés ofrecer."}
+              ? "Modifica los detalles del servicio abajo."
+              : "Define los detalles del servicio que quieres ofrecer."}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={onSubmit} className="space-y-5 pt-4">
@@ -702,7 +702,7 @@ dispatch({ type: "SET_FORM_DATA", payload: {
         const confirmed = await confirm({
             title: "Eliminar Servicio",
             description:
-                "¿Seguro que querés eliminar este servicio? Esta acción no se puede deshacer.",
+                "¿Seguro que quieres eliminar este servicio? Esta acción no se puede deshacer.",
             confirmText: "Eliminar",
             variant: "destructive",
         });

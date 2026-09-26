@@ -24,7 +24,7 @@ export default async function ContactPage() {
         title: "Ponete en",
         highlight: "Contacto",
         subtitle:
-            "¿Tenés preguntas? Estamos para ayudarte. Escribinos por cualquier consulta.",
+            "¿Tienes preguntas? Estamos para ayudarte. Escríbenos por cualquier consulta.",
     });
 
     return (
@@ -54,7 +54,7 @@ export default async function ContactPage() {
                             </div>
                             <div>
                                 <h3 className="font-semibold text-sm text-muted-foreground mb-1">
-                                    Escribinos
+                                    Escríbenos
                                 </h3>
                                 <p className="font-bold text-base hover:text-primary transition-colors">
                                     {cms?.email ?? "contacto@xcix.com"}

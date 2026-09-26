@@ -1167,7 +1167,7 @@ function AppointmentsTableClientInner({
         const confirmed = await confirm({
             title: "Cancelar Cita",
             description:
-                "¿Seguro que querés cancelar esta cita? Esta acción no se puede deshacer.",
+                "¿Seguro que quieres cancelar esta cita? Esta acción no se puede deshacer.",
             confirmText: "Sí, Cancelar Cita",
             cancelText: "No, Conservarlo",
             variant: "destructive",
@@ -1231,7 +1231,7 @@ function AppointmentsTableClientInner({
         const confirmed = await confirm({
             title: "Eliminar Cita",
             description:
-                "¿Seguro que querés eliminar PERMANENTEMENTE esta cita? Esta acción no se puede deshacer.",
+                "¿Seguro que quieres eliminar PERMANENTEMENTE esta cita? Esta acción no se puede deshacer.",
             confirmText: "Sí, Eliminar Permanentemente",
             cancelText: "Cancelar",
             variant: "destructive",

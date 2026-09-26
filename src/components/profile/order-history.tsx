@@ -48,7 +48,7 @@ export function OrderHistory({ initialOrders }: OrderHistoryProps) {
                     </div>
                     <div className="space-y-2">
                         <h3 className="text-2xl font-bold tracking-tight">
-                            Todavía no tenés pedidos
+                            Todavía no tienes pedidos
                         </h3>
                         <p className="text-muted-foreground font-medium">
                             Tu historial de compras aparecerá aquí cuando

@@ -195,7 +195,7 @@ function OrderDetailsDialog({
                                 onChange={(e) =>
                                     setEditingTracking(e.target.value)
                                 }
-                                placeholder="Ingresá el número de seguimiento..."
+                                placeholder="Ingresa el número de seguimiento..."
                             />
                             <Button
                                 onClick={() =>

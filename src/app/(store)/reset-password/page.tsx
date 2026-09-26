@@ -4,7 +4,7 @@ import { ResetPasswordPageClient } from "./reset-password-client";
 
 export const metadata: Metadata = {
     title: "Restablecer Contraseña",
-    description: "Establecé una nueva contraseña para tu cuenta",
+    description: "Establece una nueva contraseña para tu cuenta",
 };
 
 export default function ResetPasswordPage() {

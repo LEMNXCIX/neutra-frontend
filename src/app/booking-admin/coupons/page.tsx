@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 
 export const metadata = {
     title: "Gestión de cupones | Administración de reservas",
-    description: "Administrá cupones de descuento para citas",
+    description: "Administra cupones de descuento para citas",
 };
 
 const PER_PAGE = 10;

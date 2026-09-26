@@ -53,7 +53,7 @@ export function ForgotPasswordPageClient() {
                             Correo enviado
                         </CardTitle>
                         <CardDescription className="text-sm font-medium mt-1">
-                            Revisá tu bandeja de entrada para ver las instrucciones
+                            Revisa tu bandeja de entrada para ver las instrucciones
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="text-center px-8 pb-8 space-y-6">
@@ -92,7 +92,7 @@ export function ForgotPasswordPageClient() {
                 {/* Logo Section */}
                 <AuthBrandHeader
                     title="Recuperar cuenta"
-                    subtitle="Restablecé tus credenciales de seguridad"
+                    subtitle="Restablece tus credenciales de seguridad"
                 />
 
                 <Card className="t-card border-none shadow-2xl relative overflow-hidden">
@@ -102,7 +102,7 @@ export function ForgotPasswordPageClient() {
                             Restablecer contraseña
                         </CardTitle>
                         <CardDescription className="text-sm font-medium">
-                            Ingresá tu correo para recibir un enlace de recuperación
+                            Ingresa tu correo para recibir un enlace de recuperación
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="px-8 pb-8">

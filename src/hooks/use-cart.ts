@@ -41,7 +41,7 @@ export function useCart() {
   const addItem = async (id: string, name: string, quantity?: number) => {
     const result = await store.addItem(id, name, quantity);
     if (result.needsLogin) {
-      toast.error("Iniciá sesión para agregar productos al carrito");
+      toast.error("Inicia sesión para agregar productos al carrito");
       router.push("/login");
       return;
     }

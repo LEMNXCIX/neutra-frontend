@@ -18,7 +18,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
     title: "Detalles del producto",
-    description: "Mirá los detalles, el precio y la disponibilidad del producto",
+    description: "Mira los detalles, el precio y la disponibilidad del producto",
 };
 
 async function fetchProduct(id: string) {
@@ -54,7 +54,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
                         Producto no encontrado
                     </h2>
                     <p className="text-muted-foreground mb-6">
-                        El producto que buscás no existe o fue eliminado
+                        El producto que buscas no existe o fue eliminado
                     </p>
                     <Button asChild>
                         <Link href="/products">

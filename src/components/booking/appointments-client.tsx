@@ -411,7 +411,7 @@ export function AppointmentsClient({
                                 <CardContent className="pt-6">
                                     <Briefcase className="size-8 text-muted-foreground mx-auto mb-4" />
                                     <p className="text-lg font-medium">
-                                        Todavía no tenés reservas asignadas
+                                        Todavía no tienes reservas asignadas
                                     </p>
                                     <p className="text-muted-foreground">
                                         Aquí verás las reservas de los clientes
@@ -438,7 +438,7 @@ export function AppointmentsClient({
                                 <CardContent className="pt-6">
                                     <Calendar className="size-8 text-muted-foreground mx-auto mb-4" />
                                     <p className="text-lg font-medium">
-                                        No tenés reservas propias
+                                        No tienes reservas propias
                                     </p>
                                     <Button
                                         asChild
@@ -473,10 +473,10 @@ export function AppointmentsClient({
                         </div>
                         <div>
                             <p className="text-lg font-medium mb-2">
-                                Todavía no tenés citas
+                                Todavía no tienes citas
                             </p>
                             <p className="text-muted-foreground mb-6">
-                                Reservá tu primera cita para comenzar
+                                Reserva tu primera cita para comenzar
                             </p>
                         </div>
                         <Button asChild size="lg">

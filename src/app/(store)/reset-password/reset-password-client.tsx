@@ -87,7 +87,7 @@ function ResetPasswordForm() {
                 </CardHeader>
                 <CardContent className="text-center px-8 pb-6">
                     <p className="text-sm font-medium leading-relaxed text-muted-foreground">
-                        El token de recuperación es inválido, venció o ya fue utilizado. Solicitá un nuevo enlace para continuar.
+                        El token de recuperación es inválido, venció o ya fue utilizado. Solicita un nuevo enlace para continuar.
                     </p>
                 </CardContent>
                 <CardFooter className="justify-center border-t border-border/50 p-8 bg-muted/10">

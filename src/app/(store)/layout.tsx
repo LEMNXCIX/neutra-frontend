@@ -12,7 +12,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Tienda",
-  description: "Explorá nuestros productos y servicios",
+  description: "Explora nuestros productos y servicios",
 };
 
 export default async function StoreLayout({

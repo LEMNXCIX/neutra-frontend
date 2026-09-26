@@ -142,7 +142,7 @@ export function NeutralNavigation() {
                                     href="/register"
                                     className="px-5 py-2 bg-primary text-primary-foreground text-xs font-bold rounded-lg hover:opacity-90 transition-[color,background-color,border-color,box-shadow,opacity,transform] uppercase tracking-wider shadow-sm"
                                 >
-                                    Unite a la red
+                                    Únete a la red
                                 </Link>
                             </>
                         )}

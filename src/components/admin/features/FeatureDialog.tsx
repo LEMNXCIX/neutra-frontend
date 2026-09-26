@@ -183,7 +183,7 @@ export function FeatureDialog({
                                     description: e.target.value,
                                 }))
                             }
-                            placeholder="Describí qué habilita esta función..."
+                            placeholder="Describe qué habilita esta función..."
                             rows={3}
                         />
                     </div>

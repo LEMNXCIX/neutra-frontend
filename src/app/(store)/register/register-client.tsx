@@ -84,7 +84,7 @@ export function RegisterPageClient() {
     dispatch({ type: "CLEAR_ERROR" });
 
   if (!state.name || !state.email || !state.password || !state.confirmPassword) {
-    dispatch({ type: "SET_ERROR", value: "Por favor completá todos los campos" });
+    dispatch({ type: "SET_ERROR", value: "Por favor completa todos los campos" });
     return;
   }
 
@@ -113,8 +113,8 @@ export function RegisterPageClient() {
             <div className="w-full max-w-[480px] space-y-8">
                 {/* Logo/Brand Section */}
                 <AuthBrandHeader
-                    title="Unite a la red"
-                    subtitle="Inicializá tu perfil profesional hoy"
+                    title="Únete a la red"
+                    subtitle="Inicializa tu perfil profesional hoy"
                 />
 
                 {/* Register Card */}
@@ -126,7 +126,7 @@ export function RegisterPageClient() {
                             Crear cuenta
                         </CardTitle>
                         <CardDescription className="text-sm font-medium">
-                            Ingresá tus datos para crear tu identidad global
+                            Ingresa tus datos para crear tu identidad global
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="pb-8">
@@ -322,7 +322,7 @@ export function RegisterPageClient() {
                             {/* Login Link */}
                             <div className="text-center space-y-4">
                                 <p className="text-xs font-medium text-muted-foreground">
-                                    ¿Ya tenés una cuenta?
+                                    ¿Ya tienes una cuenta?
                                 </p>
                                 <Button
                                     variant="outline"

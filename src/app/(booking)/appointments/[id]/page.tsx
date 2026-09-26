@@ -6,7 +6,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
     title: "Detalles de la cita",
-    description: "Mirá los detalles de tu cita",
+    description: "Mira los detalles de tu cita",
 };
 import {
     Card,
@@ -294,7 +294,7 @@ export default async function AppointmentDetailPage(props: {
                     <AlertCircle className="size-4" />
                     <AlertDescription>
                         {error === "forbidden"
-                            ? "No tenés permiso para ver esta cita"
+                            ? "No tienes permiso para ver esta cita"
                             : "No se pudieron cargar los detalles de la cita"}
                     </AlertDescription>
                 </Alert>

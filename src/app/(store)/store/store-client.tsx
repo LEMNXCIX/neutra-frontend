@@ -323,7 +323,7 @@ function StoreNewsletter({ cms }: { cms?: HomeCms | null }) {
                                 <span className="hidden sm:block opacity-20 text-foreground">
                                     |
                                 </span>
-                                <span>Sumate a más de 48.000 amantes del diseño</span>
+                                <span>Súmate a más de 48.000 amantes del diseño</span>
                             </div>
                         </CardContent>
                     </Card>

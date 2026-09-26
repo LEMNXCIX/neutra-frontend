@@ -837,7 +837,7 @@ function ProductsTableClientInner({
         const confirmed = await confirm({
             title: "Eliminar Producto",
             description:
-                "¿Seguro que querés eliminar este producto? Esta acción no se puede deshacer.",
+                "¿Seguro que quieres eliminar este producto? Esta acción no se puede deshacer.",
             confirmText: "Eliminar",
             variant: "destructive",
         });

@@ -31,7 +31,7 @@ const DEFAULT_FAQS = [
     },
     {
         q: "Cuidado de los Productos",
-        a: "El cuidado varía según la composición del material. Consultá la ficha técnica o la etiqueta interna para instrucciones precisas.",
+        a: "El cuidado varía según la composición del material. Consulta la ficha técnica o la etiqueta interna para instrucciones precisas.",
     },
     {
         q: "Seguimiento de Pedidos",
@@ -99,14 +99,14 @@ export default async function FAQPage() {
 
                 <div className="mt-20 p-12 bg-primary/5 border border-primary/10 rounded-[2.5rem] text-center space-y-6">
                     <p className="text-muted-foreground font-semibold uppercase tracking-widest text-xs">
-                        ¿Todavía tenés preguntas?
+                        ¿Todavía tienes preguntas?
                     </p>
                     <Button
                         size="lg"
                         className="h-14 px-10 rounded-xl font-bold shadow-xl shadow-primary/10 transition-[color,background-color,border-color,box-shadow,opacity,transform] hover:-translate-y-0.5"
                         asChild
                     >
-                        <Link href="/contact">Contactá a Soporte →</Link>
+                        <Link href="/contact">Contacta a Soporte →</Link>
                     </Button>
                 </div>
             </div>

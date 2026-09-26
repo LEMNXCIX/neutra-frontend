@@ -5,7 +5,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Reservas",
-  description: "Reservá citas y servicios",
+  description: "Reserva citas y servicios",
 };
 
 export default async function BookingLayout({

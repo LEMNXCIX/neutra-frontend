@@ -83,7 +83,7 @@ export function AssignRoleDialog({
 
     const handleAssign = async () => {
         if (!user || !selectedRoleId) {
-            toast.error("Seleccioná un rol");
+            toast.error("Selecciona un rol");
             return;
         }
 
@@ -147,7 +147,7 @@ export function AssignRoleDialog({
                                 onValueChange={setSelectedRoleId}
                             >
                                 <SelectTrigger id="role-select">
-                                    <SelectValue placeholder="Elegí un rol..." />
+                                    <SelectValue placeholder="Elige un rol..." />
                                 </SelectTrigger>
                                 <SelectContent>
                                     {roles.length === 0 ? (

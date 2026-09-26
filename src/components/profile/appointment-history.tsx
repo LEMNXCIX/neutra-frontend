@@ -60,7 +60,7 @@ export function AppointmentHistory({
                     </div>
                     <div className="space-y-2">
                         <h3 className="text-2xl font-bold tracking-tight">
-                            Todavía no tenés citas
+                            Todavía no tienes citas
                         </h3>
                         <p className="text-muted-foreground font-medium">
                             Tus servicios agendados aparecerán aquí cuando

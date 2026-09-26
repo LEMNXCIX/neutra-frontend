@@ -615,7 +615,7 @@ active: true,
         const confirmed = await confirm({
             title: "Eliminar Banner",
             description:
-                "¿Seguro que querés eliminar este banner? Esta acción no se puede deshacer.",
+                "¿Seguro que quieres eliminar este banner? Esta acción no se puede deshacer.",
             confirmText: "Eliminar",
             variant: "destructive",
         });

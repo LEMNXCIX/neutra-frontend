@@ -226,7 +226,7 @@ export default function TenantFeaturesClient({
                             onValueChange={handleTenantSelect}
                         >
                             <SelectTrigger className="w-full md:w-[300px]">
-                                <SelectValue placeholder="Seleccioná un tenant..." />
+                                <SelectValue placeholder="Selecciona un tenant..." />
                             </SelectTrigger>
                             <SelectContent>
                                 {tenants.map((tenant) => (

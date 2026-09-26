@@ -361,7 +361,7 @@ No se encontraron productos
 </h3>
 <p className="text-muted-foreground text-center mb-6 max-w-md">
 {search || category !== "all"
-? "Probá ajustando los filtros o términos de búsqueda"
+? "Prueba ajustando los filtros o términos de búsqueda"
 : "No hay productos disponibles por el momento"}
 </p>
 {activeFiltersCount > 0 && (

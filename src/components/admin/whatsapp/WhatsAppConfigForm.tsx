@@ -209,7 +209,7 @@ export function WhatsAppConfigForm({ initialConfig }: WhatsAppConfigFormProps) {
                                 placeholder="****************"
                             />
                             <p className="text-xs text-muted-foreground">
-                                Actualizalo solo si generás un token nuevo. El
+                                Actualízalo solo si generas un token nuevo. El
                                 token anterior está oculto.
                             </p>
                         </div>

@@ -41,7 +41,7 @@ export function LoginForm() {
         setError("");
 
         if (!email || !password) {
-            setError("Por favor completá todos los campos");
+            setError("Por favor completa todos los campos");
             return;
         }
 
@@ -70,7 +70,7 @@ export function LoginForm() {
                         Iniciar sesión
                     </CardTitle>
                     <CardDescription className="text-sm font-medium">
-                        Ingresá tus credenciales para continuar
+                        Ingresa tus credenciales para continuar
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="pb-8">
@@ -166,7 +166,7 @@ export function LoginForm() {
 
                         <div className="text-center space-y-4">
                             <p className="text-xs font-medium text-muted-foreground">
-                                ¿Aún no tenés una cuenta?
+                                ¿Aún no tienes una cuenta?
                             </p>
                             <Button
                                 variant="outline"

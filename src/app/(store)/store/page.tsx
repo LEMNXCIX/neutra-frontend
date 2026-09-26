@@ -7,7 +7,7 @@ import { StoreHomeClient } from "./store-client";
 export const metadata: Metadata = {
     title: "Inicio",
     description:
-        "Bienvenido a nuestra tienda: explorá colecciones y productos destacados",
+        "Bienvenido a nuestra tienda: explora colecciones y productos destacados",
 };
 
 async function fetchSliders(): Promise<any[]> {

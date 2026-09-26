@@ -149,7 +149,7 @@ export function CouponCard({
           <Input
             value={code}
             onChange={(e) => onCodeChange(e.target.value.toUpperCase())}
-            placeholder="INGRESÁ CÓDIGO"
+            placeholder="INGRESA CÓDIGO"
             className="flex-1 h-11 border-2 font-black uppercase tracking-widest text-xs rounded-xl"
             disabled={!!coupon}
           />
@@ -282,7 +282,7 @@ export default function CartClient() {
 
     const handleApplyCoupon = async () => {
         if (!code.trim()) {
-            toast.error("Ingresá un código de cupón");
+            toast.error("Ingresa un código de cupón");
             return;
         }
         setApplyingCoupon(true);
@@ -308,7 +308,7 @@ export default function CartClient() {
 
     const placeOrder = async () => {
         if (items.length === 0) return toast.error("El carrito está vacío");
-        if (!address.trim()) return toast.error("Ingresá la dirección de envío");
+        if (!address.trim()) return toast.error("Ingresa la dirección de envío");
 
         setPlacing(true);
         try {
@@ -385,7 +385,7 @@ export default function CartClient() {
                         Tu <span className="text-primary">carrito</span>
                     </h1>
                     <p className="text-muted-foreground font-bold uppercase tracking-widest text-xs">
-                        Revisá tu{" "}
+                        Revisa tu{" "}
                         {items.length === 1
                             ? "selección"
                             : `${items.length} selecciones`}{" "}

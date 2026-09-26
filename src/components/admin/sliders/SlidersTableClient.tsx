@@ -627,7 +627,7 @@ function SlidersTableClientInner({
         const confirmed = await confirm({
             title: "Eliminar Slider",
             description:
-                "¿Seguro que querés eliminar este slider? Esta acción no se puede deshacer.",
+                "¿Seguro que quieres eliminar este slider? Esta acción no se puede deshacer.",
             confirmText: "Eliminar",
             variant: "destructive",
         });

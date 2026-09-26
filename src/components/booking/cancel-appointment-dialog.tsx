@@ -54,7 +54,7 @@ export function CancelAppointmentDialog({
                 <DialogHeader>
                     <DialogTitle>Cancelar cita</DialogTitle>
                     <DialogDescription>
-                        ¿Seguro que querés cancelar esta cita? Esta acción no se puede deshacer.
+                        ¿Seguro que quieres cancelar esta cita? Esta acción no se puede deshacer.
                     </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4 py-4">

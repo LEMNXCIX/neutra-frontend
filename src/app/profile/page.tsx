@@ -10,7 +10,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Mi Perfil",
-  description: "Gestioná la configuración y preferencias de tu cuenta",
+  description: "Gestiona la configuración y preferencias de tu cuenta",
 };
 
 export const dynamic = 'force-dynamic';
@@ -71,7 +71,7 @@ export default async function ProfilePage() {
                             {data.isNeutral ? "Perfil de Usuario" : "Resumen de la Cuenta"}
                         </h1>
                         <p className="text-muted-foreground text-lg font-medium">
-                            {data.isNeutral ? "Gestioná tu seguridad y preferencias globales" : "Revisá tu actividad reciente y la configuración de tu cuenta"}
+                            {data.isNeutral ? "Gestiona tu seguridad y preferencias globales" : "Revisa tu actividad reciente y la configuración de tu cuenta"}
                         </p>
                     </div>
 
