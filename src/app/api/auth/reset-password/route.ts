@@ -1,13 +1,7 @@
 import { readJsonResponse } from "@/lib/response";
 import { NextRequest, NextResponse } from "next/server";
 import { getProxyHeaders } from "@/lib/proxy";
-
-const getBackendUrl = () => {
-    const url = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4001/api";
-    return url.endsWith('/api') ? url : `${url}/api`;
-};
-
-const BACKEND_API_URL = getBackendUrl();
+import { getBackendUrl } from "@/lib/backend-url";
 
 /**
  * POST /api/auth/reset-password
@@ -16,7 +10,7 @@ const BACKEND_API_URL = getBackendUrl();
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
-        const backendUrl = `${BACKEND_API_URL}/auth/reset-password`;
+        const backendUrl = `${getBackendUrl()}/auth/reset-password`;
 
         const response = await fetch(backendUrl, {
             method: "POST",

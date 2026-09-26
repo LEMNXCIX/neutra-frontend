@@ -1,7 +1,6 @@
 import { readJsonResponse } from "@/lib/response";
 import { NextRequest, NextResponse } from "next/server";
-
-const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4001/api";
+import { getBackendUrl } from "@/lib/backend-url";
 
 /**
  * GET /api/orders/[id]
@@ -13,7 +12,7 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const backendUrl = `${BACKEND_API_URL}/order/${id}`;
+    const backendUrl = `${getBackendUrl()}/order/${id}`;
 
     const response = await fetch(backendUrl, {
       method: "GET",

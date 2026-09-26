@@ -1,11 +1,6 @@
 import { cookies } from "next/headers";
 
-const getBackendUrl = () => {
-    const url = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4001/api";
-    return url.endsWith("/api") ? url : `${url}/api`;
-};
-
-const BACKEND_API_URL = getBackendUrl();
+import { getBackendUrl } from "@/lib/backend-url";
 
 export async function validateAdminAccess() {
     try {
@@ -21,7 +16,7 @@ export async function validateAdminAccess() {
             .map((cookie) => `${cookie.name}=${cookie.value}`)
             .join("; ");
 
-        const response = await fetch(`${BACKEND_API_URL}/auth/validate`, {
+        const response = await fetch(`${getBackendUrl()}/auth/validate`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",

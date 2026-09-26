@@ -1,7 +1,7 @@
 import { StandardResponse } from '@/types/frontend-api';
 import Cookies from 'js-cookie';
 
-// Note: API_BASE_URL not used - requests go through Next.js API routes
+import { getBackendUrl } from '@/lib/backend-url';
 
 /**
  * Custom error class for API errors with context for debugging
@@ -99,17 +99,10 @@ export async function apiClient<T = unknown>(
     };
 
     const isServer = typeof window === 'undefined';
-    // Use Next.js API routes (/api/...) which proxy to the backend
-    // This ensures proper cookie handling and avoids CORS issues
-    let baseUrl = '';
-    if (isServer) {
-        // Server-side: Use the backend URL directly
-        baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001/api';
-        if (!baseUrl.endsWith('/api')) baseUrl += '/api';
-    } else {
-        // Client-side: Use the relative proxy
-        baseUrl = '/api';
-    }
+    // Browser traffic always goes through the Next.js BFF at /api, which keeps
+    // the backend origin and the session cookie in one place. Server-rendered
+    // calls hit the backend directly, because a relative URL does not resolve.
+    const baseUrl = isServer ? getBackendUrl() : '/api';
 
     const url = endpoint.startsWith('http') ? endpoint : `${baseUrl}${endpoint}`;
 

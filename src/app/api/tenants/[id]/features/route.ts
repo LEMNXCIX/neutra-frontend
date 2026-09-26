@@ -1,11 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getProxyHeaders } from "@/lib/proxy";
-
-const NEXT_PUBLIC_API_URL =
-    process.env.NEXT_PUBLIC_API_URL || "http://localhost:4001";
-const BACKEND_URL = NEXT_PUBLIC_API_URL.endsWith("/api")
-    ? NEXT_PUBLIC_API_URL
-    : `${NEXT_PUBLIC_API_URL}/api`;
+import { getBackendUrl } from "@/lib/backend-url";
 
 export async function GET(
     request: NextRequest,
@@ -13,7 +8,7 @@ export async function GET(
 ) {
     try {
         const { id } = await params;
-        const response = await fetch(`${BACKEND_URL}/tenants/${id}/features`, {
+        const response = await fetch(`${getBackendUrl()}/tenants/${id}/features`, {
             headers: getProxyHeaders(request),
             cache: "no-store",
         });
@@ -54,7 +49,7 @@ export async function PUT(
         const { id } = await params;
         const body = await request.json();
 
-        const response = await fetch(`${BACKEND_URL}/tenants/${id}/features`, {
+        const response = await fetch(`${getBackendUrl()}/tenants/${id}/features`, {
             method: "PUT",
             headers: {
                 ...getProxyHeaders(request),

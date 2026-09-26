@@ -1,7 +1,6 @@
 import { readJsonResponse } from "@/lib/response";
 import { NextRequest, NextResponse } from "next/server";
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4001";
+import { getBackendUrl } from "@/lib/backend-url";
 
 /**
  * GET /api/tenants/config/[slug]
@@ -15,7 +14,7 @@ export async function GET(
         const { slug } = await params;
 
         const response = await fetch(
-            `${BACKEND_URL}/tenants/config/${encodeURIComponent(slug)}`,
+            `${getBackendUrl()}/tenants/config/${encodeURIComponent(slug)}`,
             { cache: "no-store" },
         );
 

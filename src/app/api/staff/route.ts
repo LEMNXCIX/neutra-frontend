@@ -1,8 +1,7 @@
 import { readJsonResponse } from "@/lib/response";
 import { NextRequest, NextResponse } from "next/server";
 import { getProxyHeaders } from "@/lib/proxy";
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4001";
+import { getBackendUrl } from "@/lib/backend-url";
 
 export async function GET(request: NextRequest) {
     try {
@@ -10,7 +9,7 @@ export async function GET(request: NextRequest) {
         const activeOnly = searchParams.get("activeOnly") ?? "true";
 
         const response = await fetch(
-            `${BACKEND_URL}/staff?activeOnly=${activeOnly}`,
+            `${getBackendUrl()}/staff?activeOnly=${activeOnly}`,
             {
                 headers: getProxyHeaders(request),
                 cache: "no-store",
@@ -32,7 +31,7 @@ export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
 
-        const response = await fetch(`${BACKEND_URL}/staff`, {
+        const response = await fetch(`${getBackendUrl()}/staff`, {
             method: "POST",
             headers: {
                 ...getProxyHeaders(request),

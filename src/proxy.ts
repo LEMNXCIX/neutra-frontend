@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
+import { getBackendUrl } from '@/lib/backend-url';
+
 /**
  * Short-lived in-memory cache for tenant config (module type + tenant id).
  * Tenant types can change (e.g. store -> booking), so unlike the previous
@@ -22,10 +24,9 @@ async function fetchTenantConfig(
     }
 
     try {
-        const baseUrl =
-            process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
-        const apiUrl = baseUrl.endsWith('/api') ? baseUrl : `${baseUrl}/api`;
-        const response = await fetch(`${apiUrl}/tenants/config/${tenantSlug}`);
+        const response = await fetch(
+            `${getBackendUrl()}/tenants/config/${tenantSlug}`,
+        );
 
         if (response.ok) {
             const result = await response.json();
@@ -50,9 +51,6 @@ async function fetchTenantConfig(
 export async function proxy(request: NextRequest) {
     const hostname = request.headers.get('host') || 'localhost';
     const url = request.nextUrl;
-
-    // Extract port number
-    const port = hostname.split(':')[1];
 
     // Extract subdomain
     const domain = hostname.split(':')[0];
@@ -98,22 +96,9 @@ export async function proxy(request: NextRequest) {
         }
     }
 
-    // 2. Port-based routing for localhost development (Legacy fallback)
-    if (tenantSlug === 'default' || tenantSlug === '') {
-        if (isLocalhost) {
-            if (port === '3001') {
-                tenantSlug = 'default';
-                moduleType = 'store';
-            } else if (port === '3002') {
-                tenantSlug = 'booking1';
-                moduleType = 'booking';
-            } else if (port === '3000' && !domain.includes('.')) {
-                // Only root if no subdomain
-                tenantSlug = 'superadmin';
-                moduleType = 'root';
-            }
-        }
-    }
+    // Root host with no subdomain is always the superadmin surface. Tenant
+    // identity comes from the subdomain alone; there is no port-based fallback.
+    // Local development uses subdomains too: default.localhost, booking1.localhost.
 
     // Default path rewrites for better UX
     if (moduleType === 'store' && url.pathname === '/') {

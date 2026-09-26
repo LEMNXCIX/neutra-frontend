@@ -1,8 +1,7 @@
 import { readJsonResponse } from "@/lib/response";
 import { NextRequest, NextResponse } from "next/server";
 import { getProxyHeaders } from "@/lib/proxy";
-
-const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4001/api";
+import { getBackendUrl } from "@/lib/backend-url";
 
 /**
  * GET /api/profile
@@ -10,7 +9,7 @@ const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:400
  */
 export async function GET(req: NextRequest) {
     try {
-        const backendUrl = `${BACKEND_API_URL}/auth/validate`;
+        const backendUrl = `${getBackendUrl()}/auth/validate`;
 
         const response = await fetch(backendUrl, {
             method: "GET",
@@ -39,7 +38,7 @@ export async function PUT(req: NextRequest) {
         const body = await req.json();
 
         // First get current user ID
-        const validateUrl = `${BACKEND_API_URL}/auth/validate`;
+        const validateUrl = `${getBackendUrl()}/auth/validate`;
         const validateResponse = await fetch(validateUrl, {
             method: "GET",
             headers: getProxyHeaders(req),
@@ -56,7 +55,7 @@ export async function PUT(req: NextRequest) {
         }
 
         const userId = validateData.data.user.id;
-        const backendUrl = `${BACKEND_API_URL}/users/${userId}`;
+        const backendUrl = `${getBackendUrl()}/users/${userId}`;
 
         const response = await fetch(backendUrl, {
             method: "PUT",

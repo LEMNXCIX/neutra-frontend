@@ -1,8 +1,7 @@
 import { readJsonResponse } from "@/lib/response";
 import { NextRequest, NextResponse } from "next/server";
 import { getProxyHeaders } from "@/lib/proxy";
-
-const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4001/api";
+import { getBackendUrl } from "@/lib/backend-url";
 
 /**
  * PUT /api/users/[id]/role
@@ -16,7 +15,7 @@ export async function PUT(
         const { id } = await params;
         const body = await req.json();
 
-        const backendUrl = `${BACKEND_API_URL}/users/${id}/role`;
+        const backendUrl = `${getBackendUrl()}/users/${id}/role`;
 
         const response = await fetch(backendUrl, {
             method: "PUT",

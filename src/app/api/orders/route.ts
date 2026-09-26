@@ -1,7 +1,6 @@
 import { readJsonResponse } from "@/lib/response";
 import { NextRequest, NextResponse } from "next/server";
-
-const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4001/api";
+import { getBackendUrl } from "@/lib/backend-url";
 
 /**
  * GET /api/orders
@@ -9,7 +8,7 @@ const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:400
  */
 export async function GET(req: NextRequest) {
   try {
-    const backendUrl = `${BACKEND_API_URL}/order`;
+    const backendUrl = `${getBackendUrl()}/order`;
 
     const response = await fetch(backendUrl, {
       method: "GET",
@@ -39,7 +38,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const backendUrl = `${BACKEND_API_URL}/order`;
+    const backendUrl = `${getBackendUrl()}/order`;
     const response = await fetch(backendUrl, {
       method: "POST",
       headers: {

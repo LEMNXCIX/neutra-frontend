@@ -1,12 +1,11 @@
 import { readJsonResponse } from "@/lib/response";
 import { NextRequest, NextResponse } from 'next/server';
 import { getProxyHeaders } from '@/lib/proxy';
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
+import { getBackendUrl } from '@/lib/backend-url';
 
 export async function GET(request: NextRequest) {
     try {
-        const response = await fetch(`${BACKEND_URL}/staff/me`, {
+        const response = await fetch(`${getBackendUrl()}/staff/me`, {
             headers: getProxyHeaders(request),
             cache: 'no-store'
         });

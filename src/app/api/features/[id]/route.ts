@@ -1,8 +1,7 @@
 import { readJsonResponse } from "@/lib/response";
 import { NextRequest, NextResponse } from 'next/server';
 import { getProxyHeaders } from '@/lib/proxy';
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
+import { getBackendUrl } from '@/lib/backend-url';
 
 export async function GET(
     request: NextRequest,
@@ -10,7 +9,7 @@ export async function GET(
 ) {
     const { id } = await context.params;
     try {
-  const response = await fetch(`${BACKEND_URL}/features/${id}`, {
+  const response = await fetch(`${getBackendUrl()}/features/${id}`, {
     headers: getProxyHeaders(request),
     cache: 'no-store',
   });
@@ -34,7 +33,7 @@ export async function PUT(
     try {
         const body = await request.json();
 
-  const response = await fetch(`${BACKEND_URL}/features/${id}`, {
+  const response = await fetch(`${getBackendUrl()}/features/${id}`, {
     method: 'PUT',
     headers: {
       ...getProxyHeaders(request),
@@ -61,7 +60,7 @@ export async function DELETE(
 ) {
     const { id } = await context.params;
     try {
-  const response = await fetch(`${BACKEND_URL}/features/${id}`, {
+  const response = await fetch(`${getBackendUrl()}/features/${id}`, {
     method: 'DELETE',
     headers: getProxyHeaders(request),
     cache: 'no-store',

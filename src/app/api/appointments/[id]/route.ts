@@ -1,13 +1,14 @@
 import { readJsonResponse } from "@/lib/response";
 import { NextRequest, NextResponse } from 'next/server';
 import { getProxyHeaders } from '@/lib/proxy';
+import { getBackendUrl } from '@/lib/backend-url';
 
 export async function GET(
     request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
     const { id } = await params;
-    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
+    const backendUrl = getBackendUrl();
 
     try {
         const headers = await getProxyHeaders(request);
@@ -32,7 +33,7 @@ export async function DELETE(
     { params }: { params: Promise<{ id: string }> }
 ) {
     const { id } = await params;
-    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
+    const backendUrl = getBackendUrl();
 
     try {
         const headers = await getProxyHeaders(request);

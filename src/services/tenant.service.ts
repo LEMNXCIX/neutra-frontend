@@ -1,4 +1,5 @@
 import { api } from "@/lib/api-client";
+import { getBackendUrl } from "@/lib/backend-url";
 import { Tenant, CreateTenantData, UpdateTenantData } from "@/types/tenant";
 
 export const tenantService = {
@@ -8,12 +9,9 @@ export const tenantService = {
 
     getBySlug: async (slug: string): Promise<Tenant | null> => {
         // Server-side (RSC): hit the backend directly; relative URLs don't resolve.
-        const base =
-            process.env.NEXT_PUBLIC_API_URL || "http://localhost:4001/api";
-        const apiUrl = base.endsWith("/api") ? base : `${base}/api`;
         const url =
             typeof window === "undefined"
-                ? `${apiUrl}/tenants/config/${encodeURIComponent(slug)}`
+                ? `${getBackendUrl()}/tenants/config/${encodeURIComponent(slug)}`
                 : `/api/tenants/config/${encodeURIComponent(slug)}`;
 
         const response = await fetch(url, { cache: "no-store" });

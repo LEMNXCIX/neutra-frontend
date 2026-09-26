@@ -1,8 +1,7 @@
 import { readJsonResponse } from "@/lib/response";
 import { NextRequest, NextResponse } from "next/server";
 import { getProxyHeaders } from "@/lib/proxy";
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4001";
+import { getBackendUrl } from "@/lib/backend-url";
 
 export async function PUT(
     request: NextRequest,
@@ -12,7 +11,7 @@ export async function PUT(
         const { id } = await context.params;
         const body = await request.json();
 
-        const response = await fetch(`${BACKEND_URL}/staff/${id}/services`, {
+        const response = await fetch(`${getBackendUrl()}/staff/${id}/services`, {
             method: "PUT",
             headers: {
                 ...getProxyHeaders(request),

@@ -1,7 +1,6 @@
 import { readJsonResponse } from "@/lib/response";
 import { NextRequest, NextResponse } from "next/server";
-
-const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4001/api";
+import { getBackendUrl } from "@/lib/backend-url";
 
 /**
  * GET /api/products/[id]
@@ -13,7 +12,7 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const backendUrl = `${BACKEND_API_URL}/products/${id}`;
+    const backendUrl = `${getBackendUrl()}/products/${id}`;
 
     const response = await fetch(backendUrl, {
       method: "GET",
@@ -47,7 +46,7 @@ export async function PUT(
   try {
     const { id } = await params;
     const body = await req.json();
-    const backendUrl = `${BACKEND_API_URL}/products/${id}`;
+    const backendUrl = `${getBackendUrl()}/products/${id}`;
 
     const response = await fetch(backendUrl, {
       method: "PUT",
@@ -80,7 +79,7 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
-    const backendUrl = `${BACKEND_API_URL}/products/${id}`;
+    const backendUrl = `${getBackendUrl()}/products/${id}`;
 
     const response = await fetch(backendUrl, {
       method: "DELETE",

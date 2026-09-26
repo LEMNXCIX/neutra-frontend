@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getProxyHeaders } from '@/lib/proxy';
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
+import { getBackendUrl } from '@/lib/backend-url';
 
 export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const query = searchParams.toString();
-    const url = `${BACKEND_URL}/appointments/availability?${query}`;
+    const url = `${getBackendUrl()}/appointments/availability?${query}`;
 
     try {
         const headers = getProxyHeaders(request);

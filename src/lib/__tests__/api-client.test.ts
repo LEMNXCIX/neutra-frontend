@@ -7,7 +7,7 @@ beforeEach(() => {
     vi.clearAllMocks();
     vi.unstubAllGlobals();
     vi.stubGlobal('fetch', mockFetch);
-    vi.stubEnv('NEXT_PUBLIC_API_URL', 'http://localhost:4001/api');
+    vi.stubEnv('BACKEND_API_URL', 'http://localhost:4001/api');
 });
 
 describe('apiClient', () => {
@@ -107,7 +107,6 @@ describe('apiClient', () => {
     });
 
     it('handles 401 and dispatches unauthorized event on client-side', async () => {
-        vi.stubEnv('NEXT_PUBLIC_API_URL', ''); // client-side uses /api
         vi.stubGlobal('window', {
             dispatchEvent: vi.fn(),
             location: { href: '' },

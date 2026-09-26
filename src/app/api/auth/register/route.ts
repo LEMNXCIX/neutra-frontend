@@ -5,13 +5,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getProxyHeaders } from "@/lib/proxy";
 import { logger } from "@/lib/logger";
-
-const getBackendUrl = () => {
-  const url = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4001/api";
-  return url.endsWith('/api') ? url : `${url}/api`;
-};
-
-const BACKEND_API_URL = getBackendUrl();
+import { getBackendUrl } from "@/lib/backend-url";
 
 export async function POST(req: NextRequest) {
   const startTime = Date.now();
@@ -22,7 +16,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     logger.info(logContext, `Auth Request: Signup attempt`);
 
-    const response = await fetch(`${BACKEND_API_URL}/auth/signup`, {
+    const response = await fetch(`${getBackendUrl()}/auth/signup`, {
       method: "POST",
       headers: {
         ...getProxyHeaders(req),

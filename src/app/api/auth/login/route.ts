@@ -7,8 +7,6 @@ import { getProxyHeaders } from "@/lib/proxy";
 import { logger } from "@/lib/logger";
 import { getBackendUrl } from "@/lib/backend-url";
 
-const BACKEND_API_URL = getBackendUrl();
-
 export async function POST(req: NextRequest) {
     const startTime = Date.now();
     const endpoint = "/auth/login";
@@ -18,7 +16,7 @@ export async function POST(req: NextRequest) {
         const body = await req.json();
         logger.info(logContext, `Auth Request: Login attempt`);
 
-        const response = await fetch(`${BACKEND_API_URL}/auth/login`, {
+        const response = await fetch(`${getBackendUrl()}/auth/login`, {
             method: "POST",
             headers: {
                 ...getProxyHeaders(req),

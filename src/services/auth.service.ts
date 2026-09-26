@@ -49,16 +49,6 @@ export const authService = {
     },
 
     /**
-     * Redirect to Google OAuth
-     */
-    googleLogin: () => {
-        // Browser must hit the backend directly so the OAuth session cookie
-        // is set on the shared domain before the redirect back to the app.
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || '/api';
-        window.location.href = `${apiUrl}/auth/google`;
-    },
-
-    /**
      * Request password reset link
      */
     forgotPassword: async (email: string): Promise<any> => {
