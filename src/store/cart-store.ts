@@ -6,6 +6,7 @@ import { couponsService } from "@/services/coupons.service";
 import { useAuthStore } from "@/store/auth-store";
 import { useTenantStore } from "@/store/tenant-store";
 import { ApiError } from "@/lib/api-client";
+import { reportError } from "@/lib/error-reporting";
 import { Product } from "@/types/product.types";
 import { CouponType, type Coupon } from "@/types/coupon.types";
 
@@ -220,9 +221,10 @@ export const useCartStore = create<CartState & CartActions>()((set, get) => ({
 
       set({ loading: false });
     } catch (err) {
-      const errorMsg =
-        err instanceof ApiError ? err.message : "Error al obtener el carrito";
-      set({ error: errorMsg, loading: false });
+      set({
+        error: reportError(err, "No pudimos cargar el carrito.", { toast: false }),
+        loading: false,
+      });
       console.error("Cart fetch error:", err);
     }
   },
@@ -262,10 +264,11 @@ export const useCartStore = create<CartState & CartActions>()((set, get) => ({
       set({ loading: false });
       return { success: true };
     } catch (err) {
-      const message =
-        err instanceof ApiError ? err.message : "Error al agregar al carrito";
       set({ loading: false });
-      return { success: false, reason: message };
+      return {
+        success: false,
+        reason: reportError(err, "No pudimos agregar el producto al carrito.", { toast: false }),
+      };
     }
   },
 
@@ -278,8 +281,9 @@ export const useCartStore = create<CartState & CartActions>()((set, get) => ({
         await get().fetchCart();
       }
     } catch (err) {
-      const message =
-        err instanceof ApiError ? err.message : "Error al eliminar el producto";
+      const message = reportError(err, "No pudimos eliminar el producto del carrito.", {
+        toast: false,
+      });
       console.error(message);
     } finally {
       set({ loading: false });
@@ -308,10 +312,9 @@ export const useCartStore = create<CartState & CartActions>()((set, get) => ({
       }
       await get().fetchCart();
     } catch (err) {
-      const message =
-        err instanceof ApiError
-          ? err.message
-          : "Error al actualizar la cantidad";
+      const message = reportError(err, "No pudimos actualizar la cantidad.", {
+        toast: false,
+      });
       console.error(message);
     } finally {
       set({ loading: false });

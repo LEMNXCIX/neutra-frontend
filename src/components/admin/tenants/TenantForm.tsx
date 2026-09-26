@@ -19,7 +19,7 @@ import { PlatformFeature } from "@/services/features.service";
 
 const EMPTY_PLATFORM_FEATURES: PlatformFeature[] = [];
 import { toast } from "sonner";
-import { ApiError } from "@/lib/api-client";
+import { reportError } from "@/lib/error-reporting";
 import { Checkbox } from "@/components/ui/checkbox";
 import { BrandingEditor } from "./BrandingEditor";
 import { Clock } from "lucide-react";
@@ -442,9 +442,7 @@ export function TenantForm({
             }
             onSuccess();
         } catch (err: any) {
-            const message =
-                err instanceof ApiError ? err.message : "Error al guardar el tenant";
-            toast.error(message);
+            reportError(err, "No pudimos guardar la organización.");
         } finally {
             setIsSaving(false);
         }

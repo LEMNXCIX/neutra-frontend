@@ -26,6 +26,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { AuthBrandHeader } from "@/components/auth/AuthBrandHeader";
+import { reportError } from "@/lib/error-reporting";
 import { cn } from "@/lib/utils";
 
 const getPasswordStrength = (pass: string) => {
@@ -102,9 +103,10 @@ export function RegisterPageClient() {
     await register(state.name, state.email, state.password);
     router.push("/");
   } catch (err) {
-    let msg = "Error al registrarse";
-    if (err instanceof Error) msg = err.message;
-    dispatch({ type: "SET_ERROR", value: msg });
+    dispatch({
+      type: "SET_ERROR",
+      value: reportError(err, "No pudimos crear tu cuenta.", { toast: false }),
+    });
   }
   };
 

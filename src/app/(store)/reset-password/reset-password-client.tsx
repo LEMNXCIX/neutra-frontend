@@ -15,6 +15,7 @@ import {
     CardFooter,
 } from "@/components/ui/card";
 import { toast } from "sonner";
+import { reportError } from "@/lib/error-reporting";
 import { authService } from "@/services/auth.service";
 import { Spinner } from "@/components/ui/spinner";
 import {
@@ -64,7 +65,7 @@ function ResetPasswordForm() {
                 router.push("/login");
             }, 3000);
         } catch (error: any) {
-            toast.error(error?.message || "Error al restablecer la contraseña");
+            reportError(error, "No pudimos restablecer tu contraseña.");
         } finally {
             setLoading(false);
         }

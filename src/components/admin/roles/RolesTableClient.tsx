@@ -9,7 +9,7 @@ import { useDebouncedCallback } from "use-debounce";
 import { toast } from "sonner";
 import { rolesService } from "@/services/roles.service";
 import { permissionsService } from "@/services/permissions.service";
-import { ApiError } from "@/lib/api-client";
+import { reportError } from "@/lib/error-reporting";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -1321,8 +1321,7 @@ dispatch({ type: "SET_CREATE_OPEN", payload: false });
 await refreshPermissions();
 router.refresh();
 } catch (err) {
-const message = err instanceof ApiError ? err.message : "Error al crear el rol";
-toast.error(message);
+reportError(err, "No pudimos crear el rol.");
 } finally {
 dispatch({ type: "SET_IS_CREATING_ROLE", payload: false });
 }
@@ -1338,8 +1337,7 @@ dispatch({ type: "SET_EDIT_OPEN", payload: false });
 await refreshPermissions();
 router.refresh();
 } catch (err) {
-const message = err instanceof ApiError ? err.message : "Error al actualizar el rol";
-toast.error(message);
+reportError(err, "No pudimos actualizar el rol.");
 } finally {
 dispatch({ type: "SET_IS_EDITING_ROLE", payload: false });
 }
@@ -1355,8 +1353,7 @@ await rolesService.delete(id);
 toast.success("Rol eliminado correctamente");
 router.refresh();
 } catch (err) {
-const message = err instanceof ApiError ? err.message : "Error al eliminar el rol";
-toast.error(message);
+reportError(err, "No pudimos eliminar el rol.");
 } finally {
 dispatch({ type: "SET_IS_DELETING_ROLE", payload: null });
 }
@@ -1386,8 +1383,7 @@ toast.success("Permiso creado correctamente");
 permDispatch({ type: "SET_PERM_CREATE_OPEN", payload: false });
 router.refresh();
 } catch (err) {
-const message = err instanceof ApiError ? err.message : "Error al crear el permiso";
-toast.error(message);
+reportError(err, "No pudimos crear el permiso.");
 } finally {
 permDispatch({ type: "SET_IS_CREATING_PERM", payload: false });
 }
@@ -1402,8 +1398,7 @@ toast.success("Permiso actualizado correctamente");
 permDispatch({ type: "SET_PERM_EDIT_OPEN", payload: false });
 router.refresh();
 } catch (err) {
-const message = err instanceof ApiError ? err.message : "Error al actualizar el permiso";
-toast.error(message);
+reportError(err, "No pudimos actualizar el permiso.");
 } finally {
 permDispatch({ type: "SET_IS_EDITING_PERM", payload: false });
 }
@@ -1419,8 +1414,7 @@ toast.success("Permiso eliminado correctamente");
 await refreshPermissions();
 router.refresh();
 } catch (err) {
-const message = err instanceof ApiError ? err.message : "Error al eliminar el permiso";
-toast.error(message);
+reportError(err, "No pudimos eliminar el permiso.");
 } finally {
 permDispatch({ type: "SET_IS_DELETING_PERM", payload: null });
 }

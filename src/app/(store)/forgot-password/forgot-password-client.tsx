@@ -14,6 +14,7 @@ import {
     CardFooter,
 } from "@/components/ui/card";
 import { toast } from "sonner";
+import { reportError } from "@/lib/error-reporting";
 import { authService } from "@/services/auth.service";
 import { Spinner } from "@/components/ui/spinner";
 import { Mail, ArrowLeft, CheckCircle2, ArrowRight } from "lucide-react";
@@ -34,7 +35,7 @@ export function ForgotPasswordPageClient() {
             setSubmitted(true);
             toast.success("Enlace enviado si la cuenta existe");
         } catch (error: any) {
-            toast.error(error?.message || "Algo salió mal");
+            reportError(error, "No pudimos enviar el enlace de recuperación.");
         } finally {
             setLoading(false);
         }

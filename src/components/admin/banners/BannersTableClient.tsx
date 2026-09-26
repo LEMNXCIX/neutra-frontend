@@ -8,6 +8,7 @@ import { FilterSelect } from "@/components/admin/shared/FilterSelect";
 import React, { useRef, useState, useReducer, useCallback, useSyncExternalStore, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
+import { reportError } from "@/lib/error-reporting";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -605,7 +606,7 @@ active: true,
 } });
       router.refresh();
         } catch (err: any) {
-            toast.error(err?.message || "Error al crear el banner");
+            reportError(err, "No pudimos crear el banner.");
         } finally {
             dispatch({ type: "SET_IS_CREATING", payload: false });
         }
@@ -626,7 +627,7 @@ active: true,
             toast.success("Banner eliminado");
             router.refresh();
         } catch (err: any) {
-            toast.error(err?.message || "Error al eliminar");
+            reportError(err, "No pudimos eliminar el banner.");
         } finally {
             dispatch({ type: "SET_IS_DELETING", payload: null });
         }
@@ -669,7 +670,7 @@ active: true,
 } });
       router.refresh();
         } catch (err: any) {
-            toast.error(err?.message || "Error al actualizar");
+            reportError(err, "No pudimos actualizar el banner.");
         } finally {
             dispatch({ type: "SET_IS_EDITING", payload: false });
         }

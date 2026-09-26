@@ -25,6 +25,7 @@ import Link from "next/link";
 import { CancelAppointmentDialog } from "@/components/booking/cancel-appointment-dialog";
 import { StatusUpdateDialog } from "@/components/booking/status-update-dialog";
 import { bookingService } from "@/services/booking.service";
+import { reportError } from "@/lib/error-reporting";
 
 const getStatusVariant = (
     status: string,
@@ -355,7 +356,7 @@ export function AppointmentsClient({
             const data = await bookingService.getAppointments();
             setAppointments(data);
         } catch (err: any) {
-            setError(err.message);
+            setError(reportError(err, "No pudimos cargar tus citas."));
         }
     };
 
@@ -367,7 +368,7 @@ export function AppointmentsClient({
             });
             setStaffAppointments(data);
         } catch (err: any) {
-            setError(err.message);
+            setError(reportError(err, "No pudimos cargar las citas del equipo."));
         }
     };
 

@@ -121,7 +121,7 @@ describe('FeatureProvider / useFeatures', () => {
 
         await waitFor(() =>
             expect(screen.getByTestId('error').textContent).toBe(
-                'network down',
+                'No pudimos cargar las funcionalidades.',
             ),
         );
         expect(screen.getByTestId('coupons').textContent).toBe('false');

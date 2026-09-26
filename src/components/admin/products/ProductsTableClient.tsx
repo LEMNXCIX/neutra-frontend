@@ -8,7 +8,8 @@ import { FilterSelect } from "@/components/admin/shared/FilterSelect";
 import React, { Suspense, useRef, useReducer } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
-import { api, ApiError } from "@/lib/api-client";
+import { api } from "@/lib/api-client";
+import { reportError } from "@/lib/error-reporting";
 import { Button } from "@/components/ui/button";
 import Image from "@/components/ui/image";
 import { Input } from "@/components/ui/input";
@@ -812,7 +813,7 @@ function ProductsTableClientInner({
             try {
                 await api.post("/products", body);
             } catch (err) {
-                toast.error(err instanceof ApiError ? err.message : "Error al crear el producto");
+                reportError(err, "No pudimos crear el producto.");
                 return;
             }
     toast.success("Producto creado");
@@ -847,7 +848,7 @@ function ProductsTableClientInner({
             try {
                 await api.delete(`/products/${id}`);
             } catch (err) {
-                toast.error(err instanceof ApiError ? err.message : "Error al eliminar");
+                reportError(err, "No pudimos eliminar el producto.");
                 return;
             }
             toast.success("Producto eliminado");
@@ -893,7 +894,7 @@ function ProductsTableClientInner({
             try {
                 await api.put(`/products/${editingRef.current.id}`, body);
             } catch (err) {
-                toast.error(err instanceof ApiError ? err.message : "Error al actualizar");
+                reportError(err, "No pudimos actualizar el producto.");
                 return;
             }
     toast.success("Producto actualizado");

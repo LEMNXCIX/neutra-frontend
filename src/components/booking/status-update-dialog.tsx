@@ -21,6 +21,7 @@ import React, { useState } from "react";
 import { bookingService } from "@/services/booking.service";
 import type { AppointmentStatus } from "@/services/booking.service";
 import { canTransitionAppointmentStatus } from "@/services/booking.service";
+import { reportError } from "@/lib/error-reporting";
 import { toast } from "sonner";
 
 type StatusCopy = {
@@ -136,11 +137,7 @@ export function StatusUpdateDialog({
                 }
             }
         } catch (error) {
-            toast.error(
-                error instanceof Error
-                    ? error.message
-                    : "Error al actualizar el estado",
-            );
+            reportError(error, "No pudimos actualizar el estado de la cita.");
         } finally {
             setLoading(false);
         }

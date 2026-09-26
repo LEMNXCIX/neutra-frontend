@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { toast } from "sonner";
 import { usersService } from "@/services/users.service";
 import { rolesService } from "@/services/roles.service";
-import { ApiError } from "@/lib/api-client";
+import { reportError } from "@/lib/error-reporting";
 import {
     Dialog,
     DialogContent,
@@ -66,9 +66,7 @@ export function AssignRoleDialog({
       const fetchedRoles = await rolesService.getAll();
       setRoles(fetchedRoles);
     } catch (err) {
-      const message =
-        err instanceof ApiError ? err.message : "Error al cargar los roles";
-      toast.error(message);
+      reportError(err, "No pudimos cargar los roles.");
     } finally {
       setLoadingRoles(false);
     }
@@ -99,9 +97,7 @@ export function AssignRoleDialog({
             onOpenChange(false);
             onSuccess?.();
         } catch (err) {
-            const message =
-                err instanceof ApiError ? err.message : "Error al asignar el rol";
-            toast.error(message);
+            reportError(err, "No pudimos asignar el rol.");
         } finally {
             setLoading(false);
         }

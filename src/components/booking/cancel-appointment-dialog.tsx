@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Loader2 } from "lucide-react";
 import React, { useState } from "react";
 import { bookingService } from '@/services/booking.service';
+import { reportError } from '@/lib/error-reporting';
 import { toast } from "sonner";
 
 interface CancelAppointmentDialogProps {
@@ -39,7 +40,7 @@ export function CancelAppointmentDialog({
                 onAppointmentCancelled();
             }
         } catch (err: any) {
-            toast.error(err.message || "Error al cancelar la cita");
+            reportError(err, "No pudimos cancelar la cita.");
         } finally {
             setLoading(false);
         }

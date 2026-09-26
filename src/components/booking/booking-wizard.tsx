@@ -16,6 +16,7 @@ import {
     bookingService,
 } from "@/services/booking.service";
 import { couponsService } from "@/services/coupons.service";
+import { reportError } from "@/lib/error-reporting";
 import { CouponValidationResult } from "@/types/coupon.types";
 import { useAuthStore } from "@/store/auth-store";
 import { useFeatures } from "@/hooks/useFeatures";
@@ -866,7 +867,7 @@ export function BookingWizard({
         } catch (err: any) {
             dispatch({
                 type: "SET_COUPON_ERROR",
-                payload: err.message || "Error al validar el cupón",
+                payload: reportError(err, "No pudimos validar el cupón."),
             });
         } finally {
             dispatch({ type: "SET_VALIDATING_COUPON", payload: false });
@@ -924,7 +925,7 @@ export function BookingWizard({
         } catch (err: any) {
             dispatch({
                 type: "SET_ERROR",
-                payload: err.message || "Error al crear la cita",
+                payload: reportError(err, "No pudimos crear la cita."),
             });
         } finally {
             dispatch({ type: "SET_SUBMITTING", payload: false });

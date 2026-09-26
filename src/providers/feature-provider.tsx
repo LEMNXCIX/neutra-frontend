@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, ReactNode, useCallback, useMemo } from "react";
 import { tenantService } from "@/services/tenant.service";
+import { reportError } from "@/lib/error-reporting";
 import { FeatureContext } from "@/providers/feature-context";
 import { TenantFeatures } from "@/types/tenant";
 
@@ -32,7 +33,7 @@ export function FeatureProvider({ children }: { children: ReactNode }) {
             setError(null);
         } catch (err: any) {
             console.error("Failed to fetch tenant features:", err);
-            setError(err.message || "Error al cargar las funcionalidades");
+            setError(reportError(err, "No pudimos cargar las funcionalidades.", { toast: false }));
         } finally {
             setIsLoading(false);
         }

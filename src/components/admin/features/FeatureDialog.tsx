@@ -19,7 +19,7 @@ import {
     featuresService,
 } from "@/services/features.service";
 import { toast } from "sonner";
-import { ApiError } from "@/lib/api-client";
+import { reportError } from "@/lib/error-reporting";
 import { Zap, DollarSign } from "lucide-react";
 
 interface FeatureDialogProps {
@@ -74,11 +74,7 @@ export function FeatureDialog({
             onSuccess();
             onOpenChange(false);
         } catch (err: any) {
-            const message =
-                err instanceof ApiError
-                    ? err.message
-                    : "Error al guardar la función";
-            toast.error(message);
+            reportError(err, "No pudimos guardar la función.");
         } finally {
             setIsSaving(false);
         }

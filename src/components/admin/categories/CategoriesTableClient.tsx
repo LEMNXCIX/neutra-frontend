@@ -8,6 +8,7 @@ import { FilterSelect } from "@/components/admin/shared/FilterSelect";
 import React, { Suspense, useRef, useReducer, useSyncExternalStore } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
+import { reportError } from "@/lib/error-reporting";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -685,7 +686,7 @@ function CategoriesTableClientInner({
       dispatch({ type: "SET_FORM", payload: { name: "", description: "", type: "PRODUCT" } });
       router.refresh();
     } catch (error: any) {
-      toast.error(error.message || "Error al crear la categoría");
+      reportError(error, "No pudimos crear la categoría.");
     } finally {
       dispatch({ type: "SET_IS_CREATING", payload: false });
     }
@@ -706,7 +707,7 @@ function CategoriesTableClientInner({
       toast.success("Categoría eliminada");
       router.refresh();
     } catch (error: any) {
-      toast.error(error.message || "Error al eliminar");
+      reportError(error, "No pudimos eliminar la categoría.");
     } finally {
       dispatch({ type: "SET_IS_DELETING", payload: null });
     }
@@ -736,7 +737,7 @@ function CategoriesTableClientInner({
       dispatch({ type: "SET_FORM", payload: { name: "", description: "", type: "PRODUCT" } });
       router.refresh();
     } catch (error: any) {
-      toast.error(error.message || "Error al actualizar");
+      reportError(error, "No pudimos actualizar la categoría.");
     } finally {
       dispatch({ type: "SET_IS_EDITING", payload: false });
     }

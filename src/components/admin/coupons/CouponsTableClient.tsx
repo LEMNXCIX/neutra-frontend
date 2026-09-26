@@ -8,7 +8,7 @@ import React, { Suspense, useState, useRef, useReducer } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { couponsService } from "@/services/coupons.service";
-import { ApiError } from "@/lib/api-client";
+import { reportError } from "@/lib/error-reporting";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -905,8 +905,7 @@ setCreateOpen(false);
 resetForm();
 router.refresh();
 } catch (err) {
-const message = err instanceof ApiError ? err.message : "Error al crear el cupón";
-toast.error(message);
+reportError(err, "No pudimos crear el cupón.");
 } finally {
 setIsCreating(false);
 }
@@ -926,8 +925,7 @@ await couponsService.delete(id);
 toast.success("Cupón eliminado");
 router.refresh();
 } catch (err) {
-const message = err instanceof ApiError ? err.message : "Error al eliminar el cupón";
-toast.error(message);
+reportError(err, "No pudimos eliminar el cupón.");
 } finally {
 setIsDeleting(null);
 }
@@ -992,8 +990,7 @@ setEditing(null);
 resetForm();
 router.refresh();
 } catch (err) {
-const message = err instanceof ApiError ? err.message : "Error al actualizar el cupón";
-toast.error(message);
+reportError(err, "No pudimos actualizar el cupón.");
 } finally {
 setIsEditing(false);
 }

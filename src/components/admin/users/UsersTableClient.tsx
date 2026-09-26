@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import { usersService } from "@/services/users.service";
 import { tenantService } from "@/services/tenant.service";
 import { Tenant } from "@/types/tenant";
-import { ApiError } from "@/lib/api-client";
+import { reportError } from "@/lib/error-reporting";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -662,9 +662,7 @@ editingRef.current = null;
 dispatch({ type: "SET_FORM", payload: { name: "", email: "", tenantId: "" } });
 router.refresh();
 } catch (err) {
-const message =
-err instanceof ApiError ? err.message : "Error al actualizar el usuario";
-toast.error(message);
+reportError(err, "No pudimos actualizar el usuario.");
 } finally {
 dispatch({ type: "SET_IS_SAVING", payload: false });
 }

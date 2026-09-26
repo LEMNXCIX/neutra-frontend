@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { authService } from '@/services/auth.service';
 import { ApiError } from '@/lib/api-client';
+import { reportError } from '@/lib/error-reporting';
 import { User as APIUser } from '@/types/frontend-api';
 
 type User = {
@@ -57,10 +58,10 @@ export const useAuthStore = create<AuthState>()(
 
                     set({ user, loading: false });
                 } catch (err) {
-                    const errorMessage = err instanceof ApiError
-                        ? err.message
-                        : 'Error al iniciar sesión. Inténtalo de nuevo.';
-                    set({ loading: false, error: errorMessage });
+                    set({
+                        loading: false,
+                        error: reportError(err, 'No pudimos iniciar sesión. Intentá de nuevo.'),
+                    });
                     throw err;
                 }
             },
@@ -72,10 +73,10 @@ export const useAuthStore = create<AuthState>()(
                     const user = mapAPIUserToStoreUser(apiUser);
                     set({ user, loading: false });
                 } catch (err) {
-                    const errorMessage = err instanceof ApiError
-                        ? err.message
-                        : 'Error al registrarse. Inténtalo de nuevo.';
-                    set({ loading: false, error: errorMessage });
+                    set({
+                        loading: false,
+                        error: reportError(err, 'No pudimos crear tu cuenta. Intentá de nuevo.'),
+                    });
                     throw err;
                 }
             },

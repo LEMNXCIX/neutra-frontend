@@ -15,7 +15,7 @@ import {
 import { Spinner } from "@/components/ui/spinner";
 import { whatsappService, WhatsAppConfig } from "@/services/whatsapp.service";
 import { toast } from "sonner";
-import { ApiError } from "@/lib/api-client";
+import { reportError } from "@/lib/error-reporting";
 import { MessageSquare, Save } from "lucide-react";
 
 type WhatsAppConfigFormProps = {
@@ -74,11 +74,7 @@ export function WhatsAppConfigForm({ initialConfig }: WhatsAppConfigFormProps) {
             toast.success("Configuración guardada correctamente");
 		await loadConfig();
         } catch (err: any) {
-            const message =
-                err instanceof ApiError
-                    ? err.message
-                    : "Error al guardar la configuración";
-            toast.error(message);
+            reportError(err, "No pudimos guardar la configuración de WhatsApp.");
         } finally {
             setIsSaving(false);
         }

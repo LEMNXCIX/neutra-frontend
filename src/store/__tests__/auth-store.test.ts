@@ -53,7 +53,7 @@ describe('auth-store.login', () => {
     it('sets error and rethrows on ApiError', async () => {
         mockAuth.login.mockRejectedValue(new ApiError('Bad credentials', 401));
         await expect(useAuthStore.getState().login('a@b.com', 'x')).rejects.toThrow();
-        expect(useAuthStore.getState().error).toBe('Bad credentials');
+        expect(useAuthStore.getState().error).toBe('No pudimos iniciar sesión. Intentá de nuevo.');
     });
 });
 
