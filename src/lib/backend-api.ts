@@ -3,6 +3,8 @@
  * Centralized, type-safe client for external backend communication
  */
 
+import { headers as getRequestHeaders } from 'next/headers';
+
 import { getBackendUrl } from './backend-url';
 
 // ============================================================================
@@ -12,15 +14,23 @@ import { getBackendUrl } from './backend-url';
 const TOKEN_COOKIE_NAME = 'token';
 
 /**
- * Ensure URL has protocol prefix
+ * Header names whose values are credentials or session material. They are
+ * redacted before anything reaches a log sink.
  */
-const ensureProtocol = (url: string): string => {
-  return url.startsWith('http://') || url.startsWith('https://')
-    ? url
-    : `http://${url}`;
-};
+const SENSITIVE_HEADERS = new Set(['cookie', 'authorization', 'set-cookie']);
 
-const BASE_URL = ensureProtocol(getBackendUrl());
+/**
+ * Redact credential-bearing headers so request/response logging can never leak a
+ * JWT. Explicit opt-in via LOG_HEADERS is not enough of a guard on its own: a
+ * single log line is enough to persist a session in a log aggregator.
+ */
+const redactHeaders = (headers: Record<string, string>): Record<string, string> => {
+  const out: Record<string, string> = {};
+  for (const [key, value] of Object.entries(headers)) {
+    out[key] = SENSITIVE_HEADERS.has(key.toLowerCase()) ? '[redacted]' : value;
+  }
+  return out;
+};
 
 // ============================================================================
 // Types
@@ -90,7 +100,7 @@ async function request<T = unknown>(
 
     // Normalize endpoint
     const normalizedEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
-    const url = `${BASE_URL}${normalizedEndpoint}`;
+    const url = `${getBackendUrl()}${normalizedEndpoint}`;
 
     if (typeof window === 'undefined') {
         console.log(`[BackendApi] ${method} ${url}`);
@@ -102,20 +112,23 @@ async function request<T = unknown>(
         ...headers,
     };
 
-    // Add authentication cookie if token provided
-    if (token) {
-        requestHeaders['Cookie'] = `${TOKEN_COOKIE_NAME}=${token}`;
-    }
-
-    // Forward Tenant Headers from Server Context
-    // Only works in Server components/Server actions/API routes
+    // Forward the incoming cookie jar. The backend authenticates from the
+    // `token` cookie, and other cookies in the jar (tenant slug, refresh token)
+    // are equally part of the caller's session. Rebuilding `Cookie: token=<jwt>`
+    // silently dropped them, which is the root cause of the admin logout path
+    // being rejected before it reached the backend.
+    let forwardedCookieJar = false;
     if (typeof window === 'undefined') {
         try {
-            const { headers: nextHeaders } = require('next/headers');
+            // headers() is a promise in Next.js 15+. It throws outside a request
+            // scope, which the catch handles for static generation and tests.
+            const h = await getRequestHeaders();
+            const cookie = h?.get('cookie');
 
-            // In Next.js 15, headers() returns a Promise. 
-            // We must await it before calling .get()
-            const h = await nextHeaders();
+            if (cookie) {
+                requestHeaders['Cookie'] = cookie;
+                forwardedCookieJar = true;
+            }
 
             if (h) {
                 const tenantId = h.get('x-tenant-id');
@@ -137,6 +150,14 @@ async function request<T = unknown>(
         }
     }
 
+    // No incoming jar (e.g. a server-side call outside a request scope): send the
+    // bare token so the call is still authenticated. Logged, because a request
+    // that authenticates differently from the rest deserves to be visible.
+    if (token && !forwardedCookieJar) {
+        requestHeaders['Cookie'] = `${TOKEN_COOKIE_NAME}=${token}`;
+        console.warn('[BackendApi] No incoming cookie jar; sending token-only Cookie header.');
+    }
+
     // Build fetch options
     const fetchOptions: RequestInit = {
         method,
@@ -146,8 +167,8 @@ async function request<T = unknown>(
         next,
     };
 
-    if (typeof window === 'undefined') {
-        console.log(`[BackendApi] Headers:`, JSON.stringify(requestHeaders, null, 2));
+    if (typeof window === 'undefined' && process.env.LOG_HEADERS === 'true') {
+        console.log(`[BackendApi] Headers:`, JSON.stringify(redactHeaders(requestHeaders), null, 2));
     }
 
     // Add body for mutation requests
