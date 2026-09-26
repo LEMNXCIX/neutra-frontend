@@ -1,50 +1,16 @@
-import { readJsonResponse } from "@/lib/response";
-import { NextRequest, NextResponse } from 'next/server';
-import { getProxyHeaders } from '@/lib/proxy';
-import { getBackendUrl } from '@/lib/backend-url';
+import { createGetHandler, createPostHandler } from '@/lib/api-route-handler';
 
-export async function GET(request: NextRequest) {
-    try {
-        const { searchParams } = new URL(request.url);
-        const activeOnly = searchParams.get('activeOnly') ?? 'true';
+/**
+ * GET /api/services
+ * Defaults activeOnly to true when the caller omits it, so the backend keeps
+ * receiving the flag it used to get from the hand-rolled query string.
+ */
+export const GET = createGetHandler(
+    (req) => `/services?activeOnly=${req.nextUrl.searchParams.get('activeOnly') ?? 'true'}`,
+    { passThroughStatus: true, includeQueryParams: false },
+);
 
-  const response = await fetch(`${getBackendUrl()}/services?activeOnly=${activeOnly}`, {
-    headers: getProxyHeaders(request),
-    cache: 'no-store',
-  });
-
-        const data = await readJsonResponse(response);
-        return NextResponse.json(data, { status: response.status });
-    } catch (error) {
-        console.error('Error fetching services:', error);
-        return NextResponse.json(
-            { success: false, message: 'Failed to fetch services' },
-            { status: 500 }
-        );
-    }
-}
-
-export async function POST(request: NextRequest) {
-    try {
-        const body = await request.json();
-
-  const response = await fetch(`${getBackendUrl()}/services`, {
-    method: 'POST',
-    headers: {
-      ...getProxyHeaders(request),
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(body),
-    cache: 'no-store',
-  });
-
-        const data = await readJsonResponse(response);
-        return NextResponse.json(data, { status: response.status });
-    } catch (error) {
-        console.error('Error creating service:', error);
-        return NextResponse.json(
-            { success: false, message: 'Failed to create service' },
-            { status: 500 }
-        );
-    }
-}
+/**
+ * POST /api/services
+ */
+export const POST = createPostHandler('/services', { passThroughStatus: true });

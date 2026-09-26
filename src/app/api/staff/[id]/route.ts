@@ -1,61 +1,18 @@
-import { readJsonResponse } from "@/lib/response";
-import { NextRequest, NextResponse } from 'next/server';
-import { getProxyHeaders } from '@/lib/proxy';
-import { getBackendUrl } from '@/lib/backend-url';
+import { createDeleteHandler, createPutHandler } from '@/lib/api-route-handler';
 
-export async function PUT(
-    request: NextRequest,
-    context: { params: Promise<{ id: string }> }
-) {
-    try {
-        const { id } = await context.params;
-        const body = await request.json();
+/**
+ * PUT /api/staff/[id]
+ */
+export const PUT = createPutHandler(
+    (_req, params) => `/staff/${params?.id}`,
+    { passThroughStatus: true },
+);
 
-  const response = await fetch(`${getBackendUrl()}/staff/${id}`, {
-    method: 'PUT',
-    headers: {
-      ...getProxyHeaders(request),
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(body),
-    cache: 'no-store',
-  });
-
-        const data = await readJsonResponse(response);
-        return NextResponse.json(data, { status: response.status });
-    } catch (error) {
-        console.error('Error updating staff member:', error);
-        return NextResponse.json(
-            { success: false, message: 'Failed to update staff member' },
-            { status: 500 }
-        );
-    }
-}
-
-export async function DELETE(
-    request: NextRequest,
-    context: { params: Promise<{ id: string }> }
-) {
-    try {
-        const { id } = await context.params;
-
-  const response = await fetch(`${getBackendUrl()}/staff/${id}`, {
-    method: 'DELETE',
-    headers: getProxyHeaders(request),
-    cache: 'no-store',
-  });
-
-        if (response.status === 204 || response.status === 200) {
-            return new NextResponse(null, { status: 204 });
-        }
-
-        const data = await readJsonResponse(response);
-        return NextResponse.json(data, { status: response.status });
-    } catch (error) {
-        console.error('Error deleting staff member:', error);
-        return NextResponse.json(
-            { success: false, message: 'Failed to delete staff member' },
-            { status: 500 }
-        );
-    }
-}
+/**
+ * DELETE /api/staff/[id]
+ * Success is body-less whether the backend answers 200 or 204.
+ */
+export const DELETE = createDeleteHandler(
+    (_req, params) => `/staff/${params?.id}`,
+    { successStatus: 204 },
+);
