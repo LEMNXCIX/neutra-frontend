@@ -26,25 +26,26 @@ The browser never needs the backend address: it calls the BFF at `/api`.
 
 ## Tenants
 
-Tenant identity comes from the subdomain, never from the port. The root host
-without a subdomain is the superadmin surface.
+Tenant identity comes from the subdomain, never from the port. Both the LAN
+nip.io host and the loopback `*.localhost` host resolve the same way; the root
+host without a subdomain is the superadmin surface.
 
 | URL | Resolves to |
 | --- | --- |
+| `http://<slug>.<lan-ip>.nip.io:3001` | tenant `<slug>`, from any device on the LAN |
+| `http://<slug>.localhost:3001` | tenant `<slug>`, desktop only |
 | `http://localhost:3001` | superadmin |
-| `http://default.localhost:3001` | tenant `default` |
-| `http://booking1.localhost:3001` | tenant `booking1` |
-| `http://<slug>.<lan-ip>.nip.io:3001` | tenant `<slug>`, from another device |
 
 `*.localhost` resolves to loopback natively in every modern browser, so desktop
-development needs no extra tooling. For a physical device on the same network,
-open the app through a raw IP: `getTenantUrl` redirects to the matching
-`<slug>.<ip>.nip.io` host.
+development needs no extra tooling. For a physical device, open the app through
+the LAN IP — `getTenantUrl` rewrites it to the matching `<slug>.<ip>.nip.io`
+host, and the same mechanism is what production uses.
 
 Browsing from another device also needs HMR to accept the cross-origin websocket.
-List those hostnames in `DEV_ORIGINS` (comma-separated) — no address is hardcoded
-in `next.config.ts`, because a pinned LAN IP breaks HMR for everyone on a
-different network.
+List those hostnames in `DEV_ORIGINS` (comma-separated), e.g.
+`192.168.68.100,*.192.168.68.100.nip.io`. No address is hardcoded in
+`next.config.ts`, because a pinned LAN IP breaks HMR for everyone on a different
+network.
 
 ## BFF
 
