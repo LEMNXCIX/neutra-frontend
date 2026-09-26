@@ -24,6 +24,7 @@ import {
     ArrowRight,
 } from "lucide-react";
 import { AuthBrandHeader } from "@/components/auth/AuthBrandHeader";
+import { errorMessageFrom } from "@/lib/error-messages";
 
 export function LoginForm() {
     const login = useAuthStore((state) => state.login);
@@ -49,9 +50,11 @@ export function LoginForm() {
             await login(email, password);
             router.push(redirectTo);
         } catch (err) {
-            let msg = "Error al iniciar sesión";
-            if (err instanceof Error) msg = err.message;
-            setError(msg);
+            // The backend sends a machine-readable code; the envelope message is
+            // its own and can be English, so neither is shown as-is.
+            setError(
+                errorMessageFrom(err, "No pudimos iniciar sesión. Inténtalo de nuevo."),
+            );
         }
     };
 
