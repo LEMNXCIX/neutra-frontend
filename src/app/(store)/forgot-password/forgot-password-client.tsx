@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
     Card,
     CardContent,
@@ -17,12 +18,19 @@ import { toast } from "sonner";
 import { reportError } from "@/lib/error-reporting";
 import { authService } from "@/services/auth.service";
 import { Spinner } from "@/components/ui/spinner";
-import { Mail, ArrowLeft, CheckCircle2, ArrowRight } from "lucide-react";
+import {
+    Mail,
+    ArrowLeft,
+    CheckCircle2,
+    ArrowRight,
+    AlertCircle,
+} from "lucide-react";
 import { AuthBrandHeader } from "@/components/auth/AuthBrandHeader";
 
 export function ForgotPasswordPageClient() {
     const [email, setEmail] = useState("");
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
     const [submitted, setSubmitted] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -31,11 +39,16 @@ export function ForgotPasswordPageClient() {
 
         try {
             setLoading(true);
+            setError("");
             await authService.forgotPassword(email);
             setSubmitted(true);
             toast.success("Enlace enviado si la cuenta existe");
         } catch (error: any) {
-            reportError(error, "No pudimos enviar el enlace de recuperación.");
+            setError(
+                reportError(error, "No pudimos enviar el enlace de recuperación.", {
+                    toast: false,
+                }),
+            );
         } finally {
             setLoading(false);
         }
@@ -130,6 +143,15 @@ export function ForgotPasswordPageClient() {
                                     />
                                 </div>
                             </div>
+                            {error && (
+                                <Alert variant="destructive">
+                                    <AlertCircle
+                                        className="size-4"
+                                        aria-hidden="true"
+                                    />
+                                    <AlertDescription>{error}</AlertDescription>
+                                </Alert>
+                            )}
                             <Button
                                 type="submit"
                                 className="w-full h-12 text-sm font-bold shadow-lg shadow-primary/20 hover:-translate-y-0.5 transition-[color,background-color,border-color,box-shadow,opacity,transform] rounded-xl"

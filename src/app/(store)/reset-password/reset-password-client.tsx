@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
     Card,
     CardContent,
@@ -34,6 +35,7 @@ function ResetPasswordForm() {
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
     const [success, setSuccess] = useState(false);
 
     useEffect(() => {
@@ -58,6 +60,7 @@ function ResetPasswordForm() {
 
         try {
             setLoading(true);
+            setError("");
             await authService.resetPassword({ token, newPassword: password });
             setSuccess(true);
             toast.success("Contraseña restablecida correctamente");
@@ -65,7 +68,11 @@ function ResetPasswordForm() {
                 router.push("/login");
             }, 3000);
         } catch (error: any) {
-            reportError(error, "No pudimos restablecer tu contraseña.");
+            setError(
+                reportError(error, "No pudimos restablecer tu contraseña.", {
+                    toast: false,
+                }),
+            );
         } finally {
             setLoading(false);
         }
@@ -189,6 +196,15 @@ function ResetPasswordForm() {
                             />
                         </div>
                     </div>
+                    {error && (
+                        <Alert variant="destructive">
+                            <AlertCircle
+                                className="size-4"
+                                aria-hidden="true"
+                            />
+                            <AlertDescription>{error}</AlertDescription>
+                        </Alert>
+                    )}
                     <Button
                         type="submit"
                         className="w-full h-12 text-sm font-bold shadow-lg shadow-primary/20 hover:-translate-y-0.5 transition-[color,background-color,border-color,box-shadow,opacity,transform] rounded-xl mt-4"

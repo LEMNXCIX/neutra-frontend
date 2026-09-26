@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
     Select,
     SelectContent,
@@ -22,7 +23,7 @@ import { toast } from "sonner";
 import { reportError } from "@/lib/error-reporting";
 import { Checkbox } from "@/components/ui/checkbox";
 import { BrandingEditor } from "./BrandingEditor";
-import { Clock } from "lucide-react";
+import { Clock, AlertCircle } from "lucide-react";
 import {
     HolidaysEditor,
     WorkingHoursEditor,
@@ -390,6 +391,7 @@ export function TenantForm({
     initialPlatformFeatures = EMPTY_PLATFORM_FEATURES,
 }: TenantFormProps) {
     const [isSaving, setIsSaving] = useState(false);
+    const [error, setError] = useState("");
     const [platformFeatures, _setPlatformFeatures] = useState<PlatformFeature[]>(
         initialPlatformFeatures,
     );
@@ -432,6 +434,7 @@ export function TenantForm({
         }
 
         setIsSaving(true);
+        setError("");
         try {
             if (tenant) {
                 await tenantService.update(tenant.id, formData);
@@ -442,7 +445,11 @@ export function TenantForm({
             }
             onSuccess();
         } catch (err: any) {
-            reportError(err, "No pudimos guardar la organización.");
+            setError(
+                reportError(err, "No pudimos guardar la organización.", {
+                    toast: false,
+                }),
+            );
         } finally {
             setIsSaving(false);
         }
@@ -507,6 +514,13 @@ export function TenantForm({
                     tenant={tenant}
                 />
             </Tabs>
+
+            {error && (
+                <Alert variant="destructive">
+                    <AlertCircle className="size-4" aria-hidden="true" />
+                    <AlertDescription>{error}</AlertDescription>
+                </Alert>
+            )}
 
             <div className="flex justify-end gap-3 pt-6 border-t">
                 {onCancel && (
