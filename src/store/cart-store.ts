@@ -149,7 +149,7 @@ async function validateCoupon(
   } catch (error) {
     return {
       success: false,
-      reason: getValidationErrorMessage(error, "Failed to validate coupon"),
+      reason: getValidationErrorMessage(error, "Error al validar el cupón"),
     };
   }
 }
@@ -263,7 +263,7 @@ export const useCartStore = create<CartState & CartActions>()((set, get) => ({
       return { success: true };
     } catch (err) {
       const message =
-        err instanceof ApiError ? err.message : "Failed to add to cart";
+        err instanceof ApiError ? err.message : "Error al agregar al carrito";
       set({ loading: false });
       return { success: false, reason: message };
     }
@@ -279,7 +279,7 @@ export const useCartStore = create<CartState & CartActions>()((set, get) => ({
       }
     } catch (err) {
       const message =
-        err instanceof ApiError ? err.message : "Failed to remove item";
+        err instanceof ApiError ? err.message : "Error al eliminar el producto";
       console.error(message);
     } finally {
       set({ loading: false });
@@ -311,7 +311,7 @@ export const useCartStore = create<CartState & CartActions>()((set, get) => ({
       const message =
         err instanceof ApiError
           ? err.message
-          : "Failed to update quantity";
+          : "Error al actualizar la cantidad";
       console.error(message);
     } finally {
       set({ loading: false });

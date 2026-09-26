@@ -202,7 +202,7 @@ function SettingsTabContent({
         <TabsContent value="settings" className="py-4 space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                    <Label>Support Email</Label>
+                    <Label>Correo de soporte</Label>
                     <Input
                         value={formData.config?.settings?.supportEmail || ""}
                         onChange={(e) =>

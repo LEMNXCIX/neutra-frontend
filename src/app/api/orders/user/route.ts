@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
     } catch (error) {
         console.error("Error fetching user orders:", error);
         return NextResponse.json(
-            { success: false, error: "Failed to fetch user orders" },
+            { success: false, error: "Error al obtener los pedidos del usuario" },
             { status: 500 }
         );
     }

@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
     const duration = Date.now() - startTime;
     logger.error(logger.withError(logContext, error, duration), `Auth Error: ${error.message}`);
     return NextResponse.json(
-      { success: false, message: "Registration failed" },
+      { success: false, message: "Error al registrarse" },
       { status: 500 }
     );
   }

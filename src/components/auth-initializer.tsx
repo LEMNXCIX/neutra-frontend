@@ -12,7 +12,7 @@ export function AuthInitializer() {
 
     const handleUnauthorized = () => {
       if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
-        toast.error('Your session has expired. Please login again.');
+        toast.error('Tu sesión ha expirado. Inicia sesión nuevamente.');
         window.location.href = '/login';
       }
     };

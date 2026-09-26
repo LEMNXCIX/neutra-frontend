@@ -194,7 +194,7 @@ function LogInspectorDialog({
             </div>
           </div>
           <div className="sticky bottom-0 bg-background/80 backdrop-blur-md border-t border-border p-6 flex justify-end">
-            <Button onClick={onClose} className="rounded-xl font-bold h-11 px-10 shadow-lg">Close Inspector</Button>
+            <Button onClick={onClose} className="rounded-xl font-bold h-11 px-10 shadow-lg">Cerrar inspector</Button>
           </div>
         </div>
       </DialogContent>
@@ -233,7 +233,7 @@ function LogsFiltersSection({
               updateFilters({ level: e.target.value })
             }
           >
-            <option value="">All Levels</option>
+            <option value="">Todos los niveles</option>
             <option value="INFO">INFO</option>
             <option value="WARN">WARN</option>
             <option value="ERROR">ERROR</option>
@@ -255,7 +255,7 @@ function LogsFiltersSection({
               updateFilters({ tenantId: e.target.value })
             }
           >
-            <option value="">All Stores</option>
+            <option value="">Todas las tiendas</option>
             {tenants.map((t) => (
               <option key={t.id} value={t.id}>
                 {t.name}
@@ -592,7 +592,7 @@ export function LogsClient({
         dispatch({ type: "SET_TOTAL", payload: resAny.pagination?.total || resAny.data?.length || 0 });
       }
     } catch (error) {
-      console.error("Error loading logs", error);
+      console.error("Error al cargar los registros", error);
       dispatch({ type: "SET_LOGS", payload: [] });
     } finally {
       dispatch({ type: "SET_LOADING", payload: false });

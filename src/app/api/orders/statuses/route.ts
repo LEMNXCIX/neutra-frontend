@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
     } catch (error) {
         console.error("Error fetching order statuses:", error);
         return NextResponse.json(
-            { success: false, error: "Failed to fetch order statuses" },
+            { success: false, error: "Error al obtener los estados de los pedidos" },
             { status: 500 }
         );
     }

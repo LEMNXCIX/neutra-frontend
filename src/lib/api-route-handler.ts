@@ -210,7 +210,7 @@ export function createRouteHandler(config: RouteConfig) {
 
         } catch (error) {
             const duration = Date.now() - startTime;
-            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
             const statusCode = (error as { statusCode?: number })?.statusCode || 500;
 
             // Log error
@@ -332,7 +332,7 @@ export function createListWithStatsHandler(
 
         } catch (error) {
             const duration = Date.now() - startTime;
-            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
             
             if (logContext) {
                 logger.error(logger.withError(logContext, error, duration), `API Error: ${errorMessage}`);

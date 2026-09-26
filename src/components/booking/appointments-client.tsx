@@ -204,7 +204,7 @@ function AppointmentCardBody({
               appointmentId={appointment.id}
               currentStatus={appointment.status}
               newStatus="IN_PROGRESS"
-              reason="Appointment started by staff"
+              reason="Cita iniciada por el personal"
               onStatusUpdated={onStaffUpdated}
               trigger={
                 <Button
@@ -222,7 +222,7 @@ function AppointmentCardBody({
               appointmentId={appointment.id}
               currentStatus={appointment.status}
               newStatus="COMPLETED"
-              reason="Appointment completed by staff"
+              reason="Cita completada por el personal"
               onStatusUpdated={onStaffUpdated}
               trigger={
                 <Button
@@ -241,7 +241,7 @@ function AppointmentCardBody({
                 appointmentId={appointment.id}
                 currentStatus={appointment.status}
                 newStatus="COMPLETED"
-                reason="Resolved as completed by staff"
+                reason="Resuelta como completada por el personal"
                 onStatusUpdated={onStaffUpdated}
                 trigger={
                   <Button
@@ -257,7 +257,7 @@ function AppointmentCardBody({
                 appointmentId={appointment.id}
                 currentStatus={appointment.status}
                 newStatus="NO_SHOW"
-                reason="Resolved as no-show by staff"
+                reason="Resuelta como no asistió por el personal"
                 onStatusUpdated={onStaffUpdated}
                 trigger={
                   <Button
@@ -274,7 +274,7 @@ function AppointmentCardBody({
                 appointmentId={appointment.id}
                 currentStatus={appointment.status}
                 newStatus="CANCELLED"
-                reason="Cancelled by staff"
+                reason="Cancelada por el personal"
                 onStatusUpdated={onStaffUpdated}
                 trigger={
                   <Button

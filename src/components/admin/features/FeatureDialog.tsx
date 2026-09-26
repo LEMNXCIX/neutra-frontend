@@ -153,7 +153,7 @@ export function FeatureDialog({
                     </div>
 
                     <div className="space-y-2">
-                        <Label>Monthly Price</Label>
+                        <Label>Precio mensual</Label>
                         <div className="relative">
                             <DollarSign className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
                             <Input

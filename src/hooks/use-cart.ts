@@ -6,7 +6,7 @@ import { useCartStore } from "@/store/cart-store";
 import { useAuthStore } from "@/store/auth-store";
 
 function couponErrorMessage(reason?: string): string {
-  if (!reason || reason === "invalid" || reason === "Failed to validate coupon") {
+  if (!reason || reason === "invalid" || reason === "Error al validar el cupón") {
     return "Código de cupón inválido";
   }
   return reason;

@@ -30,7 +30,7 @@ export default function LoginExample() {
 
         try {
             await login(email, password);
-            toast.success('Login successful!');
+            toast.success('¡Sesión iniciada!');
             router.push('/'); // Redirect to home or dashboard
         } catch (err) {
             // Error is already set in the store and displayed via toast in useApiError
@@ -41,8 +41,8 @@ export default function LoginExample() {
     return (
         <Card className="w-full max-w-md mx-auto">
             <CardHeader>
-                <CardTitle>Login</CardTitle>
-                <CardDescription>Enter your credentials to continue</CardDescription>
+                <CardTitle>Iniciar sesión</CardTitle>
+                <CardDescription>Ingresa tus credenciales para continuar</CardDescription>
             </CardHeader>
             <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-4">
@@ -59,7 +59,7 @@ export default function LoginExample() {
                     </div>
 
                     <div>
-                        <label className="text-sm font-medium">Password</label>
+                        <label className="text-sm font-medium">Contraseña</label>
                         <Input
                             type="password"
                             value={password}
@@ -77,7 +77,7 @@ export default function LoginExample() {
                     )}
 
                     <Button type="submit" className="w-full" disabled={loading}>
-                        {loading ? 'Logging in...' : 'Login'}
+                        {loading ? 'Iniciando sesión...' : 'Iniciar sesión'}
                     </Button>
                 </form>
             </CardContent>

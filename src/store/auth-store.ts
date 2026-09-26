@@ -59,7 +59,7 @@ export const useAuthStore = create<AuthState>()(
                 } catch (err) {
                     const errorMessage = err instanceof ApiError
                         ? err.message
-                        : 'Login failed. Please try again.';
+                        : 'Error al iniciar sesión. Inténtalo de nuevo.';
                     set({ loading: false, error: errorMessage });
                     throw err;
                 }
@@ -74,7 +74,7 @@ export const useAuthStore = create<AuthState>()(
                 } catch (err) {
                     const errorMessage = err instanceof ApiError
                         ? err.message
-                        : 'Registration failed. Please try again.';
+                        : 'Error al registrarse. Inténtalo de nuevo.';
                     set({ loading: false, error: errorMessage });
                     throw err;
                 }

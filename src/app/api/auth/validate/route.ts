@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
 
         if (!token) {
             return NextResponse.json(
-                { success: false, message: "No session token found" },
+                { success: false, message: "No se encontró un token de sesión" },
                 { status: 401 }
             );
         }

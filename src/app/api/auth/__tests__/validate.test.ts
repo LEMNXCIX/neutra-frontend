@@ -61,7 +61,7 @@ describe('GET /api/auth/validate', () => {
 
         expect(response.status).toBe(401);
         expect(NextResponse.json).toHaveBeenCalledWith(
-            { success: false, message: 'No session token found' },
+            { success: false, message: 'No se encontró un token de sesión' },
             { status: 401 }
         );
     });

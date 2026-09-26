@@ -60,7 +60,7 @@ export function useApiQuery<TData>(
  * @example
  * const createRole = useApiPost<Role, CreateRoleDTO>('/roles', {
  *     invalidateKeys: [['roles']],
- *     onSuccess: () => toast.success('Role created'),
+ *     onSuccess: () => toast.success('Rol creado'),
  * });
  * 
  * createRole.mutate({ name: 'Admin', level: 1 });

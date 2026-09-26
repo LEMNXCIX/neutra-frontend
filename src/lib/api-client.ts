@@ -153,7 +153,7 @@ export async function apiClient<T = unknown>(
         // Check if the request was successful
         if (!data?.success) {
             throw new ApiError(
-                data.message || 'Request failed',
+                data.message || 'Error en la solicitud',
                 data.statusCode,
                 data.errors,
                 data.meta?.traceId
@@ -198,7 +198,7 @@ export async function apiFetch(input: RequestInfo, init?: RequestInit) {
 
     if (!res.ok) {
         const body = await res.json().catch(() => ({}));
-        const err = body?.error || res.statusText || 'Request failed';
+        const err = body?.error || res.statusText || 'Error en la solicitud';
         const e = new Error(err) as Error & { status?: number };
         e.status = res.status;
         throw e;

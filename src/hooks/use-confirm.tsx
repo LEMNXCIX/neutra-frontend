@@ -26,10 +26,10 @@ export function useConfirm() {
 
     const confirm = (opts?: ConfirmOptions): Promise<boolean> => {
         setOptions({
-            title: opts?.title || "Are you sure?",
-            description: opts?.description || "This action cannot be undone.",
-            confirmText: opts?.confirmText || "Continue",
-            cancelText: opts?.cancelText || "Cancel",
+            title: opts?.title || "¿Estás seguro?",
+            description: opts?.description || "Esta acción no se puede deshacer.",
+            confirmText: opts?.confirmText || "Continuar",
+            cancelText: opts?.cancelText || "Cancelar",
             variant: opts?.variant || "default",
         });
 

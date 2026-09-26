@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
     } catch (error) {
         console.error("Error fetching profile:", error);
         return NextResponse.json(
-            { error: "Failed to fetch profile" },
+            { error: "Error al obtener el perfil" },
             { status: 401 }
         );
     }
@@ -73,7 +73,7 @@ export async function PUT(req: NextRequest) {
     } catch (error) {
         console.error("Error updating profile:", error);
         return NextResponse.json(
-            { error: "Failed to update profile" },
+            { error: "Error al actualizar el perfil" },
             { status: 500 }
         );
     }

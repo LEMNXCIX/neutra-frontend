@@ -31,14 +31,14 @@ export async function POST(req: NextRequest) {
                 ? {
                       success: true,
                       statusCode: response.status,
-                      message: "Login successful",
+                      message: "Sesión iniciada",
                   }
                 : await response.json().catch(() => ({
                       success: response.ok,
                       statusCode: response.status,
                       message: response.ok
-                          ? "Login successful"
-                          : "Login failed",
+                          ? "Sesión iniciada"
+                          : "Error al iniciar sesión",
                   }));
         const duration = Date.now() - startTime;
 
@@ -87,13 +87,13 @@ export async function POST(req: NextRequest) {
     } catch (error: unknown) {
         const duration = Date.now() - startTime;
         const message =
-            error instanceof Error ? error.message : "Unknown login error";
+            error instanceof Error ? error.message : "Error desconocido al iniciar sesión";
         logger.error(
             logger.withError(logContext, error, duration),
             `Auth Error: ${message}`,
         );
         return NextResponse.json(
-            { success: false, message: "Login failed" },
+            { success: false, message: "Error al iniciar sesión" },
             { status: 500 },
         );
     }

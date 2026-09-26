@@ -277,7 +277,7 @@ export function TenantsTable({
     const handleDelete = async (tenant: Tenant) => {
         const confirmed = await confirm({
             title: "Eliminar Tenant",
-            description: `Are you sure you want to delete "${tenant.name}"? This action cannot be undone and will remove all data associated with this tenant.`,
+            description: `¿Estás seguro de que quieres eliminar "${tenant.name}"? Esta acción no se puede deshacer y eliminará todos los datos asociados a este tenant.`,
             confirmText: "Eliminar",
             cancelText: "Cancelar",
         });

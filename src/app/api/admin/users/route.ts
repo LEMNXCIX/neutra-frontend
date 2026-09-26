@@ -40,7 +40,7 @@ export async function PUT(req: NextRequest) {
         const { userId, ...updateData } = body;
 
         if (!userId) {
-            return NextResponse.json({ success: false, message: "User ID required" }, { status: 400 });
+            return NextResponse.json({ success: false, message: "El ID de usuario es obligatorio" }, { status: 400 });
         }
 
         const token = extractTokenFromRequest(req) || undefined;

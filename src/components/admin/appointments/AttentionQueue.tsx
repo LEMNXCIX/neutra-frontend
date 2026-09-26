@@ -65,7 +65,7 @@ const RESOLUTION_ACTIONS: ResolutionAction[] = [
         status: "CANCELLED",
         label: "Cancelar",
         englishLabel: "Cancelar",
-        reason: "Cancelled from the booking admin attention queue",
+        reason: "Cancelada desde la cola de atención de reservas",
         variant: "destructive",
         icon: XCircle,
     },

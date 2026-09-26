@@ -246,7 +246,7 @@ describe('cart-store.applyCoupon', () => {
 
     it('extracts the backend validation detail when the request errors', async () => {
         mockCoupons.validate.mockRejectedValue(
-            new ApiError('Request failed', 400, [{ message: 'El cupón expiró' }]),
+            new ApiError('Error en la solicitud', 400, [{ message: 'El cupón expiró' }]),
         );
 
         const result = await useCartStore.getState().applyCoupon('EXPIRED');
