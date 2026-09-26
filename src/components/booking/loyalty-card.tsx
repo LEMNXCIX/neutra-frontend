@@ -5,6 +5,7 @@ import { Copy, Gift, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     Card,
+    CardContent,
     CardDescription,
     CardHeader,
     CardTitle,
@@ -454,20 +455,22 @@ export function LoyaltyCard() {
                     </div>
                 </div>
             </CardHeader>
-            <LoyaltyCardContent
-                visibleCampaigns={visibleCampaigns}
-                selectedCampaign={selectedCampaign}
-                isLoading={isLoading}
-                error={error}
-                loadSummaries={loadSummaries}
-                setSelectedCampaignId={setSelectedCampaignId}
-                claimingCampaignId={claimingCampaignId}
-                claimReward={claimReward}
-                progress={progress}
-                copied={copied}
-                setCopied={setCopied}
-                copyCoupon={copyCoupon}
-            />
+            <CardContent>
+                <LoyaltyCardContent
+                    visibleCampaigns={visibleCampaigns}
+                    selectedCampaign={selectedCampaign}
+                    isLoading={isLoading}
+                    error={error}
+                    loadSummaries={loadSummaries}
+                    setSelectedCampaignId={setSelectedCampaignId}
+                    claimingCampaignId={claimingCampaignId}
+                    claimReward={claimReward}
+                    progress={progress}
+                    copied={copied}
+                    setCopied={setCopied}
+                    copyCoupon={copyCoupon}
+                />
+            </CardContent>
         </Card>
     );
 }
