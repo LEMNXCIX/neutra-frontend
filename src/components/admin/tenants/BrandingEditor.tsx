@@ -1,9 +1,16 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 import {
     Card,
     CardContent,
@@ -120,22 +127,65 @@ function FontField({
     value?: string;
     onChange: (family: string) => void;
 }) {
+    // The Select covers the curated families, but tenants may already have any
+    // Google Font stored, so a free-text escape hatch stays. A saved family
+    // outside the list opens the input on its own, otherwise the stored value
+    // would be invisible in the trigger.
+    const [editing, setEditing] = useState(false);
+    const known = !!value && FONT_SUGGESTIONS.includes(value);
+    const showInput = editing || (!!value && !known);
+
     return (
         <div className="space-y-2">
-            <Label>{label}</Label>
-            <Input
-                value={value || ""}
-                onChange={(e) => onChange(e.target.value)}
-                placeholder="Nombre de la familia tipográfica"
-                list={`font-suggestions-${label.replace(/\s+/g, "-").toLowerCase()}`}
-            />
-            <datalist
-                id={`font-suggestions-${label.replace(/\s+/g, "-").toLowerCase()}`}
+            <div className="flex items-center justify-between">
+                <Label>{label}</Label>
+                {value?.trim() && (
+                    <button
+                        type="button"
+                        onClick={() => {
+                            onChange("");
+                            setEditing(false);
+                        }}
+                        className="text-[10px] text-muted-foreground underline hover:text-foreground"
+                    >
+                        restablecer
+                    </button>
+                )}
+            </div>
+            {showInput ? (
+                <Input
+                    value={value || ""}
+                    onChange={(e) => onChange(e.target.value)}
+                    placeholder="Nombre de la familia tipográfica"
+                    aria-label={`Nombre de la familia para ${label}`}
+                />
+            ) : (
+                <Select
+                    value={known ? value : ""}
+                    onValueChange={(next) => {
+                        onChange(next);
+                        setEditing(false);
+                    }}
+                >
+                    <SelectTrigger className="w-full" aria-label={label}>
+                        <SelectValue placeholder="Selecciona una fuente..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {FONT_SUGGESTIONS.map((font) => (
+                            <SelectItem key={font} value={font}>
+                                {font}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            )}
+            <button
+                type="button"
+                onClick={() => setEditing((prev) => !prev)}
+                className="text-[10px] text-muted-foreground underline hover:text-foreground"
             >
-                {FONT_SUGGESTIONS.map((f) => (
-                    <option key={f} value={f} />
-                ))}
-            </datalist>
+                {showInput ? "elegir de la lista" : "otra fuente"}
+            </button>
             {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
         </div>
     );
