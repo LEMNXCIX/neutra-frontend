@@ -4,7 +4,6 @@ import React, { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
@@ -17,6 +16,7 @@ import {
 } from "@/components/ui/card";
 import { toast } from "sonner";
 import { reportError } from "@/lib/error-reporting";
+import { PasswordInput } from "@/components/ui/password-input";
 import { authService } from "@/services/auth.service";
 import { Spinner } from "@/components/ui/spinner";
 import {
@@ -163,17 +163,14 @@ function ResetPasswordForm() {
                         >
                             Nueva contraseña
                         </Label>
-                        <div className="relative group">
-                            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                            <Input
-                                id="password"
-                                type="password"
-                                required
-                                className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform] focus:border-primary"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                            />
-                        </div>
+                        <PasswordInput
+                            id="password"
+                            icon={Lock}
+                            required
+                            className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform] focus:border-primary"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                        />
                     </div>
                     <div className="space-y-2">
                         <Label
@@ -182,19 +179,16 @@ function ResetPasswordForm() {
                         >
                             Confirmar contraseña
                         </Label>
-                        <div className="relative group">
-                            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                            <Input
-                                id="confirm-password"
-                                type="password"
-                                required
-                                className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform] focus:border-primary"
-                                value={confirmPassword}
-                                onChange={(e) =>
-                                    setConfirmPassword(e.target.value)
-                                }
-                            />
-                        </div>
+                        <PasswordInput
+                            id="confirm-password"
+                            icon={Lock}
+                            required
+                            className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform] focus:border-primary"
+                            value={confirmPassword}
+                            onChange={(e) =>
+                                setConfirmPassword(e.target.value)
+                            }
+                        />
                     </div>
                     {error && (
                         <Alert variant="destructive">

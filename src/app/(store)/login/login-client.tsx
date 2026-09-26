@@ -24,6 +24,7 @@ import {
     ArrowRight,
 } from "lucide-react";
 import { AuthBrandHeader } from "@/components/auth/AuthBrandHeader";
+import { PasswordInput } from "@/components/ui/password-input";
 import { errorMessageFrom } from "@/lib/error-messages";
 
 export function LoginForm() {
@@ -114,20 +115,17 @@ export function LoginForm() {
                                     ¿Te olvidaste?
                                 </Link>
                             </div>
-                            <div className="relative group">
-                                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                                <Input
-                                    id="password"
-                                    type="password"
-                                    placeholder="••••••••"
-                                    value={password}
-                                    onChange={(e) =>
-                                        setPassword(e.target.value)
-                                    }
-                                    className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform] focus:border-primary"
-                                    disabled={loading}
-                                />
-                            </div>
+                            <PasswordInput
+                                id="password"
+                                icon={Lock}
+                                placeholder="••••••••"
+                                value={password}
+                                onChange={(e) =>
+                                    setPassword(e.target.value)
+                                }
+                                className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform] focus:border-primary"
+                                disabled={loading}
+                            />
                         </div>
 
                         {error && (

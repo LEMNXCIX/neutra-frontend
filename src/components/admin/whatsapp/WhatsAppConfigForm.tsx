@@ -16,6 +16,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { whatsappService, WhatsAppConfig } from "@/services/whatsapp.service";
 import { toast } from "sonner";
 import { reportError } from "@/lib/error-reporting";
+import { PasswordInput } from "@/components/ui/password-input";
 import { MessageSquare, Save } from "lucide-react";
 
 type WhatsAppConfigFormProps = {
@@ -193,8 +194,7 @@ export function WhatsAppConfigForm({ initialConfig }: WhatsAppConfigFormProps) {
 
                         <div className="space-y-2">
                             <Label>Token de acceso (permanente)</Label>
-                            <Input
-                                type="password"
+                            <PasswordInput
                                 value={config.accessToken || ""}
                                 onChange={(e) =>
                                     setConfig({

@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { AuthBrandHeader } from "@/components/auth/AuthBrandHeader";
 import { reportError } from "@/lib/error-reporting";
+import { PasswordInput } from "@/components/ui/password-input";
 import { cn } from "@/lib/utils";
 
 const getPasswordStrength = (pass: string) => {
@@ -188,11 +189,9 @@ export function RegisterPageClient() {
                                 >
                                     Contraseña
                                 </Label>
-                                <div className="relative group">
-                                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                                    <Input
+                                <PasswordInput
                                         id="password"
-                                        type="password"
+                                        icon={Lock}
                                         placeholder="••••••••"
                   value={state.password}
                   onChange={(e) =>
@@ -201,7 +200,6 @@ export function RegisterPageClient() {
                                         className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform] focus:border-primary"
                                         disabled={loading}
                                     />
-                                </div>
                                 {/* Password Strength Indicator */}
                                 {state.password && (
                                     <div className="space-y-2 px-1 pt-1">
@@ -246,11 +244,9 @@ export function RegisterPageClient() {
                                 >
                                     Confirmar contraseña
                                 </Label>
-                                <div className="relative group">
-                                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                                    <Input
+                                <PasswordInput
                                         id="confirmPassword"
-                                        type="password"
+                                        icon={Lock}
                                         placeholder="••••••••"
                   value={state.confirmPassword}
                   onChange={(e) =>
@@ -259,7 +255,6 @@ export function RegisterPageClient() {
                                         className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform] focus:border-primary"
                                         disabled={loading}
                                     />
-                                </div>
                                 {state.confirmPassword && (
                                     <div className="flex items-center gap-2 px-1 pt-1">
                                         {state.password === state.confirmPassword ? (
