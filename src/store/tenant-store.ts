@@ -63,6 +63,13 @@ const applySnapshot = (next: TenantSnapshot) => {
  * Hydration-safe tenant store. Usable exactly like the Zustand hook it
  * replaces: `useTenantStore()` for the whole state, `useTenantStore(s => s.id)`
  * for a field, `getState()` and `setState()` outside React.
+ *
+ * The no-argument form must include the actions, not just the data: callers
+ * destructure `{ tenantId, syncFromCookies }` from it. Returning a bare
+ * snapshot here made every one of those call sites receive undefined and threw
+ * "syncFromCookies is not a function" on mount. The action is a module-level
+ * constant so it keeps a stable identity across renders and stays a valid
+ * useEffect dependency.
  */
 interface TenantStoreHook {
     (): TenantState;
@@ -72,11 +79,14 @@ interface TenantStoreHook {
     syncFromCookies(): void;
 }
 
+const syncFromCookies = () => applySnapshot(readCookies());
+
 const useTenantStoreImpl = <T,>(
     selector?: (state: TenantSnapshot) => T,
 ): TenantState | T => {
-    const state = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
-    return selector ? selector(state) : (state as unknown as TenantState);
+    const snapshot = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+    if (selector) return selector(snapshot);
+    return { ...snapshot, syncFromCookies } as TenantState;
 };
 
 export const useTenantStore = useTenantStoreImpl as TenantStoreHook;
@@ -84,14 +94,16 @@ useTenantStore.getState = getSnapshot;
 useTenantStore.setState = (partial: Partial<TenantSnapshot>) => {
     applySnapshot({ ...current, ...partial });
 };
-useTenantStore.syncFromCookies = () => applySnapshot(readCookies());
+useTenantStore.syncFromCookies = syncFromCookies;
 
 export type { TenantSnapshot, TenantState };
 
 /** Test seam: reset module state between cases. */
 export const tenantStoreApi = {
     get: getSnapshot,
-    syncFromCookies: () => applySnapshot(readCookies()),
+    set: (partial: Partial<TenantSnapshot>) =>
+        applySnapshot({ ...current, ...partial }),
+    syncFromCookies,
     reset: () => applySnapshot({ ...EMPTY }),
 };
 
