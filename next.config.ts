@@ -1,16 +1,42 @@
+import { networkInterfaces } from "node:os";
 import type { NextConfig } from "next";
 
 /**
- * Hostnames the dev server accepts cross-origin requests from (HMR websocket).
- * Comma-separated in DEV_ORIGINS, e.g. `192.168.68.100,*.192.168.68.100.nip.io`.
+ * Hostnames this machine can be reached at, derived from its own interfaces.
  *
- * No IP is hardcoded here on purpose: a pinned LAN address silently breaks HMR
- * for everyone on a different network. Same-origin localhost needs no entry.
+ * Next matches allowedDevOrigins against the Origin hostname with no port, and
+ * already allows localhost and *.localhost on its own. A pinned LAN address
+ * would work until the network changed; reading the interfaces at startup means
+ * the dev server accepts whatever address it actually has, on whatever network
+ * it is on. The nip.io entry is what makes the tenant hosts used for device
+ * testing resolve, since those are `<slug>.<ip>.nip.io`.
+ *
+ * Inert outside development: Next only consults this list when the dev server is
+ * running. Inside the compose container the interfaces are the bridge network,
+ * not the host's LAN, so DEV_ORIGINS stays the escape hatch there.
  */
-const devOrigins = (process.env.DEV_ORIGINS ?? "")
+const localNetworkOrigins = (): string[] => {
+  const origins = new Set<string>();
+
+  for (const addresses of Object.values(networkInterfaces())) {
+    for (const address of addresses ?? []) {
+      if (address.family !== "IPv4" || address.internal) continue;
+      origins.add(address.address);
+      origins.add(`${address.address}.nip.io`);
+      origins.add(`*.${address.address}.nip.io`);
+    }
+  }
+
+  return [...origins];
+};
+
+/** Extra origins for cases the interfaces cannot cover, comma-separated. */
+const configuredOrigins = (process.env.DEV_ORIGINS ?? "")
   .split(",")
   .map((origin) => origin.trim())
   .filter(Boolean);
+
+const devOrigins = [...new Set([...localNetworkOrigins(), ...configuredOrigins])];
 
 const nextConfig: NextConfig = {
   allowedDevOrigins: devOrigins,
