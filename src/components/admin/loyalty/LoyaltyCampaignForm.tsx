@@ -1,11 +1,18 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Spinner } from "@/components/ui/spinner";
+import { productsService } from "@/services/products.service";
+import { servicesService, type ServiceItem } from "@/services/services.service";
+import { categoriesService } from "@/services/categories.service";
+import type { Product } from "@/types/product.types";
+import type { Category } from "@/types/category.types";
 import type {
     CreateLoyaltyCampaignInput,
     LoyaltyCampaign,
@@ -21,7 +28,6 @@ interface LoyaltyCampaignFormProps {
     onCancel?: () => void;
     isSaving: boolean;
     error?: string | null;
-    success?: string | null;
 }
 
 interface FormValue {
@@ -95,9 +101,7 @@ function initialValue(
     return {
         name: campaign?.name ?? "",
         description: campaign?.description ?? "",
-        source:
-            campaign?.source ??
-            (tenantType === "STORE" ? "STORE" : "BOOKING"),
+        source: campaign?.source ?? deriveSource(tenantType),
         metric: campaign?.metric ?? "COUNT",
         targetValue: campaign?.targetValue ?? "",
         startsAt: dateInputValue(campaign?.startsAt),
@@ -172,6 +176,20 @@ function validTarget(value: string, metric: LoyaltyCampaignMetric): boolean {
     if (metric === "SPEND") return true;
 
     return fraction === "" || fraction === "0" || fraction === "00";
+}
+
+/**
+ * The campaign source is a property of the tenant, not a choice: a store tenant
+ * can only run STORE campaigns and a booking tenant only BOOKING ones, which the
+ * backend enforces in assertLoyaltyCampaignSourceCompatible. A hybrid tenant
+ * accepts all three and ALL is the only value always valid for it, so that is
+ * the derived default. The value is still stored, because an existing campaign
+ * keeps the source it was created with.
+ */
+function deriveSource(tenantType?: string): LoyaltyCampaignSource {
+    if (tenantType === "STORE") return "STORE";
+    if (tenantType === "BOOKING") return "BOOKING";
+    return "ALL";
 }
 
 function sourceIsSupported(
@@ -252,35 +270,6 @@ function CampaignBasicsFields({
                         }
                         disabled={isSaving}
                     />
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="campaign-source">Origen</Label>
-                    <select
-                        id="campaign-source"
-                        className={selectClassName}
-                        value={value.source}
-                        onChange={(event) =>
-                            update(
-                                "source",
-                                event.target.value as LoyaltyCampaignSource,
-                            )
-                        }
-                        disabled={isSaving}
-                    >
-                        {(["BOOKING", "STORE", "ALL"] as const).map((source) => (
-                            <option
-                                key={source}
-                                value={source}
-                                disabled={!sourceIsSupported(source, tenantType)}
-                            >
-                                {source === "BOOKING"
-                                    ? "Reservas"
-                                    : source === "STORE"
-                                      ? "Tienda"
-                                      : "Reservas y tienda"}
-                            </option>
-                        ))}
-                    </select>
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="campaign-metric">Métrica</Label>
@@ -430,15 +419,160 @@ function CampaignBasicsFields({
     );
 }
 
+type PickerOption = { id: string; name: string };
+
+/**
+ * Names the reward can be applied to, as checkboxes.
+ *
+ * The three ID textareas asked an admin to copy a UUID per product by hand, which
+ * is the kind of input that produces a broken campaign that only fails at
+ * checkout. Showing the name removes the transcription step entirely.
+ *
+ * The form value stays a comma-joined string of ids, so initialValue, parseIds
+ * and the submit payload are untouched.
+ */
+function ApplicablePicker({
+    legend,
+    options,
+    selected,
+    onToggle,
+    isSaving,
+    isLoading,
+    emptyHint,
+}: {
+    legend: string;
+    options: PickerOption[];
+    selected: string[];
+    onToggle: (id: string) => void;
+    isSaving: boolean;
+    isLoading: boolean;
+    emptyHint: string;
+}) {
+    return (
+        <fieldset className="space-y-2 md:col-span-2">
+            <legend className="px-1 text-sm font-semibold">{legend}</legend>
+            {isLoading ? (
+                <div className="flex items-center gap-2 py-2 text-sm text-muted-foreground">
+                    <Spinner className="size-4" /> Cargando…
+                </div>
+            ) : options.length === 0 ? (
+                <p className="text-xs text-muted-foreground">{emptyHint}</p>
+            ) : (
+                <ul className="max-h-56 space-y-1 overflow-y-auto rounded-md border p-2">
+                    {options.map((option) => {
+                        const checked = selected.includes(option.id);
+                        return (
+                            <li key={option.id}>
+                                <label
+                                    htmlFor={`applicable-${option.id}`}
+                                    className="flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-sm hover:bg-accent"
+                                >
+                                    <Checkbox
+                                        id={`applicable-${option.id}`}
+                                        checked={checked}
+                                        disabled={isSaving}
+                                        onCheckedChange={() => onToggle(option.id)}
+                                    />
+                                    <span className="truncate">{option.name}</span>
+                                </label>
+                            </li>
+                        );
+                    })}
+                </ul>
+            )}
+            <p className="text-xs text-muted-foreground">
+                Sin marcar nada, la recompensa aplica a todo el catálogo.
+            </p>
+        </fieldset>
+    );
+}
+
 function CampaignRewardFields({
     value,
     update,
     isSaving,
+    tenantType,
 }: {
     value: FormValue;
     update: UpdateFormValue;
     isSaving: boolean;
+    tenantType?: string;
 }) {
+    // Only the catalogues this tenant type can actually serve are offered, so a
+    // booking tenant is never asked for product ids it cannot have.
+    const showsProducts =
+        !tenantType || tenantType === "STORE" || tenantType === "HYBRID";
+    const showsServices =
+        !tenantType || tenantType === "BOOKING" || tenantType === "HYBRID";
+    const wantedCategoryTypes = [
+        ...(showsProducts ? ["PRODUCT"] : []),
+        ...(showsServices ? ["SERVICE"] : []),
+    ];
+    const showsAnyCatalogue = wantedCategoryTypes.length > 0;
+
+    const [productOptions, setProductOptions] = useState<PickerOption[]>([]);
+    const [serviceOptions, setServiceOptions] = useState<PickerOption[]>([]);
+    const [categoryOptions, setCategoryOptions] = useState<PickerOption[]>([]);
+    const [optionsLoading, setOptionsLoading] = useState(showsAnyCatalogue);
+
+    useEffect(() => {
+        if (!showsAnyCatalogue) {
+            setOptionsLoading(false);
+            return;
+        }
+
+        let cancelled = false;
+        setOptionsLoading(true);
+
+        const toOptions = <T extends { id: string; name: string }>(
+            items: T[],
+        ): PickerOption[] => items.map(({ id, name }) => ({ id, name }));
+
+        const load = async () => {
+            // Independent lists: a failure in one must not blank the others, and
+            // a catalogue that will not load shows as empty rather than
+            // blocking the form.
+            const [products, services, categories] = await Promise.all([
+                showsProducts
+                    ? productsService.getAll().catch(() => [] as Product[])
+                    : Promise.resolve([] as Product[]),
+                showsServices
+                    ? servicesService.getAll().catch(() => [] as ServiceItem[])
+                    : Promise.resolve([] as ServiceItem[]),
+                categoriesService.getAll().catch(() => [] as Category[]),
+            ]);
+
+            if (cancelled) return;
+
+            setProductOptions(toOptions(products));
+            setServiceOptions(toOptions(services));
+            setCategoryOptions(
+                toOptions(
+                    categories.filter((category) =>
+                        wantedCategoryTypes.includes(category.type as string),
+                    ),
+                ),
+            );
+            setOptionsLoading(false);
+        };
+
+        void load();
+        return () => {
+            cancelled = true;
+        };
+    }, [showsProducts, showsServices, showsAnyCatalogue, wantedCategoryTypes.join()]);
+
+    const toggle = (
+        key: "applicableProducts" | "applicableCategories" | "applicableServices",
+        id: string,
+    ) => {
+        const current = parseIds(value[key]);
+        const next = current.includes(id)
+            ? current.filter((entry) => entry !== id)
+            : [...current, id];
+        update(key, next.join(", "));
+    };
+
     return (
             <fieldset className="space-y-5 rounded-lg border p-5">
                 <legend className="px-1 font-semibold">Definición de recompensa</legend>
@@ -514,42 +648,37 @@ function CampaignRewardFields({
                             disabled={isSaving}
                         />
                     </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="reward-products">IDs de productos</Label>
-                        <Textarea
-                            id="reward-products"
-                            placeholder="product-1, product-2"
-                            value={value.applicableProducts}
-                            onChange={(event) =>
-                                update("applicableProducts", event.target.value)
-                            }
-                            disabled={isSaving}
-                        />
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="reward-categories">IDs de categorías</Label>
-                        <Textarea
-                            id="reward-categories"
-                            placeholder="category-1, category-2"
-                            value={value.applicableCategories}
-                            onChange={(event) =>
-                                update("applicableCategories", event.target.value)
-                            }
-                            disabled={isSaving}
-                        />
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="reward-services">IDs de servicios</Label>
-                        <Textarea
-                            id="reward-services"
-                            placeholder="service-1, service-2"
-                            value={value.applicableServices}
-                            onChange={(event) =>
-                                update("applicableServices", event.target.value)
-                            }
-                            disabled={isSaving}
-                        />
-                    </div>
+                    {showsProducts && (
+                    <ApplicablePicker
+                        legend="Productos bonificados"
+                        options={productOptions}
+                        selected={parseIds(value.applicableProducts)}
+                        onToggle={(id) => toggle("applicableProducts", id)}
+                        isSaving={isSaving}
+                        isLoading={optionsLoading}
+                        emptyHint="Este tenant todavía no tiene productos cargados."
+                    />
+                    )}
+                    <ApplicablePicker
+                        legend="Categorías bonificadas"
+                        options={categoryOptions}
+                        selected={parseIds(value.applicableCategories)}
+                        onToggle={(id) => toggle("applicableCategories", id)}
+                        isSaving={isSaving}
+                        isLoading={optionsLoading}
+                        emptyHint="Este tenant todavía no tiene categorías cargadas."
+                    />
+                    {showsServices && (
+                    <ApplicablePicker
+                        legend="Servicios bonificados"
+                        options={serviceOptions}
+                        selected={parseIds(value.applicableServices)}
+                        onToggle={(id) => toggle("applicableServices", id)}
+                        isSaving={isSaving}
+                        isLoading={optionsLoading}
+                        emptyHint="Este tenant todavía no tiene servicios cargados."
+                    />
+                    )}
                 </div>
             </fieldset>
     );
@@ -562,7 +691,6 @@ export function LoyaltyCampaignForm({
     onCancel,
     isSaving,
     error,
-    success,
 }: LoyaltyCampaignFormProps) {
     const [value, setValue] = useState<FormValue>(() =>
         initialValue(campaign, tenantType),
@@ -644,16 +772,12 @@ export function LoyaltyCampaignForm({
                 value={value}
                 update={update}
                 isSaving={isSaving}
+                tenantType={tenantType}
             />
 
             {error && (
                 <p role="alert" className="text-sm text-destructive">
                     {error}
-                </p>
-            )}
-            {success && (
-                <p role="status" className="text-sm text-emerald-600">
-                    {success}
                 </p>
             )}
 

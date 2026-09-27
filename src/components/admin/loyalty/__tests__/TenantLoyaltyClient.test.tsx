@@ -16,6 +16,9 @@ const mocks = vi.hoisted(() => ({
     deleteCampaign: vi.fn(),
     toastSuccess: vi.fn(),
     toastError: vi.fn(),
+    getAllProducts: vi.fn(),
+    getAllServices: vi.fn(),
+    getAllCategories: vi.fn(),
 }));
 
 // The save confirmation is a toast now that the dialog closes on success, and
@@ -33,6 +36,16 @@ vi.mock("@/hooks/useFeatures", () => ({
         isFeatureEnabled: (feature: string) =>
             mocks.enabledFeatures.has(feature),
     }),
+}));
+
+vi.mock("@/services/products.service", () => ({
+    productsService: { getAll: mocks.getAllProducts },
+}));
+vi.mock("@/services/services.service", () => ({
+    servicesService: { getAll: mocks.getAllServices },
+}));
+vi.mock("@/services/categories.service", () => ({
+    categoriesService: { getAll: mocks.getAllCategories },
 }));
 
 vi.mock("@/services/loyalty.service", () => ({
@@ -131,6 +144,17 @@ const summary = {
 beforeEach(() => {
     vi.clearAllMocks();
     mocks.enabledFeatures = new Set(["LOYALTY", "COUPONS"]);
+    mocks.getAllProducts.mockResolvedValue([
+        { id: "product-1", name: "Lámpara Aurora" },
+        { id: "product-2", name: "Silla Roble" },
+    ]);
+    mocks.getAllServices.mockResolvedValue([
+        { id: "service-1", name: "Corte de pelo" },
+    ]);
+    mocks.getAllCategories.mockResolvedValue([
+        { id: "category-service-1", name: "Peluquería", type: "SERVICE" },
+        { id: "category-product-1", name: "Iluminación", type: "PRODUCT" },
+    ]);
     mocks.getAdminSummary.mockResolvedValue(summary);
     mocks.getAdminCampaigns.mockResolvedValue(campaigns);
     mocks.createCampaign.mockResolvedValue(draftCampaign);
@@ -204,9 +228,8 @@ describe("TenantLoyaltyClient", () => {
         fireEvent.change(screen.getByLabelText("Descripción de la campaña"), {
             target: { value: "Campaña de integración" },
         });
-        fireEvent.change(screen.getByLabelText("Origen"), {
-            target: { value: "BOOKING" },
-        });
+        // The source select is gone: a booking tenant implies BOOKING, so the
+        // form derives it instead of asking.
         fireEvent.change(screen.getByLabelText("Métrica"), {
             target: { value: "SPEND" },
         });
@@ -253,15 +276,19 @@ describe("TenantLoyaltyClient", () => {
         fireEvent.change(screen.getByLabelText("Descuento máximo"), {
             target: { value: "60" },
         });
-        fireEvent.change(screen.getByLabelText("IDs de productos"), {
-            target: { value: "product-1, product-2" },
-        });
-        fireEvent.change(screen.getByLabelText("IDs de categorías"), {
-            target: { value: "category-1 category-2" },
-        });
-        fireEvent.change(screen.getByLabelText("IDs de servicios"), {
-            target: { value: "service-1" },
-        });
+        // This tenant is BOOKING, so the products picker is not rendered at
+        // all; the applicable items are picked by name from a list.
+        expect(
+            screen.queryByText("Productos bonificados"),
+        ).not.toBeInTheDocument();
+        // Radix renders a button plus a hidden input, so a text match would
+        // find two nodes per checkbox. Role is the stable handle.
+        await user.click(
+            await screen.findByRole("checkbox", { name: "Corte de pelo" }),
+        );
+        await user.click(
+            await screen.findByRole("checkbox", { name: "Peluquería" }),
+        );
 
         const createButton = screen.getByRole("button", {
             name: "Crear borrador",
@@ -285,8 +312,10 @@ describe("TenantLoyaltyClient", () => {
                 description: "Twenty five off",
                 minPurchaseAmount: 50,
                 maxDiscountAmount: 60,
-                applicableProducts: ["product-1", "product-2"],
-                applicableCategories: ["category-1", "category-2"],
+                // The BOOKING tenant offers no products, so the picker could
+                // only produce services and service categories.
+                applicableProducts: [],
+                applicableCategories: ["category-service-1"],
                 applicableServices: ["service-1"],
             },
             rewardValidDays: 45,
