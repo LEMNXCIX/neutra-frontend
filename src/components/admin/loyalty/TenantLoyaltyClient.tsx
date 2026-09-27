@@ -20,8 +20,16 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
 import { LoyaltyCampaignForm } from "@/components/admin/loyalty/LoyaltyCampaignForm";
 import { useFeatures } from "@/hooks/useFeatures";
+import { toast } from "sonner";
 import { reportError } from "@/lib/error-reporting";
 import {
     loyaltyService,
@@ -79,58 +87,68 @@ function LoyaltySummaryCards({ summary }: { summary: LoyaltyTenantSummary }) {
 
 function LoyaltyCampaignEditor({
     editingCampaign,
-    setEditingCampaign,
+    formOpen,
+    onFormOpenChange,
     tenantType,
     onSave,
     isSaving,
     error,
-    success,
 }: {
     editingCampaign: LoyaltyCampaign | null;
-    setEditingCampaign: (campaign: LoyaltyCampaign | null) => void;
+    formOpen: boolean;
+    onFormOpenChange: (open: boolean) => void;
     tenantType: string;
     onSave: (input: CreateLoyaltyCampaignInput) => Promise<void>;
     isSaving: boolean;
     error: string | null;
-    success: string | null;
 }) {
     return (
-                    <Card>
-                        <CardHeader className="border-b">
-                            <div className="flex flex-wrap items-center justify-between gap-3">
-                                <div>
-                                    <CardTitle>
-                                        {editingCampaign
-                                            ? "Editar borrador"
-                                            : "Nueva campaña"}
-                                    </CardTitle>
-                                    <CardDescription>
-                                        La recompensa se crea junto con la campaña; no se selecciona un cupón existente.
-                                    </CardDescription>
-                                </div>
-                                {editingCampaign && (
-                                    <Button variant="outline" onClick={() => setEditingCampaign(null)}>
-                                        <Plus className="mr-2 size-4" aria-hidden="true" />
-                                        Nueva campaña
-                                    </Button>
-                                )}
-                            </div>
-                        </CardHeader>
-                        <CardContent>
-                            <LoyaltyCampaignForm
-                                key={editingCampaign?.id ?? "new"}
-                                campaign={editingCampaign}
-                                tenantType={tenantType}
-                                onSave={onSave}
-                                onCancel={() => setEditingCampaign(null)}
-                                isSaving={isSaving}
-                                error={error}
-                                success={success}
-                            />
-                        </CardContent>
-                    </Card>
+        <>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                    <h2 className="text-xl font-bold tracking-tight">
+                        Campañas
+                    </h2>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                        La recompensa se crea junto con la campaña; no se
+                        selecciona un cupón existente.
+                    </p>
+                </div>
+                <Button
+                    type="button"
+                    onClick={() => onFormOpenChange(true)}
+                >
+                    <Plus className="mr-2 size-4" aria-hidden="true" />
+                    Nueva campaña
+                </Button>
+            </div>
 
-
+            {/* The form is long, so the dialog is wider than the category one
+                and scrolls instead of growing past the viewport. */}
+            <Dialog open={formOpen} onOpenChange={onFormOpenChange}>
+                <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
+                    <DialogHeader>
+                        <DialogTitle>
+                            {editingCampaign
+                                ? "Editar borrador"
+                                : "Nueva campaña"}
+                        </DialogTitle>
+                        <DialogDescription>
+                            La recompensa se define junto con la campaña.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <LoyaltyCampaignForm
+                        key={editingCampaign?.id ?? "new"}
+                        campaign={editingCampaign}
+                        tenantType={tenantType}
+                        onSave={onSave}
+                        onCancel={() => onFormOpenChange(false)}
+                        isSaving={isSaving}
+                        error={error}
+                    />
+                </DialogContent>
+            </Dialog>
+        </>
     );
 }
 
@@ -300,12 +318,24 @@ export function TenantLoyaltyClient() {
     const [campaigns, setCampaigns] = useState<LoyaltyCampaign[]>([]);
     const [editingCampaign, setEditingCampaign] =
         useState<LoyaltyCampaign | null>(null);
+    const [formOpen, setFormOpen] = useState(false);
+
+    const openCreateForm = useCallback(() => {
+        setEditingCampaign(null);
+        setSaveError(null);
+        setFormOpen(true);
+    }, []);
+
+    const openEditForm = useCallback((campaign: LoyaltyCampaign) => {
+        setEditingCampaign(campaign);
+        setSaveError(null);
+        setFormOpen(true);
+    }, []);
     const [isLoading, setIsLoading] = useState(enabled);
     const [isSaving, setIsSaving] = useState(false);
     const [pendingAction, setPendingAction] = useState<string | null>(null);
     const [loadError, setLoadError] = useState<string | null>(null);
     const [saveError, setSaveError] = useState<string | null>(null);
-    const [success, setSuccess] = useState<string | null>(null);
 
     const loadData = useCallback(async () => {
         setIsLoading(true);
@@ -335,16 +365,16 @@ export function TenantLoyaltyClient() {
     const saveCampaign = async (input: CreateLoyaltyCampaignInput) => {
         setIsSaving(true);
         setSaveError(null);
-        setSuccess(null);
         try {
             if (editingCampaign) {
                 await loyaltyService.updateCampaign(editingCampaign.id, input);
-                setSuccess("Borrador actualizado correctamente.");
+                toast.success("Borrador actualizado correctamente.");
             } else {
                 await loyaltyService.createCampaign(input);
-                setSuccess("Campaña creada como borrador.");
+                toast.success("Campaña creada como borrador.");
             }
             setEditingCampaign(null);
+            setFormOpen(false);
             await loadData();
         } catch (err) {
             setSaveError(reportError(err, "No pudimos guardar la campaña.", { toast: false }));
@@ -362,7 +392,6 @@ export function TenantLoyaltyClient() {
 
         setPendingAction(actionKey);
         setSaveError(null);
-        setSuccess(null);
         try {
             if (action === "activate") {
                 await loyaltyService.activateCampaign(campaign.id);
@@ -373,7 +402,7 @@ export function TenantLoyaltyClient() {
             } else {
                 await loyaltyService.deleteCampaign(campaign.id);
             }
-            setSuccess(
+            toast.success(
                 action === "delete"
                     ? "Campaña eliminada correctamente."
                     : "Campaña actualizada correctamente.",
@@ -425,18 +454,18 @@ export function TenantLoyaltyClient() {
 
                     <LoyaltyCampaignEditor
                         editingCampaign={editingCampaign}
-                        setEditingCampaign={setEditingCampaign}
+                        formOpen={formOpen}
+                        onFormOpenChange={setFormOpen}
                         tenantType={summary.type}
                         onSave={saveCampaign}
                         isSaving={isSaving}
                         error={saveError}
-                        success={success}
                     />
 
                     <LoyaltyCampaignList
                         campaigns={campaigns}
                         pendingAction={pendingAction}
-                        setEditingCampaign={setEditingCampaign}
+                        setEditingCampaign={openEditForm}
                         runLifecycleAction={runLifecycleAction}
                     />
                 </>

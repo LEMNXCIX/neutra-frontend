@@ -14,6 +14,18 @@ const mocks = vi.hoisted(() => ({
     endCampaign: vi.fn(),
     archiveCampaign: vi.fn(),
     deleteCampaign: vi.fn(),
+    toastSuccess: vi.fn(),
+    toastError: vi.fn(),
+}));
+
+// The save confirmation is a toast now that the dialog closes on success, and
+// sonner's Toaster is not part of this render, so the toast is asserted through
+// the mock rather than through screen text.
+vi.mock("sonner", () => ({
+    toast: {
+        success: mocks.toastSuccess,
+        error: mocks.toastError,
+    },
 }));
 
 vi.mock("@/hooks/useFeatures", () => ({
@@ -163,7 +175,11 @@ describe("TenantLoyaltyClient", () => {
         expect(screen.getByRole("button", { name: /Eliminar/ })).toBeInTheDocument();
         expect(screen.getByRole("button", { name: /Finalizar/ })).toBeInTheDocument();
         expect(screen.getByRole("button", { name: /Archivar/ })).toBeInTheDocument();
-        expect(screen.getByText(/Fechas en UTC/)).toBeInTheDocument();
+        // The form lives in a dialog now, so its fields are not on the page
+        // until it is opened. The entry point is the button.
+        expect(
+            screen.getByRole("button", { name: /Nueva campaña/ }),
+        ).toBeInTheDocument();
         expect(
             screen.queryByLabelText(/cupón de recompensa/i),
         ).not.toBeInTheDocument();
@@ -177,6 +193,11 @@ describe("TenantLoyaltyClient", () => {
         render(<TenantLoyaltyClient />);
         await screen.findByRole("heading", { name: "Borrador de prueba" });
 
+        // The form lives in a dialog, so it must be opened before any field
+        // can be reached.
+        await user.click(
+            screen.getByRole("button", { name: /Nueva campaña/ }),
+        );
         fireEvent.change(screen.getByLabelText("Nombre"), {
             target: { value: "Campaña de gasto" },
         });
@@ -271,9 +292,11 @@ describe("TenantLoyaltyClient", () => {
             rewardValidDays: 45,
             maxClaims: 100,
         });
-        expect(
-            await screen.findByText("Campaña creada como borrador."),
-        ).toBeInTheDocument();
+        await waitFor(() =>
+            expect(mocks.toastSuccess).toHaveBeenCalledWith(
+                "Campaña creada como borrador.",
+            ),
+        );
     });
 
     it("updates an existing DRAFT campaign", async () => {
@@ -302,9 +325,13 @@ describe("TenantLoyaltyClient", () => {
                 }),
             }),
         );
-        expect(
-            await screen.findByText("Borrador actualizado correctamente."),
-        ).toBeInTheDocument();
+        // Success is a toast now: the dialog closes on save, so an inline
+        // message would never be seen.
+        await waitFor(() =>
+            expect(mocks.toastSuccess).toHaveBeenCalledWith(
+                "Borrador actualizado correctamente.",
+            ),
+        );
     });
 
     it("matches backend target precision and integer limits", async () => {
