@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Building2, Gift, RefreshCw } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { reportError } from "@/lib/error-reporting";
 import {
     Card,
     CardContent,
@@ -36,8 +37,8 @@ export function SuperAdminLoyaltyClient() {
         setLoadError(null);
         try {
             setTenants(await loyaltyService.getAdminTenants());
-        } catch {
-            setLoadError("No pudimos cargar la información de fidelización.");
+        } catch (err) {
+            setLoadError(reportError(err, "No pudimos cargar la información de fidelización.", { toast: false }));
         } finally {
             setIsLoading(false);
         }

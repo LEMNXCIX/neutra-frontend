@@ -33,6 +33,13 @@ interface FormValue {
     startsAt: string;
     endsAt: string;
     claimUntil: string;
+    /**
+     * Días de prórroga después de `endsAt` durante los que todavía se puede
+     * reclamar. No se envía al backend: es la forma de editar `claimUntil`
+     * sin tener que hacer la cuenta de días a mano. El backend recibe solo la
+     * fecha ya resuelta.
+     */
+    claimGraceDays: string;
     rewardType: CouponType;
     rewardValue: string;
     rewardDescription: string;
@@ -57,10 +64,34 @@ function dateInputValue(value?: string): string {
     return Number.isNaN(date.getTime()) ? "" : date.toISOString().slice(0, 10);
 }
 
+const DEFAULT_CLAIM_GRACE_DAYS = "7";
+
+/** Suma días a una fecha `YYYY-MM-DD` tratada como medianoche UTC. */
+function addDays(iso: string, days: number): string {
+    if (!iso || !Number.isFinite(days)) return "";
+    const date = new Date(`${iso}T00:00:00.000Z`);
+    if (Number.isNaN(date.getTime())) return "";
+    date.setUTCDate(date.getUTCDate() + days);
+    return date.toISOString().slice(0, 10);
+}
+
+/** Días entre dos fechas `YYYY-MM-DD`, o null si alguna no es válida. */
+function daysBetween(from: string, to: string): number | null {
+    if (!from || !to) return null;
+    const start = new Date(`${from}T00:00:00.000Z`).getTime();
+    const end = new Date(`${to}T00:00:00.000Z`).getTime();
+    if (!Number.isFinite(start) || !Number.isFinite(end)) return null;
+    return Math.round((end - start) / 86_400_000);
+}
+
 function initialValue(
     campaign: LoyaltyCampaign | null | undefined,
     tenantType?: string,
 ): FormValue {
+    const endsAt = dateInputValue(campaign?.endsAt);
+    const claimUntil = dateInputValue(campaign?.claimUntil);
+    const storedGrace = daysBetween(endsAt, claimUntil);
+
     return {
         name: campaign?.name ?? "",
         description: campaign?.description ?? "",
@@ -70,8 +101,12 @@ function initialValue(
         metric: campaign?.metric ?? "COUNT",
         targetValue: campaign?.targetValue ?? "",
         startsAt: dateInputValue(campaign?.startsAt),
-        endsAt: dateInputValue(campaign?.endsAt),
-        claimUntil: dateInputValue(campaign?.claimUntil),
+        endsAt,
+        claimUntil: claimUntil || (endsAt ? addDays(endsAt, 7) : ""),
+        claimGraceDays:
+            storedGrace !== null && storedGrace >= 0
+                ? String(storedGrace)
+                : DEFAULT_CLAIM_GRACE_DAYS,
         rewardType: campaign?.reward?.type ?? CouponType.PERCENT,
         rewardValue: campaign?.reward?.value.toString() ?? "10",
         rewardDescription: campaign?.reward?.description ?? "",
@@ -185,11 +220,13 @@ function CampaignBasicsFields({
     update,
     isSaving,
     tenantType,
+    claimGraceWarning,
 }: {
     value: FormValue;
     update: UpdateFormValue;
     isSaving: boolean;
     tenantType?: string;
+    claimGraceWarning?: string;
 }) {
     return (
             <div className="grid gap-5 md:grid-cols-2">
@@ -296,9 +333,17 @@ function CampaignBasicsFields({
                         }
                         disabled={isSaving}
                     />
+                    <p className="text-xs text-muted-foreground">
+                        Se cuenta desde que el cliente reclama, no desde que
+                        termina la campaña. Si la campaña dura 15 días y la
+                        validez es 2, quien reclame el último día tiene un cupón
+                        válido 2 días más.
+                    </p>
                 </div>
                 <div className="space-y-2">
-                    <Label htmlFor="campaign-starts-at">Inicio</Label>
+                    <Label htmlFor="campaign-starts-at">
+                        Inicio de la campaña
+                    </Label>
                     <Input
                         id="campaign-starts-at"
                         type="date"
@@ -311,7 +356,7 @@ function CampaignBasicsFields({
                     />
                 </div>
                 <div className="space-y-2">
-                    <Label htmlFor="campaign-ends-at">Fin</Label>
+                    <Label htmlFor="campaign-ends-at">Fin de la campaña</Label>
                     <Input
                         id="campaign-ends-at"
                         type="date"
@@ -324,7 +369,29 @@ function CampaignBasicsFields({
                     />
                 </div>
                 <div className="space-y-2">
-                    <Label htmlFor="campaign-claim-until">Reclamable hasta</Label>
+                    <Label htmlFor="campaign-claim-grace-days">
+                        Días de prórroga para reclamar
+                    </Label>
+                    <Input
+                        id="campaign-claim-grace-days"
+                        type="number"
+                        min={0}
+                        max={MAX_INT}
+                        step={1}
+                        value={value.claimGraceDays}
+                        onChange={(event) =>
+                            update("claimGraceDays", event.target.value)
+                        }
+                        disabled={isSaving}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                        Se cuenta desde el fin de la campaña, no desde el inicio.
+                    </p>
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="campaign-claim-until">
+                        Reclamable hasta
+                    </Label>
                     <Input
                         id="campaign-claim-until"
                         type="date"
@@ -335,6 +402,11 @@ function CampaignBasicsFields({
                         }
                         disabled={isSaving}
                     />
+                    {claimGraceWarning && (
+                        <p className="text-xs text-amber-600 dark:text-amber-500">
+                            {claimGraceWarning}
+                        </p>
+                    )}
                 </div>
                 <p className="text-xs text-muted-foreground md:col-span-2">
                     Fechas en UTC: cada fecha se convierte a medianoche UTC antes de enviarse.
@@ -498,10 +570,37 @@ export function LoyaltyCampaignForm({
 
     const { valid, rewardValue } = validateCampaignForm(value, tenantType);
 
+    // The backend refuses to archive a campaign before claimUntil, so a long
+    // claim window silently locks the campaign. That is only discoverable by
+    // hitting the 422, so it is surfaced here instead.
+    const claimGraceDays = Number(value.claimGraceDays);
+    const claimGraceWarning =
+        Number.isFinite(claimGraceDays) && claimGraceDays > 30
+            ? `La campaña no se podrá archivar hasta el ${value.claimUntil}, porque el backend solo permite archivar en o después de "Reclamable hasta".`
+            : undefined;
+
     const update = <Key extends keyof FormValue>(
         key: Key,
         nextValue: FormValue[Key],
-    ) => setValue((current) => ({ ...current, [key]: nextValue }));
+    ) =>
+        setValue((current) => {
+            const next = { ...current, [key]: nextValue };
+
+            // claimUntil is derived from endsAt plus the grace period, so moving
+            // the end of the campaign carries the claim window with it. Editing
+            // the grace days does the same, which is why the two inputs cannot
+            // disagree.
+            if (key === "endsAt" || key === "claimGraceDays") {
+                const days = Number(next.claimGraceDays);
+                const computed = addDays(
+                    String(next.endsAt ?? ""),
+                    Number.isFinite(days) ? days : 0,
+                );
+                if (computed) next.claimUntil = computed;
+            }
+
+            return next;
+        });
 
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -538,6 +637,7 @@ export function LoyaltyCampaignForm({
                 update={update}
                 isSaving={isSaving}
                 tenantType={tenantType}
+                claimGraceWarning={claimGraceWarning}
             />
 
             <CampaignRewardFields

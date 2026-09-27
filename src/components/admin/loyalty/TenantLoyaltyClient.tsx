@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/card";
 import { LoyaltyCampaignForm } from "@/components/admin/loyalty/LoyaltyCampaignForm";
 import { useFeatures } from "@/hooks/useFeatures";
+import { reportError } from "@/lib/error-reporting";
 import {
     loyaltyService,
     type CreateLoyaltyCampaignInput,
@@ -345,8 +346,8 @@ export function TenantLoyaltyClient() {
             }
             setEditingCampaign(null);
             await loadData();
-        } catch {
-            setSaveError("No pudimos guardar la campaña.");
+        } catch (err) {
+            setSaveError(reportError(err, "No pudimos guardar la campaña.", { toast: false }));
         } finally {
             setIsSaving(false);
         }
@@ -379,8 +380,8 @@ export function TenantLoyaltyClient() {
             );
             if (editingCampaign?.id === campaign.id) setEditingCampaign(null);
             await loadData();
-        } catch {
-            setSaveError("No pudimos completar la acción de la campaña.");
+        } catch (err) {
+            setSaveError(reportError(err, "No pudimos completar la acción de la campaña.", { toast: false }));
         } finally {
             setPendingAction(null);
         }

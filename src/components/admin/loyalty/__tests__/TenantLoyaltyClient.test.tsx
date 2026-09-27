@@ -192,11 +192,23 @@ describe("TenantLoyaltyClient", () => {
         fireEvent.change(screen.getByLabelText("Objetivo"), {
             target: { value: "150.50" },
         });
-        await user.type(screen.getByLabelText("Inicio"), "2030-01-01");
-        await user.type(screen.getByLabelText("Fin"), "2030-01-31");
         await user.type(
-            screen.getByLabelText("Reclamable hasta"),
-            "2030-02-15",
+            screen.getByLabelText("Inicio de la campaña"),
+            "2030-01-01",
+        );
+        await user.type(
+            screen.getByLabelText("Fin de la campaña"),
+            "2030-01-31",
+        );
+        // claimUntil now follows endsAt plus the grace period, so the test
+        // drives the grace days instead of typing the derived date. 7 days of
+        // grace from 2030-01-31 is 2030-02-07.
+        fireEvent.change(
+            screen.getByLabelText("Días de prórroga para reclamar"),
+            { target: { value: "7" } },
+        );
+        expect(screen.getByLabelText("Reclamable hasta")).toHaveValue(
+            "2030-02-07",
         );
         fireEvent.change(screen.getByLabelText("Validez de la recompensa (días)"), {
             target: { value: "45" },
@@ -244,7 +256,8 @@ describe("TenantLoyaltyClient", () => {
             targetValue: "150.50",
             startsAt: "2030-01-01T00:00:00.000Z",
             endsAt: "2030-01-31T00:00:00.000Z",
-            claimUntil: "2030-02-15T00:00:00.000Z",
+            // Derived: endsAt plus the 7 grace days the test set above.
+            claimUntil: "2030-02-07T00:00:00.000Z",
             reward: {
                 type: "FIXED",
                 value: 25,
