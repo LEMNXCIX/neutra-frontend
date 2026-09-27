@@ -27,12 +27,13 @@ import {
 } from "lucide-react";
 import { AuthBrandHeader } from "@/components/auth/AuthBrandHeader";
 import { reportError } from "@/lib/error-reporting";
+import { PASSWORD_MIN_LENGTH } from "@/lib/password-policy";
 import { PasswordInput } from "@/components/ui/password-input";
 import { cn } from "@/lib/utils";
 
 const getPasswordStrength = (pass: string) => {
   if (pass.length === 0) return { strength: 0, label: "", color: "" };
-  if (pass.length < 6)
+  if (pass.length < PASSWORD_MIN_LENGTH)
     return { strength: 1, label: "Débil", color: "bg-rose-500" };
   if (pass.length < 10)
     return { strength: 2, label: "Media", color: "bg-amber-500" };
@@ -95,8 +96,8 @@ export function RegisterPageClient() {
     return;
   }
 
-  if (state.password.length < 6) {
-    dispatch({ type: "SET_ERROR", value: "La contraseña debe tener al menos 6 caracteres" });
+  if (state.password.length < PASSWORD_MIN_LENGTH) {
+    dispatch({ type: "SET_ERROR", value: `La contraseña debe tener al menos ${PASSWORD_MIN_LENGTH} caracteres` });
     return;
   }
 

@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/card";
 import { toast } from "sonner";
 import { reportError } from "@/lib/error-reporting";
+import { PASSWORD_MIN_LENGTH } from "@/lib/password-policy";
 import { PasswordInput } from "@/components/ui/password-input";
 import { authService } from "@/services/auth.service";
 import { Spinner } from "@/components/ui/spinner";
@@ -53,8 +54,8 @@ function ResetPasswordForm() {
             return;
         }
 
-        if (password.length < 6) {
-            toast.error("La contraseña debe tener al menos 6 caracteres");
+        if (password.length < PASSWORD_MIN_LENGTH) {
+            toast.error(`La contraseña debe tener al menos ${PASSWORD_MIN_LENGTH} caracteres`);
             return;
         }
 
