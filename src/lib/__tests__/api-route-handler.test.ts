@@ -185,3 +185,58 @@ describe('createRouteHandler passThroughStatus', () => {
         expect(res.status).toBe(201);
     });
 });
+
+
+describe('createRouteHandler forwards the backend error codes', () => {
+    it('keeps errors[] so the client can translate the code', async () => {
+        // The shape the backend actually returns: the code is the only stable
+        // part of the contract, the message is English prose.
+        const error = Object.assign(
+            new Error('A campaign can be archived only at or after claimUntil'),
+            {
+                statusCode: 422,
+                response: {
+                    success: false,
+                    statusCode: 422,
+                    message: 'A campaign can be archived only at or after claimUntil',
+                    errors: [
+                        {
+                            code: 'LOYALTY_CAMPAIGN_ARCHIVE_TOO_EARLY',
+                            message:
+                                'A campaign can be archived only at or after claimUntil',
+                        },
+                    ],
+                },
+            },
+        );
+        mockBackendFetch.mockRejectedValue(error);
+
+        const handler = createPostHandler('/loyalty/campaigns/:id/archive');
+        const res = await handler(makeReq('http://localhost/api/archive'), {
+            params: Promise.resolve({ id: 'c1' }),
+        });
+
+        expect(res.status).toBe(422);
+        const body = await res.json();
+        expect(body.errors).toEqual([
+            {
+                code: 'LOYALTY_CAMPAIGN_ARCHIVE_TOO_EARLY',
+                message: 'A campaign can be archived only at or after claimUntil',
+            },
+        ]);
+    });
+
+    it('sends an empty errors array when the backend sent none', async () => {
+        mockBackendFetch.mockRejectedValue(
+            Object.assign(new Error('boom'), { statusCode: 500 }),
+        );
+
+        const handler = createGetHandler('/loyalty/campaigns');
+        const res = await handler(makeReq('http://localhost/api/loyalty'));
+        const body = await res.json();
+
+        // Present-but-empty, never absent: the client reads errors[].code and a
+        // missing key reads as a different failure than an empty list.
+        expect(body.errors).toEqual([]);
+    });
+});

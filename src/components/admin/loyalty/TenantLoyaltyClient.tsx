@@ -410,7 +410,12 @@ export function TenantLoyaltyClient() {
             if (editingCampaign?.id === campaign.id) setEditingCampaign(null);
             await loadData();
         } catch (err) {
-            setSaveError(reportError(err, "No pudimos completar la acción de la campaña.", { toast: false }));
+            // A lifecycle action runs from the list, not from the form. The
+            // inline slot only exists while the dialog is open, and archiving
+            // happens with it closed, so this error would be shown nowhere.
+            setSaveError(
+                reportError(err, "No pudimos completar la acción de la campaña."),
+            );
         } finally {
             setPendingAction(null);
         }

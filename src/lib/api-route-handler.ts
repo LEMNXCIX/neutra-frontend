@@ -95,21 +95,38 @@ const parseBody = async (req: NextRequest, method: HttpMethod): Promise<unknown 
 
 /**
  * Create standardized error response
+ *
+ * `errors` is forwarded from the backend instead of being dropped. The codes in
+ * it are the only stable, machine-readable part of the contract: the client
+ * translates the code and never shows `message`, which is written in English and
+ * changes without notice. Rebuilding the envelope without it left every failure
+ * looking like a generic one, no matter how specific the backend had been.
  */
 const createErrorResponse = (
     message: string,
     statusCode: number,
-    traceId: string
+    traceId: string,
+    errors: unknown[] = []
 ): NextResponse => {
     return NextResponse.json(
         {
             success: false,
             statusCode,
             message,
+            errors,
             meta: { traceId, timestamp: new Date().toISOString() }
         },
         { status: statusCode }
     );
+};
+
+/** The codes carried by a thrown error, when the backend sent any. */
+const codesFromError = (error: unknown): unknown[] => {
+    if (!error || typeof error !== "object") return [];
+    const response = (error as { response?: { errors?: unknown } }).response;
+    if (Array.isArray(response?.errors)) return response.errors;
+    if (error instanceof Array) return error;
+    return [];
 };
 
 // ============================================================================
@@ -224,7 +241,8 @@ export function createRouteHandler(config: RouteConfig) {
             return createErrorResponse(
                 errorMessage,
                 statusCode,
-                logContext?.traceId || 'unknown'
+                logContext?.traceId || 'unknown',
+                codesFromError(error)
             );
         }
     };
@@ -341,7 +359,8 @@ export function createListWithStatsHandler(
             return createErrorResponse(
                 errorMessage,
                 500,
-                logContext?.traceId || 'unknown'
+                logContext?.traceId || 'unknown',
+                codesFromError(error)
             );
         }
     };
