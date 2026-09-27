@@ -287,6 +287,16 @@ export function RegisterPageClient() {
     <AlertDescription className="text-xs font-semibold">
       {state.error}
     </AlertDescription>
+    {/* The recovery path for a registration that fails on an email someone
+        already has. The forgot and reset flows exist and work; what was
+        missing was a way to reach them from here, so someone whose email was
+        taken in another tenant had no next step. */}
+    <Link
+      href="/forgot-password"
+      className="mt-1 inline-block text-xs font-semibold underline underline-offset-2"
+    >
+      ¿Olvidaste tu contraseña?
+    </Link>
   </Alert>
 )}
 

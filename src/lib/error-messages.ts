@@ -34,6 +34,14 @@ const CODE_MESSAGES: Record<string, string> = {
     AUTH_PERMISSION_DENIED: "No tenés permisos para realizar esta acción.",
     AUTH_ACCOUNT_INACTIVE: "Tu cuenta está desactivada. Contactá a soporte.",
     AUTH_USER_ALREADY_EXISTS: "Ya existe una cuenta con ese correo.",
+    // The backend distinguishes two multi-tenant registration outcomes that
+    // used to share one code, and they have different remedies. Keeping the
+    // backend's codes distinct is what lets this map say the right thing.
+    // api-neutra-v2/types/error-codes.ts, AuthErrorCodes.
+    AUTH_ALREADY_MEMBER_OF_TENANT:
+      "Ya tenés una cuenta en este negocio. Iniciá sesión en lugar de registrarte.",
+    AUTH_EMAIL_TAKEN_IN_OTHER_TENANT:
+      "Ese correo ya está registrado en otro negocio. Iniciá sesión ahí, o usá la contraseña que creaste allí para unirte a este.",
     // AUTH_FORBIDDEN used to cover all three of these plus two more, so the
     // only copy available was "you do not have permission", which points the
     // user at the wrong remedy.
@@ -82,6 +90,8 @@ const CODE_MESSAGES: Record<string, string> = {
     BUSINESS_START_TIME_NOT_IN_FUTURE: "La fecha debe ser futura.",
     BUSINESS_HOLIDAY_CLOSED: "El negocio está cerrado ese día.",
     BUSINESS_OUTSIDE_WORKING_HOURS: "Ese horario está fuera del horario de atención.",
+    BUSINESS_STAFF_HOURS_CONFLICT:
+        "El miembro del equipo no puede tener horarios en un día que el negocio tiene cerrado.",
     BUSINESS_INVALID_COUPON: "El cupón no es válido.",
     BUSINESS_COUPON_UNAVAILABLE: "Ese cupón ya no está disponible.",
     BUSINESS_COUPON_NOT_OWNED: "Ese cupón no está asociado a tu cuenta.",
