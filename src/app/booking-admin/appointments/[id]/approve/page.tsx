@@ -1,27 +1,27 @@
-import { redirect } from 'next/navigation';
-import { apiClient } from '@/lib/api-client';
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
+import { apiClient } from "@/lib/api-client";
 
 export const metadata: Metadata = {
-  title: "Aprobar cita",
-  description: "Procesando la aprobación de la cita",
+    title: "Aprobar cita",
+    description: "Procesando la aprobación de la cita",
 };
 
 export default async function AppointmentApprovePage({
-  params,
+    params,
 }: {
-  params: Promise<{ id: string }>;
+    params: Promise<{ id: string }>;
 }) {
-  const { id } = await params;
+    const { id } = await params;
 
-  try {
-    await apiClient(`/appointments/${id}/status`, {
-      method: 'PUT',
-      body: JSON.stringify({ status: 'CONFIRMED' }),
-    });
-  } catch (error) {
-    console.error('Error approving appointment:', error);
-  }
+    try {
+        await apiClient(`/appointments/${id}/status`, {
+            method: "PUT",
+            body: JSON.stringify({ status: "CONFIRMED" }),
+        });
+    } catch (error) {
+        console.error("Error approving appointment:", error);
+    }
 
-  redirect('/booking-admin/appointments');
+    redirect("/booking-admin/appointments");
 }

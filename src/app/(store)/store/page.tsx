@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { api } from '@/lib/api-client';
+import { api } from "@/lib/api-client";
 import { getTenantNameFromHeaders } from "@/lib/server-theme";
 import { getHomeContent } from "@/lib/strapi";
 import { StoreHomeClient } from "./store-client";

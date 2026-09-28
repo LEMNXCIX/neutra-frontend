@@ -3,10 +3,10 @@ import { readJsonResponse } from "@/lib/response";
  * API Routes for Authentication - Logout
  */
 
-import { NextRequest, NextResponse } from "next/server";
-import { getProxyHeaders } from "@/lib/proxy";
-import { logger } from "@/lib/logger";
+import { type NextRequest, NextResponse } from "next/server";
 import { getBackendUrl } from "@/lib/backend-url";
+import { logger } from "@/lib/logger";
+import { getProxyHeaders } from "@/lib/proxy";
 
 async function handleLogout(req: NextRequest, method: "GET" | "POST") {
     const startTime = Date.now();

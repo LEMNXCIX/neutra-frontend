@@ -1,14 +1,14 @@
-import React from "react";
-import { Badge } from "@/components/ui/badge";
-import { getCmsPage } from "@/lib/strapi";
-import { cmsHeader, cmsRichText } from "@/lib/cms-page";
 import type { Metadata } from "next";
+import { Badge } from "@/components/ui/badge";
+import { cmsHeader, cmsRichText } from "@/lib/cms-page";
+import { getCmsPage } from "@/lib/strapi";
 
 export async function generateMetadata(): Promise<Metadata> {
     const cms = await getCmsPage("privacy-pages");
     return {
         title: cms?.title ?? "Política de Privacidad",
-        description: cms?.subtitle ?? "Nuestra política de privacidad y manejo de datos",
+        description:
+            cms?.subtitle ?? "Nuestra política de privacidad y manejo de datos",
     };
 }
 

@@ -1,31 +1,32 @@
 "use client";
 
-import React, { useState } from "react";
+import {
+    AlertCircle,
+    ArrowLeft,
+    ArrowRight,
+    CheckCircle2,
+    Mail,
+} from "lucide-react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import type React from "react";
+import { useState } from "react";
+import { toast } from "sonner";
+import { AuthBrandHeader } from "@/components/auth/AuthBrandHeader";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import {
     Card,
     CardContent,
     CardDescription,
+    CardFooter,
     CardHeader,
     CardTitle,
-    CardFooter,
 } from "@/components/ui/card";
-import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Spinner } from "@/components/ui/spinner";
 import { reportError } from "@/lib/error-reporting";
 import { authService } from "@/services/auth.service";
-import { Spinner } from "@/components/ui/spinner";
-import {
-    Mail,
-    ArrowLeft,
-    CheckCircle2,
-    ArrowRight,
-    AlertCircle,
-} from "lucide-react";
-import { AuthBrandHeader } from "@/components/auth/AuthBrandHeader";
 
 export function ForgotPasswordPageClient() {
     const [email, setEmail] = useState("");
@@ -45,9 +46,13 @@ export function ForgotPasswordPageClient() {
             toast.success("Enlace enviado si la cuenta existe");
         } catch (error: any) {
             setError(
-                reportError(error, "No pudimos enviar el enlace de recuperación.", {
-                    toast: false,
-                }),
+                reportError(
+                    error,
+                    "No pudimos enviar el enlace de recuperación.",
+                    {
+                        toast: false,
+                    },
+                ),
             );
         } finally {
             setLoading(false);
@@ -67,7 +72,8 @@ export function ForgotPasswordPageClient() {
                             Correo enviado
                         </CardTitle>
                         <CardDescription className="text-sm font-medium mt-1">
-                            Revisa tu bandeja de entrada para ver las instrucciones
+                            Revisa tu bandeja de entrada para ver las
+                            instrucciones
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="text-center px-8 pb-8 space-y-6">
@@ -76,7 +82,8 @@ export function ForgotPasswordPageClient() {
                             <span className="font-bold text-foreground">
                                 {email}
                             </span>
-                            . Si hay una cuenta asociada a esta dirección, recibirás las instrucciones en breve.
+                            . Si hay una cuenta asociada a esta dirección,
+                            recibirás las instrucciones en breve.
                         </p>
                         <Button
                             variant="outline"
@@ -116,7 +123,8 @@ export function ForgotPasswordPageClient() {
                             Restablecer contraseña
                         </CardTitle>
                         <CardDescription className="text-sm font-medium">
-                            Ingresa tu correo para recibir un enlace de recuperación
+                            Ingresa tu correo para recibir un enlace de
+                            recuperación
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="px-8 pb-8">

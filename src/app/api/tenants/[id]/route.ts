@@ -1,4 +1,4 @@
-import { createGetHandler, createPutHandler } from '@/lib/api-route-handler';
+import { createGetHandler, createPutHandler } from "@/lib/api-route-handler";
 
 /**
  * GET /api/tenants/[id]

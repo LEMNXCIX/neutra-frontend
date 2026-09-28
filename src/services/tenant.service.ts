@@ -1,14 +1,18 @@
 import { api } from "@/lib/api-client";
 import { getBackendUrl } from "@/lib/backend-url";
-import { Tenant, CreateTenantData, UpdateTenantData } from "@/types/tenant";
+import type {
+    CreateTenantData,
+    Tenant,
+    UpdateTenantData,
+} from "@/types/tenant";
 
 export const tenantService = {
     getAll: async () => {
-        return api.get<Tenant[]>('/tenants');
+        return api.get<Tenant[]>("/tenants");
     },
 
     getMine: async () => {
-        return api.get<Tenant[]>('/tenants/mine');
+        return api.get<Tenant[]>("/tenants/mine");
     },
 
     getBySlug: async (slug: string): Promise<Tenant | null> => {
@@ -25,13 +29,13 @@ export const tenantService = {
     },
 
     getAvailableFeatures: async (): Promise<any[]> => {
-        const response: any = await api.get('/features');
+        const response: any = await api.get("/features");
         // Ensure we return an array
-        return Array.isArray(response) ? response : (response.data || []);
+        return Array.isArray(response) ? response : response.data || [];
     },
 
     create: async (payload: CreateTenantData) => {
-        return api.post<Tenant>('/tenants', payload);
+        return api.post<Tenant>("/tenants", payload);
     },
 
     update: async (id: string, payload: UpdateTenantData) => {
@@ -49,6 +53,5 @@ export const tenantService = {
 
     delete: async (id: string) => {
         return api.delete(`/tenants/${id}`);
-    }
+    },
 };
-

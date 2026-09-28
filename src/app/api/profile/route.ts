@@ -1,7 +1,7 @@
-import { readJsonResponse } from "@/lib/response";
-import { NextRequest, NextResponse } from "next/server";
-import { getProxyHeaders } from "@/lib/proxy";
+import { type NextRequest, NextResponse } from "next/server";
 import { getBackendUrl } from "@/lib/backend-url";
+import { getProxyHeaders } from "@/lib/proxy";
+import { readJsonResponse } from "@/lib/response";
 
 /**
  * GET /api/profile
@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
         console.error("Error fetching profile:", error);
         return NextResponse.json(
             { error: "Error al obtener el perfil" },
-            { status: 401 }
+            { status: 401 },
         );
     }
 }
@@ -50,7 +50,7 @@ export async function PUT(req: NextRequest) {
         if (!validateData.success || !validateData.data?.user?.id) {
             return NextResponse.json(
                 { error: "Unauthorized" },
-                { status: 401 }
+                { status: 401 },
             );
         }
 
@@ -74,7 +74,7 @@ export async function PUT(req: NextRequest) {
         console.error("Error updating profile:", error);
         return NextResponse.json(
             { error: "Error al actualizar el perfil" },
-            { status: 500 }
+            { status: 500 },
         );
     }
 }

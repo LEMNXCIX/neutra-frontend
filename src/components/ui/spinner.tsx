@@ -5,15 +5,15 @@ import { cn } from "@/lib/utils";
 type SpinnerProps = React.ComponentProps<"svg"> & { size?: number | string };
 
 function Spinner({ className, size, ...props }: SpinnerProps) {
-  return (
-    <Loader2
-      role="status"
-      aria-label="Cargando"
-      size={size}
-      className={cn("size-4 animate-spin", className)}
-      {...props}
-    />
-  );
+    return (
+        <Loader2
+            role="status"
+            aria-label="Cargando"
+            size={size}
+            className={cn("size-4 animate-spin", className)}
+            {...props}
+        />
+    );
 }
 
 export { Spinner };

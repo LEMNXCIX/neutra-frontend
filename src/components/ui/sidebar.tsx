@@ -1,9 +1,9 @@
 export {
-    useSidebar,
-    SidebarProvider,
     Sidebar,
-    SidebarTrigger,
-    SidebarHeader,
     SidebarContent,
     SidebarFooter,
+    SidebarHeader,
+    SidebarProvider,
+    SidebarTrigger,
+    useSidebar,
 } from "./new-sidebar";

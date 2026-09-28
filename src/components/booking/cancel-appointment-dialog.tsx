@@ -1,3 +1,8 @@
+import { Loader2 } from "lucide-react";
+import type React from "react";
+import { useState } from "react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 import {
     Dialog,
     DialogContent,
@@ -7,13 +12,9 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2 } from "lucide-react";
-import React, { useState } from "react";
-import { bookingService } from '@/services/booking.service';
-import { reportError } from '@/lib/error-reporting';
-import { toast } from "sonner";
+import { reportError } from "@/lib/error-reporting";
+import { bookingService } from "@/services/booking.service";
 
 interface CancelAppointmentDialogProps {
     appointmentId: string;
@@ -24,7 +25,7 @@ interface CancelAppointmentDialogProps {
 export function CancelAppointmentDialog({
     appointmentId,
     onAppointmentCancelled,
-    trigger
+    trigger,
 }: CancelAppointmentDialogProps) {
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -33,7 +34,10 @@ export function CancelAppointmentDialog({
     const handleCancel = async () => {
         try {
             setLoading(true);
-            await bookingService.cancelAppointment(appointmentId, reason || undefined);
+            await bookingService.cancelAppointment(
+                appointmentId,
+                reason || undefined,
+            );
             toast.success("Cita cancelada correctamente");
             setOpen(false);
             if (onAppointmentCancelled) {
@@ -49,13 +53,16 @@ export function CancelAppointmentDialog({
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                {trigger || <Button variant="destructive">Cancelar cita</Button>}
+                {trigger || (
+                    <Button variant="destructive">Cancelar cita</Button>
+                )}
             </DialogTrigger>
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
                     <DialogTitle>Cancelar cita</DialogTitle>
                     <DialogDescription>
-                        ¿Seguro que quieres cancelar esta cita? Esta acción no se puede deshacer.
+                        ¿Seguro que quieres cancelar esta cita? Esta acción no
+                        se puede deshacer.
                     </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
@@ -67,11 +74,21 @@ export function CancelAppointmentDialog({
                     />
                 </div>
                 <DialogFooter>
-                    <Button variant="outline" onClick={() => setOpen(false)} disabled={loading}>
+                    <Button
+                        variant="outline"
+                        onClick={() => setOpen(false)}
+                        disabled={loading}
+                    >
                         Mantener cita
                     </Button>
-                    <Button variant="destructive" onClick={handleCancel} disabled={loading}>
-                        {loading && <Loader2 className="mr-2 size-4 animate-spin" />}
+                    <Button
+                        variant="destructive"
+                        onClick={handleCancel}
+                        disabled={loading}
+                    >
+                        {loading && (
+                            <Loader2 className="mr-2 size-4 animate-spin" />
+                        )}
                         Confirmar cancelación
                     </Button>
                 </DialogFooter>

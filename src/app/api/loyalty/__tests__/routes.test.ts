@@ -66,9 +66,9 @@ describe("loyalty BFF campaign routes", () => {
     });
 
     it("encodes customer and tenant campaign identifiers", () => {
-        const customerEndpoints = dynamicEndpoints(routeMocks.createGetHandler).map(
-            (endpoint) => endpoint({}, { campaignId: "campaign/a" }),
-        );
+        const customerEndpoints = dynamicEndpoints(
+            routeMocks.createGetHandler,
+        ).map((endpoint) => endpoint({}, { campaignId: "campaign/a" }));
         const tenantEndpoints = [
             ...dynamicEndpoints(routeMocks.createGetHandler),
             ...dynamicEndpoints(routeMocks.createPatchHandler),
@@ -113,7 +113,9 @@ describe("loyalty BFF campaign routes", () => {
             ...routeMocks.createDeleteHandler.mock.calls,
         ]
             .map(([endpoint]) => endpoint)
-            .filter((endpoint): endpoint is string => typeof endpoint === "string");
+            .filter(
+                (endpoint): endpoint is string => typeof endpoint === "string",
+            );
 
         expect(staticEndpoints).not.toContain("/loyalty/admin/config");
         expect(

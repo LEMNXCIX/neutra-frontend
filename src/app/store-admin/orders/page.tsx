@@ -1,7 +1,7 @@
-import React, { Suspense } from "react";
+import { Suspense } from "react";
 import OrdersTableClient from "@/components/admin/orders/OrdersTableClient";
-import { api } from '@/lib/api-client';
-import { parseOrdersResponse } from '@/lib/orders-page';
+import { api } from "@/lib/api-client";
+import { parseOrdersResponse } from "@/lib/orders-page";
 
 export const metadata = { title: "Pedidos" };
 
@@ -26,12 +26,20 @@ async function getOrders(
         const [ordersResult, statsResult, statusesResult] = await Promise.all([
             // getWithMeta keeps meta.pagination (backend orders endpoint is
             // the only one that returns real pagination metadata).
-            api.getWithMeta<any>(ordersUrl).catch(() => ({ data: [], meta: undefined })),
+            api
+                .getWithMeta<any>(ordersUrl)
+                .catch(() => ({ data: [], meta: undefined })),
             api.get<any>("/order/stats").catch(() => ({})),
             api.get<any[]>("/order/statuses").catch(() => []),
         ]);
 
-        return parseOrdersResponse(ordersResult, statsResult, statusesResult, page, limit);
+        return parseOrdersResponse(
+            ordersResult,
+            statsResult,
+            statusesResult,
+            page,
+            limit,
+        );
     } catch (err) {
         console.error("Error fetching orders:", err);
         return {
@@ -61,11 +69,11 @@ export default async function OrdersPage({ searchParams }: Props) {
     const resolvedSearchParams = await searchParams;
     const page =
         typeof resolvedSearchParams.page === "string"
-            ? parseInt(resolvedSearchParams.page)
+            ? parseInt(resolvedSearchParams.page, 10)
             : 1;
     const limit =
         typeof resolvedSearchParams.limit === "string"
-            ? parseInt(resolvedSearchParams.limit)
+            ? parseInt(resolvedSearchParams.limit, 10)
             : 10;
     const search =
         typeof resolvedSearchParams.search === "string"

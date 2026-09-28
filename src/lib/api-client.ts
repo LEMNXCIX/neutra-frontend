@@ -1,7 +1,6 @@
-import { StandardResponse } from '@/types/frontend-api';
-import Cookies from 'js-cookie';
-
-import { getBackendUrl } from '@/lib/backend-url';
+import Cookies from "js-cookie";
+import { getBackendUrl } from "@/lib/backend-url";
+import type { StandardResponse } from "@/types/frontend-api";
 
 /**
  * Custom error class for API errors with context for debugging
@@ -13,10 +12,10 @@ export class ApiError extends Error {
         public errors?: unknown[],
         public traceId?: string,
         public endpoint?: string,
-        public method?: string
+        public method?: string,
     ) {
         super(message);
-        this.name = 'ApiError';
+        this.name = "ApiError";
     }
 
     /**
@@ -27,20 +26,20 @@ export class ApiError extends Error {
         if (this.endpoint) parts.push(`Endpoint: ${this.endpoint}`);
         if (this.method) parts.push(`Method: ${this.method}`);
         if (this.traceId) parts.push(`TraceId: ${this.traceId}`);
-        return parts.join(' | ');
+        return parts.join(" | ");
     }
 }
 
 /**
  * Enhanced API fetch wrapper with StandardResponse handling
- * 
+ *
  * Features:
  * - Automatic credentials inclusion (for HttpOnly cookies)
  * - Automatic tenant-slug header inclusion from cookies
  * - Handles StandardResponse format
  * - 401 unauthorized handling with event dispatch
  * - Error extraction and formatting
- * 
+ *
  * @param endpoint - API endpoint (e.g., '/auth/login')
  * @param options - Fetch options
  * @returns Promise with the response data
@@ -48,38 +47,45 @@ export class ApiError extends Error {
 export async function apiClient<T = unknown>(
     endpoint: string,
     options: RequestInit = {},
-    includeMeta = false
+    includeMeta = false,
 ): Promise<T> {
     // Read tenant context from cookies
-    let tenantSlug, tenantId, cookieHeader;
-    
-    if (typeof window !== 'undefined') {
+    let tenantSlug: string | undefined,
+        tenantId: string | undefined,
+        cookieHeader: string | undefined;
+
+    if (typeof window !== "undefined") {
         // Client-side: use js-cookie
         try {
-            tenantSlug = Cookies.get('tenant-slug');
-            tenantId = Cookies.get('tenant-id');
+            tenantSlug = Cookies.get("tenant-slug");
+            tenantId = Cookies.get("tenant-id");
         } catch (e) {
-            console.warn('[ApiClient] Failed to read cookies:', e);
+            console.warn("[ApiClient] Failed to read cookies:", e);
         }
     } else {
         // Server-side: use next/headers
         try {
-            const { cookies: nextCookies, headers: nextHeaders } = require('next/headers');
+            const {
+                cookies: nextCookies,
+                headers: nextHeaders,
+            } = require("next/headers");
             // Prefer the x-tenant-* request headers: the proxy sets them for
             // THIS request (always correct). Cookies can be stale — they're
             // set on the response, so a request that follows a visit to
             // another subdomain still carries the previous tenant's cookie.
             const h = await nextHeaders();
-            tenantSlug = (h.get('x-tenant-slug') || undefined) as any;
-            tenantId = (h.get('x-tenant-id') || undefined) as any;
+            tenantSlug = (h.get("x-tenant-slug") || undefined) as any;
+            tenantId = (h.get("x-tenant-id") || undefined) as any;
 
             const c = await nextCookies();
-            if (!tenantSlug) tenantSlug = c.get('tenant-slug')?.value;
-            if (!tenantId) tenantId = c.get('tenant-id')?.value;
+            if (!tenantSlug) tenantSlug = c.get("tenant-slug")?.value;
+            if (!tenantId) tenantId = c.get("tenant-id")?.value;
 
             // Collect all cookies to forward them
             const allCookies = c.getAll();
-            cookieHeader = allCookies.map((cookie: any) => `${cookie.name}=${cookie.value}`).join('; ');
+            cookieHeader = allCookies
+                .map((cookie: any) => `${cookie.name}=${cookie.value}`)
+                .join("; ");
         } catch (_e) {
             // next/headers might not be available in all contexts
         }
@@ -88,29 +94,35 @@ export async function apiClient<T = unknown>(
     // Ensure credentials are included for cookie-based auth
     const config: RequestInit = {
         ...options,
-        credentials: 'include',
+        credentials: "include",
         headers: {
-            'Content-Type': 'application/json',
-            ...(tenantSlug && { 'x-tenant-slug': tenantSlug }),
-            ...(tenantId && { 'x-tenant-id': tenantId }),
-            ...(cookieHeader && { 'Cookie': cookieHeader }),
+            "Content-Type": "application/json",
+            ...(tenantSlug && { "x-tenant-slug": tenantSlug }),
+            ...(tenantId && { "x-tenant-id": tenantId }),
+            ...(cookieHeader && { Cookie: cookieHeader }),
             ...options.headers,
         },
     };
 
-    const isServer = typeof window === 'undefined';
+    const isServer = typeof window === "undefined";
     // Browser traffic always goes through the Next.js BFF at /api, which keeps
     // the backend origin and the session cookie in one place. Server-rendered
     // calls hit the backend directly, because a relative URL does not resolve.
-    const baseUrl = isServer ? getBackendUrl() : '/api';
+    const baseUrl = isServer ? getBackendUrl() : "/api";
 
-    const url = endpoint.startsWith('http') ? endpoint : `${baseUrl}${endpoint}`;
+    const url = endpoint.startsWith("http")
+        ? endpoint
+        : `${baseUrl}${endpoint}`;
 
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV === "development") {
         if (isServer) {
-            console.log(`[ApiClient] SERVER REQUEST | url: ${url} | endpoint: ${endpoint} | baseUrl: ${baseUrl}`);
+            console.log(
+                `[ApiClient] SERVER REQUEST | url: ${url} | endpoint: ${endpoint} | baseUrl: ${baseUrl}`,
+            );
         } else {
-            console.log(`[ApiClient] CLIENT REQUEST | url: ${url} | endpoint: ${endpoint}`);
+            console.log(
+                `[ApiClient] CLIENT REQUEST | url: ${url} | endpoint: ${endpoint}`,
+            );
         }
     }
 
@@ -120,26 +132,29 @@ export async function apiClient<T = unknown>(
         // Handle 401 Unauthorized
         if (res.status === 401) {
             // Check if we should suppress the unauthorized event
-            const suppressUnauthorized = options.headers &&
-                (options.headers as Record<string, string>)['x-suppress-unauthorized'] === 'true';
+            const suppressUnauthorized =
+                options.headers &&
+                (options.headers as Record<string, string>)[
+                    "x-suppress-unauthorized"
+                ] === "true";
 
             // Dispatch global event for unauthorized access ONLY if not suppressed
-            if (!suppressUnauthorized && typeof window !== 'undefined') {
-                window.dispatchEvent(new CustomEvent('unauthorized'));
+            if (!suppressUnauthorized && typeof window !== "undefined") {
+                window.dispatchEvent(new CustomEvent("unauthorized"));
             }
 
             // Try to parse the error response for a meaningful message
             try {
                 const errorData: StandardResponse<T> = await res.json();
                 throw new ApiError(
-                    errorData.message || 'Unauthorized',
+                    errorData.message || "Unauthorized",
                     errorData.statusCode || 401,
                     errorData.errors,
-                    errorData.meta?.traceId
+                    errorData.meta?.traceId,
                 );
             } catch (error) {
                 if (error instanceof ApiError) throw error;
-                throw new ApiError('Unauthorized', 401);
+                throw new ApiError("Unauthorized", 401);
             }
         }
 
@@ -153,15 +168,17 @@ export async function apiClient<T = unknown>(
         // Check if the request was successful
         if (!data?.success) {
             throw new ApiError(
-                data.message || 'Error en la solicitud',
+                data.message || "Error en la solicitud",
                 data.statusCode,
                 data.errors,
-                data.meta?.traceId
+                data.meta?.traceId,
             );
         }
 
         // Return the actual data payload (plus envelope meta if requested)
-        return (includeMeta ? { data: data.data as T, meta: data.meta } : data.data) as T;
+        return (
+            includeMeta ? { data: data.data as T, meta: data.meta } : data.data
+        ) as T;
     } catch (error) {
         // Re-throw ApiError as-is
         if (error instanceof ApiError) {
@@ -174,7 +191,7 @@ export async function apiClient<T = unknown>(
         }
 
         // Unknown error
-        throw new ApiError('Ocurrió un error inesperado', 500);
+        throw new ApiError("Ocurrió un error inesperado", 500);
     }
 }
 
@@ -183,22 +200,25 @@ export async function apiClient<T = unknown>(
  * Consider migrating to apiClient for new code
  */
 export async function apiFetch(input: RequestInfo, init?: RequestInit) {
-    const res = await fetch(input, { ...init, credentials: 'include' });
+    const res = await fetch(input, { ...init, credentials: "include" });
 
     if (res.status === 401) {
         try {
-            if (typeof window !== 'undefined' && typeof window.dispatchEvent === 'function') {
-                window.dispatchEvent(new CustomEvent('unauthorized'));
+            if (
+                typeof window !== "undefined" &&
+                typeof window.dispatchEvent === "function"
+            ) {
+                window.dispatchEvent(new CustomEvent("unauthorized"));
             }
         } catch {
             // ignore
         }
-        throw new Error('Unauthorized');
+        throw new Error("Unauthorized");
     }
 
     if (!res.ok) {
         const body = await res.json().catch(() => ({}));
-        const err = body?.error || res.statusText || 'Error en la solicitud';
+        const err = body?.error || res.statusText || "Error en la solicitud";
         const e = new Error(err) as Error & { status?: number };
         e.status = res.status;
         throw e;
@@ -212,33 +232,49 @@ export async function apiFetch(input: RequestInfo, init?: RequestInit) {
  */
 export const api = {
     get: <T = unknown>(endpoint: string, options?: RequestInit) =>
-        apiClient<T>(endpoint, { ...options, method: 'GET' }),
+        apiClient<T>(endpoint, { ...options, method: "GET" }),
 
     /** Like get(), but also returns the envelope meta (e.g. meta.pagination). */
     getWithMeta: <T = unknown>(endpoint: string, options?: RequestInit) =>
-        apiClient<{ data: T; meta?: Record<string, any> }>(endpoint, { ...options, method: 'GET' }, true),
+        apiClient<{ data: T; meta?: Record<string, any> }>(
+            endpoint,
+            { ...options, method: "GET" },
+            true,
+        ),
 
-    post: <T = unknown>(endpoint: string, body?: unknown, options?: RequestInit) =>
+    post: <T = unknown>(
+        endpoint: string,
+        body?: unknown,
+        options?: RequestInit,
+    ) =>
         apiClient<T>(endpoint, {
             ...options,
-            method: 'POST',
+            method: "POST",
             body: body ? JSON.stringify(body) : undefined,
         }),
 
-    put: <T = unknown>(endpoint: string, body?: unknown, options?: RequestInit) =>
+    put: <T = unknown>(
+        endpoint: string,
+        body?: unknown,
+        options?: RequestInit,
+    ) =>
         apiClient<T>(endpoint, {
             ...options,
-            method: 'PUT',
+            method: "PUT",
             body: body ? JSON.stringify(body) : undefined,
         }),
 
     delete: <T = unknown>(endpoint: string, options?: RequestInit) =>
-        apiClient<T>(endpoint, { ...options, method: 'DELETE' }),
+        apiClient<T>(endpoint, { ...options, method: "DELETE" }),
 
-    patch: <T = unknown>(endpoint: string, body?: unknown, options?: RequestInit) =>
+    patch: <T = unknown>(
+        endpoint: string,
+        body?: unknown,
+        options?: RequestInit,
+    ) =>
         apiClient<T>(endpoint, {
             ...options,
-            method: 'PATCH',
+            method: "PATCH",
             body: body ? JSON.stringify(body) : undefined,
         }),
 };

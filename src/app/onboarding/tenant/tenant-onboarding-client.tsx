@@ -1,18 +1,17 @@
 "use client";
 
-import React from "react";
+import { Rocket } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { TenantForm } from "@/components/admin/tenants/TenantForm";
+import Logo from "@/components/logo";
 import {
     Card,
     CardContent,
+    CardDescription,
     CardHeader,
     CardTitle,
-    CardDescription,
 } from "@/components/ui/card";
-import Logo from "@/components/logo";
-import Link from "next/link";
-import { Rocket } from "lucide-react";
 
 export function TenantOnboardingPageClient() {
     const router = useRouter();
@@ -60,7 +59,8 @@ export function TenantOnboardingPageClient() {
                                     Configuración de la instancia
                                 </CardTitle>
                                 <CardDescription className="text-muted-foreground font-bold uppercase tracking-widest text-[10px]">
-                                    Configura los parámetros principales y los protocolos operativos
+                                    Configura los parámetros principales y los
+                                    protocolos operativos
                                 </CardDescription>
                             </div>
                         </div>

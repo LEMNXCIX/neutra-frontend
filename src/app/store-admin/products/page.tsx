@@ -1,7 +1,7 @@
-import React, { Suspense } from "react";
+import { Suspense } from "react";
 import ProductsTableClient from "@/components/admin/products/ProductsTableClient";
-import { api } from '@/lib/api-client';
-import { Product } from "@/types/product.types";
+import { api } from "@/lib/api-client";
+import type { Product } from "@/types/product.types";
 
 export const metadata = { title: "Productos" };
 
@@ -128,11 +128,11 @@ export default async function ProductsPage({ searchParams }: Props) {
     const resolvedSearchParams = await searchParams;
     const page =
         typeof resolvedSearchParams.page === "string"
-            ? parseInt(resolvedSearchParams.page)
+            ? parseInt(resolvedSearchParams.page, 10)
             : 1;
     const limit =
         typeof resolvedSearchParams.limit === "string"
-            ? parseInt(resolvedSearchParams.limit)
+            ? parseInt(resolvedSearchParams.limit, 10)
             : 12;
     const search =
         typeof resolvedSearchParams.search === "string"
@@ -143,10 +143,10 @@ export default async function ProductsPage({ searchParams }: Props) {
             ? resolvedSearchParams.category
             : "all";
 
-  const [data, categories] = await Promise.all([
-    getProducts(search, category, page, limit),
-    getCategories(),
-  ]);
+    const [data, categories] = await Promise.all([
+        getProducts(search, category, page, limit),
+        getCategories(),
+    ]);
 
     return (
         <Suspense fallback={null}>

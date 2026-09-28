@@ -2,10 +2,10 @@
  * API Routes for Authentication - Login
  */
 
-import { NextRequest, NextResponse } from "next/server";
-import { getProxyHeaders } from "@/lib/proxy";
-import { logger } from "@/lib/logger";
+import { type NextRequest, NextResponse } from "next/server";
 import { getBackendUrl } from "@/lib/backend-url";
+import { logger } from "@/lib/logger";
+import { getProxyHeaders } from "@/lib/proxy";
 
 export async function POST(req: NextRequest) {
     const startTime = Date.now();
@@ -87,7 +87,9 @@ export async function POST(req: NextRequest) {
     } catch (error: unknown) {
         const duration = Date.now() - startTime;
         const message =
-            error instanceof Error ? error.message : "Error desconocido al iniciar sesión";
+            error instanceof Error
+                ? error.message
+                : "Error desconocido al iniciar sesión";
         logger.error(
             logger.withError(logContext, error, duration),
             `Auth Error: ${message}`,

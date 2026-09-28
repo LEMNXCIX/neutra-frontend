@@ -2,21 +2,16 @@
  * API Routes for Admin Coupons by ID - Refactored with unified handler
  */
 
-import {
-    createPutHandler,
-    createDeleteHandler
-} from '@/lib/api-route-handler';
+import { createDeleteHandler, createPutHandler } from "@/lib/api-route-handler";
 
 /**
  * PUT /api/admin/coupons/[id]
  */
-export const PUT = createPutHandler(
-    (req, params) => `/coupons/${params?.id}`
-);
+export const PUT = createPutHandler((req, params) => `/coupons/${params?.id}`);
 
 /**
  * DELETE /api/admin/coupons/[id]
  */
 export const DELETE = createDeleteHandler(
-    (req, params) => `/coupons/${params?.id}`
+    (req, params) => `/coupons/${params?.id}`,
 );

@@ -1,17 +1,17 @@
-import { getCmsPage } from "@/lib/strapi";
-import { cmsHeader } from "@/lib/cms-page";
-import React from "react";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle2 } from "lucide-react";
 import type { Metadata } from "next";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { cmsHeader } from "@/lib/cms-page";
+import { getCmsPage } from "@/lib/strapi";
 
 export async function generateMetadata(): Promise<Metadata> {
     const cms = await getCmsPage("returns-pages");
     return {
         title: cms?.title ?? "Devoluciones y Reembolsos",
         description:
-            cms?.subtitle ?? "Conoce nuestra política de devoluciones y reembolsos",
+            cms?.subtitle ??
+            "Conoce nuestra política de devoluciones y reembolsos",
     };
 }
 

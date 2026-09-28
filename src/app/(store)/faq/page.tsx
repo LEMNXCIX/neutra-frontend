@@ -1,4 +1,5 @@
-import React from "react";
+import type { Metadata } from "next";
+import Link from "next/link";
 import {
     Accordion,
     AccordionContent,
@@ -7,10 +8,8 @@ import {
 } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { getCmsPage } from "@/lib/strapi";
 import { cmsHeader } from "@/lib/cms-page";
-import type { Metadata } from "next";
+import { getCmsPage } from "@/lib/strapi";
 
 export async function generateMetadata(): Promise<Metadata> {
     const cms = await getCmsPage("faq-pages");

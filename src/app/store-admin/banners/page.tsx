@@ -1,7 +1,7 @@
-import React, { Suspense } from "react";
+import { Suspense } from "react";
 import BannersTableClient from "@/components/admin/banners/BannersTableClient";
+import { api } from "@/lib/api-client";
 import { validateAdminAccess } from "@/lib/server-auth";
-import { api } from '@/lib/api-client';
 
 export const metadata = { title: "Anuncios" };
 

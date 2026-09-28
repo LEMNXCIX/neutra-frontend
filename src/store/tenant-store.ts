@@ -1,7 +1,7 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
 import Cookies from "js-cookie";
+import { useSyncExternalStore } from "react";
 
 type TenantSnapshot = {
     tenantId: string | null;
@@ -81,10 +81,14 @@ interface TenantStoreHook {
 
 const syncFromCookies = () => applySnapshot(readCookies());
 
-const useTenantStoreImpl = <T,>(
+const useTenantStoreImpl = <T>(
     selector?: (state: TenantSnapshot) => T,
 ): TenantState | T => {
-    const snapshot = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+    const snapshot = useSyncExternalStore(
+        subscribe,
+        getSnapshot,
+        getServerSnapshot,
+    );
     if (selector) return selector(snapshot);
     return { ...snapshot, syncFromCookies } as TenantState;
 };

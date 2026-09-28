@@ -89,7 +89,7 @@ export const ALL_THEME_VARS = [
     "--ring",
 ];
 
-const FONT_FALLBACKS = 'ui-sans-serif, system-ui, -apple-system, sans-serif';
+const FONT_FALLBACKS = "ui-sans-serif, system-ui, -apple-system, sans-serif";
 
 const FONT_VARS = ["--font-tenant-font", "--font-tenant-heading"];
 
@@ -142,7 +142,8 @@ export function applyTenantTheme(branding?: TenantBranding | null): void {
 
     // Derived tokens (only when their source exists)
     if (b.border?.trim()) root.style.setProperty("--input", b.border);
-    if (b.primaryColor?.trim()) root.style.setProperty("--ring", b.primaryColor);
+    if (b.primaryColor?.trim())
+        root.style.setProperty("--ring", b.primaryColor);
 
     // Pin surface tokens to fight dark-mode leaks
     if (hasColor) {

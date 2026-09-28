@@ -1,32 +1,32 @@
 "use client";
 
-import React, { useState } from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import type { LucideIcon } from "lucide-react";
 import {
-    LayoutDashboard,
-    Package,
-    ShoppingCart,
-    Users,
-    Ticket,
-    LayoutList,
-    Megaphone,
-    Images,
-    BrickWallShield,
-    UserCog,
-    Building,
-    MessageSquare,
     ArrowLeft,
-    Palette,
+    BrickWallShield,
+    Building,
     Clock,
     Gift,
+    Images,
+    LayoutDashboard,
+    LayoutList,
+    Megaphone,
+    MessageSquare,
+    Package,
+    Palette,
+    ShoppingCart,
+    Ticket,
+    UserCog,
+    Users,
 } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { cn } from "@/lib/utils";
-import { NavItem } from "@/config/admin-navigation";
+import type { NavItem } from "@/config/admin-navigation";
 import { useFeatures } from "@/hooks/useFeatures";
+import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/auth-store";
 
 const ICON_MAP: Record<string, LucideIcon> = {

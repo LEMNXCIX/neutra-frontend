@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import {
     fireEvent,
     render,
@@ -8,6 +8,7 @@ import {
     within,
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import "@testing-library/jest-dom/vitest";
 
 const mocks = vi.hoisted(() => ({
@@ -200,11 +201,21 @@ describe("TenantLoyaltyClient", () => {
         expect(screen.getByText("Campaña finalizada")).toBeInTheDocument();
         expect(screen.getByText("Campaña archivada")).toBeInTheDocument();
         expect(screen.getByText("24")).toBeInTheDocument();
-        expect(screen.getByRole("button", { name: /Activar/ })).toBeInTheDocument();
-        expect(screen.getByRole("button", { name: /Editar borrador/ })).toBeInTheDocument();
-        expect(screen.getByRole("button", { name: /Eliminar/ })).toBeInTheDocument();
-        expect(screen.getByRole("button", { name: /Finalizar/ })).toBeInTheDocument();
-        expect(screen.getByRole("button", { name: /Archivar/ })).toBeInTheDocument();
+        expect(
+            screen.getByRole("button", { name: /Activar/ }),
+        ).toBeInTheDocument();
+        expect(
+            screen.getByRole("button", { name: /Editar borrador/ }),
+        ).toBeInTheDocument();
+        expect(
+            screen.getByRole("button", { name: /Eliminar/ }),
+        ).toBeInTheDocument();
+        expect(
+            screen.getByRole("button", { name: /Finalizar/ }),
+        ).toBeInTheDocument();
+        expect(
+            screen.getByRole("button", { name: /Archivar/ }),
+        ).toBeInTheDocument();
         // The form lives in a dialog now, so its fields are not on the page
         // until it is opened. The entry point is the button.
         expect(
@@ -225,9 +236,7 @@ describe("TenantLoyaltyClient", () => {
 
         // The form lives in a dialog, so it must be opened before any field
         // can be reached.
-        await user.click(
-            screen.getByRole("button", { name: /Nueva campaña/ }),
-        );
+        await user.click(screen.getByRole("button", { name: /Nueva campaña/ }));
         fireEvent.change(screen.getByLabelText("Nombre"), {
             target: { value: "Campaña de gasto" },
         });
@@ -260,9 +269,12 @@ describe("TenantLoyaltyClient", () => {
         expect(screen.getByLabelText("Reclamable hasta")).toHaveValue(
             "2030-02-07",
         );
-        fireEvent.change(screen.getByLabelText("Validez de la recompensa (días)"), {
-            target: { value: "45" },
-        });
+        fireEvent.change(
+            screen.getByLabelText("Validez de la recompensa (días)"),
+            {
+                target: { value: "45" },
+            },
+        );
         fireEvent.change(screen.getByLabelText("Límite de reclamos"), {
             target: { value: "100" },
         });
@@ -339,7 +351,9 @@ describe("TenantLoyaltyClient", () => {
         render(<TenantLoyaltyClient />);
         await screen.findByRole("heading", { name: "Borrador de prueba" });
 
-        await user.click(screen.getByRole("button", { name: /Editar borrador/ }));
+        await user.click(
+            screen.getByRole("button", { name: /Editar borrador/ }),
+        );
         fireEvent.change(screen.getByLabelText("Nombre"), {
             target: { value: "Borrador actualizado" },
         });
@@ -373,7 +387,9 @@ describe("TenantLoyaltyClient", () => {
         const user = userEvent.setup();
         render(<TenantLoyaltyClient />);
         await screen.findByRole("heading", { name: "Borrador de prueba" });
-        await user.click(screen.getByRole("button", { name: /Editar borrador/ }));
+        await user.click(
+            screen.getByRole("button", { name: /Editar borrador/ }),
+        );
 
         const target = screen.getByLabelText("Objetivo");
         const metric = screen.getByLabelText("Métrica");
@@ -486,7 +502,9 @@ describe("TenantLoyaltyClient", () => {
             ),
         ).toBeInTheDocument();
         await user.click(screen.getByRole("button", { name: "Reintentar" }));
-        await waitFor(() => expect(mocks.getAdminSummary).toHaveBeenCalledTimes(2));
+        await waitFor(() =>
+            expect(mocks.getAdminSummary).toHaveBeenCalledTimes(2),
+        );
         expect(
             await screen.findByRole("heading", { name: "Borrador de prueba" }),
         ).toBeInTheDocument();

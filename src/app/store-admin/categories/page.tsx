@@ -1,6 +1,6 @@
-import React, { Suspense } from "react";
+import { Suspense } from "react";
 import CategoriesTableClient from "@/components/admin/categories/CategoriesTableClient";
-import { api } from '@/lib/api-client';
+import { api } from "@/lib/api-client";
 
 export const metadata = { title: "Categorías" };
 
@@ -17,8 +17,7 @@ async function getCategories(searchParams: { type?: string }) {
         const data = await api.get<any>(endpoint);
 
         const categories =
-            data?.categories ||
-            (Array.isArray(data) ? data : []);
+            data?.categories || (Array.isArray(data) ? data : []);
 
         const backendStats = data?.stats;
         const totalCategories = categories.length;
@@ -44,11 +43,11 @@ async function getCategories(searchParams: { type?: string }) {
         ).length;
 
         const pagination = data?.pagination || {
-                currentPage: 1,
-                totalPages: 1,
-                totalItems: totalCategories,
-                itemsPerPage: totalCategories > 0 ? totalCategories : 10,
-            };
+            currentPage: 1,
+            totalPages: 1,
+            totalItems: totalCategories,
+            itemsPerPage: totalCategories > 0 ? totalCategories : 10,
+        };
 
         return {
             categories,

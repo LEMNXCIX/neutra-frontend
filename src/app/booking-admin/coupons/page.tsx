@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import CouponsTableClient from "@/components/admin/coupons/CouponsTableClient";
-import { api } from '@/lib/api-client';
+import { api } from "@/lib/api-client";
 
 export const dynamic = "force-dynamic";
 
@@ -49,7 +49,10 @@ async function getCoupons(
             stats,
             pagination: {
                 currentPage: page,
-                totalPages: Math.max(1, Math.ceil(allCoupons.length / PER_PAGE)),
+                totalPages: Math.max(
+                    1,
+                    Math.ceil(allCoupons.length / PER_PAGE),
+                ),
                 totalItems: allCoupons.length,
                 itemsPerPage: PER_PAGE,
             },
@@ -89,11 +92,11 @@ export default async function CouponsPage({ searchParams }: Props) {
     const resolvedSearchParams = await searchParams;
     const page =
         typeof resolvedSearchParams.page === "string"
-            ? parseInt(resolvedSearchParams.page)
+            ? parseInt(resolvedSearchParams.page, 10)
             : 1;
     const limit =
         typeof resolvedSearchParams.limit === "string"
-            ? parseInt(resolvedSearchParams.limit)
+            ? parseInt(resolvedSearchParams.limit, 10)
             : 10;
     const search =
         typeof resolvedSearchParams.search === "string"

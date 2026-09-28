@@ -1,32 +1,33 @@
 "use client";
 
-import React, { useState, useEffect, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import {
+    AlertCircle,
+    ArrowLeft,
+    ArrowRight,
+    CheckCircle2,
+    Lock,
+} from "lucide-react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
+import { useRouter, useSearchParams } from "next/navigation";
+import type React from "react";
+import { Suspense, useEffect, useState } from "react";
+import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import {
     Card,
     CardContent,
     CardDescription,
+    CardFooter,
     CardHeader,
     CardTitle,
-    CardFooter,
 } from "@/components/ui/card";
-import { toast } from "sonner";
+import { Label } from "@/components/ui/label";
+import { PasswordInput } from "@/components/ui/password-input";
+import { Spinner } from "@/components/ui/spinner";
 import { reportError } from "@/lib/error-reporting";
 import { PASSWORD_MIN_LENGTH } from "@/lib/password-policy";
-import { PasswordInput } from "@/components/ui/password-input";
 import { authService } from "@/services/auth.service";
-import { Spinner } from "@/components/ui/spinner";
-import {
-    Lock,
-    ArrowLeft,
-    CheckCircle2,
-    AlertCircle,
-    ArrowRight,
-} from "lucide-react";
 
 function ResetPasswordForm() {
     const router = useRouter();
@@ -55,7 +56,9 @@ function ResetPasswordForm() {
         }
 
         if (password.length < PASSWORD_MIN_LENGTH) {
-            toast.error(`La contraseña debe tener al menos ${PASSWORD_MIN_LENGTH} caracteres`);
+            toast.error(
+                `La contraseña debe tener al menos ${PASSWORD_MIN_LENGTH} caracteres`,
+            );
             return;
         }
 
@@ -96,7 +99,8 @@ function ResetPasswordForm() {
                 </CardHeader>
                 <CardContent className="text-center px-8 pb-6">
                     <p className="text-sm font-medium leading-relaxed text-muted-foreground">
-                        El token de recuperación es inválido, venció o ya fue utilizado. Solicita un nuevo enlace para continuar.
+                        El token de recuperación es inválido, venció o ya fue
+                        utilizado. Solicita un nuevo enlace para continuar.
                     </p>
                 </CardContent>
                 <CardFooter className="justify-center border-t border-border/50 p-8 bg-muted/10">
@@ -105,7 +109,9 @@ function ResetPasswordForm() {
                         className="w-full h-12 rounded-xl border-border font-bold text-xs transition-[color,background-color,border-color,box-shadow,opacity,transform] hover:bg-muted"
                         asChild
                     >
-                        <Link href="/forgot-password">Solicitar un nuevo enlace →</Link>
+                        <Link href="/forgot-password">
+                            Solicitar un nuevo enlace →
+                        </Link>
                     </Button>
                 </CardFooter>
             </Card>
@@ -129,14 +135,16 @@ function ResetPasswordForm() {
                 </CardHeader>
                 <CardContent className="text-center px-8 pb-10">
                     <p className="text-sm text-muted-foreground font-medium leading-relaxed mb-8">
-                        Tu contraseña se actualizó correctamente. Serás redirigido al inicio de sesión en unos instantes.
+                        Tu contraseña se actualizó correctamente. Serás
+                        redirigido al inicio de sesión en unos instantes.
                     </p>
                     <Button
                         className="w-full h-12 rounded-xl font-bold text-sm shadow-lg shadow-primary/20 transition-[color,background-color,border-color,box-shadow,opacity,transform] hover:-translate-y-0.5"
                         asChild
                     >
                         <Link href="/login">
-                            Iniciar sesión <ArrowRight className="ml-2 size-4" />
+                            Iniciar sesión{" "}
+                            <ArrowRight className="ml-2 size-4" />
                         </Link>
                     </Button>
                 </CardContent>
@@ -186,9 +194,7 @@ function ResetPasswordForm() {
                             required
                             className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform] focus:border-primary"
                             value={confirmPassword}
-                            onChange={(e) =>
-                                setConfirmPassword(e.target.value)
-                            }
+                            onChange={(e) => setConfirmPassword(e.target.value)}
                         />
                     </div>
                     {error && (

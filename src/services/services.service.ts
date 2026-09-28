@@ -1,4 +1,4 @@
-import { api } from '@/lib/api-client';
+import { api } from "@/lib/api-client";
 
 export interface ServiceItem {
     id: string;
@@ -27,13 +27,18 @@ export interface CreateServiceDTO {
 export interface UpdateServiceDTO extends Partial<CreateServiceDTO> {}
 
 export const servicesService = {
-    getAll: async (params?: { activeOnly?: boolean; tenantId?: string; categoryId?: string }): Promise<ServiceItem[]> => {
+    getAll: async (params?: {
+        activeOnly?: boolean;
+        tenantId?: string;
+        categoryId?: string;
+    }): Promise<ServiceItem[]> => {
         const query = new URLSearchParams();
-        if (params?.activeOnly !== undefined) query.append('activeOnly', String(params.activeOnly));
-        if (params?.tenantId) query.append('tenantId', params.tenantId);
-        if (params?.categoryId) query.append('categoryId', params.categoryId);
+        if (params?.activeOnly !== undefined)
+            query.append("activeOnly", String(params.activeOnly));
+        if (params?.tenantId) query.append("tenantId", params.tenantId);
+        if (params?.categoryId) query.append("categoryId", params.categoryId);
         const qs = query.toString();
-        return api.get<ServiceItem[]>(`/services${qs ? `?${qs}` : ''}`);
+        return api.get<ServiceItem[]>(`/services${qs ? `?${qs}` : ""}`);
     },
 
     getById: async (id: string): Promise<ServiceItem> => {
@@ -41,10 +46,13 @@ export const servicesService = {
     },
 
     create: async (data: CreateServiceDTO): Promise<ServiceItem> => {
-        return api.post<ServiceItem>('/services', data);
+        return api.post<ServiceItem>("/services", data);
     },
 
-    update: async (id: string, data: UpdateServiceDTO): Promise<ServiceItem> => {
+    update: async (
+        id: string,
+        data: UpdateServiceDTO,
+    ): Promise<ServiceItem> => {
         return api.put<ServiceItem>(`/services/${id}`, data);
     },
 

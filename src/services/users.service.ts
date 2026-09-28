@@ -1,5 +1,5 @@
-import { api } from '@/lib/api-client';
-import { User } from '@/types/user.types';
+import { api } from "@/lib/api-client";
+import type { User } from "@/types/user.types";
 
 /**
  * Users Service
@@ -11,7 +11,7 @@ export const usersService = {
      * Get all users
      */
     getAll: async (): Promise<User[]> => {
-        return api.get<User[]>('/users');
+        return api.get<User[]>("/users");
     },
 
     /**
@@ -24,8 +24,13 @@ export const usersService = {
     /**
      * Get user statistics
      */
-    getStats: async (): Promise<{ totalUsers: number; activeUsers: number }> => {
-        return api.get<{ totalUsers: number; activeUsers: number }>('/users/stats');
+    getStats: async (): Promise<{
+        totalUsers: number;
+        activeUsers: number;
+    }> => {
+        return api.get<{ totalUsers: number; activeUsers: number }>(
+            "/users/stats",
+        );
     },
 
     /**

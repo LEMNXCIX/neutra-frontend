@@ -1,4 +1,4 @@
-import { createGetHandler, createPostHandler } from '@/lib/api-route-handler';
+import { createGetHandler, createPostHandler } from "@/lib/api-route-handler";
 
 /**
  * GET /api/services
@@ -6,11 +6,12 @@ import { createGetHandler, createPostHandler } from '@/lib/api-route-handler';
  * receiving the flag it used to get from the hand-rolled query string.
  */
 export const GET = createGetHandler(
-    (req) => `/services?activeOnly=${req.nextUrl.searchParams.get('activeOnly') ?? 'true'}`,
+    (req) =>
+        `/services?activeOnly=${req.nextUrl.searchParams.get("activeOnly") ?? "true"}`,
     { passThroughStatus: true, includeQueryParams: false },
 );
 
 /**
  * POST /api/services
  */
-export const POST = createPostHandler('/services', { passThroughStatus: true });
+export const POST = createPostHandler("/services", { passThroughStatus: true });

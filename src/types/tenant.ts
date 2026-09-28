@@ -1,8 +1,7 @@
-
 export enum TenantType {
-    STORE = 'STORE',
-    BOOKING = 'BOOKING',
-    HYBRID = 'HYBRID'
+    STORE = "STORE",
+    BOOKING = "BOOKING",
+    HYBRID = "HYBRID",
 }
 
 export interface Tenant {
@@ -80,9 +79,9 @@ export interface TenantConfig {
 export interface NotificationSettings {
     // Canales habilitados
     channels?: {
-        email?: boolean;      // Enviar notificaciones por email
-        whatsapp?: boolean;   // Enviar notificaciones por WhatsApp
-        push?: boolean;       // Enviar notificaciones push
+        email?: boolean; // Enviar notificaciones por email
+        whatsapp?: boolean; // Enviar notificaciones por WhatsApp
+        push?: boolean; // Enviar notificaciones push
     };
 
     // Configuración por tipo de evento
@@ -102,8 +101,6 @@ export interface NotificationChannels {
     whatsapp?: boolean;
     push?: boolean;
 }
-
-
 
 export interface TenantMinimal {
     id: string;

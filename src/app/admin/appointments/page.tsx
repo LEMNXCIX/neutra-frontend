@@ -1,8 +1,8 @@
-import React, { Suspense } from "react";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 import AppointmentsTableClient from "@/components/admin/appointments/AppointmentsTableClient";
+import { api } from "@/lib/api-client";
 import { validateAdminAccess } from "@/lib/server-auth";
-import { api } from '@/lib/api-client';
 
 export const dynamic = "force-dynamic";
 
@@ -18,7 +18,10 @@ export default async function GlobalAppointmentsPage({
     const query = new URLSearchParams(params);
     query.set("tenantId", query.get("tenantId") || "all");
 
-    const appointments = (await api.get<any[]>(`/appointments?${query.toString()}`).catch(() => [])) || [];
+    const appointments =
+        (await api
+            .get<any[]>(`/appointments?${query.toString()}`)
+            .catch(() => [])) || [];
 
     // Calculate stats from the appointments matching the Stats type
     const statusCounts: Record<string, number> = {};

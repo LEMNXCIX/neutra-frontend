@@ -1,36 +1,39 @@
 "use client";
 
-import React, { useState, useSyncExternalStore } from "react";
+import { MessageSquare, Save } from "lucide-react";
+import { useState, useSyncExternalStore } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
-import { Spinner } from "@/components/ui/spinner";
-import { whatsappService, WhatsAppConfig } from "@/services/whatsapp.service";
-import { toast } from "sonner";
-import { reportError } from "@/lib/error-reporting";
 import { PasswordInput } from "@/components/ui/password-input";
-import { MessageSquare, Save } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
+import { Switch } from "@/components/ui/switch";
+import { reportError } from "@/lib/error-reporting";
+import {
+    type WhatsAppConfig,
+    whatsappService,
+} from "@/services/whatsapp.service";
 
 type WhatsAppConfigFormProps = {
-	initialConfig?: Partial<WhatsAppConfig> | null;
+    initialConfig?: Partial<WhatsAppConfig> | null;
 };
 
 const defaultConfig: Partial<WhatsAppConfig> = {
-	enabled: false,
-	notificationsEnabled: true,
-	botEnabled: false,
-	phoneNumberId: "",
-	businessAccountId: "",
-	accessToken: "",
-	webhookVerifyToken: "",
+    enabled: false,
+    notificationsEnabled: true,
+    botEnabled: false,
+    phoneNumberId: "",
+    businessAccountId: "",
+    accessToken: "",
+    webhookVerifyToken: "",
 };
 
 const emptySubscribe = () => () => {};
@@ -38,44 +41,47 @@ const getClientOrigin = () => window.location.origin;
 const getServerOrigin = () => "";
 
 export function WhatsAppConfigForm({ initialConfig }: WhatsAppConfigFormProps) {
-	// A missing config (404) is a valid state: show the empty form, not a spinner.
-	const [isLoading, setIsLoading] = useState(false);
-	const [isSaving, setIsSaving] = useState(false);
-	const [config, setConfig] = useState<Partial<WhatsAppConfig>>(
-		initialConfig ? { ...defaultConfig, ...initialConfig } : defaultConfig,
-	);
-	const callbackOrigin = useSyncExternalStore(
-		emptySubscribe,
-		getClientOrigin,
-		getServerOrigin,
-	);
+    // A missing config (404) is a valid state: show the empty form, not a spinner.
+    const [isLoading, setIsLoading] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
+    const [config, setConfig] = useState<Partial<WhatsAppConfig>>(
+        initialConfig ? { ...defaultConfig, ...initialConfig } : defaultConfig,
+    );
+    const callbackOrigin = useSyncExternalStore(
+        emptySubscribe,
+        getClientOrigin,
+        getServerOrigin,
+    );
 
-	const loadConfig = async () => {
-		try {
-			setIsLoading(true);
-			const data = await whatsappService.getConfig();
-			if (data) {
-				setConfig({
-					...defaultConfig,
-					...data,
-				});
-			}
-		} catch (err) {
-			console.error("Error al cargar las configuraciones", err);
-			toast.error("Error al cargar la configuración de WhatsApp");
-		} finally {
-			setIsLoading(false);
-		}
-	};
+    const loadConfig = async () => {
+        try {
+            setIsLoading(true);
+            const data = await whatsappService.getConfig();
+            if (data) {
+                setConfig({
+                    ...defaultConfig,
+                    ...data,
+                });
+            }
+        } catch (err) {
+            console.error("Error al cargar las configuraciones", err);
+            toast.error("Error al cargar la configuración de WhatsApp");
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     const handleSave = async () => {
         setIsSaving(true);
         try {
             await whatsappService.updateConfig(config);
             toast.success("Configuración guardada correctamente");
-		await loadConfig();
+            await loadConfig();
         } catch (err: any) {
-            reportError(err, "No pudimos guardar la configuración de WhatsApp.");
+            reportError(
+                err,
+                "No pudimos guardar la configuración de WhatsApp.",
+            );
         } finally {
             setIsSaving(false);
         }
@@ -154,7 +160,9 @@ export function WhatsAppConfigForm({ initialConfig }: WhatsAppConfigFormProps) {
                                     }
                                 />
                                 <span className="text-sm text-muted-foreground">
-                                    {config.botEnabled ? "Habilitado" : "Deshabilitado"}
+                                    {config.botEnabled
+                                        ? "Habilitado"
+                                        : "Deshabilitado"}
                                 </span>
                             </div>
                         </div>
@@ -162,7 +170,9 @@ export function WhatsAppConfigForm({ initialConfig }: WhatsAppConfigFormProps) {
 
                     {/* API Credentials */}
                     <div className="space-y-4">
-                        <h3 className="text-lg font-medium">Credenciales de la API</h3>
+                        <h3 className="text-lg font-medium">
+                            Credenciales de la API
+                        </h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <Label>ID del número de teléfono</Label>
@@ -231,15 +241,17 @@ export function WhatsAppConfigForm({ initialConfig }: WhatsAppConfigFormProps) {
                                         navigator.clipboard.writeText(
                                             config.webhookVerifyToken || "",
                                         );
-                                        toast.success("Copiado al portapapeles");
+                                        toast.success(
+                                            "Copiado al portapapeles",
+                                        );
                                     }}
                                 >
                                     Copiar
                                 </Button>
                             </div>
                             <p className="text-xs text-muted-foreground">
-                                Usá este token en el panel de Meta: WhatsApp &gt;
-                                Configuración &gt; Webhook
+                                Usá este token en el panel de Meta: WhatsApp
+                                &gt; Configuración &gt; Webhook
                             </p>
                         </div>
                         <div className="space-y-2">
@@ -257,7 +269,9 @@ export function WhatsAppConfigForm({ initialConfig }: WhatsAppConfigFormProps) {
                                         navigator.clipboard.writeText(
                                             `${window.location.origin}/api/webhooks/whatsapp`,
                                         );
-                                        toast.success("Copiado al portapapeles");
+                                        toast.success(
+                                            "Copiado al portapapeles",
+                                        );
                                     }}
                                 >
                                     Copiar

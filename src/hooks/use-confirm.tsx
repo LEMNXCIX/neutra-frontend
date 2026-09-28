@@ -27,7 +27,8 @@ export function useConfirm() {
     const confirm = (opts?: ConfirmOptions): Promise<boolean> => {
         setOptions({
             title: opts?.title || "¿Estás seguro?",
-            description: opts?.description || "Esta acción no se puede deshacer.",
+            description:
+                opts?.description || "Esta acción no se puede deshacer.",
             confirmText: opts?.confirmText || "Continuar",
             cancelText: opts?.cancelText || "Cancelar",
             variant: opts?.variant || "default",
@@ -57,7 +58,9 @@ export function useConfirm() {
             <AlertDialogContent>
                 <AlertDialogHeader>
                     <AlertDialogTitle>{options.title}</AlertDialogTitle>
-                    <AlertDialogDescription>{options.description}</AlertDialogDescription>
+                    <AlertDialogDescription>
+                        {options.description}
+                    </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                     <AlertDialogCancel onClick={handleCancel}>

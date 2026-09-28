@@ -1,4 +1,8 @@
-import { createDeleteHandler, createGetHandler, createPutHandler } from '@/lib/api-route-handler';
+import {
+    createDeleteHandler,
+    createGetHandler,
+    createPutHandler,
+} from "@/lib/api-route-handler";
 
 /**
  * GET /api/products/[id]

@@ -1,11 +1,10 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import { Sparkles, X } from "lucide-react";
 import Link from "next/link";
-import { X, Sparkles } from "lucide-react";
-import { Button } from "./ui/button";
-
+import { useEffect, useState } from "react";
 import { bannersService } from "@/services/banners.service";
-import { Banner } from "@/types/banner.types";
+import type { Banner } from "@/types/banner.types";
+import { Button } from "./ui/button";
 
 // Removed local Banner type definition
 

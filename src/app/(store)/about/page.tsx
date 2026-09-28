@@ -1,9 +1,8 @@
-import React from "react";
+import type { Metadata } from "next";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { getCmsPage } from "@/lib/strapi";
 import { cmsHeader, cmsRichText } from "@/lib/cms-page";
-import type { Metadata } from "next";
+import { getCmsPage } from "@/lib/strapi";
 
 export async function generateMetadata(): Promise<Metadata> {
     const cms = await getCmsPage("about-pages");
@@ -52,8 +51,10 @@ export default async function AboutPage() {
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-start">
                     <div className="lg:col-span-5 space-y-8">
                         <p className="text-3xl font-semibold tracking-tight text-foreground leading-snug italic border-l-2 border-primary pl-8">
-                            "{cms?.quote ??
-                                "Arquitectura de vida minimalista a través de la precisión técnica y el abastecimiento sostenible."}"
+                            "
+                            {cms?.quote ??
+                                "Arquitectura de vida minimalista a través de la precisión técnica y el abastecimiento sostenible."}
+                            "
                         </p>
                     </div>
 
@@ -62,7 +63,7 @@ export default async function AboutPage() {
                         dangerouslySetInnerHTML={{
                             __html: cmsRichText(
                                 cms?.content,
-                                "<p>XCIX es un ecosistema curado de estructuras minimalistas y productos de alto rendimiento. Creemos en el diseño intencional que optimiza tu entorno sin complicaciones técnicas.</p><p>Establecidos en 2024, nuestro objetivo es proveer piezas de alta calidad, diseñadas éticamente para entornos modernos a nivel global. Cada producto de nuestro catálogo es validado por su artesanía, integridad de materiales y estética atemporal.</p><p>Colaboramos con ingenieros y diseñadores especializados que comparten nuestra visión de optimización funcional. Desde la materia prima hasta la logística, minimizamos el impacto ambiental maximizando la utilidad y belleza de nuestros productos.</p>"
+                                "<p>XCIX es un ecosistema curado de estructuras minimalistas y productos de alto rendimiento. Creemos en el diseño intencional que optimiza tu entorno sin complicaciones técnicas.</p><p>Establecidos en 2024, nuestro objetivo es proveer piezas de alta calidad, diseñadas éticamente para entornos modernos a nivel global. Cada producto de nuestro catálogo es validado por su artesanía, integridad de materiales y estética atemporal.</p><p>Colaboramos con ingenieros y diseñadores especializados que comparten nuestra visión de optimización funcional. Desde la materia prima hasta la logística, minimizamos el impacto ambiental maximizando la utilidad y belleza de nuestros productos.</p>",
                             ),
                         }}
                     />

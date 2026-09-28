@@ -1,3 +1,16 @@
+import type { LucideIcon } from "lucide-react";
+import {
+    CheckCircle,
+    CheckCircle2,
+    Loader2,
+    Play,
+    UserX,
+    XCircle,
+} from "lucide-react";
+import type React from "react";
+import { useState } from "react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 import {
     Dialog,
     DialogContent,
@@ -7,22 +20,12 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import {
-    CheckCircle,
-    CheckCircle2,
-    Loader2,
-    Play,
-    UserX,
-    XCircle,
-} from "lucide-react";
-import type { LucideIcon } from "lucide-react";
-import React, { useState } from "react";
-import { bookingService } from "@/services/booking.service";
-import type { AppointmentStatus } from "@/services/booking.service";
-import { canTransitionAppointmentStatus } from "@/services/booking.service";
 import { reportError } from "@/lib/error-reporting";
-import { toast } from "sonner";
+import type { AppointmentStatus } from "@/services/booking.service";
+import {
+    bookingService,
+    canTransitionAppointmentStatus,
+} from "@/services/booking.service";
 
 type StatusCopy = {
     label: string;

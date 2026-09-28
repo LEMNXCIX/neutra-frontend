@@ -1,7 +1,7 @@
-import { Product } from './product.types';
+import type { Product } from "./product.types";
 
 // Updated to match API OrderStatus
-export type OrderStatus = 'PENDIENTE' | 'PAGADO' | 'ENVIADO' | 'ENTREGADO';
+export type OrderStatus = "PENDIENTE" | "PAGADO" | "ENVIADO" | "ENTREGADO";
 
 export interface OrderItem {
     id: string;
@@ -17,15 +17,16 @@ export interface Order {
     userId: string;
     status: OrderStatus;
     items: OrderItem[];
-    subtotal: number;  // Added from API
-    total: number;  // Added from API
-    discountAmount: number;  // Added from API
-    couponId?: string | null;  // Added from API
-    trackingNumber?: string | null;  // From API
-    address?: string | null;  // Shipping address
-    coupon?: {  // Applied coupon details
+    subtotal: number; // Added from API
+    total: number; // Added from API
+    discountAmount: number; // Added from API
+    couponId?: string | null; // Added from API
+    trackingNumber?: string | null; // From API
+    address?: string | null; // Shipping address
+    coupon?: {
+        // Applied coupon details
         code: string;
-        type: 'percent' | 'fixed';
+        type: "percent" | "fixed";
         value: number;
         discount: number;
     } | null;

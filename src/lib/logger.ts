@@ -1,6 +1,6 @@
 /**
  * Logger - Sistema de logging configurable para el cliente API
- * 
+ *
  * Configuración via variables de entorno:
  * - LOG_LEVEL: debug | info | warn | error (default: info)
  * - LOG_PAYLOADS: true | false - Log request body (default: false)
@@ -12,7 +12,7 @@
 // Types
 // ============================================================================
 
-export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
+export type LogLevel = "debug" | "info" | "warn" | "error";
 
 export interface LogContext {
     traceId: string;
@@ -38,10 +38,18 @@ const LOG_LEVELS: Record<LogLevel, number> = {
 };
 
 const getConfig = () => ({
-    level: (process.env.LOG_LEVEL || process.env.NEXT_PUBLIC_LOG_LEVEL || 'info') as LogLevel,
-    logPayloads: process.env.LOG_PAYLOADS === 'true' || process.env.NEXT_PUBLIC_LOG_PAYLOADS === 'true',
-    logResponses: process.env.LOG_RESPONSES === 'true' || process.env.NEXT_PUBLIC_LOG_RESPONSES === 'true',
-    logHeaders: process.env.LOG_HEADERS === 'true' || process.env.NEXT_PUBLIC_LOG_HEADERS === 'true',
+    level: (process.env.LOG_LEVEL ||
+        process.env.NEXT_PUBLIC_LOG_LEVEL ||
+        "info") as LogLevel,
+    logPayloads:
+        process.env.LOG_PAYLOADS === "true" ||
+        process.env.NEXT_PUBLIC_LOG_PAYLOADS === "true",
+    logResponses:
+        process.env.LOG_RESPONSES === "true" ||
+        process.env.NEXT_PUBLIC_LOG_RESPONSES === "true",
+    logHeaders:
+        process.env.LOG_HEADERS === "true" ||
+        process.env.NEXT_PUBLIC_LOG_HEADERS === "true",
 });
 
 // ============================================================================
@@ -97,9 +105,10 @@ const formatContext = (ctx: LogContext): Record<string, unknown> => {
     }
 
     if (ctx.error !== undefined) {
-        formatted.error = ctx.error instanceof Error
-            ? { message: ctx.error.message, stack: ctx.error.stack }
-            : ctx.error;
+        formatted.error =
+            ctx.error instanceof Error
+                ? { message: ctx.error.message, stack: ctx.error.stack }
+                : ctx.error;
     }
 
     return formatted;
@@ -108,7 +117,11 @@ const formatContext = (ctx: LogContext): Record<string, unknown> => {
 /**
  * Crea el mensaje formateado para consola
  */
-const formatMessage = (level: LogLevel, ctx: LogContext, message: string): string => {
+const formatMessage = (
+    level: LogLevel,
+    ctx: LogContext,
+    message: string,
+): string => {
     const timestamp = new Date().toISOString();
     return `[${timestamp}] [${level.toUpperCase()}] [${ctx.traceId}] ${message}`;
 };
@@ -125,16 +138,16 @@ const createLogFunction = (level: LogLevel) => {
         const context = formatContext(ctx);
 
         switch (level) {
-            case 'debug':
+            case "debug":
                 console.debug(formattedMessage, context);
                 break;
-            case 'info':
+            case "info":
                 console.info(formattedMessage, context);
                 break;
-            case 'warn':
+            case "warn":
                 console.warn(formattedMessage, context);
                 break;
-            case 'error':
+            case "error":
                 console.error(formattedMessage, context);
                 break;
         }
@@ -142,15 +155,19 @@ const createLogFunction = (level: LogLevel) => {
 };
 
 export const logger = {
-    debug: createLogFunction('debug'),
-    info: createLogFunction('info'),
-    warn: createLogFunction('warn'),
-    error: createLogFunction('error'),
+    debug: createLogFunction("debug"),
+    info: createLogFunction("info"),
+    warn: createLogFunction("warn"),
+    error: createLogFunction("error"),
 
     /**
      * Crea un contexto inicial para un request
      */
-    createContext: (endpoint: string, method: string, payload?: unknown): LogContext => ({
+    createContext: (
+        endpoint: string,
+        method: string,
+        payload?: unknown,
+    ): LogContext => ({
         traceId: generateTraceId(),
         endpoint,
         method,
@@ -160,7 +177,12 @@ export const logger = {
     /**
      * Actualiza el contexto con la respuesta
      */
-    withResponse: (ctx: LogContext, response: unknown, statusCode: number, duration: number): LogContext => ({
+    withResponse: (
+        ctx: LogContext,
+        response: unknown,
+        statusCode: number,
+        duration: number,
+    ): LogContext => ({
         ...ctx,
         response,
         statusCode,
@@ -170,7 +192,11 @@ export const logger = {
     /**
      * Actualiza el contexto con un error
      */
-    withError: (ctx: LogContext, error: Error | unknown, duration: number): LogContext => ({
+    withError: (
+        ctx: LogContext,
+        error: Error | unknown,
+        duration: number,
+    ): LogContext => ({
         ...ctx,
         error,
         duration,

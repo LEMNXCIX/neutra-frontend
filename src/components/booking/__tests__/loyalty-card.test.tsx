@@ -1,7 +1,8 @@
 // @vitest-environment happy-dom
-import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import "@testing-library/jest-dom/vitest";
 
 const mocks = vi.hoisted(() => ({
@@ -75,10 +76,12 @@ describe("LoyaltyCard", () => {
     });
 
     it("shows a loading state and an empty state when no campaigns exist", async () => {
-        let resolveCampaigns: ((value: typeof inProgress[]) => void) | undefined;
+        let resolveCampaigns:
+            | ((value: (typeof inProgress)[]) => void)
+            | undefined;
         mocks.getMyCampaigns.mockImplementationOnce(
             () =>
-                new Promise<typeof inProgress[]>((resolve) => {
+                new Promise<(typeof inProgress)[]>((resolve) => {
                     resolveCampaigns = resolve;
                 }),
         );
@@ -109,7 +112,9 @@ describe("LoyaltyCard", () => {
         expect(screen.getByText(/Reservas · Del/)).toBeInTheDocument();
         expect(screen.getByText("75")).toBeInTheDocument();
         expect(screen.getByText("de 150 completados")).toBeInTheDocument();
-        expect(screen.getByText("Te faltan 75 completados")).toBeInTheDocument();
+        expect(
+            screen.getByText("Te faltan 75 completados"),
+        ).toBeInTheDocument();
         expect(screen.getByRole("progressbar")).toHaveAttribute(
             "aria-valuenow",
             "50",
@@ -206,7 +211,9 @@ describe("LoyaltyCard", () => {
 
         await user.selectOptions(selector, "claimed-campaign");
         expect(screen.getByText(/Tienda · Del/)).toBeInTheDocument();
-        expect(screen.getByText("Has reclamado tu recompensa.")).toBeInTheDocument();
+        expect(
+            screen.getByText("Has reclamado tu recompensa."),
+        ).toBeInTheDocument();
         expect(screen.getByText("Reclamo: claim-existing")).toBeInTheDocument();
         expect(screen.getByText("Cupón: coupon-existing")).toBeInTheDocument();
     });
@@ -266,7 +273,9 @@ describe("LoyaltyCard", () => {
         expect(await screen.findByText("REWARD-2026")).toBeInTheDocument();
         expect(screen.getByText("Reclamo: claim-1")).toBeInTheDocument();
         expect(screen.getByText("Cupón: coupon-1")).toBeInTheDocument();
-        await waitFor(() => expect(mocks.getMyCampaigns).toHaveBeenCalledTimes(2));
+        await waitFor(() =>
+            expect(mocks.getMyCampaigns).toHaveBeenCalledTimes(2),
+        );
 
         await user.click(screen.getByRole("button", { name: "Copiar código" }));
         expect(mocks.writeText).toHaveBeenCalledWith("REWARD-2026");

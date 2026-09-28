@@ -17,8 +17,8 @@ vi.mock("@/lib/api-client", () => ({
 }));
 
 import {
-    loyaltyService,
     type CreateLoyaltyCampaignInput,
+    loyaltyService,
 } from "@/services/loyalty.service";
 import { CouponType } from "@/types/coupon.types";
 
@@ -74,10 +74,7 @@ describe("loyaltyService campaign mappings", () => {
         await loyaltyService.deleteCampaign("campaign/a");
 
         expect(mockGet).toHaveBeenNthCalledWith(1, "/loyalty/admin/summary");
-        expect(mockGet).toHaveBeenNthCalledWith(
-            2,
-            "/loyalty/admin/campaigns",
-        );
+        expect(mockGet).toHaveBeenNthCalledWith(2, "/loyalty/admin/campaigns");
         expect(mockGet).toHaveBeenNthCalledWith(
             3,
             "/loyalty/admin/campaigns/campaign%2Fa",
@@ -129,8 +126,8 @@ describe("loyaltyService campaign mappings", () => {
         ].map(([endpoint]) => endpoint);
 
         expect(endpoints).not.toContain("/loyalty/admin/config");
-        expect(endpoints.some((endpoint: string) => endpoint.includes("/config"))).toBe(
-            false,
-        );
+        expect(
+            endpoints.some((endpoint: string) => endpoint.includes("/config")),
+        ).toBe(false);
     });
 });

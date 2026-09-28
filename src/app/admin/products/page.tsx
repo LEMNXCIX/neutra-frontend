@@ -1,8 +1,8 @@
-import React, { Suspense } from "react";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 import ProductsTableClient from "@/components/admin/products/ProductsTableClient";
+import { api } from "@/lib/api-client";
 import { validateAdminAccess } from "@/lib/server-auth";
-import { api } from '@/lib/api-client';
 
 export const dynamic = "force-dynamic";
 
@@ -30,7 +30,10 @@ export default async function GlobalProductsPage({
             </h2>
             <Suspense fallback={null}>
                 <ProductsTableClient
-                    products={productsData?.products || (Array.isArray(productsData) ? productsData : [])}
+                    products={
+                        productsData?.products ||
+                        (Array.isArray(productsData) ? productsData : [])
+                    }
                     stats={
                         productsData?.stats || {
                             totalProducts: 0,

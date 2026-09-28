@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+import type * as React from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -28,9 +28,9 @@ function InputGroup({ className, ...props }: React.ComponentProps<"fieldset">) {
     );
 }
 
-export { InputGroup };
 export { InputGroupAddon } from "./input-group-addon";
 export { InputGroupButton } from "./input-group-button";
-export { InputGroupText } from "./input-group-text";
 export { InputGroupInput } from "./input-group-input";
+export { InputGroupText } from "./input-group-text";
 export { InputGroupTextarea } from "./input-group-textarea";
+export { InputGroup };

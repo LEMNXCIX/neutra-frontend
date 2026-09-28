@@ -1,26 +1,26 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { DollarSign, Zap } from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 import {
     Dialog,
     DialogContent,
+    DialogFooter,
     DialogHeader,
     DialogTitle,
-    DialogFooter,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Spinner } from "@/components/ui/spinner";
-import {
-    PlatformFeature,
-    CreateFeatureData,
-    featuresService,
-} from "@/services/features.service";
-import { toast } from "sonner";
+import { Textarea } from "@/components/ui/textarea";
 import { reportError } from "@/lib/error-reporting";
-import { Zap, DollarSign } from "lucide-react";
+import {
+    type CreateFeatureData,
+    featuresService,
+    type PlatformFeature,
+} from "@/services/features.service";
 
 interface FeatureDialogProps {
     open: boolean;

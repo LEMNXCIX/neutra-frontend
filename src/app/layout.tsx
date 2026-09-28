@@ -1,16 +1,16 @@
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
-import { Suspense } from "react";
 import { ThemeProvider } from "next-themes";
+import { Suspense } from "react";
 import "./globals.css";
 import { AuthInitializer } from "@/components/auth-initializer";
-import { Toaster } from "@/components/ui/sonner";
-import { QueryProvider } from "@/providers/query-provider";
-import { FeatureProvider } from "@/providers/feature-provider";
 import { SWRegistration } from "@/components/sw-registration";
 import { ProgressBar } from "@/components/ui/progress-bar";
-import { TenantThemeProvider } from "@/providers/tenant-theme-provider";
+import { Toaster } from "@/components/ui/sonner";
 import { getTenantBrandingFromHeaders } from "@/lib/server-theme";
+import { FeatureProvider } from "@/providers/feature-provider";
+import { QueryProvider } from "@/providers/query-provider";
+import { TenantThemeProvider } from "@/providers/tenant-theme-provider";
 
 const geist = Geist({
     subsets: ["latin"],

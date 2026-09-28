@@ -1,8 +1,8 @@
-import React, { Suspense } from "react";
+import { Suspense } from "react";
 import UsersTableClient from "@/components/admin/users/UsersTableClient";
-import { User } from "@/types/user.types";
-import { Permission } from "@/types/permission.types";
-import { api } from '@/lib/api-client';
+import { api } from "@/lib/api-client";
+import type { Permission } from "@/types/permission.types";
+import type { User } from "@/types/user.types";
 
 export const metadata = { title: "Usuarios" };
 
@@ -45,9 +45,9 @@ async function getUsers(
 
         const backendUsers = Array.isArray(data)
             ? data
-            : (Array.isArray(data?.users)
+            : Array.isArray(data?.users)
               ? data.users
-              : []);
+              : [];
 
         let users: User[] = backendUsers.map((u: BackendUser) => ({
             id: u.id,
@@ -154,11 +154,11 @@ export default async function UsersPage({ searchParams }: Props) {
     const resolvedSearchParams = await searchParams;
     const page =
         typeof resolvedSearchParams.page === "string"
-            ? parseInt(resolvedSearchParams.page)
+            ? parseInt(resolvedSearchParams.page, 10)
             : 1;
     const limit =
         typeof resolvedSearchParams.limit === "string"
-            ? parseInt(resolvedSearchParams.limit)
+            ? parseInt(resolvedSearchParams.limit, 10)
             : 10;
     const search =
         typeof resolvedSearchParams.search === "string"

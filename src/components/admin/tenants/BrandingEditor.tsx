@@ -1,9 +1,12 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import type React from "react";
+import { useEffect, useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
 import {
     Select,
     SelectContent,
@@ -12,17 +15,10 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import {
-    Card,
-    CardContent,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import {
     applyTenantTheme,
     clearTenantTheme,
-    ensureFontLoaded,
     DEFAULT_BRANDING,
+    ensureFontLoaded,
 } from "@/lib/theme";
 import type { TenantBranding } from "@/types/tenant";
 
@@ -83,9 +79,7 @@ function RadiusSlider({
 
     return (
         <div className="space-y-2">
-            <Label>
-                Radio ({rem.toFixed(2)}rem)
-            </Label>
+            <Label>Radio ({rem.toFixed(2)}rem)</Label>
             <input
                 type="range"
                 min={0}
@@ -94,7 +88,9 @@ function RadiusSlider({
                 value={rem}
                 aria-label="Radio de las esquinas"
                 className="w-full accent-primary cursor-pointer"
-                onChange={(e) => onChange(`${Number(e.target.value).toFixed(2)}rem`)}
+                onChange={(e) =>
+                    onChange(`${Number(e.target.value).toFixed(2)}rem`)
+                }
             />
         </div>
     );
@@ -227,7 +223,10 @@ function BrandingPreview({ branding }: { branding: TenantBranding }) {
         >
             <CardContent className="space-y-4" style={vars}>
                 {(b.tenantLogo || b.favicon) && (
-                    <div className="flex items-center gap-3 pb-3" style={{ borderBottom: `1px solid ${b.border}` }}>
+                    <div
+                        className="flex items-center gap-3 pb-3"
+                        style={{ borderBottom: `1px solid ${b.border}` }}
+                    >
                         {b.tenantLogo && (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img
@@ -238,15 +237,25 @@ function BrandingPreview({ branding }: { branding: TenantBranding }) {
                         )}
                         {b.favicon && (
                             // eslint-disable-next-line @next/next/no-img-element
-                            <img src={b.favicon} alt="Vista previa del favicon" className="size-5" />
+                            <img
+                                src={b.favicon}
+                                alt="Vista previa del favicon"
+                                className="size-5"
+                            />
                         )}
                     </div>
                 )}
 
-                <p className="text-sm font-semibold" style={{ fontFamily: headingFont }}>
+                <p
+                    className="text-sm font-semibold"
+                    style={{ fontFamily: headingFont }}
+                >
                     Vista previa
                 </p>
-                <p className="text-lg font-bold tracking-tight" style={{ fontFamily: headingFont }}>
+                <p
+                    className="text-lg font-bold tracking-tight"
+                    style={{ fontFamily: headingFont }}
+                >
                     Los títulos se ven así (H2)
                 </p>
 
@@ -305,7 +314,9 @@ function BrandingPreview({ branding }: { branding: TenantBranding }) {
                 </div>
 
                 <div className="space-y-1">
-                    <Label style={{ color: b.foreground }}>Correo electrónico</Label>
+                    <Label style={{ color: b.foreground }}>
+                        Correo electrónico
+                    </Label>
                     <Input
                         readOnly
                         placeholder="you@example.com"
@@ -321,8 +332,14 @@ function BrandingPreview({ branding }: { branding: TenantBranding }) {
                     </p>
                 </div>
 
-                <div className="p-3 rounded-lg" style={{ backgroundColor: b.muted, borderRadius: b.radius }}>
-                    <p className="text-xs font-medium" style={{ color: b.mutedForeground }}>
+                <div
+                    className="p-3 rounded-lg"
+                    style={{ backgroundColor: b.muted, borderRadius: b.radius }}
+                >
+                    <p
+                        className="text-xs font-medium"
+                        style={{ color: b.mutedForeground }}
+                    >
                         Bloque de superficie atenuado
                     </p>
                 </div>
@@ -478,7 +495,9 @@ export function BrandingEditor({
                 arriba. top-24 deja libre el navbar de administracion. */}
             <div className="lg:sticky lg:top-24 lg:self-start">
                 <CardHeader className="px-0 pt-0">
-                    <CardTitle className="text-base">Vista previa en vivo</CardTitle>
+                    <CardTitle className="text-base">
+                        Vista previa en vivo
+                    </CardTitle>
                 </CardHeader>
                 <BrandingPreview branding={branding} />
             </div>

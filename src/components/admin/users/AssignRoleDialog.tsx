@@ -1,19 +1,17 @@
 "use client";
 
-import React, { useState } from "react";
+import { Loader2, UserCog } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
-import { usersService } from "@/services/users.service";
-import { rolesService } from "@/services/roles.service";
-import { reportError } from "@/lib/error-reporting";
+import { Button } from "@/components/ui/button";
 import {
     Dialog,
     DialogContent,
+    DialogDescription,
+    DialogFooter,
     DialogHeader,
     DialogTitle,
-    DialogFooter,
-    DialogDescription,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import {
     Select,
     SelectContent,
@@ -21,19 +19,18 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { Loader2, UserCog } from "lucide-react";
+import { reportError } from "@/lib/error-reporting";
+import { rolesService } from "@/services/roles.service";
+import { usersService } from "@/services/users.service";
 
-import { Role } from "@/types/role.types";
-import { User } from "@/types/user.types";
+import type { Role } from "@/types/role.types";
+import type { User } from "@/types/user.types";
 
 const refreshPermissions = async () => {
     try {
-        const response = await fetch(
-            `/api/auth/validate`,
-            {
-                credentials: "include",
-            },
-        );
+        const response = await fetch(`/api/auth/validate`, {
+            credentials: "include",
+        });
         if (response.ok) {
             await response.json();
         }
@@ -60,24 +57,24 @@ export function AssignRoleDialog({
     const [loading, setLoading] = useState(false);
     const [loadingRoles, setLoadingRoles] = useState(false);
 
-  const loadRoles = async () => {
-    setLoadingRoles(true);
-    try {
-      const fetchedRoles = await rolesService.getAll();
-      setRoles(fetchedRoles);
-    } catch (err) {
-      reportError(err, "No pudimos cargar los roles.");
-    } finally {
-      setLoadingRoles(false);
-    }
-  };
+    const loadRoles = async () => {
+        setLoadingRoles(true);
+        try {
+            const fetchedRoles = await rolesService.getAll();
+            setRoles(fetchedRoles);
+        } catch (err) {
+            reportError(err, "No pudimos cargar los roles.");
+        } finally {
+            setLoadingRoles(false);
+        }
+    };
 
-  const handleOpenChange = (nextOpen: boolean) => {
-    if (nextOpen) {
-      loadRoles();
-    }
-    onOpenChange(nextOpen);
-  };
+    const handleOpenChange = (nextOpen: boolean) => {
+        if (nextOpen) {
+            loadRoles();
+        }
+        onOpenChange(nextOpen);
+    };
 
     const handleAssign = async () => {
         if (!user || !selectedRoleId) {

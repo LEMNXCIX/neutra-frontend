@@ -1,13 +1,13 @@
-import React from "react";
-import AdminSidebar from "@/components/admin/AdminSidebar";
-import AdminMobileNav from "@/components/admin/AdminMobileNav";
-import { BOOKING_ADMIN_NAV } from "@/config/admin-navigation";
-import { BookingNavbar } from "@/components/booking/booking-navbar";
 import type { Metadata } from "next";
+import type React from "react";
+import AdminMobileNav from "@/components/admin/AdminMobileNav";
+import AdminSidebar from "@/components/admin/AdminSidebar";
+import { BookingNavbar } from "@/components/booking/booking-navbar";
+import { BOOKING_ADMIN_NAV } from "@/config/admin-navigation";
 
 export const metadata: Metadata = {
-  title: "Administración de reservas",
-  description: "Panel de administración de reservas",
+    title: "Administración de reservas",
+    description: "Panel de administración de reservas",
 };
 
 export default function AdminLayout({

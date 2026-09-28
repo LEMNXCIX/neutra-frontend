@@ -1,25 +1,32 @@
 "use client";
 
-import React, {
-    useReducer,
+import {
+    AlertCircle,
+    ArrowRight,
+    CalendarOff,
+    Check,
+    ChevronLeft,
+    Clock,
+    Info,
+    Loader2,
+    Scissors,
+    Tag,
+    User,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
+import type React from "react";
+import {
     useCallback,
     useEffect,
     useMemo,
+    useReducer,
     useState,
     useSyncExternalStore,
 } from "react";
-import { useRouter } from "next/navigation";
-import {
-    Service,
-    Staff,
-    CreateAppointmentData,
-    bookingService,
-} from "@/services/booking.service";
-import { couponsService } from "@/services/coupons.service";
-import { reportError } from "@/lib/error-reporting";
-import { CouponValidationResult } from "@/types/coupon.types";
-import { useAuthStore } from "@/store/auth-store";
-import { useFeatures } from "@/hooks/useFeatures";
+import { AvailabilityCalendar } from "@/components/booking/availability-calendar";
+import { workingWeekdays } from "@/components/booking/working-weekdays";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
     Card,
@@ -28,30 +35,24 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Separator } from "@/components/ui/separator";
-import {
-    Loader2,
-    Clock,
-    User,
-    ChevronLeft,
-    Check,
-    AlertCircle,
-    Info,
-    Tag,
-    Scissors,
-    ArrowRight,
-    CalendarOff,
-} from "lucide-react";
-import { cn } from "@/lib/utils";
-import { filterFutureSlots, isFutureSlot } from "@/lib/appointment-time";
 import { EmptyState } from "@/components/ui/empty-state";
-import { AvailabilityCalendar } from "@/components/booking/availability-calendar";
-import { workingWeekdays } from "@/components/booking/working-weekdays";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
+import { useFeatures } from "@/hooks/useFeatures";
+import { filterFutureSlots, isFutureSlot } from "@/lib/appointment-time";
+import { reportError } from "@/lib/error-reporting";
+import { cn } from "@/lib/utils";
+import {
+    bookingService,
+    type CreateAppointmentData,
+    type Service,
+    type Staff,
+} from "@/services/booking.service";
+import { couponsService } from "@/services/coupons.service";
+import { useAuthStore } from "@/store/auth-store";
+import type { CouponValidationResult } from "@/types/coupon.types";
 
 interface BookingWizardProps {
     initialServices: Service[];
@@ -503,7 +504,8 @@ function ScheduleStep({
                     onClick={() => dispatch({ type: "SET_STEP", payload: 2 })}
                     className="font-semibold text-xs h-10"
                 >
-                    <ChevronLeft className="size-4 mr-2" /> Volver al profesional
+                    <ChevronLeft className="size-4 mr-2" /> Volver al
+                    profesional
                 </Button>
                 {selectedDate && selectedTime && (
                     <Button
@@ -597,7 +599,8 @@ function ReviewStep({
                                     <p className="text-lg font-bold text-foreground">
                                         {new Date(
                                             selectedDate,
-                                        ).toLocaleDateString("es-ES", { timeZone: "UTC",
+                                        ).toLocaleDateString("es-ES", {
+                                            timeZone: "UTC",
                                             weekday: "long",
                                             month: "long",
                                             day: "numeric",

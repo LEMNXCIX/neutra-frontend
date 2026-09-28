@@ -1,10 +1,9 @@
 "use client";
 
-import React from "react";
-import { Button } from "@/components/ui/button";
-import { CancelAppointmentDialog } from "@/components/booking/cancel-appointment-dialog";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { CancelAppointmentDialog } from "@/components/booking/cancel-appointment-dialog";
+import { Button } from "@/components/ui/button";
 
 interface AppointmentDetailActionsProps {
     appointmentId: string;

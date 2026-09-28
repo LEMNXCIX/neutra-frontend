@@ -1,6 +1,6 @@
 export enum CouponType {
-    PERCENT = 'PERCENT',
-    FIXED = 'FIXED'
+    PERCENT = "PERCENT",
+    FIXED = "FIXED",
 }
 
 export interface Coupon {

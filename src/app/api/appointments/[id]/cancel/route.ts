@@ -1,4 +1,4 @@
-import { createPutHandler } from '@/lib/api-route-handler';
+import { createPutHandler } from "@/lib/api-route-handler";
 
 /**
  * PUT /api/appointments/[id]/cancel

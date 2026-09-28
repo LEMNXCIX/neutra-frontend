@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getProxyHeaders } from '@/lib/proxy';
-import { getBackendUrl } from '@/lib/backend-url';
+import { type NextRequest, NextResponse } from "next/server";
+import { getBackendUrl } from "@/lib/backend-url";
+import { getProxyHeaders } from "@/lib/proxy";
 
 export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
@@ -11,26 +11,33 @@ export async function GET(request: NextRequest) {
         const headers = getProxyHeaders(request);
 
         const response = await fetch(url, {
-            method: 'GET',
+            method: "GET",
             headers,
-            cache: 'no-store',
+            cache: "no-store",
         });
 
         if (!response.ok) {
             const _text = await response.text();
             return NextResponse.json(
-                { success: false, message: `Backend error: ${response.status}` },
-                { status: response.status }
+                {
+                    success: false,
+                    message: `Backend error: ${response.status}`,
+                },
+                { status: response.status },
             );
         }
 
         const data = await response.json();
         return NextResponse.json(data, { status: response.status });
     } catch (error: any) {
-        console.error('Error fetching availability:', error);
+        console.error("Error fetching availability:", error);
         return NextResponse.json(
-            { success: false, message: 'Internal Server Error', error: error.message },
-            { status: 500 }
+            {
+                success: false,
+                message: "Internal Server Error",
+                error: error.message,
+            },
+            { status: 500 },
         );
     }
 }

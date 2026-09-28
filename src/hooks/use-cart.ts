@@ -1,113 +1,119 @@
 "use client";
-import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { toast } from "sonner";
-import { useCartStore } from "@/store/cart-store";
 import { useAuthStore } from "@/store/auth-store";
+import { useCartStore } from "@/store/cart-store";
 
 function couponErrorMessage(reason?: string): string {
-  if (!reason || reason === "invalid" || reason === "Error al validar el cupón") {
-    return "Código de cupón inválido";
-  }
-  return reason;
+    if (
+        !reason ||
+        reason === "invalid" ||
+        reason === "Error al validar el cupón"
+    ) {
+        return "Código de cupón inválido";
+    }
+    return reason;
 }
 
 export function useCart() {
-  const router = useRouter();
-  const user = useAuthStore((s) => s.user);
+    const router = useRouter();
+    const user = useAuthStore((s) => s.user);
 
-  const store = useCartStore();
+    const store = useCartStore();
 
-  useEffect(() => {
-    store.fetchCart();
-  }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
+    useEffect(() => {
+        store.fetchCart();
+    }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  useEffect(() => {
-    store.loadProductMap();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    useEffect(() => {
+        store.loadProductMap();
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const count = store.items.reduce((s, it) => s + it.amount, 0);
+    const count = store.items.reduce((s, it) => s + it.amount, 0);
 
-  const subtotal = store.items.reduce((s, it) => {
-    const price = store.productMap[it.id]?.price ?? it.price ?? 0;
-    return s + price * it.amount;
-  }, 0);
+    const subtotal = store.items.reduce((s, it) => {
+        const price = store.productMap[it.id]?.price ?? it.price ?? 0;
+        return s + price * it.amount;
+    }, 0);
 
-  const total = Math.max(
-    0,
-    Math.round((subtotal - store.discount) * 100) / 100,
-  );
-
-  const addItem = async (id: string, name: string, quantity?: number) => {
-    const result = await store.addItem(id, name, quantity);
-    if (result.needsLogin) {
-      toast.error("Inicia sesión para agregar productos al carrito");
-      router.push("/login");
-      return;
-    }
-    if (!result.success) {
-      toast.error(result.reason || "No se pudo agregar el producto al carrito");
-      return;
-    }
-    const qty = quantity ?? 1;
-    toast.success(
-      qty > 1
-        ? `Se agregaron ${qty} productos al carrito`
-        : "Se agregó el producto al carrito",
+    const total = Math.max(
+        0,
+        Math.round((subtotal - store.discount) * 100) / 100,
     );
-  };
 
-  const removeItem = async (id: string) => {
-    await store.removeItem(id);
-    toast("Producto eliminado del carrito");
-  };
+    const addItem = async (id: string, name: string, quantity?: number) => {
+        const result = await store.addItem(id, name, quantity);
+        if (result.needsLogin) {
+            toast.error("Inicia sesión para agregar productos al carrito");
+            router.push("/login");
+            return;
+        }
+        if (!result.success) {
+            toast.error(
+                result.reason || "No se pudo agregar el producto al carrito",
+            );
+            return;
+        }
+        const qty = quantity ?? 1;
+        toast.success(
+            qty > 1
+                ? `Se agregaron ${qty} productos al carrito`
+                : "Se agregó el producto al carrito",
+        );
+    };
 
-  const updateQuantity = async (id: string, newQty: number) => {
-    if (newQty < 1) {
-      toast.error("La cantidad debe ser al menos 1");
-      return;
-    }
+    const removeItem = async (id: string) => {
+        await store.removeItem(id);
+        toast("Producto eliminado del carrito");
+    };
 
-    const item = store.items.find((i) => i.id === id);
-    const product = store.productMap[id];
-    if (product?.stock !== undefined && newQty > product.stock) {
-      toast.error(`Solo hay ${product.stock} unidades disponibles`);
-      return;
-    }
-    if (!item) return;
+    const updateQuantity = async (id: string, newQty: number) => {
+        if (newQty < 1) {
+            toast.error("La cantidad debe ser al menos 1");
+            return;
+        }
 
-    await store.updateQuantity(id, newQty);
-  };
+        const item = store.items.find((i) => i.id === id);
+        const product = store.productMap[id];
+        if (product?.stock !== undefined && newQty > product.stock) {
+            toast.error(`Solo hay ${product.stock} unidades disponibles`);
+            return;
+        }
+        if (!item) return;
 
-  const applyCoupon = async (code: string) => {
-    const result = await store.applyCoupon(code);
-    if (result.success) {
-      toast.success("Cupón aplicado");
-    } else {
-      toast.error(couponErrorMessage(result.reason));
-    }
-    return result;
-  };
+        await store.updateQuantity(id, newQty);
+    };
 
-  const removeCoupon = () => {
-    store.removeCoupon();
-    toast("Cupón eliminado");
-  };
+    const applyCoupon = async (code: string) => {
+        const result = await store.applyCoupon(code);
+        if (result.success) {
+            toast.success("Cupón aplicado");
+        } else {
+            toast.error(couponErrorMessage(result.reason));
+        }
+        return result;
+    };
 
-  return {
-    items: store.items,
-    count,
-    loading: store.loading,
-    error: store.error,
-    subtotal,
-    discount: store.discount,
-    total,
-    coupon: store.coupon,
-    refresh: store.fetchCart,
-    addItem,
-    removeItem,
-    updateQuantity,
-    applyCoupon,
-    removeCoupon,
-  };
+    const removeCoupon = () => {
+        store.removeCoupon();
+        toast("Cupón eliminado");
+    };
+
+    return {
+        items: store.items,
+        count,
+        loading: store.loading,
+        error: store.error,
+        subtotal,
+        discount: store.discount,
+        total,
+        coupon: store.coupon,
+        refresh: store.fetchCart,
+        addItem,
+        removeItem,
+        updateQuantity,
+        applyCoupon,
+        removeCoupon,
+    };
 }

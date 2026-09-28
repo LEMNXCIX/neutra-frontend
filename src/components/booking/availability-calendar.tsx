@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+
 const WEEKDAYS = [
     { id: "sunday", label: "D" },
     { id: "monday", label: "L" },
@@ -14,8 +15,18 @@ const WEEKDAYS = [
     { id: "saturday", label: "S" },
 ];
 const MONTHS = [
-    "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-    "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre",
+    "Enero",
+    "Febrero",
+    "Marzo",
+    "Abril",
+    "Mayo",
+    "Junio",
+    "Julio",
+    "Agosto",
+    "Septiembre",
+    "Octubre",
+    "Noviembre",
+    "Diciembre",
 ];
 
 const toISODate = (d: Date) =>
@@ -60,7 +71,8 @@ export function AvailabilityCalendar({
                 <Button
                     type="button"
                     variant="ghost"
-                    size="icon" aria-label="Mes anterior"
+                    size="icon"
+                    aria-label="Mes anterior"
                     className="size-8"
                     onClick={() => shiftMonth(-1)}
                 >
@@ -72,7 +84,8 @@ export function AvailabilityCalendar({
                 <Button
                     type="button"
                     variant="ghost"
-                    size="icon" aria-label="Mes siguiente"
+                    size="icon"
+                    aria-label="Mes siguiente"
                     className="size-8"
                     onClick={() => shiftMonth(1)}
                 >
@@ -91,13 +104,19 @@ export function AvailabilityCalendar({
                 {dates.map((cell, index) => {
                     const iso = cell.iso;
                     const isPast = iso < minDate;
-                    const isWorking = workingDays.size === 0 || workingDays.has(cell.date.getDay());
+                    const isWorking =
+                        workingDays.size === 0 ||
+                        workingDays.has(cell.date.getDay());
                     const disabled = isPast || !isWorking;
                     const selected = value === iso;
                     return (
                         <button
                             key={iso}
-                            style={index === 0 ? { gridColumnStart: firstDay + 1 } : undefined}
+                            style={
+                                index === 0
+                                    ? { gridColumnStart: firstDay + 1 }
+                                    : undefined
+                            }
                             type="button"
                             disabled={disabled}
                             onClick={() => onChange(iso)}

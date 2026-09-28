@@ -1,20 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import { Building2, LayoutDashboard, LogIn, Menu } from "lucide-react";
 import Link from "next/link";
-import { useAuthStore } from "@/store/auth-store";
 import { useTheme } from "next-themes";
-import { tenantService } from "@/services/tenant.service";
-import { getTenantUrl } from "@/lib/tenant";
-import { Tenant } from "@/types/tenant";
+import { useEffect, useState } from "react";
+import Logo from "@/components/logo";
 import { Button } from "@/components/ui/button";
-import {
-    LayoutDashboard,
-    LogIn,
-    Menu,
-    Building2,
-} from "lucide-react";
-import { useTenantStore } from "@/store/tenant-store";
 import {
     Sheet,
     SheetContent,
@@ -22,7 +13,11 @@ import {
     SheetTitle,
     SheetTrigger,
 } from "@/components/ui/sheet";
-import Logo from "@/components/logo";
+import { getTenantUrl } from "@/lib/tenant";
+import { tenantService } from "@/services/tenant.service";
+import { useAuthStore } from "@/store/auth-store";
+import { useTenantStore } from "@/store/tenant-store";
+import type { Tenant } from "@/types/tenant";
 
 export function NeutralNavigation() {
     const { theme, setTheme } = useTheme();
@@ -157,7 +152,8 @@ export function NeutralNavigation() {
                             <SheetTrigger asChild>
                                 <Button
                                     variant="ghost"
-                                    size="icon" aria-label="Abrir menú de navegación"
+                                    size="icon"
+                                    aria-label="Abrir menú de navegación"
                                     className="text-foreground"
                                 >
                                     <Menu size={24} />

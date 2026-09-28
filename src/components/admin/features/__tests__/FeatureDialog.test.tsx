@@ -1,6 +1,7 @@
 // @vitest-environment happy-dom
-import { describe, expect, it, vi } from "vitest";
+
 import { render, screen } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
 import "@testing-library/jest-dom/vitest";
 
 vi.mock("@/services/features.service", () => ({
@@ -47,6 +48,8 @@ describe("FeatureDialog", () => {
         expect(screen.getByDisplayValue("LOYALTY")).toBeInTheDocument();
         expect(screen.getByDisplayValue("MODULE")).toBeInTheDocument();
         expect(screen.getByDisplayValue("3")).toBeInTheDocument();
-        expect(screen.getByDisplayValue("Enable customer loyalty rewards")).toBeInTheDocument();
+        expect(
+            screen.getByDisplayValue("Enable customer loyalty rewards"),
+        ).toBeInTheDocument();
     });
 });

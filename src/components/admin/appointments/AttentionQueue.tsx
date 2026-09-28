@@ -1,7 +1,5 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import {
     CheckCircle2,
@@ -11,23 +9,20 @@ import {
     UserX,
     XCircle,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-    Card,
-    CardContent,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
-import { bookingService } from "@/services/booking.service";
+import { useConfirm } from "@/hooks/use-confirm";
 import type {
     Appointment,
     AppointmentStatus,
 } from "@/services/booking.service";
-import { useConfirm } from "@/hooks/use-confirm";
-import { toast } from "sonner";
+import { bookingService } from "@/services/booking.service";
 
 const PAGE_SIZE = 10;
 type ResolutionStatus = Extract<
@@ -132,7 +127,10 @@ export function AttentionQueue({ onRefresh }: AttentionQueueProps) {
         action: ResolutionAction,
     ) => {
         const confirmed = await confirm({
-            title: action.status === "CANCELLED" ? "Cancelar cita" : "Resolver cita",
+            title:
+                action.status === "CANCELLED"
+                    ? "Cancelar cita"
+                    : "Resolver cita",
             description: `Esta acción marcará la cita como ${action.status}.`,
             confirmText: action.label,
             cancelText: "Volver",
@@ -196,9 +194,12 @@ export function AttentionQueue({ onRefresh }: AttentionQueueProps) {
                 ) : appointments.length === 0 ? (
                     <div className="py-8 text-center">
                         <CheckCircle2 className="mx-auto mb-3 size-8 text-emerald-500/60" />
-                        <p className="font-medium">No hay citas que requieran atención</p>
+                        <p className="font-medium">
+                            No hay citas que requieran atención
+                        </p>
                         <p className="mt-1 text-sm text-muted-foreground">
-                            Las citas pendientes de actualización aparecerán aquí.
+                            Las citas pendientes de actualización aparecerán
+                            aquí.
                         </p>
                     </div>
                 ) : (
@@ -211,10 +212,12 @@ export function AttentionQueue({ onRefresh }: AttentionQueueProps) {
                                 <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                                     <div className="min-w-0">
                                         <p className="font-semibold">
-                                            {appointment.user?.name || "Cliente"}
+                                            {appointment.user?.name ||
+                                                "Cliente"}
                                         </p>
                                         <p className="text-sm text-muted-foreground">
-                                            {appointment.service?.name || "Servicio"}
+                                            {appointment.service?.name ||
+                                                "Servicio"}
                                         </p>
                                     </div>
                                     <div className="flex items-center gap-1 text-sm text-muted-foreground">
@@ -230,13 +233,17 @@ export function AttentionQueue({ onRefresh }: AttentionQueueProps) {
                                     appointment.statusChangedAt) && (
                                     <div className="rounded-lg bg-muted/40 p-3 text-sm">
                                         {appointment.statusChangeReason && (
-                                            <p>{appointment.statusChangeReason}</p>
+                                            <p>
+                                                {appointment.statusChangeReason}
+                                            </p>
                                         )}
                                         {appointment.statusChangedAt && (
                                             <p className="mt-1 text-xs text-muted-foreground">
-                                                Marcada para revisión: {" "}
+                                                Marcada para revisión:{" "}
                                                 {format(
-                                                    new Date(appointment.statusChangedAt),
+                                                    new Date(
+                                                        appointment.statusChangedAt,
+                                                    ),
                                                     "MMM d, yyyy · HH:mm",
                                                 )}
                                             </p>
@@ -248,7 +255,8 @@ export function AttentionQueue({ onRefresh }: AttentionQueueProps) {
                                     {RESOLUTION_ACTIONS.map((action) => {
                                         const actionKey = `${appointment.id}:${action.status}`;
                                         const Icon = action.icon;
-                                        const isResolving = resolving === actionKey;
+                                        const isResolving =
+                                            resolving === actionKey;
                                         return (
                                             <Button
                                                 key={action.status}
@@ -258,11 +266,17 @@ export function AttentionQueue({ onRefresh }: AttentionQueueProps) {
                                                 aria-label={action.englishLabel}
                                                 disabled={resolving !== null}
                                                 onClick={() =>
-                                                    void resolveAppointment(appointment, action)
+                                                    void resolveAppointment(
+                                                        appointment,
+                                                        action,
+                                                    )
                                                 }
                                             >
                                                 {isResolving ? (
-                                                    <Spinner className="mr-2" size="sm" />
+                                                    <Spinner
+                                                        className="mr-2"
+                                                        size="sm"
+                                                    />
                                                 ) : (
                                                     <Icon className="mr-2 size-4" />
                                                 )}

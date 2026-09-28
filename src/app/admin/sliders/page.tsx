@@ -1,10 +1,10 @@
-import React, { Suspense } from "react";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 import SlidersTableClient from "@/components/admin/sliders/SlidersTableClient";
+import { api } from "@/lib/api-client";
 import { validateAdminAccess } from "@/lib/server-auth";
-import { api } from '@/lib/api-client';
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 export default async function SuperAdminSlidersPage({
     searchParams,
@@ -25,7 +25,9 @@ export default async function SuperAdminSlidersPage({
     const query = new URLSearchParams();
     if (tenantId) query.append("tenantId", tenantId);
 
-    const sliders = (await api.get<any[]>(`/slide?${query.toString()}`).catch(() => [])) || [];
+    const sliders =
+        (await api.get<any[]>(`/slide?${query.toString()}`).catch(() => [])) ||
+        [];
 
     // Minimal stats for now
     const stats = {

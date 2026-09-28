@@ -1,47 +1,48 @@
 "use client";
 
-import React, { useReducer, useEffect, useCallback, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { toast } from "sonner";
-import { reportError } from "@/lib/error-reporting";
 import {
-    Plus,
+    Check,
+    Clock,
     Edit,
-    Trash2,
     Mail,
     Phone,
-    User as UserIcon,
+    Plus,
     Scissors,
-    Check,
+    Trash2,
+    User as UserIcon,
 } from "lucide-react";
-import { bookingService, Staff, Service } from "@/services/booking.service";
-import { usersService } from "@/services/users.service";
-import { User } from "@/types/user.types";
+import { useRouter, useSearchParams } from "next/navigation";
+import type React from "react";
+import { Suspense, useCallback, useEffect, useReducer } from "react";
+import { toast } from "sonner";
+import { WorkingHoursEditor } from "@/components/admin/booking/working-hours-editor";
+import {
+    DEFAULT_WORKING_HOURS,
+    normalizeWorkingHours,
+    type WorkingHours,
+} from "@/components/admin/booking/working-hours-utils";
+import { AdminEntityHeader } from "@/components/admin/shared/AdminEntityHeader";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import {
     Card,
     CardContent,
-    CardHeader,
-    CardTitle,
     CardDescription,
     CardFooter,
+    CardHeader,
+    CardTitle,
 } from "@/components/ui/card";
 import {
     Dialog,
     DialogContent,
+    DialogDescription,
+    DialogFooter,
     DialogHeader,
     DialogTitle,
-    DialogFooter,
-    DialogDescription,
 } from "@/components/ui/dialog";
-import { Switch } from "@/components/ui/switch";
-import { Badge } from "@/components/ui/badge";
-import { Spinner } from "@/components/ui/spinner";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useConfirm } from "@/hooks/use-confirm";
 import {
     Select,
     SelectContent,
@@ -49,14 +50,18 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { WorkingHoursEditor } from "@/components/admin/booking/working-hours-editor";
+import { Spinner } from "@/components/ui/spinner";
+import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
+import { useConfirm } from "@/hooks/use-confirm";
+import { reportError } from "@/lib/error-reporting";
 import {
-    DEFAULT_WORKING_HOURS,
-    normalizeWorkingHours,
-    type WorkingHours,
-} from "@/components/admin/booking/working-hours-utils";
-import { Clock } from "lucide-react";
-import { AdminEntityHeader } from "@/components/admin/shared/AdminEntityHeader";
+    bookingService,
+    type Service,
+    type Staff,
+} from "@/services/booking.service";
+import { usersService } from "@/services/users.service";
+import type { User } from "@/types/user.types";
 
 interface Props {
     staff: Staff[];
@@ -100,7 +105,8 @@ function ServiceAssignmentDialog({
                     {allServices.length === 0 ? (
                         <div className="text-center py-8">
                             <p className="text-muted-foreground">
-                                No se encontraron servicios. Crea algunos servicios primero.
+                                No se encontraron servicios. Crea algunos
+                                servicios primero.
                             </p>
                         </div>
                     ) : (
@@ -135,7 +141,9 @@ function ServiceAssignmentDialog({
                                     <div
                                         className={`size-6 rounded-full border-2 flex items-center justify-center transition-[color,background-color,border-color,box-shadow,opacity,transform] ${selectedServiceIdSet.has(service.id) ? "bg-primary border-primary text-primary-foreground" : "border-muted-foreground/30"}`}
                                     >
-                                        {selectedServiceIdSet.has(service.id) && <Check className="size-3.5" />}
+                                        {selectedServiceIdSet.has(
+                                            service.id,
+                                        ) && <Check className="size-3.5" />}
                                     </div>
                                 </button>
                             ))}
@@ -252,7 +260,9 @@ function StaffCardsGrid({
                                 Miembro del equipo{" "}
                                 {isSuperAdmin && (
                                     <span className="text-[10px] font-mono opacity-50 ml-1">
-                                        ({member.tenant?.name || member.tenantId})
+                                        (
+                                        {member.tenant?.name || member.tenantId}
+                                        )
                                     </span>
                                 )}
                             </CardDescription>

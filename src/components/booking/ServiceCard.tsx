@@ -1,6 +1,6 @@
 "use client";
 
-import { Service } from "@/services/booking.service";
+import type { Service } from "@/services/booking.service";
 
 interface ServiceCardProps {
     service: Service;
@@ -37,6 +37,7 @@ export default function ServiceCard({ service, onBook }: ServiceCardProps) {
             <div className="flex justify-between items-center mt-4 pt-4 border-t border-border">
                 <div className="flex items-center text-sm text-muted-foreground">
                     <svg
+                        aria-hidden="true"
                         className="size-4 mr-1"
                         fill="none"
                         stroke="currentColor"

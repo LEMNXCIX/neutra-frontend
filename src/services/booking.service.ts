@@ -1,21 +1,21 @@
-import { apiClient as api } from '@/lib/api-client';
+import { apiClient as api } from "@/lib/api-client";
 
 export type AppointmentStatus =
-    | 'PENDING'
-    | 'CONFIRMED'
-    | 'IN_PROGRESS'
-    | 'NEEDS_REVIEW'
-    | 'COMPLETED'
-    | 'CANCELLED'
-    | 'NO_SHOW';
+    | "PENDING"
+    | "CONFIRMED"
+    | "IN_PROGRESS"
+    | "NEEDS_REVIEW"
+    | "COMPLETED"
+    | "CANCELLED"
+    | "NO_SHOW";
 
 export const APPOINTMENT_STATUS_TRANSITIONS: Readonly<
     Record<AppointmentStatus, readonly AppointmentStatus[]>
 > = {
-    PENDING: ['CONFIRMED', 'CANCELLED'],
-    CONFIRMED: ['IN_PROGRESS', 'CANCELLED'],
-    IN_PROGRESS: ['COMPLETED'],
-    NEEDS_REVIEW: ['COMPLETED', 'NO_SHOW', 'CANCELLED'],
+    PENDING: ["CONFIRMED", "CANCELLED"],
+    CONFIRMED: ["IN_PROGRESS", "CANCELLED"],
+    IN_PROGRESS: ["COMPLETED"],
+    NEEDS_REVIEW: ["COMPLETED", "NO_SHOW", "CANCELLED"],
     COMPLETED: [],
     CANCELLED: [],
     NO_SHOW: [],
@@ -29,13 +29,13 @@ export function canTransitionAppointmentStatus(
 }
 
 export const APPOINTMENT_STATUS_LABELS: Record<AppointmentStatus, string> = {
-    PENDING: 'Pendiente',
-    CONFIRMED: 'Confirmada',
-    IN_PROGRESS: 'En curso',
-    NEEDS_REVIEW: 'Pendiente de actualización',
-    COMPLETED: 'Completada',
-    CANCELLED: 'Cancelada',
-    NO_SHOW: 'No asistió',
+    PENDING: "Pendiente",
+    CONFIRMED: "Confirmada",
+    IN_PROGRESS: "En curso",
+    NEEDS_REVIEW: "Pendiente de actualización",
+    COMPLETED: "Completada",
+    CANCELLED: "Cancelada",
+    NO_SHOW: "No asistió",
 };
 
 export interface Service {
@@ -131,10 +131,13 @@ class BookingService {
     /**
      * Get all services
      */
-    async getServices(activeOnly: boolean = true, tenantId?: string): Promise<Service[]> {
+    async getServices(
+        activeOnly: boolean = true,
+        tenantId?: string,
+    ): Promise<Service[]> {
         const params = new URLSearchParams();
-        params.append('activeOnly', activeOnly.toString());
-        if (tenantId) params.append('tenantId', tenantId);
+        params.append("activeOnly", activeOnly.toString());
+        if (tenantId) params.append("tenantId", tenantId);
 
         return api<Service[]>(`/services?${params.toString()}`);
     }
@@ -142,10 +145,13 @@ class BookingService {
     /**
      * Get all staff members
      */
-    async getStaff(activeOnly: boolean = true, tenantId?: string): Promise<Staff[]> {
+    async getStaff(
+        activeOnly: boolean = true,
+        tenantId?: string,
+    ): Promise<Staff[]> {
         const params = new URLSearchParams();
-        params.append('activeOnly', activeOnly.toString());
-        if (tenantId) params.append('tenantId', tenantId);
+        params.append("activeOnly", activeOnly.toString());
+        if (tenantId) params.append("tenantId", tenantId);
 
         return api<Staff[]>(`/staff?${params.toString()}`);
     }
@@ -154,7 +160,7 @@ class BookingService {
      * Get current user's staff profile
      */
     async getMeStaff(): Promise<Staff> {
-        return api<Staff>('/staff/me');
+        return api<Staff>("/staff/me");
     }
 
     /**
@@ -199,7 +205,8 @@ class BookingService {
         const resolvedPage = rawPagination?.page ?? page;
         const resolvedLimit = rawPagination?.limit ?? limit;
         const total = rawPagination?.total ?? appointments.length;
-        const totalPages = rawPagination?.totalPages ?? Math.ceil(total / resolvedLimit);
+        const totalPages =
+            rawPagination?.totalPages ?? Math.ceil(total / resolvedLimit);
 
         return {
             appointments,
@@ -213,13 +220,17 @@ class BookingService {
         };
     }
 
-    async checkAvailability(staffId: string, serviceId: string, date: string): Promise<string[]> {
+    async checkAvailability(
+        staffId: string,
+        serviceId: string,
+        date: string,
+    ): Promise<string[]> {
         const timezoneOffset = new Date().getTimezoneOffset();
         const params = new URLSearchParams({
             staffId,
             serviceId,
             date,
-            timezoneOffset: timezoneOffset.toString()
+            timezoneOffset: timezoneOffset.toString(),
         });
 
         return api<string[]>(`/appointments/availability?${params.toString()}`);
@@ -228,9 +239,11 @@ class BookingService {
     /**
      * Create a new appointment
      */
-    async createAppointment(appointmentData: CreateAppointmentData): Promise<Appointment> {
-        return api<Appointment>('/appointments', {
-            method: 'POST',
+    async createAppointment(
+        appointmentData: CreateAppointmentData,
+    ): Promise<Appointment> {
+        return api<Appointment>("/appointments", {
+            method: "POST",
             body: JSON.stringify(appointmentData),
         });
     }
@@ -238,9 +251,12 @@ class BookingService {
     /**
      * Cancel an appointment
      */
-    async cancelAppointment(appointmentId: string, reason?: string): Promise<void> {
+    async cancelAppointment(
+        appointmentId: string,
+        reason?: string,
+    ): Promise<void> {
         return api<void>(`/appointments/${appointmentId}/cancel`, {
-            method: 'PUT',
+            method: "PUT",
             body: JSON.stringify({ reason }),
         });
     }
@@ -248,9 +264,12 @@ class BookingService {
     /**
      * Sync all services for a staff member
      */
-    async syncStaffServices(staffId: string, serviceIds: string[]): Promise<void> {
+    async syncStaffServices(
+        staffId: string,
+        serviceIds: string[],
+    ): Promise<void> {
         return api<void>(`/staff/${staffId}/services`, {
-            method: 'PUT',
+            method: "PUT",
             body: JSON.stringify({ serviceIds }),
         });
     }
@@ -267,11 +286,11 @@ class BookingService {
      */
     async updateAppointmentStatus(
         id: string,
-        status: Appointment['status'],
+        status: Appointment["status"],
         reason?: string,
     ): Promise<Appointment> {
         return api<Appointment>(`/appointments/${id}/status`, {
-            method: 'PUT',
+            method: "PUT",
             body: JSON.stringify({
                 status,
                 ...(reason === undefined ? {} : { reason }),

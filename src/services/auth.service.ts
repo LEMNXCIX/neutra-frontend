@@ -1,5 +1,5 @@
-import { api } from '@/lib/api-client';
-import { User, LoginDto, CreateUserDto } from '@/types/frontend-api';
+import { api } from "@/lib/api-client";
+import type { CreateUserDto, LoginDto, User } from "@/types/frontend-api";
 
 /**
  * Authentication Service
@@ -10,29 +10,29 @@ export const authService = {
      * Login with email and password
      */
     login: async (credentials: LoginDto): Promise<User> => {
-        return api.post<User>('/auth/login', credentials);
+        return api.post<User>("/auth/login", credentials);
     },
 
     /**
      * Register a new user
      */
     signup: async (userData: CreateUserDto): Promise<User> => {
-        return api.post<User>('/auth/register', userData);
+        return api.post<User>("/auth/register", userData);
     },
 
     /**
      * Logout current user (clears HttpOnly cookie)
      */
     logout: async (): Promise<void> => {
-        return api.post<void>('/auth/logout', {});
+        return api.post<void>("/auth/logout", {});
     },
 
     /**
      * Validate current session and get user data
      */
     validate: async (): Promise<{ user: User }> => {
-        return api.get<{ user: User }>('/auth/validate', {
-            headers: { 'x-suppress-unauthorized': 'true' }
+        return api.get<{ user: User }>("/auth/validate", {
+            headers: { "x-suppress-unauthorized": "true" },
         });
     },
 
@@ -52,13 +52,13 @@ export const authService = {
      * Request password reset link
      */
     forgotPassword: async (email: string): Promise<any> => {
-        return api.post('/auth/forgot-password', { email });
+        return api.post("/auth/forgot-password", { email });
     },
 
     /**
      * Reset password using token
      */
     resetPassword: async (data: any): Promise<any> => {
-        return api.post('/auth/reset-password', data);
+        return api.post("/auth/reset-password", data);
     },
 };

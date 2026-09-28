@@ -19,7 +19,7 @@ export async function getTenantIdFromHeaders(): Promise<string | null> {
 export async function strapiFindOneByTenant<T = any>(
     contentType: string,
     tenantId: string | null,
-    query = ""
+    query = "",
 ): Promise<T | null> {
     if (!tenantId) return null;
     try {
@@ -39,7 +39,10 @@ export async function strapiFindOneByTenant<T = any>(
 }
 
 export async function getHomeContent(): Promise<any | null> {
-    return strapiFindOneByTenant("home-contents", await getTenantIdFromHeaders());
+    return strapiFindOneByTenant(
+        "home-contents",
+        await getTenantIdFromHeaders(),
+    );
 }
 
 /** Fetch a per-tenant single-page content type (about-page, faq-page, ...). */

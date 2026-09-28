@@ -1,36 +1,37 @@
 "use client";
-import React, { useReducer } from "react";
-import { useRouter } from "next/navigation";
-import { useAuthStore } from "@/store/auth-store";
+import {
+    AlertCircle,
+    ArrowRight,
+    CheckCircle2,
+    Loader2,
+    Lock,
+    Mail,
+    User,
+    UserPlus,
+} from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import type React from "react";
+import { useReducer } from "react";
+import { AuthBrandHeader } from "@/components/auth/AuthBrandHeader";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Separator } from "@/components/ui/separator";
-import {
-  UserPlus,
-  Mail,
-  Lock,
-  User,
-  Loader2,
-  AlertCircle,
-  CheckCircle2,
-  ArrowRight,
-} from "lucide-react";
-import { AuthBrandHeader } from "@/components/auth/AuthBrandHeader";
-import { reportError } from "@/lib/error-reporting";
-import { firstErrorCode } from "@/lib/error-messages";
-import { PASSWORD_MIN_LENGTH } from "@/lib/password-policy";
 import { PasswordInput } from "@/components/ui/password-input";
+import { Separator } from "@/components/ui/separator";
+import { firstErrorCode } from "@/lib/error-messages";
+import { reportError } from "@/lib/error-reporting";
+import { PASSWORD_MIN_LENGTH } from "@/lib/password-policy";
 import { cn } from "@/lib/utils";
+import { useAuthStore } from "@/store/auth-store";
 
 /**
  * The one backend code the forgot-password link is for: the email is already
@@ -40,89 +41,121 @@ import { cn } from "@/lib/utils";
 const RECOVERY_LINK_CODE = "AUTH_EMAIL_TAKEN_IN_OTHER_TENANT";
 
 const getPasswordStrength = (pass: string) => {
-  if (pass.length === 0) return { strength: 0, label: "", color: "" };
-  if (pass.length < PASSWORD_MIN_LENGTH)
-    return { strength: 1, label: "Débil", color: "bg-rose-500" };
-  if (pass.length < 10)
-    return { strength: 2, label: "Media", color: "bg-amber-500" };
-  return { strength: 3, label: "Fuerte", color: "bg-emerald-500" };
+    if (pass.length === 0) return { strength: 0, label: "", color: "" };
+    if (pass.length < PASSWORD_MIN_LENGTH)
+        return { strength: 1, label: "Débil", color: "bg-rose-500" };
+    if (pass.length < 10)
+        return { strength: 2, label: "Media", color: "bg-amber-500" };
+    return { strength: 3, label: "Fuerte", color: "bg-emerald-500" };
 };
 
 type RegisterState = {
-  name: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-  error: string;
-  /** Backend `code` behind `error`, empty when there is none to branch on. */
-  errorCode: string;
+    name: string;
+    email: string;
+    password: string;
+    confirmPassword: string;
+    error: string;
+    /** Backend `code` behind `error`, empty when there is none to branch on. */
+    errorCode: string;
 };
 
 type RegisterAction =
-  | { type: "SET_FIELD"; field: keyof Omit<RegisterState, "error" | "errorCode">; value: string }
-  | { type: "SET_ERROR"; value: string; code?: string }
-  | { type: "CLEAR_ERROR" };
+    | {
+          type: "SET_FIELD";
+          field: keyof Omit<RegisterState, "error" | "errorCode">;
+          value: string;
+      }
+    | { type: "SET_ERROR"; value: string; code?: string }
+    | { type: "CLEAR_ERROR" };
 
-const registerReducer = (state: RegisterState, action: RegisterAction): RegisterState => {
-  switch (action.type) {
-    case "SET_FIELD":
-      return { ...state, [action.field]: action.value, error: "", errorCode: "" };
-    case "SET_ERROR":
-      return { ...state, error: action.value, errorCode: action.code ?? "" };
-    case "CLEAR_ERROR":
-      return { ...state, error: "", errorCode: "" };
-    default:
-      return state;
-  }
+const registerReducer = (
+    state: RegisterState,
+    action: RegisterAction,
+): RegisterState => {
+    switch (action.type) {
+        case "SET_FIELD":
+            return {
+                ...state,
+                [action.field]: action.value,
+                error: "",
+                errorCode: "",
+            };
+        case "SET_ERROR":
+            return {
+                ...state,
+                error: action.value,
+                errorCode: action.code ?? "",
+            };
+        case "CLEAR_ERROR":
+            return { ...state, error: "", errorCode: "" };
+        default:
+            return state;
+    }
 };
 
 const initialRegisterState: RegisterState = {
-  name: "",
-  email: "",
-  password: "",
-  confirmPassword: "",
-  error: "",
-  errorCode: "",
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    error: "",
+    errorCode: "",
 };
 
 export function RegisterPageClient() {
-  const register = useAuthStore((state) => state.register);
-  const loading = useAuthStore((state) => state.loading);
-  const [state, dispatch] = useReducer(registerReducer, initialRegisterState);
-  const router = useRouter();
+    const register = useAuthStore((state) => state.register);
+    const loading = useAuthStore((state) => state.loading);
+    const [state, dispatch] = useReducer(registerReducer, initialRegisterState);
+    const router = useRouter();
 
-  const passwordStrength = getPasswordStrength(state.password);
+    const passwordStrength = getPasswordStrength(state.password);
 
-  const onSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    dispatch({ type: "CLEAR_ERROR" });
+    const onSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        dispatch({ type: "CLEAR_ERROR" });
 
-  if (!state.name || !state.email || !state.password || !state.confirmPassword) {
-    dispatch({ type: "SET_ERROR", value: "Por favor completa todos los campos" });
-    return;
-  }
+        if (
+            !state.name ||
+            !state.email ||
+            !state.password ||
+            !state.confirmPassword
+        ) {
+            dispatch({
+                type: "SET_ERROR",
+                value: "Por favor completa todos los campos",
+            });
+            return;
+        }
 
-  if (state.password !== state.confirmPassword) {
-    dispatch({ type: "SET_ERROR", value: "Las contraseñas no coinciden" });
-    return;
-  }
+        if (state.password !== state.confirmPassword) {
+            dispatch({
+                type: "SET_ERROR",
+                value: "Las contraseñas no coinciden",
+            });
+            return;
+        }
 
-  if (state.password.length < PASSWORD_MIN_LENGTH) {
-    dispatch({ type: "SET_ERROR", value: `La contraseña debe tener al menos ${PASSWORD_MIN_LENGTH} caracteres` });
-    return;
-  }
+        if (state.password.length < PASSWORD_MIN_LENGTH) {
+            dispatch({
+                type: "SET_ERROR",
+                value: `La contraseña debe tener al menos ${PASSWORD_MIN_LENGTH} caracteres`,
+            });
+            return;
+        }
 
-  try {
-    await register(state.name, state.email, state.password);
-    router.push("/");
-  } catch (err) {
-    dispatch({
-      type: "SET_ERROR",
-      value: reportError(err, "No pudimos crear tu cuenta.", { toast: false }),
-      code: firstErrorCode(err),
-    });
-  }
-  };
+        try {
+            await register(state.name, state.email, state.password);
+            router.push("/");
+        } catch (err) {
+            dispatch({
+                type: "SET_ERROR",
+                value: reportError(err, "No pudimos crear tu cuenta.", {
+                    toast: false,
+                }),
+                code: firstErrorCode(err),
+            });
+        }
+    };
 
     return (
         <main className="min-h-[80vh] flex items-center justify-center p-6 animate-slide-up py-20">
@@ -160,10 +193,14 @@ export function RegisterPageClient() {
                                     <Input
                                         id="name"
                                         placeholder="Juan Pérez"
-                  value={state.name}
-                  onChange={(e) =>
-                    dispatch({ type: "SET_FIELD", field: "name", value: e.target.value })
-                  }
+                                        value={state.name}
+                                        onChange={(e) =>
+                                            dispatch({
+                                                type: "SET_FIELD",
+                                                field: "name",
+                                                value: e.target.value,
+                                            })
+                                        }
                                         className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform] focus:border-primary"
                                         disabled={loading}
                                     />
@@ -184,10 +221,14 @@ export function RegisterPageClient() {
                                         id="email"
                                         type="email"
                                         placeholder="juan@ejemplo.com"
-                  value={state.email}
-                  onChange={(e) =>
-                    dispatch({ type: "SET_FIELD", field: "email", value: e.target.value })
-                  }
+                                        value={state.email}
+                                        onChange={(e) =>
+                                            dispatch({
+                                                type: "SET_FIELD",
+                                                field: "email",
+                                                value: e.target.value,
+                                            })
+                                        }
                                         className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform] focus:border-primary"
                                         disabled={loading}
                                     />
@@ -203,16 +244,20 @@ export function RegisterPageClient() {
                                     Contraseña
                                 </Label>
                                 <PasswordInput
-                                        id="password"
-                                        icon={Lock}
-                                        placeholder="••••••••"
-                  value={state.password}
-                  onChange={(e) =>
-                    dispatch({ type: "SET_FIELD", field: "password", value: e.target.value })
-                  }
-                                        className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform] focus:border-primary"
-                                        disabled={loading}
-                                    />
+                                    id="password"
+                                    icon={Lock}
+                                    placeholder="••••••••"
+                                    value={state.password}
+                                    onChange={(e) =>
+                                        dispatch({
+                                            type: "SET_FIELD",
+                                            field: "password",
+                                            value: e.target.value,
+                                        })
+                                    }
+                                    className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform] focus:border-primary"
+                                    disabled={loading}
+                                />
                                 {/* Password Strength Indicator */}
                                 {state.password && (
                                     <div className="space-y-2 px-1 pt-1">
@@ -258,19 +303,24 @@ export function RegisterPageClient() {
                                     Confirmar contraseña
                                 </Label>
                                 <PasswordInput
-                                        id="confirmPassword"
-                                        icon={Lock}
-                                        placeholder="••••••••"
-                  value={state.confirmPassword}
-                  onChange={(e) =>
-                    dispatch({ type: "SET_FIELD", field: "confirmPassword", value: e.target.value })
-                  }
-                                        className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform] focus:border-primary"
-                                        disabled={loading}
-                                    />
+                                    id="confirmPassword"
+                                    icon={Lock}
+                                    placeholder="••••••••"
+                                    value={state.confirmPassword}
+                                    onChange={(e) =>
+                                        dispatch({
+                                            type: "SET_FIELD",
+                                            field: "confirmPassword",
+                                            value: e.target.value,
+                                        })
+                                    }
+                                    className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform] focus:border-primary"
+                                    disabled={loading}
+                                />
                                 {state.confirmPassword && (
                                     <div className="flex items-center gap-2 px-1 pt-1">
-                                        {state.password === state.confirmPassword ? (
+                                        {state.password ===
+                                        state.confirmPassword ? (
                                             <>
                                                 <CheckCircle2 className="size-3 text-emerald-500" />
                                                 <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider">
@@ -290,29 +340,29 @@ export function RegisterPageClient() {
                             </div>
 
                             {/* Error Alert */}
-{state.error && (
-  <Alert
-    variant="destructive"
-    className="border-none bg-destructive/10 text-destructive rounded-xl py-3"
-  >
-    <AlertCircle className="size-4" />
-    <AlertDescription className="text-xs font-semibold">
-      {state.error}
-    </AlertDescription>
-    {/* Scoped to the one code the recovery path was written for. Every other
+                            {state.error && (
+                                <Alert
+                                    variant="destructive"
+                                    className="border-none bg-destructive/10 text-destructive rounded-xl py-3"
+                                >
+                                    <AlertCircle className="size-4" />
+                                    <AlertDescription className="text-xs font-semibold">
+                                        {state.error}
+                                    </AlertDescription>
+                                    {/* Scoped to the one code the recovery path was written for. Every other
         failure here — the form's own validation, or a different backend code —
         leaves the user with no password to recover, so offering the link
         would point them at a flow that cannot help. */}
-{state.errorCode === RECOVERY_LINK_CODE && (
-    <Link
-      href="/forgot-password"
-      className="mt-1 inline-block text-xs font-semibold underline underline-offset-2"
-    >
-      ¿Olvidaste tu contraseña?
-    </Link>
-)}
-  </Alert>
-)}
+                                    {state.errorCode === RECOVERY_LINK_CODE && (
+                                        <Link
+                                            href="/forgot-password"
+                                            className="mt-1 inline-block text-xs font-semibold underline underline-offset-2"
+                                        >
+                                            ¿Olvidaste tu contraseña?
+                                        </Link>
+                                    )}
+                                </Alert>
+                            )}
 
                             {/* Submit Button */}
                             <Button
@@ -351,7 +401,9 @@ export function RegisterPageClient() {
                                     className="w-full h-12 rounded-xl border-border font-bold text-xs transition-[color,background-color,border-color,box-shadow,opacity,transform] hover:bg-muted"
                                     asChild
                                 >
-                                    <Link href="/login">Identificar Sesión</Link>
+                                    <Link href="/login">
+                                        Identificar Sesión
+                                    </Link>
                                 </Button>
                             </div>
                         </form>

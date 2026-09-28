@@ -1,18 +1,18 @@
 "use client";
 
-import React, { useState, use } from "react";
-import { logService } from "@/services/log.service";
 import {
     Activity,
     AlertCircle,
-    TrendingUp,
-    RefreshCcw,
     Database,
+    RefreshCcw,
+    TrendingUp,
     Zap,
 } from "lucide-react";
+import React, { use, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { logService } from "@/services/log.service";
 
 interface AnalyticsStats {
     totalRequests: number;
@@ -41,7 +41,6 @@ function fetchStats(timeframe: string): Promise<AnalyticsStats> {
 }
 
 function LogAnalyticsStats({
-
     statsPromise,
 }: {
     timeframe: string;
@@ -53,8 +52,8 @@ function LogAnalyticsStats({
         <div className="space-y-12">
             <div className="flex justify-between items-center border-b border-border pb-4">
                 <h3 className="font-bold uppercase tracking-widest text-xs flex items-center gap-2">
-                    <TrendingUp size={16} className="text-primary" />{" "}
-                    Salud operativa
+                    <TrendingUp size={16} className="text-primary" /> Salud
+                    operativa
                 </h3>
             </div>
 
@@ -96,7 +95,9 @@ function LogAnalyticsStats({
                                         <span>
                                             {new Date(
                                                 day.date,
-                                            ).toLocaleDateString("es-ES", { timeZone: "UTC" })}
+                                            ).toLocaleDateString("es-ES", {
+                                                timeZone: "UTC",
+                                            })}
                                         </span>
                                         <span className="text-foreground">
                                             {day.total} REQS /{" "}
@@ -212,8 +213,8 @@ export default function LogAnalyticsDashboard() {
         <div className="space-y-12">
             <div className="flex justify-between items-center border-b border-border pb-4">
                 <h3 className="font-bold uppercase tracking-widest text-xs flex items-center gap-2">
-                    <TrendingUp size={16} className="text-primary" />{" "}
-                    Salud operativa
+                    <TrendingUp size={16} className="text-primary" /> Salud
+                    operativa
                 </h3>
                 <div className="flex gap-4">
                     <select

@@ -1,12 +1,12 @@
-import { Category } from './category.types';
+import type { Category } from "./category.types";
 
 export interface Product {
     id: string;
     name: string;
     description: string;
-    image: string | null;  // Updated to match API - can be null
+    image: string | null; // Updated to match API - can be null
     price: number;
-    stock: number;  // Updated to match API - required, not optional
+    stock: number; // Updated to match API - required, not optional
     active: boolean;
     ownerId: string;
     createdAt?: Date;
@@ -21,7 +21,7 @@ export interface CreateProductDTO {
     description: string;
     image?: string;
     price: number;
-    stock: number;  // Added stock as required field
+    stock: number; // Added stock as required field
     active?: boolean;
     ownerId: string;
     categoryIds?: string[];

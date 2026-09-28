@@ -1,10 +1,10 @@
-import React, { Suspense } from "react";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 import CouponsTableClient from "@/components/admin/coupons/CouponsTableClient";
+import { api } from "@/lib/api-client";
 import { validateAdminAccess } from "@/lib/server-auth";
-import { api } from '@/lib/api-client';
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 export default async function SuperAdminCouponsPage({
     searchParams,
@@ -20,7 +20,10 @@ export default async function SuperAdminCouponsPage({
     const query = new URLSearchParams();
     if (tenantId) query.append("tenantId", tenantId);
 
-    const coupons = (await api.get<any[]>(`/coupons?${query.toString()}`).catch(() => [])) || [];
+    const coupons =
+        (await api
+            .get<any[]>(`/coupons?${query.toString()}`)
+            .catch(() => [])) || [];
 
     // Filter logic if needed or just provide initial stats
     const stats = {

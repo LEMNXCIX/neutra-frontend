@@ -3,7 +3,7 @@ import { api } from "@/lib/api-client";
 export interface LogEntry {
     id: string;
     timestamp: string;
-    level: 'DEBUG' | 'INFO' | 'WARN' | 'ERROR' | 'FATAL';
+    level: "DEBUG" | "INFO" | "WARN" | "ERROR" | "FATAL";
     method: string;
     url: string;
     statusCode: number;
@@ -31,20 +31,22 @@ export const logService = {
     getAll: async (filters: LogFilters = {}) => {
         const params = new URLSearchParams();
         Object.entries(filters).forEach(([key, value]) => {
-            if (value !== undefined && value !== '') {
+            if (value !== undefined && value !== "") {
                 params.append(key, value.toString());
             }
         });
 
         const response = await api.get<{
-            data: LogEntry[],
-            pagination: { total: number, skip: number, take: number }
+            data: LogEntry[];
+            pagination: { total: number; skip: number; take: number };
         }>(`/admin/logs?${params.toString()}`);
         return response;
     },
 
-    getStats: async (timeframe: string = 'daily') => {
-        const response = await api.get<any>(`/admin/logs/stats?timeframe=${timeframe}`);
+    getStats: async (timeframe: string = "daily") => {
+        const response = await api.get<any>(
+            `/admin/logs/stats?timeframe=${timeframe}`,
+        );
         return response;
-    }
+    },
 };

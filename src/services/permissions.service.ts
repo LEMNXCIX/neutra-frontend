@@ -1,5 +1,9 @@
-import { api } from '@/lib/api-client';
-import { Permission, CreatePermissionDTO, UpdatePermissionDTO } from '@/types/permission.types';
+import { api } from "@/lib/api-client";
+import type {
+    CreatePermissionDTO,
+    Permission,
+    UpdatePermissionDTO,
+} from "@/types/permission.types";
 
 /**
  * Permissions Service
@@ -10,7 +14,9 @@ export const permissionsService = {
      * Get all permissions
      */
     getAll: async (search?: string): Promise<Permission[]> => {
-        const url = search ? `/permissions?search=${encodeURIComponent(search)}` : '/permissions';
+        const url = search
+            ? `/permissions?search=${encodeURIComponent(search)}`
+            : "/permissions";
         return api.get<Permission[]>(url);
     },
 
@@ -25,13 +31,16 @@ export const permissionsService = {
      * Create new permission (requires authentication)
      */
     create: async (data: CreatePermissionDTO): Promise<Permission> => {
-        return api.post<Permission>('/permissions', data);
+        return api.post<Permission>("/permissions", data);
     },
 
     /**
      * Update permission (requires authentication)
      */
-    update: async (id: string, data: UpdatePermissionDTO): Promise<Permission> => {
+    update: async (
+        id: string,
+        data: UpdatePermissionDTO,
+    ): Promise<Permission> => {
         return api.put<Permission>(`/permissions/${id}`, data);
     },
 

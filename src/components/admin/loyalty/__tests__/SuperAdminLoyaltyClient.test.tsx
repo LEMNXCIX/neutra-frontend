@@ -1,7 +1,8 @@
 // @vitest-environment happy-dom
-import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import "@testing-library/jest-dom/vitest";
 
 const mocks = vi.hoisted(() => ({
@@ -102,9 +103,7 @@ describe("SuperAdminLoyaltyClient", () => {
         expect(screen.getByText("12 reclamos")).toBeInTheDocument();
         expect(screen.getAllByText("Activa")).toHaveLength(2);
         expect(
-            screen.getByText(
-                "Esta organización no tiene campañas.",
-            ),
+            screen.getByText("Esta organización no tiene campañas."),
         ).toBeInTheDocument();
     });
 
@@ -114,9 +113,13 @@ describe("SuperAdminLoyaltyClient", () => {
         await screen.findByRole("heading", { name: "Tenant enabled" });
         expect(screen.queryByLabelText("Organización")).not.toBeInTheDocument();
         expect(
-            screen.queryByRole("button", { name: /guardar|activar|editar|eliminar/i }),
+            screen.queryByRole("button", {
+                name: /guardar|activar|editar|eliminar/i,
+            }),
         ).not.toBeInTheDocument();
-        expect(screen.queryByText(/configuración por organización/i)).not.toBeInTheDocument();
+        expect(
+            screen.queryByText(/configuración por organización/i),
+        ).not.toBeInTheDocument();
     });
 
     it("shows an error and retries the overview request", async () => {

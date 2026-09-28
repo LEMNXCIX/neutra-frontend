@@ -16,11 +16,14 @@ export async function POST(req: Request) {
     const tenantId = body?.entry?.tenantId ?? body?.tenantId;
     if (typeof tenantId === "string" && tenantId) {
         revalidateTag(`content:${tenantId}`, "max");
-        return NextResponse.json({ ok: true, revalidated: `content:${tenantId}` });
+        return NextResponse.json({
+            ok: true,
+            revalidated: `content:${tenantId}`,
+        });
     }
 
     return NextResponse.json(
         { ok: false, reason: "falta tenantId en el payload" },
-        { status: 400 }
+        { status: 400 },
     );
 }

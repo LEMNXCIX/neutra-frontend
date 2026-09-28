@@ -1,12 +1,11 @@
-import { createDeleteHandler, createPutHandler } from '@/lib/api-route-handler';
+import { createDeleteHandler, createPutHandler } from "@/lib/api-route-handler";
 
 /**
  * PUT /api/staff/[id]
  */
-export const PUT = createPutHandler(
-    (_req, params) => `/staff/${params?.id}`,
-    { passThroughStatus: true },
-);
+export const PUT = createPutHandler((_req, params) => `/staff/${params?.id}`, {
+    passThroughStatus: true,
+});
 
 /**
  * DELETE /api/staff/[id]

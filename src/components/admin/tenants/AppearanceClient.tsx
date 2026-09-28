@@ -1,21 +1,21 @@
 "use client";
 
-import React, { useCallback, useEffect, useState } from "react";
-import { BrandingEditor } from "./BrandingEditor";
+import { Palette } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Spinner } from "@/components/ui/spinner";
 import {
     Card,
     CardContent,
+    CardDescription,
     CardHeader,
     CardTitle,
-    CardDescription,
 } from "@/components/ui/card";
-import { useTenantStore } from "@/store/tenant-store";
+import { Spinner } from "@/components/ui/spinner";
 import { tenantService } from "@/services/tenant.service";
+import { useTenantStore } from "@/store/tenant-store";
 import type { Tenant, TenantBranding } from "@/types/tenant";
-import { toast } from "sonner";
-import { Palette } from "lucide-react";
+import { BrandingEditor } from "./BrandingEditor";
 
 export function AppearanceClient() {
     const { tenantId } = useTenantStore();
@@ -72,7 +72,8 @@ export function AppearanceClient() {
                 <Palette className="size-10 text-muted-foreground" />
                 <p className="font-semibold">Sin contexto de organización</p>
                 <p className="text-sm text-muted-foreground">
-                    La apariencia solo se puede editar desde la administración de una organización.
+                    La apariencia solo se puede editar desde la administración
+                    de una organización.
                 </p>
             </div>
         );

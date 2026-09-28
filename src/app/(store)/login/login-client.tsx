@@ -1,31 +1,32 @@
 "use client";
-import React, { useState, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useAuthStore } from "@/store/auth-store";
+import {
+    AlertCircle,
+    ArrowRight,
+    Loader2,
+    Lock,
+    LogIn,
+    Mail,
+} from "lucide-react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import type React from "react";
+import { Suspense, useState } from "react";
+import { AuthBrandHeader } from "@/components/auth/AuthBrandHeader";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
     Card,
     CardContent,
+    CardDescription,
     CardHeader,
     CardTitle,
-    CardDescription,
 } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Separator } from "@/components/ui/separator";
-import {
-    LogIn,
-    Mail,
-    Lock,
-    Loader2,
-    AlertCircle,
-    ArrowRight,
-} from "lucide-react";
-import { AuthBrandHeader } from "@/components/auth/AuthBrandHeader";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
+import { Separator } from "@/components/ui/separator";
 import { errorMessageFrom } from "@/lib/error-messages";
+import { useAuthStore } from "@/store/auth-store";
 
 export function LoginForm() {
     const login = useAuthStore((state) => state.login);
@@ -54,7 +55,10 @@ export function LoginForm() {
             // The backend sends a machine-readable code; the envelope message is
             // its own and can be English, so neither is shown as-is.
             setError(
-                errorMessageFrom(err, "No pudimos iniciar sesión. Inténtalo de nuevo."),
+                errorMessageFrom(
+                    err,
+                    "No pudimos iniciar sesión. Inténtalo de nuevo.",
+                ),
             );
         }
     };
@@ -120,9 +124,7 @@ export function LoginForm() {
                                 icon={Lock}
                                 placeholder="••••••••"
                                 value={password}
-                                onChange={(e) =>
-                                    setPassword(e.target.value)
-                                }
+                                onChange={(e) => setPassword(e.target.value)}
                                 className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform] focus:border-primary"
                                 disabled={loading}
                             />

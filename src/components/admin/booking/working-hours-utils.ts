@@ -12,11 +12,26 @@ export const WORKING_DAYS: Array<{ key: string; label: string }> = [
 ];
 
 export const DEFAULT_WORKING_HOURS: WorkingHours = {
-    monday: [{ start: "09:00", end: "12:00" }, { start: "13:00", end: "17:00" }],
-    tuesday: [{ start: "09:00", end: "12:00" }, { start: "13:00", end: "17:00" }],
-    wednesday: [{ start: "09:00", end: "12:00" }, { start: "13:00", end: "17:00" }],
-    thursday: [{ start: "09:00", end: "12:00" }, { start: "13:00", end: "17:00" }],
-    friday: [{ start: "09:00", end: "12:00" }, { start: "13:00", end: "17:00" }],
+    monday: [
+        { start: "09:00", end: "12:00" },
+        { start: "13:00", end: "17:00" },
+    ],
+    tuesday: [
+        { start: "09:00", end: "12:00" },
+        { start: "13:00", end: "17:00" },
+    ],
+    wednesday: [
+        { start: "09:00", end: "12:00" },
+        { start: "13:00", end: "17:00" },
+    ],
+    thursday: [
+        { start: "09:00", end: "12:00" },
+        { start: "13:00", end: "17:00" },
+    ],
+    friday: [
+        { start: "09:00", end: "12:00" },
+        { start: "13:00", end: "17:00" },
+    ],
     saturday: null,
     sunday: null,
 };

@@ -1,6 +1,6 @@
-import React, { Suspense } from "react";
+import { Suspense } from "react";
 import ServicesTableClient from "@/components/admin/booking/ServicesTableClient";
-import { api } from '@/lib/api-client';
+import { api } from "@/lib/api-client";
 
 export const metadata = { title: "Servicios de reservas" };
 
@@ -10,7 +10,7 @@ async function getData() {
     try {
         const [servicesData, categoriesData] = await Promise.all([
             api.get<any[]>(`/services?activeOnly=false`).catch(() => []),
-            api.get<any[]>('/categories').catch(() => []),
+            api.get<any[]>("/categories").catch(() => []),
         ]);
 
         return {

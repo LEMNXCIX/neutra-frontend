@@ -1,93 +1,96 @@
 "use client";
 
-import React, { useReducer, useEffect, useCallback } from "react";
-import { PlatformFeature, featuresService } from "@/services/features.service";
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableRow,
-} from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
-import {
-    Edit,
-    Trash2,
-    Plus,
-    Zap,
-    Search,
-    RefreshCw,
     DollarSign,
+    Edit,
+    Plus,
+    RefreshCw,
+    Search,
+    Trash2,
+    Zap,
 } from "lucide-react";
-import { FeatureDialog } from "./FeatureDialog";
+import { useCallback, useEffect, useReducer } from "react";
 import { toast } from "sonner";
-import { Badge } from "@/components/ui/badge";
 import { AdminTableHeader } from "@/components/admin/shared/AdminTableHeader";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
+import {
+    featuresService,
+    type PlatformFeature,
+} from "@/services/features.service";
+import { FeatureDialog } from "./FeatureDialog";
 
 const EMPTY_FEATURES: PlatformFeature[] = [];
 
 type FeaturesState = {
-  features: PlatformFeature[];
-  loading: boolean;
-  search: string;
-  dialogOpen: boolean;
-  editingFeature: PlatformFeature | null;
+    features: PlatformFeature[];
+    loading: boolean;
+    search: string;
+    dialogOpen: boolean;
+    editingFeature: PlatformFeature | null;
 };
 
 type FeaturesAction =
-  | { type: "SET_FEATURES"; payload: PlatformFeature[] }
-  | { type: "SET_LOADING"; payload: boolean }
-  | { type: "SET_SEARCH"; payload: string }
-  | { type: "SET_DIALOG_OPEN"; payload: boolean }
-  | { type: "SET_EDITING_FEATURE"; payload: PlatformFeature | null };
+    | { type: "SET_FEATURES"; payload: PlatformFeature[] }
+    | { type: "SET_LOADING"; payload: boolean }
+    | { type: "SET_SEARCH"; payload: string }
+    | { type: "SET_DIALOG_OPEN"; payload: boolean }
+    | { type: "SET_EDITING_FEATURE"; payload: PlatformFeature | null };
 
-function featuresReducer(state: FeaturesState, action: FeaturesAction): FeaturesState {
-  switch (action.type) {
-    case "SET_FEATURES":
-      return { ...state, features: action.payload };
-    case "SET_LOADING":
-      return { ...state, loading: action.payload };
-    case "SET_SEARCH":
-      return { ...state, search: action.payload };
-    case "SET_DIALOG_OPEN":
-      return { ...state, dialogOpen: action.payload };
-    case "SET_EDITING_FEATURE":
-      return { ...state, editingFeature: action.payload };
-    default:
-      return state;
-  }
+function featuresReducer(
+    state: FeaturesState,
+    action: FeaturesAction,
+): FeaturesState {
+    switch (action.type) {
+        case "SET_FEATURES":
+            return { ...state, features: action.payload };
+        case "SET_LOADING":
+            return { ...state, loading: action.payload };
+        case "SET_SEARCH":
+            return { ...state, search: action.payload };
+        case "SET_DIALOG_OPEN":
+            return { ...state, dialogOpen: action.payload };
+        case "SET_EDITING_FEATURE":
+            return { ...state, editingFeature: action.payload };
+        default:
+            return state;
+    }
 }
 
 interface FeaturesTableProps {
-  initialFeatures?: PlatformFeature[];
+    initialFeatures?: PlatformFeature[];
 }
 
-export function FeaturesTable({ initialFeatures = EMPTY_FEATURES }: FeaturesTableProps) {
-  const [state, dispatch] = useReducer(featuresReducer, {
-    features: initialFeatures,
-    loading: initialFeatures.length === 0,
-    search: "",
-    dialogOpen: false,
-    editingFeature: null,
-  });
+export function FeaturesTable({
+    initialFeatures = EMPTY_FEATURES,
+}: FeaturesTableProps) {
+    const [state, dispatch] = useReducer(featuresReducer, {
+        features: initialFeatures,
+        loading: initialFeatures.length === 0,
+        search: "",
+        dialogOpen: false,
+        editingFeature: null,
+    });
 
-  const loadFeatures = useCallback(async () => {
-    dispatch({ type: "SET_LOADING", payload: true });
-      try {
-      const data = await featuresService.getAll();
-      dispatch({ type: "SET_FEATURES", payload: data });
-    } catch (error) {
-      console.error(error);
-      toast.error("Error al cargar las funciones");
-    } finally {
-      dispatch({ type: "SET_LOADING", payload: false });
-    }
-  }, []);
+    const loadFeatures = useCallback(async () => {
+        dispatch({ type: "SET_LOADING", payload: true });
+        try {
+            const data = await featuresService.getAll();
+            dispatch({ type: "SET_FEATURES", payload: data });
+        } catch (error) {
+            console.error(error);
+            toast.error("Error al cargar las funciones");
+        } finally {
+            dispatch({ type: "SET_LOADING", payload: false });
+        }
+    }, []);
 
-  useEffect(() => {
-    loadFeatures();
-  }, [loadFeatures]);
+    useEffect(() => {
+        loadFeatures();
+    }, [loadFeatures]);
 
     const handleDelete = async (id: string) => {
         if (
@@ -106,21 +109,21 @@ export function FeaturesTable({ initialFeatures = EMPTY_FEATURES }: FeaturesTabl
         }
     };
 
-  const filteredFeatures = state.features.filter(
-    (f) =>
-      f.name.toLowerCase().includes(state.search.toLowerCase()) ||
-      f.key.toLowerCase().includes(state.search.toLowerCase()) ||
-      f.category?.toLowerCase().includes(state.search.toLowerCase()),
+    const filteredFeatures = state.features.filter(
+        (f) =>
+            f.name.toLowerCase().includes(state.search.toLowerCase()) ||
+            f.key.toLowerCase().includes(state.search.toLowerCase()) ||
+            f.category?.toLowerCase().includes(state.search.toLowerCase()),
     );
 
     const openCreate = () => {
-    dispatch({ type: "SET_EDITING_FEATURE", payload: null });
-    dispatch({ type: "SET_DIALOG_OPEN", payload: true });
+        dispatch({ type: "SET_EDITING_FEATURE", payload: null });
+        dispatch({ type: "SET_DIALOG_OPEN", payload: true });
     };
 
     const openEdit = (feature: PlatformFeature) => {
-    dispatch({ type: "SET_EDITING_FEATURE", payload: feature });
-    dispatch({ type: "SET_DIALOG_OPEN", payload: true });
+        dispatch({ type: "SET_EDITING_FEATURE", payload: feature });
+        dispatch({ type: "SET_DIALOG_OPEN", payload: true });
     };
 
     return (
@@ -144,13 +147,19 @@ export function FeaturesTable({ initialFeatures = EMPTY_FEATURES }: FeaturesTabl
                             <Input
                                 placeholder="Buscar funciones..."
                                 className="pl-9"
-      value={state.search}
-          onChange={(e) => dispatch({ type: "SET_SEARCH", payload: e.target.value })}
+                                value={state.search}
+                                onChange={(e) =>
+                                    dispatch({
+                                        type: "SET_SEARCH",
+                                        payload: e.target.value,
+                                    })
+                                }
                             />
                         </div>
                         <Button
                             variant="outline"
-                            size="icon" aria-label="Actualizar funciones"
+                            size="icon"
+                            aria-label="Actualizar funciones"
                             onClick={loadFeatures}
                         >
                             <RefreshCw
@@ -170,7 +179,8 @@ export function FeaturesTable({ initialFeatures = EMPTY_FEATURES }: FeaturesTabl
                                 ]}
                             />
                             <TableBody>
-                                {state.loading && state.features.length === 0 ? (
+                                {state.loading &&
+                                state.features.length === 0 ? (
                                     <TableRow>
                                         <TableCell
                                             colSpan={5}
@@ -226,7 +236,8 @@ export function FeaturesTable({ initialFeatures = EMPTY_FEATURES }: FeaturesTabl
                                                 <div className="flex justify-end gap-2">
                                                     <Button
                                                         variant="ghost"
-                                                        size="icon" aria-label="Editar función"
+                                                        size="icon"
+                                                        aria-label="Editar función"
                                                         onClick={() =>
                                                             openEdit(feature)
                                                         }
@@ -235,7 +246,8 @@ export function FeaturesTable({ initialFeatures = EMPTY_FEATURES }: FeaturesTabl
                                                     </Button>
                                                     <Button
                                                         variant="ghost"
-                                                        size="icon" aria-label="Eliminar función"
+                                                        size="icon"
+                                                        aria-label="Eliminar función"
                                                         className="text-destructive"
                                                         onClick={() =>
                                                             handleDelete(
@@ -257,9 +269,11 @@ export function FeaturesTable({ initialFeatures = EMPTY_FEATURES }: FeaturesTabl
             </Card>
 
             <FeatureDialog
-open={state.dialogOpen}
-        onOpenChange={(open) => dispatch({ type: "SET_DIALOG_OPEN", payload: open })}
-        feature={state.editingFeature}
+                open={state.dialogOpen}
+                onOpenChange={(open) =>
+                    dispatch({ type: "SET_DIALOG_OPEN", payload: open })
+                }
+                feature={state.editingFeature}
                 onSuccess={loadFeatures}
             />
         </div>

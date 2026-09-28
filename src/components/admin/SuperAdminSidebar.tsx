@@ -1,33 +1,33 @@
 "use client";
 
-import React, { useState } from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import type { LucideIcon } from "lucide-react";
 import {
-    LayoutDashboard,
-    Package,
-    ShoppingCart,
-    Users,
-    Ticket,
-    Menu,
-    X,
-    LayoutList,
-    Megaphone,
-    Images,
+    ArrowLeft,
     BrickWallShield,
-    Scissors,
-    UserCog,
     Building,
     CalendarDays,
-    ArrowLeft,
-    Zap,
     Gift,
+    Images,
+    LayoutDashboard,
+    LayoutList,
+    Megaphone,
+    Menu,
+    Package,
+    Scissors,
+    ShoppingCart,
+    Ticket,
+    UserCog,
+    Users,
+    X,
+    Zap,
 } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { NavItem } from "@/config/admin-navigation";
+import type { NavItem } from "@/config/admin-navigation";
 
 const ICON_MAP: Record<string, LucideIcon> = {
     LayoutDashboard,
@@ -73,7 +73,8 @@ export default function SuperAdminSidebar({ items }: SuperAdminSidebarProps) {
                     </span>
                 )}
                 <Button
-                    size="icon" aria-label="Alternar menú"
+                    size="icon"
+                    aria-label="Alternar menú"
                     variant="ghost"
                     onClick={() => setSidebarOpen(!sidebarOpen)}
                     className="size-8 hover:bg-muted transition-colors rounded-md"
@@ -124,7 +125,8 @@ export default function SuperAdminSidebar({ items }: SuperAdminSidebarProps) {
                     href="/"
                     className="text-muted-foreground hover:text-foreground font-medium flex items-center gap-2 transition-colors"
                 >
-                    <ArrowLeft size={14} /> {sidebarOpen && "Volver a la Grilla"}
+                    <ArrowLeft size={14} />{" "}
+                    {sidebarOpen && "Volver a la Grilla"}
                 </Link>
             </div>
         </aside>

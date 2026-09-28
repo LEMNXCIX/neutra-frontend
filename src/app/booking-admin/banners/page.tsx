@@ -1,12 +1,12 @@
-import React, { Suspense } from "react";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 import BannersTableClient from "@/components/admin/banners/BannersTableClient";
+import { api } from "@/lib/api-client";
 import { validateAdminAccess } from "@/lib/server-auth";
-import { api } from '@/lib/api-client';
 
 export const metadata = { title: "Anuncios" };
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 export default async function BookingBannersPage() {
     const { isValid } = await validateAdminAccess();

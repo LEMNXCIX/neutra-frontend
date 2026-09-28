@@ -1,17 +1,17 @@
+import type { Metadata } from "next";
 import { headers } from "next/headers";
+import FooterWrapper from "@/components/footer-wrapper";
 import { Navigation as NavBar } from "@/components/nav_bar";
 import { NeutralNavigation } from "@/components/neutral-navigation";
-import FooterWrapper from "@/components/footer-wrapper";
 import {
     getTenantBrandingFromHeaders,
     getTenantNameFromHeaders,
 } from "@/lib/server-theme";
 import { getHomeContent } from "@/lib/strapi";
-import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Tienda",
-  description: "Explora nuestros productos y servicios",
+    title: "Tienda",
+    description: "Explora nuestros productos y servicios",
 };
 
 export default async function StoreLayout({
@@ -20,8 +20,7 @@ export default async function StoreLayout({
     children: React.ReactNode;
 }) {
     const requestHeaders = await headers();
-    const isSuperAdmin =
-        requestHeaders.get("x-tenant-slug") === "superadmin";
+    const isSuperAdmin = requestHeaders.get("x-tenant-slug") === "superadmin";
 
     const [branding, tenantName, cms] = await Promise.all([
         getTenantBrandingFromHeaders(),
@@ -33,9 +32,11 @@ export default async function StoreLayout({
         <div
             id="root-content"
             className="transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-300 ease-in-out"
-            style={{
-                marginLeft: 'var(--sidebar-width, 0px)',
-            } as React.CSSProperties}
+            style={
+                {
+                    marginLeft: "var(--sidebar-width, 0px)",
+                } as React.CSSProperties
+            }
         >
             <div className="print:hidden">
                 {isSuperAdmin ? (
@@ -47,25 +48,17 @@ export default async function StoreLayout({
                     />
                 )}
             </div>
-            <div
-                className={
-                    isSuperAdmin
-                        ? "print:pt-0"
-                        : "pt-16 print:pt-0"
-                }
-            >
+            <div className={isSuperAdmin ? "print:pt-0" : "pt-16 print:pt-0"}>
                 {children}
             </div>
             <div className="print:hidden">
-            <FooterWrapper
-                minimal={isSuperAdmin}
-                tenantName={
-                    isSuperAdmin ? "Neutra SuperAdmin" : tenantName
-                }
-                tenantLogo={branding?.tenantLogo}
-                footerDescription={cms?.footerDescription}
-                socialLinks={cms?.socialLinks}
-            />
+                <FooterWrapper
+                    minimal={isSuperAdmin}
+                    tenantName={isSuperAdmin ? "Neutra SuperAdmin" : tenantName}
+                    tenantLogo={branding?.tenantLogo}
+                    footerDescription={cms?.footerDescription}
+                    socialLinks={cms?.socialLinks}
+                />
             </div>
         </div>
     );

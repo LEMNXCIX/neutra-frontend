@@ -1,10 +1,10 @@
-import React, { Suspense } from "react";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 import ServicesTableClient from "@/components/admin/booking/ServicesTableClient";
+import { api } from "@/lib/api-client";
 import { validateAdminAccess } from "@/lib/server-auth";
-import { api } from '@/lib/api-client';
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 export default async function SuperAdminServicesPage({
     searchParams,
@@ -32,7 +32,9 @@ export default async function SuperAdminServicesPage({
             <Suspense fallback={null}>
                 <ServicesTableClient
                     services={Array.isArray(servicesData) ? servicesData : []}
-                    categories={Array.isArray(categoriesData) ? categoriesData : []}
+                    categories={
+                        Array.isArray(categoriesData) ? categoriesData : []
+                    }
                     isSuperAdmin={true}
                 />
             </Suspense>

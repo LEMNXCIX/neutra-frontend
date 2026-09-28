@@ -1,7 +1,7 @@
+import { Home, PackageX, Search } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Home, Search, PackageX } from "lucide-react";
 
 export default function NotFound() {
     return (

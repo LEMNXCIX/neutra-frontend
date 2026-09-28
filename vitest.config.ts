@@ -1,29 +1,29 @@
-import { defineConfig } from 'vitest/config';
-import path from 'path';
+import path from "node:path";
+import { defineConfig } from "vitest/config";
 
 export default defineConfig({
     resolve: {
         alias: {
-            '@': path.resolve(__dirname, './src'),
+            "@": path.resolve(__dirname, "./src"),
         },
     },
     test: {
         globals: true,
-        environment: 'node',
-        include: ['src/**/*.test.ts', 'src/**/*.test.tsx'],
-        exclude: ['node_modules', '.next'],
+        environment: "node",
+        include: ["src/**/*.test.ts", "src/**/*.test.tsx"],
+        exclude: ["node_modules", ".next"],
         coverage: {
-            provider: 'v8',
-            reporter: ['text', 'lcov'],
+            provider: "v8",
+            reporter: ["text", "lcov"],
             include: [
-                'src/lib/api-client.ts',
-                'src/lib/api-route-handler.ts',
-                'src/lib/theme.ts',
-                'src/store/**/*.ts',
-                'src/services/**/*.ts',
-                'src/app/api/**/route.ts',
+                "src/lib/api-client.ts",
+                "src/lib/api-route-handler.ts",
+                "src/lib/theme.ts",
+                "src/store/**/*.ts",
+                "src/services/**/*.ts",
+                "src/app/api/**/route.ts",
             ],
         },
-        setupFiles: ['./tests/setup.ts'],
+        setupFiles: ["./tests/setup.ts"],
     },
 });

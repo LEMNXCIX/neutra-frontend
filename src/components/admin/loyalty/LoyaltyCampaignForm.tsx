@@ -1,25 +1,25 @@
 "use client";
 
-import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { Save } from "lucide-react";
+import { type FormEvent, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Spinner } from "@/components/ui/spinner";
-import { productsService } from "@/services/products.service";
-import { servicesService, type ServiceItem } from "@/services/services.service";
+import { Textarea } from "@/components/ui/textarea";
 import { categoriesService } from "@/services/categories.service";
-import type { Product } from "@/types/product.types";
-import type { Category } from "@/types/category.types";
 import type {
     CreateLoyaltyCampaignInput,
     LoyaltyCampaign,
     LoyaltyCampaignMetric,
     LoyaltyCampaignSource,
 } from "@/services/loyalty.service";
+import { productsService } from "@/services/products.service";
+import { type ServiceItem, servicesService } from "@/services/services.service";
+import type { Category } from "@/types/category.types";
 import { CouponType } from "@/types/coupon.types";
+import type { Product } from "@/types/product.types";
 
 interface LoyaltyCampaignFormProps {
     campaign?: LoyaltyCampaign | null;
@@ -61,8 +61,7 @@ interface FormValue {
 const selectClassName =
     "flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm disabled:cursor-not-allowed disabled:opacity-50";
 const MAX_INT = 2_147_483_647;
-const POSITIVE_FIXED_DECIMAL_PATTERN =
-    /^(?:0|[1-9]\d{0,15})(?:\.\d{1,2})?$/;
+const POSITIVE_FIXED_DECIMAL_PATTERN = /^(?:0|[1-9]\d{0,15})(?:\.\d{1,2})?$/;
 
 function dateInputValue(value?: string): string {
     if (!value) return "";
@@ -149,11 +148,7 @@ function optionalNumber(value: string): number | null {
 function validInteger(value: string, required: boolean): boolean {
     if (!value.trim()) return !required;
     const parsed = Number(value);
-    return (
-        Number.isSafeInteger(parsed) &&
-        parsed > 0 &&
-        parsed <= MAX_INT
-    );
+    return Number.isSafeInteger(parsed) && parsed > 0 && parsed <= MAX_INT;
 }
 
 function validAmount(value: string): boolean {
@@ -247,175 +242,168 @@ function CampaignBasicsFields({
     claimGraceWarning?: string;
 }) {
     return (
-            <div className="grid gap-5 md:grid-cols-2">
-                <div className="space-y-2 md:col-span-2">
-                    <Label htmlFor="campaign-name">Nombre</Label>
-                    <Input
-                        id="campaign-name"
-                        required
-                        value={value.name}
-                        onChange={(event) => update("name", event.target.value)}
-                        disabled={isSaving}
-                    />
-                </div>
-                <div className="space-y-2 md:col-span-2">
-                    <Label htmlFor="campaign-description">
-                        Descripción de la campaña
-                    </Label>
-                    <Textarea
-                        id="campaign-description"
-                        value={value.description}
-                        onChange={(event) =>
-                            update("description", event.target.value)
-                        }
-                        disabled={isSaving}
-                    />
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="campaign-metric">Métrica</Label>
-                    <select
-                        id="campaign-metric"
-                        className={selectClassName}
-                        value={value.metric}
-                        onChange={(event) =>
-                            update(
-                                "metric",
-                                event.target.value as LoyaltyCampaignMetric,
-                            )
-                        }
-                        disabled={isSaving}
-                    >
-                        <option value="COUNT">Cantidad completada</option>
-                        <option value="SPEND">Gasto neto</option>
-                    </select>
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="campaign-target">Objetivo</Label>
-                    <Input
-                        id="campaign-target"
-                        required
-                        inputMode="decimal"
-                        value={value.targetValue}
-                        onChange={(event) =>
-                            update("targetValue", event.target.value)
-                        }
-                        disabled={isSaving}
-                    />
-                    <p className="text-xs text-muted-foreground">
-                        Entero para COUNT; hasta dos decimales para SPEND.
-                    </p>
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="campaign-reward-valid-days">
-                        Validez de la recompensa (días)
-                    </Label>
-                    <Input
-                        id="campaign-reward-valid-days"
-                        type="number"
-                        min={1}
-                        max={MAX_INT}
-                        step={1}
-                        required
-                        value={value.rewardValidDays}
-                        onChange={(event) =>
-                            update("rewardValidDays", event.target.value)
-                        }
-                        disabled={isSaving}
-                    />
-                    <p className="text-xs text-muted-foreground">
-                        Se cuenta desde que el cliente reclama, no desde que
-                        termina la campaña. Si la campaña dura 15 días y la
-                        validez es 2, quien reclame el último día tiene un cupón
-                        válido 2 días más.
-                    </p>
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="campaign-starts-at">
-                        Inicio de la campaña
-                    </Label>
-                    <Input
-                        id="campaign-starts-at"
-                        type="date"
-                        required
-                        value={value.startsAt}
-                        onChange={(event) =>
-                            update("startsAt", event.target.value)
-                        }
-                        disabled={isSaving}
-                    />
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="campaign-ends-at">Fin de la campaña</Label>
-                    <Input
-                        id="campaign-ends-at"
-                        type="date"
-                        required
-                        value={value.endsAt}
-                        onChange={(event) =>
-                            update("endsAt", event.target.value)
-                        }
-                        disabled={isSaving}
-                    />
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="campaign-claim-grace-days">
-                        Días de prórroga para reclamar
-                    </Label>
-                    <Input
-                        id="campaign-claim-grace-days"
-                        type="number"
-                        min={0}
-                        max={MAX_INT}
-                        step={1}
-                        value={value.claimGraceDays}
-                        onChange={(event) =>
-                            update("claimGraceDays", event.target.value)
-                        }
-                        disabled={isSaving}
-                    />
-                    <p className="text-xs text-muted-foreground">
-                        Se cuenta desde el fin de la campaña, no desde el inicio.
-                    </p>
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="campaign-claim-until">
-                        Reclamable hasta
-                    </Label>
-                    <Input
-                        id="campaign-claim-until"
-                        type="date"
-                        required
-                        value={value.claimUntil}
-                        onChange={(event) =>
-                            update("claimUntil", event.target.value)
-                        }
-                        disabled={isSaving}
-                    />
-                    {claimGraceWarning && (
-                        <p className="text-xs text-amber-600 dark:text-amber-500">
-                            {claimGraceWarning}
-                        </p>
-                    )}
-                </div>
-                <p className="text-xs text-muted-foreground md:col-span-2">
-                    Fechas en UTC: cada fecha se convierte a medianoche UTC antes de enviarse.
-                </p>
-                <div className="space-y-2">
-                    <Label htmlFor="campaign-max-claims">Límite de reclamos</Label>
-                    <Input
-                        id="campaign-max-claims"
-                        type="number"
-                        min={1}
-                        max={MAX_INT}
-                        step={1}
-                        value={value.maxClaims}
-                        onChange={(event) =>
-                            update("maxClaims", event.target.value)
-                        }
-                        disabled={isSaving}
-                    />
-                </div>
+        <div className="grid gap-5 md:grid-cols-2">
+            <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="campaign-name">Nombre</Label>
+                <Input
+                    id="campaign-name"
+                    required
+                    value={value.name}
+                    onChange={(event) => update("name", event.target.value)}
+                    disabled={isSaving}
+                />
             </div>
+            <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="campaign-description">
+                    Descripción de la campaña
+                </Label>
+                <Textarea
+                    id="campaign-description"
+                    value={value.description}
+                    onChange={(event) =>
+                        update("description", event.target.value)
+                    }
+                    disabled={isSaving}
+                />
+            </div>
+            <div className="space-y-2">
+                <Label htmlFor="campaign-metric">Métrica</Label>
+                <select
+                    id="campaign-metric"
+                    className={selectClassName}
+                    value={value.metric}
+                    onChange={(event) =>
+                        update(
+                            "metric",
+                            event.target.value as LoyaltyCampaignMetric,
+                        )
+                    }
+                    disabled={isSaving}
+                >
+                    <option value="COUNT">Cantidad completada</option>
+                    <option value="SPEND">Gasto neto</option>
+                </select>
+            </div>
+            <div className="space-y-2">
+                <Label htmlFor="campaign-target">Objetivo</Label>
+                <Input
+                    id="campaign-target"
+                    required
+                    inputMode="decimal"
+                    value={value.targetValue}
+                    onChange={(event) =>
+                        update("targetValue", event.target.value)
+                    }
+                    disabled={isSaving}
+                />
+                <p className="text-xs text-muted-foreground">
+                    Entero para COUNT; hasta dos decimales para SPEND.
+                </p>
+            </div>
+            <div className="space-y-2">
+                <Label htmlFor="campaign-reward-valid-days">
+                    Validez de la recompensa (días)
+                </Label>
+                <Input
+                    id="campaign-reward-valid-days"
+                    type="number"
+                    min={1}
+                    max={MAX_INT}
+                    step={1}
+                    required
+                    value={value.rewardValidDays}
+                    onChange={(event) =>
+                        update("rewardValidDays", event.target.value)
+                    }
+                    disabled={isSaving}
+                />
+                <p className="text-xs text-muted-foreground">
+                    Se cuenta desde que el cliente reclama, no desde que termina
+                    la campaña. Si la campaña dura 15 días y la validez es 2,
+                    quien reclame el último día tiene un cupón válido 2 días
+                    más.
+                </p>
+            </div>
+            <div className="space-y-2">
+                <Label htmlFor="campaign-starts-at">Inicio de la campaña</Label>
+                <Input
+                    id="campaign-starts-at"
+                    type="date"
+                    required
+                    value={value.startsAt}
+                    onChange={(event) => update("startsAt", event.target.value)}
+                    disabled={isSaving}
+                />
+            </div>
+            <div className="space-y-2">
+                <Label htmlFor="campaign-ends-at">Fin de la campaña</Label>
+                <Input
+                    id="campaign-ends-at"
+                    type="date"
+                    required
+                    value={value.endsAt}
+                    onChange={(event) => update("endsAt", event.target.value)}
+                    disabled={isSaving}
+                />
+            </div>
+            <div className="space-y-2">
+                <Label htmlFor="campaign-claim-grace-days">
+                    Días de prórroga para reclamar
+                </Label>
+                <Input
+                    id="campaign-claim-grace-days"
+                    type="number"
+                    min={0}
+                    max={MAX_INT}
+                    step={1}
+                    value={value.claimGraceDays}
+                    onChange={(event) =>
+                        update("claimGraceDays", event.target.value)
+                    }
+                    disabled={isSaving}
+                />
+                <p className="text-xs text-muted-foreground">
+                    Se cuenta desde el fin de la campaña, no desde el inicio.
+                </p>
+            </div>
+            <div className="space-y-2">
+                <Label htmlFor="campaign-claim-until">Reclamable hasta</Label>
+                <Input
+                    id="campaign-claim-until"
+                    type="date"
+                    required
+                    value={value.claimUntil}
+                    onChange={(event) =>
+                        update("claimUntil", event.target.value)
+                    }
+                    disabled={isSaving}
+                />
+                {claimGraceWarning && (
+                    <p className="text-xs text-amber-600 dark:text-amber-500">
+                        {claimGraceWarning}
+                    </p>
+                )}
+            </div>
+            <p className="text-xs text-muted-foreground md:col-span-2">
+                Fechas en UTC: cada fecha se convierte a medianoche UTC antes de
+                enviarse.
+            </p>
+            <div className="space-y-2">
+                <Label htmlFor="campaign-max-claims">Límite de reclamos</Label>
+                <Input
+                    id="campaign-max-claims"
+                    type="number"
+                    min={1}
+                    max={MAX_INT}
+                    step={1}
+                    value={value.maxClaims}
+                    onChange={(event) =>
+                        update("maxClaims", event.target.value)
+                    }
+                    disabled={isSaving}
+                />
+            </div>
+        </div>
     );
 }
 
@@ -471,9 +459,13 @@ function ApplicablePicker({
                                         id={`applicable-${option.id}`}
                                         checked={checked}
                                         disabled={isSaving}
-                                        onCheckedChange={() => onToggle(option.id)}
+                                        onCheckedChange={() =>
+                                            onToggle(option.id)
+                                        }
                                     />
-                                    <span className="truncate">{option.name}</span>
+                                    <span className="truncate">
+                                        {option.name}
+                                    </span>
                                 </label>
                             </li>
                         );
@@ -560,10 +552,18 @@ function CampaignRewardFields({
         return () => {
             cancelled = true;
         };
-    }, [showsProducts, showsServices, showsAnyCatalogue, wantedCategoryTypes.join()]);
+    }, [
+        showsProducts,
+        showsServices,
+        showsAnyCatalogue,
+        wantedCategoryTypes.join(),
+    ]);
 
     const toggle = (
-        key: "applicableProducts" | "applicableCategories" | "applicableServices",
+        key:
+            | "applicableProducts"
+            | "applicableCategories"
+            | "applicableServices",
         id: string,
     ) => {
         const current = parseIds(value[key]);
@@ -574,81 +574,88 @@ function CampaignRewardFields({
     };
 
     return (
-            <fieldset className="space-y-5 rounded-lg border p-5">
-                <legend className="px-1 font-semibold">Definición de recompensa</legend>
-                <div className="grid gap-5 md:grid-cols-2">
-                    <div className="space-y-2">
-                        <Label htmlFor="reward-type">Tipo</Label>
-                        <select
-                            id="reward-type"
-                            className={selectClassName}
-                            value={value.rewardType}
-                            onChange={(event) =>
-                                update("rewardType", event.target.value as CouponType)
-                            }
-                            disabled={isSaving}
-                        >
-                            <option value={CouponType.PERCENT}>Porcentaje</option>
-                            <option value={CouponType.FIXED}>Importe fijo</option>
-                        </select>
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="reward-value">Valor</Label>
-                        <Input
-                            id="reward-value"
-                            type="number"
-                            min={0}
-                            step="0.01"
-                            required
-                            value={value.rewardValue}
-                            onChange={(event) =>
-                                update("rewardValue", event.target.value)
-                            }
-                            disabled={isSaving}
-                        />
-                    </div>
-                    <div className="space-y-2 md:col-span-2">
-                        <Label htmlFor="reward-description">
-                            Descripción de la recompensa
-                        </Label>
-                        <Textarea
-                            id="reward-description"
-                            value={value.rewardDescription}
-                            onChange={(event) =>
-                                update("rewardDescription", event.target.value)
-                            }
-                            disabled={isSaving}
-                        />
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="reward-min-purchase">Compra mínima</Label>
-                        <Input
-                            id="reward-min-purchase"
-                            type="number"
-                            min={0}
-                            step="0.01"
-                            value={value.minPurchaseAmount}
-                            onChange={(event) =>
-                                update("minPurchaseAmount", event.target.value)
-                            }
-                            disabled={isSaving}
-                        />
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="reward-max-discount">Descuento máximo</Label>
-                        <Input
-                            id="reward-max-discount"
-                            type="number"
-                            min={0}
-                            step="0.01"
-                            value={value.maxDiscountAmount}
-                            onChange={(event) =>
-                                update("maxDiscountAmount", event.target.value)
-                            }
-                            disabled={isSaving}
-                        />
-                    </div>
-                    {showsProducts && (
+        <fieldset className="space-y-5 rounded-lg border p-5">
+            <legend className="px-1 font-semibold">
+                Definición de recompensa
+            </legend>
+            <div className="grid gap-5 md:grid-cols-2">
+                <div className="space-y-2">
+                    <Label htmlFor="reward-type">Tipo</Label>
+                    <select
+                        id="reward-type"
+                        className={selectClassName}
+                        value={value.rewardType}
+                        onChange={(event) =>
+                            update(
+                                "rewardType",
+                                event.target.value as CouponType,
+                            )
+                        }
+                        disabled={isSaving}
+                    >
+                        <option value={CouponType.PERCENT}>Porcentaje</option>
+                        <option value={CouponType.FIXED}>Importe fijo</option>
+                    </select>
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="reward-value">Valor</Label>
+                    <Input
+                        id="reward-value"
+                        type="number"
+                        min={0}
+                        step="0.01"
+                        required
+                        value={value.rewardValue}
+                        onChange={(event) =>
+                            update("rewardValue", event.target.value)
+                        }
+                        disabled={isSaving}
+                    />
+                </div>
+                <div className="space-y-2 md:col-span-2">
+                    <Label htmlFor="reward-description">
+                        Descripción de la recompensa
+                    </Label>
+                    <Textarea
+                        id="reward-description"
+                        value={value.rewardDescription}
+                        onChange={(event) =>
+                            update("rewardDescription", event.target.value)
+                        }
+                        disabled={isSaving}
+                    />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="reward-min-purchase">Compra mínima</Label>
+                    <Input
+                        id="reward-min-purchase"
+                        type="number"
+                        min={0}
+                        step="0.01"
+                        value={value.minPurchaseAmount}
+                        onChange={(event) =>
+                            update("minPurchaseAmount", event.target.value)
+                        }
+                        disabled={isSaving}
+                    />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="reward-max-discount">
+                        Descuento máximo
+                    </Label>
+                    <Input
+                        id="reward-max-discount"
+                        type="number"
+                        min={0}
+                        step="0.01"
+                        value={value.maxDiscountAmount}
+                        onChange={(event) =>
+                            update("maxDiscountAmount", event.target.value)
+                        }
+                        disabled={isSaving}
+                    />
+                </div>
+                {showsProducts && (
                     <ApplicablePicker
                         legend="Productos bonificados"
                         options={productOptions}
@@ -658,17 +665,17 @@ function CampaignRewardFields({
                         isLoading={optionsLoading}
                         emptyHint="Este tenant todavía no tiene productos cargados."
                     />
-                    )}
-                    <ApplicablePicker
-                        legend="Categorías bonificadas"
-                        options={categoryOptions}
-                        selected={parseIds(value.applicableCategories)}
-                        onToggle={(id) => toggle("applicableCategories", id)}
-                        isSaving={isSaving}
-                        isLoading={optionsLoading}
-                        emptyHint="Este tenant todavía no tiene categorías cargadas."
-                    />
-                    {showsServices && (
+                )}
+                <ApplicablePicker
+                    legend="Categorías bonificadas"
+                    options={categoryOptions}
+                    selected={parseIds(value.applicableCategories)}
+                    onToggle={(id) => toggle("applicableCategories", id)}
+                    isSaving={isSaving}
+                    isLoading={optionsLoading}
+                    emptyHint="Este tenant todavía no tiene categorías cargadas."
+                />
+                {showsServices && (
                     <ApplicablePicker
                         legend="Servicios bonificados"
                         options={serviceOptions}
@@ -678,9 +685,9 @@ function CampaignRewardFields({
                         isLoading={optionsLoading}
                         emptyHint="Este tenant todavía no tiene servicios cargados."
                     />
-                    )}
-                </div>
-            </fieldset>
+                )}
+            </div>
+        </fieldset>
     );
 }
 
@@ -791,7 +798,12 @@ export function LoyaltyCampaignForm({
                           : "Crear borrador"}
                 </Button>
                 {campaign && onCancel && (
-                    <Button type="button" variant="outline" onClick={onCancel} disabled={isSaving}>
+                    <Button
+                        type="button"
+                        variant="outline"
+                        onClick={onCancel}
+                        disabled={isSaving}
+                    >
                         Cancelar
                     </Button>
                 )}

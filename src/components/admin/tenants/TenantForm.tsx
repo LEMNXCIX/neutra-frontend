@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import type React from "react";
+import { useState } from "react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
     Select,
     SelectContent,
@@ -12,18 +13,16 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Spinner } from "@/components/ui/spinner";
-import { Tenant, CreateTenantData, TenantType } from "@/types/tenant";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import type { PlatformFeature } from "@/services/features.service";
 import { tenantService } from "@/services/tenant.service";
-import { PlatformFeature } from "@/services/features.service";
+import { type CreateTenantData, type Tenant, TenantType } from "@/types/tenant";
 
 const EMPTY_PLATFORM_FEATURES: PlatformFeature[] = [];
+
+import { AlertCircle, Clock } from "lucide-react";
 import { toast } from "sonner";
-import { reportError } from "@/lib/error-reporting";
-import { Checkbox } from "@/components/ui/checkbox";
-import { BrandingEditor } from "./BrandingEditor";
-import { Clock, AlertCircle } from "lucide-react";
 import {
     HolidaysEditor,
     WorkingHoursEditor,
@@ -32,6 +31,9 @@ import {
     DEFAULT_WORKING_HOURS,
     normalizeWorkingHours,
 } from "@/components/admin/booking/working-hours-utils";
+import { Checkbox } from "@/components/ui/checkbox";
+import { reportError } from "@/lib/error-reporting";
+import { BrandingEditor } from "./BrandingEditor";
 
 interface TenantFormProps {
     tenant?: Tenant | null;
@@ -392,9 +394,9 @@ export function TenantForm({
 }: TenantFormProps) {
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState("");
-    const [platformFeatures, _setPlatformFeatures] = useState<PlatformFeature[]>(
-        initialPlatformFeatures,
-    );
+    const [platformFeatures, _setPlatformFeatures] = useState<
+        PlatformFeature[]
+    >(initialPlatformFeatures);
     const [formData, setFormData] = useState<CreateTenantData>(() => ({
         name: tenant?.name || "",
         slug: tenant?.slug || "",

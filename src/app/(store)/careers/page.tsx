@@ -1,19 +1,19 @@
-import React from "react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import { MapPin, ArrowRight } from "lucide-react";
-import Link from "next/link";
-import { getCmsPage } from "@/lib/strapi";
-import { cmsHeader } from "@/lib/cms-page";
+import { ArrowRight, MapPin } from "lucide-react";
 import type { Metadata } from "next";
+import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { cmsHeader } from "@/lib/cms-page";
+import { getCmsPage } from "@/lib/strapi";
 
 export async function generateMetadata(): Promise<Metadata> {
     const cms = await getCmsPage("careers-pages");
     return {
         title: cms?.title ?? "Trabaja con Nosotros",
         description:
-            cms?.subtitle ?? "Súmate al equipo y explora oportunidades profesionales",
+            cms?.subtitle ??
+            "Súmate al equipo y explora oportunidades profesionales",
     };
 }
 

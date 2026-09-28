@@ -1,6 +1,6 @@
-import React, { Suspense } from "react";
+import { Suspense } from "react";
 import CategoriesTableClient from "@/components/admin/categories/CategoriesTableClient";
-import { api } from '@/lib/api-client';
+import { api } from "@/lib/api-client";
 
 export const metadata = { title: "Categorías de reservas" };
 
@@ -13,7 +13,8 @@ async function getCategories(searchParams: { type?: string }) {
         query.set("type", type);
 
         const data = await api.get<any>(`/categories?${query.toString()}`);
-        const categories = data?.categories || (Array.isArray(data) ? data : []);
+        const categories =
+            data?.categories || (Array.isArray(data) ? data : []);
 
         // Stats from backend if available, otherwise calculate
         const backendStats = data.data?.stats || data.stats;

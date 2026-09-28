@@ -1,12 +1,11 @@
-import React from "react";
-import { Truck, Globe, Clock } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { getCmsPage } from "@/lib/strapi";
-import { cmsHeader } from "@/lib/cms-page";
+import { Clock, Globe, Truck } from "lucide-react";
 import type { Metadata } from "next";
+import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { cmsHeader } from "@/lib/cms-page";
+import { getCmsPage } from "@/lib/strapi";
 
 export async function generateMetadata(): Promise<Metadata> {
     const cms = await getCmsPage("shipping-pages");
@@ -33,7 +32,8 @@ const DEFAULT_TIERS = [
     {
         name: "Red Global",
         price: "",
-        description: "Logística internacional en más de 50 países con gestión aduanera.",
+        description:
+            "Logística internacional en más de 50 países con gestión aduanera.",
     },
 ];
 
@@ -61,7 +61,10 @@ export default async function ShippingPage() {
           }))
         : DEFAULT_TIERS.map((t, i) => ({ icon: TIER_ICONS[i], ...t }));
     const methods = cms?.tiers?.length
-        ? cms.tiers.map((t: any) => ({ label: t.label, description: t.description }))
+        ? cms.tiers.map((t: any) => ({
+              label: t.label,
+              description: t.description,
+          }))
         : DEFAULT_METHODS;
 
     return (
@@ -157,8 +160,8 @@ export default async function ShippingPage() {
                             </h3>
                             <p className="text-sm font-medium leading-relaxed opacity-90">
                                 Al despachar, tu panel personal se actualizará
-                                con un número de seguimiento único. Monitoreá
-                                el envío en tiempo real.
+                                con un número de seguimiento único. Monitoreá el
+                                envío en tiempo real.
                             </p>
                             <Button
                                 className="w-full h-14 rounded-xl font-bold bg-white text-primary hover:bg-white/90 shadow-lg"

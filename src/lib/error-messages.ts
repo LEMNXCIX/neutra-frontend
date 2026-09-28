@@ -30,7 +30,8 @@ const CODE_MESSAGES: Record<string, string> = {
     AUTH_MISSING_TOKEN: "Tu sesión expiró. Volvé a iniciar sesión.",
     AUTH_UNAUTHORIZED: "Necesitás iniciar sesión para continuar.",
     AUTH_FORBIDDEN: "No tenés permisos para realizar esta acción.",
-    AUTH_INSUFFICIENT_PERMISSIONS: "No tenés permisos para realizar esta acción.",
+    AUTH_INSUFFICIENT_PERMISSIONS:
+        "No tenés permisos para realizar esta acción.",
     AUTH_PERMISSION_DENIED: "No tenés permisos para realizar esta acción.",
     AUTH_ACCOUNT_INACTIVE: "Tu cuenta está desactivada. Contactá a soporte.",
     AUTH_USER_ALREADY_EXISTS: "Ya existe una cuenta con ese correo.",
@@ -39,14 +40,15 @@ const CODE_MESSAGES: Record<string, string> = {
     // backend's codes distinct is what lets this map say the right thing.
     // api-neutra-v2/types/error-codes.ts, AuthErrorCodes.
     AUTH_ALREADY_MEMBER_OF_TENANT:
-      "Ya tenés una cuenta en este negocio. Iniciá sesión en lugar de registrarte.",
+        "Ya tenés una cuenta en este negocio. Iniciá sesión en lugar de registrarte.",
     AUTH_EMAIL_TAKEN_IN_OTHER_TENANT:
-      "Ese correo ya está registrado en otro negocio. Iniciá sesión ahí, o usá la contraseña que creaste allí para unirte a este.",
+        "Ese correo ya está registrado en otro negocio. Iniciá sesión ahí, o usá la contraseña que creaste allí para unirte a este.",
     // AUTH_FORBIDDEN used to cover all three of these plus two more, so the
     // only copy available was "you do not have permission", which points the
     // user at the wrong remedy.
     AUTH_RESOURCE_NOT_OWNED: "Solo podés ver tus propios recursos.",
-    AUTH_SUPER_ADMIN_REQUIRED: "Esta acción es solo para super administradores.",
+    AUTH_SUPER_ADMIN_REQUIRED:
+        "Esta acción es solo para super administradores.",
 
     // VALIDATION
     VALIDATION_MISSING_REQUIRED_FIELDS: "Completá los campos obligatorios.",
@@ -54,8 +56,10 @@ const CODE_MESSAGES: Record<string, string> = {
     VALIDATION_INVALID_PASSWORD: "La contraseña no cumple los requisitos.",
     VALIDATION_INVALID_FORMAT: "Revisá el formato del dato ingressado.",
     VALIDATION_INVALID_LENGTH: "Revisá la longitud del valor ingressado.",
-    VALIDATION_INVALID_ENUM_VALUE: "Ese valor no está entre las opciones válidas.",
-    VALIDATION_INVALID_DATA_TYPE: "El dato ingressado no tiene el formato esperado.",
+    VALIDATION_INVALID_ENUM_VALUE:
+        "Ese valor no está entre las opciones válidas.",
+    VALIDATION_INVALID_DATA_TYPE:
+        "El dato ingressado no tiene el formato esperado.",
 
     // RESOURCE
     RESOURCE_NOT_FOUND: "No encontramos ese recurso.",
@@ -70,48 +74,64 @@ const CODE_MESSAGES: Record<string, string> = {
     TENANT_NOT_FOUND: "No encontramos esa organización.",
     TENANT_INACTIVE: "Esa organización está inactiva.",
     TENANT_SLUG_EXISTS: "Ese identificador de organización ya está en uso.",
-    TENANT_FEATURE_NOT_ENABLED: "Tu organización no tiene esta funcionalidad habilitada.",
+    TENANT_FEATURE_NOT_ENABLED:
+        "Tu organización no tiene esta funcionalidad habilitada.",
     TENANT_TYPE_NOT_ALLOWED: "Tu organización no permite esta operación.",
     TENANT_MEMBERSHIP_REQUIRED:
         "Tu cuenta no pertenece a esta organización. Pedí que te agreguen.",
 
     // BUSINESS
     BUSINESS_CART_EMPTY: "Tu carrito está vacío.",
-    BUSINESS_INSUFFICIENT_STOCK: "No hay stock suficiente para algunos productos.",
+    BUSINESS_INSUFFICIENT_STOCK:
+        "No hay stock suficiente para algunos productos.",
     BUSINESS_INVALID_QUANTITY: "La cantidad indicada no es válida.",
     BUSINESS_ORDER_ALREADY_PROCESSED: "Este pedido ya fue procesado.",
     BUSINESS_PAYMENT_FAILED: "No pudimos procesar el pago. Intentá de nuevo.",
-    BUSINESS_INVALID_STATUS_TRANSITION: "Ese cambio de estado no está permitido.",
+    BUSINESS_INVALID_STATUS_TRANSITION:
+        "Ese cambio de estado no está permitido.",
     BUSINESS_RESOURCE_NOT_FOUND: "No encontramos ese recurso.",
-    BUSINESS_RESOURCE_CONFLICT: "Ese recurso tiene un conflicto con otro existente.",
+    BUSINESS_RESOURCE_CONFLICT:
+        "Ese recurso tiene un conflicto con otro existente.",
     BUSINESS_APPOINTMENT_STATUS_CONFLICT: "La cita ya cambió de estado.",
     BUSINESS_ORDER_STATUS_CONFLICT: "El pedido ya cambió de estado.",
     BUSINESS_INVALID_APPOINTMENT_STATUS: "Ese estado de cita no es válido.",
     BUSINESS_START_TIME_NOT_IN_FUTURE: "La fecha debe ser futura.",
     BUSINESS_HOLIDAY_CLOSED: "El negocio está cerrado ese día.",
-    BUSINESS_OUTSIDE_WORKING_HOURS: "Ese horario está fuera del horario de atención.",
+    BUSINESS_OUTSIDE_WORKING_HOURS:
+        "Ese horario está fuera del horario de atención.",
     BUSINESS_STAFF_HOURS_CONFLICT:
         "El miembro del equipo no puede tener horarios en un día que el negocio tiene cerrado.",
     BUSINESS_INVALID_COUPON: "El cupón no es válido.",
     BUSINESS_COUPON_UNAVAILABLE: "Ese cupón ya no está disponible.",
     BUSINESS_COUPON_NOT_OWNED: "Ese cupón no está asociado a tu cuenta.",
     BUSINESS_REWARD_COUPON_NOT_OWNED: "Todavía no reclamaste ese premio.",
-    BUSINESS_COUPONS_FEATURE_REQUIRED: "Tu organización no tiene los cupones habilitados.",
-    BUSINESS_LOYALTY_FEATURE_REQUIRED: "Tu organización no tiene la fidelización habilitada.",
-    BUSINESS_LOYALTY_REQUIRES_COUPONS: "La fidelización requiere los cupones habilitados.",
-    BUSINESS_LOYALTY_OBLIGATIONS_EXIST: "Tenés obligaciones pendientes de Campaigns anteriores.",
+    BUSINESS_COUPONS_FEATURE_REQUIRED:
+        "Tu organización no tiene los cupones habilitados.",
+    BUSINESS_LOYALTY_FEATURE_REQUIRED:
+        "Tu organización no tiene la fidelización habilitada.",
+    BUSINESS_LOYALTY_REQUIRES_COUPONS:
+        "La fidelización requiere los cupones habilitados.",
+    BUSINESS_LOYALTY_OBLIGATIONS_EXIST:
+        "Tenés obligaciones pendientes de Campaigns anteriores.",
     BUSINESS_RULE_VIOLATION: "No se puede completar la operación.",
 
     // LOYALTY
     LOYALTY_CAMPAIGN_NOT_CLAIMABLE: "Todavía no podés reclamar esta campaña.",
-    LOYALTY_CAMPAIGN_CLAIM_LIMIT_REACHED: "Alcanzaste el límite de reclamos de esta campaña.",
+    LOYALTY_CAMPAIGN_CLAIM_LIMIT_REACHED:
+        "Alcanzaste el límite de reclamos de esta campaña.",
     LOYALTY_CAMPAIGN_NOT_DRAFT: "Esta campaña ya fue publicada.",
-    LOYALTY_CAMPAIGN_ARCHIVE_TOO_EARLY: "La campaña no puede archivarse todavía.",
-    LOYALTY_CAMPAIGN_ALREADY_ACTIVE_PER_TENANT: "Ya hay una campaña activa para esta organización.",
-    LOYALTY_CAMPAIGN_SOURCE_NOT_COMPATIBLE: "El origen de la campaña no es compatible.",
-    LOYALTY_CAMPAIGN_TRANSITION_CONFLICT: "Ese cambio de estado de campaña no está permitido.",
-    LOYALTY_INVALID_CAMPAIGN_TRANSITION: "Ese cambio de estado de campaña no está permitido.",
-    LOYALTY_TARGET_NOT_REACHED: "Todavía no alcanzaste el objetivo de la campaña.",
+    LOYALTY_CAMPAIGN_ARCHIVE_TOO_EARLY:
+        "La campaña no puede archivarse todavía.",
+    LOYALTY_CAMPAIGN_ALREADY_ACTIVE_PER_TENANT:
+        "Ya hay una campaña activa para esta organización.",
+    LOYALTY_CAMPAIGN_SOURCE_NOT_COMPATIBLE:
+        "El origen de la campaña no es compatible.",
+    LOYALTY_CAMPAIGN_TRANSITION_CONFLICT:
+        "Ese cambio de estado de campaña no está permitido.",
+    LOYALTY_INVALID_CAMPAIGN_TRANSITION:
+        "Ese cambio de estado de campaña no está permitido.",
+    LOYALTY_TARGET_NOT_REACHED:
+        "Todavía no alcanzaste el objetivo de la campaña.",
     LOYALTY_TEMPLATE_NOT_REDEEMABLE: "Ese premio no se puede canjear.",
     // Kept without the LOYALTY_ prefix, as published. The backend calls this
     // shape out explicitly: renaming it to the prefix order would be a wire
@@ -120,16 +140,20 @@ const CODE_MESSAGES: Record<string, string> = {
 
     // SYSTEM, EXTERNAL, DB, RATE_LIMIT, WHATSAPP
     DB_CONNECTION_FAILED: "No pudimos conectar con la base de datos.",
-    DB_TRANSACTION_FAILED: "No pudimos completar la operación. Intentá de nuevo.",
+    DB_TRANSACTION_FAILED:
+        "No pudimos completar la operación. Intentá de nuevo.",
     DB_CONSTRAINT_VIOLATION: "La operación viola una restricción de datos.",
     DB_UNIQUE_VIOLATION: "Ese registro ya existe.",
-    DB_FOREIGN_KEY_VIOLATION: "No se puede completar la operación por datos relacionados.",
+    DB_FOREIGN_KEY_VIOLATION:
+        "No se puede completar la operación por datos relacionados.",
     DB_TIMEOUT: "La operación tardó demasiado. Intentá de nuevo.",
     EXTERNAL_THIRD_PARTY_UNAVAILABLE: "Un servicio externo no está disponible.",
     EXTERNAL_THIRD_PARTY_TIMEOUT: "Un servicio externo tardó demasiado.",
     EXTERNAL_THIRD_PARTY_ERROR: "Un servicio externo devolvió un error.",
-    EXTERNAL_PROVIDER_AUTH_FAILED: "No pudimos autenticarnos con el servicio externo.",
-    RATE_LIMIT_EXCEEDED: "Demasiados intentos. Esperá un momento e intentá de nuevo.",
+    EXTERNAL_PROVIDER_AUTH_FAILED:
+        "No pudimos autenticarnos con el servicio externo.",
+    RATE_LIMIT_EXCEEDED:
+        "Demasiados intentos. Esperá un momento e intentá de nuevo.",
     RATE_LIMIT_QUOTA_EXCEEDED: "Alcanzaste el límite de operaciones.",
     WHATSAPP_CONFIG_NOT_FOUND: "No encontramos la configuración de WhatsApp.",
     WHATSAPP_MESSAGE_FAILED: "No pudimos enviar el mensaje por WhatsApp.",
@@ -185,11 +209,9 @@ export type Resolution = "specific" | "domain" | "none";
 
 export const resolutionFor = (code: string): Resolution => {
     if (typeof code !== "string" || !code) return "none";
-    if (Object.prototype.hasOwnProperty.call(CODE_MESSAGES, code)) return "specific";
+    if (Object.hasOwn(CODE_MESSAGES, code)) return "specific";
     const domain = code.split("_")[0];
-    return Object.prototype.hasOwnProperty.call(DOMAIN_MESSAGES, domain)
-        ? "domain"
-        : "none";
+    return Object.hasOwn(DOMAIN_MESSAGES, domain) ? "domain" : "none";
 };
 
 /**
@@ -216,9 +238,7 @@ const firstDetail = (errors: unknown): ErrorDetail | undefined => {
 };
 
 /** The most specific translated message available, or undefined if there is none. */
-export const firstTranslatedError = (
-    errors: unknown,
-): string | undefined => {
+export const firstTranslatedError = (errors: unknown): string | undefined => {
     const detail = firstDetail(errors);
     return detail ? translateErrorDetail(detail) : undefined;
 };

@@ -1,11 +1,23 @@
 "use client";
-import { readJsonResponse } from "@/lib/response";
-
-import React, { useReducer, useEffect, useRef } from "react";
+import {
+    ArrowRight,
+    LayoutDashboard,
+    Loader2,
+    Menu,
+    Package,
+    Search,
+    ShoppingBagIcon,
+    User,
+} from "lucide-react";
 import Image from "next/image";
-import { useCart } from "@/hooks/use-cart";
-import { useAuthStore } from "@/store/auth-store";
+import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
+import type React from "react";
+import { useEffect, useReducer, useRef } from "react";
+import Logo from "@/components/logo";
+import { UserAccountSummary } from "@/components/shared/UserAccountSummary";
+import { Badge } from "@/components/ui/badge";
+import Link from "@/components/ui/link";
 import {
     NavigationMenu,
     NavigationMenuContent,
@@ -15,21 +27,20 @@ import {
 } from "@/components/ui/navigation-menu";
 import { navigationMenuTriggerStyle } from "@/components/ui/navigation-menu-trigger-style";
 import {
-    Search,
-    ShoppingBagIcon,
-    Menu,
-    LayoutDashboard,
-    Loader2,
-    User,
-    ArrowRight,
-    Package,
-} from "lucide-react";
-import Link from "@/components/ui/link";
-import { useRouter } from "next/navigation";
-import Logo from "@/components/logo";
+    Sheet,
+    SheetContent,
+    SheetHeader,
+    SheetTitle,
+    SheetTrigger,
+} from "@/components/ui/sheet";
+import { useCart } from "@/hooks/use-cart";
+import { readJsonResponse } from "@/lib/response";
 import { cn } from "@/lib/utils";
-import { Button } from "./ui/button";
+import { useAuthStore } from "@/store/auth-store";
+import type { Category } from "@/types/category.types";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { Button } from "./ui/button";
+import { Card } from "./ui/card";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -39,18 +50,6 @@ import {
     DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { ScrollArea } from "./ui/scroll-area";
-import { Card } from "./ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Category } from "@/types/category.types";
-import { UserAccountSummary } from "@/components/shared/UserAccountSummary";
-import {
-    Sheet,
-    SheetContent,
-    SheetHeader,
-    SheetTitle,
-    SheetTrigger,
-} from "@/components/ui/sheet";
-
 
 type Product = {
     id: string;
@@ -118,7 +117,7 @@ function DesktopMenuItems({ categories }: { categories: Category[] }) {
                 </NavigationMenuLink>
             </NavigationMenuItem>
 
-            {(Array.isArray(categories) && categories.length > 0) && (
+            {Array.isArray(categories) && categories.length > 0 && (
                 <NavigationMenuItem className="list-none">
                     <NavigationMenuTrigger className="bg-transparent font-semibold text-xs tracking-tight hover:bg-muted transition-colors rounded-lg">
                         Colecciones
@@ -130,21 +129,19 @@ function DesktopMenuItems({ categories }: { categories: Category[] }) {
                                     Categorías del catálogo
                                 </p>
                             </div>
-                            {categories.map(
-                                (c) => {
-                                    const href = `/products?category=${encodeURIComponent(c.id)}`;
-                                    return (
-                                        <ListItem
-                                            key={c.id}
-                                            title={c.name}
-                                            href={href}
-                                            className="rounded-xl hover:bg-muted transition-colors p-3"
-                                        >
-                                            {c.description}
-                                        </ListItem>
-                                    );
-                                },
-                            )}
+                            {categories.map((c) => {
+                                const href = `/products?category=${encodeURIComponent(c.id)}`;
+                                return (
+                                    <ListItem
+                                        key={c.id}
+                                        title={c.name}
+                                        href={href}
+                                        className="rounded-xl hover:bg-muted transition-colors p-3"
+                                    >
+                                        {c.description}
+                                    </ListItem>
+                                );
+                            })}
                         </ul>
                     </NavigationMenuContent>
                 </NavigationMenuItem>
@@ -414,7 +411,8 @@ function MobileMenuSheet({
                 <SheetTrigger asChild>
                     <Button
                         variant="ghost"
-                        size="icon" aria-label="Abrir menú de navegación"
+                        size="icon"
+                        aria-label="Abrir menú de navegación"
                         className="size-10 hover:bg-muted rounded-full"
                     >
                         <Menu className="size-5" />
@@ -512,33 +510,35 @@ function MobileMenuSheet({
                                                 />
                                             </Link>
 
-                                            {(Array.isArray(categories) &&
-                                                categories.length > 0) && (
-                                                <div className="grid grid-cols-2 gap-3 mt-2">
-                                                    {categories
-                                                        .slice(0, 4)
-                                                        .map((c) => (
-                                                        <Link
-                                                            key={c.id}
-                                                            href={`/products?category=${encodeURIComponent(c.id)}`}
-                                                            onClick={() =>
-                                                                dispatch({
-                                                                    type: "SET_IS_OPEN",
-                                                                    payload: false,
-                                                                })
-                                                            }
-                                                            className="flex flex-col gap-2 p-4 bg-muted/30 hover:bg-muted border border-transparent hover:border-border transition-[color,background-color,border-color,box-shadow,opacity,transform] rounded-xl"
-                                                        >
-                                                            <span className="text-[10px] font-bold text-primary/60 uppercase tracking-wider">
-                                                                Sección
-                                                            </span>
-                                                            <span className="font-semibold text-sm truncate">
-                                                                {c.name}
-                                                            </span>
-                                                        </Link>
-                                                    ))}
-                                                </div>
-                                            )}
+                                            {Array.isArray(categories) &&
+                                                categories.length > 0 && (
+                                                    <div className="grid grid-cols-2 gap-3 mt-2">
+                                                        {categories
+                                                            .slice(0, 4)
+                                                            .map((c) => (
+                                                                <Link
+                                                                    key={c.id}
+                                                                    href={`/products?category=${encodeURIComponent(c.id)}`}
+                                                                    onClick={() =>
+                                                                        dispatch(
+                                                                            {
+                                                                                type: "SET_IS_OPEN",
+                                                                                payload: false,
+                                                                            },
+                                                                        )
+                                                                    }
+                                                                    className="flex flex-col gap-2 p-4 bg-muted/30 hover:bg-muted border border-transparent hover:border-border transition-[color,background-color,border-color,box-shadow,opacity,transform] rounded-xl"
+                                                                >
+                                                                    <span className="text-[10px] font-bold text-primary/60 uppercase tracking-wider">
+                                                                        Sección
+                                                                    </span>
+                                                                    <span className="font-semibold text-sm truncate">
+                                                                        {c.name}
+                                                                    </span>
+                                                                </Link>
+                                                            ))}
+                                                    </div>
+                                                )}
                                         </div>
                                     </div>
                                 </>

@@ -1,8 +1,8 @@
 export const getTenantUrl = (slug: string): string => {
-    if (typeof window === 'undefined') return '/';
+    if (typeof window === "undefined") return "/";
 
     const { hostname, port, protocol } = window.location;
-    const portSuffix = port ? `:${port}` : '';
+    const portSuffix = port ? `:${port}` : "";
 
     // Handle raw IP addresses -> redirect to nip.io
     const isIP = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(hostname);
@@ -10,13 +10,14 @@ export const getTenantUrl = (slug: string): string => {
         return `${protocol}//${slug}.${hostname}.nip.io${portSuffix}`;
     }
 
-    const parts = hostname.split('.');
+    const parts = hostname.split(".");
 
     // Check for nip.io domains
-    const isNipIo = hostname.endsWith('.nip.io');
+    const isNipIo = hostname.endsWith(".nip.io");
 
     // Check for localhost domains
-    const isLocalhost = hostname === 'localhost' || hostname.endsWith('.localhost');
+    const isLocalhost =
+        hostname === "localhost" || hostname.endsWith(".localhost");
 
     // Determine the base domain parts count
     // localhost = 1 part (e.g., localhost)
@@ -36,7 +37,7 @@ export const getTenantUrl = (slug: string): string => {
     if (parts.length > basePartsCount) {
         // Replace the existing subdomain (first part)
         parts[0] = slug;
-        return `${protocol}//${parts.join('.')}${portSuffix}`;
+        return `${protocol}//${parts.join(".")}${portSuffix}`;
     }
 
     // No subdomain active, prepend the slug

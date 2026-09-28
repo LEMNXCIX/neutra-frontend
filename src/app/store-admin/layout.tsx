@@ -1,14 +1,13 @@
-import React from "react";
-import AdminSidebar from "@/components/admin/AdminSidebar";
-import AdminMobileNav from "@/components/admin/AdminMobileNav";
-import { STORE_ADMIN_NAV } from "@/config/admin-navigation";
 import type { Metadata } from "next";
-
+import type React from "react";
+import AdminMobileNav from "@/components/admin/AdminMobileNav";
+import AdminSidebar from "@/components/admin/AdminSidebar";
 import { Navigation as StoreNavbar } from "@/components/nav_bar";
+import { STORE_ADMIN_NAV } from "@/config/admin-navigation";
 
 export const metadata: Metadata = {
-  title: "Administración de la Tienda",
-  description: "Panel de administración de la tienda",
+    title: "Administración de la Tienda",
+    description: "Panel de administración de la tienda",
 };
 
 export default function AdminLayout({

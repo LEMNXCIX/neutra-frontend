@@ -1,10 +1,33 @@
 "use client";
 
+import { format } from "date-fns";
+import {
+    Activity,
+    AlertCircle,
+    ArrowRight,
+    Building2,
+    Calendar,
+    Clock,
+    Database,
+    Filter,
+    Globe,
+    RefreshCcw,
+    Search,
+    Terminal,
+    User,
+    X,
+} from "lucide-react";
 import React, { useCallback, useReducer } from "react";
-import { logService, LogEntry } from "@/services/log.service";
-import { Tenant } from "@/types/tenant";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
 import {
     Table,
     TableBody,
@@ -13,74 +36,51 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogDescription,
-} from "@/components/ui/dialog";
-import {
-    Search,
-    RefreshCcw,
-    AlertCircle,
-    Activity,
-    Terminal,
-    Clock,
-    Globe,
-    User,
-    Database,
-    ArrowRight,
-    Building2,
-    Calendar,
-    X,
-    Filter,
-} from "lucide-react";
-import { format } from "date-fns";
-import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { type LogEntry, logService } from "@/services/log.service";
+import type { Tenant } from "@/types/tenant";
 
 type LogsState = {
-  logs: LogEntry[];
-  total: number;
-  loading: boolean;
-  selectedLog: LogEntry | null;
-  searchTerm: string;
-  filters: {
-    level: string;
-    tenantId: string;
-    startDate: string;
-    endDate: string;
-    skip: number;
-    take: number;
-  };
+    logs: LogEntry[];
+    total: number;
+    loading: boolean;
+    selectedLog: LogEntry | null;
+    searchTerm: string;
+    filters: {
+        level: string;
+        tenantId: string;
+        startDate: string;
+        endDate: string;
+        skip: number;
+        take: number;
+    };
 };
 
 type LogsAction =
-  | { type: "SET_LOGS"; payload: LogEntry[] }
-  | { type: "SET_TOTAL"; payload: number }
-  | { type: "SET_LOADING"; payload: boolean }
-  | { type: "SET_SELECTED_LOG"; payload: LogEntry | null }
-  | { type: "SET_SEARCH_TERM"; payload: string }
-  | { type: "SET_FILTERS"; payload: LogsState["filters"] };
+    | { type: "SET_LOGS"; payload: LogEntry[] }
+    | { type: "SET_TOTAL"; payload: number }
+    | { type: "SET_LOADING"; payload: boolean }
+    | { type: "SET_SELECTED_LOG"; payload: LogEntry | null }
+    | { type: "SET_SEARCH_TERM"; payload: string }
+    | { type: "SET_FILTERS"; payload: LogsState["filters"] };
 
 function logsReducer(state: LogsState, action: LogsAction): LogsState {
-  switch (action.type) {
-    case "SET_LOGS":
-      return { ...state, logs: action.payload };
-    case "SET_TOTAL":
-      return { ...state, total: action.payload };
-    case "SET_LOADING":
-      return { ...state, loading: action.payload };
-    case "SET_SELECTED_LOG":
-      return { ...state, selectedLog: action.payload };
-    case "SET_SEARCH_TERM":
-      return { ...state, searchTerm: action.payload };
-    case "SET_FILTERS":
-      return { ...state, filters: action.payload };
-    default:
-      return state;
-  }
+    switch (action.type) {
+        case "SET_LOGS":
+            return { ...state, logs: action.payload };
+        case "SET_TOTAL":
+            return { ...state, total: action.payload };
+        case "SET_LOADING":
+            return { ...state, loading: action.payload };
+        case "SET_SELECTED_LOG":
+            return { ...state, selectedLog: action.payload };
+        case "SET_SEARCH_TERM":
+            return { ...state, searchTerm: action.payload };
+        case "SET_FILTERS":
+            return { ...state, filters: action.payload };
+        default:
+            return state;
+    }
 }
 
 interface LogsClientProps {
@@ -139,423 +139,513 @@ const getStatusColor = (code: number) => {
 };
 
 function LogInspectorDialog({
-  log,
-  onClose,
+    log,
+    onClose,
 }: {
-  log: LogEntry | null;
-  onClose: () => void;
+    log: LogEntry | null;
+    onClose: () => void;
 }) {
-  if (!log) return null;
+    if (!log) return null;
 
-  return (
-    <Dialog open={!!log} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-0 border-none shadow-3xl rounded-xl overflow-hidden">
-        <DialogHeader className="sr-only">
-          <DialogTitle>Log Inspector</DialogTitle>
-          <DialogDescription>Vista detallada del registro del sistema</DialogDescription>
-        </DialogHeader>
-        <div className="flex flex-col min-h-full bg-background">
-          <div className="p-8 space-y-6 bg-foreground text-background">
-            <div className="flex justify-between items-start">
-              <div className="space-y-3">
-                <div className="flex items-center gap-4">
-                  <div className="text-5xl font-bold tracking-tighter leading-none">{log.statusCode}</div>
-                  <div className="px-3 py-1 bg-primary text-primary-foreground font-bold uppercase text-xs rounded-lg tracking-widest">{log.method}</div>
+    return (
+        <Dialog open={!!log} onOpenChange={onClose}>
+            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-0 border-none shadow-3xl rounded-xl overflow-hidden">
+                <DialogHeader className="sr-only">
+                    <DialogTitle>Log Inspector</DialogTitle>
+                    <DialogDescription>
+                        Vista detallada del registro del sistema
+                    </DialogDescription>
+                </DialogHeader>
+                <div className="flex flex-col min-h-full bg-background">
+                    <div className="p-8 space-y-6 bg-foreground text-background">
+                        <div className="flex justify-between items-start">
+                            <div className="space-y-3">
+                                <div className="flex items-center gap-4">
+                                    <div className="text-5xl font-bold tracking-tighter leading-none">
+                                        {log.statusCode}
+                                    </div>
+                                    <div className="px-3 py-1 bg-primary text-primary-foreground font-bold uppercase text-xs rounded-lg tracking-widest">
+                                        {log.method}
+                                    </div>
+                                </div>
+                                <div className="font-mono text-[10px] uppercase tracking-widest opacity-60 bg-foreground/5 px-2 py-1 rounded">
+                                    TRACE_ID: {log.traceId}
+                                </div>
+                            </div>
+                            <div className="text-right space-y-1">
+                                <div className="text-sm font-semibold opacity-60">
+                                    {format(
+                                        new Date(log.timestamp),
+                                        "eeee, dd MMMM yyyy",
+                                    )}
+                                </div>
+                                <div className="text-2xl font-bold tracking-tight">
+                                    {format(
+                                        new Date(log.timestamp),
+                                        "HH:mm:ss.SSS",
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                        <div className="text-lg font-mono font-medium break-all leading-relaxed bg-foreground/5 rounded-xl p-5 border border-foreground/10">
+                            {log.url}
+                        </div>
+                    </div>
+                    <div className="p-8 space-y-10">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <MetaInfo
+                                label="Rendimiento"
+                                value={`${log.duration}ms`}
+                                icon={<Clock />}
+                                large
+                                color={
+                                    log.duration > 1000
+                                        ? "text-rose-500"
+                                        : "text-emerald-500"
+                                }
+                            />
+                            <MetaInfo
+                                label="IP del Cliente"
+                                value={log.ip || "UNKNOWN"}
+                                icon={<Globe />}
+                            />
+                            <MetaInfo
+                                label="ID de usuario"
+                                value={log.userId || "GUEST"}
+                                icon={<User />}
+                            />
+                            <MetaInfo
+                                label="Tenant"
+                                value={log.tenantId || "GLOBAL"}
+                                icon={<Activity />}
+                            />
+                        </div>
+                        <div className="space-y-4">
+                            <SectionTitle
+                                title="Resumen de Ejecución"
+                                icon={<Terminal />}
+                            />
+                            <div className="p-6 bg-muted/30 rounded-xl border-l border-primary/60 font-semibold tracking-tight text-xl leading-snug">
+                                {log.message}
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-1 gap-10">
+                            <PayloadBoard
+                                title="Metadatos Contextuales"
+                                data={log.metadata}
+                            />
+                            {log.error && Object.keys(log.error).length > 0 && (
+                                <PayloadBoard
+                                    title="Diagnóstico de Errores"
+                                    data={log.error}
+                                    isCritical
+                                />
+                            )}
+                            <div className="space-y-4">
+                                <SectionTitle
+                                    title="Agente del Cliente"
+                                    icon={<Globe />}
+                                />
+                                <div className="text-[10px] font-mono leading-relaxed bg-muted/20 p-4 rounded-xl border border-border/50 text-muted-foreground">
+                                    {log.userAgent}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="sticky bottom-0 bg-background/80 backdrop-blur-md border-t border-border p-6 flex justify-end">
+                        <Button
+                            onClick={onClose}
+                            className="rounded-xl font-bold h-11 px-10 shadow-lg"
+                        >
+                            Cerrar inspector
+                        </Button>
+                    </div>
                 </div>
-                <div className="font-mono text-[10px] uppercase tracking-widest opacity-60 bg-foreground/5 px-2 py-1 rounded">TRACE_ID: {log.traceId}</div>
-              </div>
-              <div className="text-right space-y-1">
-                <div className="text-sm font-semibold opacity-60">{format(new Date(log.timestamp), "eeee, dd MMMM yyyy")}</div>
-                <div className="text-2xl font-bold tracking-tight">{format(new Date(log.timestamp), "HH:mm:ss.SSS")}</div>
-              </div>
-            </div>
-            <div className="text-lg font-mono font-medium break-all leading-relaxed bg-foreground/5 rounded-xl p-5 border border-foreground/10">{log.url}</div>
-          </div>
-          <div className="p-8 space-y-10">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <MetaInfo label="Rendimiento" value={`${log.duration}ms`} icon={<Clock />} large color={log.duration > 1000 ? "text-rose-500" : "text-emerald-500"} />
-              <MetaInfo label="IP del Cliente" value={log.ip || "UNKNOWN"} icon={<Globe />} />
-              <MetaInfo label="ID de usuario" value={log.userId || "GUEST"} icon={<User />} />
-              <MetaInfo label="Tenant" value={log.tenantId || "GLOBAL"} icon={<Activity />} />
-            </div>
-            <div className="space-y-4">
-              <SectionTitle title="Resumen de Ejecución" icon={<Terminal />} />
-              <div className="p-6 bg-muted/30 rounded-xl border-l border-primary/60 font-semibold tracking-tight text-xl leading-snug">{log.message}</div>
-            </div>
-            <div className="grid grid-cols-1 gap-10">
-              <PayloadBoard title="Metadatos Contextuales" data={log.metadata} />
-              {log.error && Object.keys(log.error).length > 0 && (
-                <PayloadBoard title="Diagnóstico de Errores" data={log.error} isCritical />
-              )}
-              <div className="space-y-4">
-                <SectionTitle title="Agente del Cliente" icon={<Globe />} />
-                <div className="text-[10px] font-mono leading-relaxed bg-muted/20 p-4 rounded-xl border border-border/50 text-muted-foreground">{log.userAgent}</div>
-              </div>
-            </div>
-          </div>
-          <div className="sticky bottom-0 bg-background/80 backdrop-blur-md border-t border-border p-6 flex justify-end">
-            <Button onClick={onClose} className="rounded-xl font-bold h-11 px-10 shadow-lg">Cerrar inspector</Button>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
+            </DialogContent>
+        </Dialog>
+    );
 }
 
 function LogsFiltersSection({
-  filters,
-  searchTerm,
-  tenants,
-  updateFilters,
-  dispatch,
+    filters,
+    searchTerm,
+    tenants,
+    updateFilters,
+    dispatch,
 }: {
-  filters: LogsState["filters"];
-  searchTerm: string;
-  tenants: Tenant[];
-  updateFilters: (patch: Partial<LogsState["filters"]>) => void;
-  dispatch: React.Dispatch<LogsAction>;
+    filters: LogsState["filters"];
+    searchTerm: string;
+    tenants: Tenant[];
+    updateFilters: (patch: Partial<LogsState["filters"]>) => void;
+    dispatch: React.Dispatch<LogsAction>;
 }) {
-  return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        <div className="space-y-2">
-          <label
-            htmlFor="log-level"
-            className="text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 text-muted-foreground"
-          >
-            <Filter size={10} /> Level
-          </label>
-          <select
-            id="log-level"
-            className="w-full h-10 bg-background border border-border rounded-lg px-3 py-1 font-medium text-xs focus:border-primary outline-none transition-[color,background-color,border-color,box-shadow,opacity,transform] shadow-sm cursor-pointer"
-            value={filters.level}
-            onChange={(e) =>
-              updateFilters({ level: e.target.value })
-            }
-          >
-            <option value="">Todos los niveles</option>
-            <option value="INFO">INFO</option>
-            <option value="WARN">WARN</option>
-            <option value="ERROR">ERROR</option>
-          </select>
+    return (
+        <div className="space-y-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                <div className="space-y-2">
+                    <label
+                        htmlFor="log-level"
+                        className="text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 text-muted-foreground"
+                    >
+                        <Filter size={10} /> Level
+                    </label>
+                    <select
+                        id="log-level"
+                        className="w-full h-10 bg-background border border-border rounded-lg px-3 py-1 font-medium text-xs focus:border-primary outline-none transition-[color,background-color,border-color,box-shadow,opacity,transform] shadow-sm cursor-pointer"
+                        value={filters.level}
+                        onChange={(e) =>
+                            updateFilters({ level: e.target.value })
+                        }
+                    >
+                        <option value="">Todos los niveles</option>
+                        <option value="INFO">INFO</option>
+                        <option value="WARN">WARN</option>
+                        <option value="ERROR">ERROR</option>
+                    </select>
+                </div>
+
+                <div className="space-y-2">
+                    <label
+                        htmlFor="log-tenant"
+                        className="text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 text-muted-foreground"
+                    >
+                        <Building2 size={10} /> Tenant
+                    </label>
+                    <select
+                        id="log-tenant"
+                        className="w-full h-10 bg-background border border-border rounded-lg px-3 py-1 font-medium text-xs focus:border-primary outline-none transition-[color,background-color,border-color,box-shadow,opacity,transform] shadow-sm cursor-pointer"
+                        value={filters.tenantId}
+                        onChange={(e) =>
+                            updateFilters({ tenantId: e.target.value })
+                        }
+                    >
+                        <option value="">Todas las tiendas</option>
+                        {tenants.map((t) => (
+                            <option key={t.id} value={t.id}>
+                                {t.name}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+
+                <div className="space-y-2">
+                    <label
+                        htmlFor="log-start-date"
+                        className="text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 text-muted-foreground"
+                    >
+                        <Calendar size={10} /> Start
+                    </label>
+                    <input
+                        id="log-start-date"
+                        type="date"
+                        className="w-full h-10 bg-background border border-border rounded-lg px-3 py-1 font-medium text-xs focus:border-primary outline-none transition-[color,background-color,border-color,box-shadow,opacity,transform] shadow-sm"
+                        value={filters.startDate}
+                        onChange={(e) =>
+                            updateFilters({
+                                startDate: e.target.value,
+                            })
+                        }
+                    />
+                </div>
+
+                <div className="space-y-2">
+                    <label
+                        htmlFor="log-end-date"
+                        className="text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 text-muted-foreground"
+                    >
+                        <Calendar size={10} /> End
+                    </label>
+                    <input
+                        id="log-end-date"
+                        type="date"
+                        className="w-full h-10 bg-background border border-border rounded-lg px-3 py-1 font-medium text-xs focus:border-primary outline-none transition-[color,background-color,border-color,box-shadow,opacity,transform] shadow-sm"
+                        value={filters.endDate}
+                        onChange={(e) =>
+                            updateFilters({
+                                endDate: e.target.value,
+                            })
+                        }
+                    />
+                </div>
+
+                <div className="space-y-2">
+                    <label
+                        htmlFor="log-limit"
+                        className="text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 text-muted-foreground"
+                    >
+                        <ArrowRight size={10} /> Limit
+                    </label>
+                    <select
+                        id="log-limit"
+                        className="w-full h-10 bg-background border border-border rounded-lg px-3 py-1 font-medium text-xs focus:border-primary outline-none transition-[color,background-color,border-color,box-shadow,opacity,transform] shadow-sm cursor-pointer"
+                        value={filters.take}
+                        onChange={(e) =>
+                            updateFilters({ take: Number(e.target.value) })
+                        }
+                    >
+                        <option value="50">50 Records</option>
+                        <option value="100">100 Records</option>
+                        <option value="500">500 Records</option>
+                        <option value="1000">1000 Records</option>
+                    </select>
+                </div>
+            </div>
+
+            <div className="relative group">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                <input
+                    type="text"
+                    aria-label="Buscar logs"
+                    placeholder="Buscar por Trace ID, URL o contenido del mensaje..."
+                    value={searchTerm}
+                    onChange={(e) =>
+                        dispatch({
+                            type: "SET_SEARCH_TERM",
+                            payload: e.target.value,
+                        })
+                    }
+                    className="w-full h-12 pl-11 pr-4 bg-muted/30 border border-transparent focus:border-primary/30 focus:bg-background rounded-xl font-medium text-sm transition-[color,background-color,border-color,box-shadow,opacity,transform] outline-none"
+                />
+                {searchTerm && (
+                    <button
+                        type="button"
+                        aria-label="Limpiar búsqueda"
+                        onClick={() =>
+                            dispatch({ type: "SET_SEARCH_TERM", payload: "" })
+                        }
+                        className="absolute right-4 top-1/2 -translate-y-1/2 size-6 flex items-center justify-center rounded-full bg-muted hover:bg-border transition-colors"
+                    >
+                        <X size={12} />
+                    </button>
+                )}
+            </div>
+
+            <div className="flex justify-end">
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                        dispatch({
+                            type: "SET_FILTERS",
+                            payload: {
+                                level: "",
+                                tenantId: "",
+                                startDate: "",
+                                endDate: "",
+                                skip: 0,
+                                take: 50,
+                            },
+                        });
+                        dispatch({ type: "SET_SEARCH_TERM", payload: "" });
+                    }}
+                    className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground hover:text-primary"
+                >
+                    Reset Filters
+                </Button>
+            </div>
         </div>
-
-        <div className="space-y-2">
-          <label
-            htmlFor="log-tenant"
-            className="text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 text-muted-foreground"
-          >
-            <Building2 size={10} /> Tenant
-          </label>
-          <select
-            id="log-tenant"
-            className="w-full h-10 bg-background border border-border rounded-lg px-3 py-1 font-medium text-xs focus:border-primary outline-none transition-[color,background-color,border-color,box-shadow,opacity,transform] shadow-sm cursor-pointer"
-            value={filters.tenantId}
-            onChange={(e) =>
-              updateFilters({ tenantId: e.target.value })
-            }
-          >
-            <option value="">Todas las tiendas</option>
-            {tenants.map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="space-y-2">
-          <label
-            htmlFor="log-start-date"
-            className="text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 text-muted-foreground"
-          >
-            <Calendar size={10} /> Start
-          </label>
-          <input
-            id="log-start-date"
-            type="date"
-            className="w-full h-10 bg-background border border-border rounded-lg px-3 py-1 font-medium text-xs focus:border-primary outline-none transition-[color,background-color,border-color,box-shadow,opacity,transform] shadow-sm"
-            value={filters.startDate}
-            onChange={(e) =>
-              updateFilters({
-                startDate: e.target.value,
-              })
-            }
-          />
-        </div>
-
-        <div className="space-y-2">
-          <label
-            htmlFor="log-end-date"
-            className="text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 text-muted-foreground"
-          >
-            <Calendar size={10} /> End
-          </label>
-          <input
-            id="log-end-date"
-            type="date"
-            className="w-full h-10 bg-background border border-border rounded-lg px-3 py-1 font-medium text-xs focus:border-primary outline-none transition-[color,background-color,border-color,box-shadow,opacity,transform] shadow-sm"
-            value={filters.endDate}
-            onChange={(e) =>
-              updateFilters({
-                endDate: e.target.value,
-              })
-            }
-          />
-        </div>
-
-        <div className="space-y-2">
-          <label
-            htmlFor="log-limit"
-            className="text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 text-muted-foreground"
-          >
-            <ArrowRight size={10} /> Limit
-          </label>
-          <select
-            id="log-limit"
-            className="w-full h-10 bg-background border border-border rounded-lg px-3 py-1 font-medium text-xs focus:border-primary outline-none transition-[color,background-color,border-color,box-shadow,opacity,transform] shadow-sm cursor-pointer"
-            value={filters.take}
-            onChange={(e) =>
-              updateFilters({ take: Number(e.target.value) })
-            }
-          >
-            <option value="50">50 Records</option>
-            <option value="100">100 Records</option>
-            <option value="500">500 Records</option>
-            <option value="1000">1000 Records</option>
-          </select>
-        </div>
-      </div>
-
-      <div className="relative group">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-        <input
-          type="text"
-          aria-label="Buscar logs"
-          placeholder="Buscar por Trace ID, URL o contenido del mensaje..."
-          value={searchTerm}
-          onChange={(e) => dispatch({ type: "SET_SEARCH_TERM", payload: e.target.value })}
-          className="w-full h-12 pl-11 pr-4 bg-muted/30 border border-transparent focus:border-primary/30 focus:bg-background rounded-xl font-medium text-sm transition-[color,background-color,border-color,box-shadow,opacity,transform] outline-none"
-        />
-        {searchTerm && (
-          <button
-            type="button"
-            aria-label="Limpiar búsqueda"
-            onClick={() => dispatch({ type: "SET_SEARCH_TERM", payload: "" })}
-            className="absolute right-4 top-1/2 -translate-y-1/2 size-6 flex items-center justify-center rounded-full bg-muted hover:bg-border transition-colors"
-          >
-            <X size={12} />
-          </button>
-        )}
-      </div>
-
-      <div className="flex justify-end">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => {
-            dispatch({ type: "SET_FILTERS", payload: {
-              level: "",
-              tenantId: "",
-              startDate: "",
-              endDate: "",
-              skip: 0,
-              take: 50,
-            }});
-            dispatch({ type: "SET_SEARCH_TERM", payload: "" });
-          }}
-          className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground hover:text-primary"
-        >
-          Reset Filters
-        </Button>
-      </div>
-    </div>
-  );
+    );
 }
 
 function LogsDataTable({
-  filteredLogs,
-  loading,
-  dispatch,
+    filteredLogs,
+    loading,
+    dispatch,
 }: {
-  filteredLogs: LogEntry[];
-  loading: boolean;
-  dispatch: React.Dispatch<LogsAction>;
+    filteredLogs: LogEntry[];
+    loading: boolean;
+    dispatch: React.Dispatch<LogsAction>;
 }) {
-  return (
-    <Card className="t-card border-none shadow-xl overflow-hidden">
-      <div className="hidden md:block">
-        <Table>
-          <TableHeader className="bg-muted/50">
-            <TableRow className="border-b border-border/50 hover:bg-transparent">
-              <TableHead className="font-bold uppercase tracking-wider text-muted-foreground text-[10px] py-4">
-                Timestamp
-              </TableHead>
-              <TableHead className="font-bold uppercase tracking-wider text-muted-foreground text-[10px]">
-                Level
-              </TableHead>
-              <TableHead className="font-bold uppercase tracking-wider text-muted-foreground text-[10px]">
-                Request
-              </TableHead>
-              <TableHead className="font-bold uppercase tracking-wider text-muted-foreground text-[10px]">
-                Status
-              </TableHead>
-              <TableHead className="font-bold uppercase tracking-wider text-muted-foreground text-[10px]">
-                Latency
-              </TableHead>
-              <TableHead className="text-right font-bold uppercase tracking-wider text-muted-foreground text-[10px]">
-                Action
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {loading ? (
-              <TableRow>
-                <TableCell
-                  colSpan={6}
-                  className="h-64 text-center"
-                >
-                  <div className="flex flex-col items-center justify-center gap-3 animate-pulse">
-                    <div className="size-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-                    <span className="text-sm font-semibold text-muted-foreground">
-                      Cargando registros…
-                    </span>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ) : filteredLogs.length === 0 ? (
-              <TableRow>
-                <TableCell
-                  colSpan={6}
-                  className="h-64 text-center"
-                >
-                  <div className="flex flex-col items-center justify-center gap-2 opacity-40">
-                    <Database className="size-12 mb-2" />
-                    <p className="font-semibold text-sm">
-                      Ningún registro coincide con tu búsqueda
-                    </p>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ) : (
-              filteredLogs.map((log) => (
-                <TableRow
-                  key={log.id}
-                  className="border-b border-border/50 hover:bg-muted/30 group transition-colors cursor-pointer"
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => dispatch({ type: "SET_SELECTED_LOG", payload: log })}
-                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); dispatch({ type: "SET_SELECTED_LOG", payload: log }); } }}
-                >
-                  <TableCell className="py-4 font-mono text-[10px]">
-                    <div className="font-bold text-foreground">
-                      {format(
-                        new Date(log.timestamp),
-                        "HH:mm:ss.SSS",
-                      )}
-                    </div>
-                    <div className="text-muted-foreground">
-                      {format(
-                        new Date(log.timestamp),
-                        "dd MMM yyyy",
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    {getLevelBadge(log.level)}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex flex-col gap-1 max-w-[400px] lg:max-w-[500px]">
-                      <div className="font-bold text-[9px] uppercase bg-muted px-1.5 py-0.5 rounded border border-border/50 w-fit">
-                        {log.method}
-                      </div>
-                      <div
-                        className="font-mono text-[10px] truncate text-muted-foreground"
-                        title={log.url}
-                      >
-                        {log.url}
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell
-                    className={`font-bold text-base ${getStatusColor(log.statusCode)}`}
-                  >
-                    {log.statusCode}
-                  </TableCell>
-                  <TableCell>
-                    <div
-                      className={`font-mono text-[10px] font-semibold px-2 py-1 rounded-md ${
-                        log.duration > 1000
-                          ? "bg-rose-50 text-rose-600"
-                          : "bg-muted text-muted-foreground"
-                      }`}
-                    >
-                      {log.duration}ms
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="size-8 rounded-full p-0 opacity-0 group-hover:opacity-100 hover:bg-primary/10 hover:text-primary transition-[color,background-color,border-color,box-shadow,opacity,transform]"
-                    >
-                      <ArrowRight className="size-4" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
+    return (
+        <Card className="t-card border-none shadow-xl overflow-hidden">
+            <div className="hidden md:block">
+                <Table>
+                    <TableHeader className="bg-muted/50">
+                        <TableRow className="border-b border-border/50 hover:bg-transparent">
+                            <TableHead className="font-bold uppercase tracking-wider text-muted-foreground text-[10px] py-4">
+                                Timestamp
+                            </TableHead>
+                            <TableHead className="font-bold uppercase tracking-wider text-muted-foreground text-[10px]">
+                                Level
+                            </TableHead>
+                            <TableHead className="font-bold uppercase tracking-wider text-muted-foreground text-[10px]">
+                                Request
+                            </TableHead>
+                            <TableHead className="font-bold uppercase tracking-wider text-muted-foreground text-[10px]">
+                                Status
+                            </TableHead>
+                            <TableHead className="font-bold uppercase tracking-wider text-muted-foreground text-[10px]">
+                                Latency
+                            </TableHead>
+                            <TableHead className="text-right font-bold uppercase tracking-wider text-muted-foreground text-[10px]">
+                                Action
+                            </TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {loading ? (
+                            <TableRow>
+                                <TableCell
+                                    colSpan={6}
+                                    className="h-64 text-center"
+                                >
+                                    <div className="flex flex-col items-center justify-center gap-3 animate-pulse">
+                                        <div className="size-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+                                        <span className="text-sm font-semibold text-muted-foreground">
+                                            Cargando registros…
+                                        </span>
+                                    </div>
+                                </TableCell>
+                            </TableRow>
+                        ) : filteredLogs.length === 0 ? (
+                            <TableRow>
+                                <TableCell
+                                    colSpan={6}
+                                    className="h-64 text-center"
+                                >
+                                    <div className="flex flex-col items-center justify-center gap-2 opacity-40">
+                                        <Database className="size-12 mb-2" />
+                                        <p className="font-semibold text-sm">
+                                            Ningún registro coincide con tu
+                                            búsqueda
+                                        </p>
+                                    </div>
+                                </TableCell>
+                            </TableRow>
+                        ) : (
+                            filteredLogs.map((log) => (
+                                <TableRow
+                                    key={log.id}
+                                    className="border-b border-border/50 hover:bg-muted/30 group transition-colors cursor-pointer"
+                                    role="button"
+                                    tabIndex={0}
+                                    onClick={() =>
+                                        dispatch({
+                                            type: "SET_SELECTED_LOG",
+                                            payload: log,
+                                        })
+                                    }
+                                    onKeyDown={(e) => {
+                                        if (
+                                            e.key === "Enter" ||
+                                            e.key === " "
+                                        ) {
+                                            e.preventDefault();
+                                            dispatch({
+                                                type: "SET_SELECTED_LOG",
+                                                payload: log,
+                                            });
+                                        }
+                                    }}
+                                >
+                                    <TableCell className="py-4 font-mono text-[10px]">
+                                        <div className="font-bold text-foreground">
+                                            {format(
+                                                new Date(log.timestamp),
+                                                "HH:mm:ss.SSS",
+                                            )}
+                                        </div>
+                                        <div className="text-muted-foreground">
+                                            {format(
+                                                new Date(log.timestamp),
+                                                "dd MMM yyyy",
+                                            )}
+                                        </div>
+                                    </TableCell>
+                                    <TableCell>
+                                        {getLevelBadge(log.level)}
+                                    </TableCell>
+                                    <TableCell>
+                                        <div className="flex flex-col gap-1 max-w-[400px] lg:max-w-[500px]">
+                                            <div className="font-bold text-[9px] uppercase bg-muted px-1.5 py-0.5 rounded border border-border/50 w-fit">
+                                                {log.method}
+                                            </div>
+                                            <div
+                                                className="font-mono text-[10px] truncate text-muted-foreground"
+                                                title={log.url}
+                                            >
+                                                {log.url}
+                                            </div>
+                                        </div>
+                                    </TableCell>
+                                    <TableCell
+                                        className={`font-bold text-base ${getStatusColor(log.statusCode)}`}
+                                    >
+                                        {log.statusCode}
+                                    </TableCell>
+                                    <TableCell>
+                                        <div
+                                            className={`font-mono text-[10px] font-semibold px-2 py-1 rounded-md ${
+                                                log.duration > 1000
+                                                    ? "bg-rose-50 text-rose-600"
+                                                    : "bg-muted text-muted-foreground"
+                                            }`}
+                                        >
+                                            {log.duration}ms
+                                        </div>
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="size-8 rounded-full p-0 opacity-0 group-hover:opacity-100 hover:bg-primary/10 hover:text-primary transition-[color,background-color,border-color,box-shadow,opacity,transform]"
+                                        >
+                                            <ArrowRight className="size-4" />
+                                        </Button>
+                                    </TableCell>
+                                </TableRow>
+                            ))
+                        )}
+                    </TableBody>
+                </Table>
+            </div>
 
-      <div className="md:hidden divide-y divide-border/50">
-        {filteredLogs.map((log) => (
-          <button
-            type="button"
-            key={log.id}
-            className="p-5 space-y-3 hover:bg-muted/30 active:bg-muted transition-colors group text-left w-full"
-            onClick={() => dispatch({ type: "SET_SELECTED_LOG", payload: log })}
-          >
-            <div className="flex justify-between items-start">
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  {getLevelBadge(log.level)}
-                  <span
-                    className={`text-lg font-bold tracking-tight ${getStatusColor(log.statusCode)}`}
-                  >
-                    {log.statusCode}
-                  </span>
-                </div>
-                <div className="font-bold text-[9px] uppercase bg-muted border border-border/50 px-2 py-0.5 rounded w-fit">
-                  {log.method}
-                </div>
-              </div>
-              <div className="text-[10px] font-mono font-medium text-right text-muted-foreground uppercase">
-                {format(
-                  new Date(log.timestamp),
-                  "HH:mm:ss",
-                )}
-                <br />
-                <span
-                  className={
-                    log.duration > 1000
-                      ? "text-rose-500 font-bold"
-                      : ""
-                  }
-                >
-                  {log.duration}ms
-                </span>
-              </div>
+            <div className="md:hidden divide-y divide-border/50">
+                {filteredLogs.map((log) => (
+                    <button
+                        type="button"
+                        key={log.id}
+                        className="p-5 space-y-3 hover:bg-muted/30 active:bg-muted transition-colors group text-left w-full"
+                        onClick={() =>
+                            dispatch({ type: "SET_SELECTED_LOG", payload: log })
+                        }
+                    >
+                        <div className="flex justify-between items-start">
+                            <div className="space-y-2">
+                                <div className="flex items-center gap-2">
+                                    {getLevelBadge(log.level)}
+                                    <span
+                                        className={`text-lg font-bold tracking-tight ${getStatusColor(log.statusCode)}`}
+                                    >
+                                        {log.statusCode}
+                                    </span>
+                                </div>
+                                <div className="font-bold text-[9px] uppercase bg-muted border border-border/50 px-2 py-0.5 rounded w-fit">
+                                    {log.method}
+                                </div>
+                            </div>
+                            <div className="text-[10px] font-mono font-medium text-right text-muted-foreground uppercase">
+                                {format(new Date(log.timestamp), "HH:mm:ss")}
+                                <br />
+                                <span
+                                    className={
+                                        log.duration > 1000
+                                            ? "text-rose-500 font-bold"
+                                            : ""
+                                    }
+                                >
+                                    {log.duration}ms
+                                </span>
+                            </div>
+                        </div>
+                        <div className="font-mono text-[10px] break-all leading-tight text-muted-foreground font-medium">
+                            {log.url}
+                        </div>
+                    </button>
+                ))}
             </div>
-            <div className="font-mono text-[10px] break-all leading-tight text-muted-foreground font-medium">
-              {log.url}
-            </div>
-          </button>
-        ))}
-      </div>
-    </Card>
-  );
+        </Card>
+    );
 }
 
 export function LogsClient({
@@ -563,63 +653,75 @@ export function LogsClient({
     initialTotal,
     tenants,
 }: LogsClientProps) {
-  const [state, dispatch] = useReducer(logsReducer, null, () => ({
-    logs: initialLogs,
-    total: initialTotal,
-    loading: false,
-    selectedLog: null,
-    searchTerm: "",
-    filters: {
-      level: "",
-      tenantId: "",
-      startDate: "",
-      endDate: "",
-      skip: 0,
-      take: 50,
-    },
-  }));
-  const loadLogs = useCallback(async (filters: typeof state.filters) => {
-    const f = filters;
-    dispatch({ type: "SET_LOADING", payload: true });
-    try {
-      const response = await logService.getAll(f);
-      if (Array.isArray(response)) {
-        dispatch({ type: "SET_LOGS", payload: response });
-        dispatch({ type: "SET_TOTAL", payload: response.length });
-      } else if (response && typeof response === "object") {
-        const resAny = response as any;
-        dispatch({ type: "SET_LOGS", payload: resAny.data || [] });
-        dispatch({ type: "SET_TOTAL", payload: resAny.pagination?.total || resAny.data?.length || 0 });
-      }
-    } catch (error) {
-      console.error("Error al cargar los registros", error);
-      dispatch({ type: "SET_LOGS", payload: [] });
-    } finally {
-      dispatch({ type: "SET_LOADING", payload: false });
-    }
-  }, []);
+    const [state, dispatch] = useReducer(logsReducer, null, () => ({
+        logs: initialLogs,
+        total: initialTotal,
+        loading: false,
+        selectedLog: null,
+        searchTerm: "",
+        filters: {
+            level: "",
+            tenantId: "",
+            startDate: "",
+            endDate: "",
+            skip: 0,
+            take: 50,
+        },
+    }));
+    const loadLogs = useCallback(async (filters: typeof state.filters) => {
+        const f = filters;
+        dispatch({ type: "SET_LOADING", payload: true });
+        try {
+            const response = await logService.getAll(f);
+            if (Array.isArray(response)) {
+                dispatch({ type: "SET_LOGS", payload: response });
+                dispatch({ type: "SET_TOTAL", payload: response.length });
+            } else if (response && typeof response === "object") {
+                const resAny = response as any;
+                dispatch({ type: "SET_LOGS", payload: resAny.data || [] });
+                dispatch({
+                    type: "SET_TOTAL",
+                    payload:
+                        resAny.pagination?.total || resAny.data?.length || 0,
+                });
+            }
+        } catch (error) {
+            console.error("Error al cargar los registros", error);
+            dispatch({ type: "SET_LOGS", payload: [] });
+        } finally {
+            dispatch({ type: "SET_LOADING", payload: false });
+        }
+    }, []);
 
-  const updateFilters = useCallback((patch: Partial<typeof state.filters>) => {
-    dispatch({ type: "SET_FILTERS", payload: { ...state.filters, ...patch } });
-    const next = { ...state.filters, ...patch };
-    const hasFilters =
-      next.level ||
-      next.tenantId ||
-      next.startDate ||
-      next.endDate ||
-      next.skip !== 0 ||
-      next.take !== 50;
-    if (hasFilters) {
-      loadLogs(next);
-    }
-	}, [loadLogs, state.filters]);
+    const updateFilters = useCallback(
+        (patch: Partial<typeof state.filters>) => {
+            dispatch({
+                type: "SET_FILTERS",
+                payload: { ...state.filters, ...patch },
+            });
+            const next = { ...state.filters, ...patch };
+            const hasFilters =
+                next.level ||
+                next.tenantId ||
+                next.startDate ||
+                next.endDate ||
+                next.skip !== 0 ||
+                next.take !== 50;
+            if (hasFilters) {
+                loadLogs(next);
+            }
+        },
+        [loadLogs, state.filters],
+    );
 
-	const filteredLogs = (state.logs || []).filter(
-    (log) =>
-      log.url.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
-      log.traceId?.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
-      log.message.toLowerCase().includes(state.searchTerm.toLowerCase()),
-  );
+    const filteredLogs = (state.logs || []).filter(
+        (log) =>
+            log.url.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
+            log.traceId
+                ?.toLowerCase()
+                .includes(state.searchTerm.toLowerCase()) ||
+            log.message.toLowerCase().includes(state.searchTerm.toLowerCase()),
+    );
 
     return (
         <div className="space-y-12">
@@ -630,17 +732,19 @@ export function LogsClient({
                         Registros del sistema
                     </h1>
                     <p className="text-muted-foreground font-medium text-sm flex items-center gap-2">
-                        <Activity className="size-4 text-primary" /> Observabilidad técnica y salud del sistema en tiempo real
+                        <Activity className="size-4 text-primary" />{" "}
+                        Observabilidad técnica y salud del sistema en tiempo
+                        real
                     </p>
                 </div>
                 <div className="flex w-full md:w-auto gap-4">
                     <Button
                         onClick={() => loadLogs(state.filters)}
-          disabled={state.loading}
-          className="h-11 px-6 rounded-xl font-bold shadow-md shadow-primary/10 transition-[color,background-color,border-color,box-shadow,opacity,transform] hover:-translate-y-0.5"
-        >
-          <RefreshCcw
-            className={`size-4 mr-2 ${state.loading ? "animate-spin" : ""}`}
+                        disabled={state.loading}
+                        className="h-11 px-6 rounded-xl font-bold shadow-md shadow-primary/10 transition-[color,background-color,border-color,box-shadow,opacity,transform] hover:-translate-y-0.5"
+                    >
+                        <RefreshCcw
+                            className={`size-4 mr-2 ${state.loading ? "animate-spin" : ""}`}
                         />
                         Sync Logs
                     </Button>
@@ -658,8 +762,9 @@ export function LogsClient({
                 />
                 <QuickStat
                     label="Errores"
-          value={
-            (state.logs || []).filter((l) => l.statusCode >= 500).length
+                    value={
+                        (state.logs || []).filter((l) => l.statusCode >= 500)
+                            .length
                     }
                     icon={<AlertCircle />}
                     color="text-rose-600"
@@ -668,7 +773,10 @@ export function LogsClient({
                 />
                 <QuickStat
                     label="Slow"
-                    value={(state.logs || []).filter((l) => l.duration > 1000).length}
+                    value={
+                        (state.logs || []).filter((l) => l.duration > 1000)
+                            .length
+                    }
                     icon={<Clock />}
                     color="text-amber-600"
                     bg="bg-amber-50"
@@ -682,21 +790,26 @@ export function LogsClient({
                 />
             </div>
 
-      <LogsFiltersSection
-        filters={state.filters}
-        searchTerm={state.searchTerm}
-        tenants={tenants}
-        updateFilters={updateFilters}
-        dispatch={dispatch}
-      />
+            <LogsFiltersSection
+                filters={state.filters}
+                searchTerm={state.searchTerm}
+                tenants={tenants}
+                updateFilters={updateFilters}
+                dispatch={dispatch}
+            />
 
-      <LogsDataTable
-        filteredLogs={filteredLogs}
-        loading={state.loading}
-        dispatch={dispatch}
-      />
+            <LogsDataTable
+                filteredLogs={filteredLogs}
+                loading={state.loading}
+                dispatch={dispatch}
+            />
 
-      <LogInspectorDialog log={state.selectedLog} onClose={() => dispatch({ type: "SET_SELECTED_LOG", payload: null })} />
+            <LogInspectorDialog
+                log={state.selectedLog}
+                onClose={() =>
+                    dispatch({ type: "SET_SELECTED_LOG", payload: null })
+                }
+            />
         </div>
     );
 }
@@ -709,7 +822,6 @@ function QuickStat({
     icon,
     color = "text-foreground",
     bg = "bg-muted",
-
 }: {
     label: string;
     value: any;

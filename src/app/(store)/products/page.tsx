@@ -1,8 +1,8 @@
-import React, { Suspense } from "react";
-import ProductsPage from "./products-client";
-import { api } from '@/lib/api-client';
 import type { Metadata } from "next";
+import { Suspense } from "react";
+import { api } from "@/lib/api-client";
 import type { Category } from "@/types/category.types";
+import ProductsPage from "./products-client";
 
 export const metadata: Metadata = {
     title: "Productos",
@@ -43,7 +43,7 @@ async function fetchProducts(
             queryParams.set("category", category);
 
         const data = await api.get<any>(`/products?${queryParams.toString()}`);
-        const allProducts = (data?.products || (Array.isArray(data) ? data : []));
+        const allProducts = data?.products || (Array.isArray(data) ? data : []);
 
         return allProducts.map((p: any) => ({
             id: p.id,
@@ -76,14 +76,14 @@ export default async function Page({ searchParams }: Props) {
             ? resolvedSearchParams.category
             : "all";
 
-  const [products, categories] = await Promise.all([
-    fetchProducts(search, category),
-    fetchCategories(),
-  ]);
+    const [products, categories] = await Promise.all([
+        fetchProducts(search, category),
+        fetchCategories(),
+    ]);
 
-	return (
-		<Suspense fallback={null}>
-			<ProductsPage products={products} categories={categories} />
+    return (
+        <Suspense fallback={null}>
+            <ProductsPage products={products} categories={categories} />
         </Suspense>
     );
 }

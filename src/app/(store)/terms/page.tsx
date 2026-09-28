@@ -1,14 +1,14 @@
-import React from "react";
-import { Badge } from "@/components/ui/badge";
-import { getCmsPage } from "@/lib/strapi";
-import { cmsHeader, cmsRichText } from "@/lib/cms-page";
 import type { Metadata } from "next";
+import { Badge } from "@/components/ui/badge";
+import { cmsHeader, cmsRichText } from "@/lib/cms-page";
+import { getCmsPage } from "@/lib/strapi";
 
 export async function generateMetadata(): Promise<Metadata> {
     const cms = await getCmsPage("terms-pages");
     return {
         title: cms?.title ?? "Términos de Servicio",
-        description: cms?.subtitle ?? "Nuestros términos y condiciones del servicio",
+        description:
+            cms?.subtitle ?? "Nuestros términos y condiciones del servicio",
     };
 }
 
