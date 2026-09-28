@@ -27,9 +27,17 @@ import {
 } from "lucide-react";
 import { AuthBrandHeader } from "@/components/auth/AuthBrandHeader";
 import { reportError } from "@/lib/error-reporting";
+import { firstErrorCode } from "@/lib/error-messages";
 import { PASSWORD_MIN_LENGTH } from "@/lib/password-policy";
 import { PasswordInput } from "@/components/ui/password-input";
 import { cn } from "@/lib/utils";
+
+/**
+ * The one backend code the forgot-password link is for: the email is already
+ * registered in another tenant, so the user has a password from that other
+ * sign-up and the recovery flow is the way back into it.
+ */
+const RECOVERY_LINK_CODE = "AUTH_EMAIL_TAKEN_IN_OTHER_TENANT";
 
 const getPasswordStrength = (pass: string) => {
   if (pass.length === 0) return { strength: 0, label: "", color: "" };
@@ -46,21 +54,23 @@ type RegisterState = {
   password: string;
   confirmPassword: string;
   error: string;
+  /** Backend `code` behind `error`, empty when there is none to branch on. */
+  errorCode: string;
 };
 
 type RegisterAction =
-  | { type: "SET_FIELD"; field: keyof Omit<RegisterState, "error">; value: string }
-  | { type: "SET_ERROR"; value: string }
+  | { type: "SET_FIELD"; field: keyof Omit<RegisterState, "error" | "errorCode">; value: string }
+  | { type: "SET_ERROR"; value: string; code?: string }
   | { type: "CLEAR_ERROR" };
 
 const registerReducer = (state: RegisterState, action: RegisterAction): RegisterState => {
   switch (action.type) {
     case "SET_FIELD":
-      return { ...state, [action.field]: action.value, error: "" };
+      return { ...state, [action.field]: action.value, error: "", errorCode: "" };
     case "SET_ERROR":
-      return { ...state, error: action.value };
+      return { ...state, error: action.value, errorCode: action.code ?? "" };
     case "CLEAR_ERROR":
-      return { ...state, error: "" };
+      return { ...state, error: "", errorCode: "" };
     default:
       return state;
   }
@@ -72,6 +82,7 @@ const initialRegisterState: RegisterState = {
   password: "",
   confirmPassword: "",
   error: "",
+  errorCode: "",
 };
 
 export function RegisterPageClient() {
@@ -108,6 +119,7 @@ export function RegisterPageClient() {
     dispatch({
       type: "SET_ERROR",
       value: reportError(err, "No pudimos crear tu cuenta.", { toast: false }),
+      code: firstErrorCode(err),
     });
   }
   };
@@ -287,16 +299,18 @@ export function RegisterPageClient() {
     <AlertDescription className="text-xs font-semibold">
       {state.error}
     </AlertDescription>
-    {/* The recovery path for a registration that fails on an email someone
-        already has. The forgot and reset flows exist and work; what was
-        missing was a way to reach them from here, so someone whose email was
-        taken in another tenant had no next step. */}
+    {/* Scoped to the one code the recovery path was written for. Every other
+        failure here — the form's own validation, or a different backend code —
+        leaves the user with no password to recover, so offering the link
+        would point them at a flow that cannot help. */}
+{state.errorCode === RECOVERY_LINK_CODE && (
     <Link
       href="/forgot-password"
       className="mt-1 inline-block text-xs font-semibold underline underline-offset-2"
     >
       ¿Olvidaste tu contraseña?
     </Link>
+)}
   </Alert>
 )}
 

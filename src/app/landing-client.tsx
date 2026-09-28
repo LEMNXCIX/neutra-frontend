@@ -31,7 +31,7 @@ export function LandingPageClient() {
     let cancelled = false;
     const fetchTenants = async () => {
       try {
-        const data = await tenantService.getAll();
+        const data = await tenantService.getMine();
         if (!cancelled) setTenants(data || []);
       } catch (error) {
         console.error("Error fetching tenants:", error);

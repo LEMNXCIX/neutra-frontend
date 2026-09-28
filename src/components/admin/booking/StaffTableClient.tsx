@@ -3,6 +3,7 @@
 import React, { useReducer, useEffect, useCallback, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
+import { reportError } from "@/lib/error-reporting";
 import {
     Plus,
     Edit,
@@ -772,11 +773,11 @@ function useStaffTable(
                 await loadStaff();
             } else {
                 const errorData = await response.json();
-                toast.error(
-                    errorData.message ||
-                        editingStaff
-                            ? "No se pudo actualizar el miembro del equipo"
-                            : "No se pudo agregar el miembro del equipo",
+                reportError(
+                    errorData,
+                    editingStaff
+                        ? "No se pudo actualizar el miembro del equipo"
+                        : "No se pudo agregar el miembro del equipo",
                 );
             }
         } catch (err) {
@@ -811,8 +812,9 @@ function useStaffTable(
                 await loadStaff();
             } else {
                 const errorData = await response.json();
-                toast.error(
-                    errorData.message || "Error al eliminar al miembro del equipo",
+                reportError(
+                    errorData,
+                    "Error al eliminar al miembro del equipo",
                 );
             }
         } catch (err) {

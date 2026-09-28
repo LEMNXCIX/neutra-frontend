@@ -53,3 +53,4 @@ next-env.d.ts
 /src/data/*.tmp
 # Local Pi runtime state
 .atl/
+odd/

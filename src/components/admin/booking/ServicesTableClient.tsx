@@ -3,6 +3,7 @@
 import React, { useReducer, useEffect, useCallback, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
+import { reportError } from "@/lib/error-reporting";
 import { Edit, Trash2, Clock, DollarSign, Tag } from "lucide-react";
 import { bookingService, Service } from "@/services/booking.service";
 import { categoriesService } from "@/services/categories.service";
@@ -680,8 +681,8 @@ dispatch({ type: "SET_FORM_DATA", payload: {
       await loadServices();
     } else {
       const errorData = await response.json();
-      toast.error(
-        errorData.message ||
+      reportError(
+        errorData,
         editingService
           ? "No se pudo actualizar el servicio"
           : "No se pudo crear el servicio",
@@ -719,7 +720,7 @@ dispatch({ type: "SET_FORM_DATA", payload: {
                 await loadServices();
             } else {
                 const errorData = await response.json();
-                toast.error(errorData.message || "Error al eliminar el servicio");
+                reportError(errorData, "Error al eliminar el servicio");
             }
         } catch (err) {
             console.error("Error al eliminar el servicio:", err);

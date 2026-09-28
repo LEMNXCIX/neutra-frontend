@@ -13,7 +13,7 @@ import { existsSync, readFileSync } from 'fs';
 import { join, resolve } from 'path';
 import { describe, expect, it } from 'vitest';
 
-import { errorMessageFrom, firstTranslatedError, resolutionFor, translateErrorDetail } from '@/lib/error-messages';
+import { errorMessageFrom, firstErrorCode, firstTranslatedError, resolutionFor, translateErrorDetail } from '@/lib/error-messages';
 
 // src/lib/__tests__ -> src/lib -> src -> neutra-frontend -> Projects
 const PROJECTS_DIR = resolve(__dirname, '../../../..');
@@ -45,6 +45,17 @@ describe('error message translation', () => {
 
         expect(message).toContain('contraseña');
         expect(message).not.toContain('password must be');
+    });
+
+    it('translates staff-hours conflicts without the raw backend message', () => {
+        const message = translateErrorDetail({
+            code: 'BUSINESS_STAFF_HOURS_CONFLICT',
+            message: 'Staff working hours include active ranges on closed business day',
+        });
+
+        expect(message).toContain('miembro del equipo');
+        expect(message).toContain('cerrado');
+        expect(message).not.toContain('Staff working hours');
     });
 
     it('never surfaces the backend message', () => {
@@ -101,6 +112,40 @@ describe('error message translation', () => {
 
         expect(message).toContain('sesión expiró');
     });
+
+    it('reads the code a caller may branch on from a thrown error', () => {
+        // The shape an ApiError carries after a 422 from the backend.
+        expect(
+            firstErrorCode({
+                errors: [
+                    {
+                        code: 'AUTH_EMAIL_TAKEN_IN_OTHER_TENANT',
+                        message: 'email already belongs to another tenant',
+                        domain: 'auth',
+                    },
+                ],
+            }),
+        ).toBe('AUTH_EMAIL_TAKEN_IN_OTHER_TENANT');
+    });
+
+    it('skips details with no code when reading the first one', () => {
+        expect(
+            firstErrorCode({
+                errors: [
+                    { message: 'sin code' },
+                    { code: 'AUTH_EMAIL_TAKEN_IN_OTHER_TENANT', message: 'taken' },
+                ],
+            }),
+        ).toBe('AUTH_EMAIL_TAKEN_IN_OTHER_TENANT');
+    });
+
+    it('has no code to read for a non-object, a missing errors, or a non-array one', () => {
+        expect(firstErrorCode('boom')).toBeUndefined();
+        expect(firstErrorCode(null)).toBeUndefined();
+        expect(firstErrorCode(new Error('boom'))).toBeUndefined();
+        expect(firstErrorCode({})).toBeUndefined();
+        expect(firstErrorCode({ errors: 'not an array' })).toBeUndefined();
+    });
 });
 
 describe('coverage of the published backend codes', () => {
@@ -147,6 +192,7 @@ describe('coverage of the published backend codes', () => {
             'RESOURCE_ROUTE_NOT_FOUND',
             'TENANT_NOT_FOUND',
             'BUSINESS_INSUFFICIENT_STOCK',
+            'BUSINESS_STAFF_HOURS_CONFLICT',
             'LOYALTY_TARGET_NOT_REACHED',
             'RATE_LIMIT_EXCEEDED',
         ]) {

@@ -2,6 +2,7 @@
 
 import React, { useReducer, useRef, useSyncExternalStore } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { useAuthStore } from "@/store/auth-store";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -33,6 +34,8 @@ import {
 
 import { useTenantStore } from "@/store/tenant-store";
 import { Order } from "@/types/order.types";
+import type { Tenant } from "@/types/tenant";
+import { getTenantUrl } from "@/lib/tenant";
 import { Appointment } from "@/services/booking.service";
 import { OrderHistory } from "./order-history";
 import { AppointmentHistory } from "./appointment-history";
@@ -70,6 +73,7 @@ interface ProfileClientProps {
   initialOrders: Order[] | null;
   initialAppointments: Appointment[] | null;
   isNeutral: boolean;
+  myTenants?: Tenant[];
 }
 
 const emptySubscribe = () => () => {};
@@ -78,6 +82,7 @@ export function ProfileClient({
   initialOrders,
   initialAppointments,
   isNeutral,
+  myTenants = [],
 }: ProfileClientProps) {
   const isMounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
   const { moduleType } = useTenantStore();
@@ -241,6 +246,44 @@ export function ProfileClient({
       </Card>
 
       <LoyaltyCard />
+
+      {/* My Instances (neutral/SuperAdmin surface only) */}
+      {isNeutral && (
+        <Card className="t-card border-none shadow-2xl">
+          <CardContent className="p-8 space-y-6">
+            <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">
+              Mis instancias
+            </h2>
+
+            {myTenants.length === 0 ? (
+              <p className="text-sm text-muted-foreground font-medium">
+                Todavía no has creado ninguna instancia.
+              </p>
+            ) : (
+              <div className="flex flex-wrap gap-4">
+                {myTenants.map((tenant) => (
+                  <Button
+                    key={tenant.id}
+                    asChild
+                    variant="outline"
+                    className="h-14 px-6 rounded-xl font-bold border-2 border-border hover:border-primary hover:text-primary transition-[color,background-color,border-color,box-shadow,opacity,transform] hover:-translate-y-0.5"
+                  >
+                    <Link
+                      href={getTenantUrl(tenant.slug)}
+                      className="flex items-center gap-3"
+                    >
+                      <span>{tenant.name}</span>
+                      <Badge className="bg-primary/10 text-primary text-[10px] font-bold tracking-widest px-3 py-1 rounded-full border-none">
+                        {tenant.type}
+                      </Badge>
+                    </Link>
+                  </Button>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Content History */}
       {!isNeutral && (

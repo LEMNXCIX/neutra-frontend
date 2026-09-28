@@ -1,6 +1,12 @@
 // @vitest-environment happy-dom
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+    fireEvent,
+    render,
+    screen,
+    waitFor,
+    within,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom/vitest";
 
@@ -425,6 +431,17 @@ describe("TenantLoyaltyClient", () => {
         await screen.findByRole("heading", { name: "Borrador de prueba" });
 
         await user.click(screen.getByRole("button", { name: /Activar/ }));
+        const activationDialog = await screen.findByRole("alertdialog");
+        expect(
+            within(activationDialog).getByText("Activar campaña"),
+        ).toBeInTheDocument();
+        expect(
+            within(activationDialog).getByText(/Borrador de prueba/),
+        ).toBeInTheDocument();
+        expect(mocks.activateCampaign).not.toHaveBeenCalled();
+        await user.click(
+            within(activationDialog).getByRole("button", { name: "Activar" }),
+        );
         await waitFor(() =>
             expect(mocks.activateCampaign).toHaveBeenCalledWith("draft-1"),
         );
@@ -440,6 +457,20 @@ describe("TenantLoyaltyClient", () => {
         await waitFor(() =>
             expect(mocks.deleteCampaign).toHaveBeenCalledWith("draft-1"),
         );
+    });
+
+    it("does not activate when the confirmation is cancelled", async () => {
+        const user = userEvent.setup();
+        render(<TenantLoyaltyClient />);
+        await screen.findByRole("heading", { name: "Borrador de prueba" });
+
+        await user.click(screen.getByRole("button", { name: /Activar/ }));
+        const dialog = await screen.findByRole("alertdialog");
+        await user.click(
+            within(dialog).getByRole("button", { name: "Cancelar" }),
+        );
+
+        expect(mocks.activateCampaign).not.toHaveBeenCalled();
     });
 
     it("shows a load error and retries summary and campaign requests", async () => {

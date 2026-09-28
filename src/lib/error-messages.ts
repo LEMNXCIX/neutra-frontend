@@ -203,24 +203,43 @@ export function translateErrorDetail(detail: ErrorDetail): string {
     return label ? `${base} Revisá ${label}.` : base;
 }
 
-/** The most specific translated message available, or undefined if there is none. */
-export const firstTranslatedError = (
-    errors: unknown,
-): string | undefined => {
+/** The first detail that carries a usable code, or undefined if none does. */
+const firstDetail = (errors: unknown): ErrorDetail | undefined => {
     if (!Array.isArray(errors)) return undefined;
     for (const entry of errors) {
         if (!entry || typeof entry !== "object") continue;
         const detail = entry as ErrorDetail;
         if (typeof detail.code !== "string" || !detail.code) continue;
-        return translateErrorDetail(detail);
+        return detail;
     }
     return undefined;
+};
+
+/** The most specific translated message available, or undefined if there is none. */
+export const firstTranslatedError = (
+    errors: unknown,
+): string | undefined => {
+    const detail = firstDetail(errors);
+    return detail ? translateErrorDetail(detail) : undefined;
 };
 
 type ErrorLike = {
     errors?: unknown;
     statusCode?: number;
     name?: string;
+};
+
+/**
+ * The first machine-readable `code` of a thrown error, from its `errors` array.
+ *
+ * The code is the stable half of the backend contract — `CODE_MESSAGES` keys
+ * its Spanish copy off it — and it is the only thing a caller may branch on:
+ * the translated text is copy that can change, and the raw `message` is
+ * developer-facing English that is never rendered.
+ */
+export const firstErrorCode = (error: unknown): string | undefined => {
+    if (!error || typeof error !== "object") return undefined;
+    return firstDetail((error as ErrorLike).errors)?.code;
 };
 
 /**

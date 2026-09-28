@@ -43,7 +43,7 @@ export function NeutralNavigation() {
         let cancelled = false;
         const fetchTenants = async () => {
             try {
-                const data = await tenantService.getAll();
+                const data = await tenantService.getMine();
                 if (!cancelled) setTenants(data || []);
             } catch (error) {
                 console.error("Error fetching tenants:", error);
@@ -79,7 +79,7 @@ export function NeutralNavigation() {
                     </div>
 
                     {isAdmin && (
-                        <div className="hidden lg:flex items-center gap-6">
+                        <div className="hidden md:flex items-center gap-6">
                             <a
                                 href={`${getTenantUrl("superadmin")}/admin`}
                                 className="flex items-center gap-2 text-xs font-semibold hover:text-primary transition-colors text-foreground uppercase tracking-wider"
@@ -289,6 +289,22 @@ export function NeutralNavigation() {
                     </div>
                 </div>
             </div>
+
+            {isAdmin && tenants.length > 0 && (
+                <div className="md:hidden border-b border-border">
+                    <div className="container mx-auto py-3 w-full flex flex-nowrap gap-2 overflow-x-auto whitespace-nowrap">
+                        {tenants.map((tenant) => (
+                            <a
+                                key={tenant.id}
+                                href={getTenantUrl(tenant.slug)}
+                                className="px-3 py-1 text-[10px] font-semibold border border-border rounded-full hover:bg-primary hover:text-primary-foreground hover:border-primary transition-[color,background-color,border-color,box-shadow,opacity,transform] text-foreground"
+                            >
+                                {tenant.name}
+                            </a>
+                        ))}
+                    </div>
+                </div>
+            )}
         </nav>
     );
 }

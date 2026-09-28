@@ -7,6 +7,10 @@ export const tenantService = {
         return api.get<Tenant[]>('/tenants');
     },
 
+    getMine: async () => {
+        return api.get<Tenant[]>('/tenants/mine');
+    },
+
     getBySlug: async (slug: string): Promise<Tenant | null> => {
         // Server-side (RSC): hit the backend directly; relative URLs don't resolve.
         const url =

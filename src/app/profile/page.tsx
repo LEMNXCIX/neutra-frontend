@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { ProfileClient } from "@/components/profile/profile-client";
 import { authService } from "@/services/auth.service";
 import { api } from '@/lib/api-client';
+import type { Tenant } from "@/types/tenant";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -37,10 +38,16 @@ async function getData() {
 
         const results = await Promise.all(requests);
 
+        // Neutral/SuperAdmin surface: only the tenants the user actually belongs to.
+        const myTenants = isNeutral
+            ? await api.get<Tenant[]>('/tenants/mine').catch(() => [])
+            : [];
+
         return {
             user,
             orders: moduleType === 'store' ? (Array.isArray(results[0]) ? results[0] : []) : [],
             appointments: moduleType === 'booking' ? (Array.isArray(results[0]) ? results[0] : []) : [],
+            myTenants: Array.isArray(myTenants) ? myTenants : [],
             isNeutral,
             moduleType
         };
@@ -72,6 +79,7 @@ export default async function ProfilePage() {
                 <ProfileClient
                     initialOrders={data.orders}
                     initialAppointments={data.appointments}
+                    myTenants={data.myTenants}
                     isNeutral={data.isNeutral}
                 />
             </div>

@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/dialog";
 import { LoyaltyCampaignForm } from "@/components/admin/loyalty/LoyaltyCampaignForm";
 import { useFeatures } from "@/hooks/useFeatures";
+import { useConfirm } from "@/hooks/use-confirm";
 import { toast } from "sonner";
 import { reportError } from "@/lib/error-reporting";
 import {
@@ -312,6 +313,7 @@ function LoyaltyCampaignList({
 
 export function TenantLoyaltyClient() {
     const { isFeatureEnabled } = useFeatures();
+    const { confirm, ConfirmDialog } = useConfirm();
     const enabled =
         isFeatureEnabled("LOYALTY") && isFeatureEnabled("COUPONS");
     const [summary, setSummary] = useState<LoyaltyTenantSummary | null>(null);
@@ -394,6 +396,13 @@ export function TenantLoyaltyClient() {
         setSaveError(null);
         try {
             if (action === "activate") {
+                const confirmed = await confirm({
+                    title: "Activar campaña",
+                    description: `¿Seguro que quieres activar la campaña "${campaign.name}"?`,
+                    confirmText: "Activar",
+                    cancelText: "Cancelar",
+                });
+                if (!confirmed) return;
                 await loyaltyService.activateCampaign(campaign.id);
             } else if (action === "end") {
                 await loyaltyService.endCampaign(campaign.id);
@@ -423,6 +432,7 @@ export function TenantLoyaltyClient() {
 
     return (
         <div className="space-y-6">
+            <ConfirmDialog />
             <div>
                 <h1 className="flex items-center gap-3 text-3xl font-bold tracking-tight">
                     <Gift className="size-7 text-primary" aria-hidden="true" />
