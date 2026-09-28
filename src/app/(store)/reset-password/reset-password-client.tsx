@@ -1,29 +1,33 @@
 "use client";
 
-import React, { useState, useEffect, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import {
+    AlertCircle,
+    ArrowLeft,
+    ArrowRight,
+    CheckCircle2,
+    Lock,
+} from "lucide-react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import type React from "react";
+import { Suspense, useEffect, useState } from "react";
+import { toast } from "sonner";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
     Card,
     CardContent,
     CardDescription,
+    CardFooter,
     CardHeader,
     CardTitle,
-    CardFooter,
 } from "@/components/ui/card";
-import { toast } from "sonner";
-import { authService } from "@/services/auth.service";
+import { Label } from "@/components/ui/label";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Spinner } from "@/components/ui/spinner";
-import {
-    Lock,
-    ArrowLeft,
-    CheckCircle2,
-    AlertCircle,
-    ArrowRight,
-} from "lucide-react";
+import { reportError } from "@/lib/error-reporting";
+import { PASSWORD_MIN_LENGTH } from "@/lib/password-policy";
+import { authService } from "@/services/auth.service";
 
 function ResetPasswordForm() {
     const router = useRouter();
@@ -33,6 +37,7 @@ function ResetPasswordForm() {
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
     const [success, setSuccess] = useState(false);
 
     useEffect(() => {
@@ -50,13 +55,16 @@ function ResetPasswordForm() {
             return;
         }
 
-        if (password.length < 6) {
-            toast.error("La contraseña debe tener al menos 6 caracteres");
+        if (password.length < PASSWORD_MIN_LENGTH) {
+            toast.error(
+                `La contraseña debe tener al menos ${PASSWORD_MIN_LENGTH} caracteres`,
+            );
             return;
         }
 
         try {
             setLoading(true);
+            setError("");
             await authService.resetPassword({ token, newPassword: password });
             setSuccess(true);
             toast.success("Contraseña restablecida correctamente");
@@ -64,7 +72,11 @@ function ResetPasswordForm() {
                 router.push("/login");
             }, 3000);
         } catch (error: any) {
-            toast.error(error?.message || "Error al restablecer la contraseña");
+            setError(
+                reportError(error, "No pudimos restablecer tu contraseña.", {
+                    toast: false,
+                }),
+            );
         } finally {
             setLoading(false);
         }
@@ -87,7 +99,8 @@ function ResetPasswordForm() {
                 </CardHeader>
                 <CardContent className="text-center px-8 pb-6">
                     <p className="text-sm font-medium leading-relaxed text-muted-foreground">
-                        El token de recuperación es inválido, venció o ya fue utilizado. Solicitá un nuevo enlace para continuar.
+                        El token de recuperación es inválido, venció o ya fue
+                        utilizado. Solicita un nuevo enlace para continuar.
                     </p>
                 </CardContent>
                 <CardFooter className="justify-center border-t border-border/50 p-8 bg-muted/10">
@@ -96,7 +109,9 @@ function ResetPasswordForm() {
                         className="w-full h-12 rounded-xl border-border font-bold text-xs transition-[color,background-color,border-color,box-shadow,opacity,transform] hover:bg-muted"
                         asChild
                     >
-                        <Link href="/forgot-password">Solicitar un nuevo enlace →</Link>
+                        <Link href="/forgot-password">
+                            Solicitar un nuevo enlace →
+                        </Link>
                     </Button>
                 </CardFooter>
             </Card>
@@ -120,14 +135,16 @@ function ResetPasswordForm() {
                 </CardHeader>
                 <CardContent className="text-center px-8 pb-10">
                     <p className="text-sm text-muted-foreground font-medium leading-relaxed mb-8">
-                        Tu contraseña se actualizó correctamente. Serás redirigido al inicio de sesión en unos instantes.
+                        Tu contraseña se actualizó correctamente. Serás
+                        redirigido al inicio de sesión en unos instantes.
                     </p>
                     <Button
                         className="w-full h-12 rounded-xl font-bold text-sm shadow-lg shadow-primary/20 transition-[color,background-color,border-color,box-shadow,opacity,transform] hover:-translate-y-0.5"
                         asChild
                     >
                         <Link href="/login">
-                            Iniciar sesión <ArrowRight className="ml-2 size-4" />
+                            Iniciar sesión{" "}
+                            <ArrowRight className="ml-2 size-4" />
                         </Link>
                     </Button>
                 </CardContent>
@@ -155,17 +172,14 @@ function ResetPasswordForm() {
                         >
                             Nueva contraseña
                         </Label>
-                        <div className="relative group">
-                            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                            <Input
-                                id="password"
-                                type="password"
-                                required
-                                className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform] focus:border-primary"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                            />
-                        </div>
+                        <PasswordInput
+                            id="password"
+                            icon={Lock}
+                            required
+                            className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform] focus:border-primary"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                        />
                     </div>
                     <div className="space-y-2">
                         <Label
@@ -174,20 +188,24 @@ function ResetPasswordForm() {
                         >
                             Confirmar contraseña
                         </Label>
-                        <div className="relative group">
-                            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                            <Input
-                                id="confirm-password"
-                                type="password"
-                                required
-                                className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform] focus:border-primary"
-                                value={confirmPassword}
-                                onChange={(e) =>
-                                    setConfirmPassword(e.target.value)
-                                }
-                            />
-                        </div>
+                        <PasswordInput
+                            id="confirm-password"
+                            icon={Lock}
+                            required
+                            className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform] focus:border-primary"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                        />
                     </div>
+                    {error && (
+                        <Alert variant="destructive">
+                            <AlertCircle
+                                className="size-4"
+                                aria-hidden="true"
+                            />
+                            <AlertDescription>{error}</AlertDescription>
+                        </Alert>
+                    )}
                     <Button
                         type="submit"
                         className="w-full h-12 text-sm font-bold shadow-lg shadow-primary/20 hover:-translate-y-0.5 transition-[color,background-color,border-color,box-shadow,opacity,transform] rounded-xl mt-4"

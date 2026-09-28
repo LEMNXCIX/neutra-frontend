@@ -1,24 +1,24 @@
-import React from "react";
+import {
+    ArrowLeft,
+    Package,
+    Shield,
+    ShoppingBag,
+    Sparkles,
+    Truck,
+} from "lucide-react";
+import type { Metadata } from "next";
+import Link from "next/link";
 import ProductDetailClient from "@/components/product-detail-client";
 import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
-import {
-    Package,
-    Sparkles,
-    ShoppingBag,
-    Shield,
-    Truck,
-    ArrowLeft,
-} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
+import { Card } from "@/components/ui/card";
 import Image from "@/components/ui/image";
-import { api } from '@/lib/api-client';
-import type { Metadata } from "next";
+import { api } from "@/lib/api-client";
 
 export const metadata: Metadata = {
     title: "Detalles del producto",
-    description: "Mirá los detalles, el precio y la disponibilidad del producto",
+    description:
+        "Mira los detalles, el precio y la disponibilidad del producto",
 };
 
 async function fetchProduct(id: string) {
@@ -54,7 +54,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
                         Producto no encontrado
                     </h2>
                     <p className="text-muted-foreground mb-6">
-                        El producto que buscás no existe o fue eliminado
+                        El producto que buscas no existe o fue eliminado
                     </p>
                     <Button asChild>
                         <Link href="/products">
@@ -109,13 +109,13 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
                             <div className="absolute inset-0 bg-gradient-to-tr from-primary/10 via-transparent to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
                             <div className="aspect-square relative overflow-hidden">
                                 {product.image ? (
-      <Image
-        src={product.image}
-        alt={product.title}
-        fill
-        sizes="(max-width: 768px) 100vw, 50vw"
-        priority
-        className="object-cover transition-transform duration-1000 group-hover:scale-110"
+                                    <Image
+                                        src={product.image}
+                                        alt={product.title}
+                                        fill
+                                        sizes="(max-width: 768px) 100vw, 50vw"
+                                        priority
+                                        className="object-cover transition-transform duration-1000 group-hover:scale-110"
                                     />
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center bg-muted">

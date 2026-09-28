@@ -1,24 +1,23 @@
 "use client";
 
-import React from "react";
-import {
-    APPOINTMENT_STATUS_LABELS,
-    Appointment,
-    type AppointmentStatus,
-} from "@/services/booking.service";
+import { Calendar, Clock, Eye, User as UserIcon } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { CancelAppointmentDialog } from "@/components/booking/cancel-appointment-dialog";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
     Card,
     CardContent,
+    CardDescription,
     CardHeader,
     CardTitle,
-    CardDescription,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Calendar, Clock, User as UserIcon, Eye } from "lucide-react";
-import Link from "next/link";
-import { CancelAppointmentDialog } from "@/components/booking/cancel-appointment-dialog";
-import { useRouter } from "next/navigation";
+import {
+    APPOINTMENT_STATUS_LABELS,
+    type Appointment,
+    type AppointmentStatus,
+} from "@/services/booking.service";
 
 interface AppointmentHistoryProps {
     initialAppointments: Appointment[];
@@ -60,7 +59,7 @@ export function AppointmentHistory({
                     </div>
                     <div className="space-y-2">
                         <h3 className="text-2xl font-bold tracking-tight">
-                            Todavía no tenés citas
+                            Todavía no tienes citas
                         </h3>
                         <p className="text-muted-foreground font-medium">
                             Tus servicios agendados aparecerán aquí cuando
@@ -124,7 +123,8 @@ export function AppointmentHistory({
                                         <p className="text-base font-bold">
                                             {new Date(
                                                 a.startTime,
-                                            ).toLocaleDateString("es-ES", { timeZone: "UTC",
+                                            ).toLocaleDateString("es-ES", {
+                                                timeZone: "UTC",
                                                 dateStyle: "long",
                                             })}
                                         </p>
@@ -139,7 +139,8 @@ export function AppointmentHistory({
                                         <p className="text-base font-bold">
                                             {new Date(
                                                 a.startTime,
-                                            ).toLocaleTimeString("es-ES", { timeZone: "UTC",
+                                            ).toLocaleTimeString("es-ES", {
+                                                timeZone: "UTC",
                                                 hour: "2-digit",
                                                 minute: "2-digit",
                                             })}

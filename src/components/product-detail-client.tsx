@@ -1,12 +1,9 @@
 "use client";
-import React, { useState } from "react";
+import { Loader2, ShoppingBag as ShoppingBagIcon } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 import { useCart } from "@/hooks/use-cart";
 import { Button } from "./ui/button";
-import {
-    Loader2,
-    ShoppingBag as ShoppingBagIcon,
-} from "lucide-react";
-import { toast } from "sonner";
 
 type Product = { id: string; title: string; price?: number; stock?: number };
 
@@ -56,7 +53,11 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                             return;
                         }
                         const value = Number(rawValue);
-                        setQty(Number.isFinite(value) && value > 0 ? Math.floor(value) : 1);
+                        setQty(
+                            Number.isFinite(value) && value > 0
+                                ? Math.floor(value)
+                                : 1,
+                        );
                     }}
                     className="w-full h-16 bg-background border-2 border-border text-foreground px-6 font-bold text-2xl outline-none focus:border-foreground transition-[color,background-color,border-color,box-shadow,opacity,transform] rounded-xl"
                 />

@@ -1,46 +1,48 @@
 "use client";
 
-import React, { useReducer, useEffect, useCallback, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { toast } from "sonner";
 import {
-    Plus,
+    Check,
+    Clock,
     Edit,
-    Trash2,
     Mail,
     Phone,
-    User as UserIcon,
+    Plus,
     Scissors,
-    Check,
+    Trash2,
+    User as UserIcon,
 } from "lucide-react";
-import { bookingService, Staff, Service } from "@/services/booking.service";
-import { usersService } from "@/services/users.service";
-import { User } from "@/types/user.types";
+import { useRouter, useSearchParams } from "next/navigation";
+import type React from "react";
+import { Suspense, useCallback, useEffect, useReducer } from "react";
+import { toast } from "sonner";
+import { WorkingHoursEditor } from "@/components/admin/booking/working-hours-editor";
+import {
+    DEFAULT_WORKING_HOURS,
+    normalizeWorkingHours,
+    type WorkingHours,
+} from "@/components/admin/booking/working-hours-utils";
+import { AdminEntityHeader } from "@/components/admin/shared/AdminEntityHeader";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import {
     Card,
     CardContent,
-    CardHeader,
-    CardTitle,
     CardDescription,
     CardFooter,
+    CardHeader,
+    CardTitle,
 } from "@/components/ui/card";
 import {
     Dialog,
     DialogContent,
+    DialogDescription,
+    DialogFooter,
     DialogHeader,
     DialogTitle,
-    DialogFooter,
-    DialogDescription,
 } from "@/components/ui/dialog";
-import { Switch } from "@/components/ui/switch";
-import { Badge } from "@/components/ui/badge";
-import { Spinner } from "@/components/ui/spinner";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useConfirm } from "@/hooks/use-confirm";
 import {
     Select,
     SelectContent,
@@ -48,14 +50,18 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { WorkingHoursEditor } from "@/components/admin/booking/working-hours-editor";
+import { Spinner } from "@/components/ui/spinner";
+import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
+import { useConfirm } from "@/hooks/use-confirm";
+import { reportError } from "@/lib/error-reporting";
 import {
-    DEFAULT_WORKING_HOURS,
-    normalizeWorkingHours,
-    type WorkingHours,
-} from "@/components/admin/booking/working-hours-utils";
-import { Clock } from "lucide-react";
-import { AdminEntityHeader } from "@/components/admin/shared/AdminEntityHeader";
+    bookingService,
+    type Service,
+    type Staff,
+} from "@/services/booking.service";
+import { usersService } from "@/services/users.service";
+import type { User } from "@/types/user.types";
 
 interface Props {
     staff: Staff[];
@@ -91,7 +97,7 @@ function ServiceAssignmentDialog({
                         Asignar servicios a {editingStaff?.name}
                     </DialogTitle>
                     <DialogDescription>
-                        Seleccioná los servicios que este miembro del equipo
+                        Selecciona los servicios que este miembro del equipo
                         puede realizar.
                     </DialogDescription>
                 </DialogHeader>
@@ -99,7 +105,8 @@ function ServiceAssignmentDialog({
                     {allServices.length === 0 ? (
                         <div className="text-center py-8">
                             <p className="text-muted-foreground">
-                                No se encontraron servicios. Creá algunos servicios primero.
+                                No se encontraron servicios. Crea algunos
+                                servicios primero.
                             </p>
                         </div>
                     ) : (
@@ -134,7 +141,9 @@ function ServiceAssignmentDialog({
                                     <div
                                         className={`size-6 rounded-full border-2 flex items-center justify-center transition-[color,background-color,border-color,box-shadow,opacity,transform] ${selectedServiceIdSet.has(service.id) ? "bg-primary border-primary text-primary-foreground" : "border-muted-foreground/30"}`}
                                     >
-                                        {selectedServiceIdSet.has(service.id) && <Check className="size-3.5" />}
+                                        {selectedServiceIdSet.has(
+                                            service.id,
+                                        ) && <Check className="size-3.5" />}
                                     </div>
                                 </button>
                             ))}
@@ -251,7 +260,9 @@ function StaffCardsGrid({
                                 Miembro del equipo{" "}
                                 {isSuperAdmin && (
                                     <span className="text-[10px] font-mono opacity-50 ml-1">
-                                        ({member.tenant?.name || member.tenantId})
+                                        (
+                                        {member.tenant?.name || member.tenantId}
+                                        )
                                     </span>
                                 )}
                             </CardDescription>
@@ -349,8 +360,8 @@ function StaffFormDialog({
                     </DialogTitle>
                     <DialogDescription>
                         {editingStaff
-                            ? "Actualizá la información profesional de este miembro del equipo."
-                            : "Creá un nuevo perfil profesional para tu equipo."}
+                            ? "Actualiza la información profesional de este miembro del equipo."
+                            : "Crea un nuevo perfil profesional para tu equipo."}
                     </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={onSubmit} className="space-y-5 pt-4">
@@ -373,7 +384,7 @@ function StaffFormDialog({
                             }}
                         >
                             <SelectTrigger>
-                                <SelectValue placeholder="Seleccioná un usuario para vincular..." />
+                                <SelectValue placeholder="Selecciona un usuario para vincular..." />
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="none">
@@ -445,7 +456,7 @@ function StaffFormDialog({
                                     bio: e.target.value,
                                 })
                             }
-                            placeholder="Describí brevemente su especialidad..."
+                            placeholder="Describe brevemente su especialidad..."
                             rows={3}
                         />
                     </div>
@@ -772,11 +783,11 @@ function useStaffTable(
                 await loadStaff();
             } else {
                 const errorData = await response.json();
-                toast.error(
-                    errorData.message ||
-                        editingStaff
-                            ? "No se pudo actualizar el miembro del equipo"
-                            : "No se pudo agregar el miembro del equipo",
+                reportError(
+                    errorData,
+                    editingStaff
+                        ? "No se pudo actualizar el miembro del equipo"
+                        : "No se pudo agregar el miembro del equipo",
                 );
             }
         } catch (err) {
@@ -794,7 +805,7 @@ function useStaffTable(
         const confirmed = await confirm({
             title: "Eliminar Miembro",
             description:
-                "¿Seguro que querés eliminar a este miembro del equipo? Esta acción no se puede deshacer.",
+                "¿Seguro que quieres eliminar a este miembro del equipo? Esta acción no se puede deshacer.",
             confirmText: "Eliminar",
             variant: "destructive",
         });
@@ -811,8 +822,9 @@ function useStaffTable(
                 await loadStaff();
             } else {
                 const errorData = await response.json();
-                toast.error(
-                    errorData.message || "Error al eliminar al miembro del equipo",
+                reportError(
+                    errorData,
+                    "Error al eliminar al miembro del equipo",
                 );
             }
         } catch (err) {

@@ -1,7 +1,7 @@
-import React, { Suspense } from "react";
+import { Suspense } from "react";
 import UsersTableClient from "@/components/admin/users/UsersTableClient";
-import { User } from "@/types/user.types";
-import { api } from '@/lib/api-client';
+import { api } from "@/lib/api-client";
+import type { User } from "@/types/user.types";
 
 export const metadata = { title: "Usuarios de reservas" };
 
@@ -34,26 +34,24 @@ async function getUsers(
         // Map backend users to frontend format
         let users: User[] = [];
         if (data) {
-            const rawUsers = Array.isArray(data) ? data : (data.data || []);
-            users = rawUsers.map(
-                (u: BackendUser) => ({
-                    id: u.id,
-                    name: u.name,
-                    email: u.email,
-                    roleId: u.roleId || u.role?.id || "",
-                    active: u.active !== undefined ? u.active : true,
-                    profilePic: u.profilePic || undefined,
-                    role: u.role
-                        ? {
-                              id: u.role.id,
-                              name: u.role.name,
-                              permissions: u.role.permissions || [],
-                          }
-                        : undefined,
-                    createdAt: u.createdAt ? new Date(u.createdAt) : undefined,
-                    updatedAt: u.updatedAt ? new Date(u.updatedAt) : undefined,
-                }),
-            );
+            const rawUsers = Array.isArray(data) ? data : data.data || [];
+            users = rawUsers.map((u: BackendUser) => ({
+                id: u.id,
+                name: u.name,
+                email: u.email,
+                roleId: u.roleId || u.role?.id || "",
+                active: u.active !== undefined ? u.active : true,
+                profilePic: u.profilePic || undefined,
+                role: u.role
+                    ? {
+                          id: u.role.id,
+                          name: u.role.name,
+                          permissions: u.role.permissions || [],
+                      }
+                    : undefined,
+                createdAt: u.createdAt ? new Date(u.createdAt) : undefined,
+                updatedAt: u.updatedAt ? new Date(u.updatedAt) : undefined,
+            }));
         }
 
         // Apply filters
@@ -138,11 +136,11 @@ export default async function UsersPage({ searchParams }: Props) {
     const resolvedSearchParams = await searchParams;
     const page =
         typeof resolvedSearchParams.page === "string"
-            ? parseInt(resolvedSearchParams.page)
+            ? parseInt(resolvedSearchParams.page, 10)
             : 1;
     const limit =
         typeof resolvedSearchParams.limit === "string"
-            ? parseInt(resolvedSearchParams.limit)
+            ? parseInt(resolvedSearchParams.limit, 10)
             : 10;
     const search =
         typeof resolvedSearchParams.search === "string"

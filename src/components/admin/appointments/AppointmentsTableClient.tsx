@@ -1,27 +1,34 @@
 "use client";
-import { readJsonResponse } from "@/lib/response";
-
-
-import React, { Suspense, useReducer, useSyncExternalStore } from "react";
+import { format } from "date-fns";
+import {
+    CalendarCheck,
+    CalendarDays,
+    CalendarX,
+    CheckCircle2,
+    Clock,
+    Eye,
+    Scissors,
+    Tag,
+    Trash2,
+    User,
+    XCircle,
+} from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
+import type React from "react";
+import { Suspense, useReducer, useSyncExternalStore } from "react";
 import { toast } from "sonner";
-import {
-    Card,
-    CardHeader,
-    CardTitle,
-    CardContent,
-} from "@/components/ui/card";
-import {
-    Table,
-    TableHeader,
-    TableHead,
-    TableRow,
-    TableCell,
-    TableBody,
-} from "@/components/ui/table";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { StatusUpdateDialog } from "@/components/booking/status-update-dialog";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+    Dialog,
+    DialogContent,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import {
     Select,
@@ -30,34 +37,21 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogFooter,
-} from "@/components/ui/dialog";
-import {
-    CalendarDays,
-    CalendarCheck,
-    CalendarX,
-    Eye,
-    XCircle,
-    CheckCircle2,
-    Clock,
-    User,
-    Scissors,
-    Tag,
-    Trash2,
-} from "lucide-react";
-import {
-    Appointment,
-    type AppointmentStatus,
-} from "@/services/booking.service";
-import { StatusUpdateDialog } from "@/components/booking/status-update-dialog";
 import { Spinner } from "@/components/ui/spinner";
-import { format } from "date-fns";
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table";
 import { useConfirm } from "@/hooks/use-confirm";
+import { readJsonResponse } from "@/lib/response";
+import type {
+    Appointment,
+    AppointmentStatus,
+} from "@/services/booking.service";
 
 const getStatusBadge = (status: Appointment["status"]) => {
     switch (status) {
@@ -137,11 +131,19 @@ type StatusAction = {
 
 const STATUS_ACTIONS: Record<AppointmentStatus, StatusAction[]> = {
     PENDING: [],
-    CONFIRMED: [{ status: "IN_PROGRESS", label: "Iniciar", variant: "default" }],
-    IN_PROGRESS: [{ status: "COMPLETED", label: "Completar", variant: "default" }],
+    CONFIRMED: [
+        { status: "IN_PROGRESS", label: "Iniciar", variant: "default" },
+    ],
+    IN_PROGRESS: [
+        { status: "COMPLETED", label: "Completar", variant: "default" },
+    ],
     NEEDS_REVIEW: [
         { status: "COMPLETED", label: "Marcar completada", variant: "default" },
-        { status: "NO_SHOW", label: "Marcar no asistió", variant: "destructive" },
+        {
+            status: "NO_SHOW",
+            label: "Marcar no asistió",
+            variant: "destructive",
+        },
     ],
     COMPLETED: [],
     CANCELLED: [],
@@ -171,953 +173,979 @@ type Props = {
 };
 
 const StatCard = ({
-  icon: Icon,
-  title,
-  value,
-  color,
-  description,
+    icon: Icon,
+    title,
+    value,
+    color,
+    description,
 }: {
-  icon: any;
-  title: string;
-  value: number;
-  color: string;
-  description: string;
+    icon: any;
+    title: string;
+    value: number;
+    color: string;
+    description: string;
 }) => (
-  <Card className="overflow-hidden">
-    <CardContent className="p-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm font-medium text-muted-foreground">
-            {title}
-          </p>
-          <h3 className="text-2xl font-bold mt-1">{value}</h3>
-          <p className="text-xs text-muted-foreground mt-1">
-            {description}
-          </p>
-        </div>
-        <div className={`p-3 rounded-xl ${color}`}>
-          <Icon className="size-6 text-white" />
-        </div>
-      </div>
-    </CardContent>
-  </Card>
+    <Card className="overflow-hidden">
+        <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+                <div>
+                    <p className="text-sm font-medium text-muted-foreground">
+                        {title}
+                    </p>
+                    <h3 className="text-2xl font-bold mt-1">{value}</h3>
+                    <p className="text-xs text-muted-foreground mt-1">
+                        {description}
+                    </p>
+                </div>
+                <div className={`p-3 rounded-xl ${color}`}>
+                    <Icon className="size-6 text-white" />
+                </div>
+            </div>
+        </CardContent>
+    </Card>
 );
 
 function AppointmentStatusActions({
-  appointment,
-  onStatusUpdated,
+    appointment,
+    onStatusUpdated,
 }: {
-  appointment: Appointment;
-  onStatusUpdated: () => void | Promise<void>;
+    appointment: Appointment;
+    onStatusUpdated: () => void | Promise<void>;
 }) {
-  const actions = getStatusActions(appointment.status);
-  if (actions.length === 0) return null;
+    const actions = getStatusActions(appointment.status);
+    if (actions.length === 0) return null;
 
-  return (
-    <div className="flex w-full min-w-0 flex-wrap gap-2 sm:w-auto">
-      {actions.map((action) => (
-        <StatusUpdateDialog
-          key={action.status}
-          appointmentId={appointment.id}
-          currentStatus={appointment.status}
-          newStatus={action.status}
-          reason={`Resolved from booking admin as ${action.status}`}
-          onStatusUpdated={onStatusUpdated}
-          trigger={
-            <Button
-              type="button"
-              size="sm"
-              variant={action.variant}
-              className="w-full sm:w-auto"
-            >
-              {action.label}
-            </Button>
-          }
-        />
-      ))}
-    </div>
-  );
+    return (
+        <div className="flex w-full min-w-0 flex-wrap gap-2 sm:w-auto">
+            {actions.map((action) => (
+                <StatusUpdateDialog
+                    key={action.status}
+                    appointmentId={appointment.id}
+                    currentStatus={appointment.status}
+                    newStatus={action.status}
+                    reason={`Resolved from booking admin as ${action.status}`}
+                    onStatusUpdated={onStatusUpdated}
+                    trigger={
+                        <Button
+                            type="button"
+                            size="sm"
+                            variant={action.variant}
+                            className="w-full sm:w-auto"
+                        >
+                            {action.label}
+                        </Button>
+                    }
+                />
+            ))}
+        </div>
+    );
 }
 
 function AppointmentDetailsDialog({
-  appointment,
-  open,
-  onOpenChange,
-  onConfirm,
-  onCancel,
-  onDelete,
-  onStatusUpdated,
-  isConfirming,
-  isCancelling,
-  isDeleting,
+    appointment,
+    open,
+    onOpenChange,
+    onConfirm,
+    onCancel,
+    onDelete,
+    onStatusUpdated,
+    isConfirming,
+    isCancelling,
+    isDeleting,
 }: {
-  appointment: Appointment | null;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onConfirm: (id: string) => void;
-  onCancel: (id: string) => void;
-  onDelete: (id: string) => void;
-  onStatusUpdated: () => void;
-  isConfirming: string | null;
-  isCancelling: string | null;
-  isDeleting: string | null;
+    appointment: Appointment | null;
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+    onConfirm: (id: string) => void;
+    onCancel: (id: string) => void;
+    onDelete: (id: string) => void;
+    onStatusUpdated: () => void;
+    isConfirming: string | null;
+    isCancelling: string | null;
+    isDeleting: string | null;
 }) {
-  if (!appointment) return null;
+    if (!appointment) return null;
 
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg bg-background border-muted">
-        <DialogHeader>
-          <DialogTitle className="text-xl font-bold flex items-center gap-2">
-            <Clock className="size-5 text-blue-500" />
-            Detalles de la cita
-          </DialogTitle>
-        </DialogHeader>
-        <div className="space-y-6 pt-4">
-          <div className="grid grid-cols-2 gap-x-4 gap-y-6">
-            <div className="space-y-1">
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Estado
-              </p>
-              <div>
-                {getStatusBadge(appointment.status)}
-              </div>
-            </div>
-            <div className="space-y-1">
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Creada el
-              </p>
-              <p className="font-medium">
-                {format(
-                  new Date(appointment.createdAt),
-                  "MMM dd, yyyy HH:mm",
-                )}
-              </p>
-            </div>
-            <div className="col-span-2 space-y-1">
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Información del cliente
-              </p>
-              <div className="p-3 border rounded-lg bg-muted/30">
-                <p className="font-bold flex items-center gap-2">
-                  <User className="size-4 text-muted-foreground" />
-                  {appointment.user?.name || "Cliente Invitado"}
-                </p>
-                <p className="text-sm text-muted-foreground ml-6">
-                  {appointment.user?.email || "Sin correo"}
-                </p>
-                <p className="text-xs text-muted-foreground ml-6 mt-1 italic">
-                  ID: {appointment.userId}
-                </p>
-              </div>
-            </div>
-            <div className="space-y-1">
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Servicio
-              </p>
-              <p className="font-medium flex items-center gap-2">
-                <Scissors className="size-4 text-muted-foreground" />
-                {appointment.service?.name}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {appointment.service?.duration} min - ${appointment.service?.price}
-              </p>
-              {appointment.discountAmount > 0 && (
-                <div className="mt-2 p-2 bg-green-50 rounded border border-green-100 dark:bg-green-900/20 dark:border-green-800">
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="text-muted-foreground">Subtotal: </span>
-                    <span>
-                      ${appointment.subtotal > 0 ? appointment.subtotal : appointment.service?.price}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center text-sm text-green-600 dark:text-green-400 font-medium">
-                    <span className="flex items-center gap-1">
-                      <Tag className="size-3" /> Descuento{" "}
-                      {appointment.coupon ? `(${appointment.coupon.code})` : ""}:
-                    </span>
-                    <span>
-                      -${appointment.discountAmount}
-                    </span>
-                  </div>
-                  <div className="border-t border-green-200 dark:border-green-800 my-1"></div>
-                  <div className="flex justify-between items-center font-bold">
-                    <span>Total:</span>
-                    <span>
-                      ${appointment.total}
-                    </span>
-                  </div>
+    return (
+        <Dialog open={open} onOpenChange={onOpenChange}>
+            <DialogContent className="max-w-lg bg-background border-muted">
+                <DialogHeader>
+                    <DialogTitle className="text-xl font-bold flex items-center gap-2">
+                        <Clock className="size-5 text-blue-500" />
+                        Detalles de la cita
+                    </DialogTitle>
+                </DialogHeader>
+                <div className="space-y-6 pt-4">
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-6">
+                        <div className="space-y-1">
+                            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                                Estado
+                            </p>
+                            <div>{getStatusBadge(appointment.status)}</div>
+                        </div>
+                        <div className="space-y-1">
+                            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                                Creada el
+                            </p>
+                            <p className="font-medium">
+                                {format(
+                                    new Date(appointment.createdAt),
+                                    "MMM dd, yyyy HH:mm",
+                                )}
+                            </p>
+                        </div>
+                        <div className="col-span-2 space-y-1">
+                            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                                Información del cliente
+                            </p>
+                            <div className="p-3 border rounded-lg bg-muted/30">
+                                <p className="font-bold flex items-center gap-2">
+                                    <User className="size-4 text-muted-foreground" />
+                                    {appointment.user?.name ||
+                                        "Cliente Invitado"}
+                                </p>
+                                <p className="text-sm text-muted-foreground ml-6">
+                                    {appointment.user?.email || "Sin correo"}
+                                </p>
+                                <p className="text-xs text-muted-foreground ml-6 mt-1 italic">
+                                    ID: {appointment.userId}
+                                </p>
+                            </div>
+                        </div>
+                        <div className="space-y-1">
+                            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                                Servicio
+                            </p>
+                            <p className="font-medium flex items-center gap-2">
+                                <Scissors className="size-4 text-muted-foreground" />
+                                {appointment.service?.name}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                                {appointment.service?.duration} min - $
+                                {appointment.service?.price}
+                            </p>
+                            {appointment.discountAmount > 0 && (
+                                <div className="mt-2 p-2 bg-green-50 rounded border border-green-100 dark:bg-green-900/20 dark:border-green-800">
+                                    <div className="flex justify-between items-center text-sm">
+                                        <span className="text-muted-foreground">
+                                            Subtotal:{" "}
+                                        </span>
+                                        <span>
+                                            $
+                                            {appointment.subtotal > 0
+                                                ? appointment.subtotal
+                                                : appointment.service?.price}
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-between items-center text-sm text-green-600 dark:text-green-400 font-medium">
+                                        <span className="flex items-center gap-1">
+                                            <Tag className="size-3" /> Descuento{" "}
+                                            {appointment.coupon
+                                                ? `(${appointment.coupon.code})`
+                                                : ""}
+                                            :
+                                        </span>
+                                        <span>
+                                            -${appointment.discountAmount}
+                                        </span>
+                                    </div>
+                                    <div className="border-t border-green-200 dark:border-green-800 my-1"></div>
+                                    <div className="flex justify-between items-center font-bold">
+                                        <span>Total:</span>
+                                        <span>${appointment.total}</span>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                        <div className="space-y-1">
+                            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                                Miembro del equipo
+                            </p>
+                            <p className="font-medium">
+                                {appointment.staff?.name}
+                            </p>
+                        </div>
+                        <div className="col-span-2 space-y-1">
+                            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                                Agenda
+                            </p>
+                            <div className="p-3 border rounded-lg bg-blue-50/10 border-blue-500/20">
+                                <p className="font-bold text-blue-600 dark:text-blue-400">
+                                    {format(
+                                        new Date(appointment.startTime),
+                                        "EEEE, MMMM dd, yyyy",
+                                    )}
+                                </p>
+                                <p className="text-lg font-mono">
+                                    {format(
+                                        new Date(appointment.startTime),
+                                        "HH:mm",
+                                    )}{" "}
+                                    -{" "}
+                                    {format(
+                                        new Date(appointment.endTime),
+                                        "HH:mm",
+                                    )}
+                                </p>
+                            </div>
+                        </div>
+                        {appointment.notes && (
+                            <div className="col-span-2 space-y-1">
+                                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                                    Notas
+                                </p>
+                                <p className="text-sm p-3 bg-muted/50 rounded-lg italic">
+                                    "{appointment.notes}"
+                                </p>
+                            </div>
+                        )}
+                    </div>
                 </div>
-              )}
-            </div>
-            <div className="space-y-1">
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Miembro del equipo
-              </p>
-              <p className="font-medium">
-                {appointment.staff?.name}
-              </p>
-            </div>
-            <div className="col-span-2 space-y-1">
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Agenda
-              </p>
-              <div className="p-3 border rounded-lg bg-blue-50/10 border-blue-500/20">
-                <p className="font-bold text-blue-600 dark:text-blue-400">
-                  {format(
-                    new Date(appointment.startTime),
-                    "EEEE, MMMM dd, yyyy",
-                  )}
-                </p>
-                <p className="text-lg font-mono">
-                  {format(new Date(appointment.startTime), "HH:mm")} -{" "}
-                  {format(new Date(appointment.endTime), "HH:mm")}
-                </p>
-              </div>
-            </div>
-            {appointment.notes && (
-              <div className="col-span-2 space-y-1">
-                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  Notas
-                </p>
-                <p className="text-sm p-3 bg-muted/50 rounded-lg italic">
-                  "{appointment.notes}"
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
-        <DialogFooter className="mt-8 flex w-full min-w-0 flex-col gap-2 sm:flex-row sm:flex-wrap sm:justify-end">
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            className="w-full border-muted bg-background hover:bg-muted sm:w-auto"
-          >
-            Cerrar
-          </Button>
-          {appointment.status === "PENDING" && (
-            <Button
-              className="w-full bg-green-600 font-semibold text-white hover:bg-green-700 sm:w-auto"
-              onClick={() => onConfirm(appointment.id)}
-              disabled={isConfirming === appointment.id}
-            >
-              {isConfirming === appointment.id ? (
-                <>
-                  <Spinner className="mr-2" /> Confirmando…
-                </>
-              ) : (
-                <>
-                  <CheckCircle2 className="size-4 mr-2" />
-                  Confirmar cita
-                </>
-              )}
-            </Button>
-          )}
+                <DialogFooter className="mt-8 flex w-full min-w-0 flex-col gap-2 sm:flex-row sm:flex-wrap sm:justify-end">
+                    <Button
+                        variant="outline"
+                        onClick={() => onOpenChange(false)}
+                        className="w-full border-muted bg-background hover:bg-muted sm:w-auto"
+                    >
+                        Cerrar
+                    </Button>
+                    {appointment.status === "PENDING" && (
+                        <Button
+                            className="w-full bg-green-600 font-semibold text-white hover:bg-green-700 sm:w-auto"
+                            onClick={() => onConfirm(appointment.id)}
+                            disabled={isConfirming === appointment.id}
+                        >
+                            {isConfirming === appointment.id ? (
+                                <>
+                                    <Spinner className="mr-2" /> Confirmando…
+                                </>
+                            ) : (
+                                <>
+                                    <CheckCircle2 className="size-4 mr-2" />
+                                    Confirmar cita
+                                </>
+                            )}
+                        </Button>
+                    )}
 
-          <AppointmentStatusActions
-            appointment={appointment}
-            onStatusUpdated={onStatusUpdated}
-          />
+                    <AppointmentStatusActions
+                        appointment={appointment}
+                        onStatusUpdated={onStatusUpdated}
+                    />
 
-          {(appointment.status === "PENDING" ||
-            appointment.status === "CONFIRMED" ||
-            appointment.status === "NEEDS_REVIEW") && (
-            <Button
-              variant="outline"
-              onClick={() => onCancel(appointment.id)}
-              disabled={isCancelling === appointment.id}
-              className="w-full border-rose-200 text-rose-600 hover:bg-rose-50 sm:w-auto"
-            >
-              {isCancelling === appointment.id ? (
-                <Spinner className="mr-2" />
-              ) : (
-                <XCircle className="size-4 mr-2" />
-              )}
-              Cancelar
-            </Button>
-          )}
+                    {(appointment.status === "PENDING" ||
+                        appointment.status === "CONFIRMED" ||
+                        appointment.status === "NEEDS_REVIEW") && (
+                        <Button
+                            variant="outline"
+                            onClick={() => onCancel(appointment.id)}
+                            disabled={isCancelling === appointment.id}
+                            className="w-full border-rose-200 text-rose-600 hover:bg-rose-50 sm:w-auto"
+                        >
+                            {isCancelling === appointment.id ? (
+                                <Spinner className="mr-2" />
+                            ) : (
+                                <XCircle className="size-4 mr-2" />
+                            )}
+                            Cancelar
+                        </Button>
+                    )}
 
-          <Button
-            variant="destructive"
-            onClick={() => onDelete(appointment.id)}
-            disabled={isDeleting === appointment?.id}
-            className="w-full bg-red-600 hover:bg-red-700 sm:w-auto"
-          >
-            {isDeleting === appointment?.id ? (
-              <Spinner className="mr-2" />
-            ) : (
-              <Trash2 className="size-4 mr-2" />
-            )}
-            Eliminar
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
+                    <Button
+                        variant="destructive"
+                        onClick={() => onDelete(appointment.id)}
+                        disabled={isDeleting === appointment?.id}
+                        className="w-full bg-red-600 hover:bg-red-700 sm:w-auto"
+                    >
+                        {isDeleting === appointment?.id ? (
+                            <Spinner className="mr-2" />
+                        ) : (
+                            <Trash2 className="size-4 mr-2" />
+                        )}
+                        Eliminar
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    );
 }
 
 type AppointmentsDialogState = {
-  selectedAppointment: Appointment | null;
-  detailsOpen: boolean;
-  isCancelling: string | null;
-  isConfirming: string | null;
-  isDeleting: string | null;
+    selectedAppointment: Appointment | null;
+    detailsOpen: boolean;
+    isCancelling: string | null;
+    isConfirming: string | null;
+    isDeleting: string | null;
 };
 
 type AppointmentsDialogAction =
-  | { type: "SET_SELECTED_APPOINTMENT"; payload: Appointment | null }
-  | { type: "SET_DETAILS_OPEN"; payload: boolean }
-  | { type: "SET_IS_CANCELLING"; payload: string | null }
-  | { type: "SET_IS_CONFIRMING"; payload: string | null }
-  | { type: "SET_IS_DELETING"; payload: string | null };
+    | { type: "SET_SELECTED_APPOINTMENT"; payload: Appointment | null }
+    | { type: "SET_DETAILS_OPEN"; payload: boolean }
+    | { type: "SET_IS_CANCELLING"; payload: string | null }
+    | { type: "SET_IS_CONFIRMING"; payload: string | null }
+    | { type: "SET_IS_DELETING"; payload: string | null };
 
 function appointmentsDialogReducer(
-  state: AppointmentsDialogState,
-  action: AppointmentsDialogAction,
+    state: AppointmentsDialogState,
+    action: AppointmentsDialogAction,
 ): AppointmentsDialogState {
-  switch (action.type) {
-    case "SET_SELECTED_APPOINTMENT":
-      return { ...state, selectedAppointment: action.payload };
-    case "SET_DETAILS_OPEN":
-      return { ...state, detailsOpen: action.payload };
-    case "SET_IS_CANCELLING":
-      return { ...state, isCancelling: action.payload };
-    case "SET_IS_CONFIRMING":
-      return { ...state, isConfirming: action.payload };
-    case "SET_IS_DELETING":
-      return { ...state, isDeleting: action.payload };
-    default:
-      return state;
-  }
+    switch (action.type) {
+        case "SET_SELECTED_APPOINTMENT":
+            return { ...state, selectedAppointment: action.payload };
+        case "SET_DETAILS_OPEN":
+            return { ...state, detailsOpen: action.payload };
+        case "SET_IS_CANCELLING":
+            return { ...state, isCancelling: action.payload };
+        case "SET_IS_CONFIRMING":
+            return { ...state, isConfirming: action.payload };
+        case "SET_IS_DELETING":
+            return { ...state, isDeleting: action.payload };
+        default:
+            return state;
+    }
 }
 
 const emptySubscribe = () => () => {};
 
 function AppointmentsMobileCards({
-  appointments,
-  dispatch,
-  isCancelling,
-  isDeleting,
-  handleCancel,
-  handleDelete,
-  onStatusUpdated,
+    appointments,
+    dispatch,
+    isCancelling,
+    isDeleting,
+    handleCancel,
+    handleDelete,
+    onStatusUpdated,
 }: {
-  appointments: Appointment[];
-  dispatch: React.Dispatch<AppointmentsDialogAction>;
-  isCancelling: string | null;
-  isDeleting: string | null;
-  handleCancel: (id: string) => void;
-  handleDelete: (id: string) => void;
-  onStatusUpdated: () => void;
+    appointments: Appointment[];
+    dispatch: React.Dispatch<AppointmentsDialogAction>;
+    isCancelling: string | null;
+    isDeleting: string | null;
+    handleCancel: (id: string) => void;
+    handleDelete: (id: string) => void;
+    onStatusUpdated: () => void;
 }) {
-  return (
-    <div className="grid grid-cols-1 gap-4 md:hidden">
-      {appointments.length === 0 ? (
-        <Card className="border-dashed t-card">
-          <CardContent className="p-12 text-center">
-            <CalendarX className="size-12 mx-auto text-muted-foreground/30 mb-4" />
-            <p className="text-sm font-medium text-muted-foreground">
-              No se encontraron citas
-            </p>
-          </CardContent>
-        </Card>
-      ) : (
-        appointments.map((appointment) => (
-          <Card
-            key={appointment.id}
-            className="t-card overflow-hidden"
-          >
-            <CardHeader className="pb-4 bg-muted/10 border-b border-border/50">
-              <div className="flex justify-between items-start">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-3">
-                    <Avatar className="size-10 border border-border">
-                      <AvatarImage
-                        src={
-                          appointment.user
-                            ?.profilePic
-                        }
-                      />
-                      <AvatarFallback className="bg-primary text-primary-foreground text-xs font-bold">
-                        {(
-                          appointment.user
-                            ?.name || "G"
-                        )
-                          .slice(0, 2)
-                          .toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <CardTitle className="text-base font-bold">
-                      {appointment.user?.name ||
-                        "Cliente Invitado"}
-                    </CardTitle>
-                  </div>
-                  <p className="text-xs font-medium text-muted-foreground pl-[52px]">
-                    {format(
-                      new Date(appointment.startTime),
-                      "MMM dd, yyyy",
-                    )}{" "}
-                    &bull;{" "}
-                    {format(
-                      new Date(appointment.startTime),
-                      "HH:mm",
-                    )}
-                  </p>
-                </div>
-                {getStatusBadge(appointment.status)}
-              </div>
-            </CardHeader>
-            <CardContent className="py-4 px-6 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
-                    Servicio
-                  </p>
-                  <div className="flex items-center gap-2">
-                    <Scissors
-                      size={12}
-                      className="text-primary"
-                    />
-                    <span className="font-medium text-sm truncate">
-                      {appointment.service?.name}
-                    </span>
-                  </div>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
-                    Personal
-                  </p>
-                  <div className="flex items-center gap-2">
-                    <User
-                      size={12}
-                      className="text-primary"
-                    />
-                    <span className="font-medium text-sm truncate">
-                      {appointment.staff?.name}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-            <div className="px-6 pb-6 pt-2 grid grid-cols-2 gap-3 mt-auto">
-              <Button
-                variant="outline"
-                className="w-full h-10 rounded-lg font-semibold text-xs"
-                onClick={() => {
-                  dispatch({ type: "SET_SELECTED_APPOINTMENT", payload: appointment });
-                  dispatch({ type: "SET_DETAILS_OPEN", payload: true });
-                }}
-              >
-                <Eye size={14} className="mr-2" /> Ver
-              </Button>
-              <div className="col-span-2">
-                <AppointmentStatusActions
-                  appointment={appointment}
-                  onStatusUpdated={onStatusUpdated}
-                />
-              </div>
-              {(appointment.status === "PENDING" ||
-                appointment.status === "CONFIRMED" ||
-                appointment.status === "NEEDS_REVIEW") ? (
-                <Button
-                  variant="outline"
-                  className="w-full h-10 border-rose-200 text-rose-600 rounded-lg font-semibold text-xs hover:bg-rose-50 hover:border-rose-300"
-                  disabled={
-                    isCancelling === appointment.id
-                  }
-                  onClick={() =>
-                    handleCancel(appointment.id)
-                  }
-                >
-                  {isCancelling === appointment.id ? (
-                    <Spinner size="sm" />
-                  ) : (
-                    <>
-                      <XCircle
-                        size={14}
-                        className="mr-2"
-                      />{" "}
-                      Cancelar
-                    </>
-                  )}
-                </Button>
-              ) : (
-                <Button
-                  variant="outline"
-                  className="w-full h-10 border-rose-200 text-rose-600 rounded-lg font-semibold text-xs hover:bg-rose-50 hover:border-rose-300"
-                  disabled={isDeleting === appointment.id}
-                  onClick={() =>
-                    handleDelete(appointment.id)
-                  }
-                >
-                  {isDeleting === appointment.id ? (
-                    <Spinner size="sm" />
-                  ) : (
-                    <>
-                      <Trash2
-                        size={14}
-                        className="mr-2"
-                      />{" "}
-                      Eliminar
-                    </>
-                  )}
-                </Button>
-              )}
-            </div>
-          </Card>
-        ))
-      )}
-    </div>
-  );
+    return (
+        <div className="grid grid-cols-1 gap-4 md:hidden">
+            {appointments.length === 0 ? (
+                <Card className="border-dashed t-card">
+                    <CardContent className="p-12 text-center">
+                        <CalendarX className="size-12 mx-auto text-muted-foreground/30 mb-4" />
+                        <p className="text-sm font-medium text-muted-foreground">
+                            No se encontraron citas
+                        </p>
+                    </CardContent>
+                </Card>
+            ) : (
+                appointments.map((appointment) => (
+                    <Card
+                        key={appointment.id}
+                        className="t-card overflow-hidden"
+                    >
+                        <CardHeader className="pb-4 bg-muted/10 border-b border-border/50">
+                            <div className="flex justify-between items-start">
+                                <div className="space-y-1">
+                                    <div className="flex items-center gap-3">
+                                        <Avatar className="size-10 border border-border">
+                                            <AvatarImage
+                                                src={
+                                                    appointment.user?.profilePic
+                                                }
+                                            />
+                                            <AvatarFallback className="bg-primary text-primary-foreground text-xs font-bold">
+                                                {(appointment.user?.name || "G")
+                                                    .slice(0, 2)
+                                                    .toUpperCase()}
+                                            </AvatarFallback>
+                                        </Avatar>
+                                        <CardTitle className="text-base font-bold">
+                                            {appointment.user?.name ||
+                                                "Cliente Invitado"}
+                                        </CardTitle>
+                                    </div>
+                                    <p className="text-xs font-medium text-muted-foreground pl-[52px]">
+                                        {format(
+                                            new Date(appointment.startTime),
+                                            "MMM dd, yyyy",
+                                        )}{" "}
+                                        &bull;{" "}
+                                        {format(
+                                            new Date(appointment.startTime),
+                                            "HH:mm",
+                                        )}
+                                    </p>
+                                </div>
+                                {getStatusBadge(appointment.status)}
+                            </div>
+                        </CardHeader>
+                        <CardContent className="py-4 px-6 space-y-4">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-1">
+                                    <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+                                        Servicio
+                                    </p>
+                                    <div className="flex items-center gap-2">
+                                        <Scissors
+                                            size={12}
+                                            className="text-primary"
+                                        />
+                                        <span className="font-medium text-sm truncate">
+                                            {appointment.service?.name}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div className="space-y-1">
+                                    <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+                                        Personal
+                                    </p>
+                                    <div className="flex items-center gap-2">
+                                        <User
+                                            size={12}
+                                            className="text-primary"
+                                        />
+                                        <span className="font-medium text-sm truncate">
+                                            {appointment.staff?.name}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </CardContent>
+                        <div className="px-6 pb-6 pt-2 grid grid-cols-2 gap-3 mt-auto">
+                            <Button
+                                variant="outline"
+                                className="w-full h-10 rounded-lg font-semibold text-xs"
+                                onClick={() => {
+                                    dispatch({
+                                        type: "SET_SELECTED_APPOINTMENT",
+                                        payload: appointment,
+                                    });
+                                    dispatch({
+                                        type: "SET_DETAILS_OPEN",
+                                        payload: true,
+                                    });
+                                }}
+                            >
+                                <Eye size={14} className="mr-2" /> Ver
+                            </Button>
+                            <div className="col-span-2">
+                                <AppointmentStatusActions
+                                    appointment={appointment}
+                                    onStatusUpdated={onStatusUpdated}
+                                />
+                            </div>
+                            {appointment.status === "PENDING" ||
+                            appointment.status === "CONFIRMED" ||
+                            appointment.status === "NEEDS_REVIEW" ? (
+                                <Button
+                                    variant="outline"
+                                    className="w-full h-10 border-rose-200 text-rose-600 rounded-lg font-semibold text-xs hover:bg-rose-50 hover:border-rose-300"
+                                    disabled={isCancelling === appointment.id}
+                                    onClick={() => handleCancel(appointment.id)}
+                                >
+                                    {isCancelling === appointment.id ? (
+                                        <Spinner size="sm" />
+                                    ) : (
+                                        <>
+                                            <XCircle
+                                                size={14}
+                                                className="mr-2"
+                                            />{" "}
+                                            Cancelar
+                                        </>
+                                    )}
+                                </Button>
+                            ) : (
+                                <Button
+                                    variant="outline"
+                                    className="w-full h-10 border-rose-200 text-rose-600 rounded-lg font-semibold text-xs hover:bg-rose-50 hover:border-rose-300"
+                                    disabled={isDeleting === appointment.id}
+                                    onClick={() => handleDelete(appointment.id)}
+                                >
+                                    {isDeleting === appointment.id ? (
+                                        <Spinner size="sm" />
+                                    ) : (
+                                        <>
+                                            <Trash2
+                                                size={14}
+                                                className="mr-2"
+                                            />{" "}
+                                            Eliminar
+                                        </>
+                                    )}
+                                </Button>
+                            )}
+                        </div>
+                    </Card>
+                ))
+            )}
+        </div>
+    );
 }
 
 function AppointmentsDesktopTable({
-  appointments,
-  isSuperAdmin,
-  dispatch,
-  isCancelling,
-  isDeleting,
-  handleCancel,
-  handleDelete,
-  onStatusUpdated,
+    appointments,
+    isSuperAdmin,
+    dispatch,
+    isCancelling,
+    isDeleting,
+    handleCancel,
+    handleDelete,
+    onStatusUpdated,
 }: {
-  appointments: Appointment[];
-  isSuperAdmin: boolean;
-  dispatch: React.Dispatch<AppointmentsDialogAction>;
-  isCancelling: string | null;
-  isDeleting: string | null;
-  handleCancel: (id: string) => void;
-  handleDelete: (id: string) => void;
-  onStatusUpdated: () => void;
+    appointments: Appointment[];
+    isSuperAdmin: boolean;
+    dispatch: React.Dispatch<AppointmentsDialogAction>;
+    isCancelling: string | null;
+    isDeleting: string | null;
+    handleCancel: (id: string) => void;
+    handleDelete: (id: string) => void;
+    onStatusUpdated: () => void;
 }) {
-  return (
-    <Card className="t-card border-none shadow-xl overflow-hidden hidden md:block">
-      <div className="overflow-x-auto">
-        <Table>
-          <TableHeader className="bg-muted/50">
-            <TableRow className="hover:bg-transparent border-b border-border/50">
-              <TableHead className="w-[180px] text-[10px] font-bold uppercase tracking-wider text-muted-foreground py-4">
-                Fecha y hora
-              </TableHead>
-              <TableHead className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                Cliente
-              </TableHead>
-              <TableHead className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                Servicio
-              </TableHead>
-              <TableHead className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                Personal
-              </TableHead>
-              {isSuperAdmin && (
-                <TableHead className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                  Organización
-                </TableHead>
-              )}
-              <TableHead className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                Precio
-              </TableHead>
-              <TableHead className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                Estado
-              </TableHead>
-              <TableHead className="text-right text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                Acciones
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {appointments.length === 0 ? (
-              <TableRow>
-                <TableCell
-                  colSpan={isSuperAdmin ? 8 : 7}
-                  className="h-32 text-center text-muted-foreground font-medium"
-                >
-                  No se encontraron citas en el sistema
-                </TableCell>
-              </TableRow>
-            ) : (
-              appointments.map((appointment) => (
-                <TableRow
-                  key={appointment.id}
-                  className="group hover:bg-muted/30 transition-colors border-b border-border/50"
-                >
-                  <TableCell className="py-4">
-                    <div className="flex flex-col gap-0.5">
-                      <span className="font-bold text-sm text-foreground">
-                        {format(
-                          new Date(
-                            appointment.startTime,
-                          ),
-                          "MMM dd, yyyy",
+    return (
+        <Card className="t-card border-none shadow-xl overflow-hidden hidden md:block">
+            <div className="overflow-x-auto">
+                <Table>
+                    <TableHeader className="bg-muted/50">
+                        <TableRow className="hover:bg-transparent border-b border-border/50">
+                            <TableHead className="w-[180px] text-[10px] font-bold uppercase tracking-wider text-muted-foreground py-4">
+                                Fecha y hora
+                            </TableHead>
+                            <TableHead className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                                Cliente
+                            </TableHead>
+                            <TableHead className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                                Servicio
+                            </TableHead>
+                            <TableHead className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                                Personal
+                            </TableHead>
+                            {isSuperAdmin && (
+                                <TableHead className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                                    Organización
+                                </TableHead>
+                            )}
+                            <TableHead className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                                Precio
+                            </TableHead>
+                            <TableHead className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                                Estado
+                            </TableHead>
+                            <TableHead className="text-right text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                                Acciones
+                            </TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {appointments.length === 0 ? (
+                            <TableRow>
+                                <TableCell
+                                    colSpan={isSuperAdmin ? 8 : 7}
+                                    className="h-32 text-center text-muted-foreground font-medium"
+                                >
+                                    No se encontraron citas en el sistema
+                                </TableCell>
+                            </TableRow>
+                        ) : (
+                            appointments.map((appointment) => (
+                                <TableRow
+                                    key={appointment.id}
+                                    className="group hover:bg-muted/30 transition-colors border-b border-border/50"
+                                >
+                                    <TableCell className="py-4">
+                                        <div className="flex flex-col gap-0.5">
+                                            <span className="font-bold text-sm text-foreground">
+                                                {format(
+                                                    new Date(
+                                                        appointment.startTime,
+                                                    ),
+                                                    "MMM dd, yyyy",
+                                                )}
+                                            </span>
+                                            <span className="text-[10px] font-medium text-muted-foreground">
+                                                {format(
+                                                    new Date(
+                                                        appointment.startTime,
+                                                    ),
+                                                    "HH:mm",
+                                                )}{" "}
+                                                -{" "}
+                                                {format(
+                                                    new Date(
+                                                        appointment.endTime,
+                                                    ),
+                                                    "HH:mm",
+                                                )}
+                                            </span>
+                                        </div>
+                                    </TableCell>
+                                    <TableCell>
+                                        <div className="flex items-center gap-3">
+                                            <Avatar className="size-8 border border-border">
+                                                <AvatarImage
+                                                    src={
+                                                        appointment.user
+                                                            ?.profilePic
+                                                    }
+                                                />
+                                                <AvatarFallback className="bg-primary/10 text-primary text-[10px] font-bold">
+                                                    {(
+                                                        appointment.user
+                                                            ?.name || "G"
+                                                    )
+                                                        .slice(0, 2)
+                                                        .toUpperCase()}
+                                                </AvatarFallback>
+                                            </Avatar>
+                                            <div className="flex flex-col min-w-0">
+                                                <span className="font-semibold text-sm truncate max-w-[120px]">
+                                                    {appointment.user?.name ||
+                                                        "Invitado"}
+                                                </span>
+                                                <span className="text-[10px] font-medium text-muted-foreground truncate max-w-[120px]">
+                                                    {appointment.user?.email ||
+                                                        "Sin correo"}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </TableCell>
+                                    <TableCell>
+                                        <div className="flex items-center gap-2">
+                                            <Scissors className="size-3.5 text-primary opacity-60" />
+                                            <span className="text-sm font-medium text-foreground">
+                                                {appointment.service?.name ||
+                                                    "Servicio"}
+                                            </span>
+                                        </div>
+                                    </TableCell>
+                                    <TableCell>
+                                        <span className="text-sm font-medium text-muted-foreground">
+                                            {appointment.staff?.name ||
+                                                "Asignado"}
+                                        </span>
+                                    </TableCell>
+                                    {isSuperAdmin && (
+                                        <TableCell>
+                                            <Badge
+                                                variant="secondary"
+                                                className="font-bold text-[9px] uppercase tracking-wider"
+                                            >
+                                                {appointment.tenant?.name ||
+                                                    "—"}
+                                            </Badge>
+                                        </TableCell>
+                                    )}
+                                    <TableCell>
+                                        <div className="flex flex-col">
+                                            <span className="font-bold text-sm text-foreground">
+                                                $
+                                                {appointment.total > 0
+                                                    ? appointment.total
+                                                    : appointment.service
+                                                          ?.price}
+                                            </span>
+                                            {appointment.discountAmount > 0 && (
+                                                <span className="text-[10px] font-bold text-emerald-600 flex items-center gap-0.5">
+                                                    <Tag className="size-2.5" />
+                                                    -$
+                                                    {appointment.discountAmount}
+                                                </span>
+                                            )}
+                                        </div>
+                                    </TableCell>
+                                    <TableCell>
+                                        {getStatusBadge(appointment.status)}
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                        <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <Button
+                                                size="icon"
+                                                aria-label="Ver detalles de la cita"
+                                                variant="ghost"
+                                                className="size-8 rounded-full hover:bg-primary/10 hover:text-primary transition-[color,background-color,border-color,box-shadow,opacity,transform]"
+                                                onClick={() => {
+                                                    dispatch({
+                                                        type: "SET_SELECTED_APPOINTMENT",
+                                                        payload: appointment,
+                                                    });
+                                                    dispatch({
+                                                        type: "SET_DETAILS_OPEN",
+                                                        payload: true,
+                                                    });
+                                                }}
+                                            >
+                                                <Eye className="size-4" />
+                                            </Button>
+                                            <AppointmentStatusActions
+                                                appointment={appointment}
+                                                onStatusUpdated={
+                                                    onStatusUpdated
+                                                }
+                                            />
+                                            {appointment.status === "PENDING" ||
+                                            appointment.status ===
+                                                "CONFIRMED" ||
+                                            appointment.status ===
+                                                "NEEDS_REVIEW" ? (
+                                                <Button
+                                                    size="icon"
+                                                    aria-label="Cancelar cita"
+                                                    variant="ghost"
+                                                    className="size-8 rounded-full text-rose-500 hover:text-rose-600 hover:bg-rose-50 transition-[color,background-color,border-color,box-shadow,opacity,transform]"
+                                                    disabled={
+                                                        isCancelling ===
+                                                        appointment.id
+                                                    }
+                                                    onClick={() =>
+                                                        handleCancel(
+                                                            appointment.id,
+                                                        )
+                                                    }
+                                                >
+                                                    {isCancelling ===
+                                                    appointment.id ? (
+                                                        <Spinner size="sm" />
+                                                    ) : (
+                                                        <XCircle className="size-4" />
+                                                    )}
+                                                </Button>
+                                            ) : (
+                                                <Button
+                                                    size="icon"
+                                                    aria-label="Eliminar cita"
+                                                    variant="ghost"
+                                                    className="size-8 rounded-full text-muted-foreground hover:text-rose-600 hover:bg-rose-50 transition-[color,background-color,border-color,box-shadow,opacity,transform]"
+                                                    disabled={
+                                                        isDeleting ===
+                                                        appointment.id
+                                                    }
+                                                    onClick={() =>
+                                                        handleDelete(
+                                                            appointment.id,
+                                                        )
+                                                    }
+                                                >
+                                                    {isDeleting ===
+                                                    appointment.id ? (
+                                                        <Spinner size="sm" />
+                                                    ) : (
+                                                        <Trash2 className="size-4" />
+                                                    )}
+                                                </Button>
+                                            )}
+                                        </div>
+                                    </TableCell>
+                                </TableRow>
+                            ))
                         )}
-                      </span>
-                      <span className="text-[10px] font-medium text-muted-foreground">
-                        {format(
-                          new Date(
-                            appointment.startTime,
-                          ),
-                          "HH:mm",
-                        )}{" "}
-                        -{" "}
-                        {format(
-                          new Date(
-                            appointment.endTime,
-                          ),
-                          "HH:mm",
-                        )}
-                      </span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-3">
-                      <Avatar className="size-8 border border-border">
-                        <AvatarImage
-                          src={
-                            appointment.user
-                              ?.profilePic
-                          }
-                        />
-                        <AvatarFallback className="bg-primary/10 text-primary text-[10px] font-bold">
-                          {(
-                            appointment.user
-                              ?.name || "G"
-                          )
-                            .slice(0, 2)
-                            .toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex flex-col min-w-0">
-                        <span className="font-semibold text-sm truncate max-w-[120px]">
-                          {appointment.user
-                            ?.name || "Invitado"}
-                        </span>
-                        <span className="text-[10px] font-medium text-muted-foreground truncate max-w-[120px]">
-                          {appointment.user
-                            ?.email ||
-                            "Sin correo"}
-                        </span>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Scissors className="size-3.5 text-primary opacity-60" />
-                      <span className="text-sm font-medium text-foreground">
-                        {appointment.service
-                          ?.name || "Servicio"}
-                      </span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <span className="text-sm font-medium text-muted-foreground">
-                      {appointment.staff?.name ||
-                        "Asignado"}
-                    </span>
-                  </TableCell>
-                  {isSuperAdmin && (
-                    <TableCell>
-                      <Badge
-                        variant="secondary"
-                        className="font-bold text-[9px] uppercase tracking-wider"
-                      >
-                        {appointment.tenant?.name || "—"}
-                      </Badge>
-                    </TableCell>
-                  )}
-                  <TableCell>
-                    <div className="flex flex-col">
-                      <span className="font-bold text-sm text-foreground">
-                        $
-                        {appointment.total > 0
-                          ? appointment.total
-                          : appointment.service
-                            ?.price}
-                      </span>
-                      {appointment.discountAmount >
-                        0 && (
-                        <span className="text-[10px] font-bold text-emerald-600 flex items-center gap-0.5">
-                          <Tag className="size-2.5" />
-                          -$
-                          {
-                            appointment.discountAmount
-                          }
-                        </span>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    {getStatusBadge(appointment.status)}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button
-                        size="icon" aria-label="Ver detalles de la cita"
-                        variant="ghost"
-                        className="size-8 rounded-full hover:bg-primary/10 hover:text-primary transition-[color,background-color,border-color,box-shadow,opacity,transform]"
-                        onClick={() => {
-                          dispatch({ type: "SET_SELECTED_APPOINTMENT", payload: appointment });
-                          dispatch({ type: "SET_DETAILS_OPEN", payload: true });
-                        }}
-                      >
-                        <Eye className="size-4" />
-                      </Button>
-                      <AppointmentStatusActions
-                        appointment={appointment}
-                        onStatusUpdated={onStatusUpdated}
-                      />
-                      {(appointment.status === "PENDING" ||
-                        appointment.status === "CONFIRMED" ||
-                        appointment.status === "NEEDS_REVIEW") ? (
-                        <Button
-                          size="icon" aria-label="Cancelar cita"
-                          variant="ghost"
-                          className="size-8 rounded-full text-rose-500 hover:text-rose-600 hover:bg-rose-50 transition-[color,background-color,border-color,box-shadow,opacity,transform]"
-                          disabled={
-                            isCancelling ===
-                            appointment.id
-                          }
-                          onClick={() =>
-                            handleCancel(
-                              appointment.id,
-                            )
-                          }
-                        >
-                          {isCancelling ===
-                          appointment.id ? (
-                            <Spinner size="sm" />
-                          ) : (
-                            <XCircle className="size-4" />
-                          )}
-                        </Button>
-                      ) : (
-                        <Button
-                          size="icon" aria-label="Eliminar cita"
-                          variant="ghost"
-                          className="size-8 rounded-full text-muted-foreground hover:text-rose-600 hover:bg-rose-50 transition-[color,background-color,border-color,box-shadow,opacity,transform]"
-                          disabled={
-                            isDeleting ===
-                            appointment.id
-                          }
-                          onClick={() =>
-                            handleDelete(
-                              appointment.id,
-                            )
-                          }
-                        >
-                          {isDeleting ===
-                          appointment.id ? (
-                            <Spinner size="sm" />
-                          ) : (
-                            <Trash2 className="size-4" />
-                          )}
-                        </Button>
-                      )}
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
-    </Card>
-  );
+                    </TableBody>
+                </Table>
+            </div>
+        </Card>
+    );
 }
 
 function AppointmentsPagination({
-  pagination,
-  handlePageChange,
+    pagination,
+    handlePageChange,
 }: {
-  pagination: {
-    currentPage: number;
-    totalPages: number;
-    totalItems: number;
-    totalItemsPerPage: number;
-  };
-  handlePageChange: (page: number) => void;
+    pagination: {
+        currentPage: number;
+        totalPages: number;
+        totalItems: number;
+        totalItemsPerPage: number;
+    };
+    handlePageChange: (page: number) => void;
 }) {
-  return (
-    <Card className="border-none shadow-sm">
-      <div className="p-4 flex flex-col sm:flex-row justify-between items-center gap-4 bg-muted/20 rounded-lg">
-        <p className="text-sm text-muted-foreground order-2 sm:order-1">
-          Mostrando{" "}
-          <span className="font-medium text-foreground">
-            {(pagination.currentPage - 1) *
-              pagination.totalItemsPerPage +
-              1}
-          </span>{" "}
-          a{" "}
-          <span className="font-medium text-foreground">
-            {Math.min(
-              pagination.currentPage *
-                pagination.totalItemsPerPage,
-              pagination.totalItems,
-            )}
-          </span>{" "}
-          de{" "}
-          <span className="font-medium text-foreground">
-            {pagination.totalItems}
-          </span>{" "}
-          citas
-        </p>
-        <div className="flex gap-2 order-1 sm:order-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() =>
-              handlePageChange(pagination.currentPage - 1)
-            }
-            disabled={pagination.currentPage === 1}
-            className="bg-background"
-          >
-            Anterior
-          </Button>
-          <div className="flex items-center gap-1">
-            {[1, 2, 3, 4, 5]
-              .filter((pageNum) => pageNum <= pagination.totalPages)
-              .map((pageNum) => (
-                <Button
-                  key={`page-${pageNum}`}
-                  variant={
-                    pagination.currentPage === pageNum ? "default" : "outline"
-                  }
-                  size="sm"
-                  onClick={() => handlePageChange(pageNum)}
-                  className={
-                    pagination.currentPage === pageNum ? "" : "bg-background"
-                  }
-                >
-                  {pageNum}
-                </Button>
-              ))}
-          </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() =>
-              handlePageChange(pagination.currentPage + 1)
-            }
-            disabled={
-              pagination.currentPage ===
-                pagination.totalPages ||
-              pagination.totalPages === 0
-            }
-            className="bg-background"
-          >
-            Siguiente
-          </Button>
-        </div>
-      </div>
-    </Card>
-  );
+    return (
+        <Card className="border-none shadow-sm">
+            <div className="p-4 flex flex-col sm:flex-row justify-between items-center gap-4 bg-muted/20 rounded-lg">
+                <p className="text-sm text-muted-foreground order-2 sm:order-1">
+                    Mostrando{" "}
+                    <span className="font-medium text-foreground">
+                        {(pagination.currentPage - 1) *
+                            pagination.totalItemsPerPage +
+                            1}
+                    </span>{" "}
+                    a{" "}
+                    <span className="font-medium text-foreground">
+                        {Math.min(
+                            pagination.currentPage *
+                                pagination.totalItemsPerPage,
+                            pagination.totalItems,
+                        )}
+                    </span>{" "}
+                    de{" "}
+                    <span className="font-medium text-foreground">
+                        {pagination.totalItems}
+                    </span>{" "}
+                    citas
+                </p>
+                <div className="flex gap-2 order-1 sm:order-2">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                            handlePageChange(pagination.currentPage - 1)
+                        }
+                        disabled={pagination.currentPage === 1}
+                        className="bg-background"
+                    >
+                        Anterior
+                    </Button>
+                    <div className="flex items-center gap-1">
+                        {[1, 2, 3, 4, 5]
+                            .filter(
+                                (pageNum) => pageNum <= pagination.totalPages,
+                            )
+                            .map((pageNum) => (
+                                <Button
+                                    key={`page-${pageNum}`}
+                                    variant={
+                                        pagination.currentPage === pageNum
+                                            ? "default"
+                                            : "outline"
+                                    }
+                                    size="sm"
+                                    onClick={() => handlePageChange(pageNum)}
+                                    className={
+                                        pagination.currentPage === pageNum
+                                            ? ""
+                                            : "bg-background"
+                                    }
+                                >
+                                    {pageNum}
+                                </Button>
+                            ))}
+                    </div>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                            handlePageChange(pagination.currentPage + 1)
+                        }
+                        disabled={
+                            pagination.currentPage === pagination.totalPages ||
+                            pagination.totalPages === 0
+                        }
+                        className="bg-background"
+                    >
+                        Siguiente
+                    </Button>
+                </div>
+            </div>
+        </Card>
+    );
 }
 
 function AppointmentsFiltersBar({
-  searchQuery,
-  statusFilter,
-  tenantFilter,
-  isSuperAdmin,
-  handleSearch,
-  handleStatusFilterChange,
-  handleTenantFilterChange,
+    searchQuery,
+    statusFilter,
+    tenantFilter,
+    isSuperAdmin,
+    handleSearch,
+    handleStatusFilterChange,
+    handleTenantFilterChange,
 }: {
-  searchQuery: string;
-  statusFilter: string;
-  tenantFilter: string;
-  isSuperAdmin: boolean;
-  handleSearch: (term: string) => void;
-  handleStatusFilterChange: (status: string) => void;
-  handleTenantFilterChange: (tenant: string) => void;
+    searchQuery: string;
+    statusFilter: string;
+    tenantFilter: string;
+    isSuperAdmin: boolean;
+    handleSearch: (term: string) => void;
+    handleStatusFilterChange: (status: string) => void;
+    handleTenantFilterChange: (tenant: string) => void;
 }) {
-  return (
-    <Card className="border-none shadow-sm bg-muted/30">
-      <CardContent className="p-4 flex flex-col md:flex-row gap-4 items-center">
-        <div className="relative flex-1 w-full">
-          <Input
-            placeholder="Buscar por nombre o ID del cliente..."
-            value={searchQuery}
-            onChange={(e) => handleSearch(e.target.value)}
-            className="bg-background border-muted-foreground/20"
-          />
-        </div>
-        <div className="w-full md:w-[200px]">
-          <Select
-            value={statusFilter}
-            onValueChange={handleStatusFilterChange}
-          >
-            <SelectTrigger className="bg-background border-muted-foreground/20 text-foreground">
-              <SelectValue placeholder="Todos los estados" />
-            </SelectTrigger>
-            <SelectContent className="bg-background border-muted">
-              <SelectItem value="all">
-                Todos los estados
-              </SelectItem>
-              <SelectItem value="PENDING">Pendiente</SelectItem>
-              <SelectItem value="CONFIRMED">
-                Confirmada
-              </SelectItem>
-              <SelectItem value="IN_PROGRESS">
-                En curso
-              </SelectItem>
-              <SelectItem value="NEEDS_REVIEW">
-                Requiere revisión
-              </SelectItem>
-              <SelectItem value="COMPLETED">
-                Completada
-              </SelectItem>
-              <SelectItem value="CANCELLED">
-                Cancelada
-              </SelectItem>
-              <SelectItem value="NO_SHOW">No asistió</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        {isSuperAdmin && (
-          <div className="w-full md:w-[200px]">
-            <Select
-              value={tenantFilter}
-              onValueChange={handleTenantFilterChange}
-            >
-              <SelectTrigger className="bg-background border-muted-foreground/20 text-foreground">
-                <SelectValue placeholder="Todos las organizaciones" />
-              </SelectTrigger>
-              <SelectContent className="bg-background border-muted">
-                <SelectItem value="all">
-                  Todas las organizaciones
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  );
+    return (
+        <Card className="border-none shadow-sm bg-muted/30">
+            <CardContent className="p-4 flex flex-col md:flex-row gap-4 items-center">
+                <div className="relative flex-1 w-full">
+                    <Input
+                        placeholder="Buscar por nombre o ID del cliente..."
+                        value={searchQuery}
+                        onChange={(e) => handleSearch(e.target.value)}
+                        className="bg-background border-muted-foreground/20"
+                    />
+                </div>
+                <div className="w-full md:w-[200px]">
+                    <Select
+                        value={statusFilter}
+                        onValueChange={handleStatusFilterChange}
+                    >
+                        <SelectTrigger className="bg-background border-muted-foreground/20 text-foreground">
+                            <SelectValue placeholder="Todos los estados" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-background border-muted">
+                            <SelectItem value="all">
+                                Todos los estados
+                            </SelectItem>
+                            <SelectItem value="PENDING">Pendiente</SelectItem>
+                            <SelectItem value="CONFIRMED">
+                                Confirmada
+                            </SelectItem>
+                            <SelectItem value="IN_PROGRESS">
+                                En curso
+                            </SelectItem>
+                            <SelectItem value="NEEDS_REVIEW">
+                                Requiere revisión
+                            </SelectItem>
+                            <SelectItem value="COMPLETED">
+                                Completada
+                            </SelectItem>
+                            <SelectItem value="CANCELLED">Cancelada</SelectItem>
+                            <SelectItem value="NO_SHOW">No asistió</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+                {isSuperAdmin && (
+                    <div className="w-full md:w-[200px]">
+                        <Select
+                            value={tenantFilter}
+                            onValueChange={handleTenantFilterChange}
+                        >
+                            <SelectTrigger className="bg-background border-muted-foreground/20 text-foreground">
+                                <SelectValue placeholder="Todos las organizaciones" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-background border-muted">
+                                <SelectItem value="all">
+                                    Todas las organizaciones
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                )}
+            </CardContent>
+        </Card>
+    );
 }
 
 export default function AppointmentsTableClient(props: Props) {
-  return (
-    <Suspense fallback={<div className="p-6" />}>
-      <AppointmentsTableClientInner {...props} />
-    </Suspense>
-  );
+    return (
+        <Suspense fallback={<div className="p-6" />}>
+            <AppointmentsTableClientInner {...props} />
+        </Suspense>
+    );
 }
 
 function AppointmentsTableClientInner({
-  appointments,
-  stats,
-  pagination,
-  isSuperAdmin = false,
+    appointments,
+    stats,
+    pagination,
+    isSuperAdmin = false,
 }: Props) {
-  const isMounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
-  const router = useRouter();
-  const searchParams = useSearchParams();
+    const isMounted = useSyncExternalStore(
+        emptySubscribe,
+        () => true,
+        () => false,
+    );
+    const router = useRouter();
+    const searchParams = useSearchParams();
 
-  const [dialogState, dispatch] = useReducer(appointmentsDialogReducer, {
-    selectedAppointment: null,
-    detailsOpen: false,
-    isCancelling: null,
-    isConfirming: null,
-    isDeleting: null,
-  });
-  const { confirm, ConfirmDialog } = useConfirm();
+    const [dialogState, dispatch] = useReducer(appointmentsDialogReducer, {
+        selectedAppointment: null,
+        detailsOpen: false,
+        isCancelling: null,
+        isConfirming: null,
+        isDeleting: null,
+    });
+    const { confirm, ConfirmDialog } = useConfirm();
 
     // URL State
     const searchQuery = searchParams.get("search") || "";
@@ -1167,7 +1195,7 @@ function AppointmentsTableClientInner({
         const confirmed = await confirm({
             title: "Cancelar Cita",
             description:
-                "¿Seguro que querés cancelar esta cita? Esta acción no se puede deshacer.",
+                "¿Seguro que quieres cancelar esta cita? Esta acción no se puede deshacer.",
             confirmText: "Sí, Cancelar Cita",
             cancelText: "No, Conservarlo",
             variant: "destructive",
@@ -1175,51 +1203,53 @@ function AppointmentsTableClientInner({
 
         if (!confirmed) return;
 
-    dispatch({ type: "SET_IS_CANCELLING", payload: id });
-    try {
-      const response = await fetch(`/api/appointments/${id}/cancel`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ reason: "Cancelled by administrator" }),
-      });
+        dispatch({ type: "SET_IS_CANCELLING", payload: id });
+        try {
+            const response = await fetch(`/api/appointments/${id}/cancel`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    reason: "Cancelada por el administrador",
+                }),
+            });
 
-      const data = await readJsonResponse(response);
-      if (data.success) {
-        toast.success("Cita cancelada correctamente");
-        router.refresh();
-        dispatch({ type: "SET_DETAILS_OPEN", payload: false });
-      } else {
-        toast.error(data.message || "Error al cancelar la cita");
-      }
-    } catch (_error) {
-      toast.error("Ocurrió un error al cancelar la cita");
-    } finally {
-      dispatch({ type: "SET_IS_CANCELLING", payload: null });
-    }
+            const data = await readJsonResponse(response);
+            if (data.success) {
+                toast.success("Cita cancelada correctamente");
+                router.refresh();
+                dispatch({ type: "SET_DETAILS_OPEN", payload: false });
+            } else {
+                toast.error(data.message || "Error al cancelar la cita");
+            }
+        } catch (_error) {
+            toast.error("Ocurrió un error al cancelar la cita");
+        } finally {
+            dispatch({ type: "SET_IS_CANCELLING", payload: null });
+        }
     };
 
-  const handleConfirm = async (id: string) => {
-    dispatch({ type: "SET_IS_CONFIRMING", payload: id });
-    try {
-      const response = await fetch(`/api/appointments/${id}/status`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: "CONFIRMED" }),
-      });
+    const handleConfirm = async (id: string) => {
+        dispatch({ type: "SET_IS_CONFIRMING", payload: id });
+        try {
+            const response = await fetch(`/api/appointments/${id}/status`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ status: "CONFIRMED" }),
+            });
 
-      const data = await readJsonResponse(response);
-      if (data.success) {
-        toast.success("Cita confirmada correctamente");
-        router.refresh();
-        dispatch({ type: "SET_DETAILS_OPEN", payload: false });
-      } else {
-        toast.error(data.message || "Error al confirmar la cita");
-      }
-    } catch (_error) {
-      toast.error("Ocurrió un error al confirmar la cita");
-    } finally {
-      dispatch({ type: "SET_IS_CONFIRMING", payload: null });
-    }
+            const data = await readJsonResponse(response);
+            if (data.success) {
+                toast.success("Cita confirmada correctamente");
+                router.refresh();
+                dispatch({ type: "SET_DETAILS_OPEN", payload: false });
+            } else {
+                toast.error(data.message || "Error al confirmar la cita");
+            }
+        } catch (_error) {
+            toast.error("Ocurrió un error al confirmar la cita");
+        } finally {
+            dispatch({ type: "SET_IS_CONFIRMING", payload: null });
+        }
     };
 
     const handleStatusUpdated = () => {
@@ -1231,7 +1261,7 @@ function AppointmentsTableClientInner({
         const confirmed = await confirm({
             title: "Eliminar Cita",
             description:
-                "¿Seguro que querés eliminar PERMANENTEMENTE esta cita? Esta acción no se puede deshacer.",
+                "¿Seguro que quieres eliminar PERMANENTEMENTE esta cita? Esta acción no se puede deshacer.",
             confirmText: "Sí, Eliminar Permanentemente",
             cancelText: "Cancelar",
             variant: "destructive",
@@ -1239,32 +1269,32 @@ function AppointmentsTableClientInner({
 
         if (!confirmed) return;
 
-    dispatch({ type: "SET_IS_DELETING", payload: id });
-    try {
-      const response = await fetch(`/api/appointments/${id}`, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-      });
+        dispatch({ type: "SET_IS_DELETING", payload: id });
+        try {
+            const response = await fetch(`/api/appointments/${id}`, {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" },
+            });
 
-      const data = await readJsonResponse(response);
-      if (data.success) {
-        toast.success("Cita eliminada correctamente");
-        router.refresh();
-        dispatch({ type: "SET_DETAILS_OPEN", payload: false });
-      } else {
-        toast.error(data.message || "Error al eliminar la cita");
-      }
-    } catch (_error) {
-      toast.error("Ocurrió un error al eliminar la cita");
-    } finally {
-      dispatch({ type: "SET_IS_DELETING", payload: null });
-    }
-};
+            const data = await readJsonResponse(response);
+            if (data.success) {
+                toast.success("Cita eliminada correctamente");
+                router.refresh();
+                dispatch({ type: "SET_DETAILS_OPEN", payload: false });
+            } else {
+                toast.error(data.message || "Error al eliminar la cita");
+            }
+        } catch (_error) {
+            toast.error("Ocurrió un error al eliminar la cita");
+        } finally {
+            dispatch({ type: "SET_IS_DELETING", payload: null });
+        }
+    };
 
-  if (!isMounted) return null;
+    if (!isMounted) return null;
 
-  return (
-    <div className="space-y-6" suppressHydrationWarning>
+    return (
+        <div className="space-y-6" suppressHydrationWarning>
             <div className="flex justify-between items-center">
                 <h1 className="text-2xl font-bold tracking-tight">
                     Gestión de citas
@@ -1298,65 +1328,67 @@ function AppointmentsTableClientInner({
                     icon={CalendarX}
                     title="Canceladas / No Asistió"
                     value={
-                        (stats?.statusCounts?.["CANCELLED"] || 0) +
-                        (stats?.statusCounts?.["NO_SHOW"] || 0)
+                        (stats?.statusCounts?.CANCELLED || 0) +
+                        (stats?.statusCounts?.NO_SHOW || 0)
                     }
                     color="bg-red-500"
                     description="Visitas no completadas"
                 />
             </div>
 
-        <AppointmentsFiltersBar
-          searchQuery={searchQuery}
-          statusFilter={statusFilter}
-          tenantFilter={tenantFilter}
-          isSuperAdmin={isSuperAdmin}
-          handleSearch={handleSearch}
-          handleStatusFilterChange={handleStatusFilterChange}
-          handleTenantFilterChange={handleTenantFilterChange}
-        />
+            <AppointmentsFiltersBar
+                searchQuery={searchQuery}
+                statusFilter={statusFilter}
+                tenantFilter={tenantFilter}
+                isSuperAdmin={isSuperAdmin}
+                handleSearch={handleSearch}
+                handleStatusFilterChange={handleStatusFilterChange}
+                handleTenantFilterChange={handleTenantFilterChange}
+            />
 
-        <AppointmentsMobileCards
-          appointments={appointments}
-          dispatch={dispatch}
-          isCancelling={dialogState.isCancelling}
-          isDeleting={dialogState.isDeleting}
-          handleCancel={handleCancel}
-          handleDelete={handleDelete}
-          onStatusUpdated={handleStatusUpdated}
-        />
+            <AppointmentsMobileCards
+                appointments={appointments}
+                dispatch={dispatch}
+                isCancelling={dialogState.isCancelling}
+                isDeleting={dialogState.isDeleting}
+                handleCancel={handleCancel}
+                handleDelete={handleDelete}
+                onStatusUpdated={handleStatusUpdated}
+            />
 
-        <AppointmentsDesktopTable
-          appointments={appointments}
-          isSuperAdmin={isSuperAdmin}
-          dispatch={dispatch}
-          isCancelling={dialogState.isCancelling}
-          isDeleting={dialogState.isDeleting}
-          handleCancel={handleCancel}
-          handleDelete={handleDelete}
-          onStatusUpdated={handleStatusUpdated}
-        />
+            <AppointmentsDesktopTable
+                appointments={appointments}
+                isSuperAdmin={isSuperAdmin}
+                dispatch={dispatch}
+                isCancelling={dialogState.isCancelling}
+                isDeleting={dialogState.isDeleting}
+                handleCancel={handleCancel}
+                handleDelete={handleDelete}
+                onStatusUpdated={handleStatusUpdated}
+            />
 
-        {pagination.totalItems > 0 && (
-          <AppointmentsPagination
-            pagination={pagination}
-            handlePageChange={handlePageChange}
-          />
-        )}
+            {pagination.totalItems > 0 && (
+                <AppointmentsPagination
+                    pagination={pagination}
+                    handlePageChange={handlePageChange}
+                />
+            )}
 
-      <AppointmentDetailsDialog
-        appointment={dialogState.selectedAppointment}
-        open={dialogState.detailsOpen}
-        onOpenChange={(open) => dispatch({ type: "SET_DETAILS_OPEN", payload: open })}
-        onConfirm={handleConfirm}
-        onCancel={handleCancel}
-        onDelete={handleDelete}
-        onStatusUpdated={handleStatusUpdated}
-        isConfirming={dialogState.isConfirming}
-        isCancelling={dialogState.isCancelling}
-        isDeleting={dialogState.isDeleting}
-      />
-      <ConfirmDialog />
+            <AppointmentDetailsDialog
+                appointment={dialogState.selectedAppointment}
+                open={dialogState.detailsOpen}
+                onOpenChange={(open) =>
+                    dispatch({ type: "SET_DETAILS_OPEN", payload: open })
+                }
+                onConfirm={handleConfirm}
+                onCancel={handleCancel}
+                onDelete={handleDelete}
+                onStatusUpdated={handleStatusUpdated}
+                isConfirming={dialogState.isConfirming}
+                isCancelling={dialogState.isCancelling}
+                isDeleting={dialogState.isDeleting}
+            />
+            <ConfirmDialog />
         </div>
     );
 }

@@ -1,19 +1,25 @@
 import { api } from "@/lib/api-client";
-import { Tenant, CreateTenantData, UpdateTenantData } from "@/types/tenant";
+import { getBackendUrl } from "@/lib/backend-url";
+import type {
+    CreateTenantData,
+    Tenant,
+    UpdateTenantData,
+} from "@/types/tenant";
 
 export const tenantService = {
     getAll: async () => {
-        return api.get<Tenant[]>('/tenants');
+        return api.get<Tenant[]>("/tenants");
+    },
+
+    getMine: async () => {
+        return api.get<Tenant[]>("/tenants/mine");
     },
 
     getBySlug: async (slug: string): Promise<Tenant | null> => {
         // Server-side (RSC): hit the backend directly; relative URLs don't resolve.
-        const base =
-            process.env.NEXT_PUBLIC_API_URL || "http://localhost:4001/api";
-        const apiUrl = base.endsWith("/api") ? base : `${base}/api`;
         const url =
             typeof window === "undefined"
-                ? `${apiUrl}/tenants/config/${encodeURIComponent(slug)}`
+                ? `${getBackendUrl()}/tenants/config/${encodeURIComponent(slug)}`
                 : `/api/tenants/config/${encodeURIComponent(slug)}`;
 
         const response = await fetch(url, { cache: "no-store" });
@@ -23,13 +29,13 @@ export const tenantService = {
     },
 
     getAvailableFeatures: async (): Promise<any[]> => {
-        const response: any = await api.get('/features');
+        const response: any = await api.get("/features");
         // Ensure we return an array
-        return Array.isArray(response) ? response : (response.data || []);
+        return Array.isArray(response) ? response : response.data || [];
     },
 
     create: async (payload: CreateTenantData) => {
-        return api.post<Tenant>('/tenants', payload);
+        return api.post<Tenant>("/tenants", payload);
     },
 
     update: async (id: string, payload: UpdateTenantData) => {
@@ -47,6 +53,5 @@ export const tenantService = {
 
     delete: async (id: string) => {
         return api.delete(`/tenants/${id}`);
-    }
+    },
 };
-

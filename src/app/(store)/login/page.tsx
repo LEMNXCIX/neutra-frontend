@@ -1,10 +1,10 @@
-import { Suspense } from "react";
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { LoginPageClient } from "./login-client";
 
 export const metadata: Metadata = {
     title: "Iniciar Sesión",
-    description: "Iniciá sesión en tu cuenta",
+    description: "Inicia sesión en tu cuenta",
 };
 
 export default function LoginPage() {

@@ -1,17 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import { Calendar, Eye, Package, ShoppingBag } from "lucide-react";
 import Link from "next/link";
-import { Order } from "@/types/order.types";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-    ShoppingBag,
-    Calendar,
-    Package,
-    Eye,
-} from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import type { Order } from "@/types/order.types";
 
 interface OrderHistoryProps {
     initialOrders: Order[];
@@ -48,7 +43,7 @@ export function OrderHistory({ initialOrders }: OrderHistoryProps) {
                     </div>
                     <div className="space-y-2">
                         <h3 className="text-2xl font-bold tracking-tight">
-                            Todavía no tenés pedidos
+                            Todavía no tienes pedidos
                         </h3>
                         <p className="text-muted-foreground font-medium">
                             Tu historial de compras aparecerá aquí cuando
@@ -70,7 +65,8 @@ export function OrderHistory({ initialOrders }: OrderHistoryProps) {
     return (
         <div className="space-y-8">
             <h2 className="text-3xl font-bold tracking-tight flex items-center gap-3">
-                <ShoppingBag className="size-8 text-primary" /> Historial de compras
+                <ShoppingBag className="size-8 text-primary" /> Historial de
+                compras
             </h2>
             <div className="space-y-6">
                 {orders.map((o) => (
@@ -92,7 +88,8 @@ export function OrderHistory({ initialOrders }: OrderHistoryProps) {
                                         <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
                                             {new Date(
                                                 o.createdAt,
-                                            ).toLocaleDateString("es-ES", { timeZone: "UTC",
+                                            ).toLocaleDateString("es-ES", {
+                                                timeZone: "UTC",
                                                 dateStyle: "long",
                                             })}
                                         </p>
@@ -117,12 +114,18 @@ export function OrderHistory({ initialOrders }: OrderHistoryProps) {
                             <div className="flex flex-wrap gap-8 text-sm font-medium">
                                 <span className="flex items-center gap-2 text-muted-foreground">
                                     <Calendar className="size-4 text-primary" />{" "}
-                                    {new Date(o.createdAt).toLocaleDateString("es-ES", { timeZone: "UTC" })}
+                                    {new Date(o.createdAt).toLocaleDateString(
+                                        "es-ES",
+                                        { timeZone: "UTC" },
+                                    )}
                                 </span>
                                 <span className="flex items-center gap-2 text-muted-foreground">
                                     <Package className="size-4 text-primary" />{" "}
                                     {o.items.length}{" "}
-                                    {o.items.length === 1 ? "artículo" : "artículos"} incluidos
+                                    {o.items.length === 1
+                                        ? "artículo"
+                                        : "artículos"}{" "}
+                                    incluidos
                                 </span>
                             </div>
                             <div className="flex gap-3">

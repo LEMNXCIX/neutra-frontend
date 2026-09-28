@@ -1,20 +1,22 @@
 /**
  * API Route Handler - Wrapper unificado para rutas API proxy
- * 
- * Reduce código duplicado en las rutas /app/api/** 
+ *
+ * Reduce código duplicado en las rutas /app/api/**
  * y proporciona logging automático con trace IDs.
  */
 
-import { NextRequest, NextResponse } from 'next/server';
-import { extractTokenFromRequest } from './server-auth';
-import { backendFetch, ApiResponse, HttpMethod } from './backend-api';
-import { logger, LogContext } from './logger';
+import { type NextRequest, NextResponse } from "next/server";
+import { type ApiResponse, backendFetch, type HttpMethod } from "./backend-api";
+import { type LogContext, logger } from "./logger";
+import { extractTokenFromRequest } from "./server-auth";
 
 // ============================================================================
 // Types
 // ============================================================================
 
-export type EndpointResolver = string | ((req: NextRequest, params?: Record<string, string>) => string);
+export type EndpointResolver =
+    | string
+    | ((req: NextRequest, params?: Record<string, string>) => string);
 
 export interface RouteConfig {
     /** HTTP method for this route */
@@ -25,6 +27,14 @@ export interface RouteConfig {
     successStatus?: number;
     /** Whether to include query params in the endpoint (for GET requests) */
     includeQueryParams?: boolean;
+    /**
+     * Forward the status the backend actually returned instead of the declared
+     * `successStatus`. Use it when the BFF must not rewrite the backend's answer:
+     * 201/202 from a POST, or 204 from a DELETE. Without it a successful response
+     * is flattened to 200 (or 201 for POST), which loses information the caller
+     * may depend on.
+     */
+    passThroughStatus?: boolean;
 }
 
 export interface RouteContext {
@@ -41,20 +51,23 @@ export interface RouteContext {
 const resolveEndpoint = async (
     config: RouteConfig,
     req: NextRequest,
-    context?: RouteContext
+    context?: RouteContext,
 ): Promise<string> => {
     const params = context?.params ? await context.params : undefined;
 
-    let endpoint = typeof config.endpoint === 'function'
-        ? config.endpoint(req, params)
-        : config.endpoint;
+    let endpoint =
+        typeof config.endpoint === "function"
+            ? config.endpoint(req, params)
+            : config.endpoint;
 
     // Append query params for GET requests if configured
-    if (config.includeQueryParams !== false && config.method === 'GET') {
+    if (config.includeQueryParams !== false && config.method === "GET") {
         const { searchParams } = new URL(req.url);
         const queryString = searchParams.toString();
         if (queryString) {
-            endpoint += endpoint.includes('?') ? `&${queryString}` : `?${queryString}`;
+            endpoint += endpoint.includes("?")
+                ? `&${queryString}`
+                : `?${queryString}`;
         }
     }
 
@@ -68,14 +81,17 @@ const getSuccessStatus = (config: RouteConfig): number => {
     if (config.successStatus !== undefined) {
         return config.successStatus;
     }
-    return config.method === 'POST' ? 201 : 200;
+    return config.method === "POST" ? 201 : 200;
 };
 
 /**
  * Parse request body for mutation methods
  */
-const parseBody = async (req: NextRequest, method: HttpMethod): Promise<unknown | undefined> => {
-    if (['POST', 'PUT', 'PATCH'].includes(method)) {
+const parseBody = async (
+    req: NextRequest,
+    method: HttpMethod,
+): Promise<unknown | undefined> => {
+    if (["POST", "PUT", "PATCH"].includes(method)) {
         try {
             return await req.json();
         } catch {
@@ -87,21 +103,38 @@ const parseBody = async (req: NextRequest, method: HttpMethod): Promise<unknown 
 
 /**
  * Create standardized error response
+ *
+ * `errors` is forwarded from the backend instead of being dropped. The codes in
+ * it are the only stable, machine-readable part of the contract: the client
+ * translates the code and never shows `message`, which is written in English and
+ * changes without notice. Rebuilding the envelope without it left every failure
+ * looking like a generic one, no matter how specific the backend had been.
  */
 const createErrorResponse = (
     message: string,
     statusCode: number,
-    traceId: string
+    traceId: string,
+    errors: unknown[] = [],
 ): NextResponse => {
     return NextResponse.json(
         {
             success: false,
             statusCode,
             message,
-            meta: { traceId, timestamp: new Date().toISOString() }
+            errors,
+            meta: { traceId, timestamp: new Date().toISOString() },
         },
-        { status: statusCode }
+        { status: statusCode },
     );
+};
+
+/** The codes carried by a thrown error, when the backend sent any. */
+const codesFromError = (error: unknown): unknown[] => {
+    if (!error || typeof error !== "object") return [];
+    const response = (error as { response?: { errors?: unknown } }).response;
+    if (Array.isArray(response?.errors)) return response.errors;
+    if (Array.isArray(error)) return error;
+    return [];
 };
 
 // ============================================================================
@@ -110,21 +143,21 @@ const createErrorResponse = (
 
 /**
  * Creates a route handler with automatic logging, error handling, and token extraction
- * 
+ *
  * @example
  * // Simple GET endpoint
  * export const GET = createRouteHandler({
  *     method: 'GET',
  *     endpoint: '/roles'
  * });
- * 
+ *
  * @example
  * // Dynamic endpoint with params
  * export const GET = createRouteHandler({
  *     method: 'GET',
  *     endpoint: (req, params) => `/roles/${params?.id}`
  * });
- * 
+ *
  * @example
  * // POST with custom success status
  * export const POST = createRouteHandler({
@@ -134,7 +167,10 @@ const createErrorResponse = (
  * });
  */
 export function createRouteHandler(config: RouteConfig) {
-    return async (req: NextRequest, context?: RouteContext): Promise<NextResponse> => {
+    return async (
+        req: NextRequest,
+        context?: RouteContext,
+    ): Promise<NextResponse> => {
         const startTime = Date.now();
         let logContext: LogContext | null = null;
 
@@ -152,7 +188,10 @@ export function createRouteHandler(config: RouteConfig) {
             logContext = logger.createContext(endpoint, config.method, body);
 
             // Log request start
-            logger.info(logContext, `API Request: ${config.method} ${endpoint}`);
+            logger.info(
+                logContext,
+                `API Request: ${config.method} ${endpoint}`,
+            );
 
             // Make backend request
             const result: ApiResponse = await backendFetch(endpoint, {
@@ -169,12 +208,15 @@ export function createRouteHandler(config: RouteConfig) {
                     logContext,
                     result,
                     result.statusCode || 500,
-                    duration
+                    duration,
                 );
-                logger.warn(updatedContext, `API Response: Backend returned error`);
+                logger.warn(
+                    updatedContext,
+                    `API Response: Backend returned error`,
+                );
 
                 return NextResponse.json(result, {
-                    status: result.statusCode || 500
+                    status: result.statusCode || 500,
                 });
             }
 
@@ -183,36 +225,49 @@ export function createRouteHandler(config: RouteConfig) {
                 logContext,
                 result.data,
                 result.statusCode || 200,
-                duration
+                duration,
             );
             logger.info(successContext, `API Response: Success`);
 
-            // Return successful response (204 must be body-less)
-            const successStatus = getSuccessStatus(config);
-            if (successStatus === 204) {
-                return new NextResponse(null, { status: 204 });
+            // Return successful response (204/304 must be body-less)
+            const declaredStatus = getSuccessStatus(config);
+            const successStatus = config.passThroughStatus
+                ? (result.statusCode ?? declaredStatus)
+                : declaredStatus;
+
+            if (successStatus === 204 || successStatus === 304) {
+                return new NextResponse(null, { status: successStatus });
             }
             return NextResponse.json(result, {
-                status: successStatus
+                status: successStatus,
             });
-
         } catch (error) {
             const duration = Date.now() - startTime;
-            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-            const statusCode = (error as { statusCode?: number })?.statusCode || 500;
+            const errorMessage =
+                error instanceof Error ? error.message : "Error desconocido";
+            const statusCode =
+                (error as { statusCode?: number })?.statusCode || 500;
 
             // Log error
             if (logContext) {
-                const errorContext = logger.withError(logContext, error, duration);
+                const errorContext = logger.withError(
+                    logContext,
+                    error,
+                    duration,
+                );
                 logger.error(errorContext, `API Error: ${errorMessage}`);
             } else {
-                console.error(`[API Error] Unhandled error before context creation:`, error);
+                console.error(
+                    `[API Error] Unhandled error before context creation:`,
+                    error,
+                );
             }
 
             return createErrorResponse(
                 errorMessage,
                 statusCode,
-                logContext?.traceId || 'unknown'
+                logContext?.traceId || "unknown",
+                codesFromError(error),
             );
         }
     };
@@ -225,32 +280,48 @@ export function createRouteHandler(config: RouteConfig) {
 /**
  * Create a simple GET handler
  */
-export const createGetHandler = (endpoint: EndpointResolver, options?: Partial<RouteConfig>) =>
-    createRouteHandler({ method: 'GET', endpoint, ...options });
+export const createGetHandler = (
+    endpoint: EndpointResolver,
+    options?: Partial<RouteConfig>,
+) => createRouteHandler({ method: "GET", endpoint, ...options });
 
 /**
  * Create a simple POST handler
  */
-export const createPostHandler = (endpoint: EndpointResolver, options?: Partial<RouteConfig>) =>
-    createRouteHandler({ method: 'POST', endpoint, successStatus: 201, ...options });
+export const createPostHandler = (
+    endpoint: EndpointResolver,
+    options?: Partial<RouteConfig>,
+) =>
+    createRouteHandler({
+        method: "POST",
+        endpoint,
+        successStatus: 201,
+        ...options,
+    });
 
 /**
  * Create a simple PUT handler
  */
-export const createPutHandler = (endpoint: EndpointResolver, options?: Partial<RouteConfig>) =>
-    createRouteHandler({ method: 'PUT', endpoint, ...options });
+export const createPutHandler = (
+    endpoint: EndpointResolver,
+    options?: Partial<RouteConfig>,
+) => createRouteHandler({ method: "PUT", endpoint, ...options });
 
 /**
  * Create a simple DELETE handler
  */
-export const createDeleteHandler = (endpoint: EndpointResolver, options?: Partial<RouteConfig>) =>
-    createRouteHandler({ method: 'DELETE', endpoint, ...options });
+export const createDeleteHandler = (
+    endpoint: EndpointResolver,
+    options?: Partial<RouteConfig>,
+) => createRouteHandler({ method: "DELETE", endpoint, ...options });
 
 /**
  * Create a simple PATCH handler
  */
-export const createPatchHandler = (endpoint: EndpointResolver, options?: Partial<RouteConfig>) =>
-    createRouteHandler({ method: 'PATCH', endpoint, ...options });
+export const createPatchHandler = (
+    endpoint: EndpointResolver,
+    options?: Partial<RouteConfig>,
+) => createRouteHandler({ method: "PATCH", endpoint, ...options });
 
 // ============================================================================
 // Specialized Handlers
@@ -263,37 +334,64 @@ export const createPatchHandler = (endpoint: EndpointResolver, options?: Partial
 export function createListWithStatsHandler(
     listEndpoint: EndpointResolver,
     statsEndpoint: string,
-    transform?: (data: any) => any
+    transform?: (data: any) => any,
 ) {
-    return async (req: NextRequest, context?: RouteContext): Promise<NextResponse> => {
+    return async (
+        req: NextRequest,
+        context?: RouteContext,
+    ): Promise<NextResponse> => {
         const startTime = Date.now();
         let logContext: LogContext | null = null;
 
         try {
             const token = extractTokenFromRequest(req);
             const resolvedListEndpoint = await resolveEndpoint(
-                { method: 'GET', endpoint: listEndpoint },
+                { method: "GET", endpoint: listEndpoint },
                 req,
-                context
+                context,
             );
 
-            logContext = logger.createContext(resolvedListEndpoint, 'GET');
-            logger.info(logContext, `API Request (List+Stats): ${resolvedListEndpoint} & ${statsEndpoint}`);
+            logContext = logger.createContext(resolvedListEndpoint, "GET");
+            logger.info(
+                logContext,
+                `API Request (List+Stats): ${resolvedListEndpoint} & ${statsEndpoint}`,
+            );
 
             // Fetch both in parallel
             const [listResult, statsResult] = await Promise.all([
-                backendFetch(resolvedListEndpoint, { method: 'GET', token: token || undefined }).catch(err => ({ success: false, error: err.message, data: [], statusCode: 500 })),
-                backendFetch(statsEndpoint, { method: 'GET', token: token || undefined }).catch(err => ({ success: false, error: err.message, data: null, statusCode: 500 }))
+                backendFetch(resolvedListEndpoint, {
+                    method: "GET",
+                    token: token || undefined,
+                }).catch((err) => ({
+                    success: false,
+                    error: err.message,
+                    data: [],
+                    statusCode: 500,
+                })),
+                backendFetch(statsEndpoint, {
+                    method: "GET",
+                    token: token || undefined,
+                }).catch((err) => ({
+                    success: false,
+                    error: err.message,
+                    data: null,
+                    statusCode: 500,
+                })),
             ]);
 
             const duration = Date.now() - startTime;
 
             if (!listResult.success) {
-                return NextResponse.json(listResult, { status: (listResult as any).statusCode || 500 });
+                return NextResponse.json(listResult, {
+                    status: (listResult as any).statusCode || 500,
+                });
             }
 
             // Apply transform if provided
-            const finalData = transform && listResult.data ? transform(listResult.data) : listResult.data;
+            const finalData =
+                transform && listResult.data
+                    ? transform(listResult.data)
+                    : listResult.data;
 
             // Merge results
             const mergedResult = {
@@ -305,31 +403,40 @@ export function createListWithStatsHandler(
                     currentPage: 1,
                     totalPages: 1,
                     totalItems: Array.isArray(finalData) ? finalData.length : 0,
-                    itemsPerPage: Array.isArray(finalData) ? finalData.length : 10,
+                    itemsPerPage: Array.isArray(finalData)
+                        ? finalData.length
+                        : 10,
                 },
                 meta: {
                     traceId: logContext.traceId,
                     timestamp: new Date().toISOString(),
-                    duration: `${duration}ms`
-                }
+                    duration: `${duration}ms`,
+                },
             };
 
-            logger.info(logger.withResponse(logContext, mergedResult, 200, duration), `API Response: Success (Merged)`);
+            logger.info(
+                logger.withResponse(logContext, mergedResult, 200, duration),
+                `API Response: Success (Merged)`,
+            );
 
             return NextResponse.json(mergedResult);
-
         } catch (error) {
             const duration = Date.now() - startTime;
-            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-            
+            const errorMessage =
+                error instanceof Error ? error.message : "Error desconocido";
+
             if (logContext) {
-                logger.error(logger.withError(logContext, error, duration), `API Error: ${errorMessage}`);
+                logger.error(
+                    logger.withError(logContext, error, duration),
+                    `API Error: ${errorMessage}`,
+                );
             }
 
             return createErrorResponse(
                 errorMessage,
                 500,
-                logContext?.traceId || 'unknown'
+                logContext?.traceId || "unknown",
+                codesFromError(error),
             );
         }
     };

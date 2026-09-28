@@ -1,6 +1,6 @@
-import React, { Suspense } from "react";
+import { Suspense } from "react";
 import SlidersTableClient from "@/components/admin/sliders/SlidersTableClient";
-import { api } from '@/lib/api-client';
+import { api } from "@/lib/api-client";
 import { validateAdminAccess } from "@/lib/server-auth";
 
 export const metadata = { title: "Carruseles" };
@@ -104,11 +104,11 @@ export default async function SlidersPage({ searchParams }: Props) {
     const resolvedSearchParams = await searchParams;
     const page =
         typeof resolvedSearchParams.page === "string"
-            ? parseInt(resolvedSearchParams.page)
+            ? parseInt(resolvedSearchParams.page, 10)
             : 1;
     const limit =
         typeof resolvedSearchParams.limit === "string"
-            ? parseInt(resolvedSearchParams.limit)
+            ? parseInt(resolvedSearchParams.limit, 10)
             : 10;
     const search =
         typeof resolvedSearchParams.search === "string"

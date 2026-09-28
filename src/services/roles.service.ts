@@ -1,5 +1,5 @@
-import { api } from '@/lib/api-client';
-import { Role, CreateRoleDTO, UpdateRoleDTO } from '@/types/role.types';
+import { api } from "@/lib/api-client";
+import type { CreateRoleDTO, Role, UpdateRoleDTO } from "@/types/role.types";
 
 /**
  * Roles Service
@@ -10,7 +10,7 @@ export const rolesService = {
      * Get all roles
      */
     getAll: async (): Promise<Role[]> => {
-        return api.get<Role[]>('/roles');
+        return api.get<Role[]>("/roles");
     },
 
     /**
@@ -24,7 +24,7 @@ export const rolesService = {
      * Create new role (requires authentication)
      */
     create: async (data: CreateRoleDTO): Promise<Role> => {
-        return api.post<Role>('/roles', data);
+        return api.post<Role>("/roles", data);
     },
 
     /**

@@ -1,18 +1,17 @@
 "use client";
 
-import React from "react";
+import { Rocket } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { TenantForm } from "@/components/admin/tenants/TenantForm";
+import Logo from "@/components/logo";
 import {
     Card,
     CardContent,
+    CardDescription,
     CardHeader,
     CardTitle,
-    CardDescription,
 } from "@/components/ui/card";
-import Logo from "@/components/logo";
-import Link from "next/link";
-import { Rocket } from "lucide-react";
 
 export function TenantOnboardingPageClient() {
     const router = useRouter();
@@ -42,7 +41,7 @@ export function TenantOnboardingPageClient() {
                             Initialize Node
                         </h1>
                         <p className="text-muted-foreground font-black uppercase tracking-[0.4em] text-[10px]">
-                            Architecting your enterprise grid in real-time
+                            Diseñando tu red empresarial en tiempo real
                         </p>
                     </div>
                 </div>
@@ -57,11 +56,11 @@ export function TenantOnboardingPageClient() {
                             </div>
                             <div className="space-y-1">
                                 <CardTitle className="text-4xl font-black uppercase tracking-tight italic">
-                                    Instance Setup
+                                    Configuración de la instancia
                                 </CardTitle>
                                 <CardDescription className="text-muted-foreground font-bold uppercase tracking-widest text-[10px]">
-                                    Configure core parameters and operational
-                                    protocols
+                                    Configura los parámetros principales y los
+                                    protocolos operativos
                                 </CardDescription>
                             </div>
                         </div>
@@ -70,7 +69,7 @@ export function TenantOnboardingPageClient() {
                         <TenantForm
                             onSuccess={handleSuccess}
                             onCancel={() => router.push("/")}
-                            submitLabel="Launch Instance node →"
+                            submitLabel="Lanzar nodo de instancia →"
                             isWizard={true}
                         />
                     </CardContent>

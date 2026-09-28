@@ -1,6 +1,6 @@
-import React, { Suspense } from "react";
+import { Suspense } from "react";
 import UsersTableClient from "@/components/admin/users/UsersTableClient";
-import { api } from '@/lib/api-client';
+import { api } from "@/lib/api-client";
 
 export const dynamic = "force-dynamic";
 
@@ -11,47 +11,40 @@ async function getUsers(
     limit: number,
 ) {
     try {
-
-        const data = await api.get<any[]>('/users').catch(() => []);
+        const data = await api.get<any[]>("/users").catch(() => []);
         const backendUsers = Array.isArray(data) ? data : [];
-        let users: any[] = backendUsers.map(
-                (u: any) => {
-                    const tenantRole = u.role || u.tenants?.[0]?.role;
-                    const tenantInfo = u.tenant || u.tenants?.[0]?.tenant;
+        let users: any[] = backendUsers.map((u: any) => {
+            const tenantRole = u.role || u.tenants?.[0]?.role;
+            const tenantInfo = u.tenant || u.tenants?.[0]?.tenant;
 
-                    return {
-                        id: u.id,
-                        name: u.name,
-                        email: u.email,
-                        roleId: u.roleId || tenantRole?.id || "",
-                        active: u.active !== undefined ? u.active : true,
-                        profilePic: u.profilePic || undefined,
-                        tenantId: u.tenantId || tenantInfo?.id || "",
-                        role: tenantRole
-                            ? {
-                                  id: tenantRole.id,
-                                  name: tenantRole.name,
-                                  permissions: tenantRole.permissions || [],
-                              }
-                            : u.roleId
-                              ? { id: u.roleId, name: "USER", permissions: [] }
-                              : undefined,
-                        createdAt: u.createdAt
-                            ? new Date(u.createdAt)
-                            : undefined,
-                        updatedAt: u.updatedAt
-                            ? new Date(u.updatedAt)
-                            : undefined,
-                        tenant: tenantInfo
-                            ? {
-                                  id: tenantInfo.id,
-                                  name: tenantInfo.name,
-                                  slug: tenantInfo.slug,
-                              }
-                            : undefined,
-                    };
-                },
-            );
+            return {
+                id: u.id,
+                name: u.name,
+                email: u.email,
+                roleId: u.roleId || tenantRole?.id || "",
+                active: u.active !== undefined ? u.active : true,
+                profilePic: u.profilePic || undefined,
+                tenantId: u.tenantId || tenantInfo?.id || "",
+                role: tenantRole
+                    ? {
+                          id: tenantRole.id,
+                          name: tenantRole.name,
+                          permissions: tenantRole.permissions || [],
+                      }
+                    : u.roleId
+                      ? { id: u.roleId, name: "USER", permissions: [] }
+                      : undefined,
+                createdAt: u.createdAt ? new Date(u.createdAt) : undefined,
+                updatedAt: u.updatedAt ? new Date(u.updatedAt) : undefined,
+                tenant: tenantInfo
+                    ? {
+                          id: tenantInfo.id,
+                          name: tenantInfo.name,
+                          slug: tenantInfo.slug,
+                      }
+                    : undefined,
+            };
+        });
 
         // Apply filters
         if (search) {
@@ -135,11 +128,11 @@ export default async function UsersPage({ searchParams }: Props) {
     const resolvedSearchParams = await searchParams;
     const page =
         typeof resolvedSearchParams.page === "string"
-            ? parseInt(resolvedSearchParams.page)
+            ? parseInt(resolvedSearchParams.page, 10)
             : 1;
     const limit =
         typeof resolvedSearchParams.limit === "string"
-            ? parseInt(resolvedSearchParams.limit)
+            ? parseInt(resolvedSearchParams.limit, 10)
             : 10;
     const search =
         typeof resolvedSearchParams.search === "string"

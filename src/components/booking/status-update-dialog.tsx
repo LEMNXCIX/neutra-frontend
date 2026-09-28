@@ -1,3 +1,16 @@
+import type { LucideIcon } from "lucide-react";
+import {
+    CheckCircle,
+    CheckCircle2,
+    Loader2,
+    Play,
+    UserX,
+    XCircle,
+} from "lucide-react";
+import type React from "react";
+import { useState } from "react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 import {
     Dialog,
     DialogContent,
@@ -7,21 +20,12 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import {
-    CheckCircle,
-    CheckCircle2,
-    Loader2,
-    Play,
-    UserX,
-    XCircle,
-} from "lucide-react";
-import type { LucideIcon } from "lucide-react";
-import React, { useState } from "react";
-import { bookingService } from "@/services/booking.service";
+import { reportError } from "@/lib/error-reporting";
 import type { AppointmentStatus } from "@/services/booking.service";
-import { canTransitionAppointmentStatus } from "@/services/booking.service";
-import { toast } from "sonner";
+import {
+    bookingService,
+    canTransitionAppointmentStatus,
+} from "@/services/booking.service";
 
 type StatusCopy = {
     label: string;
@@ -136,11 +140,7 @@ export function StatusUpdateDialog({
                 }
             }
         } catch (error) {
-            toast.error(
-                error instanceof Error
-                    ? error.message
-                    : "Error al actualizar el estado",
-            );
+            reportError(error, "No pudimos actualizar el estado de la cita.");
         } finally {
             setLoading(false);
         }

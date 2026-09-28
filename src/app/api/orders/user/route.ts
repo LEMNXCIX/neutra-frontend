@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { backendGet } from "@/lib/backend-api";
 import { extractTokenFromRequest } from "@/lib/server-auth";
 
@@ -9,16 +9,22 @@ export async function GET(req: NextRequest) {
         const searchParams = req.nextUrl.search;
 
         // Proxy to /order/getOrderByUser
-        const result = await backendGet(`/order/getOrderByUser${searchParams}`, token);
+        const result = await backendGet(
+            `/order/getOrderByUser${searchParams}`,
+            token,
+        );
 
         return NextResponse.json(result, {
-            status: result.success ? 200 : 500
+            status: result.success ? 200 : 500,
         });
     } catch (error) {
         console.error("Error fetching user orders:", error);
         return NextResponse.json(
-            { success: false, error: "Failed to fetch user orders" },
-            { status: 500 }
+            {
+                success: false,
+                error: "Error al obtener los pedidos del usuario",
+            },
+            { status: 500 },
         );
     }
 }

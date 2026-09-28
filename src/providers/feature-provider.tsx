@@ -1,11 +1,17 @@
 "use client";
 
-import React, { useState, useEffect, ReactNode, useCallback, useMemo } from "react";
-import { tenantService } from "@/services/tenant.service";
+import {
+    type ReactNode,
+    useCallback,
+    useEffect,
+    useMemo,
+    useState,
+} from "react";
+import { reportError } from "@/lib/error-reporting";
 import { FeatureContext } from "@/providers/feature-context";
-import { TenantFeatures } from "@/types/tenant";
-
+import { tenantService } from "@/services/tenant.service";
 import { useTenantStore } from "@/store/tenant-store";
+import type { TenantFeatures } from "@/types/tenant";
 
 export function FeatureProvider({ children }: { children: ReactNode }) {
     const { tenantId, syncFromCookies } = useTenantStore();
@@ -32,7 +38,11 @@ export function FeatureProvider({ children }: { children: ReactNode }) {
             setError(null);
         } catch (err: any) {
             console.error("Failed to fetch tenant features:", err);
-            setError(err.message || "Failed to load features");
+            setError(
+                reportError(err, "No pudimos cargar las funcionalidades.", {
+                    toast: false,
+                }),
+            );
         } finally {
             setIsLoading(false);
         }
@@ -42,21 +52,27 @@ export function FeatureProvider({ children }: { children: ReactNode }) {
         fetchFeatures();
     }, [fetchFeatures]);
 
-    const isFeatureEnabled = useCallback((featureName: string): boolean => {
-        return !!features[featureName];
-    }, [features]);
+    const isFeatureEnabled = useCallback(
+        (featureName: string): boolean => {
+            return !!features[featureName];
+        },
+        [features],
+    );
 
     const refreshFeatures = useCallback(async () => {
         await fetchFeatures();
     }, [fetchFeatures]);
 
-    const value = useMemo(() => ({
-        features,
-        isLoading,
-        error,
-        isFeatureEnabled,
-        refreshFeatures,
-    }), [features, isLoading, error, isFeatureEnabled, refreshFeatures]);
+    const value = useMemo(
+        () => ({
+            features,
+            isLoading,
+            error,
+            isFeatureEnabled,
+            refreshFeatures,
+        }),
+        [features, isLoading, error, isFeatureEnabled, refreshFeatures],
+    );
 
     return (
         <FeatureContext.Provider value={value}>

@@ -1,29 +1,28 @@
 "use client";
 
-import React from "react";
-import { usePathname } from "next/navigation";
-import { NavItem } from "@/config/admin-navigation";
-import { useFeatures } from "@/hooks/useFeatures";
-import { useAuthStore } from "@/store/auth-store";
+import type { LucideIcon } from "lucide-react";
 import {
-    LayoutDashboard,
-    Package,
-    ShoppingCart,
-    Users,
-    Ticket,
-    LayoutList,
-    Megaphone,
-    Images,
     BrickWallShield,
-    Scissors,
-    UserCog,
     Building,
-    Palette,
     Clock,
     Gift,
+    Images,
+    LayoutDashboard,
+    LayoutList,
+    Megaphone,
+    Package,
+    Palette,
+    Scissors,
+    ShoppingCart,
+    Ticket,
+    UserCog,
+    Users,
 } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
+import { usePathname } from "next/navigation";
 import { MobileAdminNav } from "@/components/admin/shared/MobileAdminNav";
+import type { NavItem } from "@/config/admin-navigation";
+import { useFeatures } from "@/hooks/useFeatures";
+import { useAuthStore } from "@/store/auth-store";
 
 const ICON_MAP: Record<string, LucideIcon> = {
     LayoutDashboard,
@@ -64,5 +63,11 @@ export default function AdminMobileNav({ items }: AdminMobileNavProps) {
             : requiredFeatures.every((feature) => isFeatureEnabled(feature));
     });
 
-    return <MobileAdminNav items={filteredItems} pathname={pathname} iconMap={ICON_MAP} />;
+    return (
+        <MobileAdminNav
+            items={filteredItems}
+            pathname={pathname}
+            iconMap={ICON_MAP}
+        />
+    );
 }

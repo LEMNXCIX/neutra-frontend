@@ -13,7 +13,8 @@ function renderChildren(children: any[] = []): string {
             if (c.bold) html = `<strong>${html}</strong>`;
             if (c.italic) html = `<em>${html}</em>`;
             if (c.underline) html = `<u>${html}</u>`;
-            if (c.code) html = `<code class="bg-muted px-1 rounded">${html}</code>`;
+            if (c.code)
+                html = `<code class="bg-muted px-1 rounded">${html}</code>`;
             if (c.strikethrough) html = `<s>${html}</s>`;
             return html;
         })
@@ -35,7 +36,7 @@ export function blocksToHtml(blocks: any[] = []): string {
                     const items = (b.children ?? [])
                         .map(
                             (li: any) =>
-                                `<li class="ml-6 list-disc">${renderChildren(li.children)}</li>`
+                                `<li class="ml-6 list-disc">${renderChildren(li.children)}</li>`,
                         )
                         .join("");
                     return `<ul class="space-y-2 my-4">${items}</ul>`;
@@ -52,7 +53,10 @@ export function blocksToHtml(blocks: any[] = []): string {
 }
 
 /** Render repeatable rich-text components, or `fallback` HTML when empty. */
-export function cmsRichText(content: any[] | null | undefined, fallback: string): string {
+export function cmsRichText(
+    content: any[] | null | undefined,
+    fallback: string,
+): string {
     const blocks = (content ?? []).flatMap((c: any) => c.content ?? []);
     return blocks.length ? blocksToHtml(blocks) : fallback;
 }
@@ -60,7 +64,12 @@ export function cmsRichText(content: any[] | null | undefined, fallback: string)
 /** Page header fields with fallbacks. */
 export function cmsHeader(
     cms: any,
-    fallback: { badge: string; title: string; highlight: string; subtitle: string }
+    fallback: {
+        badge: string;
+        title: string;
+        highlight: string;
+        subtitle: string;
+    },
 ) {
     return {
         badge: cms?.badge ?? fallback.badge,

@@ -1,20 +1,8 @@
 "use client";
 
-import React, { useCallback, useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Spinner } from "@/components/ui/spinner";
-import {
-    Card,
-    CardContent,
-    CardHeader,
-    CardTitle,
-    CardDescription,
-} from "@/components/ui/card";
-import { useTenantStore } from "@/store/tenant-store";
-import { tenantService } from "@/services/tenant.service";
-import type { Tenant } from "@/types/tenant";
-import { toast } from "sonner";
 import { Clock } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 import {
     HolidaysEditor,
     WorkingHoursEditor,
@@ -24,6 +12,18 @@ import {
     normalizeWorkingHours,
     type WorkingHours,
 } from "@/components/admin/booking/working-hours-utils";
+import { Button } from "@/components/ui/button";
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card";
+import { Spinner } from "@/components/ui/spinner";
+import { tenantService } from "@/services/tenant.service";
+import { useTenantStore } from "@/store/tenant-store";
+import type { Tenant } from "@/types/tenant";
 
 export function BusinessHoursClient() {
     const { tenantId } = useTenantStore();

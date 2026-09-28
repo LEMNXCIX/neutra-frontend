@@ -1,34 +1,9 @@
-import { readJsonResponse } from "@/lib/response";
-import { NextRequest, NextResponse } from "next/server";
-import { getProxyHeaders } from "@/lib/proxy";
+import { createPutHandler } from "@/lib/api-route-handler";
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4001";
-
-export async function PUT(
-    request: NextRequest,
-    context: { params: Promise<{ id: string }> },
-) {
-    try {
-        const { id } = await context.params;
-        const body = await request.json();
-
-        const response = await fetch(`${BACKEND_URL}/staff/${id}/services`, {
-            method: "PUT",
-            headers: {
-                ...getProxyHeaders(request),
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(body),
-            cache: "no-store",
-        });
-
-        const data = await readJsonResponse(response);
-        return NextResponse.json(data, { status: response.status });
-    } catch (error) {
-        console.error("Error syncing staff services:", error);
-        return NextResponse.json(
-            { success: false, message: "Failed to sync staff services" },
-            { status: 500 },
-        );
-    }
-}
+/**
+ * PUT /api/staff/[id]/services
+ */
+export const PUT = createPutHandler(
+    (_req, params) => `/staff/${params?.id}/services`,
+    { passThroughStatus: true },
+);

@@ -2,21 +2,24 @@
  * API Routes for Admin Dashboard Stats - Refactored with unified utilities
  */
 
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { backendFetch } from "@/lib/backend-api";
-import { extractTokenFromRequest } from "@/lib/server-auth";
 import { logger } from "@/lib/logger";
+import { extractTokenFromRequest } from "@/lib/server-auth";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
     const startTime = Date.now();
-    const endpoint = '/admin/stats/overview';
-    const logContext = logger.createContext(endpoint, 'GET');
+    const endpoint = "/admin/stats/overview";
+    const logContext = logger.createContext(endpoint, "GET");
 
     try {
         const token = extractTokenFromRequest(req) || undefined;
-        logger.info(logContext, `API Request (Stats Overview): Aggregating from multiple endpoints`);
+        logger.info(
+            logContext,
+            `API Request (Stats Overview): Aggregating from multiple endpoints`,
+        );
 
         // Parallel fetch for all stats using backendFetch for consistency
         const [
@@ -26,15 +29,57 @@ export async function GET(req: NextRequest) {
             couponsRes,
             slidersRes,
             bannersRes,
-            categoriesRes
+            categoriesRes,
         ] = await Promise.all([
-            backendFetch('/users/stats/summary', { method: 'GET', token }).catch(() => ({ success: false, data: { totalUsers: 0, adminUsers: 0, regularUsers: 0 } })),
-            backendFetch('/products/stats/summary', { method: 'GET', token }).catch(() => ({ success: false, data: { totalProducts: 0, totalValue: 0, lowStockCount: 0, outOfStockCount: 0 } })),
-            backendFetch('/order/stats', { method: 'GET', token }).catch(() => ({ success: false, data: { totalOrders: 0, totalRevenue: 0 } })),
-            backendFetch('/coupons/stats', { method: 'GET', token }).catch(() => ({ success: false, data: { totalCoupons: 0, activeCoupons: 0, usedCoupons: 0 } })),
-            backendFetch('/slide/stats', { method: 'GET', token }).catch(() => ({ success: false, data: { totalSliders: 0, activeSliders: 0, withImages: 0 } })),
-            backendFetch('/banners/stats', { method: 'GET', token }).catch(() => ({ success: false, data: { totalBanners: 0, activeBanners: 0 } })),
-            backendFetch('/categories/stats', { method: 'GET', token }).catch(() => ({ success: false, data: { totalCategories: 0, avgProductsPerCategory: 0 } })),
+            backendFetch("/users/stats/summary", {
+                method: "GET",
+                token,
+            }).catch(() => ({
+                success: false,
+                data: { totalUsers: 0, adminUsers: 0, regularUsers: 0 },
+            })),
+            backendFetch("/products/stats/summary", {
+                method: "GET",
+                token,
+            }).catch(() => ({
+                success: false,
+                data: {
+                    totalProducts: 0,
+                    totalValue: 0,
+                    lowStockCount: 0,
+                    outOfStockCount: 0,
+                },
+            })),
+            backendFetch("/order/stats", { method: "GET", token }).catch(
+                () => ({
+                    success: false,
+                    data: { totalOrders: 0, totalRevenue: 0 },
+                }),
+            ),
+            backendFetch("/coupons/stats", { method: "GET", token }).catch(
+                () => ({
+                    success: false,
+                    data: { totalCoupons: 0, activeCoupons: 0, usedCoupons: 0 },
+                }),
+            ),
+            backendFetch("/slide/stats", { method: "GET", token }).catch(
+                () => ({
+                    success: false,
+                    data: { totalSliders: 0, activeSliders: 0, withImages: 0 },
+                }),
+            ),
+            backendFetch("/banners/stats", { method: "GET", token }).catch(
+                () => ({
+                    success: false,
+                    data: { totalBanners: 0, activeBanners: 0 },
+                }),
+            ),
+            backendFetch("/categories/stats", { method: "GET", token }).catch(
+                () => ({
+                    success: false,
+                    data: { totalCategories: 0, avgProductsPerCategory: 0 },
+                }),
+            ),
         ]);
 
         const ordersData: any = ordersRes.data || {};
@@ -63,7 +108,8 @@ export async function GET(req: NextRequest) {
             orders: {
                 total: ordersCount,
                 revenue: ordersRevenue,
-                avgOrderValue: ordersCount > 0 ? ordersRevenue / ordersCount : 0,
+                avgOrderValue:
+                    ordersCount > 0 ? ordersRevenue / ordersCount : 0,
             },
             coupons: {
                 total: couponsData.totalCoupons || 0,
@@ -87,18 +133,27 @@ export async function GET(req: NextRequest) {
 
         const duration = Date.now() - startTime;
         const result = { success: true, data: stats };
-        
-        logger.info(logger.withResponse(logContext, result, 200, duration), `API Response: Success (Stats Aggregated)`);
+
+        logger.info(
+            logger.withResponse(logContext, result, 200, duration),
+            `API Response: Success (Stats Aggregated)`,
+        );
 
         return NextResponse.json(result);
-
     } catch (error: any) {
         const duration = Date.now() - startTime;
-        logger.error(logger.withError(logContext, error, duration), `API Error: ${error.message}`);
-        
+        logger.error(
+            logger.withError(logContext, error, duration),
+            `API Error: ${error.message}`,
+        );
+
         return NextResponse.json(
-            { success: false, message: "Failed to fetch analytics", meta: { traceId: logContext.traceId } },
-            { status: 500 }
+            {
+                success: false,
+                message: "Error al obtener las analíticas",
+                meta: { traceId: logContext.traceId },
+            },
+            { status: 500 },
         );
     }
 }

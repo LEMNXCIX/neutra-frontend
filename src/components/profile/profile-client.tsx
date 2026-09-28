@@ -1,351 +1,421 @@
 "use client";
 
-import React, { useReducer, useRef, useSyncExternalStore } from "react";
-import Image from "next/image";
-import { useAuthStore } from "@/store/auth-store";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
-  Card,
-  CardContent,
-} from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Label } from "@/components/ui/label";
-import {
-  Camera,
-  UserCircle,
-  Edit,
-  Mail,
-  User as
-  Shield,
-  LogOut,
+    Camera,
+    Edit,
+    LogOut,
+    Mail,
+    User as Shield,
+    UserCircle,
 } from "lucide-react";
-
-import { useTenantStore } from "@/store/tenant-store";
-import { Order } from "@/types/order.types";
-import { Appointment } from "@/services/booking.service";
-import { OrderHistory } from "./order-history";
-import { AppointmentHistory } from "./appointment-history";
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import type React from "react";
+import { useReducer, useRef, useSyncExternalStore } from "react";
+import { toast } from "sonner";
 import { LoyaltyCard } from "@/components/booking/loyalty-card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+    Dialog,
+    DialogContent,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { getTenantUrl } from "@/lib/tenant";
+import type { Appointment } from "@/services/booking.service";
+import { useAuthStore } from "@/store/auth-store";
+import { useTenantStore } from "@/store/tenant-store";
+import type { Order } from "@/types/order.types";
+import type { Tenant } from "@/types/tenant";
+import { AppointmentHistory } from "./appointment-history";
+import { OrderHistory } from "./order-history";
 
 type ProfileEditState = {
-  editOpen: boolean;
-  isSaving: boolean;
-  profileForm: { name: string; email: string };
-  avatarPreview: string | null;
+    editOpen: boolean;
+    isSaving: boolean;
+    profileForm: { name: string; email: string };
+    avatarPreview: string | null;
 };
 
 type ProfileEditAction =
-  | { type: "SET_EDIT_OPEN"; payload: boolean }
-  | { type: "SET_IS_SAVING"; payload: boolean }
-  | { type: "SET_PROFILE_FORM"; payload: ProfileEditState["profileForm"] }
-  | { type: "SET_AVATAR_PREVIEW"; payload: string | null };
+    | { type: "SET_EDIT_OPEN"; payload: boolean }
+    | { type: "SET_IS_SAVING"; payload: boolean }
+    | { type: "SET_PROFILE_FORM"; payload: ProfileEditState["profileForm"] }
+    | { type: "SET_AVATAR_PREVIEW"; payload: string | null };
 
-function profileEditReducer(state: ProfileEditState, action: ProfileEditAction): ProfileEditState {
-  switch (action.type) {
-    case "SET_EDIT_OPEN":
-      return { ...state, editOpen: action.payload };
-    case "SET_IS_SAVING":
-      return { ...state, isSaving: action.payload };
-    case "SET_PROFILE_FORM":
-      return { ...state, profileForm: action.payload };
-    case "SET_AVATAR_PREVIEW":
-      return { ...state, avatarPreview: action.payload };
-    default:
-      return state;
-  }
+function profileEditReducer(
+    state: ProfileEditState,
+    action: ProfileEditAction,
+): ProfileEditState {
+    switch (action.type) {
+        case "SET_EDIT_OPEN":
+            return { ...state, editOpen: action.payload };
+        case "SET_IS_SAVING":
+            return { ...state, isSaving: action.payload };
+        case "SET_PROFILE_FORM":
+            return { ...state, profileForm: action.payload };
+        case "SET_AVATAR_PREVIEW":
+            return { ...state, avatarPreview: action.payload };
+        default:
+            return state;
+    }
 }
 
 interface ProfileClientProps {
-  initialOrders: Order[] | null;
-  initialAppointments: Appointment[] | null;
-  isNeutral: boolean;
+    initialOrders: Order[] | null;
+    initialAppointments: Appointment[] | null;
+    isNeutral: boolean;
+    myTenants?: Tenant[];
 }
 
 const emptySubscribe = () => () => {};
 
 export function ProfileClient({
-  initialOrders,
-  initialAppointments,
-  isNeutral,
+    initialOrders,
+    initialAppointments,
+    isNeutral,
+    myTenants = [],
 }: ProfileClientProps) {
-  const isMounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
-  const { moduleType } = useTenantStore();
-  const user = useAuthStore((state) => state.user);
-  const logout = useAuthStore((state) => state.logout);
-  const updateUser = useAuthStore((state) => state.updateUser);
-  const router = useRouter();
+    const isMounted = useSyncExternalStore(
+        emptySubscribe,
+        () => true,
+        () => false,
+    );
+    const { moduleType } = useTenantStore();
+    const user = useAuthStore((state) => state.user);
+    const logout = useAuthStore((state) => state.logout);
+    const updateUser = useAuthStore((state) => state.updateUser);
+    const router = useRouter();
 
-  const [editState, dispatch] = useReducer(profileEditReducer, {
-    editOpen: false,
-    isSaving: false,
-    profileForm: { name: "", email: "" },
-    avatarPreview: null,
-  });
-  const avatarBase64Ref = useRef<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+    const [editState, dispatch] = useReducer(profileEditReducer, {
+        editOpen: false,
+        isSaving: false,
+        profileForm: { name: "", email: "" },
+        avatarPreview: null,
+    });
+    const avatarBase64Ref = useRef<string | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
-  if (!user || !isMounted) return null;
+    if (!user || !isMounted) return null;
 
-  const openEditProfile = () => {
-    dispatch({ type: "SET_PROFILE_FORM", payload: { name: user.name, email: user.email || "" } });
-    dispatch({ type: "SET_AVATAR_PREVIEW", payload: user.avatar || null });
-    avatarBase64Ref.current = null;
-    dispatch({ type: "SET_EDIT_OPEN", payload: true });
-  };
-
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const result = reader.result as string;
-      dispatch({ type: "SET_AVATAR_PREVIEW", payload: result });
-      avatarBase64Ref.current = result;
+    const openEditProfile = () => {
+        dispatch({
+            type: "SET_PROFILE_FORM",
+            payload: { name: user.name, email: user.email || "" },
+        });
+        dispatch({ type: "SET_AVATAR_PREVIEW", payload: user.avatar || null });
+        avatarBase64Ref.current = null;
+        dispatch({ type: "SET_EDIT_OPEN", payload: true });
     };
-    reader.readAsDataURL(file);
-  };
 
-  const saveProfile = async () => {
-    if (!editState.profileForm.name.trim() || !editState.profileForm.email.trim()) {
-      toast.error("Nombre y correo son obligatorios");
-      return;
-    }
+    const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            const result = reader.result as string;
+            dispatch({ type: "SET_AVATAR_PREVIEW", payload: result });
+            avatarBase64Ref.current = result;
+        };
+        reader.readAsDataURL(file);
+    };
 
-    dispatch({ type: "SET_IS_SAVING", payload: true });
-    try {
-      const body: any = {
-        name: editState.profileForm.name,
-        email: editState.profileForm.email,
-      };
-      if (avatarBase64Ref.current)
-        body.profilePic = avatarBase64Ref.current;
+    const saveProfile = async () => {
+        if (
+            !editState.profileForm.name.trim() ||
+            !editState.profileForm.email.trim()
+        ) {
+            toast.error("Nombre y correo son obligatorios");
+            return;
+        }
 
-      const res = await fetch("/api/profile", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
+        dispatch({ type: "SET_IS_SAVING", payload: true });
+        try {
+            const body: any = {
+                name: editState.profileForm.name,
+                email: editState.profileForm.email,
+            };
+            if (avatarBase64Ref.current)
+                body.profilePic = avatarBase64Ref.current;
 
-      if (!res.ok) throw new Error("Error al actualizar el perfil");
+            const res = await fetch("/api/profile", {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(body),
+            });
 
-      const data = await res.json();
-      if (data.success) {
-        updateUser({ ...data.data, avatar: data.data.profilePic });
-        toast.success("¡Perfil actualizado! 🎉");
-        dispatch({ type: "SET_EDIT_OPEN", payload: false });
-      }
-    } catch (_error) {
-      toast.error("Error al actualizar el perfil");
-    } finally {
-      dispatch({ type: "SET_IS_SAVING", payload: false });
-    }
-  };
+            if (!res.ok) throw new Error("Error al actualizar el perfil");
 
-  return (
-    <div className="space-y-12 animate-slide-up" suppressHydrationWarning>
-      {/* Profile Card */}
-      <Card className="t-card border-none shadow-2xl relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-1.5 bg-primary" />
+            const data = await res.json();
+            if (data.success) {
+                updateUser({ ...data.data, avatar: data.data.profilePic });
+                toast.success("¡Perfil actualizado! 🎉");
+                dispatch({ type: "SET_EDIT_OPEN", payload: false });
+            }
+        } catch (_error) {
+            toast.error("Error al actualizar el perfil");
+        } finally {
+            dispatch({ type: "SET_IS_SAVING", payload: false });
+        }
+    };
 
-        <CardContent className="p-8 sm:p-12">
-          <div className="flex flex-col md:flex-row items-start md:items-center gap-10">
-            <div className="relative group">
-              <div className="absolute inset-0 bg-primary/20 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
-              {user.avatar ? (
-                <Image
-                  src={user.avatar}
-                  alt={user.name}
-                  width={128}
-                  height={128}
-                  className="relative z-10 size-32 rounded-full object-cover border border-border shadow-xl"
-                />
-              ) : (
-                <div className="relative z-10 size-32 bg-primary/10 text-primary rounded-full flex items-center justify-center shadow-lg border border-primary/20">
-                  <UserCircle className="size-20 opacity-90" />
-                </div>
-              )}
-              <button
-                type="button"
-                aria-label="Cambiar foto de perfil"
-                onClick={openEditProfile}
-                className="absolute bottom-1 right-1 z-20 p-2.5 bg-background border border-border rounded-full shadow-lg hover:scale-110 active:scale-90 transition-[color,background-color,border-color,box-shadow,opacity,transform] hover:border-primary/50"
-              >
-                <Camera className="size-4 text-foreground" />
-              </button>
-            </div>
+    return (
+        <div className="space-y-12 animate-slide-up" suppressHydrationWarning>
+            {/* Profile Card */}
+            <Card className="t-card border-none shadow-2xl relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-1.5 bg-primary" />
 
-            <div className="flex-1 space-y-4">
-              <div className="space-y-1">
-                <div className="flex flex-wrap items-center gap-4">
-                  <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground leading-none">
-                    {user.name}
-                  </h2>
-                  {user.isAdmin && (
-                    <Badge className="bg-foreground text-background font-bold text-[10px] tracking-widest px-4 py-1.5 rounded-full shadow-lg border-none">
-                      <Shield className="size-3 mr-2" />{" "}
-                      ADMINISTRADOR
-                    </Badge>
-                  )}
-                </div>
-                <div className="flex items-center gap-2 text-muted-foreground font-medium text-base">
-                  <Mail className="size-4 opacity-70" />{" "}
-                  <span>{user.email}</span>
-                </div>
-              </div>
+                <CardContent className="p-8 sm:p-12">
+                    <div className="flex flex-col md:flex-row items-start md:items-center gap-10">
+                        <div className="relative group">
+                            <div className="absolute inset-0 bg-primary/20 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
+                            {user.avatar ? (
+                                <Image
+                                    src={user.avatar}
+                                    alt={user.name}
+                                    width={128}
+                                    height={128}
+                                    className="relative z-10 size-32 rounded-full object-cover border border-border shadow-xl"
+                                />
+                            ) : (
+                                <div className="relative z-10 size-32 bg-primary/10 text-primary rounded-full flex items-center justify-center shadow-lg border border-primary/20">
+                                    <UserCircle className="size-20 opacity-90" />
+                                </div>
+                            )}
+                            <button
+                                type="button"
+                                aria-label="Cambiar foto de perfil"
+                                onClick={openEditProfile}
+                                className="absolute bottom-1 right-1 z-20 p-2.5 bg-background border border-border rounded-full shadow-lg hover:scale-110 active:scale-90 transition-[color,background-color,border-color,box-shadow,opacity,transform] hover:border-primary/50"
+                            >
+                                <Camera className="size-4 text-foreground" />
+                            </button>
+                        </div>
 
-              <div className="flex flex-wrap gap-4 pt-4">
-                <div className="px-6 py-3 bg-muted/40 rounded-xl border border-border/50">
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1 opacity-70">
-                    Fecha de registro
-                  </p>
-                  <p className="text-sm font-bold text-foreground">
-                    Febrero de 2026
-                  </p>
-                </div>
-              </div>
-            </div>
+                        <div className="flex-1 space-y-4">
+                            <div className="space-y-1">
+                                <div className="flex flex-wrap items-center gap-4">
+                                    <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground leading-none">
+                                        {user.name}
+                                    </h2>
+                                    {user.isAdmin && (
+                                        <Badge className="bg-foreground text-background font-bold text-[10px] tracking-widest px-4 py-1.5 rounded-full shadow-lg border-none">
+                                            <Shield className="size-3 mr-2" />{" "}
+                                            ADMINISTRADOR
+                                        </Badge>
+                                    )}
+                                </div>
+                                <div className="flex items-center gap-2 text-muted-foreground font-medium text-base">
+                                    <Mail className="size-4 opacity-70" />{" "}
+                                    <span>{user.email}</span>
+                                </div>
+                            </div>
 
-            <div className="flex flex-col gap-3 w-full md:w-auto">
-              <Button
-                onClick={openEditProfile}
-                size="lg"
-                className="h-14 px-10 rounded-xl font-bold bg-foreground text-background hover:bg-foreground/90 shadow-xl shadow-foreground/10 transition-[color,background-color,border-color,box-shadow,opacity,transform] hover:-translate-y-1"
-              >
-                <Edit className="size-4 mr-2" /> Editar perfil
-              </Button>
-              <Button
-                variant="outline"
-                size="lg"
-                onClick={async () => {
-                  await logout();
-                  router.push("/login");
-                }}
-                className="h-14 px-10 rounded-xl font-bold border-2 border-border hover:bg-destructive hover:text-destructive-foreground hover:border-destructive transition-[color,background-color,border-color,box-shadow,opacity,transform]"
-              >
-                <LogOut className="size-4 mr-2" /> Cerrar sesión
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+                            <div className="flex flex-wrap gap-4 pt-4">
+                                <div className="px-6 py-3 bg-muted/40 rounded-xl border border-border/50">
+                                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1 opacity-70">
+                                        Fecha de registro
+                                    </p>
+                                    <p className="text-sm font-bold text-foreground">
+                                        Febrero de 2026
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
 
-      <LoyaltyCard />
+                        <div className="flex flex-col gap-3 w-full md:w-auto">
+                            <Button
+                                onClick={openEditProfile}
+                                size="lg"
+                                className="h-14 px-10 rounded-xl font-bold bg-foreground text-background hover:bg-foreground/90 shadow-xl shadow-foreground/10 transition-[color,background-color,border-color,box-shadow,opacity,transform] hover:-translate-y-1"
+                            >
+                                <Edit className="size-4 mr-2" /> Editar perfil
+                            </Button>
+                            <Button
+                                variant="outline"
+                                size="lg"
+                                onClick={async () => {
+                                    await logout();
+                                    router.push("/login");
+                                }}
+                                className="h-14 px-10 rounded-xl font-bold border-2 border-border hover:bg-destructive hover:text-destructive-foreground hover:border-destructive transition-[color,background-color,border-color,box-shadow,opacity,transform]"
+                            >
+                                <LogOut className="size-4 mr-2" /> Cerrar sesión
+                            </Button>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
 
-      {/* Content History */}
-      {!isNeutral && (
-        <>
-          {moduleType === "booking" ? (
-            <AppointmentHistory
-              initialAppointments={initialAppointments || []}
-            />
-          ) : (
-            <OrderHistory initialOrders={initialOrders || []} />
-          )}
-        </>
-      )}
+            <LoyaltyCard />
 
-      {/* Edit Dialog */}
-      <Dialog open={editState.editOpen} onOpenChange={(open) => dispatch({ type: "SET_EDIT_OPEN", payload: open })}>
-        <DialogContent className="max-w-md rounded-xl p-0 overflow-hidden border-none shadow-2xl">
-          <DialogHeader className="p-8 pb-0">
-            <DialogTitle className="text-xl font-bold">
-              Editar perfil
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-6 p-8">
-            <div className="flex flex-col items-center gap-4">
-              <div className="relative group">
-                <Avatar className="size-24 border-2 border-border shadow-md group-hover:border-primary/30 transition-[color,background-color,border-color,box-shadow,opacity,transform]">
-                  <AvatarImage
-                    src={editState.avatarPreview || user.avatar}
-                  />
-                  <AvatarFallback className="bg-primary/10 text-primary text-2xl font-bold">
-                    {user.name.slice(0, 2).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                <button
-                  type="button"
-                  aria-label="Subir imagen de avatar"
-                  onClick={() =>
-                    fileInputRef.current?.click()
-                  }
-                  className="absolute bottom-0 right-0 p-2 bg-primary text-primary-foreground rounded-full shadow-lg hover:scale-110 active:scale-95 transition-[color,background-color,border-color,box-shadow,opacity,transform]"
-                >
-                  <Camera className="size-4" />
-                </button>
-              </div>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleAvatarChange}
-                aria-label="Subir imagen de avatar"
-                className="hidden"
-              />
-            </div>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label className="text-xs font-semibold ml-1">
-                  Nombre completo
-                </Label>
-                <Input
-                  value={editState.profileForm.name}
-                  onChange={(e) =>
-                    dispatch({ type: "SET_PROFILE_FORM", payload: {
-                      ...editState.profileForm,
-                      name: e.target.value,
-                    }})
-                  }
-                  className="h-12 rounded-xl border-border focus:border-primary transition-[color,background-color,border-color,box-shadow,opacity,transform]"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-xs font-semibold ml-1">
-                  Correo electrónico
-                </Label>
-                <Input
-                  type="email"
-                  value={editState.profileForm.email}
-                  onChange={(e) =>
-                    dispatch({ type: "SET_PROFILE_FORM", payload: {
-                      ...editState.profileForm,
-                      email: e.target.value,
-                    }})
-                  }
-                  className="h-12 rounded-xl border-border focus:border-primary transition-[color,background-color,border-color,box-shadow,opacity,transform]"
-                />
-              </div>
-            </div>
-          </div>
-          <DialogFooter className="p-8 pt-0 gap-3">
-            <Button
-              variant="outline"
-              onClick={() => dispatch({ type: "SET_EDIT_OPEN", payload: false })}
-              className="rounded-xl font-semibold h-12 flex-1"
+            {/* My Instances (neutral/SuperAdmin surface only) */}
+            {isNeutral && (
+                <Card className="t-card border-none shadow-2xl">
+                    <CardContent className="p-8 space-y-6">
+                        <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">
+                            Mis instancias
+                        </h2>
+
+                        {myTenants.length === 0 ? (
+                            <p className="text-sm text-muted-foreground font-medium">
+                                Todavía no has creado ninguna instancia.
+                            </p>
+                        ) : (
+                            <div className="flex flex-wrap gap-4">
+                                {myTenants.map((tenant) => (
+                                    <Button
+                                        key={tenant.id}
+                                        asChild
+                                        variant="outline"
+                                        className="h-14 px-6 rounded-xl font-bold border-2 border-border hover:border-primary hover:text-primary transition-[color,background-color,border-color,box-shadow,opacity,transform] hover:-translate-y-0.5"
+                                    >
+                                        <Link
+                                            href={getTenantUrl(tenant.slug)}
+                                            className="flex items-center gap-3"
+                                        >
+                                            <span>{tenant.name}</span>
+                                            <Badge className="bg-primary/10 text-primary text-[10px] font-bold tracking-widest px-3 py-1 rounded-full border-none">
+                                                {tenant.type}
+                                            </Badge>
+                                        </Link>
+                                    </Button>
+                                ))}
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+            )}
+
+            {/* Content History */}
+            {!isNeutral &&
+                (moduleType === "booking" ? (
+                    <AppointmentHistory
+                        initialAppointments={initialAppointments || []}
+                    />
+                ) : (
+                    <OrderHistory initialOrders={initialOrders || []} />
+                ))}
+
+            {/* Edit Dialog */}
+            <Dialog
+                open={editState.editOpen}
+                onOpenChange={(open) =>
+                    dispatch({ type: "SET_EDIT_OPEN", payload: open })
+                }
             >
-              Cancelar
-            </Button>
-            <Button
-              onClick={saveProfile}
-              disabled={editState.isSaving}
-              className="rounded-xl font-bold h-12 flex-1 shadow-lg shadow-primary/20"
-            >
-              {editState.isSaving ? "Guardando..." : "Guardar cambios"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
+                <DialogContent className="max-w-md rounded-xl p-0 overflow-hidden border-none shadow-2xl">
+                    <DialogHeader className="p-8 pb-0">
+                        <DialogTitle className="text-xl font-bold">
+                            Editar perfil
+                        </DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-6 p-8">
+                        <div className="flex flex-col items-center gap-4">
+                            <div className="relative group">
+                                <Avatar className="size-24 border-2 border-border shadow-md group-hover:border-primary/30 transition-[color,background-color,border-color,box-shadow,opacity,transform]">
+                                    <AvatarImage
+                                        src={
+                                            editState.avatarPreview ||
+                                            user.avatar
+                                        }
+                                    />
+                                    <AvatarFallback className="bg-primary/10 text-primary text-2xl font-bold">
+                                        {user.name.slice(0, 2).toUpperCase()}
+                                    </AvatarFallback>
+                                </Avatar>
+                                <button
+                                    type="button"
+                                    aria-label="Subir imagen de avatar"
+                                    onClick={() =>
+                                        fileInputRef.current?.click()
+                                    }
+                                    className="absolute bottom-0 right-0 p-2 bg-primary text-primary-foreground rounded-full shadow-lg hover:scale-110 active:scale-95 transition-[color,background-color,border-color,box-shadow,opacity,transform]"
+                                >
+                                    <Camera className="size-4" />
+                                </button>
+                            </div>
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept="image/*"
+                                onChange={handleAvatarChange}
+                                aria-label="Subir imagen de avatar"
+                                className="hidden"
+                            />
+                        </div>
+                        <div className="space-y-4">
+                            <div className="space-y-2">
+                                <Label className="text-xs font-semibold ml-1">
+                                    Nombre completo
+                                </Label>
+                                <Input
+                                    value={editState.profileForm.name}
+                                    onChange={(e) =>
+                                        dispatch({
+                                            type: "SET_PROFILE_FORM",
+                                            payload: {
+                                                ...editState.profileForm,
+                                                name: e.target.value,
+                                            },
+                                        })
+                                    }
+                                    className="h-12 rounded-xl border-border focus:border-primary transition-[color,background-color,border-color,box-shadow,opacity,transform]"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="text-xs font-semibold ml-1">
+                                    Correo electrónico
+                                </Label>
+                                <Input
+                                    type="email"
+                                    value={editState.profileForm.email}
+                                    onChange={(e) =>
+                                        dispatch({
+                                            type: "SET_PROFILE_FORM",
+                                            payload: {
+                                                ...editState.profileForm,
+                                                email: e.target.value,
+                                            },
+                                        })
+                                    }
+                                    className="h-12 rounded-xl border-border focus:border-primary transition-[color,background-color,border-color,box-shadow,opacity,transform]"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                    <DialogFooter className="p-8 pt-0 gap-3">
+                        <Button
+                            variant="outline"
+                            onClick={() =>
+                                dispatch({
+                                    type: "SET_EDIT_OPEN",
+                                    payload: false,
+                                })
+                            }
+                            className="rounded-xl font-semibold h-12 flex-1"
+                        >
+                            Cancelar
+                        </Button>
+                        <Button
+                            onClick={saveProfile}
+                            disabled={editState.isSaving}
+                            className="rounded-xl font-bold h-12 flex-1 shadow-lg shadow-primary/20"
+                        >
+                            {editState.isSaving
+                                ? "Guardando..."
+                                : "Guardar cambios"}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+        </div>
+    );
 }

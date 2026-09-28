@@ -1,14 +1,14 @@
 // Minimal Service Worker to satisfy PWA installation requirements
-self.addEventListener('install', () => {
+self.addEventListener("install", () => {
     // console.log('Service Worker installing...');
     self.skipWaiting();
 });
 
-self.addEventListener('activate', () => {
+self.addEventListener("activate", () => {
     // console.log('Service Worker activating...');
 });
 
-self.addEventListener('fetch', (event) => {
+self.addEventListener("fetch", (event) => {
     // Skip cross-origin requests
     if (!event.request.url.startsWith(self.location.origin)) return;
 

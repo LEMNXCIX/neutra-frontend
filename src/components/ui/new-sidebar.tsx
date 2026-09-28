@@ -1,11 +1,11 @@
 "use client";
 
+import { PanelLeftIcon } from "lucide-react";
 import * as React from "react";
 import { use } from "react";
+import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { PanelLeftIcon } from "lucide-react";
 
 // Sidebar provider will sync a --sidebar-width CSS variable and
 // set data-sidebar-expanded on the <body> element so the root layout
@@ -122,22 +122,23 @@ export function Sidebar({ className, children, ...props }: SidebarProps) {
 
     if (isMobile) {
         return (
-<button
-      type="button"
-      tabIndex={-1}
-      className={cn(
-        "fixed inset-0 z-50 bg-background/80 backdrop-blur-sm",
-        openMobile
-        ? "opacity-100"
-        : "opacity-0 pointer-events-none",
-        "transition-opacity duration-300",
-      )}
-      onClick={() => setOpenMobile(false)}
-      onKeyDown={(e) => {
-        if (e.key === "Escape") setOpenMobile(false);
-      }}
-    >
+            <button
+                type="button"
+                tabIndex={-1}
+                className={cn(
+                    "fixed inset-0 z-50 bg-background/80 backdrop-blur-sm",
+                    openMobile
+                        ? "opacity-100"
+                        : "opacity-0 pointer-events-none",
+                    "transition-opacity duration-300",
+                )}
+                onClick={() => setOpenMobile(false)}
+                onKeyDown={(e) => {
+                    if (e.key === "Escape") setOpenMobile(false);
+                }}
+            >
                 <div
+                    role="none"
                     className={cn(
                         "fixed inset-y-0 left-0 z-40 w-64 bg-background border-r",
                         "transform transition-transform duration-300",
@@ -145,9 +146,9 @@ export function Sidebar({ className, children, ...props }: SidebarProps) {
                     )}
                     onClick={(e) => e.stopPropagation()}
                 >
-{children}
-      </div>
-    </button>
+                    {children}
+                </div>
+            </button>
         );
     }
 

@@ -1,23 +1,21 @@
 "use client";
-import { AdminStatCard as StatCard } from "@/components/admin/shared/AdminStatCard";
-
-
-import React, { Suspense, useReducer, useSyncExternalStore } from "react";
+import { Eye, Package, ShoppingCart, TrendingUp, Truck } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useReducer, useSyncExternalStore } from "react";
 import { toast } from "sonner";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import {
-    Table,
-    TableHeader,
-    TableHead,
-    TableRow,
-    TableCell,
-    TableBody,
-} from "@/components/ui/table";
+import { AdminStatCard as StatCard } from "@/components/admin/shared/AdminStatCard";
 import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+    Dialog,
+    DialogContent,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
     Select,
     SelectContent,
@@ -25,17 +23,17 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogFooter,
-} from "@/components/ui/dialog";
-import { Package, TrendingUp, ShoppingCart, Eye, Truck } from "lucide-react";
-import { Order, OrderStatus } from "@/types/order.types";
 import { Spinner } from "@/components/ui/spinner";
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table";
 import { cn } from "@/lib/utils";
+import type { Order, OrderStatus } from "@/types/order.types";
 
 const getStatusColor = (status: string) => {
     switch (status) {
@@ -76,7 +74,6 @@ type Props = {
     };
     initialStatuses?: { value: string; label: string }[];
 };
-
 
 function OrderDetailsDialog({
     order,
@@ -129,7 +126,10 @@ function OrderDetailsDialog({
                                 Fecha
                             </p>
                             <p className="font-medium">
-                                {new Date(order.createdAt).toLocaleString("es-ES", { timeZone: "UTC" })}
+                                {new Date(order.createdAt).toLocaleString(
+                                    "es-ES",
+                                    { timeZone: "UTC" },
+                                )}
                             </p>
                         </div>
                         <div>
@@ -195,7 +195,7 @@ function OrderDetailsDialog({
                                 onChange={(e) =>
                                     setEditingTracking(e.target.value)
                                 }
-                                placeholder="Ingresá el número de seguimiento..."
+                                placeholder="Ingresa el número de seguimiento..."
                             />
                             <Button
                                 onClick={() =>
@@ -213,7 +213,9 @@ function OrderDetailsDialog({
                     </div>
 
                     <div>
-                        <h3 className="font-semibold mb-2">Artículos del pedido</h3>
+                        <h3 className="font-semibold mb-2">
+                            Artículos del pedido
+                        </h3>
                         <div className="border rounded-lg overflow-hidden">
                             <Table>
                                 <TableHeader>
@@ -383,7 +385,9 @@ function OrdersFilters({
                             <SelectValue placeholder="Todos los Estados" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="all">Todos los estados</SelectItem>
+                            <SelectItem value="all">
+                                Todos los estados
+                            </SelectItem>
                             {statuses.map((s) => (
                                 <SelectItem key={s.value} value={s.value}>
                                     {s.label}
@@ -500,7 +504,8 @@ function OrdersDesktopTable({
                                                     variant="secondary"
                                                     className="text-[10px] font-bold bg-muted/50 border-none shadow-none"
                                                 >
-                                                    {o.items?.length || 0} ARTÍCULOS
+                                                    {o.items?.length || 0}{" "}
+                                                    ARTÍCULOS
                                                 </Badge>
                                             </TableCell>
                                             <TableCell className="font-bold text-sm text-foreground">
@@ -561,7 +566,8 @@ function OrdersDesktopTable({
                                             <TableCell className="text-muted-foreground font-semibold text-[10px]">
                                                 {new Date(
                                                     o.createdAt,
-                                                ).toLocaleDateString("es-ES", { timeZone: "UTC",
+                                                ).toLocaleDateString("es-ES", {
+                                                    timeZone: "UTC",
                                                     month: "short",
                                                     day: "numeric",
                                                     year: "numeric",
@@ -687,7 +693,8 @@ function OrdersMobileCards({
                                                     .toUpperCase()}
                                             </div>
                                             <CardTitle className="text-base font-bold">
-                                                {o.user?.name || "Cliente Invitado"}
+                                                {o.user?.name ||
+                                                    "Cliente Invitado"}
                                             </CardTitle>
                                         </div>
                                         <p className="text-xs font-medium text-muted-foreground pl-[52px]">
@@ -721,7 +728,9 @@ function OrdersMobileCards({
                                         <p className="font-medium text-sm">
                                             {new Date(
                                                 o.createdAt,
-                                            ).toLocaleDateString("es-ES", { timeZone: "UTC" })}
+                                            ).toLocaleDateString("es-ES", {
+                                                timeZone: "UTC",
+                                            })}
                                         </p>
                                     </div>
                                 </div>
@@ -730,7 +739,8 @@ function OrdersMobileCards({
                                         Seguimiento
                                     </p>
                                     <p className="text-xs font-mono font-medium truncate bg-muted/50 p-2 rounded-md border border-border/50">
-                                        {o.trackingNumber || "Sin información de seguimiento"}
+                                        {o.trackingNumber ||
+                                            "Sin información de seguimiento"}
                                     </p>
                                 </div>
                             </CardContent>
@@ -855,7 +865,9 @@ function OrdersTableClientInner({
 
             if (!res.ok) {
                 const error = await res.json();
-                toast.error(error.error || "Error al actualizar el seguimiento");
+                toast.error(
+                    error.error || "Error al actualizar el seguimiento",
+                );
                 return;
             }
 

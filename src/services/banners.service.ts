@@ -1,5 +1,9 @@
-import { api } from '@/lib/api-client';
-import { Banner, CreateBannerDTO, UpdateBannerDTO } from '@/types/banner.types';
+import { api } from "@/lib/api-client";
+import type {
+    Banner,
+    CreateBannerDTO,
+    UpdateBannerDTO,
+} from "@/types/banner.types";
 
 /**
  * Banners Service
@@ -10,7 +14,7 @@ export const bannersService = {
      * Get all banners
      */
     getAll: async (tenantId?: string): Promise<Banner[]> => {
-        const url = tenantId ? `/banners?tenantId=${tenantId}` : '/banners';
+        const url = tenantId ? `/banners?tenantId=${tenantId}` : "/banners";
         return api.get<Banner[]>(url);
     },
 
@@ -25,7 +29,7 @@ export const bannersService = {
      * Create new banner (requires authentication)
      */
     create: async (data: CreateBannerDTO): Promise<Banner> => {
-        return api.post<Banner>('/banners', data);
+        return api.post<Banner>("/banners", data);
     },
 
     /**
@@ -45,7 +49,12 @@ export const bannersService = {
     /**
      * Get banner statistics (requires authentication)
      */
-    getStats: async (): Promise<{ totalBanners: number; activeBanners: number }> => {
-        return api.get<{ totalBanners: number; activeBanners: number }>('/banners/stats');
+    getStats: async (): Promise<{
+        totalBanners: number;
+        activeBanners: number;
+    }> => {
+        return api.get<{ totalBanners: number; activeBanners: number }>(
+            "/banners/stats",
+        );
     },
 };

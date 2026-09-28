@@ -1,27 +1,37 @@
 "use client";
 
-import React, { useState } from "react";
+import {
+    AlertCircle,
+    ArrowLeft,
+    ArrowRight,
+    CheckCircle2,
+    Mail,
+} from "lucide-react";
 import Link from "next/link";
+import type React from "react";
+import { useState } from "react";
+import { toast } from "sonner";
+import { AuthBrandHeader } from "@/components/auth/AuthBrandHeader";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
     Card,
     CardContent,
     CardDescription,
+    CardFooter,
     CardHeader,
     CardTitle,
-    CardFooter,
 } from "@/components/ui/card";
-import { toast } from "sonner";
-import { authService } from "@/services/auth.service";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
-import { Mail, ArrowLeft, CheckCircle2, ArrowRight } from "lucide-react";
-import { AuthBrandHeader } from "@/components/auth/AuthBrandHeader";
+import { reportError } from "@/lib/error-reporting";
+import { authService } from "@/services/auth.service";
 
 export function ForgotPasswordPageClient() {
     const [email, setEmail] = useState("");
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
     const [submitted, setSubmitted] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -30,11 +40,20 @@ export function ForgotPasswordPageClient() {
 
         try {
             setLoading(true);
+            setError("");
             await authService.forgotPassword(email);
             setSubmitted(true);
             toast.success("Enlace enviado si la cuenta existe");
         } catch (error: any) {
-            toast.error(error?.message || "Algo salió mal");
+            setError(
+                reportError(
+                    error,
+                    "No pudimos enviar el enlace de recuperación.",
+                    {
+                        toast: false,
+                    },
+                ),
+            );
         } finally {
             setLoading(false);
         }
@@ -53,7 +72,8 @@ export function ForgotPasswordPageClient() {
                             Correo enviado
                         </CardTitle>
                         <CardDescription className="text-sm font-medium mt-1">
-                            Revisá tu bandeja de entrada para ver las instrucciones
+                            Revisa tu bandeja de entrada para ver las
+                            instrucciones
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="text-center px-8 pb-8 space-y-6">
@@ -62,7 +82,8 @@ export function ForgotPasswordPageClient() {
                             <span className="font-bold text-foreground">
                                 {email}
                             </span>
-                            . Si hay una cuenta asociada a esta dirección, recibirás las instrucciones en breve.
+                            . Si hay una cuenta asociada a esta dirección,
+                            recibirás las instrucciones en breve.
                         </p>
                         <Button
                             variant="outline"
@@ -92,7 +113,7 @@ export function ForgotPasswordPageClient() {
                 {/* Logo Section */}
                 <AuthBrandHeader
                     title="Recuperar cuenta"
-                    subtitle="Restablecé tus credenciales de seguridad"
+                    subtitle="Restablece tus credenciales de seguridad"
                 />
 
                 <Card className="t-card border-none shadow-2xl relative overflow-hidden">
@@ -102,7 +123,8 @@ export function ForgotPasswordPageClient() {
                             Restablecer contraseña
                         </CardTitle>
                         <CardDescription className="text-sm font-medium">
-                            Ingresá tu correo para recibir un enlace de recuperación
+                            Ingresa tu correo para recibir un enlace de
+                            recuperación
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="px-8 pb-8">
@@ -129,6 +151,15 @@ export function ForgotPasswordPageClient() {
                                     />
                                 </div>
                             </div>
+                            {error && (
+                                <Alert variant="destructive">
+                                    <AlertCircle
+                                        className="size-4"
+                                        aria-hidden="true"
+                                    />
+                                    <AlertDescription>{error}</AlertDescription>
+                                </Alert>
+                            )}
                             <Button
                                 type="submit"
                                 className="w-full h-12 text-sm font-bold shadow-lg shadow-primary/20 hover:-translate-y-0.5 transition-[color,background-color,border-color,box-shadow,opacity,transform] rounded-xl"

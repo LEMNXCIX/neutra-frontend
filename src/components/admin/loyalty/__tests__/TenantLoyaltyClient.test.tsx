@@ -1,7 +1,14 @@
 // @vitest-environment happy-dom
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+
+import {
+    fireEvent,
+    render,
+    screen,
+    waitFor,
+    within,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import "@testing-library/jest-dom/vitest";
 
 const mocks = vi.hoisted(() => ({
@@ -14,6 +21,21 @@ const mocks = vi.hoisted(() => ({
     endCampaign: vi.fn(),
     archiveCampaign: vi.fn(),
     deleteCampaign: vi.fn(),
+    toastSuccess: vi.fn(),
+    toastError: vi.fn(),
+    getAllProducts: vi.fn(),
+    getAllServices: vi.fn(),
+    getAllCategories: vi.fn(),
+}));
+
+// The save confirmation is a toast now that the dialog closes on success, and
+// sonner's Toaster is not part of this render, so the toast is asserted through
+// the mock rather than through screen text.
+vi.mock("sonner", () => ({
+    toast: {
+        success: mocks.toastSuccess,
+        error: mocks.toastError,
+    },
 }));
 
 vi.mock("@/hooks/useFeatures", () => ({
@@ -21,6 +43,16 @@ vi.mock("@/hooks/useFeatures", () => ({
         isFeatureEnabled: (feature: string) =>
             mocks.enabledFeatures.has(feature),
     }),
+}));
+
+vi.mock("@/services/products.service", () => ({
+    productsService: { getAll: mocks.getAllProducts },
+}));
+vi.mock("@/services/services.service", () => ({
+    servicesService: { getAll: mocks.getAllServices },
+}));
+vi.mock("@/services/categories.service", () => ({
+    categoriesService: { getAll: mocks.getAllCategories },
 }));
 
 vi.mock("@/services/loyalty.service", () => ({
@@ -119,6 +151,17 @@ const summary = {
 beforeEach(() => {
     vi.clearAllMocks();
     mocks.enabledFeatures = new Set(["LOYALTY", "COUPONS"]);
+    mocks.getAllProducts.mockResolvedValue([
+        { id: "product-1", name: "Lámpara Aurora" },
+        { id: "product-2", name: "Silla Roble" },
+    ]);
+    mocks.getAllServices.mockResolvedValue([
+        { id: "service-1", name: "Corte de pelo" },
+    ]);
+    mocks.getAllCategories.mockResolvedValue([
+        { id: "category-service-1", name: "Peluquería", type: "SERVICE" },
+        { id: "category-product-1", name: "Iluminación", type: "PRODUCT" },
+    ]);
     mocks.getAdminSummary.mockResolvedValue(summary);
     mocks.getAdminCampaigns.mockResolvedValue(campaigns);
     mocks.createCampaign.mockResolvedValue(draftCampaign);
@@ -158,12 +201,26 @@ describe("TenantLoyaltyClient", () => {
         expect(screen.getByText("Campaña finalizada")).toBeInTheDocument();
         expect(screen.getByText("Campaña archivada")).toBeInTheDocument();
         expect(screen.getByText("24")).toBeInTheDocument();
-        expect(screen.getByRole("button", { name: /Activar/ })).toBeInTheDocument();
-        expect(screen.getByRole("button", { name: /Editar borrador/ })).toBeInTheDocument();
-        expect(screen.getByRole("button", { name: /Eliminar/ })).toBeInTheDocument();
-        expect(screen.getByRole("button", { name: /Finalizar/ })).toBeInTheDocument();
-        expect(screen.getByRole("button", { name: /Archivar/ })).toBeInTheDocument();
-        expect(screen.getByText(/Fechas en UTC/)).toBeInTheDocument();
+        expect(
+            screen.getByRole("button", { name: /Activar/ }),
+        ).toBeInTheDocument();
+        expect(
+            screen.getByRole("button", { name: /Editar borrador/ }),
+        ).toBeInTheDocument();
+        expect(
+            screen.getByRole("button", { name: /Eliminar/ }),
+        ).toBeInTheDocument();
+        expect(
+            screen.getByRole("button", { name: /Finalizar/ }),
+        ).toBeInTheDocument();
+        expect(
+            screen.getByRole("button", { name: /Archivar/ }),
+        ).toBeInTheDocument();
+        // The form lives in a dialog now, so its fields are not on the page
+        // until it is opened. The entry point is the button.
+        expect(
+            screen.getByRole("button", { name: /Nueva campaña/ }),
+        ).toBeInTheDocument();
         expect(
             screen.queryByLabelText(/cupón de recompensa/i),
         ).not.toBeInTheDocument();
@@ -177,30 +234,47 @@ describe("TenantLoyaltyClient", () => {
         render(<TenantLoyaltyClient />);
         await screen.findByRole("heading", { name: "Borrador de prueba" });
 
+        // The form lives in a dialog, so it must be opened before any field
+        // can be reached.
+        await user.click(screen.getByRole("button", { name: /Nueva campaña/ }));
         fireEvent.change(screen.getByLabelText("Nombre"), {
             target: { value: "Campaña de gasto" },
         });
         fireEvent.change(screen.getByLabelText("Descripción de la campaña"), {
             target: { value: "Campaña de integración" },
         });
-        fireEvent.change(screen.getByLabelText("Origen"), {
-            target: { value: "BOOKING" },
-        });
+        // The source select is gone: a booking tenant implies BOOKING, so the
+        // form derives it instead of asking.
         fireEvent.change(screen.getByLabelText("Métrica"), {
             target: { value: "SPEND" },
         });
         fireEvent.change(screen.getByLabelText("Objetivo"), {
             target: { value: "150.50" },
         });
-        await user.type(screen.getByLabelText("Inicio"), "2030-01-01");
-        await user.type(screen.getByLabelText("Fin"), "2030-01-31");
         await user.type(
-            screen.getByLabelText("Reclamable hasta"),
-            "2030-02-15",
+            screen.getByLabelText("Inicio de la campaña"),
+            "2030-01-01",
         );
-        fireEvent.change(screen.getByLabelText("Validez de la recompensa (días)"), {
-            target: { value: "45" },
-        });
+        await user.type(
+            screen.getByLabelText("Fin de la campaña"),
+            "2030-01-31",
+        );
+        // claimUntil now follows endsAt plus the grace period, so the test
+        // drives the grace days instead of typing the derived date. 7 days of
+        // grace from 2030-01-31 is 2030-02-07.
+        fireEvent.change(
+            screen.getByLabelText("Días de prórroga para reclamar"),
+            { target: { value: "7" } },
+        );
+        expect(screen.getByLabelText("Reclamable hasta")).toHaveValue(
+            "2030-02-07",
+        );
+        fireEvent.change(
+            screen.getByLabelText("Validez de la recompensa (días)"),
+            {
+                target: { value: "45" },
+            },
+        );
         fireEvent.change(screen.getByLabelText("Límite de reclamos"), {
             target: { value: "100" },
         });
@@ -220,15 +294,19 @@ describe("TenantLoyaltyClient", () => {
         fireEvent.change(screen.getByLabelText("Descuento máximo"), {
             target: { value: "60" },
         });
-        fireEvent.change(screen.getByLabelText("IDs de productos"), {
-            target: { value: "product-1, product-2" },
-        });
-        fireEvent.change(screen.getByLabelText("IDs de categorías"), {
-            target: { value: "category-1 category-2" },
-        });
-        fireEvent.change(screen.getByLabelText("IDs de servicios"), {
-            target: { value: "service-1" },
-        });
+        // This tenant is BOOKING, so the products picker is not rendered at
+        // all; the applicable items are picked by name from a list.
+        expect(
+            screen.queryByText("Productos bonificados"),
+        ).not.toBeInTheDocument();
+        // Radix renders a button plus a hidden input, so a text match would
+        // find two nodes per checkbox. Role is the stable handle.
+        await user.click(
+            await screen.findByRole("checkbox", { name: "Corte de pelo" }),
+        );
+        await user.click(
+            await screen.findByRole("checkbox", { name: "Peluquería" }),
+        );
 
         const createButton = screen.getByRole("button", {
             name: "Crear borrador",
@@ -244,23 +322,28 @@ describe("TenantLoyaltyClient", () => {
             targetValue: "150.50",
             startsAt: "2030-01-01T00:00:00.000Z",
             endsAt: "2030-01-31T00:00:00.000Z",
-            claimUntil: "2030-02-15T00:00:00.000Z",
+            // Derived: endsAt plus the 7 grace days the test set above.
+            claimUntil: "2030-02-07T00:00:00.000Z",
             reward: {
                 type: "FIXED",
                 value: 25,
                 description: "Twenty five off",
                 minPurchaseAmount: 50,
                 maxDiscountAmount: 60,
-                applicableProducts: ["product-1", "product-2"],
-                applicableCategories: ["category-1", "category-2"],
+                // The BOOKING tenant offers no products, so the picker could
+                // only produce services and service categories.
+                applicableProducts: [],
+                applicableCategories: ["category-service-1"],
                 applicableServices: ["service-1"],
             },
             rewardValidDays: 45,
             maxClaims: 100,
         });
-        expect(
-            await screen.findByText("Campaña creada como borrador."),
-        ).toBeInTheDocument();
+        await waitFor(() =>
+            expect(mocks.toastSuccess).toHaveBeenCalledWith(
+                "Campaña creada como borrador.",
+            ),
+        );
     });
 
     it("updates an existing DRAFT campaign", async () => {
@@ -268,7 +351,9 @@ describe("TenantLoyaltyClient", () => {
         render(<TenantLoyaltyClient />);
         await screen.findByRole("heading", { name: "Borrador de prueba" });
 
-        await user.click(screen.getByRole("button", { name: /Editar borrador/ }));
+        await user.click(
+            screen.getByRole("button", { name: /Editar borrador/ }),
+        );
         fireEvent.change(screen.getByLabelText("Nombre"), {
             target: { value: "Borrador actualizado" },
         });
@@ -289,16 +374,22 @@ describe("TenantLoyaltyClient", () => {
                 }),
             }),
         );
-        expect(
-            await screen.findByText("Borrador actualizado correctamente."),
-        ).toBeInTheDocument();
+        // Success is a toast now: the dialog closes on save, so an inline
+        // message would never be seen.
+        await waitFor(() =>
+            expect(mocks.toastSuccess).toHaveBeenCalledWith(
+                "Borrador actualizado correctamente.",
+            ),
+        );
     });
 
     it("matches backend target precision and integer limits", async () => {
         const user = userEvent.setup();
         render(<TenantLoyaltyClient />);
         await screen.findByRole("heading", { name: "Borrador de prueba" });
-        await user.click(screen.getByRole("button", { name: /Editar borrador/ }));
+        await user.click(
+            screen.getByRole("button", { name: /Editar borrador/ }),
+        );
 
         const target = screen.getByLabelText("Objetivo");
         const metric = screen.getByLabelText("Métrica");
@@ -356,6 +447,17 @@ describe("TenantLoyaltyClient", () => {
         await screen.findByRole("heading", { name: "Borrador de prueba" });
 
         await user.click(screen.getByRole("button", { name: /Activar/ }));
+        const activationDialog = await screen.findByRole("alertdialog");
+        expect(
+            within(activationDialog).getByText("Activar campaña"),
+        ).toBeInTheDocument();
+        expect(
+            within(activationDialog).getByText(/Borrador de prueba/),
+        ).toBeInTheDocument();
+        expect(mocks.activateCampaign).not.toHaveBeenCalled();
+        await user.click(
+            within(activationDialog).getByRole("button", { name: "Activar" }),
+        );
         await waitFor(() =>
             expect(mocks.activateCampaign).toHaveBeenCalledWith("draft-1"),
         );
@@ -373,6 +475,20 @@ describe("TenantLoyaltyClient", () => {
         );
     });
 
+    it("does not activate when the confirmation is cancelled", async () => {
+        const user = userEvent.setup();
+        render(<TenantLoyaltyClient />);
+        await screen.findByRole("heading", { name: "Borrador de prueba" });
+
+        await user.click(screen.getByRole("button", { name: /Activar/ }));
+        const dialog = await screen.findByRole("alertdialog");
+        await user.click(
+            within(dialog).getByRole("button", { name: "Cancelar" }),
+        );
+
+        expect(mocks.activateCampaign).not.toHaveBeenCalled();
+    });
+
     it("shows a load error and retries summary and campaign requests", async () => {
         const user = userEvent.setup();
         mocks.getAdminSummary.mockRejectedValueOnce(new Error("network"));
@@ -386,7 +502,9 @@ describe("TenantLoyaltyClient", () => {
             ),
         ).toBeInTheDocument();
         await user.click(screen.getByRole("button", { name: "Reintentar" }));
-        await waitFor(() => expect(mocks.getAdminSummary).toHaveBeenCalledTimes(2));
+        await waitFor(() =>
+            expect(mocks.getAdminSummary).toHaveBeenCalledTimes(2),
+        );
         expect(
             await screen.findByRole("heading", { name: "Borrador de prueba" }),
         ).toBeInTheDocument();

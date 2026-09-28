@@ -1,7 +1,7 @@
-import React, { Suspense } from "react";
+import { Suspense } from "react";
 import BannersTableClient from "@/components/admin/banners/BannersTableClient";
+import { api } from "@/lib/api-client";
 import { validateAdminAccess } from "@/lib/server-auth";
-import { api } from '@/lib/api-client';
 
 export const metadata = { title: "Anuncios" };
 
@@ -60,7 +60,7 @@ async function getBanners() {
                 totalItems: 0,
                 itemsPerPage: 10,
             },
-            error: err.message || "Exception during banner fetch",
+            error: err.message || "Excepción al obtener los banners",
         };
     }
 }

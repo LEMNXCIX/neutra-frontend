@@ -3,30 +3,70 @@
  * Centralized, type-safe client for external backend communication
  */
 
-import { getBackendUrl } from './backend-url';
+import { headers as getRequestHeaders } from "next/headers";
+
+import { getBackendUrl } from "./backend-url";
 
 // ============================================================================
 // Configuration
 // ============================================================================
 
-const TOKEN_COOKIE_NAME = 'token';
+const TOKEN_COOKIE_NAME = "token";
 
 /**
- * Ensure URL has protocol prefix
+ * Header names whose values are credentials or session material. They are
+ * redacted before anything reaches a log sink.
  */
-const ensureProtocol = (url: string): string => {
-  return url.startsWith('http://') || url.startsWith('https://')
-    ? url
-    : `http://${url}`;
+const SENSITIVE_HEADERS = new Set(["cookie", "authorization", "set-cookie"]);
+
+/**
+ * Derive the public origin of the incoming request so the backend can build
+ * absolute links (receipts, password-reset URLs) against the tenant host rather
+ * than against its own internal address. Lives here, next to the tenant
+ * forwarding, so every BFF call carries it instead of only the routes that
+ * happened to remember getProxyHeaders.
+ */
+const resolveOriginalOrigin = (h: Headers): string | null => {
+    const origin = h.get("origin");
+    if (origin && origin !== "null") return origin;
+
+    const referer = h.get("referer");
+    if (referer) {
+        try {
+            return new URL(referer).origin;
+        } catch {
+            // Malformed referer: fall through to host-based reconstruction.
+        }
+    }
+
+    const host = h.get("host");
+    if (!host) return null;
+    const proto = h.get("x-forwarded-proto") || "http";
+    return `${proto}://${host}`;
 };
 
-const BASE_URL = ensureProtocol(getBackendUrl());
+/**
+ * Redact credential-bearing headers so request/response logging can never leak a
+ * JWT. Explicit opt-in via LOG_HEADERS is not enough of a guard on its own: a
+ * single log line is enough to persist a session in a log aggregator.
+ */
+const redactHeaders = (
+    headers: Record<string, string>,
+): Record<string, string> => {
+    const out: Record<string, string> = {};
+    for (const [key, value] of Object.entries(headers)) {
+        out[key] = SENSITIVE_HEADERS.has(key.toLowerCase())
+            ? "[redacted]"
+            : value;
+    }
+    return out;
+};
 
 // ============================================================================
 // Types
 // ============================================================================
 
-export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+export type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
 
 export interface ApiRequestConfig {
     method?: HttpMethod;
@@ -61,7 +101,7 @@ class BackendApiError extends Error implements ApiError {
 
     constructor(message: string, statusCode?: number, response?: ApiResponse) {
         super(message);
-        this.name = 'BackendApiError';
+        this.name = "BackendApiError";
         this.statusCode = statusCode;
         this.response = response;
     }
@@ -76,10 +116,10 @@ class BackendApiError extends Error implements ApiError {
  */
 async function request<T = unknown>(
     endpoint: string,
-    config: ApiRequestConfig = {}
+    config: ApiRequestConfig = {},
 ): Promise<ApiResponse<T>> {
     const {
-        method = 'GET',
+        method = "GET",
         body,
         headers = {},
         token,
@@ -89,47 +129,59 @@ async function request<T = unknown>(
     } = config;
 
     // Normalize endpoint
-    const normalizedEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
-    const url = `${BASE_URL}${normalizedEndpoint}`;
+    const normalizedEndpoint = endpoint.startsWith("/")
+        ? endpoint
+        : `/${endpoint}`;
+    const url = `${getBackendUrl()}${normalizedEndpoint}`;
 
-    if (typeof window === 'undefined') {
+    if (typeof window === "undefined") {
         console.log(`[BackendApi] ${method} ${url}`);
     }
 
     // Build headers
     const requestHeaders: Record<string, string> = {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         ...headers,
     };
 
-    // Add authentication cookie if token provided
-    if (token) {
-        requestHeaders['Cookie'] = `${TOKEN_COOKIE_NAME}=${token}`;
-    }
-
-    // Forward Tenant Headers from Server Context
-    // Only works in Server components/Server actions/API routes
-    if (typeof window === 'undefined') {
+    // Forward the incoming cookie jar. The backend authenticates from the
+    // `token` cookie, and other cookies in the jar (tenant slug, refresh token)
+    // are equally part of the caller's session. Rebuilding `Cookie: token=<jwt>`
+    // silently dropped them, which is the root cause of the admin logout path
+    // being rejected before it reached the backend.
+    let forwardedCookieJar = false;
+    if (typeof window === "undefined") {
         try {
-            const { headers: nextHeaders } = require('next/headers');
+            // headers() is a promise in Next.js 15+. It throws outside a request
+            // scope, which the catch handles for static generation and tests.
+            const h = await getRequestHeaders();
+            const cookie = h?.get("cookie");
 
-            // In Next.js 15, headers() returns a Promise. 
-            // We must await it before calling .get()
-            const h = await nextHeaders();
+            if (cookie) {
+                requestHeaders.Cookie = cookie;
+                forwardedCookieJar = true;
+            }
 
             if (h) {
-                const tenantId = h.get('x-tenant-id');
-                const tenantSlug = h.get('x-tenant-slug');
+                const tenantId = h.get("x-tenant-id");
+                const tenantSlug = h.get("x-tenant-slug");
 
                 // Prioritize slug for better resolution reliability
                 if (tenantSlug) {
-                    requestHeaders['x-tenant-slug'] = tenantSlug;
+                    requestHeaders["x-tenant-slug"] = tenantSlug;
                 }
 
                 // Only forward x-tenant-id if it exists AND is not the known default ID that causes conflicts
-                const defaultTenantId = process.env.NEXT_PUBLIC_DEFAULT_TENANT || 'default-tenant-00000000-0000-0000-0000-000000000001';
+                const defaultTenantId =
+                    process.env.NEXT_PUBLIC_DEFAULT_TENANT ||
+                    "default-tenant-00000000-0000-0000-0000-000000000001";
                 if (tenantId && tenantId !== defaultTenantId) {
-                    requestHeaders['x-tenant-id'] = tenantId;
+                    requestHeaders["x-tenant-id"] = tenantId;
+                }
+
+                const originalOrigin = resolveOriginalOrigin(h);
+                if (originalOrigin) {
+                    requestHeaders["x-original-origin"] = originalOrigin;
                 }
             }
         } catch (_e) {
@@ -137,21 +189,34 @@ async function request<T = unknown>(
         }
     }
 
+    // No incoming jar (e.g. a server-side call outside a request scope): send the
+    // bare token so the call is still authenticated. Logged, because a request
+    // that authenticates differently from the rest deserves to be visible.
+    if (token && !forwardedCookieJar) {
+        requestHeaders.Cookie = `${TOKEN_COOKIE_NAME}=${token}`;
+        console.warn(
+            "[BackendApi] No incoming cookie jar; sending token-only Cookie header.",
+        );
+    }
+
     // Build fetch options
     const fetchOptions: RequestInit = {
         method,
         headers: requestHeaders,
-        credentials: 'include',
-        cache: cache || 'no-store',
+        credentials: "include",
+        cache: cache || "no-store",
         next,
     };
 
-    if (typeof window === 'undefined') {
-        console.log(`[BackendApi] Headers:`, JSON.stringify(requestHeaders, null, 2));
+    if (typeof window === "undefined" && process.env.LOG_HEADERS === "true") {
+        console.log(
+            `[BackendApi] Headers:`,
+            JSON.stringify(redactHeaders(requestHeaders), null, 2),
+        );
     }
 
     // Add body for mutation requests
-    if (body && ['POST', 'PUT', 'PATCH'].includes(method)) {
+    if (body && ["POST", "PUT", "PATCH"].includes(method)) {
         fetchOptions.body = JSON.stringify(body);
     }
 
@@ -177,7 +242,10 @@ async function request<T = unknown>(
 
         // Handle error responses
         if (!response.ok) {
-            const errorMessage = data.error || data.message || `Request failed with status ${response.status}`;
+            const errorMessage =
+                data.error ||
+                data.message ||
+                `Request failed with status ${response.status}`;
             throw new BackendApiError(errorMessage, response.status, {
                 success: false,
                 error: errorMessage,
@@ -186,8 +254,10 @@ async function request<T = unknown>(
             });
         }
 
-        if (typeof window === 'undefined') {
-            console.log(`[BackendApi] Response: ${response.status} ${response.statusText}`);
+        if (typeof window === "undefined") {
+            console.log(
+                `[BackendApi] Response: ${response.status} ${response.statusText}`,
+            );
         }
 
         return {
@@ -196,7 +266,7 @@ async function request<T = unknown>(
             ...data,
         };
     } catch (error) {
-        if (typeof window === 'undefined') {
+        if (typeof window === "undefined") {
             console.error(`[BackendApi] ERROR:`, error);
         }
         clearTimeout(timeoutId);
@@ -207,20 +277,19 @@ async function request<T = unknown>(
         }
 
         // Handle abort/timeout
-        if (error instanceof Error && error.name === 'AbortError') {
-            throw new BackendApiError('Request timeout', 408);
+        if (error instanceof Error && error.name === "AbortError") {
+            throw new BackendApiError("Request timeout", 408);
         }
 
         // Handle network errors
         if (error instanceof Error) {
-            throw new BackendApiError(
-                `Network error: ${error.message}`,
-                0,
-                { success: false, error: error.message }
-            );
+            throw new BackendApiError(`Network error: ${error.message}`, 0, {
+                success: false,
+                error: error.message,
+            });
         }
 
-        throw new BackendApiError('Unknown error occurred');
+        throw new BackendApiError("Ocurrió un error desconocido");
     }
 }
 
@@ -234,9 +303,9 @@ async function request<T = unknown>(
 export const get = <T = unknown>(
     endpoint: string,
     token?: string,
-    headers?: Record<string, string>
+    headers?: Record<string, string>,
 ): Promise<ApiResponse<T>> => {
-    return request<T>(endpoint, { method: 'GET', token, headers });
+    return request<T>(endpoint, { method: "GET", token, headers });
 };
 
 /**
@@ -246,9 +315,9 @@ export const post = <T = unknown>(
     endpoint: string,
     body: unknown,
     token?: string,
-    headers?: Record<string, string>
+    headers?: Record<string, string>,
 ): Promise<ApiResponse<T>> => {
-    return request<T>(endpoint, { method: 'POST', body, token, headers });
+    return request<T>(endpoint, { method: "POST", body, token, headers });
 };
 
 /**
@@ -258,9 +327,9 @@ export const put = <T = unknown>(
     endpoint: string,
     body: unknown,
     token?: string,
-    headers?: Record<string, string>
+    headers?: Record<string, string>,
 ): Promise<ApiResponse<T>> => {
-    return request<T>(endpoint, { method: 'PUT', body, token, headers });
+    return request<T>(endpoint, { method: "PUT", body, token, headers });
 };
 
 /**
@@ -270,9 +339,9 @@ export const patch = <T = unknown>(
     endpoint: string,
     body: unknown,
     token?: string,
-    headers?: Record<string, string>
+    headers?: Record<string, string>,
 ): Promise<ApiResponse<T>> => {
-    return request<T>(endpoint, { method: 'PATCH', body, token, headers });
+    return request<T>(endpoint, { method: "PATCH", body, token, headers });
 };
 
 /**
@@ -281,9 +350,9 @@ export const patch = <T = unknown>(
 export const del = <T = unknown>(
     endpoint: string,
     token?: string,
-    headers?: Record<string, string>
+    headers?: Record<string, string>,
 ): Promise<ApiResponse<T>> => {
-    return request<T>(endpoint, { method: 'DELETE', token, headers });
+    return request<T>(endpoint, { method: "DELETE", token, headers });
 };
 
 // ============================================================================
@@ -299,7 +368,7 @@ export const backendDelete = del;
 export type BackendResponse<T = unknown> = ApiResponse<T>;
 export type BackendFetchOptions = ApiRequestConfig;
 
-export { getBackendUrl } from './backend-url';
+export { getBackendUrl } from "./backend-url";
 
 // ============================================================================
 // Default Export (API Client Object)

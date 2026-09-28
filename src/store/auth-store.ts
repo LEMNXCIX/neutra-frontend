@@ -1,8 +1,9 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import { authService } from '@/services/auth.service';
-import { ApiError } from '@/lib/api-client';
-import { User as APIUser } from '@/types/frontend-api';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import { ApiError } from "@/lib/api-client";
+import { reportError } from "@/lib/error-reporting";
+import { authService } from "@/services/auth.service";
+import type { User as APIUser } from "@/types/frontend-api";
 
 type User = {
     id: string;
@@ -22,7 +23,14 @@ type AuthState = {
     register: (name: string, email: string, password: string) => Promise<void>;
     logout: () => Promise<void>;
     checkSession: () => Promise<void>;
-    updateUser: (userData: Partial<{ name: string; email: string; avatar: string; isAdmin: boolean }>) => void;
+    updateUser: (
+        userData: Partial<{
+            name: string;
+            email: string;
+            avatar: string;
+            isAdmin: boolean;
+        }>,
+    ) => void;
     clearError: () => void;
 };
 
@@ -34,7 +42,10 @@ function mapAPIUserToStoreUser(apiUser: APIUser): User {
         id: apiUser.id,
         name: apiUser.name,
         email: apiUser.email,
-        isAdmin: apiUser.role?.name === 'SUPER_ADMIN' || apiUser.role?.name === 'ADMIN' || false,
+        isAdmin:
+            apiUser.role?.name === "SUPER_ADMIN" ||
+            apiUser.role?.name === "ADMIN" ||
+            false,
         roleName: apiUser.role?.name,
         avatar: apiUser.profilePic || undefined,
         roleId: apiUser.roleId,
@@ -51,16 +62,22 @@ export const useAuthStore = create<AuthState>()(
             login: async (email, password) => {
                 set({ loading: true, error: null });
                 try {
-                    const apiUser = await authService.login({ email, password });
+                    const apiUser = await authService.login({
+                        email,
+                        password,
+                    });
 
                     const user = mapAPIUserToStoreUser(apiUser);
 
                     set({ user, loading: false });
                 } catch (err) {
-                    const errorMessage = err instanceof ApiError
-                        ? err.message
-                        : 'Login failed. Please try again.';
-                    set({ loading: false, error: errorMessage });
+                    set({
+                        loading: false,
+                        error: reportError(
+                            err,
+                            "No pudimos iniciar sesión. Intentá de nuevo.",
+                        ),
+                    });
                     throw err;
                 }
             },
@@ -68,14 +85,21 @@ export const useAuthStore = create<AuthState>()(
             register: async (name, email, password) => {
                 set({ loading: true, error: null });
                 try {
-                    const apiUser = await authService.signup({ name, email, password });
+                    const apiUser = await authService.signup({
+                        name,
+                        email,
+                        password,
+                    });
                     const user = mapAPIUserToStoreUser(apiUser);
                     set({ user, loading: false });
                 } catch (err) {
-                    const errorMessage = err instanceof ApiError
-                        ? err.message
-                        : 'Registration failed. Please try again.';
-                    set({ loading: false, error: errorMessage });
+                    set({
+                        loading: false,
+                        error: reportError(
+                            err,
+                            "No pudimos crear tu cuenta. Intentá de nuevo.",
+                        ),
+                    });
                     throw err;
                 }
             },
@@ -86,7 +110,7 @@ export const useAuthStore = create<AuthState>()(
                     await authService.logout();
                 } catch (err) {
                     // Log but don't block logout on client
-                    console.error('Logout API call failed:', err);
+                    console.error("Logout API call failed:", err);
                 } finally {
                     set({ user: null, loading: false });
                 }
@@ -117,7 +141,7 @@ export const useAuthStore = create<AuthState>()(
                         user: {
                             ...state.user,
                             ...userData,
-                        }
+                        },
                     };
                 });
             },
@@ -127,11 +151,11 @@ export const useAuthStore = create<AuthState>()(
             },
         }),
         {
-            name: 'auth-storage',
+            name: "auth-storage",
             // Never persist session data (user/role): it is spoofable and
             // goes stale. The session is restored from the HttpOnly cookie
             // via checkSession() on boot.
             partialize: (state) => ({ error: state.error }),
-        }
-    )
+        },
+    ),
 );

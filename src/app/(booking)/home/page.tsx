@@ -1,14 +1,13 @@
-import React from "react";
-import Link from "next/link";
 import { ArrowRight, CalendarDays } from "lucide-react";
+import type { Metadata } from "next";
+import Link from "next/link";
+import { BookingBanners } from "@/components/booking/booking-banners";
+import { ServicesGrid } from "@/components/booking/services-grid";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ServicesGrid } from "@/components/booking/services-grid";
-import { BookingBanners } from "@/components/booking/booking-banners";
 import { api } from "@/lib/api-client";
-import { getHomeContent } from "@/lib/strapi";
 import { getTenantNameFromHeaders } from "@/lib/server-theme";
-import type { Metadata } from "next";
+import { getHomeContent } from "@/lib/strapi";
 
 export const metadata: Metadata = {
     title: "Inicio",
@@ -53,7 +52,10 @@ export default async function BookingHomePage() {
             <section className="relative overflow-hidden py-24 md:py-32">
                 <div className="absolute inset-0 bg-gradient-to-b from-muted/20 via-transparent to-transparent" />
                 <div className="relative max-w-5xl mx-auto px-6 text-center space-y-8">
-                    <Badge variant="secondary" className="px-4 py-1 rounded-full">
+                    <Badge
+                        variant="secondary"
+                        className="px-4 py-1 rounded-full"
+                    >
                         {brandName}
                     </Badge>
                     <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-foreground leading-[1.1]">
@@ -64,7 +66,7 @@ export default async function BookingHomePage() {
                     </h1>
                     <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed font-medium">
                         {cms?.bookingHeroSubtitle ??
-                            "Reservá servicios profesionales de forma simple y online. Elegí un servicio, seleccioná un horario y listo."}
+                            "Reserva servicios profesionales de forma simple y online. Elige un servicio, selecciona un horario y listo."}
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                         <Button
@@ -102,7 +104,10 @@ export default async function BookingHomePage() {
                         <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-3 text-foreground">
                             {cms?.servicesTitle ?? (
                                 <>
-                                    Nuestros <span className="text-primary">servicios</span>
+                                    Nuestros{" "}
+                                    <span className="text-primary">
+                                        servicios
+                                    </span>
                                 </>
                             )}
                         </h2>

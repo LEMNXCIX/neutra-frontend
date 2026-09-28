@@ -1,4 +1,3 @@
-import React from "react";
 import ProductGrid from "./product-grid";
 
 type Product = {

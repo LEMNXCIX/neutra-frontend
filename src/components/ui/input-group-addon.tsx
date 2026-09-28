@@ -1,7 +1,7 @@
 "use client";
 
-import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
+import type * as React from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -27,14 +27,15 @@ const inputGroupAddonVariants = cva(
 );
 
 function InputGroupAddon({
-  className,
-  align = "inline-start",
-  ...props
-}: React.ComponentProps<"button"> & VariantProps<typeof inputGroupAddonVariants>) {
-  return (
-    <button
-      type="button"
-      data-slot="input-group-addon"
+    className,
+    align = "inline-start",
+    ...props
+}: React.ComponentProps<"button"> &
+    VariantProps<typeof inputGroupAddonVariants>) {
+    return (
+        <button
+            type="button"
+            data-slot="input-group-addon"
             data-align={align}
             className={cn(inputGroupAddonVariants({ align }), className)}
             onClick={(e) => {

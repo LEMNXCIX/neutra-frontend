@@ -1,19 +1,19 @@
-import React from "react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import { MapPin, ArrowRight } from "lucide-react";
-import Link from "next/link";
-import { getCmsPage } from "@/lib/strapi";
-import { cmsHeader } from "@/lib/cms-page";
+import { ArrowRight, MapPin } from "lucide-react";
 import type { Metadata } from "next";
+import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { cmsHeader } from "@/lib/cms-page";
+import { getCmsPage } from "@/lib/strapi";
 
 export async function generateMetadata(): Promise<Metadata> {
     const cms = await getCmsPage("careers-pages");
     return {
-        title: cms?.title ?? "Trabajá con Nosotros",
+        title: cms?.title ?? "Trabaja con Nosotros",
         description:
-            cms?.subtitle ?? "Sumate al equipo y explorá oportunidades profesionales",
+            cms?.subtitle ??
+            "Súmate al equipo y explora oportunidades profesionales",
     };
 }
 
@@ -21,12 +21,12 @@ const DEFAULT_JOBS = [
     {
         title: "Arquitecto Senior de Diseño",
         location: "Global / Remoto",
-        desc: "Liderá el diseño espacial de nuestra próxima colección de productos.",
+        desc: "Lidera el diseño espacial de nuestra próxima colección de productos.",
     },
     {
         title: "Controller de Operaciones",
         location: "Hub de Nueva York",
-        desc: "Optimizá el flujo logístico y la integridad de la cadena de suministro en toda la red.",
+        desc: "Optimiza el flujo logístico y la integridad de la cadena de suministro en toda la red.",
     },
 ];
 
@@ -34,7 +34,7 @@ export default async function CareersPage() {
     const cms = await getCmsPage("careers-pages");
     const header = cmsHeader(cms, {
         badge: "Recursos Humanos",
-        title: "Unite a Nuestra",
+        title: "Únete a Nuestra",
         highlight: "Red",
         subtitle:
             "Estamos construyendo un nuevo paradigma para entornos minimalistas y buscamos talento especializado para sumar a nuestro equipo.",
@@ -110,7 +110,7 @@ export default async function CareersPage() {
 
                     <div className="pt-12 text-center space-y-4">
                         <p className="text-muted-foreground font-semibold uppercase tracking-widest text-xs">
-                            ¿No encontrás una vacancia para vos?
+                            ¿No encuentras una vacancia para ti?
                         </p>
                         <a
                             href="mailto:careers@xcix.com"

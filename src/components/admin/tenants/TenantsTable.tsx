@@ -1,38 +1,33 @@
 "use client";
 
-import React, {
-    useReducer,
-    useEffect,
+import { format } from "date-fns";
+import {
+    Building,
+    Edit,
+    Plus,
+    RefreshCw,
+    Search,
+    Settings,
+    Trash2,
+} from "lucide-react";
+import {
     useCallback,
+    useEffect,
+    useReducer,
     useSyncExternalStore,
 } from "react";
-import { Tenant } from "@/types/tenant";
-import { tenantService } from "@/services/tenant.service";
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableRow,
-} from "@/components/ui/table";
+import { toast } from "sonner";
+import { AdminTableHeader } from "@/components/admin/shared/AdminTableHeader";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-    Edit,
-    Trash2,
-    Plus,
-    Building,
-    Search,
-    RefreshCw,
-    Settings,
-} from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
+import { useConfirm } from "@/hooks/use-confirm";
+import { tenantService } from "@/services/tenant.service";
+import type { Tenant } from "@/types/tenant";
 import { TenantDialog } from "./TenantDialog";
 import { TenantFeaturesDialog } from "./TenantFeaturesDialog";
-import { toast } from "sonner";
-import { Badge } from "@/components/ui/badge";
-import { format } from "date-fns";
-import { useConfirm } from "@/hooks/use-confirm";
-import { AdminTableHeader } from "@/components/admin/shared/AdminTableHeader";
 
 const EMPTY_TENANTS: Tenant[] = [];
 const EMPTY_PLATFORM_FEATURES: any[] = [];
@@ -80,7 +75,8 @@ function TenantRow({
                 <div className="flex justify-end gap-2">
                     <Button
                         variant="ghost"
-                        size="icon" aria-label="Gestionar funciones"
+                        size="icon"
+                        aria-label="Gestionar funciones"
                         onClick={() => onFeatures(tenant)}
                         title="Gestionar Funciones"
                     >
@@ -88,14 +84,16 @@ function TenantRow({
                     </Button>
                     <Button
                         variant="ghost"
-                        size="icon" aria-label="Editar tenant"
+                        size="icon"
+                        aria-label="Editar tenant"
                         onClick={() => onEdit(tenant)}
                     >
                         <Edit className="size-4" />
                     </Button>
                     <Button
                         variant="ghost"
-                        size="icon" aria-label="Eliminar tenant"
+                        size="icon"
+                        aria-label="Eliminar tenant"
                         onClick={() => onDelete(tenant)}
                         className="text-destructive hover:text-destructive"
                     >
@@ -131,7 +129,8 @@ function TenantCard({
                     <div className="flex gap-2">
                         <Button
                             variant="ghost"
-                            size="icon" aria-label="Gestionar funciones"
+                            size="icon"
+                            aria-label="Gestionar funciones"
                             onClick={() => onFeatures(tenant)}
                             title="Gestionar Funciones"
                         >
@@ -139,14 +138,16 @@ function TenantCard({
                         </Button>
                         <Button
                             variant="ghost"
-                            size="icon" aria-label="Editar tenant"
+                            size="icon"
+                            aria-label="Editar tenant"
                             onClick={() => onEdit(tenant)}
                         >
                             <Edit className="size-4" />
                         </Button>
                         <Button
                             variant="ghost"
-                            size="icon" aria-label="Eliminar tenant"
+                            size="icon"
+                            aria-label="Eliminar tenant"
                             onClick={() => onDelete(tenant)}
                             className="text-destructive hover:text-destructive"
                         >
@@ -277,7 +278,7 @@ export function TenantsTable({
     const handleDelete = async (tenant: Tenant) => {
         const confirmed = await confirm({
             title: "Eliminar Tenant",
-            description: `Are you sure you want to delete "${tenant.name}"? This action cannot be undone and will remove all data associated with this tenant.`,
+            description: `¿Estás seguro de que quieres eliminar "${tenant.name}"? Esta acción no se puede deshacer y eliminará todos los datos asociados a este tenant.`,
             confirmText: "Eliminar",
             cancelText: "Cancelar",
         });
@@ -305,7 +306,7 @@ export function TenantsTable({
                 </h2>
                 <Button onClick={openCreate}>
                     <Plus className="size-4 mr-2" />
-                    New Tenant
+                    Nuevo tenant
                 </Button>
             </div>
 
@@ -328,7 +329,8 @@ export function TenantsTable({
                         </div>
                         <Button
                             variant="outline"
-                            size="icon" aria-label="Actualizar tenants"
+                            size="icon"
+                            aria-label="Actualizar tenants"
                             onClick={loadTenants}
                         >
                             <RefreshCw
@@ -342,7 +344,7 @@ export function TenantsTable({
                         <Table>
                             <AdminTableHeader
                                 columns={[
-                                    { label: "Name" },
+                                    { label: "Nombre" },
                                     { label: "Slug" },
                                     { label: "Type" },
                                     { label: "Created" },
@@ -355,7 +357,7 @@ export function TenantsTable({
                                             colSpan={5}
                                             className="text-center py-8"
                                         >
-                                            Loading…
+                                            Cargando…
                                         </TableCell>
                                     </TableRow>
                                 ) : filteredTenants.length === 0 ? (
@@ -364,7 +366,7 @@ export function TenantsTable({
                                             colSpan={5}
                                             className="text-center py-8 text-muted-foreground"
                                         >
-                                            No tenants found
+                                            No se encontraron tenants
                                         </TableCell>
                                     </TableRow>
                                 ) : (
@@ -385,10 +387,10 @@ export function TenantsTable({
                     {/* Mobile Card View */}
                     <div className="md:hidden space-y-4">
                         {state.loading && state.tenants.length === 0 ? (
-                            <div className="text-center py-8">Loading…</div>
+                            <div className="text-center py-8">Cargando…</div>
                         ) : filteredTenants.length === 0 ? (
                             <div className="text-center py-8 text-muted-foreground">
-                                No tenants found
+                                No se encontraron tenants
                             </div>
                         ) : (
                             filteredTenants.map((tenant) => (

@@ -1,7 +1,7 @@
-import React, { Suspense } from "react";
+import { Suspense } from "react";
 import RolesTableClient from "@/components/admin/roles/RolesTableClient";
-import { Permission } from "@/types/permission.types";
-import { api } from '@/lib/api-client';
+import { api } from "@/lib/api-client";
+import type { Permission } from "@/types/permission.types";
 
 export const dynamic = "force-dynamic";
 
@@ -23,13 +23,23 @@ async function getRolesAndPermissions(
         if (permissionSearch) permQuery.set("search", permissionSearch);
         const [rolesResult, permissionsResult] = await Promise.all([
             api.get<any>(`/roles?${roleQuery.toString()}`).catch(() => ({})),
-            api.get<any>(`/permissions?${permQuery.toString()}`).catch(() => ({})),
+            api
+                .get<any>(`/permissions?${permQuery.toString()}`)
+                .catch(() => ({})),
         ]);
         const allRoles = Array.isArray(rolesResult) ? rolesResult : [];
-        const allPermissions: Permission[] = Array.isArray(permissionsResult) ? permissionsResult : [];
+        const allPermissions: Permission[] = Array.isArray(permissionsResult)
+            ? permissionsResult
+            : [];
 
-        const roles = allRoles.slice((rolePage - 1) * PER_PAGE, rolePage * PER_PAGE);
-        const permissions = allPermissions.slice((permissionPage - 1) * PER_PAGE, permissionPage * PER_PAGE);
+        const roles = allRoles.slice(
+            (rolePage - 1) * PER_PAGE,
+            rolePage * PER_PAGE,
+        );
+        const permissions = allPermissions.slice(
+            (permissionPage - 1) * PER_PAGE,
+            permissionPage * PER_PAGE,
+        );
 
         const buildPagination = (total: number, page: number) => ({
             currentPage: page,
@@ -47,7 +57,10 @@ async function getRolesAndPermissions(
                 totalPermissions: allPermissions.length,
             },
             rolePagination: buildPagination(allRoles.length, rolePage),
-            permissionPagination: buildPagination(allPermissions.length, permissionPage),
+            permissionPagination: buildPagination(
+                allPermissions.length,
+                permissionPage,
+            ),
         };
     } catch (err) {
         console.error("Error fetching roles and permissions:", err);
@@ -85,11 +98,11 @@ export default async function RolesPage({ searchParams }: Props) {
     const resolvedSearchParams = await searchParams;
     const rolePage =
         typeof resolvedSearchParams.rolePage === "string"
-            ? parseInt(resolvedSearchParams.rolePage)
+            ? parseInt(resolvedSearchParams.rolePage, 10)
             : 1;
     const permissionPage =
         typeof resolvedSearchParams.permissionPage === "string"
-            ? parseInt(resolvedSearchParams.permissionPage)
+            ? parseInt(resolvedSearchParams.permissionPage, 10)
             : 1;
     const roleSearch =
         typeof resolvedSearchParams.roleSearch === "string"

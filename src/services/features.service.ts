@@ -1,4 +1,4 @@
-import { api } from '@/lib/api-client';
+import { api } from "@/lib/api-client";
 
 export interface PlatformFeature {
     id: string;
@@ -20,7 +20,7 @@ export interface CreateFeatureData {
 
 export const featuresService = {
     getAll: async (): Promise<PlatformFeature[]> => {
-        return api.get<PlatformFeature[]>('/features');
+        return api.get<PlatformFeature[]>("/features");
     },
 
     getById: async (id: string): Promise<PlatformFeature> => {
@@ -28,10 +28,13 @@ export const featuresService = {
     },
 
     create: async (data: CreateFeatureData): Promise<PlatformFeature> => {
-        return api.post<PlatformFeature>('/features', data);
+        return api.post<PlatformFeature>("/features", data);
     },
 
-    update: async (id: string, data: Partial<CreateFeatureData>): Promise<PlatformFeature> => {
+    update: async (
+        id: string,
+        data: Partial<CreateFeatureData>,
+    ): Promise<PlatformFeature> => {
         return api.put<PlatformFeature>(`/features/${id}`, data);
     },
 

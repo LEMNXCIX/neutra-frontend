@@ -1,10 +1,10 @@
-import { api } from '@/lib/api-client';
-import {
+import { api } from "@/lib/api-client";
+import type {
     Coupon,
+    CouponValidationResult,
     CreateCouponDTO,
     UpdateCouponDTO,
-    CouponValidationResult
-} from '@/types/coupon.types';
+} from "@/types/coupon.types";
 
 /**
  * Coupons Service
@@ -15,7 +15,7 @@ export const couponsService = {
      * Get all coupons
      */
     getAll: async (tenantId?: string): Promise<Coupon[]> => {
-        const url = tenantId ? `/coupons?tenantId=${tenantId}` : '/coupons';
+        const url = tenantId ? `/coupons?tenantId=${tenantId}` : "/coupons";
         return api.get<Coupon[]>(url);
     },
 
@@ -29,13 +29,19 @@ export const couponsService = {
     /**
      * Validate coupon
      */
-    validate: async (code: string, orderTotal: number, productIds?: string[], categoryIds?: string[], serviceIds?: string[]): Promise<CouponValidationResult> => {
-        return api.post<CouponValidationResult>('/coupons/validate', {
+    validate: async (
+        code: string,
+        orderTotal: number,
+        productIds?: string[],
+        categoryIds?: string[],
+        serviceIds?: string[],
+    ): Promise<CouponValidationResult> => {
+        return api.post<CouponValidationResult>("/coupons/validate", {
             code,
             orderTotal,
             productIds,
             categoryIds,
-            serviceIds
+            serviceIds,
         });
     },
 
@@ -43,7 +49,7 @@ export const couponsService = {
      * Create new coupon (requires authentication)
      */
     create: async (data: CreateCouponDTO): Promise<Coupon> => {
-        return api.post<Coupon>('/coupons', data);
+        return api.post<Coupon>("/coupons", data);
     },
 
     /**
@@ -63,7 +69,15 @@ export const couponsService = {
     /**
      * Get coupon statistics (requires authentication)
      */
-    getStats: async (): Promise<{ totalCoupons: number; activeCoupons: number; usedCoupons: number }> => {
-        return api.get<{ totalCoupons: number; activeCoupons: number; usedCoupons: number }>('/coupons/stats');
+    getStats: async (): Promise<{
+        totalCoupons: number;
+        activeCoupons: number;
+        usedCoupons: number;
+    }> => {
+        return api.get<{
+            totalCoupons: number;
+            activeCoupons: number;
+            usedCoupons: number;
+        }>("/coupons/stats");
     },
 };

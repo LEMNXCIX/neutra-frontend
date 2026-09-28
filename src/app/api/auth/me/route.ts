@@ -1,36 +1,30 @@
-import { readJsonResponse } from "@/lib/response";
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
+import { getBackendUrl } from "@/lib/backend-url";
 import { getProxyHeaders } from "@/lib/proxy";
-
-const getBackendUrl = () => {
-  const url = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4001/api";
-  return url.endsWith('/api') ? url : `${url}/api`;
-};
-
-const BACKEND_API_URL = getBackendUrl();
+import { readJsonResponse } from "@/lib/response";
 
 /**
  * GET /api/auth/me
  * Proxy to backend API to get current user
  */
 export async function GET(req: NextRequest) {
-  try {
-    const backendUrl = `${BACKEND_API_URL}/auth/validate`;
+    try {
+        const backendUrl = `${getBackendUrl()}/auth/validate`;
 
-    const response = await fetch(backendUrl, {
-      method: "GET",
-      headers: getProxyHeaders(req),
-      cache: "no-store",
-    });
+        const response = await fetch(backendUrl, {
+            method: "GET",
+            headers: getProxyHeaders(req),
+            cache: "no-store",
+        });
 
-    const data = await readJsonResponse(response);
+        const data = await readJsonResponse(response);
 
-    return NextResponse.json(data, { status: response.status });
-  } catch (error) {
-    console.error("Error validating session:", error);
-    return NextResponse.json(
-      { error: "Failed to validate session" },
-      { status: 401 }
-    );
-  }
+        return NextResponse.json(data, { status: response.status });
+    } catch (error) {
+        console.error("Error validating session:", error);
+        return NextResponse.json(
+            { error: "Error al validar la sesión" },
+            { status: 401 },
+        );
+    }
 }

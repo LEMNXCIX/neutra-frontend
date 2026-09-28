@@ -1,348 +1,415 @@
 "use client";
-import React, { useSyncExternalStore } from "react";
+import {
+    AlertTriangle,
+    DollarSign,
+    ImageIcon,
+    Package,
+    Shield,
+    ShoppingCart,
+    Ticket,
+    TrendingDown,
+    TrendingUp,
+    Users,
+} from "lucide-react";
+import type React from "react";
+import { useSyncExternalStore } from "react";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Users,
-  Package,
-  ShoppingCart,
-  DollarSign,
-  TrendingUp,
-  TrendingDown,
-  Ticket,
-  ImageIcon,
-  Shield,
-  AlertTriangle,
-} from "lucide-react";
 import { useApiQuery } from "@/hooks/use-api";
 import { useFeatures } from "@/hooks/useFeatures";
 import { cn } from "@/lib/utils";
-import { Badge } from "@/components/ui/badge";
 
 type Stats = {
-  users: { total: number; admins: number; regular: number };
-  products: { total: number; totalValue: number; lowStock: number; outOfStock: number };
-  orders: { total: number; revenue: number; avgOrderValue: number };
-  coupons: { total: number; active: number; used: number };
-  sliders: { total: number; active: number; withImages: number };
-  banners: { total: number; active: number };
-  categories: { total: number; avgProducts: number };
+    users: { total: number; admins: number; regular: number };
+    products: {
+        total: number;
+        totalValue: number;
+        lowStock: number;
+        outOfStock: number;
+    };
+    orders: { total: number; revenue: number; avgOrderValue: number };
+    coupons: { total: number; active: number; used: number };
+    sliders: { total: number; active: number; withImages: number };
+    banners: { total: number; active: number };
+    categories: { total: number; avgProducts: number };
 };
 
 const COLOR_VARIANTS = {
-  primary: {
-    bar: "bg-primary",
-    icon: "bg-primary/10 text-primary",
-  },
-  accent: {
-    bar: "bg-accent",
-    icon: "bg-accent text-accent-foreground",
-  },
-  muted: {
-    bar: "bg-muted-foreground",
-    icon: "bg-muted text-muted-foreground",
-  },
-  destructive: {
-    bar: "bg-destructive",
-    icon: "bg-destructive/10 text-destructive",
-  },
+    primary: {
+        bar: "bg-primary",
+        icon: "bg-primary/10 text-primary",
+    },
+    accent: {
+        bar: "bg-accent",
+        icon: "bg-accent text-accent-foreground",
+    },
+    muted: {
+        bar: "bg-muted-foreground",
+        icon: "bg-muted text-muted-foreground",
+    },
+    destructive: {
+        bar: "bg-destructive",
+        icon: "bg-destructive/10 text-destructive",
+    },
 } as const;
 
 type ColorVariant = keyof typeof COLOR_VARIANTS;
 
 const StatCard = ({
-  icon: Icon,
-  title,
-  value,
-  subtitle,
-  variant = "primary",
-  trend,
+    icon: Icon,
+    title,
+    value,
+    subtitle,
+    variant = "primary",
+    trend,
 }: {
-  icon: React.ElementType;
-  title: string;
-  value: string | number;
-  subtitle?: string;
-  variant?: ColorVariant;
-  trend?: 'up' | 'down';
+    icon: React.ElementType;
+    title: string;
+    value: string | number;
+    subtitle?: string;
+    variant?: ColorVariant;
+    trend?: "up" | "down";
 }) => (
-  <Card className="group relative overflow-hidden border-border bg-card transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-300 hover:shadow-2xl hover:shadow-primary/5 hover:translate-y-[-2px]">
-    <div className={cn("absolute top-0 left-0 w-1 h-full opacity-0 group-hover:opacity-100 transition-opacity", COLOR_VARIANTS[variant].bar)} />
-    <CardContent className="pt-6">
-      <div className="flex items-start justify-between">
-        <div className="flex-1 space-y-1">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{title}</p>
-          <div className="flex items-baseline gap-2">
-            <p className="text-3xl font-bold tracking-tighter">{value}</p>
-            {trend && (
-              <Badge variant="outline" className={cn(
-                "px-1 py-0 border-none flex items-center gap-0.5 font-bold text-[10px]",
-                trend === 'up' ? "text-green-600" : "text-red-600"
-              )}>
-                {trend === 'up' ? <TrendingUp className="size-3" /> : <TrendingDown className="size-3" />}
-                {trend === 'up' ? "+12%" : "-5%"}
-              </Badge>
+    <Card className="group relative overflow-hidden border-border bg-card transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-300 hover:shadow-2xl hover:shadow-primary/5 hover:translate-y-[-2px]">
+        <div
+            className={cn(
+                "absolute top-0 left-0 w-1 h-full opacity-0 group-hover:opacity-100 transition-opacity",
+                COLOR_VARIANTS[variant].bar,
             )}
-          </div>
-          {subtitle && (
-            <p className="text-xs font-medium text-muted-foreground/70 tracking-tight">{subtitle}</p>
-          )}
-        </div>
-        <div className={cn("p-2.5 rounded-xl transition-transform group-hover:scale-110 duration-500", COLOR_VARIANTS[variant].icon)}>
-          <Icon className="size-5" />
-        </div>
-      </div>
-    </CardContent>
-  </Card>
+        />
+        <CardContent className="pt-6">
+            <div className="flex items-start justify-between">
+                <div className="flex-1 space-y-1">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                        {title}
+                    </p>
+                    <div className="flex items-baseline gap-2">
+                        <p className="text-3xl font-bold tracking-tighter">
+                            {value}
+                        </p>
+                        {trend && (
+                            <Badge
+                                variant="outline"
+                                className={cn(
+                                    "px-1 py-0 border-none flex items-center gap-0.5 font-bold text-[10px]",
+                                    trend === "up"
+                                        ? "text-green-600"
+                                        : "text-red-600",
+                                )}
+                            >
+                                {trend === "up" ? (
+                                    <TrendingUp className="size-3" />
+                                ) : (
+                                    <TrendingDown className="size-3" />
+                                )}
+                                {trend === "up" ? "+12%" : "-5%"}
+                            </Badge>
+                        )}
+                    </div>
+                    {subtitle && (
+                        <p className="text-xs font-medium text-muted-foreground/70 tracking-tight">
+                            {subtitle}
+                        </p>
+                    )}
+                </div>
+                <div
+                    className={cn(
+                        "p-2.5 rounded-xl transition-transform group-hover:scale-110 duration-500",
+                        COLOR_VARIANTS[variant].icon,
+                    )}
+                >
+                    <Icon className="size-5" />
+                </div>
+            </div>
+        </CardContent>
+    </Card>
 );
 
 const emptySubscribe = () => () => {};
 
 export default function AnalyticsOverview() {
-  const isMounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
-  const { isFeatureEnabled } = useFeatures();
-
-  const { data: stats, isLoading: loading } = useApiQuery<Stats>(
-    ['admin', 'stats', 'overview'],
-    '/admin/stats/overview'
-  );
-
-  if (!isMounted) return null;
-
-  if (loading) {
-    return (
-      <div className="space-y-8 animate-pulse">
-        <Skeleton className="h-9 w-64 rounded-lg" />
-
-        {/* Primary Metrics - 4 cards */}
-        <div>
-          <Skeleton className="h-5 w-40 mb-4" />
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-{["metrics-1", "metrics-2", "metrics-3", "metrics-4"].map((k) => (
-                <Card key={k} className="overflow-hidden border-none shadow-md">
-                  <CardContent className="pt-6">
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-3 flex-1">
-                        <Skeleton className="h-4 w-32" />
-                        <Skeleton className="h-9 w-28" />
-                        <Skeleton className="h-3 w-40" />
-                      </div>
-                      <Skeleton className="size-12 rounded-full" />
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-
-          {/* Inventory Status - 3 cards */}
-          <div>
-            <Skeleton className="h-5 w-48 mb-4" />
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {["inventory-1", "inventory-2", "inventory-3"].map((k) => (
-                <Card key={k} className="overflow-hidden border-none shadow-md">
-                  <CardContent className="pt-6">
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-3 flex-1">
-                        <Skeleton className="h-4 w-36" />
-                        <Skeleton className="h-9 w-20" />
-                        <Skeleton className="h-3 w-44" />
-                      </div>
-                      <Skeleton className="size-12 rounded-full" />
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-
-          {/* Marketing & Promotions - 4 cards */}
-          <div>
-            <Skeleton className="h-5 w-56 mb-4" />
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {["marketing-1", "marketing-2", "marketing-3", "marketing-4"].map((k) => (
-                <Card key={k} className="overflow-hidden border-none shadow-md">
-                  <CardContent className="pt-6">
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-3 flex-1">
-                        <Skeleton className="h-4 w-28" />
-                        <Skeleton className="h-9 w-24" />
-                        <Skeleton className="h-3 w-48" />
-                      </div>
-                      <Skeleton className="size-12 rounded-full" />
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-
-          {/* User Management - 3 cards */}
-          <div>
-            <Skeleton className="h-5 w-44 mb-4" />
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {["users-1", "users-2", "users-3"].map((k) => (
-                <Card key={k} className="overflow-hidden border-none shadow-md">
-                  <CardContent className="pt-6">
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-3 flex-1">
-                        <Skeleton className="h-4 w-32" />
-                      <Skeleton className="h-9 w-24" />
-                      <Skeleton className="h-3 w-36" />
-                    </div>
-                    <Skeleton className="size-12 rounded-full" />
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </div>
+    const isMounted = useSyncExternalStore(
+        emptySubscribe,
+        () => true,
+        () => false,
     );
-  }
+    const { isFeatureEnabled } = useFeatures();
 
-  if (!stats) return null;
+    const { data: stats, isLoading: loading } = useApiQuery<Stats>(
+        ["admin", "stats", "overview"],
+        "/admin/stats/overview",
+    );
 
-  return (
-    <div className="space-y-6" suppressHydrationWarning>
-      <h2 className="text-2xl font-bold">Resumen de analíticas</h2>
+    if (!isMounted) return null;
 
-      {/* Primary Metrics */}
-      <div>
-        <h3 className="text-lg font-semibold mb-4 text-muted-foreground">Métricas principales</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {isFeatureEnabled("ORDERS") && (
-            <>
-              <StatCard
-                icon={ShoppingCart}
-                title="Total de Pedidos"
-                value={stats.orders.total}
-                subtitle={`$${stats.orders.revenue.toFixed(2)} en ingresos`}
-                variant="primary"
-                trend="up"
-              />
-              <StatCard
-                icon={DollarSign}
-                title="Ingresos Totales"
-                value={`$${stats.orders.revenue.toFixed(2)}`}
-                subtitle={`Promedio: $${stats.orders.avgOrderValue.toFixed(2)} por pedido`}
-                variant="primary"
-                trend="up"
-              />
-            </>
-          )}
-          <StatCard
-            icon={Users}
-            title="Total de Usuarios"
-            value={stats.users.total}
-            subtitle={`${stats.users.admins} administradores, ${stats.users.regular} usuarios`}
-            variant="accent"
-          />
-          <StatCard
-            icon={Package}
-            title="Total de Productos"
-            value={stats.products.total}
-            subtitle={`$${stats.products.totalValue.toFixed(2)} de valor en inventario`}
-            variant="muted"
-          />
+    if (loading) {
+        return (
+            <div className="space-y-8 animate-pulse">
+                <Skeleton className="h-9 w-64 rounded-lg" />
+
+                {/* Primary Metrics - 4 cards */}
+                <div>
+                    <Skeleton className="h-5 w-40 mb-4" />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        {[
+                            "metrics-1",
+                            "metrics-2",
+                            "metrics-3",
+                            "metrics-4",
+                        ].map((k) => (
+                            <Card
+                                key={k}
+                                className="overflow-hidden border-none shadow-md"
+                            >
+                                <CardContent className="pt-6">
+                                    <div className="flex items-center justify-between">
+                                        <div className="space-y-3 flex-1">
+                                            <Skeleton className="h-4 w-32" />
+                                            <Skeleton className="h-9 w-28" />
+                                            <Skeleton className="h-3 w-40" />
+                                        </div>
+                                        <Skeleton className="size-12 rounded-full" />
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Inventory Status - 3 cards */}
+                <div>
+                    <Skeleton className="h-5 w-48 mb-4" />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {["inventory-1", "inventory-2", "inventory-3"].map(
+                            (k) => (
+                                <Card
+                                    key={k}
+                                    className="overflow-hidden border-none shadow-md"
+                                >
+                                    <CardContent className="pt-6">
+                                        <div className="flex items-center justify-between">
+                                            <div className="space-y-3 flex-1">
+                                                <Skeleton className="h-4 w-36" />
+                                                <Skeleton className="h-9 w-20" />
+                                                <Skeleton className="h-3 w-44" />
+                                            </div>
+                                            <Skeleton className="size-12 rounded-full" />
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            ),
+                        )}
+                    </div>
+                </div>
+
+                {/* Marketing & Promotions - 4 cards */}
+                <div>
+                    <Skeleton className="h-5 w-56 mb-4" />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        {[
+                            "marketing-1",
+                            "marketing-2",
+                            "marketing-3",
+                            "marketing-4",
+                        ].map((k) => (
+                            <Card
+                                key={k}
+                                className="overflow-hidden border-none shadow-md"
+                            >
+                                <CardContent className="pt-6">
+                                    <div className="flex items-center justify-between">
+                                        <div className="space-y-3 flex-1">
+                                            <Skeleton className="h-4 w-28" />
+                                            <Skeleton className="h-9 w-24" />
+                                            <Skeleton className="h-3 w-48" />
+                                        </div>
+                                        <Skeleton className="size-12 rounded-full" />
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
+                </div>
+
+                {/* User Management - 3 cards */}
+                <div>
+                    <Skeleton className="h-5 w-44 mb-4" />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {["users-1", "users-2", "users-3"].map((k) => (
+                            <Card
+                                key={k}
+                                className="overflow-hidden border-none shadow-md"
+                            >
+                                <CardContent className="pt-6">
+                                    <div className="flex items-center justify-between">
+                                        <div className="space-y-3 flex-1">
+                                            <Skeleton className="h-4 w-32" />
+                                            <Skeleton className="h-9 w-24" />
+                                            <Skeleton className="h-3 w-36" />
+                                        </div>
+                                        <Skeleton className="size-12 rounded-full" />
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (!stats) return null;
+
+    return (
+        <div className="space-y-6" suppressHydrationWarning>
+            <h2 className="text-2xl font-bold">Resumen de analíticas</h2>
+
+            {/* Primary Metrics */}
+            <div>
+                <h3 className="text-lg font-semibold mb-4 text-muted-foreground">
+                    Métricas principales
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {isFeatureEnabled("ORDERS") && (
+                        <>
+                            <StatCard
+                                icon={ShoppingCart}
+                                title="Total de Pedidos"
+                                value={stats.orders.total}
+                                subtitle={`$${stats.orders.revenue.toFixed(2)} en ingresos`}
+                                variant="primary"
+                                trend="up"
+                            />
+                            <StatCard
+                                icon={DollarSign}
+                                title="Ingresos Totales"
+                                value={`$${stats.orders.revenue.toFixed(2)}`}
+                                subtitle={`Promedio: $${stats.orders.avgOrderValue.toFixed(2)} por pedido`}
+                                variant="primary"
+                                trend="up"
+                            />
+                        </>
+                    )}
+                    <StatCard
+                        icon={Users}
+                        title="Total de Usuarios"
+                        value={stats.users.total}
+                        subtitle={`${stats.users.admins} administradores, ${stats.users.regular} usuarios`}
+                        variant="accent"
+                    />
+                    <StatCard
+                        icon={Package}
+                        title="Total de Productos"
+                        value={stats.products.total}
+                        subtitle={`$${stats.products.totalValue.toFixed(2)} de valor en inventario`}
+                        variant="muted"
+                    />
+                </div>
+            </div>
+
+            {/* Inventory & Stock */}
+            <div>
+                <h3 className="text-lg font-semibold mb-4 text-muted-foreground">
+                    Estado del inventario
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <StatCard
+                        icon={AlertTriangle}
+                        title="Productos con Poco Stock"
+                        value={stats.products.lowStock}
+                        subtitle="Productos con menos de 10 unidades"
+                        variant="accent"
+                    />
+                    <StatCard
+                        icon={Package}
+                        title="Sin Stock"
+                        value={stats.products.outOfStock}
+                        subtitle="Necesita reposición"
+                        variant="destructive"
+                    />
+                    <StatCard
+                        icon={Package}
+                        title="Total de Categorías"
+                        value={stats.categories.total}
+                        subtitle={`Promedio de ${stats.categories.avgProducts.toFixed(1)} productos por categoría`}
+                        variant="primary"
+                    />
+                </div>
+            </div>
+
+            {/* Marketing & Promotions */}
+            <div>
+                <h3 className="text-lg font-semibold mb-4 text-muted-foreground">
+                    Marketing y promociones
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {isFeatureEnabled("COUPONS") && (
+                        <>
+                            <StatCard
+                                icon={Ticket}
+                                title="Cupones"
+                                value={stats.coupons.total}
+                                subtitle={`${stats.coupons.active} activos, ${stats.coupons.used} usados`}
+                                variant="primary"
+                            />
+                            <StatCard
+                                icon={Ticket}
+                                title="Cupones Activos"
+                                value={stats.coupons.active}
+                                subtitle="Disponible para uso"
+                                variant="primary"
+                            />
+                        </>
+                    )}
+                    <StatCard
+                        icon={ImageIcon}
+                        title="Carruseles"
+                        value={stats.sliders.total}
+                        subtitle={`${stats.sliders.active} activos, ${stats.sliders.withImages} con imagen`}
+                        variant="accent"
+                    />
+                    {isFeatureEnabled("BANNERS") && (
+                        <StatCard
+                            icon={Ticket}
+                            title="Anuncios"
+                            value={stats.banners.total}
+                            subtitle={`${stats.banners.active} activos`}
+                            variant="muted"
+                        />
+                    )}
+                </div>
+            </div>
+
+            {/* User Management */}
+            <div>
+                <h3 className="text-lg font-semibold mb-4 text-muted-foreground">
+                    Gestión de usuarios
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <StatCard
+                        icon={Shield}
+                        title="Administradores"
+                        value={stats.users.admins}
+                        subtitle="Administradores del sistema"
+                        variant="accent"
+                    />
+                    <StatCard
+                        icon={Users}
+                        title="Usuarios Regulares"
+                        value={stats.users.regular}
+                        subtitle="Cuentas de clientes"
+                        variant="muted"
+                    />
+                    <StatCard
+                        icon={Users}
+                        title="Proporción de Admins"
+                        value={`${stats.users.total > 0 ? ((stats.users.admins / stats.users.total) * 100).toFixed(1) : 0}%`}
+                        subtitle="Porcentaje de administradores"
+                        variant="primary"
+                    />
+                </div>
+            </div>
         </div>
-      </div>
-
-      {/* Inventory & Stock */}
-      <div>
-        <h3 className="text-lg font-semibold mb-4 text-muted-foreground">Estado del inventario</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <StatCard
-            icon={AlertTriangle}
-            title="Productos con Poco Stock"
-            value={stats.products.lowStock}
-            subtitle="Productos con menos de 10 unidades"
-            variant="accent"
-          />
-          <StatCard
-            icon={Package}
-            title="Sin Stock"
-            value={stats.products.outOfStock}
-            subtitle="Necesita reposición"
-            variant="destructive"
-          />
-          <StatCard
-            icon={Package}
-            title="Total de Categorías"
-            value={stats.categories.total}
-            subtitle={`Promedio de ${stats.categories.avgProducts.toFixed(1)} productos por categoría`}
-            variant="primary"
-          />
-        </div>
-      </div>
-
-      {/* Marketing & Promotions */}
-      <div>
-        <h3 className="text-lg font-semibold mb-4 text-muted-foreground">Marketing y promociones</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {isFeatureEnabled("COUPONS") && (
-            <>
-              <StatCard
-                icon={Ticket}
-                title="Cupones"
-                value={stats.coupons.total}
-                subtitle={`${stats.coupons.active} activos, ${stats.coupons.used} usados`}
-                variant="primary"
-              />
-              <StatCard
-                icon={Ticket}
-                title="Cupones Activos"
-                value={stats.coupons.active}
-                subtitle="Disponible para uso"
-                variant="primary"
-              />
-            </>
-          )}
-          <StatCard
-            icon={ImageIcon}
-            title="Carruseles"
-            value={stats.sliders.total}
-            subtitle={`${stats.sliders.active} activos, ${stats.sliders.withImages} con imagen`}
-            variant="accent"
-          />
-          {isFeatureEnabled("BANNERS") && (
-            <StatCard
-              icon={Ticket}
-              title="Anuncios"
-              value={stats.banners.total}
-              subtitle={`${stats.banners.active} activos`}
-              variant="muted"
-            />
-          )}
-        </div>
-      </div>
-
-      {/* User Management */}
-      <div>
-        <h3 className="text-lg font-semibold mb-4 text-muted-foreground">Gestión de usuarios</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <StatCard
-            icon={Shield}
-            title="Administradores"
-            value={stats.users.admins}
-            subtitle="Administradores del sistema"
-            variant="accent"
-          />
-          <StatCard
-            icon={Users}
-            title="Usuarios Regulares"
-            value={stats.users.regular}
-            subtitle="Cuentas de clientes"
-            variant="muted"
-          />
-          <StatCard
-            icon={Users}
-            title="Proporción de Admins"
-            value={`${stats.users.total > 0 ? ((stats.users.admins / stats.users.total) * 100).toFixed(1) : 0}%`}
-            subtitle="Porcentaje de administradores"
-            variant="primary"
-          />
-        </div>
-      </div>
-    </div>
-  );
+    );
 }

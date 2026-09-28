@@ -13,9 +13,9 @@ services:
       - .:/app:cached
       - /app/node_modules
     ports:
-      - "3002:3000"
+      - "3001:3001"
     environment:
-      - NEXT_PUBLIC_API_URL=http://api-neutra-v2-app-1:4001/api
+      - BACKEND_API_URL=http://api-neutra-v2-app-1:4001/api
       - HOST=0.0.0.0
       # use polling so chokidar can detect file changes over a mounted volume
       - CHOKIDAR_USEPOLLING=true

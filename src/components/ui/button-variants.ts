@@ -32,5 +32,5 @@ const buttonVariants = cva(
     },
 );
 
-export { buttonVariants };
 export type { VariantProps };
+export { buttonVariants };

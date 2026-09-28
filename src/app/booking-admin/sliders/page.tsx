@@ -1,12 +1,12 @@
-import React, { Suspense } from "react";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 import SlidersTableClient from "@/components/admin/sliders/SlidersTableClient";
+import { api } from "@/lib/api-client";
 import { validateAdminAccess } from "@/lib/server-auth";
-import { api } from '@/lib/api-client';
 
 export const metadata = { title: "Carruseles" };
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 export default async function BookingSlidersPage() {
     const { isValid } = await validateAdminAccess();

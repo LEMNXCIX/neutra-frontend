@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { api } from '@/lib/api-client';
+import { api } from "@/lib/api-client";
 import { getTenantNameFromHeaders } from "@/lib/server-theme";
 import { getHomeContent } from "@/lib/strapi";
 import { StoreHomeClient } from "./store-client";
@@ -7,7 +7,7 @@ import { StoreHomeClient } from "./store-client";
 export const metadata: Metadata = {
     title: "Inicio",
     description:
-        "Bienvenido a nuestra tienda: explorá colecciones y productos destacados",
+        "Bienvenido a nuestra tienda: explora colecciones y productos destacados",
 };
 
 async function fetchSliders(): Promise<any[]> {

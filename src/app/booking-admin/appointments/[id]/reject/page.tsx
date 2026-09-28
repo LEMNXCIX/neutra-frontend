@@ -1,27 +1,27 @@
-import { redirect } from 'next/navigation';
-import { apiClient } from '@/lib/api-client';
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
+import { apiClient } from "@/lib/api-client";
 
 export const metadata: Metadata = {
-  title: "Rechazar cita",
-  description: "Procesando el rechazo de la cita",
+    title: "Rechazar cita",
+    description: "Procesando el rechazo de la cita",
 };
 
 export default async function AppointmentRejectPage({
-  params,
+    params,
 }: {
-  params: Promise<{ id: string }>;
+    params: Promise<{ id: string }>;
 }) {
-  const { id } = await params;
+    const { id } = await params;
 
-  try {
-    await apiClient(`/appointments/${id}/status`, {
-      method: 'PUT',
-      body: JSON.stringify({ status: 'CANCELLED' }),
-    });
-  } catch (error) {
-    console.error('Error rejecting appointment:', error);
-  }
+    try {
+        await apiClient(`/appointments/${id}/status`, {
+            method: "PUT",
+            body: JSON.stringify({ status: "CANCELLED" }),
+        });
+    } catch (error) {
+        console.error("Error rejecting appointment:", error);
+    }
 
-  redirect('/booking-admin/appointments');
+    redirect("/booking-admin/appointments");
 }

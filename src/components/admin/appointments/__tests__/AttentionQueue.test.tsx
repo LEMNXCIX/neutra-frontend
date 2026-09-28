@@ -1,15 +1,18 @@
 // @vitest-environment happy-dom
-import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import "@testing-library/jest-dom/vitest";
 import type { ReactElement } from "react";
 
-const { mockGetQueue, mockUpdateStatus, mockRouterRefresh } = vi.hoisted(() => ({
-    mockGetQueue: vi.fn(),
-    mockUpdateStatus: vi.fn(),
-    mockRouterRefresh: vi.fn(),
-}));
+const { mockGetQueue, mockUpdateStatus, mockRouterRefresh } = vi.hoisted(
+    () => ({
+        mockGetQueue: vi.fn(),
+        mockUpdateStatus: vi.fn(),
+        mockRouterRefresh: vi.fn(),
+    }),
+);
 
 vi.mock("@/services/booking.service", async (importOriginal) => {
     const actual =
@@ -35,14 +38,14 @@ vi.mock("sonner", () => ({
     },
 }));
 
+import AttentionQueue from "@/components/admin/appointments/AttentionQueue";
+import { AppointmentDetailActions } from "@/components/booking/appointment-detail-actions";
+import { AppointmentsClient } from "@/components/booking/appointments-client";
+import { AppointmentHistory } from "@/components/profile/appointment-history";
 import type {
     Appointment,
     AppointmentStatus,
 } from "@/services/booking.service";
-import AttentionQueue from "@/components/admin/appointments/AttentionQueue";
-import { AppointmentsClient } from "@/components/booking/appointments-client";
-import { AppointmentDetailActions } from "@/components/booking/appointment-detail-actions";
-import { AppointmentHistory } from "@/components/profile/appointment-history";
 
 const appointment: Appointment = {
     id: "appointment-1",
@@ -185,7 +188,9 @@ describe("AttentionQueue", () => {
 
         expect(await screen.findByText("Alex Customer")).toBeInTheDocument();
         expect(screen.getByText("Facial")).toBeInTheDocument();
-        expect(screen.getByText("1 cita requiere atención")).toBeInTheDocument();
+        expect(
+            screen.getByText("1 cita requiere atención"),
+        ).toBeInTheDocument();
         expect(
             screen.getByText("Outcome unresolved after grace period"),
         ).toBeInTheDocument();
@@ -195,7 +200,9 @@ describe("AttentionQueue", () => {
         expect(
             screen.getByRole("button", { name: "Marcar no asistió" }),
         ).toBeInTheDocument();
-        expect(screen.getByRole("button", { name: "Cancelar" })).toBeInTheDocument();
+        expect(
+            screen.getByRole("button", { name: "Cancelar" }),
+        ).toBeInTheDocument();
 
         await user.click(
             screen.getByRole("button", { name: "Marcar completada" }),
@@ -209,11 +216,13 @@ describe("AttentionQueue", () => {
             expect(mockUpdateStatus).toHaveBeenCalledWith(
                 "appointment-1",
                 "COMPLETED",
-                "Resolved as completed from the booking admin attention queue",
+                "Resuelta como completada desde la cola de atención de reservas",
             );
         });
         expect(onRefresh).toHaveBeenCalledTimes(1);
-        expect(await screen.findByText("No hay citas que requieran atención")).toBeInTheDocument();
+        expect(
+            await screen.findByText("No hay citas que requieran atención"),
+        ).toBeInTheDocument();
     });
 
     it("returns to page one and refreshes after resolving the last row", async () => {
@@ -269,7 +278,9 @@ describe("AttentionQueue", () => {
         render(<AttentionQueue onRefresh={onRefresh} />);
 
         expect(await screen.findByText("Customer 1")).toBeInTheDocument();
-        expect(screen.getByText("11 citas requieren atención")).toBeInTheDocument();
+        expect(
+            screen.getByText("11 citas requieren atención"),
+        ).toBeInTheDocument();
 
         await user.click(screen.getByRole("button", { name: "Siguiente" }));
         expect(await screen.findByText("Final Customer")).toBeInTheDocument();
@@ -284,7 +295,9 @@ describe("AttentionQueue", () => {
         );
 
         expect(await screen.findByText("Customer 1")).toBeInTheDocument();
-        expect(screen.getByText("10 citas requieren atención")).toBeInTheDocument();
+        expect(
+            screen.getByText("10 citas requieren atención"),
+        ).toBeInTheDocument();
         expect(screen.queryByText("Final Customer")).not.toBeInTheDocument();
         expect(
             screen.queryByText("No hay citas que requieran atención"),

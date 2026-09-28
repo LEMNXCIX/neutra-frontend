@@ -1,4 +1,4 @@
-import { api } from '@/lib/api-client';
+import { api } from "@/lib/api-client";
 
 export interface StaffMember {
     id: string;
@@ -29,12 +29,16 @@ export interface CreateStaffDTO {
 export interface UpdateStaffDTO extends Partial<CreateStaffDTO> {}
 
 export const staffService = {
-    getAll: async (activeOnly?: boolean, tenantId?: string): Promise<StaffMember[]> => {
+    getAll: async (
+        activeOnly?: boolean,
+        tenantId?: string,
+    ): Promise<StaffMember[]> => {
         const params = new URLSearchParams();
-        if (activeOnly !== undefined) params.append('activeOnly', String(activeOnly));
-        if (tenantId) params.append('tenantId', tenantId);
+        if (activeOnly !== undefined)
+            params.append("activeOnly", String(activeOnly));
+        if (tenantId) params.append("tenantId", tenantId);
         const qs = params.toString();
-        return api.get<StaffMember[]>(`/staff${qs ? `?${qs}` : ''}`);
+        return api.get<StaffMember[]>(`/staff${qs ? `?${qs}` : ""}`);
     },
 
     getById: async (id: string): Promise<StaffMember> => {
@@ -42,11 +46,11 @@ export const staffService = {
     },
 
     getMe: async (): Promise<StaffMember> => {
-        return api.get<StaffMember>('/staff/me');
+        return api.get<StaffMember>("/staff/me");
     },
 
     create: async (data: CreateStaffDTO): Promise<StaffMember> => {
-        return api.post<StaffMember>('/staff', data);
+        return api.post<StaffMember>("/staff", data);
     },
 
     update: async (id: string, data: UpdateStaffDTO): Promise<StaffMember> => {
@@ -57,7 +61,10 @@ export const staffService = {
         return api.delete(`/staff/${id}`);
     },
 
-    syncServices: async (staffId: string, serviceIds: string[]): Promise<void> => {
+    syncServices: async (
+        staffId: string,
+        serviceIds: string[],
+    ): Promise<void> => {
         return api.put(`/staff/${staffId}/services`, { serviceIds });
     },
 };

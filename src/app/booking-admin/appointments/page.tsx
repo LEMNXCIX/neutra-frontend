@@ -1,7 +1,7 @@
-import React, { Suspense } from "react";
+import { Suspense } from "react";
 import AppointmentsTableClient from "@/components/admin/appointments/AppointmentsTableClient";
-import { Appointment } from "@/services/booking.service";
-import { api } from '@/lib/api-client';
+import { api } from "@/lib/api-client";
+import type { Appointment } from "@/services/booking.service";
 
 export const metadata = { title: "Citas" };
 
@@ -106,11 +106,11 @@ export default async function AppointmentsPage({ searchParams }: Props) {
     const resolvedSearchParams = await searchParams;
     const page =
         typeof resolvedSearchParams.page === "string"
-            ? parseInt(resolvedSearchParams.page)
+            ? parseInt(resolvedSearchParams.page, 10)
             : 1;
     const limit =
         typeof resolvedSearchParams.limit === "string"
-            ? parseInt(resolvedSearchParams.limit)
+            ? parseInt(resolvedSearchParams.limit, 10)
             : 10;
     const search =
         typeof resolvedSearchParams.search === "string"

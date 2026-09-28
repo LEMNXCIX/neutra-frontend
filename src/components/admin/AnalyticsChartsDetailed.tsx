@@ -1,12 +1,10 @@
 "use client";
-import { readJsonResponse } from "@/lib/response";
+import { Package } from "lucide-react";
 
 import React, { use, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-} from "@/components/ui/select";
-import { Package } from "lucide-react";
+import { readJsonResponse } from "@/lib/response";
 
 type Order = {
     id: string;
@@ -105,7 +103,8 @@ function TimelineCard({
                             const percentage = (value / maxDisplayValue) * 100;
                             const formattedDate = new Date(
                                 date,
-                            ).toLocaleDateString("es-ES", { timeZone: "UTC",
+                            ).toLocaleDateString("es-ES", {
+                                timeZone: "UTC",
                                 month: "short",
                                 day: "numeric",
                             });
@@ -118,7 +117,9 @@ function TimelineCard({
                                         </span>
                                         <span
                                             className="font-semibold"
-                                            style={{ color: `var(${colorVar})` }}
+                                            style={{
+                                                color: `var(${colorVar})`,
+                                            }}
                                         >
                                             {valueLabel(value)}
                                         </span>
@@ -137,7 +138,9 @@ function TimelineCard({
                         })}
                     </div>
                 ) : (
-                    <div className="text-sm text-muted-foreground">Sin datos</div>
+                    <div className="text-sm text-muted-foreground">
+                        Sin datos
+                    </div>
                 )}
             </CardContent>
         </Card>

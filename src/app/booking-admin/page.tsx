@@ -1,21 +1,21 @@
+import {
+    ArrowRight,
+    CalendarDays,
+    CalendarPlus,
+    Clock,
+    Scissors,
+    Users,
+} from "lucide-react";
 import Link from "next/link";
+import AttentionQueue from "@/components/admin/appointments/AttentionQueue";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { api } from "@/lib/api-client";
 import {
     APPOINTMENT_STATUS_LABELS,
     type Appointment,
 } from "@/services/booking.service";
-import AttentionQueue from "@/components/admin/appointments/AttentionQueue";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-    CalendarDays,
-    Clock,
-    Users,
-    Scissors,
-    ArrowRight,
-    CalendarPlus,
-} from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -52,18 +52,41 @@ export default async function BookingDashboardPage() {
         )
         .sort(
             (a, b) =>
-                new Date(a.startTime).getTime() - new Date(b.startTime).getTime(),
+                new Date(a.startTime).getTime() -
+                new Date(b.startTime).getTime(),
         )
         .slice(0, 5);
 
     const pending = appointments.filter((a) => a.status === "PENDING").length;
-    const confirmed = appointments.filter((a) => a.status === "CONFIRMED").length;
+    const confirmed = appointments.filter(
+        (a) => a.status === "CONFIRMED",
+    ).length;
 
     const stats = [
-        { label: "Pendientes", value: pending, icon: Clock, href: "/admin/appointments?status=PENDING" },
-        { label: "Confirmadas", value: confirmed, icon: CalendarDays, href: "/admin/appointments?status=CONFIRMED" },
-        { label: "Equipo", value: staff.length, icon: Users, href: "/admin/staff" },
-        { label: "Servicios", value: services.length, icon: Scissors, href: "/admin/services" },
+        {
+            label: "Pendientes",
+            value: pending,
+            icon: Clock,
+            href: "/admin/appointments?status=PENDING",
+        },
+        {
+            label: "Confirmadas",
+            value: confirmed,
+            icon: CalendarDays,
+            href: "/admin/appointments?status=CONFIRMED",
+        },
+        {
+            label: "Equipo",
+            value: staff.length,
+            icon: Users,
+            href: "/admin/staff",
+        },
+        {
+            label: "Servicios",
+            value: services.length,
+            icon: Scissors,
+            href: "/admin/services",
+        },
     ];
 
     return (
@@ -142,7 +165,8 @@ export default async function BookingDashboardPage() {
                                             <p className="text-sm font-semibold truncate">
                                                 {new Date(
                                                     a.startTime,
-                                                ).toLocaleDateString("es-ES", { timeZone: "UTC",
+                                                ).toLocaleDateString("es-ES", {
+                                                    timeZone: "UTC",
                                                     weekday: "short",
                                                     day: "numeric",
                                                     month: "short",
@@ -150,7 +174,8 @@ export default async function BookingDashboardPage() {
                                                 ·{" "}
                                                 {new Date(
                                                     a.startTime,
-                                                ).toLocaleTimeString("es-ES", { timeZone: "UTC",
+                                                ).toLocaleTimeString("es-ES", {
+                                                    timeZone: "UTC",
                                                     hour: "2-digit",
                                                     minute: "2-digit",
                                                 })}
@@ -163,7 +188,8 @@ export default async function BookingDashboardPage() {
                                     <Badge
                                         className={`border-none ${STATUS_STYLES[a.status] || ""}`}
                                     >
-                                        {APPOINTMENT_STATUS_LABELS[a.status] || a.status}
+                                        {APPOINTMENT_STATUS_LABELS[a.status] ||
+                                            a.status}
                                     </Badge>
                                 </div>
                             ))}

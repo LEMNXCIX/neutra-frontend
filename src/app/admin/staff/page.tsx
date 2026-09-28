@@ -1,10 +1,10 @@
-import React, { Suspense } from "react";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 import StaffTableClient from "@/components/admin/booking/StaffTableClient";
+import { api } from "@/lib/api-client";
 import { validateAdminAccess } from "@/lib/server-auth";
-import { api } from '@/lib/api-client';
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 export default async function SuperAdminStaffPage({
     searchParams,
@@ -22,12 +22,17 @@ export default async function SuperAdminStaffPage({
     query.append("activeOnly", "false");
     query.append("tenantId", tenantId === undefined ? "all" : tenantId);
 
-    const data = await api.get<any[]>(`/staff?${query.toString()}`).catch(() => ({}));
+    const data = await api
+        .get<any[]>(`/staff?${query.toString()}`)
+        .catch(() => ({}));
 
     return (
         <div className="container mx-auto py-8">
             <Suspense fallback={null}>
-                <StaffTableClient staff={Array.isArray(data) ? data : []} isSuperAdmin={true} />
+                <StaffTableClient
+                    staff={Array.isArray(data) ? data : []}
+                    isSuperAdmin={true}
+                />
             </Suspense>
         </div>
     );

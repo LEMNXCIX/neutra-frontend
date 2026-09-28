@@ -1,24 +1,32 @@
 "use client";
 
-import React, {
-    useReducer,
+import {
+    AlertCircle,
+    ArrowRight,
+    CalendarOff,
+    Check,
+    ChevronLeft,
+    Clock,
+    Info,
+    Loader2,
+    Scissors,
+    Tag,
+    User,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
+import type React from "react";
+import {
     useCallback,
     useEffect,
     useMemo,
+    useReducer,
     useState,
     useSyncExternalStore,
 } from "react";
-import { useRouter } from "next/navigation";
-import {
-    Service,
-    Staff,
-    CreateAppointmentData,
-    bookingService,
-} from "@/services/booking.service";
-import { couponsService } from "@/services/coupons.service";
-import { CouponValidationResult } from "@/types/coupon.types";
-import { useAuthStore } from "@/store/auth-store";
-import { useFeatures } from "@/hooks/useFeatures";
+import { AvailabilityCalendar } from "@/components/booking/availability-calendar";
+import { workingWeekdays } from "@/components/booking/working-weekdays";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
     Card,
@@ -27,30 +35,24 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Separator } from "@/components/ui/separator";
-import {
-    Loader2,
-    Clock,
-    User,
-    ChevronLeft,
-    Check,
-    AlertCircle,
-    Info,
-    Tag,
-    Scissors,
-    ArrowRight,
-    CalendarOff,
-} from "lucide-react";
-import { cn } from "@/lib/utils";
-import { filterFutureSlots, isFutureSlot } from "@/lib/appointment-time";
 import { EmptyState } from "@/components/ui/empty-state";
-import { AvailabilityCalendar } from "@/components/booking/availability-calendar";
-import { workingWeekdays } from "@/components/booking/working-weekdays";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
+import { useFeatures } from "@/hooks/useFeatures";
+import { filterFutureSlots, isFutureSlot } from "@/lib/appointment-time";
+import { reportError } from "@/lib/error-reporting";
+import { cn } from "@/lib/utils";
+import {
+    bookingService,
+    type CreateAppointmentData,
+    type Service,
+    type Staff,
+} from "@/services/booking.service";
+import { couponsService } from "@/services/coupons.service";
+import { useAuthStore } from "@/store/auth-store";
+import type { CouponValidationResult } from "@/types/coupon.types";
 
 interface BookingWizardProps {
     initialServices: Service[];
@@ -169,10 +171,10 @@ function ServiceStep({
         <div className="space-y-8">
             <div className="space-y-2">
                 <h2 className="text-3xl font-bold tracking-tight text-foreground">
-                    Elegí un servicio
+                    Elige un servicio
                 </h2>
                 <p className="text-muted-foreground font-medium text-sm">
-                    Elegí la sesión que mejor se adapte a tus necesidades
+                    Elige la sesión que mejor se adapte a tus necesidades
                 </p>
             </div>
             {services.length === 0 ? (
@@ -284,7 +286,7 @@ function StaffStep({
                     Profesional asignado
                 </h2>
                 <p className="text-muted-foreground font-medium text-sm">
-                    Elegí el profesional asignado
+                    Elige el profesional asignado
                 </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -403,7 +405,7 @@ function ScheduleStep({
                     Agenda
                 </h2>
                 <p className="text-muted-foreground font-medium text-sm">
-                    Elegí el horario que prefieras
+                    Elige el horario que prefieras
                 </p>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -502,7 +504,8 @@ function ScheduleStep({
                     onClick={() => dispatch({ type: "SET_STEP", payload: 2 })}
                     className="font-semibold text-xs h-10"
                 >
-                    <ChevronLeft className="size-4 mr-2" /> Volver al profesional
+                    <ChevronLeft className="size-4 mr-2" /> Volver al
+                    profesional
                 </Button>
                 {selectedDate && selectedTime && (
                     <Button
@@ -559,7 +562,7 @@ function ReviewStep({
                     Revisar detalles
                 </h2>
                 <p className="text-muted-foreground font-medium text-sm">
-                    Revisá los datos de tu reserva
+                    Revisa los datos de tu reserva
                 </p>
             </div>
 
@@ -596,7 +599,8 @@ function ReviewStep({
                                     <p className="text-lg font-bold text-foreground">
                                         {new Date(
                                             selectedDate,
-                                        ).toLocaleDateString("es-ES", { timeZone: "UTC",
+                                        ).toLocaleDateString("es-ES", {
+                                            timeZone: "UTC",
                                             weekday: "long",
                                             month: "long",
                                             day: "numeric",
@@ -628,7 +632,7 @@ function ReviewStep({
                                         })
                                     }
                                     rows={4}
-                                    placeholder="Contanos cualquier cosa que debamos saber..."
+                                    placeholder="Cuéntanos cualquier cosa que debamos saber..."
                                     className="rounded-xl border-border focus:border-primary transition-[color,background-color,border-color,box-shadow,opacity,transform] bg-muted/10 font-medium"
                                 />
                             </div>
@@ -866,7 +870,7 @@ export function BookingWizard({
         } catch (err: any) {
             dispatch({
                 type: "SET_COUPON_ERROR",
-                payload: err.message || "Error al validar el cupón",
+                payload: reportError(err, "No pudimos validar el cupón."),
             });
         } finally {
             dispatch({ type: "SET_VALIDATING_COUPON", payload: false });
@@ -924,7 +928,7 @@ export function BookingWizard({
         } catch (err: any) {
             dispatch({
                 type: "SET_ERROR",
-                payload: err.message || "Error al crear la cita",
+                payload: reportError(err, "No pudimos crear la cita."),
             });
         } finally {
             dispatch({ type: "SET_SUBMITTING", payload: false });

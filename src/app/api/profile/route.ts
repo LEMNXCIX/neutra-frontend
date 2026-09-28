@@ -1,8 +1,7 @@
-import { readJsonResponse } from "@/lib/response";
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
+import { getBackendUrl } from "@/lib/backend-url";
 import { getProxyHeaders } from "@/lib/proxy";
-
-const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4001/api";
+import { readJsonResponse } from "@/lib/response";
 
 /**
  * GET /api/profile
@@ -10,7 +9,7 @@ const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:400
  */
 export async function GET(req: NextRequest) {
     try {
-        const backendUrl = `${BACKEND_API_URL}/auth/validate`;
+        const backendUrl = `${getBackendUrl()}/auth/validate`;
 
         const response = await fetch(backendUrl, {
             method: "GET",
@@ -24,8 +23,8 @@ export async function GET(req: NextRequest) {
     } catch (error) {
         console.error("Error fetching profile:", error);
         return NextResponse.json(
-            { error: "Failed to fetch profile" },
-            { status: 401 }
+            { error: "Error al obtener el perfil" },
+            { status: 401 },
         );
     }
 }
@@ -39,7 +38,7 @@ export async function PUT(req: NextRequest) {
         const body = await req.json();
 
         // First get current user ID
-        const validateUrl = `${BACKEND_API_URL}/auth/validate`;
+        const validateUrl = `${getBackendUrl()}/auth/validate`;
         const validateResponse = await fetch(validateUrl, {
             method: "GET",
             headers: getProxyHeaders(req),
@@ -51,12 +50,12 @@ export async function PUT(req: NextRequest) {
         if (!validateData.success || !validateData.data?.user?.id) {
             return NextResponse.json(
                 { error: "Unauthorized" },
-                { status: 401 }
+                { status: 401 },
             );
         }
 
         const userId = validateData.data.user.id;
-        const backendUrl = `${BACKEND_API_URL}/users/${userId}`;
+        const backendUrl = `${getBackendUrl()}/users/${userId}`;
 
         const response = await fetch(backendUrl, {
             method: "PUT",
@@ -74,8 +73,8 @@ export async function PUT(req: NextRequest) {
     } catch (error) {
         console.error("Error updating profile:", error);
         return NextResponse.json(
-            { error: "Failed to update profile" },
-            { status: 500 }
+            { error: "Error al actualizar el perfil" },
+            { status: 500 },
         );
     }
 }

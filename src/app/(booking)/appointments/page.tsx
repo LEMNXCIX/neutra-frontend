@@ -1,9 +1,8 @@
-import React from "react";
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { AppointmentsClient } from "@/components/booking/appointments-client";
+import { api } from "@/lib/api-client";
 import { authService } from "@/services/auth.service";
-import { api } from '@/lib/api-client';
-import type { Metadata } from "next";
 
 export const metadata: Metadata = {
     title: "Mis citas",
@@ -25,7 +24,7 @@ async function getInitialData() {
         ];
 
         if (isStaff) {
-            requests.push(api.get<any>('/staff/me').catch(() => null));
+            requests.push(api.get<any>("/staff/me").catch(() => null));
         }
 
         const results = await Promise.all(requests);
@@ -37,11 +36,20 @@ async function getInitialData() {
         if (isStaff && results[1]) {
             staffProfile = results[1];
             if (staffProfile?.id) {
-                staffAppointments = await api.get<any[]>(`/appointments?staffId=${staffProfile.id}`).catch(() => []) || [];
+                staffAppointments =
+                    (await api
+                        .get<any[]>(`/appointments?staffId=${staffProfile.id}`)
+                        .catch(() => [])) || [];
             }
         }
 
-        return { user, userAppointments, staffProfile, staffAppointments, isStaff };
+        return {
+            user,
+            userAppointments,
+            staffProfile,
+            staffAppointments,
+            isStaff,
+        };
     } catch (error) {
         console.error("Error fetching initial appointments data:", error);
         return null;

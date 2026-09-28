@@ -33,9 +33,11 @@ export function parseOrdersResponse(
         ? (ordersResult as { data: Order[] }).data
         : [];
 
-    const paginationMeta = (ordersResult as {
-        meta?: { pagination?: Record<string, number> };
-    })?.meta?.pagination;
+    const paginationMeta = (
+        ordersResult as {
+            meta?: { pagination?: Record<string, number> };
+        }
+    )?.meta?.pagination;
 
     const pagination = paginationMeta || {
         page: 0,

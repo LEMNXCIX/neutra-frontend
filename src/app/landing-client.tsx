@@ -1,48 +1,48 @@
 "use client";
 
+import { Calendar, PlusCircle, ShoppingCart } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState, useSyncExternalStore } from "react";
-import { getTenantUrl } from "@/lib/tenant";
-import { useAuthStore } from "@/store/auth-store";
-import { tenantService } from "@/services/tenant.service";
-import { Tenant } from "@/types/tenant";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import {
-    PlusCircle,
-    ShoppingCart,
-    Calendar,
-} from "lucide-react";
-import { NeutralNavigation } from "@/components/neutral-navigation";
 import FooterWrapper from "@/components/footer-wrapper";
+import { NeutralNavigation } from "@/components/neutral-navigation";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { getTenantUrl } from "@/lib/tenant";
 import { cn } from "@/lib/utils";
+import { tenantService } from "@/services/tenant.service";
+import { useAuthStore } from "@/store/auth-store";
+import type { Tenant } from "@/types/tenant";
 
 const emptySubscribe = () => () => {};
 
 export function LandingPageClient() {
-  const isMounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
-  const [tenants, setTenants] = useState<Tenant[]>([]);
-  const user = useAuthStore((state) => state.user);
-  const isAdmin = user?.isAdmin;
+    const isMounted = useSyncExternalStore(
+        emptySubscribe,
+        () => true,
+        () => false,
+    );
+    const [tenants, setTenants] = useState<Tenant[]>([]);
+    const user = useAuthStore((state) => state.user);
+    const isAdmin = user?.isAdmin;
 
-  useEffect(() => {
-    if (!isAdmin) return;
+    useEffect(() => {
+        if (!isAdmin) return;
 
-    let cancelled = false;
-    const fetchTenants = async () => {
-      try {
-        const data = await tenantService.getAll();
-        if (!cancelled) setTenants(data || []);
-      } catch (error) {
-        console.error("Error fetching tenants:", error);
-      }
-    };
-    void fetchTenants();
+        let cancelled = false;
+        const fetchTenants = async () => {
+            try {
+                const data = await tenantService.getMine();
+                if (!cancelled) setTenants(data || []);
+            } catch (error) {
+                console.error("Error fetching tenants:", error);
+            }
+        };
+        void fetchTenants();
 
-    return () => {
-      cancelled = true;
-    };
-  }, [isAdmin]);
+        return () => {
+            cancelled = true;
+        };
+    }, [isAdmin]);
 
     if (!isMounted) return null;
 

@@ -1,9 +1,8 @@
 "use client";
 
-import * as React from "react";
-
-import { cn } from "@/lib/utils";
+import type * as React from "react";
 import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
 
 function InputGroupTextarea({
     className,

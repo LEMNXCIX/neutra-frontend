@@ -1,62 +1,18 @@
-import { readJsonResponse } from "@/lib/response";
-import { NextRequest, NextResponse } from 'next/server';
-import { getProxyHeaders } from '@/lib/proxy';
+import { createDeleteHandler, createPutHandler } from "@/lib/api-route-handler";
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
+/**
+ * PUT /api/services/[id]
+ */
+export const PUT = createPutHandler(
+    (_req, params) => `/services/${params?.id}`,
+    { passThroughStatus: true },
+);
 
-export async function PUT(
-    request: NextRequest,
-    context: { params: Promise<{ id: string }> }
-) {
-    try {
-        const { id } = await context.params;
-        const body = await request.json();
-
-  const response = await fetch(`${BACKEND_URL}/services/${id}`, {
-    method: 'PUT',
-    headers: {
-      ...getProxyHeaders(request),
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(body),
-    cache: 'no-store',
-  });
-
-        const data = await readJsonResponse(response);
-        return NextResponse.json(data, { status: response.status });
-    } catch (error) {
-        console.error('Error updating service:', error);
-        return NextResponse.json(
-            { success: false, message: 'Failed to update service' },
-            { status: 500 }
-        );
-    }
-}
-
-export async function DELETE(
-    request: NextRequest,
-    context: { params: Promise<{ id: string }> }
-) {
-    try {
-        const { id } = await context.params;
-
-  const response = await fetch(`${BACKEND_URL}/services/${id}`, {
-    method: 'DELETE',
-    headers: getProxyHeaders(request),
-    cache: 'no-store',
-  });
-
-        if (response.status === 204 || response.status === 200) {
-            return new NextResponse(null, { status: 204 });
-        }
-
-        const data = await readJsonResponse(response);
-        return NextResponse.json(data, { status: response.status });
-    } catch (error) {
-        console.error('Error deleting service:', error);
-        return NextResponse.json(
-            { success: false, message: 'Failed to delete service' },
-            { status: 500 }
-        );
-    }
-}
+/**
+ * DELETE /api/services/[id]
+ * Success is body-less whether the backend answers 200 or 204.
+ */
+export const DELETE = createDeleteHandler(
+    (_req, params) => `/services/${params?.id}`,
+    { successStatus: 204 },
+);

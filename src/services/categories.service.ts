@@ -1,5 +1,9 @@
-import { api } from '@/lib/api-client';
-import { Category, CreateCategoryDTO, UpdateCategoryDTO } from '@/types/category.types';
+import { api } from "@/lib/api-client";
+import type {
+    Category,
+    CreateCategoryDTO,
+    UpdateCategoryDTO,
+} from "@/types/category.types";
 
 /**
  * Categories Service
@@ -10,13 +14,19 @@ export const categoriesService = {
      * Get all categories (with optional pagination)
      * Note: Pagination info is lost when not using pagination params
      */
-    getAll: async (page?: number, limit?: number, type?: 'PRODUCT' | 'SERVICE'): Promise<Category[]> => {
+    getAll: async (
+        page?: number,
+        limit?: number,
+        type?: "PRODUCT" | "SERVICE",
+    ): Promise<Category[]> => {
         const params = new URLSearchParams();
-        if (page) params.append('page', page.toString());
-        if (limit) params.append('limit', limit.toString());
-        if (type) params.append('type', type);
+        if (page) params.append("page", page.toString());
+        if (limit) params.append("limit", limit.toString());
+        if (type) params.append("type", type);
 
-        const url = params.toString() ? `/categories?${params.toString()}` : '/categories';
+        const url = params.toString()
+            ? `/categories?${params.toString()}`
+            : "/categories";
         const res = await api.get<any>(url);
 
         // Handle both simple array, StandardResponse with data.categories, or data as array
@@ -39,7 +49,7 @@ export const categoriesService = {
      * Create new category (requires authentication)
      */
     create: async (data: CreateCategoryDTO): Promise<Category> => {
-        return api.post<Category>('/categories', data);
+        return api.post<Category>("/categories", data);
     },
 
     /**
@@ -59,7 +69,13 @@ export const categoriesService = {
     /**
      * Get category statistics (requires authentication)
      */
-    getStats: async (): Promise<{ totalCategories: number; avgProductsPerCategory: number }> => {
-        return api.get<{ totalCategories: number; avgProductsPerCategory: number }>('/categories/stats');
+    getStats: async (): Promise<{
+        totalCategories: number;
+        avgProductsPerCategory: number;
+    }> => {
+        return api.get<{
+            totalCategories: number;
+            avgProductsPerCategory: number;
+        }>("/categories/stats");
     },
 };

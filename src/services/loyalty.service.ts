@@ -1,11 +1,7 @@
 import { api } from "@/lib/api-client";
 import type { Coupon, CouponType } from "@/types/coupon.types";
 
-export type LoyaltyCampaignStatus =
-    | "DRAFT"
-    | "ACTIVE"
-    | "ENDED"
-    | "ARCHIVED";
+export type LoyaltyCampaignStatus = "DRAFT" | "ACTIVE" | "ENDED" | "ARCHIVED";
 
 export type LoyaltyCampaignSource = "BOOKING" | "STORE" | "ALL";
 export type LoyaltyCampaignMetric = "COUNT" | "SPEND";
@@ -153,7 +149,9 @@ export const loyaltyService = {
         return api.get<LoyaltyCampaign>(campaignEndpoint(campaignId));
     },
 
-    createCampaign(campaign: CreateLoyaltyCampaignInput): Promise<LoyaltyCampaign> {
+    createCampaign(
+        campaign: CreateLoyaltyCampaignInput,
+    ): Promise<LoyaltyCampaign> {
         return api.post<LoyaltyCampaign>("/loyalty/admin/campaigns", campaign);
     },
 

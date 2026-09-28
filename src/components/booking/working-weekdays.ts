@@ -1,4 +1,7 @@
-import { normalizeWorkingHours, type WorkingHours } from "@/components/admin/booking/working-hours-utils";
+import {
+    normalizeWorkingHours,
+    type WorkingHours,
+} from "@/components/admin/booking/working-hours-utils";
 
 /** Weekdays (0=Sun..6=Sat) the staff member works, from their workingHours. */
 export function workingWeekdays(workingHours: unknown): Set<number> {

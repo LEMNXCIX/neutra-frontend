@@ -1,20 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import { Building2, LayoutDashboard, LogIn, Menu } from "lucide-react";
 import Link from "next/link";
-import { useAuthStore } from "@/store/auth-store";
 import { useTheme } from "next-themes";
-import { tenantService } from "@/services/tenant.service";
-import { getTenantUrl } from "@/lib/tenant";
-import { Tenant } from "@/types/tenant";
+import { useEffect, useState } from "react";
+import Logo from "@/components/logo";
 import { Button } from "@/components/ui/button";
-import {
-    LayoutDashboard,
-    LogIn,
-    Menu,
-    Building2,
-} from "lucide-react";
-import { useTenantStore } from "@/store/tenant-store";
 import {
     Sheet,
     SheetContent,
@@ -22,7 +13,11 @@ import {
     SheetTitle,
     SheetTrigger,
 } from "@/components/ui/sheet";
-import Logo from "@/components/logo";
+import { getTenantUrl } from "@/lib/tenant";
+import { tenantService } from "@/services/tenant.service";
+import { useAuthStore } from "@/store/auth-store";
+import { useTenantStore } from "@/store/tenant-store";
+import type { Tenant } from "@/types/tenant";
 
 export function NeutralNavigation() {
     const { theme, setTheme } = useTheme();
@@ -43,7 +38,7 @@ export function NeutralNavigation() {
         let cancelled = false;
         const fetchTenants = async () => {
             try {
-                const data = await tenantService.getAll();
+                const data = await tenantService.getMine();
                 if (!cancelled) setTenants(data || []);
             } catch (error) {
                 console.error("Error fetching tenants:", error);
@@ -79,7 +74,7 @@ export function NeutralNavigation() {
                     </div>
 
                     {isAdmin && (
-                        <div className="hidden lg:flex items-center gap-6">
+                        <div className="hidden md:flex items-center gap-6">
                             <a
                                 href={`${getTenantUrl("superadmin")}/admin`}
                                 className="flex items-center gap-2 text-xs font-semibold hover:text-primary transition-colors text-foreground uppercase tracking-wider"
@@ -142,7 +137,7 @@ export function NeutralNavigation() {
                                     href="/register"
                                     className="px-5 py-2 bg-primary text-primary-foreground text-xs font-bold rounded-lg hover:opacity-90 transition-[color,background-color,border-color,box-shadow,opacity,transform] uppercase tracking-wider shadow-sm"
                                 >
-                                    Unite a la red
+                                    Únete a la red
                                 </Link>
                             </>
                         )}
@@ -157,7 +152,8 @@ export function NeutralNavigation() {
                             <SheetTrigger asChild>
                                 <Button
                                     variant="ghost"
-                                    size="icon" aria-label="Abrir menú de navegación"
+                                    size="icon"
+                                    aria-label="Abrir menú de navegación"
                                     className="text-foreground"
                                 >
                                     <Menu size={24} />
@@ -289,6 +285,22 @@ export function NeutralNavigation() {
                     </div>
                 </div>
             </div>
+
+            {isAdmin && tenants.length > 0 && (
+                <div className="md:hidden border-b border-border">
+                    <div className="container mx-auto py-3 w-full flex flex-nowrap gap-2 overflow-x-auto whitespace-nowrap">
+                        {tenants.map((tenant) => (
+                            <a
+                                key={tenant.id}
+                                href={getTenantUrl(tenant.slug)}
+                                className="px-3 py-1 text-[10px] font-semibold border border-border rounded-full hover:bg-primary hover:text-primary-foreground hover:border-primary transition-[color,background-color,border-color,box-shadow,opacity,transform] text-foreground"
+                            >
+                                {tenant.name}
+                            </a>
+                        ))}
+                    </div>
+                </div>
+            )}
         </nav>
     );
 }

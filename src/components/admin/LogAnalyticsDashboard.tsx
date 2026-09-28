@@ -1,18 +1,18 @@
 "use client";
 
-import React, { useState, use } from "react";
-import { logService } from "@/services/log.service";
 import {
     Activity,
     AlertCircle,
-    TrendingUp,
-    RefreshCcw,
     Database,
+    RefreshCcw,
+    TrendingUp,
     Zap,
 } from "lucide-react";
+import React, { use, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { logService } from "@/services/log.service";
 
 interface AnalyticsStats {
     totalRequests: number;
@@ -41,7 +41,6 @@ function fetchStats(timeframe: string): Promise<AnalyticsStats> {
 }
 
 function LogAnalyticsStats({
-
     statsPromise,
 }: {
     timeframe: string;
@@ -53,8 +52,8 @@ function LogAnalyticsStats({
         <div className="space-y-12">
             <div className="flex justify-between items-center border-b border-border pb-4">
                 <h3 className="font-bold uppercase tracking-widest text-xs flex items-center gap-2">
-                    <TrendingUp size={16} className="text-primary" />{" "}
-                    Operational Health
+                    <TrendingUp size={16} className="text-primary" /> Salud
+                    operativa
                 </h3>
             </div>
 
@@ -96,7 +95,9 @@ function LogAnalyticsStats({
                                         <span>
                                             {new Date(
                                                 day.date,
-                                            ).toLocaleDateString("es-ES", { timeZone: "UTC" })}
+                                            ).toLocaleDateString("es-ES", {
+                                                timeZone: "UTC",
+                                            })}
                                         </span>
                                         <span className="text-foreground">
                                             {day.total} REQS /{" "}
@@ -125,12 +126,12 @@ function LogAnalyticsStats({
 
                 <div className="space-y-6">
                     <h4 className="font-bold uppercase tracking-widest text-xs flex items-center gap-2 text-muted-foreground">
-                        <AlertCircle size={14} /> Critical Failure Points
+                        <AlertCircle size={14} /> Puntos críticos de falla
                     </h4>
                     <div className="t-card overflow-hidden divide-y divide-border/50 border-none shadow-xl">
                         {stats.topFailedEndpoints.length === 0 ? (
                             <div className="p-12 text-center text-muted-foreground font-medium text-sm italic">
-                                System stable / No errors detected
+                                Sistema estable / No se detectaron errores
                             </div>
                         ) : (
                             stats.topFailedEndpoints.map((endpoint) => (
@@ -212,8 +213,8 @@ export default function LogAnalyticsDashboard() {
         <div className="space-y-12">
             <div className="flex justify-between items-center border-b border-border pb-4">
                 <h3 className="font-bold uppercase tracking-widest text-xs flex items-center gap-2">
-                    <TrendingUp size={16} className="text-primary" />{" "}
-                    Operational Health
+                    <TrendingUp size={16} className="text-primary" /> Salud
+                    operativa
                 </h3>
                 <div className="flex gap-4">
                     <select
@@ -222,8 +223,8 @@ export default function LogAnalyticsDashboard() {
                         value={timeframe}
                         onChange={(e) => handleTimeframeChange(e.target.value)}
                     >
-                        <option value="last_24h">Last 24 Hours</option>
-                        <option value="last_7_days">Last 7 Days</option>
+                        <option value="last_24h">Últimas 24 horas</option>
+                        <option value="last_7_days">Últimos 7 días</option>
                     </select>
                     <button
                         type="button"

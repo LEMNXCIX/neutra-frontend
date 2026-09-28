@@ -1,13 +1,12 @@
 "use client";
 
-import React from "react";
 import {
     Dialog,
     DialogContent,
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
-import { Tenant } from "@/types/tenant";
+import type { Tenant } from "@/types/tenant";
 import { TenantForm } from "./TenantForm";
 
 const EMPTY_PLATFORM_FEATURES: any[] = [];

@@ -1,29 +1,32 @@
 "use client";
-import React, { useState, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useAuthStore } from "@/store/auth-store";
+import {
+    AlertCircle,
+    ArrowRight,
+    Loader2,
+    Lock,
+    LogIn,
+    Mail,
+} from "lucide-react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import type React from "react";
+import { Suspense, useState } from "react";
+import { AuthBrandHeader } from "@/components/auth/AuthBrandHeader";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
     Card,
     CardContent,
+    CardDescription,
     CardHeader,
     CardTitle,
-    CardDescription,
 } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Separator } from "@/components/ui/separator";
-import {
-    LogIn,
-    Mail,
-    Lock,
-    Loader2,
-    AlertCircle,
-    ArrowRight,
-} from "lucide-react";
-import { AuthBrandHeader } from "@/components/auth/AuthBrandHeader";
+import { errorMessageFrom } from "@/lib/error-messages";
+import { useAuthStore } from "@/store/auth-store";
 
 export function LoginForm() {
     const login = useAuthStore((state) => state.login);
@@ -41,7 +44,7 @@ export function LoginForm() {
         setError("");
 
         if (!email || !password) {
-            setError("Por favor completá todos los campos");
+            setError("Por favor completa todos los campos");
             return;
         }
 
@@ -49,9 +52,14 @@ export function LoginForm() {
             await login(email, password);
             router.push(redirectTo);
         } catch (err) {
-            let msg = "Error al iniciar sesión";
-            if (err instanceof Error) msg = err.message;
-            setError(msg);
+            // The backend sends a machine-readable code; the envelope message is
+            // its own and can be English, so neither is shown as-is.
+            setError(
+                errorMessageFrom(
+                    err,
+                    "No pudimos iniciar sesión. Inténtalo de nuevo.",
+                ),
+            );
         }
     };
 
@@ -70,7 +78,7 @@ export function LoginForm() {
                         Iniciar sesión
                     </CardTitle>
                     <CardDescription className="text-sm font-medium">
-                        Ingresá tus credenciales para continuar
+                        Ingresa tus credenciales para continuar
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="pb-8">
@@ -111,20 +119,15 @@ export function LoginForm() {
                                     ¿Te olvidaste?
                                 </Link>
                             </div>
-                            <div className="relative group">
-                                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                                <Input
-                                    id="password"
-                                    type="password"
-                                    placeholder="••••••••"
-                                    value={password}
-                                    onChange={(e) =>
-                                        setPassword(e.target.value)
-                                    }
-                                    className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform] focus:border-primary"
-                                    disabled={loading}
-                                />
-                            </div>
+                            <PasswordInput
+                                id="password"
+                                icon={Lock}
+                                placeholder="••••••••"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform] focus:border-primary"
+                                disabled={loading}
+                            />
                         </div>
 
                         {error && (
@@ -166,7 +169,7 @@ export function LoginForm() {
 
                         <div className="text-center space-y-4">
                             <p className="text-xs font-medium text-muted-foreground">
-                                ¿Aún no tenés una cuenta?
+                                ¿Aún no tienes una cuenta?
                             </p>
                             <Button
                                 variant="outline"

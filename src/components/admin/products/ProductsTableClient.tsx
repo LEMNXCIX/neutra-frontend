@@ -1,34 +1,42 @@
 "use client";
-import { TablePagination, MobileTablePagination } from "@/components/admin/shared/TablePagination";
-
+import {
+    AlertTriangle,
+    DollarSign,
+    Edit,
+    Package,
+    Plus,
+    Trash2,
+    Upload,
+    X,
+} from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import type React from "react";
+import { Suspense, useReducer, useRef } from "react";
+import { toast } from "sonner";
 import { AdminStatCard as StatCard } from "@/components/admin/shared/AdminStatCard";
 import { FilterSelect } from "@/components/admin/shared/FilterSelect";
-
-
-import React, { Suspense, useRef, useReducer } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { toast } from "sonner";
-import { api, ApiError } from "@/lib/api-client";
-import { Button } from "@/components/ui/button";
-import Image from "@/components/ui/image";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
 import {
-    Table,
-    TableHeader,
-    TableBody,
-    TableRow,
-    TableHead,
-    TableCell,
-} from "@/components/ui/table";
+    MobileTablePagination,
+    TablePagination,
+} from "@/components/admin/shared/TablePagination";
+import {
+    Accordion,
+    AccordionContent,
+    AccordionItem,
+    AccordionTrigger,
+} from "@/components/ui/accordion";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
     Dialog,
     DialogContent,
+    DialogFooter,
     DialogHeader,
     DialogTitle,
-    DialogFooter,
 } from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
+import Image from "@/components/ui/image";
+import { Input } from "@/components/ui/input";
 import {
     Select,
     SelectContent,
@@ -38,23 +46,17 @@ import {
 } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
 import {
-    Upload,
-    X,
-    Edit,
-    Trash2,
-    Plus,
-    Package,
-    DollarSign,
-    AlertTriangle,
-} from "lucide-react";
-import {
-    Accordion,
-    AccordionContent,
-    AccordionItem,
-    AccordionTrigger,
-} from "@/components/ui/accordion";
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table";
 import { useConfirm } from "@/hooks/use-confirm";
-import { Product } from "@/types/product.types";
+import { api } from "@/lib/api-client";
+import { reportError } from "@/lib/error-reporting";
+import type { Product } from "@/types/product.types";
 
 const getStockBadge = (stock: number) => {
     if (stock === 0)
@@ -100,609 +102,772 @@ type Props = {
     isSuperAdmin?: boolean;
 };
 
-
 function ProductFormFields({
-  form,
-  setForm,
-  preview,
-  setPreview,
-  categories,
-  prefix,
-  onImageUpload,
+    form,
+    setForm,
+    preview,
+    setPreview,
+    categories,
+    prefix,
+    onImageUpload,
 }: {
-  form: { name: string; price: string; stock: string; category: string; imageBase64: string };
-  setForm: (form: { name: string; price: string; stock: string; category: string; imageBase64: string }) => void;
-  preview: string | null;
-  setPreview: (preview: string | null) => void;
-  categories: Array<{ id: string; name: string }>;
-  prefix: string;
-  onImageUpload: (e: React.ChangeEvent<HTMLInputElement>, isEdit: boolean) => void;
+    form: {
+        name: string;
+        price: string;
+        stock: string;
+        category: string;
+        imageBase64: string;
+    };
+    setForm: (form: {
+        name: string;
+        price: string;
+        stock: string;
+        category: string;
+        imageBase64: string;
+    }) => void;
+    preview: string | null;
+    setPreview: (preview: string | null) => void;
+    categories: Array<{ id: string; name: string }>;
+    prefix: string;
+    onImageUpload: (
+        e: React.ChangeEvent<HTMLInputElement>,
+        isEdit: boolean,
+    ) => void;
 }) {
-  const isEdit = prefix === "edit";
-  return (
-    <div className="space-y-4">
-      <div>
-        <label htmlFor={`${prefix}-product-name`} className="text-sm font-medium">Nombre</label>
-        <Input id={`${prefix}-product-name`} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Nombre del producto" />
-      </div>
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label htmlFor={`${prefix}-product-price`} className="text-sm font-medium">Precio</label>
-          <Input id={`${prefix}-product-price`} type="number" min="0" step="0.01" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} placeholder="0.00" />
-        </div>
-        <div>
-          <label htmlFor={`${prefix}-product-stock`} className="text-sm font-medium">Stock</label>
-          <Input id={`${prefix}-product-stock`} type="number" min="0" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} placeholder="0" />
-        </div>
-      </div>
-      <div>
-        <label htmlFor={`${prefix}-product-category`} className="text-sm font-medium">Categoría</label>
-        <Select value={form.category} onValueChange={(val) => setForm({ ...form, category: val })}>
-          <SelectTrigger id={`${prefix}-product-category`}><SelectValue placeholder="Seleccionar categoría" /></SelectTrigger>
-          <SelectContent>
-            {(Array.isArray(categories) ? categories : []).map((cat) => (
-              <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-      <div>
-        <label htmlFor={`${prefix}-product-image`} className="text-sm font-medium">Imagen</label>
-        <div className="mt-2 flex items-center gap-3">
-          {preview && (
-            <div className="relative">
-              <Image src={preview} alt="Vista Previa" width={64} height={64} className="rounded object-cover" />
-              <Button size="sm" variant="destructive" className="absolute -top-2 -right-2 size-6 rounded-full p-0" onClick={() => { setPreview(null); setForm({ ...form, imageBase64: "" }); }}>
-                <X className="size-3" />
-              </Button>
+    const isEdit = prefix === "edit";
+    return (
+        <div className="space-y-4">
+            <div>
+                <label
+                    htmlFor={`${prefix}-product-name`}
+                    className="text-sm font-medium"
+                >
+                    Nombre
+                </label>
+                <Input
+                    id={`${prefix}-product-name`}
+                    value={form.name}
+                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                    placeholder="Nombre del producto"
+                />
             </div>
-          )}
-          <label htmlFor={`${prefix}-product-image`} className="cursor-pointer">
-            <div className="border-2 border-dashed rounded-lg p-4 hover:bg-muted/50 transition-colors">
-              <Upload className="size-6 mx-auto mb-1 text-muted-foreground" />
-              <p className="text-xs text-muted-foreground">{isEdit ? "Cambiar Imagen" : "Subir Imagen"}</p>
+            <div className="grid grid-cols-2 gap-3">
+                <div>
+                    <label
+                        htmlFor={`${prefix}-product-price`}
+                        className="text-sm font-medium"
+                    >
+                        Precio
+                    </label>
+                    <Input
+                        id={`${prefix}-product-price`}
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={form.price}
+                        onChange={(e) =>
+                            setForm({ ...form, price: e.target.value })
+                        }
+                        placeholder="0.00"
+                    />
+                </div>
+                <div>
+                    <label
+                        htmlFor={`${prefix}-product-stock`}
+                        className="text-sm font-medium"
+                    >
+                        Stock
+                    </label>
+                    <Input
+                        id={`${prefix}-product-stock`}
+                        type="number"
+                        min="0"
+                        value={form.stock}
+                        onChange={(e) =>
+                            setForm({ ...form, stock: e.target.value })
+                        }
+                        placeholder="0"
+                    />
+                </div>
             </div>
-            <input id={`${prefix}-product-image`} type="file" accept="image/*" className="hidden" onChange={(e) => onImageUpload(e, isEdit)} />
-          </label>
+            <div>
+                <label
+                    htmlFor={`${prefix}-product-category`}
+                    className="text-sm font-medium"
+                >
+                    Categoría
+                </label>
+                <Select
+                    value={form.category}
+                    onValueChange={(val) => setForm({ ...form, category: val })}
+                >
+                    <SelectTrigger id={`${prefix}-product-category`}>
+                        <SelectValue placeholder="Seleccionar categoría" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {(Array.isArray(categories) ? categories : []).map(
+                            (cat) => (
+                                <SelectItem key={cat.id} value={cat.id}>
+                                    {cat.name}
+                                </SelectItem>
+                            ),
+                        )}
+                    </SelectContent>
+                </Select>
+            </div>
+            <div>
+                <label
+                    htmlFor={`${prefix}-product-image`}
+                    className="text-sm font-medium"
+                >
+                    Imagen
+                </label>
+                <div className="mt-2 flex items-center gap-3">
+                    {preview && (
+                        <div className="relative">
+                            <Image
+                                src={preview}
+                                alt="Vista Previa"
+                                width={64}
+                                height={64}
+                                className="rounded object-cover"
+                            />
+                            <Button
+                                size="sm"
+                                variant="destructive"
+                                className="absolute -top-2 -right-2 size-6 rounded-full p-0"
+                                onClick={() => {
+                                    setPreview(null);
+                                    setForm({ ...form, imageBase64: "" });
+                                }}
+                            >
+                                <X className="size-3" />
+                            </Button>
+                        </div>
+                    )}
+                    <label
+                        htmlFor={`${prefix}-product-image`}
+                        className="cursor-pointer"
+                    >
+                        <div className="border-2 border-dashed rounded-lg p-4 hover:bg-muted/50 transition-colors">
+                            <Upload className="size-6 mx-auto mb-1 text-muted-foreground" />
+                            <p className="text-xs text-muted-foreground">
+                                {isEdit ? "Cambiar Imagen" : "Subir Imagen"}
+                            </p>
+                        </div>
+                        <input
+                            id={`${prefix}-product-image`}
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => onImageUpload(e, isEdit)}
+                        />
+                    </label>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-  );
+    );
 }
 
 type ProductsDialogState = {
-  createOpen: boolean;
-  editOpen: boolean;
-  form: { name: string; price: string; stock: string; category: string; imageBase64: string };
-  preview: string | null;
-  isCreating: boolean;
-  isEditing: boolean;
-  isDeleting: string | null;
+    createOpen: boolean;
+    editOpen: boolean;
+    form: {
+        name: string;
+        price: string;
+        stock: string;
+        category: string;
+        imageBase64: string;
+    };
+    preview: string | null;
+    isCreating: boolean;
+    isEditing: boolean;
+    isDeleting: string | null;
 };
 
 type ProductsDialogAction =
-  | { type: "SET_CREATE_OPEN"; payload: boolean }
-  | { type: "SET_EDIT_OPEN"; payload: boolean }
-  | { type: "SET_FORM"; payload: ProductsDialogState["form"] }
-  | { type: "SET_PREVIEW"; payload: string | null }
-  | { type: "SET_IS_CREATING"; payload: boolean }
-  | { type: "SET_IS_EDITING"; payload: boolean }
-  | { type: "SET_IS_DELETING"; payload: string | null };
+    | { type: "SET_CREATE_OPEN"; payload: boolean }
+    | { type: "SET_EDIT_OPEN"; payload: boolean }
+    | { type: "SET_FORM"; payload: ProductsDialogState["form"] }
+    | { type: "SET_PREVIEW"; payload: string | null }
+    | { type: "SET_IS_CREATING"; payload: boolean }
+    | { type: "SET_IS_EDITING"; payload: boolean }
+    | { type: "SET_IS_DELETING"; payload: string | null };
 
-function productsDialogReducer(state: ProductsDialogState, action: ProductsDialogAction): ProductsDialogState {
-  switch (action.type) {
-    case "SET_CREATE_OPEN":
-      return { ...state, createOpen: action.payload };
-    case "SET_EDIT_OPEN":
-      return { ...state, editOpen: action.payload };
-    case "SET_FORM":
-      return { ...state, form: action.payload };
-    case "SET_PREVIEW":
-      return { ...state, preview: action.payload };
-    case "SET_IS_CREATING":
-      return { ...state, isCreating: action.payload };
-    case "SET_IS_EDITING":
-      return { ...state, isEditing: action.payload };
-    case "SET_IS_DELETING":
-      return { ...state, isDeleting: action.payload };
-    default:
-      return state;
-  }
+function productsDialogReducer(
+    state: ProductsDialogState,
+    action: ProductsDialogAction,
+): ProductsDialogState {
+    switch (action.type) {
+        case "SET_CREATE_OPEN":
+            return { ...state, createOpen: action.payload };
+        case "SET_EDIT_OPEN":
+            return { ...state, editOpen: action.payload };
+        case "SET_FORM":
+            return { ...state, form: action.payload };
+        case "SET_PREVIEW":
+            return { ...state, preview: action.payload };
+        case "SET_IS_CREATING":
+            return { ...state, isCreating: action.payload };
+        case "SET_IS_EDITING":
+            return { ...state, isEditing: action.payload };
+        case "SET_IS_DELETING":
+            return { ...state, isDeleting: action.payload };
+        default:
+            return state;
+    }
 }
 
 function ProductsDesktopTable({
-  products,
-  isSuperAdmin,
-  openEdit,
-  deleteProduct,
+    products,
+    isSuperAdmin,
+    openEdit,
+    deleteProduct,
 
-  pagination,
-  handlePageChange,
+    pagination,
+    handlePageChange,
 }: {
-  products: Product[];
-  isSuperAdmin: boolean;
-  openEdit: (p: Product) => void;
-  deleteProduct: (id: string) => void;
-  isDeleting: string | null;
-  pagination: PaginationProps;
-  handlePageChange: (page: number) => void;
+    products: Product[];
+    isSuperAdmin: boolean;
+    openEdit: (p: Product) => void;
+    deleteProduct: (id: string) => void;
+    isDeleting: string | null;
+    pagination: PaginationProps;
+    handlePageChange: (page: number) => void;
 }) {
-  return (
-    <Card className="hidden lg:block">
-      <div className="overflow-x-auto">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[80px]">
-                Imagen
-              </TableHead>
-              <TableHead className="w-[120px]">ID</TableHead>
-              <TableHead className="w-[200px]">
-                Nombre
-              </TableHead>
-              <TableHead className="w-[120px]">
-                Categoría
-              </TableHead>
-              {isSuperAdmin && (
-                <TableHead className="w-[100px]">
-                  Organización
-                </TableHead>
-              )}
-              <TableHead className="w-[100px]">
-                Precio
-              </TableHead>
-              <TableHead className="w-[80px]">
-                Stock
-              </TableHead>
-              <TableHead className="w-[120px]">
-                Estado
-              </TableHead>
-              <TableHead className="w-[150px]">
-                Acciones
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {products.length === 0 ? (
-              <TableRow>
-                <TableCell
-                  colSpan={8}
-                  className="text-center py-8 text-muted-foreground"
-                >
-                  No se encontraron productos
-                </TableCell>
-              </TableRow>
-            ) : (
-              products.map((p) => (
-                <TableRow
-                  key={p.id}
-                  className="group hover:bg-muted/50 transition-colors border-b border-border/50"
-                >
-                  <TableCell className="py-4">
-                    {p.image ? (
-                      <div className="relative size-12 rounded-lg overflow-hidden shadow-sm border border-border group-hover:scale-110 transition-transform duration-500">
-                        <Image
-                          src={p.image}
-                          alt={p.name}
-                          fill
-                          sizes="48px"
-                          className="object-cover"
-                        />
-                      </div>
-                    ) : (
-                      <div className="size-12 bg-muted rounded-lg flex items-center justify-center border border-border">
-                        <Package className="size-5 text-muted-foreground/40" />
-                      </div>
-                    )}
-                  </TableCell>
-                  <TableCell className="font-mono text-[10px] text-muted-foreground tracking-tighter">
-                    #{p.id.slice(0, 8)}
-                  </TableCell>
-                  <TableCell>
-                    <span className="font-semibold text-sm">
-                      {p.name}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex flex-wrap gap-1">
-                      {p.categories?.map((c) => (
-                        <Badge
-                          key={c.id}
-                          variant="secondary"
-                          className="text-[9px] font-bold uppercase tracking-wider"
-                        >
-                          {c.name}
-                        </Badge>
-                      )) || (
-                        <span className="text-muted-foreground italic text-xs">
-                          N/A
-                        </span>
-                      )}
-                    </div>
-                  </TableCell>
-                  {isSuperAdmin && (
-                    <TableCell>
-                      <Badge
-                        variant="secondary"
-                        className="text-[9px] font-bold uppercase tracking-wider"
-                      >
-                        {p.tenant?.name || "—"}
-                      </Badge>
-                    </TableCell>
-                  )}
-                  <TableCell>
-                    <span className="font-bold text-sm">
-                      ${p.price.toFixed(2)}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <span className="font-medium text-sm text-muted-foreground">
-                      {p.stock || 0}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    {getStockBadge(p.stock || 0)}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button
-                        size="icon" aria-label="Editar producto"
-                        variant="ghost"
-                        className="size-8 rounded-full hover:bg-primary/5 hover:text-primary"
-                        onClick={() => openEdit(p)}
-                      >
-                        <Edit className="size-4" />
-                      </Button>
-                      <Button
-                        size="icon" aria-label="Eliminar producto"
-                        variant="ghost"
-                        className="size-8 rounded-full hover:bg-destructive/5 hover:text-destructive"
-                        onClick={() =>
-                          deleteProduct(p.id)
-                        }
-                      >
-                        <Trash2 className="size-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
+    return (
+        <Card className="hidden lg:block">
+            <div className="overflow-x-auto">
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead className="w-[80px]">Imagen</TableHead>
+                            <TableHead className="w-[120px]">ID</TableHead>
+                            <TableHead className="w-[200px]">Nombre</TableHead>
+                            <TableHead className="w-[120px]">
+                                Categoría
+                            </TableHead>
+                            {isSuperAdmin && (
+                                <TableHead className="w-[100px]">
+                                    Organización
+                                </TableHead>
+                            )}
+                            <TableHead className="w-[100px]">Precio</TableHead>
+                            <TableHead className="w-[80px]">Stock</TableHead>
+                            <TableHead className="w-[120px]">Estado</TableHead>
+                            <TableHead className="w-[150px]">
+                                Acciones
+                            </TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {products.length === 0 ? (
+                            <TableRow>
+                                <TableCell
+                                    colSpan={8}
+                                    className="text-center py-8 text-muted-foreground"
+                                >
+                                    No se encontraron productos
+                                </TableCell>
+                            </TableRow>
+                        ) : (
+                            products.map((p) => (
+                                <TableRow
+                                    key={p.id}
+                                    className="group hover:bg-muted/50 transition-colors border-b border-border/50"
+                                >
+                                    <TableCell className="py-4">
+                                        {p.image ? (
+                                            <div className="relative size-12 rounded-lg overflow-hidden shadow-sm border border-border group-hover:scale-110 transition-transform duration-500">
+                                                <Image
+                                                    src={p.image}
+                                                    alt={p.name}
+                                                    fill
+                                                    sizes="48px"
+                                                    className="object-cover"
+                                                />
+                                            </div>
+                                        ) : (
+                                            <div className="size-12 bg-muted rounded-lg flex items-center justify-center border border-border">
+                                                <Package className="size-5 text-muted-foreground/40" />
+                                            </div>
+                                        )}
+                                    </TableCell>
+                                    <TableCell className="font-mono text-[10px] text-muted-foreground tracking-tighter">
+                                        #{p.id.slice(0, 8)}
+                                    </TableCell>
+                                    <TableCell>
+                                        <span className="font-semibold text-sm">
+                                            {p.name}
+                                        </span>
+                                    </TableCell>
+                                    <TableCell>
+                                        <div className="flex flex-wrap gap-1">
+                                            {p.categories?.map((c) => (
+                                                <Badge
+                                                    key={c.id}
+                                                    variant="secondary"
+                                                    className="text-[9px] font-bold uppercase tracking-wider"
+                                                >
+                                                    {c.name}
+                                                </Badge>
+                                            )) || (
+                                                <span className="text-muted-foreground italic text-xs">
+                                                    N/A
+                                                </span>
+                                            )}
+                                        </div>
+                                    </TableCell>
+                                    {isSuperAdmin && (
+                                        <TableCell>
+                                            <Badge
+                                                variant="secondary"
+                                                className="text-[9px] font-bold uppercase tracking-wider"
+                                            >
+                                                {p.tenant?.name || "—"}
+                                            </Badge>
+                                        </TableCell>
+                                    )}
+                                    <TableCell>
+                                        <span className="font-bold text-sm">
+                                            ${p.price.toFixed(2)}
+                                        </span>
+                                    </TableCell>
+                                    <TableCell>
+                                        <span className="font-medium text-sm text-muted-foreground">
+                                            {p.stock || 0}
+                                        </span>
+                                    </TableCell>
+                                    <TableCell>
+                                        {getStockBadge(p.stock || 0)}
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                        <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <Button
+                                                size="icon"
+                                                aria-label="Editar producto"
+                                                variant="ghost"
+                                                className="size-8 rounded-full hover:bg-primary/5 hover:text-primary"
+                                                onClick={() => openEdit(p)}
+                                            >
+                                                <Edit className="size-4" />
+                                            </Button>
+                                            <Button
+                                                size="icon"
+                                                aria-label="Eliminar producto"
+                                                variant="ghost"
+                                                className="size-8 rounded-full hover:bg-destructive/5 hover:text-destructive"
+                                                onClick={() =>
+                                                    deleteProduct(p.id)
+                                                }
+                                            >
+                                                <Trash2 className="size-4" />
+                                            </Button>
+                                        </div>
+                                    </TableCell>
+                                </TableRow>
+                            ))
+                        )}
+                    </TableBody>
+                </Table>
+            </div>
 
-      <TablePagination pagination={pagination} onPageChange={handlePageChange} />
-    </Card>
-  );
+            <TablePagination
+                pagination={pagination}
+                onPageChange={handlePageChange}
+            />
+        </Card>
+    );
 }
 
 function ProductsMobileCards({
-  products,
-  openEdit,
-  deleteProduct,
-  isDeleting,
-  pagination,
-  handlePageChange,
+    products,
+    openEdit,
+    deleteProduct,
+    isDeleting,
+    pagination,
+    handlePageChange,
 }: {
-  products: Product[];
-  openEdit: (p: Product) => void;
-  deleteProduct: (id: string) => void;
-  isDeleting: string | null;
-  pagination: PaginationProps;
-  handlePageChange: (page: number) => void;
+    products: Product[];
+    openEdit: (p: Product) => void;
+    deleteProduct: (id: string) => void;
+    isDeleting: string | null;
+    pagination: PaginationProps;
+    handlePageChange: (page: number) => void;
 }) {
-  return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:hidden">
-      {products.map((p) => (
-        <Card
-          key={p.id}
-          className="t-card overflow-hidden group border-none"
-        >
-          <div className="aspect-square bg-muted relative overflow-hidden">
-            {p.image ? (
-              <Image
-                src={p.image}
-                alt={p.name}
-                fill
-                sizes="(max-width: 768px) 100vw, 50vw"
-                className="object-cover transition-transform group-hover:scale-110 duration-500"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center">
-                <Package className="size-16 text-muted-foreground/30" />
-              </div>
-            )}
-          </div>
-          <CardContent className="p-5 space-y-4">
-            <div className="space-y-1">
-              <h3 className="font-bold text-base line-clamp-1 text-foreground">
-                {p.name}
-              </h3>
-              <p className="text-[10px] font-medium text-muted-foreground font-mono">
-                ID: #{p.id.slice(0, 8)}
-              </p>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="font-bold text-lg text-primary">
-                ${p.price.toFixed(2)}
-              </span>
-              {getStockBadge(p.stock || 0)}
-            </div>
-            <div className="flex gap-2 pt-2 border-t border-border/50">
-              <Button
-                size="sm"
-                variant="outline"
-                className="flex-1 font-semibold h-10"
-                onClick={() => openEdit(p)}
-              >
-                <Edit className="size-4 mr-2" />
-                Editar
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                className="flex-1 font-semibold h-10 text-destructive border-destructive/20 hover:bg-destructive/10"
-                onClick={() => deleteProduct(p.id)}
-                disabled={isDeleting === p.id}
-              >
-                {isDeleting === p.id ? (
-                  <Spinner className="size-4" />
-                ) : (
-                  <Trash2 className="size-4 mr-2" />
-                )}
-                Eliminar
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
+    return (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:hidden">
+            {products.map((p) => (
+                <Card
+                    key={p.id}
+                    className="t-card overflow-hidden group border-none"
+                >
+                    <div className="aspect-square bg-muted relative overflow-hidden">
+                        {p.image ? (
+                            <Image
+                                src={p.image}
+                                alt={p.name}
+                                fill
+                                sizes="(max-width: 768px) 100vw, 50vw"
+                                className="object-cover transition-transform group-hover:scale-110 duration-500"
+                            />
+                        ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                                <Package className="size-16 text-muted-foreground/30" />
+                            </div>
+                        )}
+                    </div>
+                    <CardContent className="p-5 space-y-4">
+                        <div className="space-y-1">
+                            <h3 className="font-bold text-base line-clamp-1 text-foreground">
+                                {p.name}
+                            </h3>
+                            <p className="text-[10px] font-medium text-muted-foreground font-mono">
+                                ID: #{p.id.slice(0, 8)}
+                            </p>
+                        </div>
+                        <div className="flex justify-between items-center">
+                            <span className="font-bold text-lg text-primary">
+                                ${p.price.toFixed(2)}
+                            </span>
+                            {getStockBadge(p.stock || 0)}
+                        </div>
+                        <div className="flex gap-2 pt-2 border-t border-border/50">
+                            <Button
+                                size="sm"
+                                variant="outline"
+                                className="flex-1 font-semibold h-10"
+                                onClick={() => openEdit(p)}
+                            >
+                                <Edit className="size-4 mr-2" />
+                                Editar
+                            </Button>
+                            <Button
+                                size="sm"
+                                variant="outline"
+                                className="flex-1 font-semibold h-10 text-destructive border-destructive/20 hover:bg-destructive/10"
+                                onClick={() => deleteProduct(p.id)}
+                                disabled={isDeleting === p.id}
+                            >
+                                {isDeleting === p.id ? (
+                                    <Spinner className="size-4" />
+                                ) : (
+                                    <Trash2 className="size-4 mr-2" />
+                                )}
+                                Eliminar
+                            </Button>
+                        </div>
+                    </CardContent>
+                </Card>
+            ))}
 
-      <MobileTablePagination pagination={pagination} onPageChange={handlePageChange} />
-    </div>
-  );
+            <MobileTablePagination
+                pagination={pagination}
+                onPageChange={handlePageChange}
+            />
+        </div>
+    );
 }
 
 function CreateProductDialog({
-  dialogState,
-  dispatch,
-  createProduct,
-  handleImageUpload,
-  categories,
+    dialogState,
+    dispatch,
+    createProduct,
+    handleImageUpload,
+    categories,
 }: {
-  dialogState: ProductsDialogState;
-  dispatch: React.Dispatch<ProductsDialogAction>;
-  createProduct: () => void;
-  handleImageUpload: (e: React.ChangeEvent<HTMLInputElement>, isEdit: boolean) => void;
-  categories: Array<{ id: string; name: string }>;
+    dialogState: ProductsDialogState;
+    dispatch: React.Dispatch<ProductsDialogAction>;
+    createProduct: () => void;
+    handleImageUpload: (
+        e: React.ChangeEvent<HTMLInputElement>,
+        isEdit: boolean,
+    ) => void;
+    categories: Array<{ id: string; name: string }>;
 }) {
-  return (
-    <Dialog open={dialogState.createOpen} onOpenChange={(v) => dispatch({ type: "SET_CREATE_OPEN", payload: v })}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle>Agregar producto</DialogTitle>
-        </DialogHeader>
-        <ProductFormFields form={dialogState.form} setForm={(f: ProductsDialogState["form"]) => dispatch({ type: "SET_FORM", payload: f })} preview={dialogState.preview} setPreview={(p: string | null) => dispatch({ type: "SET_PREVIEW", payload: p })} categories={categories} prefix="create" onImageUpload={handleImageUpload} />
-        <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => dispatch({ type: "SET_CREATE_OPEN", payload: false })}
-            disabled={dialogState.isCreating}
-          >
-            Cancelar
-          </Button>
-          <Button onClick={createProduct} disabled={dialogState.isCreating}>
-            {dialogState.isCreating ? (
-              <>
-                <Spinner className="mr-2" /> Creando…
-              </>
-            ) : (
-              "Crear Producto"
-            )}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
+    return (
+        <Dialog
+            open={dialogState.createOpen}
+            onOpenChange={(v) =>
+                dispatch({ type: "SET_CREATE_OPEN", payload: v })
+            }
+        >
+            <DialogContent className="max-w-md">
+                <DialogHeader>
+                    <DialogTitle>Agregar producto</DialogTitle>
+                </DialogHeader>
+                <ProductFormFields
+                    form={dialogState.form}
+                    setForm={(f: ProductsDialogState["form"]) =>
+                        dispatch({ type: "SET_FORM", payload: f })
+                    }
+                    preview={dialogState.preview}
+                    setPreview={(p: string | null) =>
+                        dispatch({ type: "SET_PREVIEW", payload: p })
+                    }
+                    categories={categories}
+                    prefix="create"
+                    onImageUpload={handleImageUpload}
+                />
+                <DialogFooter>
+                    <Button
+                        variant="outline"
+                        onClick={() =>
+                            dispatch({
+                                type: "SET_CREATE_OPEN",
+                                payload: false,
+                            })
+                        }
+                        disabled={dialogState.isCreating}
+                    >
+                        Cancelar
+                    </Button>
+                    <Button
+                        onClick={createProduct}
+                        disabled={dialogState.isCreating}
+                    >
+                        {dialogState.isCreating ? (
+                            <>
+                                <Spinner className="mr-2" /> Creando…
+                            </>
+                        ) : (
+                            "Crear Producto"
+                        )}
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    );
 }
 
 function EditProductDialog({
-  dialogState,
-  dispatch,
-  saveEdit,
-  handleImageUpload,
-  categories,
-
+    dialogState,
+    dispatch,
+    saveEdit,
+    handleImageUpload,
+    categories,
 }: {
-  dialogState: ProductsDialogState;
-  dispatch: React.Dispatch<ProductsDialogAction>;
-  saveEdit: () => void;
-  handleImageUpload: (e: React.ChangeEvent<HTMLInputElement>, isEdit: boolean) => void;
-  categories: Array<{ id: string; name: string }>;
-  editingRef: React.MutableRefObject<Product | null>;
+    dialogState: ProductsDialogState;
+    dispatch: React.Dispatch<ProductsDialogAction>;
+    saveEdit: () => void;
+    handleImageUpload: (
+        e: React.ChangeEvent<HTMLInputElement>,
+        isEdit: boolean,
+    ) => void;
+    categories: Array<{ id: string; name: string }>;
+    editingRef: React.MutableRefObject<Product | null>;
 }) {
-  return (
-    <Dialog open={dialogState.editOpen} onOpenChange={(v) => dispatch({ type: "SET_EDIT_OPEN", payload: v })}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle>Editar producto</DialogTitle>
-        </DialogHeader>
-        <ProductFormFields form={dialogState.form} setForm={(f: ProductsDialogState["form"]) => dispatch({ type: "SET_FORM", payload: f })} preview={dialogState.preview} setPreview={(p: string | null) => dispatch({ type: "SET_PREVIEW", payload: p })} categories={categories} prefix="edit" onImageUpload={handleImageUpload} />
-        <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => dispatch({ type: "SET_EDIT_OPEN", payload: false })}
-            disabled={dialogState.isEditing}
-          >
-            Cancelar
-          </Button>
-          <Button onClick={saveEdit} disabled={dialogState.isEditing}>
-            {dialogState.isEditing ? (
-              <>
-                <Spinner className="mr-2" /> Guardando…
-              </>
-            ) : (
-              "Guardar Cambios"
-            )}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
+    return (
+        <Dialog
+            open={dialogState.editOpen}
+            onOpenChange={(v) =>
+                dispatch({ type: "SET_EDIT_OPEN", payload: v })
+            }
+        >
+            <DialogContent className="max-w-md">
+                <DialogHeader>
+                    <DialogTitle>Editar producto</DialogTitle>
+                </DialogHeader>
+                <ProductFormFields
+                    form={dialogState.form}
+                    setForm={(f: ProductsDialogState["form"]) =>
+                        dispatch({ type: "SET_FORM", payload: f })
+                    }
+                    preview={dialogState.preview}
+                    setPreview={(p: string | null) =>
+                        dispatch({ type: "SET_PREVIEW", payload: p })
+                    }
+                    categories={categories}
+                    prefix="edit"
+                    onImageUpload={handleImageUpload}
+                />
+                <DialogFooter>
+                    <Button
+                        variant="outline"
+                        onClick={() =>
+                            dispatch({ type: "SET_EDIT_OPEN", payload: false })
+                        }
+                        disabled={dialogState.isEditing}
+                    >
+                        Cancelar
+                    </Button>
+                    <Button onClick={saveEdit} disabled={dialogState.isEditing}>
+                        {dialogState.isEditing ? (
+                            <>
+                                <Spinner className="mr-2" /> Guardando…
+                            </>
+                        ) : (
+                            "Guardar Cambios"
+                        )}
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    );
 }
 
 function ProductsStats({ stats }: { stats: Stats }) {
-  return (
-    <>
-      <div className="hidden md:grid md:grid-cols-3 gap-4">
-        <StatCard iconClassName="size-6"
-          icon={Package}
-          title="Total de Productos"
-          value={stats.totalProducts}
-          color="bg-primary/10 text-primary"
-        />
-        <StatCard iconClassName="size-6"
-          icon={DollarSign}
-          title="Valor Total del Inventario"
-          value={`$${stats.totalValue.toFixed(2)}`}
-          color="bg-accent text-accent-foreground"
-        />
-        <StatCard iconClassName="size-6"
-          icon={AlertTriangle}
-          title="Productos con Poco Stock"
-          value={stats.lowStockCount}
-          color="bg-destructive/10 text-destructive"
-        />
-      </div>
+    return (
+        <>
+            <div className="hidden md:grid md:grid-cols-3 gap-4">
+                <StatCard
+                    iconClassName="size-6"
+                    icon={Package}
+                    title="Total de Productos"
+                    value={stats.totalProducts}
+                    color="bg-primary/10 text-primary"
+                />
+                <StatCard
+                    iconClassName="size-6"
+                    icon={DollarSign}
+                    title="Valor Total del Inventario"
+                    value={`$${stats.totalValue.toFixed(2)}`}
+                    color="bg-accent text-accent-foreground"
+                />
+                <StatCard
+                    iconClassName="size-6"
+                    icon={AlertTriangle}
+                    title="Productos con Poco Stock"
+                    value={stats.lowStockCount}
+                    color="bg-destructive/10 text-destructive"
+                />
+            </div>
 
-      <Accordion type="single" collapsible className="w-full md:hidden">
-        <AccordionItem value="stats" className="border rounded-lg">
-          <AccordionTrigger className="px-4 hover:no-underline">
-            <div className="flex items-center gap-3">
-              <Package className="size-5 text-muted-foreground" />
-              <span className="font-medium">
-                Estadísticas de productos
-              </span>
-            </div>
-          </AccordionTrigger>
-          <AccordionContent className="px-4 pb-4 pt-2">
-            <div className="grid grid-cols-1 gap-4">
-              <StatCard iconClassName="size-6"
-                icon={Package}
-                title="Total de Productos"
-                value={stats.totalProducts}
-                color="bg-primary/10 text-primary"
-              />
-              <StatCard iconClassName="size-6"
-                icon={DollarSign}
-                title="Valor Total del Inventario"
-                value={`$${stats.totalValue.toFixed(2)}`}
-                color="bg-accent text-accent-foreground"
-              />
-              <StatCard iconClassName="size-6"
-                icon={AlertTriangle}
-                title="Productos con Poco Stock"
-                value={stats.lowStockCount}
-                color="bg-destructive/10 text-destructive"
-              />
-            </div>
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
-    </>
-  );
+            <Accordion type="single" collapsible className="w-full md:hidden">
+                <AccordionItem value="stats" className="border rounded-lg">
+                    <AccordionTrigger className="px-4 hover:no-underline">
+                        <div className="flex items-center gap-3">
+                            <Package className="size-5 text-muted-foreground" />
+                            <span className="font-medium">
+                                Estadísticas de productos
+                            </span>
+                        </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="px-4 pb-4 pt-2">
+                        <div className="grid grid-cols-1 gap-4">
+                            <StatCard
+                                iconClassName="size-6"
+                                icon={Package}
+                                title="Total de Productos"
+                                value={stats.totalProducts}
+                                color="bg-primary/10 text-primary"
+                            />
+                            <StatCard
+                                iconClassName="size-6"
+                                icon={DollarSign}
+                                title="Valor Total del Inventario"
+                                value={`$${stats.totalValue.toFixed(2)}`}
+                                color="bg-accent text-accent-foreground"
+                            />
+                            <StatCard
+                                iconClassName="size-6"
+                                icon={AlertTriangle}
+                                title="Productos con Poco Stock"
+                                value={stats.lowStockCount}
+                                color="bg-destructive/10 text-destructive"
+                            />
+                        </div>
+                    </AccordionContent>
+                </AccordionItem>
+            </Accordion>
+        </>
+    );
 }
 
 function ProductsFilters({
-  categories,
-  isSuperAdmin,
-  categoryFilter,
-  tenantFilter,
-  searchQuery,
-  handleFilterChange,
-  handleTenantFilterChange,
-  handleSearch,
+    categories,
+    isSuperAdmin,
+    categoryFilter,
+    tenantFilter,
+    searchQuery,
+    handleFilterChange,
+    handleTenantFilterChange,
+    handleSearch,
 }: {
-  categories: Array<{ id: string; name: string }>;
-  isSuperAdmin: boolean;
-  categoryFilter: string;
-  tenantFilter: string;
-  searchQuery: string;
-  handleFilterChange: (filter: string) => void;
-  handleTenantFilterChange: (tenant: string) => void;
-  handleSearch: (term: string) => void;
+    categories: Array<{ id: string; name: string }>;
+    isSuperAdmin: boolean;
+    categoryFilter: string;
+    tenantFilter: string;
+    searchQuery: string;
+    handleFilterChange: (filter: string) => void;
+    handleTenantFilterChange: (tenant: string) => void;
+    handleSearch: (term: string) => void;
 }) {
-  return (
-    <Card>
-      <CardContent className="pt-6">
-        <div className="flex flex-wrap gap-3">
-          <Select
-            value={categoryFilter}
-            onValueChange={handleFilterChange}
-          >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Todas las Categorías" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">
-                Todas las categorías
-              </SelectItem>
-              {(Array.isArray(categories)
-                ? categories
-                : []
-              ).map((cat) => (
-                <SelectItem key={cat.id} value={cat.id}>
-                  {cat.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+    return (
+        <Card>
+            <CardContent className="pt-6">
+                <div className="flex flex-wrap gap-3">
+                    <Select
+                        value={categoryFilter}
+                        onValueChange={handleFilterChange}
+                    >
+                        <SelectTrigger className="w-[180px]">
+                            <SelectValue placeholder="Todas las Categorías" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">
+                                Todas las categorías
+                            </SelectItem>
+                            {(Array.isArray(categories) ? categories : []).map(
+                                (cat) => (
+                                    <SelectItem key={cat.id} value={cat.id}>
+                                        {cat.name}
+                                    </SelectItem>
+                                ),
+                            )}
+                        </SelectContent>
+                    </Select>
 
-          {isSuperAdmin && (
-            <div className="w-[180px]">
-              <FilterSelect
-                value={tenantFilter}
-                onValueChange={handleTenantFilterChange}
-                placeholder="Todos los tenants"
-                options={[{ value: "all", label: "Todos los tenants" }]}
-              />
-            </div>
-          )}
+                    {isSuperAdmin && (
+                        <div className="w-[180px]">
+                            <FilterSelect
+                                value={tenantFilter}
+                                onValueChange={handleTenantFilterChange}
+                                placeholder="Todos los tenants"
+                                options={[
+                                    {
+                                        value: "all",
+                                        label: "Todos los tenants",
+                                    },
+                                ]}
+                            />
+                        </div>
+                    )}
 
-          <div className="flex gap-2 flex-1">
-            <Input
-              placeholder="Buscar por nombre o ID de producto..."
-              defaultValue={searchQuery}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  handleSearch(e.currentTarget.value);
-                }
-              }}
-              className="max-w-md"
-            />
-            <Button
-              onClick={() => {
-                const input = document.querySelector(
-                  'input[placeholder="Buscar por nombre o ID de producto..."]',
-                ) as HTMLInputElement;
-                handleSearch(input?.value || "");
-              }}
-            >
-              Buscar
-            </Button>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
+                    <div className="flex gap-2 flex-1">
+                        <Input
+                            placeholder="Buscar por nombre o ID de producto..."
+                            defaultValue={searchQuery}
+                            onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                    handleSearch(e.currentTarget.value);
+                                }
+                            }}
+                            className="max-w-md"
+                        />
+                        <Button
+                            onClick={() => {
+                                const input = document.querySelector(
+                                    'input[placeholder="Buscar por nombre o ID de producto..."]',
+                                ) as HTMLInputElement;
+                                handleSearch(input?.value || "");
+                            }}
+                        >
+                            Buscar
+                        </Button>
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
+    );
 }
 
 export default function ProductsTableClient(props: Props) {
-  return (
-    <Suspense fallback={<div className="p-6" />}>
-      <ProductsTableClientInner {...props} />
-    </Suspense>
-  );
+    return (
+        <Suspense fallback={<div className="p-6" />}>
+            <ProductsTableClientInner {...props} />
+        </Suspense>
+    );
 }
 
 function ProductsTableClientInner({
@@ -717,16 +882,16 @@ function ProductsTableClientInner({
     const { confirm, ConfirmDialog } = useConfirm();
 
     // Local state for UI interactions (Dialogs, Forms)
-  const [dialogState, dispatch] = useReducer(productsDialogReducer, {
-    createOpen: false,
-    editOpen: false,
-    form: { name: "", price: "", stock: "", category: "", imageBase64: "" },
-    preview: null,
-    isCreating: false,
-    isEditing: false,
-    isDeleting: null,
-  });
-  const editingRef = useRef<Product | null>(null);
+    const [dialogState, dispatch] = useReducer(productsDialogReducer, {
+        createOpen: false,
+        editOpen: false,
+        form: { name: "", price: "", stock: "", category: "", imageBase64: "" },
+        preview: null,
+        isCreating: false,
+        isEditing: false,
+        isDeleting: null,
+    });
+    const editingRef = useRef<Product | null>(null);
 
     // URL State
     const searchQuery = searchParams.get("search") || "";
@@ -782,8 +947,11 @@ function ProductsTableClientInner({
         const reader = new FileReader();
         reader.onload = () => {
             const base64 = reader.result as string;
-    dispatch({ type: "SET_FORM", payload: { ...dialogState.form, imageBase64: base64 } });
-    dispatch({ type: "SET_PREVIEW", payload: base64 });
+            dispatch({
+                type: "SET_FORM",
+                payload: { ...dialogState.form, imageBase64: base64 },
+            });
+            dispatch({ type: "SET_PREVIEW", payload: base64 });
         };
         reader.readAsDataURL(file);
     };
@@ -793,43 +961,51 @@ function ProductsTableClientInner({
             toast.error("El nombre es obligatorio");
             return;
         }
-  if (Number(dialogState.form.price) < 0 || Number(dialogState.form.stock) < 0) {
-    toast.error("El precio y el stock no pueden ser negativos");
-    return;
-  }
+        if (
+            Number(dialogState.form.price) < 0 ||
+            Number(dialogState.form.stock) < 0
+        ) {
+            toast.error("El precio y el stock no pueden ser negativos");
+            return;
+        }
 
-  dispatch({ type: "SET_IS_CREATING", payload: true });
-  try {
-    const body = {
-      name: dialogState.form.name,
-      description: "",
-      price: Number(dialogState.form.price || 0),
-      stock: Number(dialogState.form.stock || 0),
-      categoryIds: dialogState.form.category ? [dialogState.form.category] : [],
-      image: dialogState.form.imageBase64 || undefined,
+        dispatch({ type: "SET_IS_CREATING", payload: true });
+        try {
+            const body = {
+                name: dialogState.form.name,
+                description: "",
+                price: Number(dialogState.form.price || 0),
+                stock: Number(dialogState.form.stock || 0),
+                categoryIds: dialogState.form.category
+                    ? [dialogState.form.category]
+                    : [],
+                image: dialogState.form.imageBase64 || undefined,
                 ownerId: "admin",
             };
             try {
                 await api.post("/products", body);
             } catch (err) {
-                toast.error(err instanceof ApiError ? err.message : "Error al crear el producto");
+                reportError(err, "No pudimos crear el producto.");
                 return;
             }
-    toast.success("Producto creado");
-    dispatch({ type: "SET_CREATE_OPEN", payload: false });
-    dispatch({ type: "SET_FORM", payload: {
-      name: "",
-      price: "",
-      stock: "",
-      category: "",
-      imageBase64: "",
-    }});
-    dispatch({ type: "SET_PREVIEW", payload: null });
-    router.refresh();
-  } catch {
-    toast.error("Error de red");
-  } finally {
-    dispatch({ type: "SET_IS_CREATING", payload: false });
+            toast.success("Producto creado");
+            dispatch({ type: "SET_CREATE_OPEN", payload: false });
+            dispatch({
+                type: "SET_FORM",
+                payload: {
+                    name: "",
+                    price: "",
+                    stock: "",
+                    category: "",
+                    imageBase64: "",
+                },
+            });
+            dispatch({ type: "SET_PREVIEW", payload: null });
+            router.refresh();
+        } catch {
+            toast.error("Error de red");
+        } finally {
+            dispatch({ type: "SET_IS_CREATING", payload: false });
         }
     };
 
@@ -837,7 +1013,7 @@ function ProductsTableClientInner({
         const confirmed = await confirm({
             title: "Eliminar Producto",
             description:
-                "¿Seguro que querés eliminar este producto? Esta acción no se puede deshacer.",
+                "¿Seguro que quieres eliminar este producto? Esta acción no se puede deshacer.",
             confirmText: "Eliminar",
             variant: "destructive",
         });
@@ -847,7 +1023,7 @@ function ProductsTableClientInner({
             try {
                 await api.delete(`/products/${id}`);
             } catch (err) {
-                toast.error(err instanceof ApiError ? err.message : "Error al eliminar");
+                reportError(err, "No pudimos eliminar el producto.");
                 return;
             }
             toast.success("Producto eliminado");
@@ -861,118 +1037,134 @@ function ProductsTableClientInner({
 
     const openEdit = (p: Product) => {
         editingRef.current = p;
-  dispatch({ type: "SET_FORM", payload: {
-    name: p.name,
-    price: String(p.price),
-    stock: String(p.stock || 0),
-    category: p.categories?.[0]?.id || "",
-    imageBase64: "",
-  }});
-  dispatch({ type: "SET_PREVIEW", payload: p.image || null });
-  dispatch({ type: "SET_EDIT_OPEN", payload: true });
+        dispatch({
+            type: "SET_FORM",
+            payload: {
+                name: p.name,
+                price: String(p.price),
+                stock: String(p.stock || 0),
+                category: p.categories?.[0]?.id || "",
+                imageBase64: "",
+            },
+        });
+        dispatch({ type: "SET_PREVIEW", payload: p.image || null });
+        dispatch({ type: "SET_EDIT_OPEN", payload: true });
     };
 
     const saveEdit = async () => {
         if (!editingRef.current) return;
-  if (Number(dialogState.form.price) < 0 || Number(dialogState.form.stock) < 0) {
-    toast.error("El precio y el stock no pueden ser negativos");
-    return;
-  }
+        if (
+            Number(dialogState.form.price) < 0 ||
+            Number(dialogState.form.stock) < 0
+        ) {
+            toast.error("El precio y el stock no pueden ser negativos");
+            return;
+        }
 
-  dispatch({ type: "SET_IS_EDITING", payload: true });
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const body: any = {
-      name: dialogState.form.name,
-      price: Number(dialogState.form.price || 0),
-      stock: Number(dialogState.form.stock || 0),
-      categoryIds: dialogState.form.category ? [dialogState.form.category] : [],
-    };
-    if (dialogState.form.imageBase64) body.image = dialogState.form.imageBase64;
+        dispatch({ type: "SET_IS_EDITING", payload: true });
+        try {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const body: any = {
+                name: dialogState.form.name,
+                price: Number(dialogState.form.price || 0),
+                stock: Number(dialogState.form.stock || 0),
+                categoryIds: dialogState.form.category
+                    ? [dialogState.form.category]
+                    : [],
+            };
+            if (dialogState.form.imageBase64)
+                body.image = dialogState.form.imageBase64;
 
             try {
                 await api.put(`/products/${editingRef.current.id}`, body);
             } catch (err) {
-                toast.error(err instanceof ApiError ? err.message : "Error al actualizar");
+                reportError(err, "No pudimos actualizar el producto.");
                 return;
             }
-    toast.success("Producto actualizado");
-    dispatch({ type: "SET_EDIT_OPEN", payload: false });
-    editingRef.current = null;
-    dispatch({ type: "SET_FORM", payload: {
-      name: "",
-      price: "",
-      stock: "",
-      category: "",
-      imageBase64: "",
-    }});
-    dispatch({ type: "SET_PREVIEW", payload: null });
-    router.refresh();
-  } catch {
-    toast.error("Error de red");
-  } finally {
-    dispatch({ type: "SET_IS_EDITING", payload: false });
+            toast.success("Producto actualizado");
+            dispatch({ type: "SET_EDIT_OPEN", payload: false });
+            editingRef.current = null;
+            dispatch({
+                type: "SET_FORM",
+                payload: {
+                    name: "",
+                    price: "",
+                    stock: "",
+                    category: "",
+                    imageBase64: "",
+                },
+            });
+            dispatch({ type: "SET_PREVIEW", payload: null });
+            router.refresh();
+        } catch {
+            toast.error("Error de red");
+        } finally {
+            dispatch({ type: "SET_IS_EDITING", payload: false });
         }
     };
 
-  return (
+    return (
         <div className="w-full space-y-6">
             <div className="flex justify-between items-center">
                 <h2 className="text-xl font-medium">Gestión de productos</h2>
-                <Button onClick={() => dispatch({ type: "SET_CREATE_OPEN", payload: true })}>
+                <Button
+                    onClick={() =>
+                        dispatch({ type: "SET_CREATE_OPEN", payload: true })
+                    }
+                >
                     <Plus className="size-4 mr-2" />
                     Agregar producto
                 </Button>
             </div>
 
-      <ProductsStats stats={stats} />
+            <ProductsStats stats={stats} />
 
-      <ProductsFilters
-        categories={categories}
-        isSuperAdmin={isSuperAdmin}
-        categoryFilter={categoryFilter}
-        tenantFilter={tenantFilter}
-        searchQuery={searchQuery}
-        handleFilterChange={handleFilterChange}
-        handleTenantFilterChange={handleTenantFilterChange}
-        handleSearch={handleSearch}
-      />
+            <ProductsFilters
+                categories={categories}
+                isSuperAdmin={isSuperAdmin}
+                categoryFilter={categoryFilter}
+                tenantFilter={tenantFilter}
+                searchQuery={searchQuery}
+                handleFilterChange={handleFilterChange}
+                handleTenantFilterChange={handleTenantFilterChange}
+                handleSearch={handleSearch}
+            />
 
-      <ProductsDesktopTable
-        products={products}
-        isSuperAdmin={isSuperAdmin}
-        openEdit={openEdit}
-        deleteProduct={deleteProduct}
-        isDeleting={dialogState.isDeleting}
-        pagination={pagination}
-        handlePageChange={handlePageChange}
-      />
+            <ProductsDesktopTable
+                products={products}
+                isSuperAdmin={isSuperAdmin}
+                openEdit={openEdit}
+                deleteProduct={deleteProduct}
+                isDeleting={dialogState.isDeleting}
+                pagination={pagination}
+                handlePageChange={handlePageChange}
+            />
 
-      <ProductsMobileCards
-        products={products}
-        openEdit={openEdit}
-        deleteProduct={deleteProduct}
-        isDeleting={dialogState.isDeleting}
-        pagination={pagination}
-        handlePageChange={handlePageChange}
-      />
+            <ProductsMobileCards
+                products={products}
+                openEdit={openEdit}
+                deleteProduct={deleteProduct}
+                isDeleting={dialogState.isDeleting}
+                pagination={pagination}
+                handlePageChange={handlePageChange}
+            />
 
-      <CreateProductDialog
-        dialogState={dialogState}
-        dispatch={dispatch}
-        createProduct={createProduct}
-        handleImageUpload={handleImageUpload}
-        categories={categories}
-      />
+            <CreateProductDialog
+                dialogState={dialogState}
+                dispatch={dispatch}
+                createProduct={createProduct}
+                handleImageUpload={handleImageUpload}
+                categories={categories}
+            />
 
-      <EditProductDialog
-        dialogState={dialogState}
-        dispatch={dispatch}
-        saveEdit={saveEdit}
-        handleImageUpload={handleImageUpload}
-        categories={categories}
-        editingRef={editingRef}
-      />
+            <EditProductDialog
+                dialogState={dialogState}
+                dispatch={dispatch}
+                saveEdit={saveEdit}
+                handleImageUpload={handleImageUpload}
+                categories={categories}
+                editingRef={editingRef}
+            />
 
             <ConfirmDialog />
         </div>

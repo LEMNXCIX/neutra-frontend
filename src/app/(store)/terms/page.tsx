@@ -1,19 +1,19 @@
-import React from "react";
-import { Badge } from "@/components/ui/badge";
-import { getCmsPage } from "@/lib/strapi";
-import { cmsHeader, cmsRichText } from "@/lib/cms-page";
 import type { Metadata } from "next";
+import { Badge } from "@/components/ui/badge";
+import { cmsHeader, cmsRichText } from "@/lib/cms-page";
+import { getCmsPage } from "@/lib/strapi";
 
 export async function generateMetadata(): Promise<Metadata> {
     const cms = await getCmsPage("terms-pages");
     return {
         title: cms?.title ?? "Términos de Servicio",
-        description: cms?.subtitle ?? "Nuestros términos y condiciones del servicio",
+        description:
+            cms?.subtitle ?? "Nuestros términos y condiciones del servicio",
     };
 }
 
 const FALLBACK_HTML = `
-<h2>1. Terminología y Acuerdo</h2><p>Al acceder o utilizar esta plataforma, aceptás estos Términos de Servicio. Si no estás de acuerdo con estas condiciones, no inicies sesión.</p>
+<h2>1. Terminología y Acuerdo</h2><p>Al acceder o utilizar esta plataforma, aceptas estos Términos de Servicio. Si no estás de acuerdo con estas condiciones, no inicies sesión.</p>
 <h2>2. Precios y Precisión</h2><p>Buscamos precisión en la representación de nuestros productos. Sin embargo, no podemos garantizar la reproducción exacta de colores en tu pantalla. Los precios son dinámicos y pueden actualizarse sin aviso previo.</p>
 <h2>3. Devoluciones y Reembolsos</h2><p>El proceso de devolución tiene una ventana de 30 días. Los productos deben conservar su estado original para ser elegibles a reembolso. Los productos de venta final no admiten devolución.</p>
 <h2>4. Responsabilidad</h2><p>No asumimos responsabilidad por fallas indirectas o incidentales derivadas del uso de los productos o de la inability de acceder a los servicios de la plataforma.</p>

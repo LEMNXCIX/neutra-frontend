@@ -1,10 +1,9 @@
 "use client";
 
-import React from "react";
-import { Button } from "@/components/ui/button";
-import { CancelAppointmentDialog } from "@/components/booking/cancel-appointment-dialog";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { CancelAppointmentDialog } from "@/components/booking/cancel-appointment-dialog";
+import { Button } from "@/components/ui/button";
 
 interface AppointmentDetailActionsProps {
     appointmentId: string;
@@ -29,7 +28,7 @@ export function AppointmentDetailActions({
             {(status === "PENDING" || status === "CONFIRMED") && (
                 <div className="mt-4 pt-2 border-t">
                     <p className="text-[10px] text-center mb-3 text-muted-foreground italic">
-                        ¿Necesitás reprogramar? Contactanos directamente.
+                        ¿Necesitas reprogramar? Contáctanos directamente.
                     </p>
                     <CancelAppointmentDialog
                         appointmentId={appointmentId}

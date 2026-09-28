@@ -1,6 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import type React from "react";
+import { useState } from "react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,18 +13,16 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Spinner } from "@/components/ui/spinner";
-import { Tenant, CreateTenantData, TenantType } from "@/types/tenant";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import type { PlatformFeature } from "@/services/features.service";
 import { tenantService } from "@/services/tenant.service";
-import { PlatformFeature } from "@/services/features.service";
+import { type CreateTenantData, type Tenant, TenantType } from "@/types/tenant";
 
 const EMPTY_PLATFORM_FEATURES: PlatformFeature[] = [];
+
+import { AlertCircle, Clock } from "lucide-react";
 import { toast } from "sonner";
-import { ApiError } from "@/lib/api-client";
-import { Checkbox } from "@/components/ui/checkbox";
-import { BrandingEditor } from "./BrandingEditor";
-import { Clock } from "lucide-react";
 import {
     HolidaysEditor,
     WorkingHoursEditor,
@@ -31,6 +31,9 @@ import {
     DEFAULT_WORKING_HOURS,
     normalizeWorkingHours,
 } from "@/components/admin/booking/working-hours-utils";
+import { Checkbox } from "@/components/ui/checkbox";
+import { reportError } from "@/lib/error-reporting";
+import { BrandingEditor } from "./BrandingEditor";
 
 interface TenantFormProps {
     tenant?: Tenant | null;
@@ -122,7 +125,7 @@ function GeneralTabContent({
                     </SelectTrigger>
                     <SelectContent>
                         <SelectItem value={TenantType.STORE}>
-                            Store (E-commerce)
+                            Tienda (comercio electrónico)
                         </SelectItem>
                         <SelectItem value={TenantType.BOOKING}>
                             Booking (Services)
@@ -140,7 +143,7 @@ function GeneralTabContent({
                         onClick={() => setActiveTab("branding")}
                         className="font-bold"
                     >
-                        Next Step: Branding →
+                        Siguiente paso: Marca →
                     </Button>
                 </div>
             )}
@@ -172,14 +175,14 @@ function BrandingTabContent({
                         variant="outline"
                         onClick={() => setActiveTab("general")}
                     >
-                        ← Back
+                        ← Volver
                     </Button>
                     <Button
                         type="button"
                         onClick={() => setActiveTab("settings")}
                         className="font-bold"
                     >
-                        Next Step: Settings →
+                        Siguiente paso: Configuración →
                     </Button>
                 </div>
             )}
@@ -202,7 +205,7 @@ function SettingsTabContent({
         <TabsContent value="settings" className="py-4 space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                    <Label>Support Email</Label>
+                    <Label>Correo de soporte</Label>
                     <Input
                         value={formData.config?.settings?.supportEmail || ""}
                         onChange={(e) =>
@@ -312,14 +315,14 @@ function SettingsTabContent({
                         variant="outline"
                         onClick={() => setActiveTab("branding")}
                     >
-                        ← Back
+                        ← Volver
                     </Button>
                     <Button
                         type="button"
                         onClick={() => setActiveTab("features")}
                         className="font-bold"
                     >
-                        Next Step: Features →
+                        Siguiente paso: Funcionalidades →
                     </Button>
                 </div>
             )}
@@ -374,7 +377,7 @@ function FeaturesTabContent({
                     variant="outline"
                     onClick={() => setActiveTab("settings")}
                 >
-                    ← Back
+                    ← Volver
                 </Button>
             </div>
         </TabsContent>
@@ -390,9 +393,10 @@ export function TenantForm({
     initialPlatformFeatures = EMPTY_PLATFORM_FEATURES,
 }: TenantFormProps) {
     const [isSaving, setIsSaving] = useState(false);
-    const [platformFeatures, _setPlatformFeatures] = useState<PlatformFeature[]>(
-        initialPlatformFeatures,
-    );
+    const [error, setError] = useState("");
+    const [platformFeatures, _setPlatformFeatures] = useState<
+        PlatformFeature[]
+    >(initialPlatformFeatures);
     const [formData, setFormData] = useState<CreateTenantData>(() => ({
         name: tenant?.name || "",
         slug: tenant?.slug || "",
@@ -432,6 +436,7 @@ export function TenantForm({
         }
 
         setIsSaving(true);
+        setError("");
         try {
             if (tenant) {
                 await tenantService.update(tenant.id, formData);
@@ -442,9 +447,11 @@ export function TenantForm({
             }
             onSuccess();
         } catch (err: any) {
-            const message =
-                err instanceof ApiError ? err.message : "Error al guardar el tenant";
-            toast.error(message);
+            setError(
+                reportError(err, "No pudimos guardar la organización.", {
+                    toast: false,
+                }),
+            );
         } finally {
             setIsSaving(false);
         }
@@ -510,6 +517,13 @@ export function TenantForm({
                 />
             </Tabs>
 
+            {error && (
+                <Alert variant="destructive">
+                    <AlertCircle className="size-4" aria-hidden="true" />
+                    <AlertDescription>{error}</AlertDescription>
+                </Alert>
+            )}
+
             <div className="flex justify-end gap-3 pt-6 border-t">
                 {onCancel && (
                     <Button
@@ -519,7 +533,7 @@ export function TenantForm({
                         disabled={isSaving}
                         className="rounded-xl"
                     >
-                        Cancel
+                        Cancelar
                     </Button>
                 )}
                 <Button

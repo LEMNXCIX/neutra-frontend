@@ -1,7 +1,7 @@
+import { Home, PackageX, Search } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Home, Search, PackageX } from "lucide-react";
 
 export default function NotFound() {
     return (
@@ -25,11 +25,11 @@ export default function NotFound() {
                     {/* Title & Description */}
                     <div className="mb-8 space-y-3">
                         <h2 className="text-3xl sm:text-4xl font-bold">
-                            Page Not Found
+                            Página no encontrada
                         </h2>
                         <p className="text-lg text-muted-foreground max-w-md mx-auto">
-                            Sorry, we couldn&apos;t find the page you&apos;re
-                            looking for. It might have been moved or deleted.
+                            Lo sentimos, no pudimos encontrar la página que
+                            buscas. Es posible que se haya movido o eliminado.
                         </p>
                     </div>
 
@@ -38,7 +38,7 @@ export default function NotFound() {
                         <Button size="lg" asChild className="h-12 px-6">
                             <Link href="/">
                                 <Home className="mr-2 size-5" />
-                                Back to Home
+                                Volver al inicio
                             </Link>
                         </Button>
                         <Button
@@ -49,7 +49,7 @@ export default function NotFound() {
                         >
                             <Link href="/products">
                                 <Search className="mr-2 size-5" />
-                                Browse Products
+                                Explorar productos
                             </Link>
                         </Button>
                     </div>
@@ -57,14 +57,14 @@ export default function NotFound() {
                     {/* Additional Help */}
                     <div className="mt-12 pt-8 border-t">
                         <p className="text-sm text-muted-foreground mb-4">
-                            Need help finding something?
+                            ¿Necesitas ayuda para encontrar algo?
                         </p>
                         <div className="flex flex-wrap justify-center gap-3 text-sm">
                             <Link
                                 href="/contact"
                                 className="text-primary hover:underline"
                             >
-                                Contact Support
+                                Contactar a soporte
                             </Link>
                             <span className="text-muted-foreground">•</span>
                             <Link
@@ -78,7 +78,7 @@ export default function NotFound() {
                                 href="/products"
                                 className="text-primary hover:underline"
                             >
-                                All Products
+                                Todos los productos
                             </Link>
                         </div>
                     </div>

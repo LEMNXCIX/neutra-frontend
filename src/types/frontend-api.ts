@@ -91,10 +91,10 @@ export interface Cart {
 }
 
 export enum OrderStatus {
-    PENDIENTE = 'PENDIENTE',
-    PAGADO = 'PAGADO',
-    ENVIADO = 'ENVIADO',
-    ENTREGADO = 'ENTREGADO',
+    PENDIENTE = "PENDIENTE",
+    PAGADO = "PAGADO",
+    ENVIADO = "ENVIADO",
+    ENTREGADO = "ENTREGADO",
 }
 
 export interface OrderItem {

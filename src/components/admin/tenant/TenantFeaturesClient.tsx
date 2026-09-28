@@ -1,7 +1,9 @@
 "use client";
 
-import React, { useReducer, useEffect, useCallback } from "react";
+import { Building, Save, Settings } from "lucide-react";
+import { useCallback, useEffect, useReducer } from "react";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 import {
     Card,
     CardContent,
@@ -9,6 +11,7 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 import {
     Select,
     SelectContent,
@@ -16,57 +19,57 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
-import { Save, Settings, Building } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import { tenantService } from "@/services/tenant.service";
-import { Tenant } from "@/types/tenant";
 import { useTenantStore } from "@/store/tenant-store";
+import type { Tenant } from "@/types/tenant";
 
 type TenantFeaturesState = {
-  selectedTenantId: string | null;
-  tenants: Tenant[];
-  loadingFeatures: boolean;
-  loadingTenants: boolean;
-  saving: boolean;
-  availableFeatures: any[];
-  featureState: Record<string, boolean>;
+    selectedTenantId: string | null;
+    tenants: Tenant[];
+    loadingFeatures: boolean;
+    loadingTenants: boolean;
+    saving: boolean;
+    availableFeatures: any[];
+    featureState: Record<string, boolean>;
 };
 
 type TenantFeaturesAction =
-  | { type: "SET_SELECTED_TENANT_ID"; payload: string | null }
-  | { type: "SET_TENANTS"; payload: Tenant[] }
-  | { type: "SET_LOADING_FEATURES"; payload: boolean }
-  | { type: "SET_LOADING_TENANTS"; payload: boolean }
-  | { type: "SET_SAVING"; payload: boolean }
-  | { type: "SET_AVAILABLE_FEATURES"; payload: any[] }
-  | { type: "SET_FEATURE_STATE"; payload: Record<string, boolean> };
+    | { type: "SET_SELECTED_TENANT_ID"; payload: string | null }
+    | { type: "SET_TENANTS"; payload: Tenant[] }
+    | { type: "SET_LOADING_FEATURES"; payload: boolean }
+    | { type: "SET_LOADING_TENANTS"; payload: boolean }
+    | { type: "SET_SAVING"; payload: boolean }
+    | { type: "SET_AVAILABLE_FEATURES"; payload: any[] }
+    | { type: "SET_FEATURE_STATE"; payload: Record<string, boolean> };
 
-function tenantFeaturesReducer(state: TenantFeaturesState, action: TenantFeaturesAction): TenantFeaturesState {
-  switch (action.type) {
-    case "SET_SELECTED_TENANT_ID":
-      return { ...state, selectedTenantId: action.payload };
-    case "SET_TENANTS":
-      return { ...state, tenants: action.payload };
-    case "SET_LOADING_FEATURES":
-      return { ...state, loadingFeatures: action.payload };
-    case "SET_LOADING_TENANTS":
-      return { ...state, loadingTenants: action.payload };
-    case "SET_SAVING":
-      return { ...state, saving: action.payload };
-    case "SET_AVAILABLE_FEATURES":
-      return { ...state, availableFeatures: action.payload };
-    case "SET_FEATURE_STATE":
-      return { ...state, featureState: action.payload };
-    default:
-      return state;
-  }
+function tenantFeaturesReducer(
+    state: TenantFeaturesState,
+    action: TenantFeaturesAction,
+): TenantFeaturesState {
+    switch (action.type) {
+        case "SET_SELECTED_TENANT_ID":
+            return { ...state, selectedTenantId: action.payload };
+        case "SET_TENANTS":
+            return { ...state, tenants: action.payload };
+        case "SET_LOADING_FEATURES":
+            return { ...state, loadingFeatures: action.payload };
+        case "SET_LOADING_TENANTS":
+            return { ...state, loadingTenants: action.payload };
+        case "SET_SAVING":
+            return { ...state, saving: action.payload };
+        case "SET_AVAILABLE_FEATURES":
+            return { ...state, availableFeatures: action.payload };
+        case "SET_FEATURE_STATE":
+            return { ...state, featureState: action.payload };
+        default:
+            return state;
+    }
 }
 
 interface TenantFeaturesClientProps {
-  activeTenantId?: string;
+    activeTenantId?: string;
 }
 
 export default function TenantFeaturesClient({
@@ -75,90 +78,102 @@ export default function TenantFeaturesClient({
     const { tenantId: contextTenantId } = useTenantStore();
     const effectiveTenantId = activeTenantId || contextTenantId;
     const isSuperAdminView = !effectiveTenantId;
-  const [state, dispatch] = useReducer(tenantFeaturesReducer, {
-    selectedTenantId: null,
-    tenants: [],
-    loadingFeatures: false,
-    loadingTenants: false,
-    saving: false,
-    availableFeatures: [],
-    featureState: {},
-  });
-  const { selectedTenantId, tenants, loadingFeatures, loadingTenants, saving, availableFeatures, featureState } = state;
-  const setFeatureState = (updater: any) => { const next = typeof updater === 'function' ? updater(featureState) : updater; dispatch({ type: "SET_FEATURE_STATE", payload: next }); };
+    const [state, dispatch] = useReducer(tenantFeaturesReducer, {
+        selectedTenantId: null,
+        tenants: [],
+        loadingFeatures: false,
+        loadingTenants: false,
+        saving: false,
+        availableFeatures: [],
+        featureState: {},
+    });
+    const {
+        selectedTenantId,
+        tenants,
+        loadingFeatures,
+        loadingTenants,
+        saving,
+        availableFeatures,
+        featureState,
+    } = state;
+    const setFeatureState = (updater: any) => {
+        const next =
+            typeof updater === "function" ? updater(featureState) : updater;
+        dispatch({ type: "SET_FEATURE_STATE", payload: next });
+    };
 
-  const loadAvailableFeatures = useCallback(async () => {
-    try {
-      const features = await tenantService.getAvailableFeatures();
-      dispatch({ type: "SET_AVAILABLE_FEATURES", payload: features });
-    } catch (error) {
-      console.error(
-        "Error al cargar las definiciones de funciones",
-        error,
-      );
-    }
-  }, []);
+    const loadAvailableFeatures = useCallback(async () => {
+        try {
+            const features = await tenantService.getAvailableFeatures();
+            dispatch({ type: "SET_AVAILABLE_FEATURES", payload: features });
+        } catch (error) {
+            console.error(
+                "Error al cargar las definiciones de funciones",
+                error,
+            );
+        }
+    }, []);
 
-  const loadTenants = useCallback(async () => {
-    try {
-      dispatch({ type: "SET_LOADING_TENANTS", payload: true });
-      const response = await tenantService.getAll();
-      const data = response as any;
-      const tenantsList = Array.isArray(data) ? data : data.data || [];
-      dispatch({ type: "SET_TENANTS", payload: tenantsList });
-    } catch (error) {
-      console.error("Error al cargar los tenants", error);
-      toast.error("Error al cargar la lista de tenants");
-    } finally {
-      dispatch({ type: "SET_LOADING_TENANTS", payload: false });
-    }
-  }, []);
+    const loadTenants = useCallback(async () => {
+        try {
+            dispatch({ type: "SET_LOADING_TENANTS", payload: true });
+            const response = await tenantService.getAll();
+            const data = response as any;
+            const tenantsList = Array.isArray(data) ? data : data.data || [];
+            dispatch({ type: "SET_TENANTS", payload: tenantsList });
+        } catch (error) {
+            console.error("Error al cargar los tenants", error);
+            toast.error("Error al cargar la lista de tenants");
+        } finally {
+            dispatch({ type: "SET_LOADING_TENANTS", payload: false });
+        }
+    }, []);
 
-  const loadTenantFeatures = useCallback(async (id: string) => {
-    try {
-      dispatch({ type: "SET_LOADING_FEATURES", payload: true });
-      const data = await tenantService.getFeatures(id);
-      dispatch({ type: "SET_FEATURE_STATE", payload: data || {} });
-    } catch (error: any) {
-      const msg = error?.message || "Error desconocido";
-      toast.error(`Failed to load features: ${msg}`);
-    } finally {
-      dispatch({ type: "SET_LOADING_FEATURES", payload: false });
-    }
-  }, []);
+    const loadTenantFeatures = useCallback(async (id: string) => {
+        try {
+            dispatch({ type: "SET_LOADING_FEATURES", payload: true });
+            const data = await tenantService.getFeatures(id);
+            dispatch({ type: "SET_FEATURE_STATE", payload: data || {} });
+        } catch (error: any) {
+            const msg = error?.message || "Error desconocido";
+            toast.error(`Failed to load features: ${msg}`);
+        } finally {
+            dispatch({ type: "SET_LOADING_FEATURES", payload: false });
+        }
+    }, []);
 
-  useEffect(() => {
-    loadAvailableFeatures();
-  }, [loadAvailableFeatures]);
+    useEffect(() => {
+        loadAvailableFeatures();
+    }, [loadAvailableFeatures]);
 
-  useEffect(() => {
-    if (isSuperAdminView) {
-      loadTenants();
-    }
-  }, [isSuperAdminView, loadTenants]);
+    useEffect(() => {
+        if (isSuperAdminView) {
+            loadTenants();
+        }
+    }, [isSuperAdminView, loadTenants]);
 
-  useEffect(() => {
-    if (effectiveTenantId) {
-      loadTenantFeatures(effectiveTenantId);
-    }
-  }, [effectiveTenantId, loadTenantFeatures]);
+    useEffect(() => {
+        if (effectiveTenantId) {
+            loadTenantFeatures(effectiveTenantId);
+        }
+    }, [effectiveTenantId, loadTenantFeatures]);
 
-  const handleTenantSelect = (id: string) => {
-    dispatch({ type: "SET_SELECTED_TENANT_ID", payload: id });
-    loadTenantFeatures(id);
-  };
+    const handleTenantSelect = (id: string) => {
+        dispatch({ type: "SET_SELECTED_TENANT_ID", payload: id });
+        loadTenantFeatures(id);
+    };
 
-  const handleToggle = (key: string) => {
-    setFeatureState((prev: any) => ({ ...prev, [key]: !prev[key] }));
-  };
+    const handleToggle = (key: string) => {
+        setFeatureState((prev: any) => ({ ...prev, [key]: !prev[key] }));
+    };
 
     const activeId = effectiveTenantId || selectedTenantId;
 
-  const handleSave = async () => {
+    const handleSave = async () => {
         if (!activeId) return;
         try {
-      dispatch({ type: "SET_SAVING", payload: true });
-      await tenantService.updateFeatures(activeId, featureState);
+            dispatch({ type: "SET_SAVING", payload: true });
+            await tenantService.updateFeatures(activeId, featureState);
             toast.success("Configuración de funciones guardada");
         } catch (error) {
             console.error("Error al guardar las funciones", error);
@@ -187,7 +202,7 @@ export default function TenantFeaturesClient({
                         Feature Configuration
                     </h1>
                     <p className="text-muted-foreground">
-                        Manage active features for your tenant
+                        Gestiona las funcionalidades activas de tu tenant
                     </p>
                 </div>
                 {activeId && (
@@ -201,7 +216,7 @@ export default function TenantFeaturesClient({
                             </>
                         ) : (
                             <>
-                                <Save className="mr-2 size-4" /> Save Changes
+                                <Save className="mr-2 size-4" /> Guardar cambios
                             </>
                         )}
                     </Button>
@@ -214,10 +229,10 @@ export default function TenantFeaturesClient({
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <Building className="size-5" />
-                            Select Tenant
+                            Seleccionar tenant
                         </CardTitle>
                         <CardDescription>
-                            Choose a tenant to configure features
+                            Elige un tenant para configurar sus funcionalidades
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -226,7 +241,7 @@ export default function TenantFeaturesClient({
                             onValueChange={handleTenantSelect}
                         >
                             <SelectTrigger className="w-full md:w-[300px]">
-                                <SelectValue placeholder="Seleccioná un tenant..." />
+                                <SelectValue placeholder="Selecciona un tenant..." />
                             </SelectTrigger>
                             <SelectContent>
                                 {tenants.map((tenant) => (
@@ -250,7 +265,7 @@ export default function TenantFeaturesClient({
                     </div>
                 ) : availableFeatures.length === 0 ? (
                     <div className="text-center text-muted-foreground py-8">
-                        No features definition found.
+                        No se encontró ninguna definición de funcionalidades.
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 gap-6">
@@ -261,7 +276,8 @@ export default function TenantFeaturesClient({
                                     Available Features
                                 </CardTitle>
                                 <CardDescription>
-                                    Enable or disable platform capabilities
+                                    Activa o desactiva las funcionalidades de la
+                                    plataforma
                                 </CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-6">
@@ -292,10 +308,10 @@ export default function TenantFeaturesClient({
                                             </p>
                                         </div>
                                         <Switch
-                  checked={
-                    featureState[feature.key] ??
-                    false
-                  }
+                                            checked={
+                                                featureState[feature.key] ??
+                                                false
+                                            }
                                             onCheckedChange={() =>
                                                 handleToggle(feature.key)
                                             }
@@ -310,7 +326,7 @@ export default function TenantFeaturesClient({
                 !contextTenantId &&
                 !activeTenantId && (
                     <div className="flex justify-center items-center h-40 border-2 border-dashed rounded-lg text-muted-foreground">
-                        Please select a tenant to configure features
+                        Selecciona un tenant para configurar sus funcionalidades
                     </div>
                 )
             )}

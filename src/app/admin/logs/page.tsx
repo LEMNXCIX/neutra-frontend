@@ -1,14 +1,15 @@
-import React from "react";
 import { LogsClient } from "@/components/admin/logs/logs-client";
-import { api } from '@/lib/api-client';
+import { api } from "@/lib/api-client";
 
 export const dynamic = "force-dynamic";
 
 async function getData() {
     try {
         const [logsResult, tenantsResult] = await Promise.all([
-            api.get<any>(`/admin/logs?take=50`).catch(() => ({ data: [], pagination: {} })),
-            api.get<any[]>('/tenants').catch(() => []),
+            api
+                .get<any>(`/admin/logs?take=50`)
+                .catch(() => ({ data: [], pagination: {} })),
+            api.get<any[]>("/tenants").catch(() => []),
         ]);
         return {
             logs: logsResult?.data || [],

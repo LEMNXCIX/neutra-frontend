@@ -1,11 +1,11 @@
+import type { Metadata } from "next";
 import { WhatsAppConfigForm } from "@/components/admin/whatsapp/WhatsAppConfigForm";
+import { api } from "@/lib/api-client";
 import type { WhatsAppConfig } from "@/services/whatsapp.service";
-import { Metadata } from "next";
-import { api } from '@/lib/api-client';
 
 export const metadata: Metadata = {
     title: "WhatsApp Configuration | Admin",
-    description: "Manage WhatsApp Business API integration",
+    description: "Gestiona la integración con WhatsApp Business API",
 };
 
 async function fetchWhatsAppConfig(): Promise<Partial<WhatsAppConfig> | null> {
@@ -26,8 +26,8 @@ export default async function WhatsAppConfigPage() {
                     WhatsApp Integration
                 </h1>
                 <p className="text-muted-foreground">
-                    Connect your Meta Business Account to enable automated
-                    notifications and conversational bot.
+                    Conecta tu cuenta de Meta Business para activar las
+                    notificaciones automáticas y el bot conversacional.
                 </p>
             </div>
 

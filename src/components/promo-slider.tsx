@@ -1,40 +1,41 @@
 "use client";
-import React, { useState, useEffect, useRef, useCallback } from "react";
-import Image from "@/components/ui/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import type React from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import Image from "@/components/ui/image";
 import { Skeleton } from "@/components/ui/skeleton";
 
 type Slide = {
-	id: string;
-	title: string;
-	desc?: string;
-	img?: string;
+    id: string;
+    title: string;
+    desc?: string;
+    img?: string;
 };
 
 type PromoSliderProps = {
-	initialSlides?: Slide[];
+    initialSlides?: Slide[];
 };
 
 export default function PromoSlider({ initialSlides }: PromoSliderProps) {
-  const slides = initialSlides || [];
-  const loading = !initialSlides;
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [direction, setDirection] = useState<"next" | "prev">("next");
+    const slides = initialSlides || [];
+    const loading = !initialSlides;
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const [direction, setDirection] = useState<"next" | "prev">("next");
 
-  const touchStartRef = useRef<number | null>(null);
-  const touchEndRef = useRef<number | null>(null);
+    const touchStartRef = useRef<number | null>(null);
+    const touchEndRef = useRef<number | null>(null);
 
-  const minSwipeDistance = 50;
+    const minSwipeDistance = 50;
 
-  const prev = useCallback(() => {
-    setDirection("prev");
-    setCurrentIndex((p) => (p - 1 + slides.length) % slides.length);
-  }, [slides.length]);
+    const prev = useCallback(() => {
+        setDirection("prev");
+        setCurrentIndex((p) => (p - 1 + slides.length) % slides.length);
+    }, [slides.length]);
 
-  const next = useCallback(() => {
-    setDirection("next");
-    setCurrentIndex((p) => (p + 1) % slides.length);
-  }, [slides.length]);
+    const next = useCallback(() => {
+        setDirection("next");
+        setCurrentIndex((p) => (p + 1) % slides.length);
+    }, [slides.length]);
 
     // Touch event handlers for swipe detection
     const onTouchStart = (e: React.TouchEvent) => {
@@ -60,11 +61,11 @@ export default function PromoSlider({ initialSlides }: PromoSliderProps) {
         }
     };
 
-  useEffect(() => {
-    if (slides.length === 0) return;
-    const interval = setInterval(() => next(), 20000);
-    return () => clearInterval(interval);
-  }, [slides.length, next]);
+    useEffect(() => {
+        if (slides.length === 0) return;
+        const interval = setInterval(() => next(), 20000);
+        return () => clearInterval(interval);
+    }, [slides.length, next]);
 
     if (loading) {
         return (
@@ -172,7 +173,7 @@ export default function PromoSlider({ initialSlides }: PromoSliderProps) {
             </div>
 
             {/* Animaciones personalizadas */}
-<style>{`
+            <style>{`
       @keyframes slide-up {
         from {
           transform: translateY(20px);

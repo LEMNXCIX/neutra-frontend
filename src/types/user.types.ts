@@ -1,4 +1,4 @@
-import { Role } from './role.types';
+import type { Role } from "./role.types";
 
 export interface User {
     id: string;
@@ -6,7 +6,7 @@ export interface User {
     email: string;
     password?: string;
     roleId: string;
-    role?: Role;  // Optional, populated when needed
+    role?: Role; // Optional, populated when needed
     profilePic?: string;
     active: boolean;
     googleId?: string;
@@ -27,7 +27,7 @@ export interface CreateUserDTO {
     name: string;
     email: string;
     password?: string;
-    roleId?: string;  // Optional, defaults to USER role if not provided
+    roleId?: string; // Optional, defaults to USER role if not provided
     profilePic?: string;
     active?: boolean;
     googleId?: string;

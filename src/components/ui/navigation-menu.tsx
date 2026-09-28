@@ -1,9 +1,8 @@
-import * as React from "react";
 import * as NavigationMenuPrimitive from "@radix-ui/react-navigation-menu";
 import { ChevronDownIcon } from "lucide-react";
-
-import { cn } from "@/lib/utils";
+import type * as React from "react";
 import { navigationMenuTriggerStyle } from "@/components/ui/navigation-menu-trigger-style";
+import { cn } from "@/lib/utils";
 
 function NavigationMenu({
     className,
@@ -153,11 +152,11 @@ function NavigationMenuIndicator({
 
 export {
     NavigationMenu,
-    NavigationMenuList,
-    NavigationMenuItem,
     NavigationMenuContent,
-    NavigationMenuTrigger,
-    NavigationMenuLink,
     NavigationMenuIndicator,
+    NavigationMenuItem,
+    NavigationMenuLink,
+    NavigationMenuList,
+    NavigationMenuTrigger,
     NavigationMenuViewport,
 };

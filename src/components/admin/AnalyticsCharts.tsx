@@ -1,336 +1,330 @@
 "use client";
-import React from "react";
+import {
+    ArrowDownRight,
+    ArrowUpRight,
+    DollarSign,
+    Package,
+    ShoppingCart,
+} from "lucide-react";
+import type React from "react";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Badge } from "@/components/ui/badge";
-import {
-  ShoppingCart,
-  DollarSign,
-  Package,
-  ArrowUpRight,
-  ArrowDownRight,
-} from "lucide-react";
 
 const ORDER_STATUS_LABELS: Record<string, string> = {
-  processing: "Procesando",
-  shipped: "Enviado",
-  delivered: "Entregado",
-  cancelled: "Cancelado",
-  pending: "Pendiente",
+    processing: "Procesando",
+    shipped: "Enviado",
+    delivered: "Entregado",
+    cancelled: "Cancelado",
+    pending: "Pendiente",
 };
 
 type Order = {
-  id: string;
-  total?: number;
-  date?: string;
-  status?: string;
-  items?: Array<{
     id: string;
-    productId?: string;
-    qty?: number;
-    amount?: number;
-    name: string;
-    price?: number;
-    product?: { name: string };
-  }>;
+    total?: number;
+    date?: string;
+    status?: string;
+    items?: Array<{
+        id: string;
+        productId?: string;
+        qty?: number;
+        amount?: number;
+        name: string;
+        price?: number;
+        product?: { name: string };
+    }>;
 };
 
 function TrendCard({
-  title,
-  icon: Icon,
-  value,
-  trend,
-  dates,
-  getBarValue,
-  total,
-  /** CSS variable holding the accent color, e.g. "--primary" */
-  colorVar,
-  minBarHeight,
-  formatBarTitle,
+    title,
+    icon: Icon,
+    value,
+    trend,
+    dates,
+    getBarValue,
+    total,
+    /** CSS variable holding the accent color, e.g. "--primary" */
+    colorVar,
+    minBarHeight,
+    formatBarTitle,
 }: {
-  title: string;
-  icon: React.ElementType;
-  value: string;
-  trend: number;
-  dates: string[];
-  getBarValue: (date: string) => number;
-  total: number;
-  colorVar: string;
-  minBarHeight: number;
-  formatBarTitle: (date: string, val: number) => string;
+    title: string;
+    icon: React.ElementType;
+    value: string;
+    trend: number;
+    dates: string[];
+    getBarValue: (date: string) => number;
+    total: number;
+    colorVar: string;
+    minBarHeight: number;
+    formatBarTitle: (date: string, val: number) => string;
 }) {
-  return (
-    <Card
-      className="overflow-hidden border-none shadow-lg hover:shadow-xl transition-[color,background-color,border-color,box-shadow,opacity,transform]"
-      style={{
-        background:
-          `linear-gradient(135deg, color-mix(in srgb, var(${colorVar}) 6%, transparent), color-mix(in srgb, var(${colorVar}) 14%, transparent))`,
-      }}
-    >
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-base font-medium text-muted-foreground">
-            {title}
-          </CardTitle>
-          <div
-            className="p-2 rounded-lg"
-            style={{ backgroundColor: `color-mix(in srgb, var(${colorVar}) 12%, transparent)` }}
-          >
-            <Icon
-              className="size-5"
-              style={{ color: `var(${colorVar})` }}
-            />
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-3">
-          <div className="flex items-baseline gap-2">
-            <span className="text-4xl font-bold">
-              {value}
-            </span>
-            {trend !== 0 && (
-              <div
-                className={`flex items-center gap-1 text-sm font-medium ${trend > 0 ? "text-green-600" : "text-red-600"}`}
-              >
-                {trend > 0 ? (
-                  <ArrowUpRight className="size-4" />
-                ) : (
-                  <ArrowDownRight className="size-4" />
-                )}
-                {Math.abs(trend).toFixed(1)}%
-              </div>
-            )}
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Comparado con los 7 días anteriores
-          </p>
+    return (
+        <Card
+            className="overflow-hidden border-none shadow-lg hover:shadow-xl transition-[color,background-color,border-color,box-shadow,opacity,transform]"
+            style={{
+                background: `linear-gradient(135deg, color-mix(in srgb, var(${colorVar}) 6%, transparent), color-mix(in srgb, var(${colorVar}) 14%, transparent))`,
+            }}
+        >
+            <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                    <CardTitle className="text-base font-medium text-muted-foreground">
+                        {title}
+                    </CardTitle>
+                    <div
+                        className="p-2 rounded-lg"
+                        style={{
+                            backgroundColor: `color-mix(in srgb, var(${colorVar}) 12%, transparent)`,
+                        }}
+                    >
+                        <Icon
+                            className="size-5"
+                            style={{ color: `var(${colorVar})` }}
+                        />
+                    </div>
+                </div>
+            </CardHeader>
+            <CardContent>
+                <div className="space-y-3">
+                    <div className="flex items-baseline gap-2">
+                        <span className="text-4xl font-bold">{value}</span>
+                        {trend !== 0 && (
+                            <div
+                                className={`flex items-center gap-1 text-sm font-medium ${trend > 0 ? "text-green-600" : "text-red-600"}`}
+                            >
+                                {trend > 0 ? (
+                                    <ArrowUpRight className="size-4" />
+                                ) : (
+                                    <ArrowDownRight className="size-4" />
+                                )}
+                                {Math.abs(trend).toFixed(1)}%
+                            </div>
+                        )}
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                        Comparado con los 7 días anteriores
+                    </p>
 
-          <div className="w-full h-16 flex items-end gap-1">
-            {dates.map((date) => {
-              const dayValue = getBarValue(date);
-              const height =
-                total > 0 ? (dayValue / total) * 100 : 0;
-              return (
-                <div
-                  key={date}
-                  className="flex-1 rounded-t opacity-60 hover:opacity-100 transition-opacity"
-                  style={{
-                    height: `${Math.max(height, minBarHeight)}%`,
-                    backgroundColor: `var(${colorVar})`,
-                  }}
-                  title={formatBarTitle(date, dayValue)}
-                />
-              );
-            })}
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
+                    <div className="w-full h-16 flex items-end gap-1">
+                        {dates.map((date) => {
+                            const dayValue = getBarValue(date);
+                            const height =
+                                total > 0 ? (dayValue / total) * 100 : 0;
+                            return (
+                                <div
+                                    key={date}
+                                    className="flex-1 rounded-t opacity-60 hover:opacity-100 transition-opacity"
+                                    style={{
+                                        height: `${Math.max(height, minBarHeight)}%`,
+                                        backgroundColor: `var(${colorVar})`,
+                                    }}
+                                    title={formatBarTitle(date, dayValue)}
+                                />
+                            );
+                        })}
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
+    );
 }
 
-function TopProductsCard({ topProducts }: { topProducts: { name: string; qty: number; revenue: number }[] }) {
-  return (
-    <Card className="overflow-hidden border-none shadow-md hover:shadow-lg transition-shadow">
-      <CardHeader className="flex flex-row items-center justify-between pb-3">
-        <CardTitle className="text-base font-medium">
-          Productos con más ingresos
-        </CardTitle>
-        <Package className="size-5 text-muted-foreground" />
-      </CardHeader>
-      <CardContent>
-        {topProducts.length ? (
-          <div className="space-y-4">
-            {topProducts.map((product, index) => (
-              <div
-                key={product.name}
-                className="space-y-2"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 flex-1 min-w-0">
-                    <span className="flex-shrink-0 size-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-semibold text-primary">
-                      {index + 1}
-                    </span>
-                    <span
-                      className="font-medium text-sm truncate"
-                      title={product.name}
-                    >
-                      {product.name}
-                    </span>
-                  </div>
-                  <div className="text-right flex-shrink-0 ml-2">
-                    <p className="font-semibold text-sm">
-                      $
-                      {product.revenue.toFixed(2)}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {product.qty} vendidos
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="h-40 flex items-center justify-center text-sm text-muted-foreground">
-            Todavía no hay ventas de productos
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  );
+function TopProductsCard({
+    topProducts,
+}: {
+    topProducts: { name: string; qty: number; revenue: number }[];
+}) {
+    return (
+        <Card className="overflow-hidden border-none shadow-md hover:shadow-lg transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between pb-3">
+                <CardTitle className="text-base font-medium">
+                    Productos con más ingresos
+                </CardTitle>
+                <Package className="size-5 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+                {topProducts.length ? (
+                    <div className="space-y-4">
+                        {topProducts.map((product, index) => (
+                            <div key={product.name} className="space-y-2">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                                        <span className="flex-shrink-0 size-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-semibold text-primary">
+                                            {index + 1}
+                                        </span>
+                                        <span
+                                            className="font-medium text-sm truncate"
+                                            title={product.name}
+                                        >
+                                            {product.name}
+                                        </span>
+                                    </div>
+                                    <div className="text-right flex-shrink-0 ml-2">
+                                        <p className="font-semibold text-sm">
+                                            ${product.revenue.toFixed(2)}
+                                        </p>
+                                        <p className="text-xs text-muted-foreground">
+                                            {product.qty} vendidos
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="h-40 flex items-center justify-center text-sm text-muted-foreground">
+                        Todavía no hay ventas de productos
+                    </div>
+                )}
+            </CardContent>
+        </Card>
+    );
 }
 
 const statusColors: Record<string, string> = {
-  processing:
-    "bg-yellow-500/10 text-yellow-600 border-yellow-200",
-  shipped:
-    "bg-blue-500/10 text-blue-600 border-blue-200",
-  delivered:
-    "bg-green-500/10 text-green-600 border-green-200",
-  cancelled:
-    "bg-red-500/10 text-red-600 border-red-200",
+    processing: "bg-yellow-500/10 text-yellow-600 border-yellow-200",
+    shipped: "bg-blue-500/10 text-blue-600 border-blue-200",
+    delivered: "bg-green-500/10 text-green-600 border-green-200",
+    cancelled: "bg-red-500/10 text-red-600 border-red-200",
 };
 
 function RecentOrdersCard({ recentOrders }: { recentOrders: Order[] }) {
-  return (
-    <Card className="overflow-hidden border-none shadow-md hover:shadow-lg transition-shadow">
-      <CardHeader className="flex flex-row items-center justify-between pb-3">
-        <CardTitle className="text-base font-medium">
-          Pedidos recientes
-        </CardTitle>
-        <ShoppingCart className="size-5 text-muted-foreground" />
-      </CardHeader>
-      <CardContent>
-        {recentOrders.length ? (
-          <div className="space-y-3">
-            {recentOrders.map((order) => {
-              const statusColor =
-                statusColors[
-                  order.status || "processing"
-                ] ||
-                "bg-muted text-muted-foreground border-border";
+    return (
+        <Card className="overflow-hidden border-none shadow-md hover:shadow-lg transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between pb-3">
+                <CardTitle className="text-base font-medium">
+                    Pedidos recientes
+                </CardTitle>
+                <ShoppingCart className="size-5 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+                {recentOrders.length ? (
+                    <div className="space-y-3">
+                        {recentOrders.map((order) => {
+                            const statusColor =
+                                statusColors[order.status || "processing"] ||
+                                "bg-muted text-muted-foreground border-border";
 
-              return (
-                <div
-                  key={order.id}
-                  className="flex items-center justify-between p-3 rounded-lg border bg-muted/20 hover:bg-muted/40 transition-colors"
-                >
-                  <div className="flex-1 min-w-0 pr-3">
-                    <p className="font-medium text-sm truncate">
-                      Pedido n.º {order.id}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {order.date}
-                    </p>
-                  </div>
+                            return (
+                                <div
+                                    key={order.id}
+                                    className="flex items-center justify-between p-3 rounded-lg border bg-muted/20 hover:bg-muted/40 transition-colors"
+                                >
+                                    <div className="flex-1 min-w-0 pr-3">
+                                        <p className="font-medium text-sm truncate">
+                                            Pedido n.º {order.id}
+                                        </p>
+                                        <p className="text-xs text-muted-foreground mt-0.5">
+                                            {order.date}
+                                        </p>
+                                    </div>
 
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    <span
-                      className={`px-2 py-1 rounded text-xs font-medium border whitespace-nowrap ${statusColor}`}
-                    >
-                      {ORDER_STATUS_LABELS[order.status || "pending"] || order.status}
-                    </span>
-                    <p className="font-semibold text-sm whitespace-nowrap">
-                      $
-                      {(order.total || 0).toFixed(
-                        2,
-                      )}
-                    </p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        ) : (
-          <div className="h-40 flex items-center justify-center text-sm text-muted-foreground">
-            No hay pedidos recientes
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  );
+                                    <div className="flex items-center gap-2 flex-shrink-0">
+                                        <span
+                                            className={`px-2 py-1 rounded text-xs font-medium border whitespace-nowrap ${statusColor}`}
+                                        >
+                                            {ORDER_STATUS_LABELS[
+                                                order.status || "pending"
+                                            ] || order.status}
+                                        </span>
+                                        <p className="font-semibold text-sm whitespace-nowrap">
+                                            ${(order.total || 0).toFixed(2)}
+                                        </p>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                ) : (
+                    <div className="h-40 flex items-center justify-center text-sm text-muted-foreground">
+                        No hay pedidos recientes
+                    </div>
+                )}
+            </CardContent>
+        </Card>
+    );
 }
 
 type AnalyticsChartsProps = {
-  initialOrders?: Order[];
+    initialOrders?: Order[];
 };
 
 function getAnalyticsData(orders: Order[]) {
-const ordersByDate = new Map<string, { count: number; revenue: number }>();
-for (const ord of orders) {
-  const d = ord.date || new Date().toISOString().slice(0, 10);
-  const cur = ordersByDate.get(d) || { count: 0, revenue: 0 };
-  cur.count += 1;
-  cur.revenue += Number(ord.total || 0);
-  ordersByDate.set(d, cur);
-}
+    const ordersByDate = new Map<string, { count: number; revenue: number }>();
+    for (const ord of orders) {
+        const d = ord.date || new Date().toISOString().slice(0, 10);
+        const cur = ordersByDate.get(d) || { count: 0, revenue: 0 };
+        cur.count += 1;
+        cur.revenue += Number(ord.total || 0);
+        ordersByDate.set(d, cur);
+    }
 
-const sortedDates = Array.from(ordersByDate.keys())
-  .sort((a, b) => a.localeCompare(b))
-  .slice(-30);
+    const sortedDates = Array.from(ordersByDate.keys())
+        .sort((a, b) => a.localeCompare(b))
+        .slice(-30);
 
-const last7Days = sortedDates.slice(-7);
-const prev7Days = sortedDates.slice(-14, -7);
+    const last7Days = sortedDates.slice(-7);
+    const prev7Days = sortedDates.slice(-14, -7);
 
-const last7Revenue = last7Days.reduce(
-  (sum, d) => sum + (ordersByDate.get(d)?.revenue || 0),
-  0,
-);
-const prev7Revenue = prev7Days.reduce(
-  (sum, d) => sum + (ordersByDate.get(d)?.revenue || 0),
-  0,
-);
-const revenueTrend =
-  prev7Revenue > 0
-    ? ((last7Revenue - prev7Revenue) / prev7Revenue) * 100
-    : 0;
+    const last7Revenue = last7Days.reduce(
+        (sum, d) => sum + (ordersByDate.get(d)?.revenue || 0),
+        0,
+    );
+    const prev7Revenue = prev7Days.reduce(
+        (sum, d) => sum + (ordersByDate.get(d)?.revenue || 0),
+        0,
+    );
+    const revenueTrend =
+        prev7Revenue > 0
+            ? ((last7Revenue - prev7Revenue) / prev7Revenue) * 100
+            : 0;
 
-const last7Orders = last7Days.reduce(
-  (sum, d) => sum + (ordersByDate.get(d)?.count || 0),
-  0,
-);
-const prev7Orders = prev7Days.reduce(
-  (sum, d) => sum + (ordersByDate.get(d)?.count || 0),
-  0,
-);
-const ordersTrend =
-  prev7Orders > 0 ? ((last7Orders - prev7Orders) / prev7Orders) * 100 : 0;
+    const last7Orders = last7Days.reduce(
+        (sum, d) => sum + (ordersByDate.get(d)?.count || 0),
+        0,
+    );
+    const prev7Orders = prev7Days.reduce(
+        (sum, d) => sum + (ordersByDate.get(d)?.count || 0),
+        0,
+    );
+    const ordersTrend =
+        prev7Orders > 0 ? ((last7Orders - prev7Orders) / prev7Orders) * 100 : 0;
 
-const productSales = new Map<
-  string,
-  { name: string; qty: number; revenue: number }
->();
-for (const ord of orders) {
-  for (const item of ord.items || []) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const productId = (item as any).productId || item.id;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const qty = (item as any).amount || item.qty || 0;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const price = (item as any).price || 0;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const name =
-      (item as any).product?.name || item.name || "Producto desconocido";
+    const productSales = new Map<
+        string,
+        { name: string; qty: number; revenue: number }
+    >();
+    for (const ord of orders) {
+        for (const item of ord.items || []) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const productId = (item as any).productId || item.id;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const qty = (item as any).amount || item.qty || 0;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const price = (item as any).price || 0;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const name =
+                (item as any).product?.name ||
+                item.name ||
+                "Producto desconocido";
 
-    const current = productSales.get(productId) || {
-      name,
-      qty: 0,
-      revenue: 0,
-    };
-    current.qty += qty;
-    current.revenue += qty * price;
-    productSales.set(productId, current);
-  }
-}
-const topProducts = Array.from(productSales.values())
-  .sort((a, b) => b.revenue - a.revenue)
-  .slice(0, 8);
+            const current = productSales.get(productId) || {
+                name,
+                qty: 0,
+                revenue: 0,
+            };
+            current.qty += qty;
+            current.revenue += qty * price;
+            productSales.set(productId, current);
+        }
+    }
+    const topProducts = Array.from(productSales.values())
+        .sort((a, b) => b.revenue - a.revenue)
+        .slice(0, 8);
 
-const recentOrders = orders
-  .toSorted((a, b) => (b.date || "").localeCompare(a.date || ""))
-  .slice(0, 6);
+    const recentOrders = orders
+        .toSorted((a, b) => (b.date || "").localeCompare(a.date || ""))
+        .slice(0, 6);
 
     return {
         ordersByDate,
@@ -344,84 +338,86 @@ const recentOrders = orders
     };
 }
 
-export default function AnalyticsCharts({ initialOrders }: AnalyticsChartsProps = {}) {
-  const orders = initialOrders || [];
-  const loading = !initialOrders;
+export default function AnalyticsCharts({
+    initialOrders,
+}: AnalyticsChartsProps = {}) {
+    const orders = initialOrders || [];
+    const loading = !initialOrders;
 
-  const {
-    ordersByDate,
-    last7Days,
-    last7Revenue,
-    revenueTrend,
-    last7Orders,
-    ordersTrend,
-    topProducts,
-    recentOrders,
-  } = getAnalyticsData(orders);
+    const {
+        ordersByDate,
+        last7Days,
+        last7Revenue,
+        revenueTrend,
+        last7Orders,
+        ordersTrend,
+        topProducts,
+        recentOrders,
+    } = getAnalyticsData(orders);
 
-  if (loading) {
+    if (loading) {
+        return (
+            <div className="space-y-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {["skeleton-1", "skeleton-2"].map((k) => (
+                        <Card
+                            key={k}
+                            className="overflow-hidden border-none shadow-md"
+                        >
+                            <CardHeader>
+                                <Skeleton className="h-5 w-32" />
+                            </CardHeader>
+                            <CardContent className="space-y-2">
+                                <Skeleton className="h-4 w-24" />
+                                <Skeleton className="h-36 w-full" />
+                            </CardContent>
+                        </Card>
+                    ))}
+                </div>
+            </div>
+        );
+    }
+
     return (
-      <div className="space-y-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {["skeleton-1", "skeleton-2"].map((k) => (
-            <Card
-              key={k}
-              className="overflow-hidden border-none shadow-md"
-            >
-              <CardHeader>
-                <Skeleton className="h-5 w-32" />
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <Skeleton className="h-4 w-24" />
-                <Skeleton className="h-36 w-full" />
-              </CardContent>
-            </Card>
-          ))}
+        <div className="space-y-6">
+            <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-bold">Detalle de analíticas</h2>
+                <Badge variant="outline" className="text-sm">
+                    Últimos 30 días
+                </Badge>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <TrendCard
+                    title="Ingresos Semanales"
+                    icon={DollarSign}
+                    value={`$${last7Revenue.toFixed(0)}`}
+                    trend={revenueTrend}
+                    dates={last7Days}
+                    getBarValue={(d) => ordersByDate.get(d)?.revenue || 0}
+                    total={last7Revenue}
+                    colorVar="--primary"
+                    minBarHeight={5}
+                    formatBarTitle={(d, v) => `${d}: $${v.toFixed(2)}`}
+                />
+                <TrendCard
+                    title="Pedidos Semanales"
+                    icon={ShoppingCart}
+                    value={`${last7Orders}`}
+                    trend={ordersTrend}
+                    dates={last7Days}
+                    getBarValue={(d) => ordersByDate.get(d)?.count || 0}
+                    total={last7Orders}
+                    colorVar="--accent"
+                    minBarHeight={10}
+                    formatBarTitle={(d, v) => `${d}: ${v} pedidos`}
+                />
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <TopProductsCard topProducts={topProducts} />
+                <RecentOrdersCard recentOrders={recentOrders} />
+            </div>
         </div>
-      </div>
     );
-  }
-
-  return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Detalle de analíticas</h2>
-        <Badge variant="outline" className="text-sm">
-          Últimos 30 días
-        </Badge>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <TrendCard
-          title="Ingresos Semanales"
-          icon={DollarSign}
-          value={`$${last7Revenue.toFixed(0)}`}
-          trend={revenueTrend}
-          dates={last7Days}
-          getBarValue={(d) => ordersByDate.get(d)?.revenue || 0}
-          total={last7Revenue}
-          colorVar="--primary"
-          minBarHeight={5}
-          formatBarTitle={(d, v) => `${d}: $${v.toFixed(2)}`}
-        />
-        <TrendCard
-          title="Pedidos Semanales"
-          icon={ShoppingCart}
-          value={`${last7Orders}`}
-          trend={ordersTrend}
-          dates={last7Days}
-          getBarValue={(d) => ordersByDate.get(d)?.count || 0}
-          total={last7Orders}
-          colorVar="--accent"
-          minBarHeight={10}
-          formatBarTitle={(d, v) => `${d}: ${v} pedidos`}
-        />
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <TopProductsCard topProducts={topProducts} />
-        <RecentOrdersCard recentOrders={recentOrders} />
-      </div>
-    </div>
-  );
 }

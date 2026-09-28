@@ -31,7 +31,7 @@ export default function UiImage({
                     className,
                 )}
             >
-                <span className="text-xs">No Image</span>
+                <span className="text-xs">Sin imagen</span>
             </div>
         );
     }

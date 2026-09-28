@@ -1,12 +1,11 @@
-import React from "react";
 import { TenantsTable } from "@/components/admin/tenants/TenantsTable";
-import { api } from '@/lib/api-client';
+import { api } from "@/lib/api-client";
 
 export const dynamic = "force-dynamic";
 
 async function getTenants() {
     try {
-        return await api.get<any[]>('/tenants') || [];
+        return (await api.get<any[]>("/tenants")) || [];
     } catch (error) {
         console.error("Error fetching tenants on server:", error);
         return [];
@@ -15,7 +14,7 @@ async function getTenants() {
 
 async function getPlatformFeatures() {
     try {
-        return await api.get<any[]>('/features') || [];
+        return (await api.get<any[]>("/features")) || [];
     } catch (error) {
         console.error("Error fetching features on server:", error);
         return [];

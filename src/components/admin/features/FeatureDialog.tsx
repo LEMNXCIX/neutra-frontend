@@ -1,26 +1,26 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { DollarSign, Zap } from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 import {
     Dialog,
     DialogContent,
+    DialogFooter,
     DialogHeader,
     DialogTitle,
-    DialogFooter,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Spinner } from "@/components/ui/spinner";
+import { Textarea } from "@/components/ui/textarea";
+import { reportError } from "@/lib/error-reporting";
 import {
-    PlatformFeature,
-    CreateFeatureData,
+    type CreateFeatureData,
     featuresService,
+    type PlatformFeature,
 } from "@/services/features.service";
-import { toast } from "sonner";
-import { ApiError } from "@/lib/api-client";
-import { Zap, DollarSign } from "lucide-react";
 
 interface FeatureDialogProps {
     open: boolean;
@@ -74,11 +74,7 @@ export function FeatureDialog({
             onSuccess();
             onOpenChange(false);
         } catch (err: any) {
-            const message =
-                err instanceof ApiError
-                    ? err.message
-                    : "Error al guardar la función";
-            toast.error(message);
+            reportError(err, "No pudimos guardar la función.");
         } finally {
             setIsSaving(false);
         }
@@ -148,12 +144,12 @@ export function FeatureDialog({
                                     category: e.target.value,
                                 }))
                             }
-                            placeholder="e.g. Analytics, Marketing, Support"
+                            placeholder="Ej.: Analítica, Marketing, Soporte"
                         />
                     </div>
 
                     <div className="space-y-2">
-                        <Label>Monthly Price</Label>
+                        <Label>Precio mensual</Label>
                         <div className="relative">
                             <DollarSign className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
                             <Input
@@ -183,7 +179,7 @@ export function FeatureDialog({
                                     description: e.target.value,
                                 }))
                             }
-                            placeholder="Describí qué habilita esta función..."
+                            placeholder="Describe qué habilita esta función..."
                             rows={3}
                         />
                     </div>
@@ -194,15 +190,15 @@ export function FeatureDialog({
                         variant="outline"
                         onClick={() => onOpenChange(false)}
                     >
-                        Cancel
+                        Cancelar
                     </Button>
                     <Button onClick={handleSubmit} disabled={isSaving}>
                         {isSaving ? (
                             <>
-                                <Spinner className="mr-2" /> Saving…
+                                <Spinner className="mr-2" /> Guardando…
                             </>
                         ) : (
-                            "Save"
+                            "Guardar"
                         )}
                     </Button>
                 </DialogFooter>

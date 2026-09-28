@@ -1,13 +1,12 @@
-import React from "react";
 import { Mail, MapPin, Phone, Send } from "lucide-react";
+import type { Metadata } from "next";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { getCmsPage } from "@/lib/strapi";
 import { cmsHeader } from "@/lib/cms-page";
-import type { Metadata } from "next";
+import { getCmsPage } from "@/lib/strapi";
 
 export async function generateMetadata(): Promise<Metadata> {
     const cms = await getCmsPage("contact-pages");
@@ -24,7 +23,7 @@ export default async function ContactPage() {
         title: "Ponete en",
         highlight: "Contacto",
         subtitle:
-            "¿Tenés preguntas? Estamos para ayudarte. Escribinos por cualquier consulta.",
+            "¿Tienes preguntas? Estamos para ayudarte. Escríbenos por cualquier consulta.",
     });
 
     return (
@@ -40,7 +39,9 @@ export default async function ContactPage() {
                         </Badge>
                         <h1 className="text-5xl md:text-6xl font-bold tracking-tight text-foreground leading-tight">
                             {header.title}{" "}
-                            <span className="text-primary">{header.highlight}</span>
+                            <span className="text-primary">
+                                {header.highlight}
+                            </span>
                         </h1>
                         <p className="text-lg text-muted-foreground font-medium max-w-md leading-relaxed">
                             {header.subtitle}
@@ -54,7 +55,7 @@ export default async function ContactPage() {
                             </div>
                             <div>
                                 <h3 className="font-semibold text-sm text-muted-foreground mb-1">
-                                    Escribinos
+                                    Escríbenos
                                 </h3>
                                 <p className="font-bold text-base hover:text-primary transition-colors">
                                     {cms?.email ?? "contacto@xcix.com"}
@@ -113,7 +114,7 @@ export default async function ContactPage() {
                             Enviar Mensaje
                         </CardTitle>
                         <p className="text-sm text-muted-foreground">
-                            Completá el formulario y te responderemos a la
+                            Completa el formulario y te responderemos a la
                             brevedad.
                         </p>
                     </CardHeader>

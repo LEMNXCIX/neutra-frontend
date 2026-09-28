@@ -1,21 +1,24 @@
 "use client";
 
-import React, { useEffect } from "react";
+import type React from "react";
+import { useEffect, useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
 import {
-    Card,
-    CardContent,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 import {
     applyTenantTheme,
     clearTenantTheme,
-    ensureFontLoaded,
     DEFAULT_BRANDING,
+    ensureFontLoaded,
 } from "@/lib/theme";
 import type { TenantBranding } from "@/types/tenant";
 
@@ -76,9 +79,7 @@ function RadiusSlider({
 
     return (
         <div className="space-y-2">
-            <Label>
-                Radio ({rem.toFixed(2)}rem)
-            </Label>
+            <Label>Radio ({rem.toFixed(2)}rem)</Label>
             <input
                 type="range"
                 min={0}
@@ -87,7 +88,9 @@ function RadiusSlider({
                 value={rem}
                 aria-label="Radio de las esquinas"
                 className="w-full accent-primary cursor-pointer"
-                onChange={(e) => onChange(`${Number(e.target.value).toFixed(2)}rem`)}
+                onChange={(e) =>
+                    onChange(`${Number(e.target.value).toFixed(2)}rem`)
+                }
             />
         </div>
     );
@@ -120,22 +123,65 @@ function FontField({
     value?: string;
     onChange: (family: string) => void;
 }) {
+    // The Select covers the curated families, but tenants may already have any
+    // Google Font stored, so a free-text escape hatch stays. A saved family
+    // outside the list opens the input on its own, otherwise the stored value
+    // would be invisible in the trigger.
+    const [editing, setEditing] = useState(false);
+    const known = !!value && FONT_SUGGESTIONS.includes(value);
+    const showInput = editing || (!!value && !known);
+
     return (
         <div className="space-y-2">
-            <Label>{label}</Label>
-            <Input
-                value={value || ""}
-                onChange={(e) => onChange(e.target.value)}
-                placeholder="Nombre de la familia tipográfica"
-                list={`font-suggestions-${label.replace(/\s+/g, "-").toLowerCase()}`}
-            />
-            <datalist
-                id={`font-suggestions-${label.replace(/\s+/g, "-").toLowerCase()}`}
+            <div className="flex items-center justify-between">
+                <Label>{label}</Label>
+                {value?.trim() && (
+                    <button
+                        type="button"
+                        onClick={() => {
+                            onChange("");
+                            setEditing(false);
+                        }}
+                        className="text-[10px] text-muted-foreground underline hover:text-foreground"
+                    >
+                        restablecer
+                    </button>
+                )}
+            </div>
+            {showInput ? (
+                <Input
+                    value={value || ""}
+                    onChange={(e) => onChange(e.target.value)}
+                    placeholder="Nombre de la familia tipográfica"
+                    aria-label={`Nombre de la familia para ${label}`}
+                />
+            ) : (
+                <Select
+                    value={known ? value : ""}
+                    onValueChange={(next) => {
+                        onChange(next);
+                        setEditing(false);
+                    }}
+                >
+                    <SelectTrigger className="w-full" aria-label={label}>
+                        <SelectValue placeholder="Selecciona una fuente..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {FONT_SUGGESTIONS.map((font) => (
+                            <SelectItem key={font} value={font}>
+                                {font}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            )}
+            <button
+                type="button"
+                onClick={() => setEditing((prev) => !prev)}
+                className="text-[10px] text-muted-foreground underline hover:text-foreground"
             >
-                {FONT_SUGGESTIONS.map((f) => (
-                    <option key={f} value={f} />
-                ))}
-            </datalist>
+                {showInput ? "elegir de la lista" : "otra fuente"}
+            </button>
             {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
         </div>
     );
@@ -177,7 +223,10 @@ function BrandingPreview({ branding }: { branding: TenantBranding }) {
         >
             <CardContent className="space-y-4" style={vars}>
                 {(b.tenantLogo || b.favicon) && (
-                    <div className="flex items-center gap-3 pb-3" style={{ borderBottom: `1px solid ${b.border}` }}>
+                    <div
+                        className="flex items-center gap-3 pb-3"
+                        style={{ borderBottom: `1px solid ${b.border}` }}
+                    >
                         {b.tenantLogo && (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img
@@ -188,15 +237,25 @@ function BrandingPreview({ branding }: { branding: TenantBranding }) {
                         )}
                         {b.favicon && (
                             // eslint-disable-next-line @next/next/no-img-element
-                            <img src={b.favicon} alt="Vista previa del favicon" className="size-5" />
+                            <img
+                                src={b.favicon}
+                                alt="Vista previa del favicon"
+                                className="size-5"
+                            />
                         )}
                     </div>
                 )}
 
-                <p className="text-sm font-semibold" style={{ fontFamily: headingFont }}>
+                <p
+                    className="text-sm font-semibold"
+                    style={{ fontFamily: headingFont }}
+                >
                     Vista previa
                 </p>
-                <p className="text-lg font-bold tracking-tight" style={{ fontFamily: headingFont }}>
+                <p
+                    className="text-lg font-bold tracking-tight"
+                    style={{ fontFamily: headingFont }}
+                >
                     Los títulos se ven así (H2)
                 </p>
 
@@ -255,7 +314,9 @@ function BrandingPreview({ branding }: { branding: TenantBranding }) {
                 </div>
 
                 <div className="space-y-1">
-                    <Label style={{ color: b.foreground }}>Correo electrónico</Label>
+                    <Label style={{ color: b.foreground }}>
+                        Correo electrónico
+                    </Label>
                     <Input
                         readOnly
                         placeholder="you@example.com"
@@ -271,8 +332,14 @@ function BrandingPreview({ branding }: { branding: TenantBranding }) {
                     </p>
                 </div>
 
-                <div className="p-3 rounded-lg" style={{ backgroundColor: b.muted, borderRadius: b.radius }}>
-                    <p className="text-xs font-medium" style={{ color: b.mutedForeground }}>
+                <div
+                    className="p-3 rounded-lg"
+                    style={{ backgroundColor: b.muted, borderRadius: b.radius }}
+                >
+                    <p
+                        className="text-xs font-medium"
+                        style={{ color: b.mutedForeground }}
+                    >
                         Bloque de superficie atenuado
                     </p>
                 </div>
@@ -422,9 +489,15 @@ export function BrandingEditor({
                 </div>
             </div>
 
-            <div>
+            {/* Sticky: en un grid de dos columnas ambas celdas miden lo mismo,
+                asi que sin esto el preview se iba con el scroll y editar la
+                tipografia (abajo en la columna izquierda) obligaba a volver
+                arriba. top-24 deja libre el navbar de administracion. */}
+            <div className="lg:sticky lg:top-24 lg:self-start">
                 <CardHeader className="px-0 pt-0">
-                    <CardTitle className="text-base">Vista previa en vivo</CardTitle>
+                    <CardTitle className="text-base">
+                        Vista previa en vivo
+                    </CardTitle>
                 </CardHeader>
                 <BrandingPreview branding={branding} />
             </div>

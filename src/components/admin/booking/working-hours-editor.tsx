@@ -1,18 +1,15 @@
 "use client";
 
-import React from "react";
+import { Plus, X } from "lucide-react";
+import {
+    type TimeRange,
+    WORKING_DAYS,
+    type WorkingHours,
+} from "@/components/admin/booking/working-hours-utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Plus, X } from "lucide-react";
-
-import {
-    WORKING_DAYS,
-    type TimeRange,
-    type WorkingHours,
-} from "@/components/admin/booking/working-hours-utils";
-
 
 export function WorkingHoursEditor({
     value,
@@ -89,7 +86,8 @@ export function WorkingHoursEditor({
                                         <Button
                                             type="button"
                                             variant="ghost"
-                                            size="icon" aria-label="Eliminar rango horario"
+                                            size="icon"
+                                            aria-label="Eliminar rango horario"
                                             className="size-8 shrink-0 sm:size-7"
                                             onClick={() => {
                                                 const next = ranges.filter(

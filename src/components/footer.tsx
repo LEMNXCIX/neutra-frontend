@@ -1,10 +1,9 @@
 "use client";
 
+import { ArrowRight, Mail } from "lucide-react";
 import Link from "next/link";
-import React from "react";
-import { Mail, ArrowRight } from "lucide-react";
-import { Category } from "@/types/category.types";
 import Logo from "@/components/logo";
+import type { Category } from "@/types/category.types";
 
 const EMPTY_CATEGORIES: Category[] = [];
 
@@ -17,8 +16,22 @@ const SOCIAL_LABELS: Record<string, string> = {
 
 const DEFAULT_SOCIAL_LABELS = ["f", "t", "ig", "in"];
 
-export default function Footer({ minimal = false, tenantName, tenantLogo, footerDescription, socialLinks, initialCategories = EMPTY_CATEGORIES }: { minimal?: boolean; tenantName?: string | null; tenantLogo?: string | null; footerDescription?: string | null; socialLinks?: any[] | null; initialCategories?: Category[] }) {
-  const categories = initialCategories.filter((c) => c.active).slice(0, 5);
+export default function Footer({
+    minimal = false,
+    tenantName,
+    tenantLogo,
+    footerDescription,
+    socialLinks,
+    initialCategories = EMPTY_CATEGORIES,
+}: {
+    minimal?: boolean;
+    tenantName?: string | null;
+    tenantLogo?: string | null;
+    footerDescription?: string | null;
+    socialLinks?: any[] | null;
+    initialCategories?: Category[];
+}) {
+    const categories = initialCategories.filter((c) => c.active).slice(0, 5);
 
     return (
         <footer className="bg-background border-t border-border pt-24 pb-12 transition-colors duration-300">
@@ -28,7 +41,11 @@ export default function Footer({ minimal = false, tenantName, tenantLogo, footer
                     <div className="md:col-span-1 space-y-8">
                         <div className="flex items-center gap-3">
                             <div className="p-2.5 bg-primary/5 rounded-xl border border-primary/10">
-                                <Logo size={32} className="text-primary" src={tenantLogo} />
+                                <Logo
+                                    size={32}
+                                    className="text-primary"
+                                    src={tenantLogo}
+                                />
                             </div>
                             <h3 className="text-2xl font-bold tracking-tight text-foreground">
                                 {tenantName || "XCIX"}
@@ -49,20 +66,19 @@ export default function Footer({ minimal = false, tenantName, tenantLogo, footer
                                       { platform: "linkedin", url: "" },
                                   ]
                             ).map((social: any, i: number) => {
-                                const label = SOCIAL_LABELS[social.platform] ?? DEFAULT_SOCIAL_LABELS[i % 4];
+                                const label =
+                                    SOCIAL_LABELS[social.platform] ??
+                                    DEFAULT_SOCIAL_LABELS[i % 4];
                                 return (
                                     <a
                                         href={social.url || "#"}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        key={social.platform + i}
+                                        key={social.platform}
                                         className="size-10 rounded-full bg-muted/50 border border-transparent hover:border-primary/20 hover:bg-background hover:text-primary transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-300 flex items-center justify-center group"
                                         aria-label={social.platform}
                                     >
-                                        <span
-                                            aria-hidden="true"
-                                            className="size-4 flex items-center justify-center text-xs font-bold leading-none transition-transform group-hover:scale-110"
-                                        >
+                                        <span className="size-4 flex items-center justify-center text-xs font-bold leading-none transition-transform group-hover:scale-110">
                                             {label}
                                         </span>
                                     </a>
@@ -199,8 +215,11 @@ export default function Footer({ minimal = false, tenantName, tenantLogo, footer
 
                 {/* Bottom Bar */}
                 <div className="border-t border-border pt-10 flex flex-col md:flex-row justify-between items-center gap-6">
-        <p className="text-[11px] font-medium text-muted-foreground" suppressHydrationWarning>
-          &copy; {new Date().getFullYear()} XCIX Platforms. Todos
+                    <p
+                        className="text-[11px] font-medium text-muted-foreground"
+                        suppressHydrationWarning
+                    >
+                        &copy; {new Date().getFullYear()} XCIX Platforms. Todos
                         los derechos reservados.
                     </p>
                     <div className="flex items-center gap-8">

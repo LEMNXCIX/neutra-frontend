@@ -1,5 +1,5 @@
 import { createContext } from "react";
-import { TenantFeatures } from "@/types/tenant";
+import type { TenantFeatures } from "@/types/tenant";
 
 interface FeatureContextType {
     features: TenantFeatures;
@@ -11,5 +11,5 @@ interface FeatureContextType {
 
 const FeatureContext = createContext<FeatureContextType | undefined>(undefined);
 
-export { FeatureContext };
 export type { FeatureContextType };
+export { FeatureContext };

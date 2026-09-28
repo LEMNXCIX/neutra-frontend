@@ -1,5 +1,9 @@
-import { api } from '@/lib/api-client';
-import { Product, CreateProductDTO, UpdateProductDTO } from '@/types/product.types';
+import { api } from "@/lib/api-client";
+import type {
+    CreateProductDTO,
+    Product,
+    UpdateProductDTO,
+} from "@/types/product.types";
 
 /**
  * Products Service
@@ -10,8 +14,8 @@ export const productsService = {
      * Get all products
      */
     getAll: async (): Promise<Product[]> => {
-        const res = await api.get<any>('/products');
-        return Array.isArray(res) ? res : (res?.products || []);
+        const res = await api.get<any>("/products");
+        return Array.isArray(res) ? res : res?.products || [];
     },
 
     /**
@@ -25,14 +29,14 @@ export const productsService = {
      * Search products by name
      */
     search: async (name: string): Promise<Product[]> => {
-        return api.post<Product[]>('/products/search', { name });
+        return api.post<Product[]>("/products/search", { name });
     },
 
     /**
      * Create new product (requires authentication)
      */
     create: async (data: CreateProductDTO): Promise<Product> => {
-        return api.post<Product>('/products', data);
+        return api.post<Product>("/products", data);
     },
 
     /**
@@ -52,7 +56,15 @@ export const productsService = {
     /**
      * Get product statistics (requires authentication)
      */
-    getStats: async (): Promise<{ totalProducts: number; outOfStock: number; lowStock: number }> => {
-        return api.get<{ totalProducts: number; outOfStock: number; lowStock: number }>('/products/stats');
+    getStats: async (): Promise<{
+        totalProducts: number;
+        outOfStock: number;
+        lowStock: number;
+    }> => {
+        return api.get<{
+            totalProducts: number;
+            outOfStock: number;
+            lowStock: number;
+        }>("/products/stats");
     },
 };

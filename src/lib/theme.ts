@@ -89,7 +89,7 @@ export const ALL_THEME_VARS = [
     "--ring",
 ];
 
-const FONT_FALLBACKS = 'ui-sans-serif, system-ui, -apple-system, sans-serif';
+const FONT_FALLBACKS = "ui-sans-serif, system-ui, -apple-system, sans-serif";
 
 const FONT_VARS = ["--font-tenant-font", "--font-tenant-heading"];
 
@@ -125,6 +125,16 @@ export function applyTenantTheme(branding?: TenantBranding | null): void {
     const root = document.documentElement;
     const b = branding ?? {};
 
+    // No tenant palette: leave globals.css in charge, dark mode included.
+    // This guard is what makes it safe to mount the provider once in the root
+    // layout: without it the derived surface pinning below would run on every
+    // route, including superadmin, and override the .dark rules.
+    const hasColor = Object.keys(CSS_VAR_MAP).some((key) =>
+        (b as Record<string, string | undefined>)[key]?.trim(),
+    );
+    const hasFont = !!(b.fontFamily?.trim() || b.headingFont?.trim());
+    if (!hasColor && !hasFont) return;
+
     for (const [key, cssVar] of Object.entries(CSS_VAR_MAP)) {
         const value = (b as Record<string, string | undefined>)[key];
         if (value?.trim()) root.style.setProperty(cssVar, value);
@@ -132,11 +142,14 @@ export function applyTenantTheme(branding?: TenantBranding | null): void {
 
     // Derived tokens (only when their source exists)
     if (b.border?.trim()) root.style.setProperty("--input", b.border);
-    if (b.primaryColor?.trim()) root.style.setProperty("--ring", b.primaryColor);
+    if (b.primaryColor?.trim())
+        root.style.setProperty("--ring", b.primaryColor);
 
     // Pin surface tokens to fight dark-mode leaks
-    for (const [cssVar, value] of DERIVED_SURFACE_VARS) {
-        root.style.setProperty(cssVar, value);
+    if (hasColor) {
+        for (const [cssVar, value] of DERIVED_SURFACE_VARS) {
+            root.style.setProperty(cssVar, value);
+        }
     }
 
     // Typography

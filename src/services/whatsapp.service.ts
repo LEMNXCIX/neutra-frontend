@@ -12,12 +12,17 @@ export interface WhatsAppConfig {
 
 export const whatsappService = {
     async getConfig(): Promise<WhatsAppConfig | null> {
-        const response = await api.get<WhatsAppConfig>("/admin/whatsapp/config");
+        const response = await api.get<WhatsAppConfig>(
+            "/admin/whatsapp/config",
+        );
         return response || null;
     },
 
     async updateConfig(data: Partial<WhatsAppConfig>): Promise<WhatsAppConfig> {
-        const response = await api.post<WhatsAppConfig>("/admin/whatsapp/config", data);
+        const response = await api.post<WhatsAppConfig>(
+            "/admin/whatsapp/config",
+            data,
+        );
         return response;
-    }
+    },
 };

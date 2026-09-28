@@ -1,10 +1,10 @@
-import React, { Suspense } from "react";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 import BannersTableClient from "@/components/admin/banners/BannersTableClient";
+import { api } from "@/lib/api-client";
 import { validateAdminAccess } from "@/lib/server-auth";
-import { api } from '@/lib/api-client';
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 export default async function SuperAdminBannersPage({
     searchParams,
@@ -27,7 +27,10 @@ export default async function SuperAdminBannersPage({
 
     // /banners/all/list is the admin endpoint (all banners incl. inactive,
     // resolveSuperAdminTenant honors the tenantId filter).
-    const banners = (await api.get<any[]>(`/banners/all/list?${query.toString()}`).catch(() => [])) || [];
+    const banners =
+        (await api
+            .get<any[]>(`/banners/all/list?${query.toString()}`)
+            .catch(() => [])) || [];
 
     // Minimal stats for now
     const stats = {

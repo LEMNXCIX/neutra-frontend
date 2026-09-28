@@ -10,8 +10,8 @@ vi.mock("@/lib/api-client", () => ({
 
 import {
     APPOINTMENT_STATUS_LABELS,
-    bookingService,
     type Appointment,
+    bookingService,
 } from "@/services/booking.service";
 
 const appointment = {
