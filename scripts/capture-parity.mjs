@@ -1,4 +1,6 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
+import http from "node:http";
+import https from "node:https";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -18,28 +20,80 @@ export async function loadRoutes() {
     return routes;
 }
 
-/** The tenant header set that identifies each fixture. */
-export function tenantHeaders(tenant) {
+/** Tenant identity is carried as explicit headers and as the subdomain the Next
+ * proxy actually resolves from `Host`. `PARITY_TENANT_DOMAIN` overrides the
+ * domain portion for non-local environments. */
+export function tenantHeaders(tenant, baseUrl = DEFAULT_BASE_URL) {
+    const domain = process.env.PARITY_TENANT_DOMAIN || "localhost";
+    const url = new URL(baseUrl);
+    const port = url.port ? `:${url.port}` : "";
     return {
         "x-tenant-slug": tenant,
         "x-tenant-id": tenant,
+        host: `${tenant}.${domain}${port}`,
     };
 }
 
-export function fixturePath(route) {
+export function fixturePath(route, fixturesDir = FIXTURES_DIR) {
     return path.join(
-        FIXTURES_DIR,
+        fixturesDir,
         `${route.tenant}-${encodeURIComponent(route.path)}.json`,
     );
 }
 
-export async function requestRoute(baseUrl, route) {
-    const response = await fetch(new URL(route.path, baseUrl), {
-        headers: tenantHeaders(route.tenant),
-        redirect: "manual",
+/** node:http is used instead of fetch because fetch silently drops an
+ * overridden `host` header, which would defeat tenant resolution. */
+function requestOnce(url, headers) {
+    return new Promise((resolve, reject) => {
+        const transport = url.protocol === "https:" ? https : http;
+        const request = transport.request(
+            {
+                protocol: url.protocol,
+                hostname: url.hostname,
+                port: url.port || undefined,
+                path: `${url.pathname}${url.search}`,
+                method: "GET",
+                headers,
+            },
+            (response) => {
+                const chunks = [];
+                response.on("data", (chunk) => chunks.push(chunk));
+                response.on("end", () => {
+                    const responseHeaders = new Headers();
+                    for (const [name, value] of Object.entries(
+                        response.headers,
+                    )) {
+                        if (value === undefined) continue;
+                        for (const entry of Array.isArray(value)
+                            ? value
+                            : [value]) {
+                            responseHeaders.append(name, String(entry));
+                        }
+                    }
+                    resolve({
+                        status: response.statusCode ?? 0,
+                        headers: responseHeaders,
+                        body: Buffer.concat(chunks).toString("utf8"),
+                    });
+                });
+            },
+        );
+        const timeoutMs = Number(
+            process.env.PARITY_REQUEST_TIMEOUT_MS ?? 10000,
+        );
+        request.setTimeout(timeoutMs, () => {
+            request.destroy(
+                new Error(`request timed out after ${timeoutMs}ms`),
+            );
+        });
+        request.on("error", reject);
+        request.end();
     });
-    const body = await response.text();
-    return { status: response.status, headers: response.headers, body };
+}
+
+export function requestRoute(baseUrl, route) {
+    const url = new URL(route.path, baseUrl);
+    return requestOnce(url, tenantHeaders(route.tenant, baseUrl));
 }
 
 function headerSubset(headers) {
@@ -103,54 +157,55 @@ export function buildSnapshot({ status, body }) {
     };
 }
 
-async function capture() {
-    const baseUrl = process.env.BASE_URL || DEFAULT_BASE_URL;
+export async function captureRoutes({
+    baseUrl = process.env.BASE_URL || DEFAULT_BASE_URL,
+    fixturesDir = FIXTURES_DIR,
+} = {}) {
     const routes = await loadRoutes();
-    await mkdir(FIXTURES_DIR, { recursive: true });
+    const captured = [];
 
-    let failures = 0;
+    // Collect every response before writing anything: a single failed request
+    // must leave no partial baseline behind.
     for (const route of routes) {
         let result;
         try {
             result = await requestRoute(baseUrl, route);
         } catch (error) {
-            failures += 1;
-            console.error(
-                `FETCH ERROR ${route.tenant} ${route.path}: ${error.message}`,
+            throw new Error(
+                `Failed to capture ${route.tenant} ${route.path} from ${baseUrl}: ${error.message}`,
+                { cause: error },
             );
-            result = {
-                status: 0,
-                headers: new Headers(),
-                body: `Error: ${error.message}`,
-            };
         }
 
-        const fixture = {
-            path: route.path,
-            tenant: route.tenant,
-            capturedAt: new Date().toISOString(),
-            status: result.status,
-            headers: headerSubset(result.headers),
-            body: result.body,
-        };
-        const destination = fixturePath(route);
+        captured.push({
+            route,
+            fixture: {
+                path: route.path,
+                tenant: route.tenant,
+                capturedAt: new Date().toISOString(),
+                status: result.status,
+                headers: headerSubset(result.headers),
+                body: result.body,
+            },
+        });
+    }
+
+    await mkdir(fixturesDir, { recursive: true });
+    for (const { route, fixture } of captured) {
+        const destination = fixturePath(route, fixturesDir);
         await writeFile(destination, `${JSON.stringify(fixture, null, 2)}\n`);
         console.log(
-            `CAPTURED ${route.tenant} ${route.path} -> ${path.relative(HERE, destination)} (status ${result.status})`,
+            `CAPTURED ${route.tenant} ${route.path} -> ${path.relative(HERE, destination)} (status ${fixture.status})`,
         );
     }
 
     console.log(`Captured ${routes.length} route(s) from ${baseUrl}.`);
-    if (failures) {
-        console.error(`${failures} request(s) failed.`);
-        process.exitCode = 1;
-    }
 }
 
 const invokedPath = process.argv[1] ? path.resolve(process.argv[1]) : "";
 if (invokedPath === fileURLToPath(import.meta.url)) {
-    capture().catch((error) => {
-        console.error(error);
+    captureRoutes().catch((error) => {
+        console.error(error.message);
         process.exitCode = 1;
     });
 }
