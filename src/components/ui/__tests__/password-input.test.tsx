@@ -7,6 +7,10 @@ import "@testing-library/jest-dom/vitest";
 
 import { PasswordInput } from "@/components/ui/password-input";
 
+const Lock = (props: { className?: string }) => (
+    <svg data-testid="lock" {...props} />
+);
+
 describe("PasswordInput", () => {
     it("masks the value by default and reveals it on click", async () => {
         render(
@@ -84,9 +88,6 @@ describe("PasswordInput", () => {
         const { rerender } = render(<PasswordInput aria-label="Contraseña" />);
         expect(leading()).toBeNull();
 
-        const Lock = (props: { className?: string }) => (
-            <svg data-testid="lock" {...props} />
-        );
         rerender(<PasswordInput aria-label="Contraseña" icon={Lock} />);
         expect(screen.getByTestId("lock")).toBeInTheDocument();
     });

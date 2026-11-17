@@ -38,6 +38,7 @@
                 "noStaticElementInteractions": "warn"
             },
             "correctness": {
+                "noComponentHookFactories": "warn",
                 "noUnusedFunctionParameters": "warn",
                 "useExhaustiveDependencies": "warn"
             },
