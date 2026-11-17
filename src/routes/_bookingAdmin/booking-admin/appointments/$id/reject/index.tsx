@@ -1,9 +1,27 @@
-// Generated from scripts/page-routes.json — page body ports in Tasks 8-9.
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createServerFn } from "@tanstack/react-start";
+
+const rejectAppointment = createServerFn({ method: "GET" })
+    .validator((data: { id: string }) => data)
+    .handler(async ({ data }) => {
+        const { apiClient } = await import("@/lib/api-client");
+        try {
+            await apiClient(`/appointments/${data.id}/status`, {
+                method: "PUT",
+                body: JSON.stringify({ status: "CANCELLED" }),
+            });
+        } catch (error) {
+            console.error("Error rejecting appointment:", error);
+        }
+    });
 
 export const Route = createFileRoute(
     "/_bookingAdmin/booking-admin/appointments/$id/reject/",
 )({
+    loader: async ({ params }) => {
+        await rejectAppointment({ data: { id: params.id } });
+        throw redirect({ to: "/booking-admin/appointments" });
+    },
     head: () => ({
         meta: [
             { title: "Rechazar cita" },
@@ -13,12 +31,9 @@ export const Route = createFileRoute(
             },
         ],
     }),
-    component: PageShell,
+    component: AppointmentRejectRoute,
 });
 
-/** Placeholder replaced by the real loader + component in Tasks 8-9. */
-function PageShell() {
-    return (
-        <div data-route="/_bookingAdmin/booking-admin/appointments/$id/reject/" />
-    );
+function AppointmentRejectRoute() {
+    return <div />;
 }

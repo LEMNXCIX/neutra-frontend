@@ -1,7 +1,36 @@
-// Generated from scripts/page-routes.json — page body ports in Tasks 8-9.
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createServerFn } from "@tanstack/react-start";
+import BannersTableClient from "@/components/admin/banners/BannersTableClient";
+
+const getBannersData = createServerFn({ method: "GET" }).handler(async () => {
+    const [{ api }, { validateAdminAccess }] = await Promise.all([
+        import("@/lib/api-client"),
+        import("@/lib/server-auth"),
+    ]);
+    const { isValid } = await validateAdminAccess();
+    if (!isValid) return { unauthorized: true as const };
+
+    const banners = (await api.get<any[]>(`/banners`).catch(() => [])) || [];
+    const stats = {
+        totalBanners: banners.length,
+        activeBanners: banners.filter((b: any) => b.active).length,
+        inactiveBanners: banners.filter((b: any) => !b.active).length,
+    };
+    const pagination = {
+        currentPage: 1,
+        totalPages: 1,
+        totalItems: banners.length,
+        itemsPerPage: 100,
+    };
+    return { banners, stats, pagination };
+});
 
 export const Route = createFileRoute("/_bookingAdmin/booking-admin/banners/")({
+    loader: async () => {
+        const data = await getBannersData();
+        if ("unauthorized" in data) throw redirect({ to: "/login" });
+        return data;
+    },
     head: () => ({
         meta: [
             { title: "Anuncios" },
@@ -11,10 +40,18 @@ export const Route = createFileRoute("/_bookingAdmin/booking-admin/banners/")({
             },
         ],
     }),
-    component: PageShell,
+    component: BookingAdminBannersRoute,
 });
 
-/** Placeholder replaced by the real loader + component in Tasks 8-9. */
-function PageShell() {
-    return <div data-route="/_bookingAdmin/booking-admin/banners/" />;
+function BookingAdminBannersRoute() {
+    const { banners, stats, pagination } = Route.useLoaderData();
+    return (
+        <div className="container mx-auto py-8">
+            <BannersTableClient
+                banners={banners}
+                stats={stats}
+                pagination={pagination}
+            />
+        </div>
+    );
 }

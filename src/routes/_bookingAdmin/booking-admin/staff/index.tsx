@@ -1,7 +1,20 @@
-// Generated from scripts/page-routes.json — page body ports in Tasks 8-9.
 import { createFileRoute } from "@tanstack/react-router";
+import { createServerFn } from "@tanstack/react-start";
+import StaffTableClient from "@/components/admin/booking/StaffTableClient";
+
+const getStaffData = createServerFn({ method: "GET" }).handler(async () => {
+    const { api } = await import("@/lib/api-client");
+    try {
+        const data = await api.get<any[]>("/staff?activeOnly=false");
+        return { staff: Array.isArray(data) ? data : [] };
+    } catch (err) {
+        console.error("Error fetching staff:", err);
+        return { staff: [] };
+    }
+});
 
 export const Route = createFileRoute("/_bookingAdmin/booking-admin/staff/")({
+    loader: () => getStaffData(),
     head: () => ({
         meta: [
             { title: "Personal de reservas" },
@@ -11,10 +24,14 @@ export const Route = createFileRoute("/_bookingAdmin/booking-admin/staff/")({
             },
         ],
     }),
-    component: PageShell,
+    component: BookingAdminStaffRoute,
 });
 
-/** Placeholder replaced by the real loader + component in Tasks 8-9. */
-function PageShell() {
-    return <div data-route="/_bookingAdmin/booking-admin/staff/" />;
+function BookingAdminStaffRoute() {
+    const { staff } = Route.useLoaderData();
+    return (
+        <div className="p-6">
+            <StaffTableClient staff={staff} />
+        </div>
+    );
 }

@@ -1,5 +1,5 @@
-// Generated from scripts/page-routes.json — page body ports in Tasks 8-9.
 import { createFileRoute } from "@tanstack/react-router";
+import { AppearanceClient } from "@/components/admin/tenants/AppearanceClient";
 
 export const Route = createFileRoute("/_storeAdmin/store-admin/appearance/")({
     head: () => ({
@@ -11,10 +11,9 @@ export const Route = createFileRoute("/_storeAdmin/store-admin/appearance/")({
             },
         ],
     }),
-    component: PageShell,
+    component: StoreAdminAppearanceRoute,
 });
 
-/** Placeholder replaced by the real loader + component in Tasks 8-9. */
-function PageShell() {
-    return <div data-route="/_storeAdmin/store-admin/appearance/" />;
+function StoreAdminAppearanceRoute() {
+    return <AppearanceClient />;
 }

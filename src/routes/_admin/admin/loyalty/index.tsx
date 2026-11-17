@@ -1,5 +1,5 @@
-// Generated from scripts/page-routes.json — page body ports in Tasks 8-9.
 import { createFileRoute } from "@tanstack/react-router";
+import { SuperAdminLoyaltyClient } from "@/components/admin/loyalty/SuperAdminLoyaltyClient";
 
 export const Route = createFileRoute("/_admin/admin/loyalty/")({
     head: () => ({
@@ -12,10 +12,9 @@ export const Route = createFileRoute("/_admin/admin/loyalty/")({
             },
         ],
     }),
-    component: PageShell,
+    component: AdminLoyaltyRoute,
 });
 
-/** Placeholder replaced by the real loader + component in Tasks 8-9. */
-function PageShell() {
-    return <div data-route="/_admin/admin/loyalty/" />;
+function AdminLoyaltyRoute() {
+    return <SuperAdminLoyaltyClient />;
 }

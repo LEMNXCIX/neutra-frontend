@@ -1,5 +1,5 @@
-// Generated from scripts/page-routes.json — page body ports in Tasks 8-9.
 import { createFileRoute } from "@tanstack/react-router";
+import { BusinessHoursClient } from "@/components/admin/tenants/BusinessHoursClient";
 
 export const Route = createFileRoute("/_bookingAdmin/booking-admin/hours/")({
     head: () => ({
@@ -11,10 +11,9 @@ export const Route = createFileRoute("/_bookingAdmin/booking-admin/hours/")({
             },
         ],
     }),
-    component: PageShell,
+    component: BookingAdminHoursRoute,
 });
 
-/** Placeholder replaced by the real loader + component in Tasks 8-9. */
-function PageShell() {
-    return <div data-route="/_bookingAdmin/booking-admin/hours/" />;
+function BookingAdminHoursRoute() {
+    return <BusinessHoursClient />;
 }
