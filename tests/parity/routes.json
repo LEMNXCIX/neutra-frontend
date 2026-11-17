@@ -1,0 +1,12 @@
+[
+    { "path": "/store", "tenant": "store" },
+    { "path": "/products", "tenant": "store" },
+    { "path": "/cart", "tenant": "store" },
+    { "path": "/login", "tenant": "store" },
+    { "path": "/admin/orders", "tenant": "store" },
+    { "path": "/api/products", "tenant": "store" },
+    { "path": "/api/webhooks/health", "tenant": "store" },
+    { "path": "/booking/home", "tenant": "booking" },
+    { "path": "/booking/services", "tenant": "booking" },
+    { "path": "/booking/appointments", "tenant": "booking" }
+]

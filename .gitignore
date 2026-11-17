@@ -13,6 +13,9 @@
 # testing
 /coverage
 
+# parity fixtures captured from the pre-rewrite app (generated, not source)
+/tests/parity/fixtures/**
+
 # next.js
 /.next/
 /.next-*/
