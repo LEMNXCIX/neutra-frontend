@@ -17,7 +17,11 @@ const getStoreLayoutData = createServerFn({ method: "GET" }).handler(
             ]);
         // The proxy injects this header for this request; a stale tenant
         // cookie must not change which navigation the storefront renders.
-        const isSuperAdmin = getRequestHeader("x-tenant-slug") === "superadmin";
+        // A missing header is a root/superadmin surface, NOT a store tenant:
+        // otherwise an unproxied/SSR-only call would show the store navbar on
+        // the root host.
+        const tenantSlug = getRequestHeader("x-tenant-slug");
+        const isSuperAdmin = !tenantSlug || tenantSlug === "superadmin";
         const [branding, tenantName, cms] = await Promise.all([
             serverTheme.getTenantBrandingFromHeaders(),
             serverTheme.getTenantNameFromHeaders(),

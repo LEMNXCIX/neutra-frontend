@@ -1,16 +1,21 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
+import { BookingNavbar } from "@/components/booking/booking-navbar";
+import FooterWrapper from "@/components/footer-wrapper";
+import { Navigation as StoreNavbar } from "@/components/nav_bar";
+import { NeutralNavigation } from "@/components/neutral-navigation";
 import { ProfileClient } from "@/components/profile/profile-client";
 import type { Tenant } from "@/types/tenant";
 
 /** Server-only profile data, reached through Start's server-fn boundary so
  *  cookie and auth helpers never enter the client bundle. */
 const getProfileData = createServerFn({ method: "GET" }).handler(async () => {
-    const [{ api }, { authService }, { getCookie }] = await Promise.all([
-        import("@/lib/api-client"),
-        import("@/services/auth.service"),
-        import("@tanstack/react-start/server"),
-    ]);
+    const [{ api }, { authService }, { getCookie, getRequestHeader }] =
+        await Promise.all([
+            import("@/lib/api-client"),
+            import("@/services/auth.service"),
+            import("@tanstack/react-start/server"),
+        ]);
 
     try {
         const token = getCookie("token");
@@ -20,9 +25,16 @@ const getProfileData = createServerFn({ method: "GET" }).handler(async () => {
         const user = authRes?.user;
         if (!user) return null;
 
-        const tenantSlug = getCookie("tenant-slug") || "";
+        // The server entry's Host-derived header is authoritative. Cookies can
+        // be stale from another tenant; a missing header means root/superadmin.
+        const headerSlug = getRequestHeader("x-tenant-slug");
+        const tenantSlug = headerSlug || getCookie("tenant-slug") || "";
         const moduleType = getCookie("module-type") || "root";
-        const isNeutral = moduleType === "root" || tenantSlug === "superadmin";
+        const isNeutral =
+            !headerSlug ||
+            headerSlug === "superadmin" ||
+            moduleType === "root" ||
+            tenantSlug === "superadmin";
         const requests: Promise<any>[] = [];
 
         if (moduleType === "store") {
@@ -94,11 +106,12 @@ export const Route = createFileRoute("/profile/")({
 });
 
 function ProfileRoute() {
-    const { orders, appointments, myTenants, isNeutral } =
+    const { orders, appointments, myTenants, isNeutral, moduleType } =
         Route.useLoaderData();
-    return (
+
+    const content = (
         <main
-            className={`min-h-screen py-16 px-4 ${isNeutral ? "bg-gradient-to-b from-background to-muted/20" : "bg-background"}`}
+            className={`flex-1 py-16 px-4 ${isNeutral ? "bg-gradient-to-b from-background to-muted/20" : "bg-background"}`}
         >
             <div className="max-w-6xl mx-auto space-y-12">
                 <div
@@ -128,5 +141,22 @@ function ProfileRoute() {
                 />
             </div>
         </main>
+    );
+
+    if (moduleType === "booking") {
+        return (
+            <div className="min-h-screen bg-background flex flex-col">
+                <BookingNavbar />
+                {content}
+            </div>
+        );
+    }
+
+    return (
+        <div id="root-content" className="min-h-screen flex flex-col">
+            {isNeutral ? <NeutralNavigation /> : <StoreNavbar />}
+            <div className="pt-16 flex-1 bg-background">{content}</div>
+            <FooterWrapper minimal={isNeutral} />
+        </div>
     );
 }

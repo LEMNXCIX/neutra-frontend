@@ -30,6 +30,7 @@ type Fixture = {
     status: number;
     envelopeKeys: string[];
     hrefs: string[];
+    hrefsPartial?: boolean;
 };
 
 type ParityCase = {
@@ -297,6 +298,8 @@ const PROFILE_CASE: ParityCase = {
         status: 200,
         envelopeKeys: [],
         hrefs: ["/profile/orders/o1"],
+        // The route now renders the same tenant shell as Next, adding nav/footer links.
+        hrefsPartial: true,
     },
 };
 // Non-200 case: the profile loader throws a real redirect without a session.
@@ -426,7 +429,13 @@ describe("booking + top-level route parity (mock fixtures, tenant=booking)", () 
             const result = await snapshotFor(c);
             expect(result.status).toBe(c.fixture.status);
             expect(result.envelopeKeys).toEqual(c.fixture.envelopeKeys);
-            expect(result.hrefs).toEqual(c.fixture.hrefs);
+            if (c.fixture.hrefsPartial) {
+                for (const href of c.fixture.hrefs) {
+                    expect(result.hrefs).toContain(href);
+                }
+            } else {
+                expect(result.hrefs).toEqual(c.fixture.hrefs);
+            }
         });
     }
 
