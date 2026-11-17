@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/services/auth.service", () => ({
     authService: {
@@ -12,6 +12,11 @@ vi.mock("@/services/auth.service", () => ({
 import { ApiError } from "@/lib/api-client";
 import { authService } from "@/services/auth.service";
 import { useAuthStore } from "@/store/auth-store";
+import {
+    AUTH_STORAGE_KEY,
+    authStore,
+    createAuthStore,
+} from "@/store/tanstack/auth-store";
 
 const mockAuth = authService as unknown as {
     login: ReturnType<typeof vi.fn>;
@@ -103,5 +108,71 @@ describe("auth-store.updateUser", () => {
         useAuthStore.getState().updateUser({ name: "B" });
         expect(useAuthStore.getState().user?.name).toBe("B");
         expect(useAuthStore.getState().user?.id).toBe("u1");
+    });
+});
+
+/**
+ * The zustand store persisted through `persist({ name: "auth-storage",
+ * partialize: s => ({ error: s.error }) })`. The TanStack rewrite must keep the
+ * same key, the same on-disk shape (zustand's `{ state, version }` envelope)
+ * and, critically, must never write the spoofable user/session to storage.
+ */
+describe("auth-store TanStack persistence", () => {
+    const makeStorage = (initial: string | null = null) => ({
+        getItem: vi.fn((_key: string) => initial),
+        setItem: vi.fn((_key: string, _value: string) => undefined),
+        removeItem: vi.fn((_key: string) => undefined),
+        clear: vi.fn(() => undefined),
+        key: vi.fn((_index: number) => null),
+        length: 0,
+    });
+
+    afterEach(() => {
+        vi.unstubAllGlobals();
+    });
+
+    it("persists only the error field under the auth-storage key", () => {
+        const storage = makeStorage();
+        vi.stubGlobal("localStorage", storage);
+
+        const store = createAuthStore();
+        store.setState((prev) => ({
+            ...prev,
+            user: { id: "u1", name: "A", isAdmin: true },
+            error: "boom",
+        }));
+
+        expect(storage.setItem).toHaveBeenCalled();
+        const [key, value] = storage.setItem.mock.calls.at(-1) as [
+            string,
+            string,
+        ];
+        expect(key).toBe(AUTH_STORAGE_KEY);
+        expect(JSON.parse(value)).toEqual({
+            state: { error: "boom" },
+            version: 0,
+        });
+        expect(value).not.toContain("u1");
+    });
+
+    it("rehydrates error on creation but never restores a persisted user", () => {
+        const storage = makeStorage(
+            JSON.stringify({
+                state: { error: "persisted", user: { id: "spoofed" } },
+                version: 0,
+            }),
+        );
+        vi.stubGlobal("localStorage", storage);
+
+        const store = createAuthStore();
+        expect(store.get().error).toBe("persisted");
+        expect(store.get().user).toBeNull();
+    });
+
+    it("exposes actions through the TanStack store API", () => {
+        expect(typeof authStore.actions.login).toBe("function");
+        expect(typeof authStore.actions.checkSession).toBe("function");
+        expect(typeof authStore.actions.logout).toBe("function");
+        expect(authStore.get().user).toBeNull();
     });
 });

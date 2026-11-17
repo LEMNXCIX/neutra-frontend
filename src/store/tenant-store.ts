@@ -1,13 +1,12 @@
 "use client";
 
-import Cookies from "js-cookie";
 import { useSyncExternalStore } from "react";
-
-type TenantSnapshot = {
-    tenantId: string | null;
-    tenantSlug: string | null;
-    moduleType: string | null;
-};
+import {
+    EMPTY_TENANT,
+    syncTenantFromCookies,
+    type TenantSnapshot,
+    tenantStore,
+} from "./tanstack/tenant-store";
 
 type TenantState = TenantSnapshot & {
     /** Re-read tenant cookies set by the proxy (e.g. after first navigation). */
@@ -24,39 +23,21 @@ type TenantState = TenantSnapshot & {
  * null while the client got a real id, so every component branching on
  * tenantId during render produced a hydration mismatch. AppearanceClient was the
  * visible one, the same latent bug sat behind the other seven consumers.
+ *
+ * The state itself lives in a TanStack Store; this hook keeps its own raw
+ * `useSyncExternalStore` binding because TanStack's `useSelector` feeds the live
+ * state as the server snapshot too, which would reintroduce that mismatch.
  */
-const EMPTY: TenantSnapshot = {
-    tenantId: null,
-    tenantSlug: null,
-    moduleType: null,
-};
-
-let current: TenantSnapshot = { ...EMPTY };
-const listeners = new Set<() => void>();
-
-const emit = () => {
-    for (const listener of listeners) listener();
-};
-
 const subscribe = (listener: () => void) => {
-    listeners.add(listener);
-    return () => {
-        listeners.delete(listener);
-    };
+    const { unsubscribe } = tenantStore.subscribe(listener);
+    return unsubscribe;
 };
 
-const getSnapshot = () => current;
-const getServerSnapshot = (): TenantSnapshot => EMPTY;
-
-const readCookies = (): TenantSnapshot => ({
-    tenantId: Cookies.get("tenant-id") ?? null,
-    tenantSlug: Cookies.get("tenant-slug") ?? null,
-    moduleType: Cookies.get("module-type") ?? null,
-});
+const getSnapshot = () => tenantStore.get();
+const getServerSnapshot = (): TenantSnapshot => EMPTY_TENANT;
 
 const applySnapshot = (next: TenantSnapshot) => {
-    current = next;
-    emit();
+    tenantStore.setState(() => next);
 };
 
 /**
@@ -79,7 +60,7 @@ interface TenantStoreHook {
     syncFromCookies(): void;
 }
 
-const syncFromCookies = () => applySnapshot(readCookies());
+const syncFromCookies = () => syncTenantFromCookies();
 
 const useTenantStoreImpl = <T>(
     selector?: (state: TenantSnapshot) => T,
@@ -90,13 +71,13 @@ const useTenantStoreImpl = <T>(
         getServerSnapshot,
     );
     if (selector) return selector(snapshot);
-    return { ...snapshot, syncFromCookies } as TenantState;
+    return { ...snapshot, syncFromCookies };
 };
 
 export const useTenantStore = useTenantStoreImpl as TenantStoreHook;
 useTenantStore.getState = getSnapshot;
 useTenantStore.setState = (partial: Partial<TenantSnapshot>) => {
-    applySnapshot({ ...current, ...partial });
+    applySnapshot({ ...getSnapshot(), ...partial });
 };
 useTenantStore.syncFromCookies = syncFromCookies;
 
@@ -105,14 +86,9 @@ export type { TenantSnapshot, TenantState };
 /** Test seam: reset module state between cases. */
 export const tenantStoreApi = {
     get: getSnapshot,
-    set: (partial: Partial<TenantSnapshot>) =>
-        applySnapshot({ ...current, ...partial }),
+    set: (partial: Partial<TenantSnapshot>) => {
+        applySnapshot({ ...getSnapshot(), ...partial });
+    },
     syncFromCookies,
-    reset: () => applySnapshot({ ...EMPTY }),
+    reset: () => applySnapshot({ ...EMPTY_TENANT }),
 };
-
-// Populate on module load in the browser so the first client render after
-// hydration already has the tenant. No-ops on the server where Cookies is empty.
-if (typeof window !== "undefined") {
-    current = readCookies();
-}
