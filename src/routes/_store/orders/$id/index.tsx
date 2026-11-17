@@ -368,7 +368,13 @@ const statusConfig: Record<
 };
 
 export const Route = createFileRoute("/_store/orders/$id/")({
-    loader: ({ params }) => getOrderData({ data: { id: params.id } }),
+    loader: async ({ params }) => {
+        const data = await getOrderData({ data: { id: params.id } });
+        // notFound() returns a NotFoundError that must be thrown; doing it in
+        // the loader is the idiomatic Start path to the nearest notFound UI.
+        if (!data.order) throw notFound();
+        return { order: data.order };
+    },
     head: () => ({
         meta: [
             { title: "Detalles del Pedido" },
@@ -383,7 +389,6 @@ export const Route = createFileRoute("/_store/orders/$id/")({
 
 function OrderRoute() {
     const { order } = Route.useLoaderData();
-    if (!order) throw notFound();
 
     const currentStatus = statusConfig[order.status] || statusConfig.processing;
     const StatusIcon = currentStatus.icon;

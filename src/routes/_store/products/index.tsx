@@ -13,65 +13,79 @@ type FrontendProduct = {
     stock?: number;
 };
 
-const getProductsData = createServerFn({ method: "GET" }).handler(async () => {
-    const { api } = await import("@/lib/api-client");
+const getProductsData = createServerFn({ method: "GET" })
+    .validator((data: { search: string; category: string }) => data)
+    .handler(async ({ data }) => {
+        const { api } = await import("@/lib/api-client");
 
-    const fetchCategories = async (): Promise<Category[]> => {
-        try {
-            const data = await api.get<any>("/categories?type=PRODUCT");
-            if (Array.isArray(data)) return data;
-            if (data?.categories) return data.categories;
-            return [];
-        } catch (error) {
-            console.error("Error fetching categories:", error);
-            return [];
-        }
-    };
+        const fetchCategories = async (): Promise<Category[]> => {
+            try {
+                const payload = await api.get<any>("/categories?type=PRODUCT");
+                if (Array.isArray(payload)) return payload;
+                if (payload?.categories) return payload.categories;
+                return [];
+            } catch (error) {
+                console.error("Error fetching categories:", error);
+                return [];
+            }
+        };
 
-    const fetchProducts = async (
-        search?: string,
-        category?: string,
-    ): Promise<FrontendProduct[]> => {
-        try {
-            const queryParams = new URLSearchParams();
-            if (search) queryParams.set("search", search);
-            if (category && category !== "all")
-                queryParams.set("category", category);
+        const fetchProducts = async (
+            search?: string,
+            category?: string,
+        ): Promise<FrontendProduct[]> => {
+            try {
+                const queryParams = new URLSearchParams();
+                if (search) queryParams.set("search", search);
+                if (category && category !== "all")
+                    queryParams.set("category", category);
 
-            const data = await api.get<any>(
-                `/products?${queryParams.toString()}`,
-            );
-            const allProducts =
-                data?.products || (Array.isArray(data) ? data : []);
+                const payload = await api.get<any>(
+                    `/products?${queryParams.toString()}`,
+                );
+                const allProducts =
+                    payload?.products ||
+                    (Array.isArray(payload) ? payload : []);
 
-            return allProducts.map((p: any) => ({
-                id: p.id,
-                title: p.name,
-                price: p.price,
-                description: p.description,
-                image: p.image || undefined,
-                category: p.categories?.[0]?.name || undefined,
-                stock: p.stock,
-            }));
-        } catch (error) {
-            console.error("Error fetching products:", error);
-            return [];
-        }
-    };
+                return allProducts.map((p: any) => ({
+                    id: p.id,
+                    title: p.name,
+                    price: p.price,
+                    description: p.description,
+                    image: p.image || undefined,
+                    category: p.categories?.[0]?.name || undefined,
+                    stock: p.stock,
+                }));
+            } catch (error) {
+                console.error("Error fetching products:", error);
+                return [];
+            }
+        };
 
-    // The original page read `search`/`category` from searchParams. The
-    // client component owns those filters through its router hooks, so the
-    // initial server payload is the unfiltered catalogue, matching the
-    // no-query first paint.
-    const [products, categories] = await Promise.all([
-        fetchProducts(),
-        fetchCategories(),
-    ]);
-    return { products, categories };
-});
+        // Mirror the original page's server fetch: the validated URL search still
+        // filters the first backend payload, so deep links keep their result set.
+        const [products, categories] = await Promise.all([
+            fetchProducts(data.search, data.category),
+            fetchCategories(),
+        ]);
+        return { products, categories };
+    });
 
 export const Route = createFileRoute("/_store/products/")({
-    loader: () => getProductsData(),
+    // Optional fields keep every existing <Link to="/products"> valid; the
+    // loader applies the same defaults the original page used.
+    validateSearch: (
+        search: Record<string, unknown>,
+    ): { search?: string; category?: string } => ({
+        search: typeof search.search === "string" ? search.search : undefined,
+        category:
+            typeof search.category === "string" ? search.category : undefined,
+    }),
+    loaderDeps: ({ search }) => ({
+        search: search.search ?? "",
+        category: search.category ?? "all",
+    }),
+    loader: ({ deps }) => getProductsData({ data: deps }),
     head: () => ({
         meta: [
             { title: "Productos" },
