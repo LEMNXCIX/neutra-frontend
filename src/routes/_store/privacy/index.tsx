@@ -1,20 +1,72 @@
-// Generated from scripts/page-routes.json — page body ports in Tasks 8-9.
 import { createFileRoute } from "@tanstack/react-router";
+import { createServerFn } from "@tanstack/react-start";
+import { Badge } from "@/components/ui/badge";
+import { cmsHeader, cmsRichText } from "@/lib/cms-page";
+
+const getPrivacyData = createServerFn({ method: "GET" }).handler(async () => {
+    const { getCmsPage } = await import("@/lib/strapi");
+    const cms = await getCmsPage("privacy-pages");
+    return { cms };
+});
+
+const FALLBACK_HTML = `
+<p>Recopilamos los datos brindados durante el registro, la sesión y la compra. Esto incluye identificadores, direcciones de correo y tokens de transacción seguros.</p>
+<p>Los datos recopilados se utilizan para optimizar la logística, facilitar la comunicación sobre el estado de tus pedidos y fortalecer la integridad de la red contra operaciones fraudulentas.</p>
+<p>Implementamos protocolos de encriptación avanzados para proteger tu identidad. La integridad de los datos es un componente central de nuestra arquitectura.</p>
+<p>Utilizamos cookies temporales para mejorar el rendimiento de la sesión y analizar patrones de tráfico. Tú mantienes el control sobre estos parámetros desde la configuración de tu navegador.</p>
+`;
 
 export const Route = createFileRoute("/_store/privacy/")({
-    head: () => ({
+    loader: () => getPrivacyData(),
+    head: ({ loaderData }) => ({
         meta: [
-            { title: "Política de Privacidad" },
+            { title: loaderData?.cms?.title ?? "Política de Privacidad" },
             {
                 name: "description",
-                content: "Nuestra política de privacidad y manejo de datos",
+                content:
+                    loaderData?.cms?.subtitle ??
+                    "Nuestra política de privacidad y manejo de datos",
             },
         ],
     }),
-    component: PageShell,
+    component: PrivacyRoute,
 });
 
-/** Placeholder replaced by the real loader + component in Tasks 8-9. */
-function PageShell() {
-    return <div data-route="/_store/privacy/" />;
+function PrivacyRoute() {
+    const { cms } = Route.useLoaderData();
+    const header = cmsHeader(cms, {
+        badge: "Estándares de Datos",
+        title: "Privacidad",
+        highlight: "y Datos",
+        subtitle: "Nuestra política de privacidad y manejo de datos",
+    });
+
+    return (
+        <div className="max-w-4xl mx-auto px-6 py-24 lg:py-32 animate-slide-up">
+            <div className="space-y-16">
+                <header className="space-y-6 max-w-2xl">
+                    <Badge
+                        variant="secondary"
+                        className="px-4 py-1 rounded-full"
+                    >
+                        {header.badge}
+                    </Badge>
+                    <h1 className="text-5xl md:text-6xl font-bold tracking-tight text-foreground leading-tight">
+                        {header.title}{" "}
+                        <span className="text-primary">{header.highlight}</span>
+                    </h1>
+                    <p className="text-lg text-muted-foreground font-medium leading-relaxed">
+                        {header.subtitle}
+                    </p>
+                </header>
+
+                <div
+                    className="space-y-6 text-lg text-muted-foreground font-medium"
+                    dangerouslySetInnerHTML={{
+                        __html: cmsRichText(cms?.content, FALLBACK_HTML),
+                    }}
+                />
+            </div>
+        </div>
+    );
 }

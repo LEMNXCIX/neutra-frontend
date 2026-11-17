@@ -1,5 +1,5 @@
-// Generated from scripts/page-routes.json — page body ports in Tasks 8-9.
 import { createFileRoute } from "@tanstack/react-router";
+import { ForgotPasswordPageClient } from "@/app/(store)/forgot-password/forgot-password-client";
 
 export const Route = createFileRoute("/_store/forgot-password/")({
     head: () => ({
@@ -11,10 +11,9 @@ export const Route = createFileRoute("/_store/forgot-password/")({
             },
         ],
     }),
-    component: PageShell,
+    component: ForgotPasswordRoute,
 });
 
-/** Placeholder replaced by the real loader + component in Tasks 8-9. */
-function PageShell() {
-    return <div data-route="/_store/forgot-password/" />;
+function ForgotPasswordRoute() {
+    return <ForgotPasswordPageClient />;
 }

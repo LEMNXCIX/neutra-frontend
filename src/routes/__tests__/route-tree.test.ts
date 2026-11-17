@@ -78,21 +78,31 @@ const pageShellFiles = (): string[] =>
     );
 
 /** Read the title/description literally from the `head` option, the same way
- *  a reviewer would, so a missing or renamed head cannot pass the test. */
+ *  a reviewer would, so a missing or renamed head cannot pass the test. CMS-driven
+ *  pages (ported in Task 8) keep the manifest literal as a `??` fallback, so the
+ *  head may take a `({ loaderData })` parameter and the literal may be the
+ *  fallback of a dynamic expression. */
 const readHead = (source: string): { title?: string; description?: string } => {
     const head = source.match(
-        /head:\s*(?:async\s*)?\(\)\s*=>\s*\(\{([\s\S]*?)\n\s{4}\}\),/,
+        /head:\s*(?:async\s*)?\([^)]*\)\s*=>\s*\(\{([\s\S]*?)\n\s{4}\}\),/,
     );
     if (!head) return {};
-    const title = head[1].match(/title:\s*("(?:[^"\\]|\\.)*")/);
-    const description = head[1].match(
-        /name:\s*"description",\s*content:\s*("(?:[^"\\]|\\.)*")/,
+    const title = head[1].match(
+        /title:\s*(?:"((?:[^"\\]|\\.)*)"|[^,\n]*\?\?\s*"((?:[^"\\]|\\.)*)")/,
     );
+    const description = head[1].match(
+        /name:\s*"description",\s*content:\s*(?:"((?:[^"\\]|\\.)*)"|[\s\S]*?\?\?\s*"((?:[^"\\]|\\.)*)")/,
+    );
+    const literal = (match: RegExpMatchArray | null): string | undefined => {
+        if (!match) return undefined;
+        const value = match[1] ?? match[2];
+        return value === undefined
+            ? undefined
+            : (JSON.parse(`"${value}"`) as string);
+    };
     return {
-        title: title ? (JSON.parse(title[1]) as string) : undefined,
-        description: description
-            ? (JSON.parse(description[1]) as string)
-            : undefined,
+        title: literal(title),
+        description: literal(description),
     };
 };
 
@@ -127,7 +137,7 @@ describe("generated page route tree", () => {
             );
             expect(match?.[1], entry.source).toBe(entry.routePath);
             expect(source, entry.source).toMatch(/export const Route = /);
-            expect(source, entry.source).toMatch(/head:\s*\(\)\s*=>/);
+            expect(source, entry.source).toMatch(/head:\s*\([^)]*\)\s*=>/);
 
             const head = readHead(source);
             expect(head.title, entry.source).toBe(entry.title);
