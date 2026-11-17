@@ -2,7 +2,8 @@
 
 import { Link } from "@tanstack/react-router";
 import { Eye, Loader2, Package, PackageOpen, ShoppingCart } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { VirtualizedRows } from "@/components/shared/virtualization";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -18,6 +19,10 @@ type Product = {
     category?: string;
     stock?: number;
 };
+
+const GRID_COLUMNS = 4;
+const GRID_ROW_HEIGHT = 520;
+const LIST_ROW_HEIGHT = 400;
 
 export default function ProductGrid({
     products,
@@ -38,6 +43,16 @@ export default function ProductGrid({
         }
     };
 
+    // The responsive grid is virtualized a row at a time so each card keeps its
+    // original markup and responsive columns inside the row.
+    const gridRows = useMemo(() => {
+        const rows: Product[][] = [];
+        for (let i = 0; i < products.length; i += GRID_COLUMNS) {
+            rows.push(products.slice(i, i + GRID_COLUMNS));
+        }
+        return rows;
+    }, [products]);
+
     if (!products || products.length === 0) {
         return (
             <EmptyState
@@ -52,8 +67,11 @@ export default function ProductGrid({
 
     if (viewMode === "list") {
         return (
-            <div className="space-y-6">
-                {products.map((p, index) => {
+            <VirtualizedRows
+                items={products}
+                estimateSize={() => LIST_ROW_HEIGHT}
+                getItemKey={(product) => product.id}
+                renderRow={(p, index) => {
                     const inStock = (p.stock ?? 0) > 0;
                     const lowStock = (p.stock ?? 0) > 0 && (p.stock ?? 0) <= 5;
 
@@ -178,117 +196,135 @@ export default function ProductGrid({
                             </div>
                         </Card>
                     );
-                })}
-            </div>
+                }}
+                rowClassName="pb-6"
+            />
         );
     }
 
     // Grid View - Professional Minimalist Style
     return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {products.map((p, index) => {
-                const inStock = (p.stock ?? 0) > 0;
-                const lowStock = (p.stock ?? 0) > 0 && (p.stock ?? 0) <= 5;
+        <VirtualizedRows
+            items={gridRows}
+            estimateSize={() => GRID_ROW_HEIGHT}
+            getItemKey={(row) => row[0]?.id ?? "row"}
+            renderRow={(row, rowIndex) => (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                    {row.map((p) => {
+                        const index = rowIndex * GRID_COLUMNS + row.indexOf(p);
+                        const inStock = (p.stock ?? 0) > 0;
+                        const lowStock =
+                            (p.stock ?? 0) > 0 && (p.stock ?? 0) <= 5;
 
-                return (
-                    <Card
-                        key={p.id}
-                        className="group overflow-hidden border-none shadow-lg hover:shadow-2xl transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-500 rounded-[2rem] bg-background animate-in fade-in slide-in-from-bottom-4 fill-mode-both relative"
-                        style={{ animationDelay: `${index * 50}ms` }}
-                    >
-                        {/* Product Image */}
-                        <Link
-                            to="/products/$id"
-                            params={{ id: p.id }}
-                            className="block relative aspect-[4/5] overflow-hidden bg-muted"
-                        >
-                            {p.image ? (
-                                <img
-                                    src={p.image}
-                                    alt={p.title || "Imagen del producto"}
-                                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-1000 group-hover:scale-110"
-                                />
-                            ) : (
-                                <div className="w-full h-full flex items-center justify-center bg-muted/30">
-                                    <Package className="size-16 text-muted-foreground/20" />
-                                </div>
-                            )}
-
-                            {/* Status Badges */}
-                            <div className="absolute top-4 right-4 flex flex-col gap-2 z-10">
-                                {!inStock && (
-                                    <Badge
-                                        variant="destructive"
-                                        className="rounded-full px-3 py-1 font-bold text-[10px] uppercase tracking-widest shadow-xl border-2 border-background"
-                                    >
-                                        Agotado
-                                    </Badge>
-                                )}
-                                {lowStock && inStock && (
-                                    <Badge className="bg-destructive text-destructive-foreground rounded-full px-3 py-1 font-bold text-[10px] uppercase tracking-widest shadow-xl border-2 border-background">
-                                        Últimas {p.stock}
-                                    </Badge>
-                                )}
-                            </div>
-
-                            {/* View Overlay */}
-                            <div className="absolute inset-0 bg-foreground/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center backdrop-blur-[1px]">
-                                <div className="px-6 py-3 bg-background text-foreground border border-foreground/10 rounded-full font-bold text-[10px] uppercase tracking-widest translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
-                                    Ver producto →
-                                </div>
-                            </div>
-                        </Link>
-
-                        {/* Content Section */}
-                        <CardContent className="p-6 space-y-6">
-                            <div className="space-y-1">
-                                {/* Category */}
-                                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
-                                    {p.category || "General"}
-                                </p>
-
-                                {/* Title */}
-                                <h3 className="text-xl font-bold tracking-tight line-clamp-1 group-hover:text-primary transition-colors leading-none">
-                                    <Link
-                                        to="/products/$id"
-                                        params={{ id: p.id }}
-                                    >
-                                        {p.title}
-                                    </Link>
-                                </h3>
-                            </div>
-
-                            {/* Price & Action */}
-                            <div className="space-y-4 pt-4 border-t border-border/50">
-                                <div className="flex items-center justify-between">
-                                    <div className="text-2xl font-bold text-foreground">
-                                        ${p.price}
-                                    </div>
-                                </div>
-
-                                <Button
-                                    onClick={() => handleAdd(p.id, p.title)}
-                                    disabled={loadingId === p.id || !inStock}
-                                    className="w-full h-14 bg-foreground text-background hover:bg-foreground/90 font-bold uppercase tracking-widest text-[11px] rounded-xl transition-[color,background-color,border-color,box-shadow,opacity,transform] shadow-xl shadow-foreground/5"
-                                    size="lg"
+                        return (
+                            <Card
+                                key={p.id}
+                                className="group overflow-hidden border-none shadow-lg hover:shadow-2xl transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-500 rounded-[2rem] bg-background animate-in fade-in slide-in-from-bottom-4 fill-mode-both relative"
+                                style={{ animationDelay: `${index * 50}ms` }}
+                            >
+                                {/* Product Image */}
+                                <Link
+                                    to="/products/$id"
+                                    params={{ id: p.id }}
+                                    className="block relative aspect-[4/5] overflow-hidden bg-muted"
                                 >
-                                    {loadingId === p.id ? (
-                                        <div className="flex items-center gap-2">
-                                            <Loader2 className="size-4 animate-spin" />
-                                            <span>Procesando</span>
-                                        </div>
+                                    {p.image ? (
+                                        <img
+                                            src={p.image}
+                                            alt={
+                                                p.title || "Imagen del producto"
+                                            }
+                                            className="absolute inset-0 h-full w-full object-cover transition-transform duration-1000 group-hover:scale-110"
+                                        />
                                     ) : (
-                                        <div className="flex items-center gap-2">
-                                            <ShoppingCart className="size-4" />
-                                            <span>Agregar al Carrito</span>
+                                        <div className="w-full h-full flex items-center justify-center bg-muted/30">
+                                            <Package className="size-16 text-muted-foreground/20" />
                                         </div>
                                     )}
-                                </Button>
-                            </div>
-                        </CardContent>
-                    </Card>
-                );
-            })}
-        </div>
+
+                                    {/* Status Badges */}
+                                    <div className="absolute top-4 right-4 flex flex-col gap-2 z-10">
+                                        {!inStock && (
+                                            <Badge
+                                                variant="destructive"
+                                                className="rounded-full px-3 py-1 font-bold text-[10px] uppercase tracking-widest shadow-xl border-2 border-background"
+                                            >
+                                                Agotado
+                                            </Badge>
+                                        )}
+                                        {lowStock && inStock && (
+                                            <Badge className="bg-destructive text-destructive-foreground rounded-full px-3 py-1 font-bold text-[10px] uppercase tracking-widest shadow-xl border-2 border-background">
+                                                Últimas {p.stock}
+                                            </Badge>
+                                        )}
+                                    </div>
+
+                                    {/* View Overlay */}
+                                    <div className="absolute inset-0 bg-foreground/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center backdrop-blur-[1px]">
+                                        <div className="px-6 py-3 bg-background text-foreground border border-foreground/10 rounded-full font-bold text-[10px] uppercase tracking-widest translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+                                            Ver producto →
+                                        </div>
+                                    </div>
+                                </Link>
+
+                                {/* Content Section */}
+                                <CardContent className="p-6 space-y-6">
+                                    <div className="space-y-1">
+                                        {/* Category */}
+                                        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
+                                            {p.category || "General"}
+                                        </p>
+
+                                        {/* Title */}
+                                        <h3 className="text-xl font-bold tracking-tight line-clamp-1 group-hover:text-primary transition-colors leading-none">
+                                            <Link
+                                                to="/products/$id"
+                                                params={{ id: p.id }}
+                                            >
+                                                {p.title}
+                                            </Link>
+                                        </h3>
+                                    </div>
+
+                                    {/* Price & Action */}
+                                    <div className="space-y-4 pt-4 border-t border-border/50">
+                                        <div className="flex items-center justify-between">
+                                            <div className="text-2xl font-bold text-foreground">
+                                                ${p.price}
+                                            </div>
+                                        </div>
+
+                                        <Button
+                                            onClick={() =>
+                                                handleAdd(p.id, p.title)
+                                            }
+                                            disabled={
+                                                loadingId === p.id || !inStock
+                                            }
+                                            className="w-full h-14 bg-foreground text-background hover:bg-foreground/90 font-bold uppercase tracking-widest text-[11px] rounded-xl transition-[color,background-color,border-color,box-shadow,opacity,transform] shadow-xl shadow-foreground/5"
+                                            size="lg"
+                                        >
+                                            {loadingId === p.id ? (
+                                                <div className="flex items-center gap-2">
+                                                    <Loader2 className="size-4 animate-spin" />
+                                                    <span>Procesando</span>
+                                                </div>
+                                            ) : (
+                                                <div className="flex items-center gap-2">
+                                                    <ShoppingCart className="size-4" />
+                                                    <span>
+                                                        Agregar al Carrito
+                                                    </span>
+                                                </div>
+                                            )}
+                                        </Button>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        );
+                    })}
+                </div>
+            )}
+        />
     );
 }

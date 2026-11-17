@@ -19,6 +19,7 @@ import {
     MobileTablePagination,
     TablePagination,
 } from "@/components/admin/shared/TablePagination";
+import { useAdminTable } from "@/components/admin/shared/useAdminTable";
 import {
     Accordion,
     AccordionContent,
@@ -437,6 +438,12 @@ function CouponsDesktopTable({
     pagination: PaginationProps;
     onPageChange: (page: number) => void;
 }) {
+    const { rows } = useAdminTable({
+        data: coupons,
+        getRowId: (coupon) => coupon.id,
+        enablePagination: true,
+    });
+
     return (
         <Card className="hidden lg:block">
             <div className="overflow-x-auto">
@@ -459,7 +466,7 @@ function CouponsDesktopTable({
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {coupons.length === 0 ? (
+                        {rows.length === 0 ? (
                             <TableRow>
                                 <TableCell
                                     colSpan={6}
@@ -469,7 +476,7 @@ function CouponsDesktopTable({
                                 </TableCell>
                             </TableRow>
                         ) : (
-                            coupons.map((c) => {
+                            rows.map((c) => {
                                 const status = getCouponStatus(c);
                                 return (
                                     <TableRow
@@ -591,9 +598,15 @@ function CouponsMobileCards({
     pagination: PaginationProps;
     onPageChange: (page: number) => void;
 }) {
+    const { rows } = useAdminTable({
+        data: coupons,
+        getRowId: (coupon) => coupon.id,
+        enablePagination: true,
+    });
+
     return (
         <div className="space-y-3 lg:hidden">
-            {coupons.map((c) => {
+            {rows.map((c) => {
                 const status = getCouponStatus(c);
                 return (
                     <Card key={c.id} className="shadow-sm border-muted/50">

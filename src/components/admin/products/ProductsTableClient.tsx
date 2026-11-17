@@ -18,6 +18,7 @@ import {
     MobileTablePagination,
     TablePagination,
 } from "@/components/admin/shared/TablePagination";
+import { useAdminTable } from "@/components/admin/shared/useAdminTable";
 import {
     Accordion,
     AccordionContent,
@@ -335,6 +336,12 @@ function ProductsDesktopTable({
     pagination: PaginationProps;
     handlePageChange: (page: number) => void;
 }) {
+    const { rows } = useAdminTable({
+        data: products,
+        getRowId: (product) => product.id,
+        enablePagination: true,
+    });
+
     return (
         <Card className="hidden lg:block">
             <div className="overflow-x-auto">
@@ -361,7 +368,7 @@ function ProductsDesktopTable({
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {products.length === 0 ? (
+                        {rows.length === 0 ? (
                             <TableRow>
                                 <TableCell
                                     colSpan={8}
@@ -371,7 +378,7 @@ function ProductsDesktopTable({
                                 </TableCell>
                             </TableRow>
                         ) : (
-                            products.map((p) => (
+                            rows.map((p) => (
                                 <TableRow
                                     key={p.id}
                                     className="group hover:bg-muted/50 transition-colors border-b border-border/50"
@@ -495,9 +502,15 @@ function ProductsMobileCards({
     pagination: PaginationProps;
     handlePageChange: (page: number) => void;
 }) {
+    const { rows } = useAdminTable({
+        data: products,
+        getRowId: (product) => product.id,
+        enablePagination: true,
+    });
+
     return (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:hidden">
-            {products.map((p) => (
+            {rows.map((p) => (
                 <Card
                     key={p.id}
                     className="t-card overflow-hidden group border-none"

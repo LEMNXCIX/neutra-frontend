@@ -21,6 +21,7 @@ import {
     type WorkingHours,
 } from "@/components/admin/booking/working-hours-utils";
 import { AdminEntityHeader } from "@/components/admin/shared/AdminEntityHeader";
+import { useAdminTable } from "@/components/admin/shared/useAdminTable";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -224,9 +225,14 @@ function StaffCardsGrid({
     onServiceAssignment: (member: Staff) => void;
     onDelete: (id: string) => void;
 }) {
+    const { rows } = useAdminTable({
+        data: staff,
+        getRowId: (member) => member.id,
+    });
+
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {staff.map((member) => (
+            {rows.map((member) => (
                 <Card
                     key={member.id}
                     className="min-w-0 overflow-hidden group hover:border-primary/50 transition-[color,background-color,border-color,box-shadow,opacity,transform] active:scale-[0.98]"

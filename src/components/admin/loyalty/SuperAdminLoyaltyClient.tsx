@@ -2,6 +2,7 @@
 
 import { Building2, Gift, RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { useAdminTable } from "@/components/admin/shared/useAdminTable";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -31,6 +32,10 @@ export function SuperAdminLoyaltyClient() {
     const [tenants, setTenants] = useState<LoyaltyTenantOverview[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [loadError, setLoadError] = useState<string | null>(null);
+    const { rows } = useAdminTable({
+        data: tenants,
+        getRowId: (tenant) => tenant.tenantId,
+    });
 
     const loadTenants = useCallback(async () => {
         setIsLoading(true);
@@ -93,7 +98,7 @@ export function SuperAdminLoyaltyClient() {
                         </Button>
                     </CardContent>
                 </Card>
-            ) : tenants.length === 0 ? (
+            ) : rows.length === 0 ? (
                 <Card>
                     <CardContent>
                         <p className="text-sm text-muted-foreground">
@@ -103,7 +108,7 @@ export function SuperAdminLoyaltyClient() {
                 </Card>
             ) : (
                 <ul className="space-y-6 list-none">
-                    {tenants.map((tenant) => (
+                    {rows.map((tenant) => (
                         <li key={tenant.tenantId}>
                             <Card>
                                 <CardHeader>

@@ -8,6 +8,7 @@ import {
     MobileTablePagination,
     TablePagination,
 } from "@/components/admin/shared/TablePagination";
+import { useAdminTable } from "@/components/admin/shared/useAdminTable";
 import {
     Accordion,
     AccordionContent,
@@ -329,125 +330,142 @@ const CategoriesDesktopTable = ({
     onEdit: (c: CategoryWithCount) => void;
     onDelete: (id: string) => void;
     isDeleting: string | null;
-}) => (
-    <Card className="hidden md:block">
-        <div className="overflow-x-auto">
-            <Table>
-                <TableHeader>
-                    <TableRow>
-                        <TableHead className="w-[120px]">ID</TableHead>
-                        <TableHead className="w-[200px]">Nombre</TableHead>
-                        <TableHead className="w-[300px]">Descripción</TableHead>
-                        <TableHead className="w-[100px]">Tipo</TableHead>
-                        {isSuperAdmin && (
-                            <TableHead className="w-[100px]">
-                                Organización
-                            </TableHead>
-                        )}
-                        <TableHead className="w-[100px]">Productos</TableHead>
-                        <TableHead className="w-[150px]">Acciones</TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {categories.length === 0 ? (
+}) => {
+    const { rows } = useAdminTable({
+        data: categories,
+        getRowId: (category) => category.id,
+        enablePagination: true,
+    });
+
+    return (
+        <Card className="hidden md:block">
+            <div className="overflow-x-auto">
+                <Table>
+                    <TableHeader>
                         <TableRow>
-                            <TableCell
-                                colSpan={5}
-                                className="text-center py-8 text-muted-foreground"
-                            >
-                                No se encontraron categorías
-                            </TableCell>
+                            <TableHead className="w-[120px]">ID</TableHead>
+                            <TableHead className="w-[200px]">Nombre</TableHead>
+                            <TableHead className="w-[300px]">
+                                Descripción
+                            </TableHead>
+                            <TableHead className="w-[100px]">Tipo</TableHead>
+                            {isSuperAdmin && (
+                                <TableHead className="w-[100px]">
+                                    Organización
+                                </TableHead>
+                            )}
+                            <TableHead className="w-[100px]">
+                                Productos
+                            </TableHead>
+                            <TableHead className="w-[150px]">
+                                Acciones
+                            </TableHead>
                         </TableRow>
-                    ) : (
-                        categories.map((c) => (
-                            <TableRow
-                                key={c.id}
-                                className="group hover:bg-muted/50 transition-colors border-b border-border/50"
-                            >
-                                <TableCell className="font-mono text-[10px] text-muted-foreground tracking-tighter py-4">
-                                    #{c.id.slice(0, 8)}
-                                </TableCell>
-                                <TableCell>
-                                    <span className="font-semibold text-sm">
-                                        {c.name}
-                                    </span>
-                                </TableCell>
-                                <TableCell>
-                                    <span className="text-sm text-muted-foreground font-medium line-clamp-1 max-w-[300px]">
-                                        {c.description || "—"}
-                                    </span>
-                                </TableCell>
-                                <TableCell>
-                                    <Badge
-                                        variant={
-                                            c.type === "SERVICE"
-                                                ? "default"
-                                                : "secondary"
-                                        }
-                                        className="text-[10px] font-bold uppercase tracking-wider"
-                                    >
-                                        {c.type}
-                                    </Badge>
-                                </TableCell>
-                                {isSuperAdmin && (
-                                    <TableCell>
-                                        <Badge
-                                            variant="secondary"
-                                            className="text-[10px] font-bold uppercase tracking-wider"
-                                        >
-                                            {c.tenant?.name || "—"}
-                                        </Badge>
-                                    </TableCell>
-                                )}
-                                <TableCell>
-                                    <div className="flex items-center gap-2">
-                                        <div className="size-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center border border-primary/20">
-                                            <span className="text-xs font-bold">
-                                                {c.productCount || 0}
-                                            </span>
-                                        </div>
-                                        <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                                            Productos
-                                        </span>
-                                    </div>
-                                </TableCell>
-                                <TableCell className="text-right">
-                                    <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <Button
-                                            size="icon"
-                                            aria-label="Editar categoría"
-                                            variant="ghost"
-                                            className="size-8 rounded-full hover:bg-primary/5 hover:text-primary"
-                                            onClick={() => onEdit(c)}
-                                        >
-                                            <Edit className="size-4" />
-                                        </Button>
-                                        <Button
-                                            size="icon"
-                                            aria-label="Eliminar categoría"
-                                            variant="ghost"
-                                            className="size-8 rounded-full hover:bg-destructive/5 hover:text-destructive"
-                                            onClick={() => onDelete(c.id)}
-                                            disabled={isDeleting === c.id}
-                                        >
-                                            {isDeleting === c.id ? (
-                                                <Spinner className="size-4" />
-                                            ) : (
-                                                <Trash2 className="size-4" />
-                                            )}
-                                        </Button>
-                                    </div>
+                    </TableHeader>
+                    <TableBody>
+                        {rows.length === 0 ? (
+                            <TableRow>
+                                <TableCell
+                                    colSpan={5}
+                                    className="text-center py-8 text-muted-foreground"
+                                >
+                                    No se encontraron categorías
                                 </TableCell>
                             </TableRow>
-                        ))
-                    )}
-                </TableBody>
-            </Table>
-        </div>
+                        ) : (
+                            rows.map((c) => (
+                                <TableRow
+                                    key={c.id}
+                                    className="group hover:bg-muted/50 transition-colors border-b border-border/50"
+                                >
+                                    <TableCell className="font-mono text-[10px] text-muted-foreground tracking-tighter py-4">
+                                        #{c.id.slice(0, 8)}
+                                    </TableCell>
+                                    <TableCell>
+                                        <span className="font-semibold text-sm">
+                                            {c.name}
+                                        </span>
+                                    </TableCell>
+                                    <TableCell>
+                                        <span className="text-sm text-muted-foreground font-medium line-clamp-1 max-w-[300px]">
+                                            {c.description || "—"}
+                                        </span>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Badge
+                                            variant={
+                                                c.type === "SERVICE"
+                                                    ? "default"
+                                                    : "secondary"
+                                            }
+                                            className="text-[10px] font-bold uppercase tracking-wider"
+                                        >
+                                            {c.type}
+                                        </Badge>
+                                    </TableCell>
+                                    {isSuperAdmin && (
+                                        <TableCell>
+                                            <Badge
+                                                variant="secondary"
+                                                className="text-[10px] font-bold uppercase tracking-wider"
+                                            >
+                                                {c.tenant?.name || "—"}
+                                            </Badge>
+                                        </TableCell>
+                                    )}
+                                    <TableCell>
+                                        <div className="flex items-center gap-2">
+                                            <div className="size-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center border border-primary/20">
+                                                <span className="text-xs font-bold">
+                                                    {c.productCount || 0}
+                                                </span>
+                                            </div>
+                                            <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                                                Productos
+                                            </span>
+                                        </div>
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                        <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <Button
+                                                size="icon"
+                                                aria-label="Editar categoría"
+                                                variant="ghost"
+                                                className="size-8 rounded-full hover:bg-primary/5 hover:text-primary"
+                                                onClick={() => onEdit(c)}
+                                            >
+                                                <Edit className="size-4" />
+                                            </Button>
+                                            <Button
+                                                size="icon"
+                                                aria-label="Eliminar categoría"
+                                                variant="ghost"
+                                                className="size-8 rounded-full hover:bg-destructive/5 hover:text-destructive"
+                                                onClick={() => onDelete(c.id)}
+                                                disabled={isDeleting === c.id}
+                                            >
+                                                {isDeleting === c.id ? (
+                                                    <Spinner className="size-4" />
+                                                ) : (
+                                                    <Trash2 className="size-4" />
+                                                )}
+                                            </Button>
+                                        </div>
+                                    </TableCell>
+                                </TableRow>
+                            ))
+                        )}
+                    </TableBody>
+                </Table>
+            </div>
 
-        <TablePagination pagination={pagination} onPageChange={onPageChange} />
-    </Card>
-);
+            <TablePagination
+                pagination={pagination}
+                onPageChange={onPageChange}
+            />
+        </Card>
+    );
+};
 
 const CategoriesMobileCards = ({
     categories,
@@ -463,83 +481,93 @@ const CategoriesMobileCards = ({
     onEdit: (c: CategoryWithCount) => void;
     onDelete: (id: string) => void;
     isDeleting: string | null;
-}) => (
-    <div className="space-y-4 md:hidden">
-        {categories.map((c) => (
-            <Card key={c.id} className="t-card overflow-hidden">
-                <CardContent className="p-6 space-y-6">
-                    <div className="flex justify-between items-start">
-                        <div className="space-y-1 flex-1">
-                            <h3 className="font-bold text-lg tracking-tight text-foreground">
-                                {c.name}
-                            </h3>
-                            <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
-                                ID: #{c.id.slice(0, 8)}
-                            </p>
+}) => {
+    const { rows } = useAdminTable({
+        data: categories,
+        getRowId: (category) => category.id,
+        enablePagination: true,
+    });
+
+    return (
+        <div className="space-y-4 md:hidden">
+            {rows.map((c) => (
+                <Card key={c.id} className="t-card overflow-hidden">
+                    <CardContent className="p-6 space-y-6">
+                        <div className="flex justify-between items-start">
+                            <div className="space-y-1 flex-1">
+                                <h3 className="font-bold text-lg tracking-tight text-foreground">
+                                    {c.name}
+                                </h3>
+                                <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
+                                    ID: #{c.id.slice(0, 8)}
+                                </p>
+                            </div>
+                            <Badge
+                                variant={
+                                    c.type === "SERVICE"
+                                        ? "default"
+                                        : "secondary"
+                                }
+                                className="text-[10px] font-bold uppercase tracking-wider"
+                            >
+                                {c.type}
+                            </Badge>
                         </div>
-                        <Badge
-                            variant={
-                                c.type === "SERVICE" ? "default" : "secondary"
-                            }
-                            className="text-[10px] font-bold uppercase tracking-wider"
-                        >
-                            {c.type}
-                        </Badge>
-                    </div>
 
-                    {c.description && (
-                        <p className="text-sm font-medium text-muted-foreground leading-relaxed italic border-l-2 border-primary/30 pl-4">
-                            {c.description}
-                        </p>
-                    )}
+                        {c.description && (
+                            <p className="text-sm font-medium text-muted-foreground leading-relaxed italic border-l-2 border-primary/30 pl-4">
+                                {c.description}
+                            </p>
+                        )}
 
-                    <div className="flex items-center justify-between pt-4 border-t border-border/50">
-                        <div className="flex items-center gap-2">
-                            <div className="size-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center border border-primary/20">
-                                <span className="text-xs font-bold">
-                                    {c.productCount || 0}
+                        <div className="flex items-center justify-between pt-4 border-t border-border/50">
+                            <div className="flex items-center gap-2">
+                                <div className="size-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center border border-primary/20">
+                                    <span className="text-xs font-bold">
+                                        {c.productCount || 0}
+                                    </span>
+                                </div>
+                                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                                    Productos
                                 </span>
                             </div>
-                            <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                                Productos
-                            </span>
+                            <div className="flex gap-2">
+                                <Button
+                                    size="icon"
+                                    aria-label="Editar categoría"
+                                    variant="outline"
+                                    className="size-10 rounded-lg"
+                                    onClick={() => onEdit(c)}
+                                >
+                                    <Edit className="size-4" />
+                                </Button>
+                                <Button
+                                    size="icon"
+                                    aria-label="Eliminar categoría"
+                                    variant="outline"
+                                    className="size-10 border-destructive/20 text-destructive rounded-lg hover:bg-destructive/10"
+                                    onClick={() => onDelete(c.id)}
+                                    disabled={isDeleting === c.id}
+                                >
+                                    {isDeleting === c.id ? (
+                                        <Spinner className="size-4" />
+                                    ) : (
+                                        <Trash2 className="size-4" />
+                                    )}
+                                </Button>
+                            </div>
                         </div>
-                        <div className="flex gap-2">
-                            <Button
-                                size="icon"
-                                aria-label="Editar categoría"
-                                variant="outline"
-                                className="size-10 rounded-lg"
-                                onClick={() => onEdit(c)}
-                            >
-                                <Edit className="size-4" />
-                            </Button>
-                            <Button
-                                size="icon"
-                                aria-label="Eliminar categoría"
-                                variant="outline"
-                                className="size-10 border-destructive/20 text-destructive rounded-lg hover:bg-destructive/10"
-                                onClick={() => onDelete(c.id)}
-                                disabled={isDeleting === c.id}
-                            >
-                                {isDeleting === c.id ? (
-                                    <Spinner className="size-4" />
-                                ) : (
-                                    <Trash2 className="size-4" />
-                                )}
-                            </Button>
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
-        ))}
+                    </CardContent>
+                </Card>
+            ))}
 
-        <MobileTablePagination
-            pagination={pagination}
-            onPageChange={onPageChange}
-        />
-    </div>
-);
+            <MobileTablePagination
+                pagination={pagination}
+                onPageChange={onPageChange}
+            />
+        </div>
+    );
+};
 
 const CreateCategoryDialog = ({
     open,
