@@ -1,6 +1,7 @@
 import {
     createRootRoute,
     HeadContent,
+    Link,
     Outlet,
     Scripts,
 } from "@tanstack/react-router";
@@ -62,6 +63,28 @@ export function RootDocument({ children }: { children: React.ReactNode }) {
     );
 }
 
+function NotFound() {
+    return (
+        <main className="flex min-h-screen flex-col items-center justify-center gap-4 px-6 text-center">
+            <p className="text-sm font-semibold uppercase tracking-widest text-primary">
+                404
+            </p>
+            <h1 className="text-2xl font-bold text-foreground">
+                Página no encontrada
+            </h1>
+            <p className="max-w-md text-muted-foreground">
+                La página que buscás no existe o fue movida.
+            </p>
+            <Link
+                to="/"
+                className="rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground"
+            >
+                Volver al inicio
+            </Link>
+        </main>
+    );
+}
+
 export const Route = createRootRoute({
     head: () => ({
         meta: [
@@ -76,8 +99,13 @@ export const Route = createRootRoute({
                 content:
                     "Comercio electrónico y reservas en una sola plataforma",
             },
+            { name: "theme-color", content: "#000000" },
         ],
-        links: [{ rel: "icon", href: "/icon.svg" }],
+        links: [
+            { rel: "icon", href: "/icon.svg" },
+            { rel: "manifest", href: "/manifest.webmanifest" },
+        ],
     }),
+    notFoundComponent: NotFound,
     shellComponent: RootDocument,
 });

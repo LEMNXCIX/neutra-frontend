@@ -1,52 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { createManifestResponse } from "@/lib/manifest";
 
-/**
- * PWA manifest, ported from `src/app/manifest.ts`. The tenant name still comes
- * from the subdomain of the request Host, so each tenant gets its own label.
- */
+/** Legacy alias kept for existing links; canonical route is /manifest.webmanifest. */
 export const Route = createFileRoute("/api/manifest.webmanifest")({
     server: {
         handlers: {
-            GET: ({ request }) => {
-                const host = request.headers.get("host") || "";
-
-                let tenantName = "XCIX";
-                const parts = host.split(".");
-                if (
-                    parts.length >= 3 &&
-                    parts[0] !== "www" &&
-                    parts[0] !== "api"
-                ) {
-                    tenantName =
-                        parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
-                }
-
-                return Response.json({
-                    id: "/",
-                    name: `${tenantName} Platform`,
-                    short_name: tenantName,
-                    description: `Mobile app for ${tenantName}`,
-                    start_url: "/",
-                    scope: "/",
-                    display: "standalone",
-                    background_color: "#ffffff",
-                    theme_color: "#000000",
-                    icons: [
-                        {
-                            src: "/icon.svg",
-                            sizes: "any",
-                            type: "image/svg+xml",
-                            purpose: "any",
-                        },
-                        {
-                            src: "/icon.svg",
-                            sizes: "any",
-                            type: "image/svg+xml",
-                            purpose: "maskable",
-                        },
-                    ],
-                });
-            },
+            GET: ({ request }) => createManifestResponse(request),
         },
     },
 });

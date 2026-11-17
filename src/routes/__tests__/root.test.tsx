@@ -1,8 +1,9 @@
 // @vitest-environment happy-dom
 
+import { type ComponentType, createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
-import { RootDocument } from "../__root";
+import { RootDocument, Route } from "../__root";
 
 // HeadContent/Scripts read the router context, which a standalone document
 // render does not provide. Stub only those; keep createRootRoute/Outlet real.
@@ -13,6 +14,9 @@ vi.mock("@tanstack/react-router", async (importOriginal) => {
         ...actual,
         HeadContent: () => <meta data-testid="head-content" />,
         Scripts: () => <script data-testid="scripts" />,
+        Link: ({ to, children }: { to: string; children: React.ReactNode }) => (
+            <a href={to}>{children}</a>
+        ),
     };
 });
 
@@ -30,5 +34,27 @@ describe("RootDocument", () => {
         expect(html?.querySelector("head")).not.toBeNull();
         expect(html?.querySelector("body")).not.toBeNull();
         expect(document.body.textContent).toContain("root-document-child");
+    });
+
+    it("links the canonical PWA manifest", async () => {
+        const head = await Route.options.head!({} as never);
+
+        expect(head.links).toContainEqual({
+            rel: "manifest",
+            href: "/manifest.webmanifest",
+        });
+    });
+
+    it("provides a localized not-found component with a home link", () => {
+        const NotFound = Route.options.notFoundComponent;
+        expect(NotFound).toBeTypeOf("function");
+
+        const markup = renderToStaticMarkup(
+            createElement(NotFound as ComponentType),
+        );
+        const document = new DOMParser().parseFromString(markup, "text/html");
+
+        expect(document.body.textContent).toContain("Página no encontrada");
+        expect(document.querySelector("a")?.getAttribute("href")).toBe("/");
     });
 });
