@@ -1,5 +1,7 @@
 "use client";
 
+import { useForm } from "@tanstack/react-form";
+import { useSelector } from "@tanstack/react-store";
 import { Save } from "lucide-react";
 import { type FormEvent, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -699,11 +701,14 @@ export function LoyaltyCampaignForm({
     isSaving,
     error,
 }: LoyaltyCampaignFormProps) {
-    const [value, setValue] = useState<FormValue>(() =>
-        initialValue(campaign, tenantType),
-    );
+    const form = useForm({
+        defaultValues: initialValue(campaign, tenantType),
+    });
 
-    const { valid, rewardValue } = validateCampaignForm(value, tenantType);
+    // The field editors stay pure value/update components; reading the form
+    // store keeps the derived validity, warning and submit-button state live.
+    const value = useSelector(form.store, (state) => state.values);
+    const { valid } = validateCampaignForm(value, tenantType);
 
     // The backend refuses to archive a campaign before claimUntil, so a long
     // claim window silently locks the campaign. That is only discoverable by
@@ -717,51 +722,64 @@ export function LoyaltyCampaignForm({
     const update = <Key extends keyof FormValue>(
         key: Key,
         nextValue: FormValue[Key],
-    ) =>
-        setValue((current) => {
-            const next = { ...current, [key]: nextValue };
+    ) => {
+        const current = form.state.values;
+        const next = { ...current, [key]: nextValue };
 
-            // claimUntil is derived from endsAt plus the grace period, so moving
-            // the end of the campaign carries the claim window with it. Editing
-            // the grace days does the same, which is why the two inputs cannot
-            // disagree.
-            if (key === "endsAt" || key === "claimGraceDays") {
-                const days = Number(next.claimGraceDays);
-                const computed = addDays(
-                    String(next.endsAt ?? ""),
-                    Number.isFinite(days) ? days : 0,
-                );
-                if (computed) next.claimUntil = computed;
+        // claimUntil is derived from endsAt plus the grace period, so moving
+        // the end of the campaign carries the claim window with it. Editing
+        // the grace days does the same, which is why the two inputs cannot
+        // disagree.
+        if (key === "endsAt" || key === "claimGraceDays") {
+            const days = Number(next.claimGraceDays);
+            const computed = addDays(
+                String(next.endsAt ?? ""),
+                Number.isFinite(days) ? days : 0,
+            );
+            if (computed) next.claimUntil = computed;
+        }
+
+        for (const field of Object.keys(next) as Array<keyof FormValue>) {
+            if (!Object.is(next[field], current[field])) {
+                form.setFieldValue(field as never, next[field] as never);
             }
+        }
+    };
 
-            return next;
-        });
-
-    const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    // Kept synchronous: callers (and the campaign integration tests) rely on
+    // `onSave` being invoked in the same tick as the submit event. TanStack Form
+    // still owns every field value; this handler only reads the snapshot and
+    // builds the backend payload, exactly as before the migration.
+    const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
+        const current = form.state.values;
+        const { valid, rewardValue } = validateCampaignForm(
+            current,
+            tenantType,
+        );
         if (!valid || isSaving) return;
 
-        await onSave({
-            name: value.name.trim(),
-            description: value.description.trim() || null,
-            source: value.source,
-            metric: value.metric,
-            targetValue: value.targetValue.trim(),
-            startsAt: `${value.startsAt}T00:00:00.000Z`,
-            endsAt: `${value.endsAt}T00:00:00.000Z`,
-            claimUntil: `${value.claimUntil}T00:00:00.000Z`,
+        void onSave({
+            name: current.name.trim(),
+            description: current.description.trim() || null,
+            source: current.source,
+            metric: current.metric,
+            targetValue: current.targetValue.trim(),
+            startsAt: `${current.startsAt}T00:00:00.000Z`,
+            endsAt: `${current.endsAt}T00:00:00.000Z`,
+            claimUntil: `${current.claimUntil}T00:00:00.000Z`,
             reward: {
-                type: value.rewardType,
+                type: current.rewardType,
                 value: rewardValue,
-                description: value.rewardDescription.trim() || null,
-                minPurchaseAmount: optionalNumber(value.minPurchaseAmount),
-                maxDiscountAmount: optionalNumber(value.maxDiscountAmount),
-                applicableProducts: parseIds(value.applicableProducts),
-                applicableCategories: parseIds(value.applicableCategories),
-                applicableServices: parseIds(value.applicableServices),
+                description: current.rewardDescription.trim() || null,
+                minPurchaseAmount: optionalNumber(current.minPurchaseAmount),
+                maxDiscountAmount: optionalNumber(current.maxDiscountAmount),
+                applicableProducts: parseIds(current.applicableProducts),
+                applicableCategories: parseIds(current.applicableCategories),
+                applicableServices: parseIds(current.applicableServices),
             },
-            rewardValidDays: Number(value.rewardValidDays),
-            maxClaims: optionalNumber(value.maxClaims),
+            rewardValidDays: Number(current.rewardValidDays),
+            maxClaims: optionalNumber(current.maxClaims),
         });
     };
 

@@ -1,5 +1,7 @@
 "use client";
 
+import { useForm } from "@tanstack/react-form";
+import { useSelector } from "@tanstack/react-store";
 import { MessageSquare, Save } from "lucide-react";
 import { useState, useSyncExternalStore } from "react";
 import { toast } from "sonner";
@@ -17,6 +19,11 @@ import { PasswordInput } from "@/components/ui/password-input";
 import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
 import { reportError } from "@/lib/error-reporting";
+import {
+    applyServerErrors,
+    clearFieldErrors,
+    type FieldErrorSetter,
+} from "@/lib/form-errors";
 import {
     type WhatsAppConfig,
     whatsappService,
@@ -36,6 +43,8 @@ const defaultConfig: Partial<WhatsAppConfig> = {
     webhookVerifyToken: "",
 };
 
+const WHATSAPP_FIELDS = Object.keys(defaultConfig);
+
 const emptySubscribe = () => () => {};
 const getClientOrigin = () => window.location.origin;
 const getServerOrigin = () => "";
@@ -44,9 +53,47 @@ export function WhatsAppConfigForm({ initialConfig }: WhatsAppConfigFormProps) {
     // A missing config (404) is a valid state: show the empty form, not a spinner.
     const [isLoading, setIsLoading] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
-    const [config, setConfig] = useState<Partial<WhatsAppConfig>>(
-        initialConfig ? { ...defaultConfig, ...initialConfig } : defaultConfig,
-    );
+
+    const form = useForm({
+        defaultValues: initialConfig
+            ? { ...defaultConfig, ...initialConfig }
+            : defaultConfig,
+        onSubmit: async ({ value }) => {
+            clearFieldErrors(WHATSAPP_FIELDS, setFieldServerError);
+            setIsSaving(true);
+            try {
+                await whatsappService.updateConfig(value);
+                toast.success("Configuración guardada correctamente");
+                await loadConfig();
+            } catch (err) {
+                reportError(
+                    err,
+                    "No pudimos guardar la configuración de WhatsApp.",
+                );
+                applyServerErrors({
+                    error: err,
+                    fallback:
+                        "No pudimos guardar la configuración de WhatsApp.",
+                    knownFields: WHATSAPP_FIELDS,
+                    setFormError: () => {},
+                    setFieldError: setFieldServerError,
+                });
+            } finally {
+                setIsSaving(false);
+            }
+        },
+    });
+
+    const setFieldServerError: FieldErrorSetter = (field, message) =>
+        form.setFieldMeta(field as never, (prev) => ({
+            ...prev,
+            errorMap: {
+                ...prev?.errorMap,
+                onServer: message,
+            },
+        }));
+
+    const config = useSelector(form.store, (state) => state.values);
     const callbackOrigin = useSyncExternalStore(
         emptySubscribe,
         getClientOrigin,
@@ -58,7 +105,7 @@ export function WhatsAppConfigForm({ initialConfig }: WhatsAppConfigFormProps) {
             setIsLoading(true);
             const data = await whatsappService.getConfig();
             if (data) {
-                setConfig({
+                form.reset({
                     ...defaultConfig,
                     ...data,
                 });
@@ -68,22 +115,6 @@ export function WhatsAppConfigForm({ initialConfig }: WhatsAppConfigFormProps) {
             toast.error("Error al cargar la configuración de WhatsApp");
         } finally {
             setIsLoading(false);
-        }
-    };
-
-    const handleSave = async () => {
-        setIsSaving(true);
-        try {
-            await whatsappService.updateConfig(config);
-            toast.success("Configuración guardada correctamente");
-            await loadConfig();
-        } catch (err: any) {
-            reportError(
-                err,
-                "No pudimos guardar la configuración de WhatsApp.",
-            );
-        } finally {
-            setIsSaving(false);
         }
     };
 
@@ -121,7 +152,7 @@ export function WhatsAppConfigForm({ initialConfig }: WhatsAppConfigFormProps) {
                                 <Switch
                                     checked={config.enabled}
                                     onCheckedChange={(c) =>
-                                        setConfig({ ...config, enabled: c })
+                                        form.setFieldValue("enabled", c)
                                     }
                                 />
                                 <span className="text-sm text-muted-foreground">
@@ -135,10 +166,10 @@ export function WhatsAppConfigForm({ initialConfig }: WhatsAppConfigFormProps) {
                                 <Switch
                                     checked={config.notificationsEnabled}
                                     onCheckedChange={(c) =>
-                                        setConfig({
-                                            ...config,
-                                            notificationsEnabled: c,
-                                        })
+                                        form.setFieldValue(
+                                            "notificationsEnabled",
+                                            c,
+                                        )
                                     }
                                 />
                                 <span className="text-sm text-muted-foreground">
@@ -156,7 +187,7 @@ export function WhatsAppConfigForm({ initialConfig }: WhatsAppConfigFormProps) {
                                 <Switch
                                     checked={config.botEnabled}
                                     onCheckedChange={(c) =>
-                                        setConfig({ ...config, botEnabled: c })
+                                        form.setFieldValue("botEnabled", c)
                                     }
                                 />
                                 <span className="text-sm text-muted-foreground">
@@ -179,10 +210,10 @@ export function WhatsAppConfigForm({ initialConfig }: WhatsAppConfigFormProps) {
                                 <Input
                                     value={config.phoneNumberId || ""}
                                     onChange={(e) =>
-                                        setConfig({
-                                            ...config,
-                                            phoneNumberId: e.target.value,
-                                        })
+                                        form.setFieldValue(
+                                            "phoneNumberId",
+                                            e.target.value,
+                                        )
                                     }
                                     placeholder="Ej. 1045..."
                                 />
@@ -192,10 +223,10 @@ export function WhatsAppConfigForm({ initialConfig }: WhatsAppConfigFormProps) {
                                 <Input
                                     value={config.businessAccountId || ""}
                                     onChange={(e) =>
-                                        setConfig({
-                                            ...config,
-                                            businessAccountId: e.target.value,
-                                        })
+                                        form.setFieldValue(
+                                            "businessAccountId",
+                                            e.target.value,
+                                        )
                                     }
                                     placeholder="Ej. 1015..."
                                 />
@@ -207,10 +238,10 @@ export function WhatsAppConfigForm({ initialConfig }: WhatsAppConfigFormProps) {
                             <PasswordInput
                                 value={config.accessToken || ""}
                                 onChange={(e) =>
-                                    setConfig({
-                                        ...config,
-                                        accessToken: e.target.value,
-                                    })
+                                    form.setFieldValue(
+                                        "accessToken",
+                                        e.target.value,
+                                    )
                                 }
                                 placeholder="****************"
                             />
@@ -282,7 +313,7 @@ export function WhatsAppConfigForm({ initialConfig }: WhatsAppConfigFormProps) {
 
                     <div className="flex justify-end pt-6">
                         <Button
-                            onClick={handleSave}
+                            onClick={() => void form.handleSubmit()}
                             disabled={isSaving}
                             className="w-full md:w-auto"
                         >
@@ -292,7 +323,7 @@ export function WhatsAppConfigForm({ initialConfig }: WhatsAppConfigFormProps) {
                                 </>
                             ) : (
                                 <>
-                                    <Save className="mr-2 size-4" /> Guardar
+                                    <Save className="mr-2" /> Guardar
                                     configuración
                                 </>
                             )}

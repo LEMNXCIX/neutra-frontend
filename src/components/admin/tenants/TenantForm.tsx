@@ -1,5 +1,7 @@
 "use client";
 
+import { useForm } from "@tanstack/react-form";
+import { useSelector } from "@tanstack/react-store";
 import type React from "react";
 import { useState } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -32,8 +34,14 @@ import {
     normalizeWorkingHours,
 } from "@/components/admin/booking/working-hours-utils";
 import { Checkbox } from "@/components/ui/checkbox";
-import { reportError } from "@/lib/error-reporting";
+import {
+    applyServerErrors,
+    clearFieldErrors,
+    type FieldErrorSetter,
+} from "@/lib/form-errors";
 import { BrandingEditor } from "./BrandingEditor";
+
+const TENANT_FIELDS = ["name", "slug", "type", "config"] as const;
 
 interface TenantFormProps {
     tenant?: Tenant | null;
@@ -393,16 +401,85 @@ export function TenantForm({
     initialPlatformFeatures = EMPTY_PLATFORM_FEATURES,
 }: TenantFormProps) {
     const [isSaving, setIsSaving] = useState(false);
-    const [error, setError] = useState("");
+    const [serverError, setServerError] = useState("");
     const [platformFeatures, _setPlatformFeatures] = useState<
         PlatformFeature[]
     >(initialPlatformFeatures);
-    const [formData, setFormData] = useState<CreateTenantData>(() => ({
-        name: tenant?.name || "",
-        slug: tenant?.slug || "",
-        type: tenant?.type || TenantType.STORE,
-        config: tenant?.config || { features: {} },
-    }));
+
+    const form = useForm({
+        defaultValues: {
+            name: tenant?.name || "",
+            slug: tenant?.slug || "",
+            type: tenant?.type || TenantType.STORE,
+            config: tenant?.config || { features: {} },
+        },
+        validators: {
+            onSubmit: ({ value }) => {
+                if (!value.name || !value.slug) {
+                    return "Nombre y slug son obligatorios";
+                }
+                return undefined;
+            },
+        },
+        onSubmitInvalid: () => {
+            toast.error("Nombre y slug son obligatorios");
+        },
+        onSubmit: async ({ value }) => {
+            clearFieldErrors(TENANT_FIELDS, setFieldServerError);
+            setIsSaving(true);
+            setServerError("");
+            try {
+                if (tenant) {
+                    await tenantService.update(tenant.id, value);
+                    toast.success("Tenant actualizado");
+                } else {
+                    await tenantService.create(value);
+                    toast.success("¡Tenant creado correctamente!");
+                }
+                onSuccess();
+            } catch (err) {
+                applyServerErrors({
+                    error: err,
+                    fallback: "No pudimos guardar la organización.",
+                    knownFields: TENANT_FIELDS,
+                    setFormError: setServerError,
+                    setFieldError: setFieldServerError,
+                });
+            } finally {
+                setIsSaving(false);
+            }
+        },
+    });
+
+    const setFieldServerError: FieldErrorSetter = (field, message) =>
+        form.setFieldMeta(field as never, (prev) => ({
+            ...prev,
+            errorMap: {
+                ...prev?.errorMap,
+                onServer: message,
+            },
+        }));
+
+    // The tab editors are pure value/setter components. Feeding them the form
+    // store's values through the same functional-setter contract keeps their
+    // controlled behaviour (including the name→slug derivation) untouched.
+    const formData = useSelector(form.store, (state) => state.values);
+    const setFormData: React.Dispatch<
+        React.SetStateAction<CreateTenantData>
+    > = (updater) => {
+        const current = form.state.values;
+        const next =
+            typeof updater === "function"
+                ? (updater as (prev: CreateTenantData) => CreateTenantData)(
+                      current,
+                  )
+                : updater;
+        for (const key of Object.keys(next) as Array<keyof CreateTenantData>) {
+            if (!Object.is(next[key], current[key])) {
+                form.setFieldValue(key as never, next[key] as never);
+            }
+        }
+    };
 
     const [activeTab, setActiveTab] = useState("general");
 
@@ -428,37 +505,15 @@ export function TenantForm({
         updateConfig("features", key, !currentFeatures[key]);
     };
 
-    const handleSubmit = async (e?: React.FormEvent) => {
-        e?.preventDefault();
-        if (!formData.name || !formData.slug) {
-            toast.error("Nombre y slug son obligatorios");
-            return;
-        }
-
-        setIsSaving(true);
-        setError("");
-        try {
-            if (tenant) {
-                await tenantService.update(tenant.id, formData);
-                toast.success("Tenant actualizado");
-            } else {
-                await tenantService.create(formData);
-                toast.success("¡Tenant creado correctamente!");
-            }
-            onSuccess();
-        } catch (err: any) {
-            setError(
-                reportError(err, "No pudimos guardar la organización.", {
-                    toast: false,
-                }),
-            );
-        } finally {
-            setIsSaving(false);
-        }
-    };
-
     return (
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form
+            onSubmit={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                void form.handleSubmit();
+            }}
+            className="space-y-6"
+        >
             <Tabs
                 value={activeTab}
                 onValueChange={setActiveTab}
@@ -517,10 +572,10 @@ export function TenantForm({
                 />
             </Tabs>
 
-            {error && (
+            {serverError && (
                 <Alert variant="destructive">
                     <AlertCircle className="size-4" aria-hidden="true" />
-                    <AlertDescription>{error}</AlertDescription>
+                    <AlertDescription>{serverError}</AlertDescription>
                 </Alert>
             )}
 
