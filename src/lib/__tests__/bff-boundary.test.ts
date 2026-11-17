@@ -12,7 +12,7 @@ import { join, relative, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const SRC = resolve(__dirname, "../..");
-const API_DIR = join(SRC, "app/api");
+const API_DIR = join(SRC, "routes/api");
 
 const collectRouteFiles = (dir: string): string[] =>
     readdirSync(dir).flatMap((entry) => {
