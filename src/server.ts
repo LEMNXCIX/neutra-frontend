@@ -5,11 +5,71 @@ import {
 } from "@tanstack/react-start/server";
 
 import { getBackendUrl } from "./lib/backend-url";
+import { onContentRevalidated } from "./lib/content-cache";
 import { applyTenantToRequest, TenantLookupError } from "./lib/tenant-request";
 
 const startHandler = createStartHandler(defaultStreamHandler);
 
 const WEBHOOK_PREFIX = "/api/webhooks/";
+const REVALIDATION_EVENTS_PATH = "/api/revalidate/events";
+
+/**
+ * SSE feed for browser QueryClients. The revalidate webhook runs in this
+ * process; without a delivery path the browser half of the invalidation bridge
+ * would never learn that Strapi published something. The endpoint is handled
+ * here (not as a generated BFF route) so the 75-route API inventory stays
+ * exactly the ported Next surface.
+ */
+function revalidationEventStream(request: Request): Response {
+    const encoder = new TextEncoder();
+    let unsubscribe = () => {};
+    let heartbeat: ReturnType<typeof setInterval> | undefined;
+
+    const stream = new ReadableStream<Uint8Array>({
+        start(controller) {
+            const send = (text: string) => {
+                try {
+                    controller.enqueue(encoder.encode(text));
+                } catch {
+                    // The reader is gone; cancel()/abort will clean us up.
+                }
+            };
+            // Flush the response headers immediately; without an initial chunk
+            // the Node adapter buffers them until the first real event.
+            send(": connected\n\n");
+            unsubscribe = onContentRevalidated((tag) => {
+                send(`data: ${tag}\n\n`);
+            });
+            // Keep idle connections alive through proxies that close streams.
+            heartbeat = setInterval(() => send(": ping\n\n"), 25_000);
+            request.signal.addEventListener(
+                "abort",
+                () => {
+                    if (heartbeat) clearInterval(heartbeat);
+                    unsubscribe();
+                    try {
+                        controller.close();
+                    } catch {
+                        // Already closed by the reader.
+                    }
+                },
+                { once: true },
+            );
+        },
+        cancel() {
+            if (heartbeat) clearInterval(heartbeat);
+            unsubscribe();
+        },
+    });
+
+    return new Response(stream, {
+        headers: {
+            "content-type": "text/event-stream; charset=utf-8",
+            "cache-control": "no-cache, no-transform",
+            connection: "keep-alive",
+        },
+    });
+}
 
 /** A tenant name the backend does not know, or a backend that cannot answer,
  *  must never render a guessed storefront under that tenant's identity. */
@@ -59,6 +119,10 @@ function withTenantCookies(response: Response, cookies: string[]): Response {
 export const fetch = createServerEntry({
     async fetch(request, opts) {
         const url = new URL(request.url);
+
+        if (url.pathname === REVALIDATION_EVENTS_PATH) {
+            return revalidationEventStream(request);
+        }
 
         if (url.pathname.startsWith(WEBHOOK_PREFIX)) {
             return forwardWebhook(request, url);

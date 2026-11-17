@@ -112,4 +112,40 @@ describe("server entry", () => {
         expect(response.headers.getSetCookie()).toHaveLength(0);
         expect(response.status).toBe(200);
     });
+
+    it("streams revalidation events to connected browser query clients", async () => {
+        const { notifyContentRevalidated } = await import(
+            "@/lib/content-cache"
+        );
+        const response = await serverFetch(
+            new Request("http://localhost:3001/api/revalidate/events"),
+        );
+
+        expect(response.headers.get("content-type")).toContain(
+            "text/event-stream",
+        );
+        expect(h.downstream).toHaveLength(0);
+
+        const body = response.body;
+        expect(body).toBeDefined();
+        if (!body) throw new Error("SSE response must have a body");
+        const reader = body.getReader();
+        try {
+            notifyContentRevalidated("content:tenant-1");
+            // The stream starts with a `: connected` comment that flushes the
+            // headers; read through it to the actual event.
+            let received = "";
+            for (
+                let attempt = 0;
+                attempt < 3 && !received.includes("data:");
+                attempt++
+            ) {
+                const { value } = await reader.read();
+                received += new TextDecoder().decode(value);
+            }
+            expect(received).toContain("data: content:tenant-1");
+        } finally {
+            await reader.cancel();
+        }
+    });
 });

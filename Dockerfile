@@ -17,6 +17,8 @@ WORKDIR /app
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/scripts/serve-start.mjs ./scripts/serve-start.mjs
+COPY --from=builder /app/scripts/serve-start-headers.mjs ./scripts/serve-start-headers.mjs
+COPY --from=builder /app/scripts/serve-start-request.mjs ./scripts/serve-start-request.mjs
 COPY --from=builder /app/package*.json ./
 RUN npm ci --omit=dev
 

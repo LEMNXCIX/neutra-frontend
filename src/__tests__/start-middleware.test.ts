@@ -135,6 +135,28 @@ describe("global request middleware", () => {
         expect((result as Response).status).toBe(403);
     });
 
+    it("does not consume the request body on its way to a POST handler", async () => {
+        const request = new Request("http://localhost:3001/_serverFn/probe", {
+            method: "POST",
+            headers: {
+                host: "localhost:3001",
+                "sec-fetch-site": "same-origin",
+                "content-type": "application/json",
+            },
+            body: JSON.stringify({ entry: { tenantId: "tenant-1" } }),
+        });
+
+        await runPipeline(request, "router");
+
+        // A previous version called applyTenantToRequest() here; its
+        // `new Request(request, { headers })` stole the body stream, so every
+        // BFF POST received `bodyUsed: true` and request.json() returned null.
+        expect(request.bodyUsed).toBe(false);
+        expect(await request.json()).toEqual({
+            entry: { tenantId: "tenant-1" },
+        });
+    });
+
     it("returns the Task 3-injected tenant slug from getTenantContext()", async () => {
         const request = new Request("http://acme.nip.io/_serverFn/probe", {
             headers: {

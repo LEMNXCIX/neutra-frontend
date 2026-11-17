@@ -166,19 +166,40 @@ export async function resolveTenant(host: string): Promise<TenantResolution> {
 }
 
 /**
+ * Resolve tenant identity from a Request's headers without cloning the Request.
+ *
+ * `new Request(request, { headers })` transfers the original body stream to the
+ * clone. A middleware that only needs tenant context must use this helper:
+ * cloning there consumed the body before a BFF handler could `request.json()`,
+ * so every JSON POST (including the Strapi revalidate webhook) silently failed.
+ */
+export async function resolveTenantIdentity(
+    request: Request,
+): Promise<TenantResolution> {
+    const host = request.headers.get("host") ?? new URL(request.url).host;
+    const tenant = await resolveTenant(host);
+    return {
+        slug: request.headers.get("x-tenant-slug") || tenant.slug,
+        moduleType: tenant.moduleType,
+        tenantId: request.headers.get("x-tenant-id") || tenant.tenantId,
+    };
+}
+
+/**
  * Inject the resolved tenant context into a Request and return the cookies the
  * server entry should write back. Proxy-injected `x-tenant-slug`/`x-tenant-id`
  * headers win over anything else, so a stale client cookie cannot override the
  * host-derived identity.
+ *
+ * Only the server entry calls this — it intentionally owns the body from here
+ * on. Request middleware must use `resolveTenantIdentity` instead.
  */
 export async function applyTenantToRequest(
     request: Request,
 ): Promise<TenantRequestResult> {
-    const host = request.headers.get("host") ?? new URL(request.url).host;
-    const tenant = await resolveTenant(host);
-
-    const slug = request.headers.get("x-tenant-slug") || tenant.slug;
-    const tenantId = request.headers.get("x-tenant-id") || tenant.tenantId;
+    const tenant = await resolveTenantIdentity(request);
+    const slug = tenant.slug;
+    const tenantId = tenant.tenantId;
 
     const headers = new Headers(request.headers);
     headers.set("x-tenant-slug", slug);

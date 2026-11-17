@@ -20,7 +20,13 @@ import {
     serverBackendFetch,
 } from "./backend-api";
 import { getBackendUrl } from "./backend-url";
+import {
+    contentTag,
+    notifyContentRevalidated,
+    revalidateTag,
+} from "./content-cache";
 import { type LogContext, logger } from "./logger";
+import { invalidateContentQueries } from "./query-invalidation";
 import { readJsonResponse } from "./response";
 import { extractTokenFromRequest } from "./server-auth";
 
@@ -1186,13 +1192,17 @@ const webBffHandlers: Record<string, BffHandler> = {
         const body = await request.json().catch(() => null);
         const tenantId = body?.entry?.tenantId ?? body?.tenantId;
         if (typeof tenantId === "string" && tenantId) {
-            // TanStack Start has no next/cache revalidateTag. The HTTP contract
-            // (auth check, payload validation, response shape) is preserved;
-            // cache invalidation is wired to the server entry in a later task.
-            console.info(`[revalidate] content:${tenantId}`);
+            // Real invalidation, not a log line: purge the tenant's tagged
+            // Strapi cache and invalidate every QueryClient registered in this
+            // realm. The response contract is unchanged.
+            const tag = contentTag(tenantId);
+            const purged = revalidateTag(tag);
+            invalidateContentQueries();
+            notifyContentRevalidated(tag);
+            console.info(`[revalidate] ${tag} (purged ${purged})`);
             return Response.json({
                 ok: true,
-                revalidated: `content:${tenantId}`,
+                revalidated: tag,
             });
         }
         return Response.json(

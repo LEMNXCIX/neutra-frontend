@@ -1,9 +1,9 @@
-import { networkInterfaces } from "node:os";
 import { fileURLToPath } from "node:url";
 import tailwindcss from "@tailwindcss/vite";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import viteReact from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
+import { computeAllowedDevHosts } from "./vite-dev-hosts";
 
 /**
  * Replacement for next.config.ts's `allowedDevOrigins`. Vite checks the Host
@@ -13,34 +13,11 @@ import { defineConfig } from "vite";
  * network; `.nip.io` covers every nip.io subdomain, including ones resolved
  * after the dev server started. DEV_ORIGINS stays the escape hatch for compose
  * containers, where the visible interfaces are the bridge network.
+ *
+ * The derivation lives in a pure helper so it is testable without importing
+ * the Start plugin or mutating process.env (tests/vite-dev-hosts.test.ts).
  */
-const localDevHosts = (): string[] => {
-    const hosts = new Set<string>();
-    for (const addresses of Object.values(networkInterfaces())) {
-        for (const address of addresses ?? []) {
-            if (address.family !== "IPv4" || address.internal) continue;
-            hosts.add(address.address);
-            hosts.add(`${address.address}.nip.io`);
-            hosts.add(`.${address.address}.nip.io`);
-        }
-    }
-    return [...hosts];
-};
-
-const configuredDevHosts = (process.env.DEV_ORIGINS ?? "")
-    .split(",")
-    .map((origin) =>
-        origin
-            .trim()
-            .replace(/^[a-z][a-z\d+.-]*:\/\//i, "")
-            .replace(/\/.*$/, "")
-            .replace(/:\d+$/, ""),
-    )
-    .filter(Boolean);
-
-const allowedDevHosts = [
-    ...new Set([".nip.io", ...localDevHosts(), ...configuredDevHosts]),
-];
+const allowedDevHosts = computeAllowedDevHosts(process.env.DEV_ORIGINS);
 
 export default defineConfig({
     // Suppress auto-discovery of the Next-oriented postcss.config.mjs;

@@ -199,9 +199,28 @@ const labelFor = (field?: string): string | undefined => {
 
 const CATCH_ALL = "No pudimos completar la operación.";
 
+/**
+ * Match the longest known domain prefix, not just the first underscore token.
+ * `RATE_LIMIT_*` is a published domain whose name contains an underscore, so
+ * `code.split("_")[0]` ("RATE") would miss its fallback and leak the catch-all
+ * for any code added to that domain later.
+ */
+const domainOf = (code: string): string | undefined => {
+    let match: string | undefined;
+    for (const domain of Object.keys(DOMAIN_MESSAGES)) {
+        if (
+            (code === domain || code.startsWith(`${domain}_`)) &&
+            (!match || domain.length > match.length)
+        ) {
+            match = domain;
+        }
+    }
+    return match;
+};
+
 const domainMessage = (code: string): string => {
-    const domain = code.split("_")[0];
-    return DOMAIN_MESSAGES[domain] ?? CATCH_ALL;
+    const domain = domainOf(code);
+    return domain ? DOMAIN_MESSAGES[domain] : CATCH_ALL;
 };
 
 /** How a code was resolved. 'none' means the catch-all, i.e. untranslated. */
@@ -210,8 +229,7 @@ export type Resolution = "specific" | "domain" | "none";
 export const resolutionFor = (code: string): Resolution => {
     if (typeof code !== "string" || !code) return "none";
     if (Object.hasOwn(CODE_MESSAGES, code)) return "specific";
-    const domain = code.split("_")[0];
-    return Object.hasOwn(DOMAIN_MESSAGES, domain) ? "domain" : "none";
+    return domainOf(code) ? "domain" : "none";
 };
 
 /**

@@ -22,20 +22,53 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Biome CI check
+        run: npm run check
+
       - name: Typecheck
         run: npm run typecheck
 
-      - name: Tests
+      - name: Tests (full suite, parity sweep and cutover gates)
         run: npm test
 
       - name: Build
         run: npm run build
         env:
-          NEXT_PUBLIC_API_URL: http://localhost:4000/api
-
-      # New stack is built alongside Next until the final cutover; script
-      # names above are unchanged so parity fixtures can still be captured.
-      - name: Build (TanStack Start)
-        run: npm run build:start
-        env:
           BACKEND_API_URL: http://localhost:4000/api
+
+      # Explicit gates so a skipped/renamed test cannot silently remove the
+      # zero-Next or error-code coverage checks from the cutover evidence.
+      - name: Zero-Next grep
+        run: |
+          if grep -RInE "from[[:space:]]*['\"]next(/|['\"])|require\(['\"]next(/|['\"])|import\(['\"]next(/|['\"])" src --include='*.ts' --include='*.tsx'; then
+            echo "next/* import found under src/" >&2
+            exit 1
+          fi
+          node -e 'const p=require("./package.json");const d={...p.dependencies,...p.devDependencies};for(const n of ["next","next-themes"]){if(n in d){console.error(n+" is still a dependency");process.exit(1)}}'
+
+      - name: Error-code coverage + parity fixtures + static gates
+        run: npx vitest run src/lib/__tests__/error-codes.test.ts tests/parity/full.test.ts
+
+      - name: Docker smoke (tenant headers)
+        run: |
+          docker build -t neutra-start:ci .
+          docker run -d --name neutra-start-smoke -p 3001:3001 \
+            -e BACKEND_API_URL=http://localhost:4000/api \
+            -e REVALIDATE_SECRET= \
+            neutra-start:ci
+          for i in $(seq 1 30); do
+            # A 400 here is fine: it means the Start server is up and routing.
+            code=$(curl -sS -o /dev/null -w '%{http_code}' -X POST \
+              http://localhost:3001/api/revalidate \
+              -H 'content-type: application/json' -d '{}' || true)
+            if [ "$code" != "000" ] && [ -n "$code" ]; then break; fi
+            sleep 2
+          done
+          response=$(curl -fsS -X POST http://localhost:3001/api/revalidate \
+            -H 'content-type: application/json' \
+            -H 'x-tenant-slug: store' \
+            -H 'x-tenant-id: tenant-1' \
+            -d '{"entry":{"tenantId":"tenant-1"}}')
+          echo "smoke response: $response"
+          echo "$response" | grep -q '"revalidated":"content:tenant-1"'
+          docker rm -f neutra-start-smoke

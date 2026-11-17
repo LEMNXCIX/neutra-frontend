@@ -4,7 +4,7 @@ import {
     createStart,
 } from "@tanstack/react-start";
 import type { TenantContext } from "./lib/server-context";
-import { applyTenantToRequest } from "./lib/tenant-request";
+import { resolveTenantIdentity } from "./lib/tenant-request";
 
 /**
  * The server entry (`src/server.ts`) already injects the tenant identity into
@@ -14,17 +14,14 @@ import { applyTenantToRequest } from "./lib/tenant-request";
  */
 const tenantContextMiddleware = createMiddleware().server(
     async ({ request, next }) => {
-        const { request: tenantRequest } = await applyTenantToRequest(request);
-        const headers = tenantRequest.headers;
-        const moduleType = headers.get("x-module-type");
+        // Header-only resolution: cloning the Request here would transfer its
+        // body stream and leave BFF POST handlers with an unparseable body.
+        const identity = await resolveTenantIdentity(request);
 
         const tenant: TenantContext = {
-            slug: headers.get("x-tenant-slug") ?? "",
-            moduleType:
-                moduleType === "store" || moduleType === "booking"
-                    ? moduleType
-                    : "root",
-            tenantId: headers.get("x-tenant-id") ?? "",
+            slug: identity.slug,
+            moduleType: identity.moduleType,
+            tenantId: identity.tenantId,
         };
 
         return next({ context: { tenant } });
