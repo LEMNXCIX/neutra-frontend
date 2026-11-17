@@ -1,6 +1,7 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { BookingNavbar } from "@/components/booking/booking-navbar";
+import { NotFound } from "@/components/not-found";
 
 /** Server-only tenant data for the booking shell (RPC boundary + dynamic
  *  imports keep server helpers out of the client bundle). */
@@ -18,9 +19,32 @@ const getBookingLayoutData = createServerFn({ method: "GET" }).handler(
 
 /** Pathless replacement for the App Router `(booking)` group. */
 export const Route = createFileRoute("/_booking")({
+    notFoundComponent: BookingNotFound,
     loader: () => getBookingLayoutData(),
     component: BookingLayout,
 });
+
+function BookingNotFound() {
+    const { branding, tenantName } = Route.useLoaderData();
+    return (
+        <div className="min-h-screen bg-background transition-colors duration-300 flex flex-col">
+            <BookingNavbar
+                tenantName={tenantName}
+                tenantLogo={branding?.tenantLogo}
+            />
+            <main className="flex-1 pt-16">
+                <NotFound />
+            </main>
+            <footer className="border-t border-border py-6 px-6">
+                <p className="text-[10px] text-muted-foreground text-center font-semibold uppercase tracking-widest">
+                    &copy; {new Date().getFullYear()}{" "}
+                    {tenantName || "XCIX Platforms"}. Todos los derechos
+                    reservados.
+                </p>
+            </footer>
+        </div>
+    );
+}
 
 function BookingLayout() {
     const { branding, tenantName } = Route.useLoaderData();

@@ -3,7 +3,9 @@
 import { type ComponentType, createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
+import { NotFound } from "@/components/not-found";
 import { RootDocument, Route } from "../__root";
+import { Route as StoreRoute } from "../_store";
 
 // HeadContent/Scripts read the router context, which a standalone document
 // render does not provide. Stub only those; keep createRootRoute/Outlet real.
@@ -46,8 +48,7 @@ describe("RootDocument", () => {
     });
 
     it("provides a localized not-found component with a home link", () => {
-        const NotFound = Route.options.notFoundComponent;
-        expect(NotFound).toBeTypeOf("function");
+        expect(StoreRoute.options.notFoundComponent).toBeTypeOf("function");
 
         const markup = renderToStaticMarkup(
             createElement(NotFound as ComponentType),
