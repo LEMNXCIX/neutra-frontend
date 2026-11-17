@@ -5,6 +5,10 @@ import {
     Scripts,
 } from "@tanstack/react-router";
 import { ThemeProvider } from "next-themes";
+import { AuthInitializer } from "@/components/auth-initializer";
+import { SWRegistration } from "@/components/sw-registration";
+import { Toaster } from "@/components/ui/sonner";
+import { FeatureProvider } from "@/providers/feature-provider";
 import { QueryProvider } from "@/providers/query-provider";
 import { TenantThemeProvider } from "@/providers/tenant-theme-provider";
 
@@ -27,7 +31,14 @@ export function RootDocument({ children }: { children: React.ReactNode }) {
                     disableTransitionOnChange
                 >
                     <TenantThemeProvider>
-                        <QueryProvider>{children ?? <Outlet />}</QueryProvider>
+                        <FeatureProvider>
+                            <SWRegistration />
+                            <AuthInitializer />
+                            <QueryProvider>
+                                {children ?? <Outlet />}
+                                <Toaster richColors />
+                            </QueryProvider>
+                        </FeatureProvider>
                     </TenantThemeProvider>
                 </ThemeProvider>
                 <Scripts />

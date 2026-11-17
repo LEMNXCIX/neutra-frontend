@@ -1,8 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-// strapi.ts is server-only; neutralize the guard in tests
-vi.mock("server-only", () => ({}));
-
 const mockFetch = vi.fn();
 vi.stubGlobal("fetch", mockFetch);
 

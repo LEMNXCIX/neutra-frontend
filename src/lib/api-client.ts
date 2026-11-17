@@ -1,6 +1,44 @@
+import { createIsomorphicFn } from "@tanstack/react-start";
 import Cookies from "js-cookie";
 import { getBackendUrl } from "@/lib/backend-url";
 import type { StandardResponse } from "@/types/frontend-api";
+
+type ServerTenantContext = {
+    tenantSlug: string | undefined;
+    tenantId: string | undefined;
+    cookieHeader: string | undefined;
+};
+
+/**
+ * Start's compiler extracts the `.server()` body from the client bundle, so
+ * the server-only request helpers stay out of browser code while this call
+ * site keeps the same values and the same no-request-scope fallback as before.
+ */
+const readServerTenantContext = createIsomorphicFn()
+    .server(async (): Promise<ServerTenantContext> => {
+        const { getRequest, getRequestHeader, getCookie } = await import(
+            "@tanstack/react-start/server"
+        );
+
+        // Prefer the x-tenant-* request headers: the proxy sets them for THIS
+        // request (always correct). Cookies can be stale — they're set on the
+        // response, so a request that follows a visit to another subdomain
+        // still carries the previous tenant's cookie.
+        return {
+            tenantSlug:
+                getRequestHeader("x-tenant-slug") || getCookie("tenant-slug"),
+            tenantId: getRequestHeader("x-tenant-id") || getCookie("tenant-id"),
+            // Forward the whole jar, not just the token cookie.
+            cookieHeader: getRequest()?.headers?.get("cookie") ?? undefined,
+        };
+    })
+    .client(
+        (): ServerTenantContext => ({
+            tenantSlug: undefined,
+            tenantId: undefined,
+            cookieHeader: undefined,
+        }),
+    );
 
 /**
  * Custom error class for API errors with context for debugging
@@ -63,24 +101,13 @@ export async function apiClient<T = unknown>(
             console.warn("[ApiClient] Failed to read cookies:", e);
         }
     } else {
-        // Server-side: read the Start request context. Imported lazily so a
-        // browser bundle never pulls in the server-only module.
+        // Server-side: read the Start request context through the isomorphic
+        // boundary; browser bundles only see its client implementation.
         try {
-            const { getRequest, getRequestHeader, getCookie } = await import(
-                "@tanstack/react-start/server"
-            );
-
-            // Prefer the x-tenant-* request headers: the proxy sets them for
-            // THIS request (always correct). Cookies can be stale — they're
-            // set on the response, so a request that follows a visit to
-            // another subdomain still carries the previous tenant's cookie.
-            tenantSlug =
-                getRequestHeader("x-tenant-slug") || getCookie("tenant-slug");
-            tenantId =
-                getRequestHeader("x-tenant-id") || getCookie("tenant-id");
-
-            // Forward the whole jar, not just the token cookie.
-            cookieHeader = getRequest()?.headers?.get("cookie") ?? undefined;
+            const context = await readServerTenantContext();
+            tenantSlug = context.tenantSlug;
+            tenantId = context.tenantId;
+            cookieHeader = context.cookieHeader;
         } catch (_e) {
             // No Start request scope (static generation, scripts, unit tests).
         }

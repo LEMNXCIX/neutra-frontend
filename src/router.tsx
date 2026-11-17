@@ -1,11 +1,9 @@
 import { createRouter } from "@tanstack/react-router";
-import { Route as rootRoute } from "./routes/__root";
+import { routeTree } from "./routeTree.gen";
 import "./styles/globals.css";
 
-// Only the root route exists during scaffolding. Later tasks replace this
-// hand-assembled tree with the generated file-based `routeTree.gen.ts`.
-const routeTree = rootRoute.addChildren([]);
-
+/** Use the generated file-based tree so the 68 page routes, pathless group
+ *  layouts and API/server routes are reachable (no hand-assembled root tree). */
 export function getRouter() {
     return createRouter({
         routeTree,

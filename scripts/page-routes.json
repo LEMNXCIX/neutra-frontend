@@ -1,0 +1,546 @@
+[
+  {
+    "source": "src/app/(booking)/appointments/[id]/page.tsx",
+    "layout": "_booking",
+    "url": "/appointments/[id]",
+    "routePath": "/_booking/appointments/$id/",
+    "title": "Detalles de la cita",
+    "description": "Mira los detalles de tu cita"
+  },
+  {
+    "source": "src/app/(booking)/appointments/page.tsx",
+    "layout": "_booking",
+    "url": "/appointments",
+    "routePath": "/_booking/appointments/",
+    "title": "Mis citas",
+    "description": "Ver y gestionar tus citas"
+  },
+  {
+    "source": "src/app/(booking)/book/page.tsx",
+    "layout": "_booking",
+    "url": "/book",
+    "routePath": "/_booking/book/",
+    "title": "Reservar una Cita",
+    "description": "Agenda tu próxima cita en línea"
+  },
+  {
+    "source": "src/app/(booking)/home/page.tsx",
+    "layout": "_booking",
+    "url": "/home",
+    "routePath": "/_booking/home/",
+    "title": "Inicio",
+    "description": "Reserva citas y servicios"
+  },
+  {
+    "source": "src/app/(booking)/services/page.tsx",
+    "layout": "_booking",
+    "url": "/services",
+    "routePath": "/_booking/services/",
+    "title": "Servicios",
+    "description": "Explora los servicios disponibles para reservar"
+  },
+  {
+    "source": "src/app/(store)/about/page.tsx",
+    "layout": "_store",
+    "url": "/about",
+    "routePath": "/_store/about/",
+    "title": "Sobre Nosotros",
+    "description": "Conoce nuestra misión, visión y equipo"
+  },
+  {
+    "source": "src/app/(store)/careers/page.tsx",
+    "layout": "_store",
+    "url": "/careers",
+    "routePath": "/_store/careers/",
+    "title": "Trabaja con Nosotros",
+    "description": "Súmate al equipo y explora oportunidades profesionales"
+  },
+  {
+    "source": "src/app/(store)/cart/page.tsx",
+    "layout": "_store",
+    "url": "/cart",
+    "routePath": "/_store/cart/",
+    "title": "Carrito",
+    "description": "Revisa tu carrito de compras"
+  },
+  {
+    "source": "src/app/(store)/contact/page.tsx",
+    "layout": "_store",
+    "url": "/contact",
+    "routePath": "/_store/contact/",
+    "title": "Contacto",
+    "description": "Ponete en contacto con nuestro equipo"
+  },
+  {
+    "source": "src/app/(store)/faq/page.tsx",
+    "layout": "_store",
+    "url": "/faq",
+    "routePath": "/_store/faq/",
+    "title": "Preguntas Frecuentes",
+    "description": "Preguntas y respuestas frecuentes"
+  },
+  {
+    "source": "src/app/(store)/forgot-password/page.tsx",
+    "layout": "_store",
+    "url": "/forgot-password",
+    "routePath": "/_store/forgot-password/",
+    "title": "Recuperar Contraseña",
+    "description": "Solicita un enlace para restablecer tu contraseña"
+  },
+  {
+    "source": "src/app/(store)/login/page.tsx",
+    "layout": "_store",
+    "url": "/login",
+    "routePath": "/_store/login/",
+    "title": "Iniciar Sesión",
+    "description": "Inicia sesión en tu cuenta"
+  },
+  {
+    "source": "src/app/(store)/orders/[id]/page.tsx",
+    "layout": "_store",
+    "url": "/orders/[id]",
+    "routePath": "/_store/orders/$id/",
+    "title": "Detalles del Pedido",
+    "description": "Ver el estado y los detalles de tu pedido"
+  },
+  {
+    "source": "src/app/(store)/privacy/page.tsx",
+    "layout": "_store",
+    "url": "/privacy",
+    "routePath": "/_store/privacy/",
+    "title": "Política de Privacidad",
+    "description": "Nuestra política de privacidad y manejo de datos"
+  },
+  {
+    "source": "src/app/(store)/products/[id]/page.tsx",
+    "layout": "_store",
+    "url": "/products/[id]",
+    "routePath": "/_store/products/$id/",
+    "title": "Detalles del producto",
+    "description": "Mira los detalles, el precio y la disponibilidad del producto"
+  },
+  {
+    "source": "src/app/(store)/products/page.tsx",
+    "layout": "_store",
+    "url": "/products",
+    "routePath": "/_store/products/",
+    "title": "Productos",
+    "description": "Explora nuestro catálogo completo de productos"
+  },
+  {
+    "source": "src/app/(store)/register/page.tsx",
+    "layout": "_store",
+    "url": "/register",
+    "routePath": "/_store/register/",
+    "title": "Registrarse",
+    "description": "Crear una nueva cuenta"
+  },
+  {
+    "source": "src/app/(store)/reset-password/page.tsx",
+    "layout": "_store",
+    "url": "/reset-password",
+    "routePath": "/_store/reset-password/",
+    "title": "Restablecer Contraseña",
+    "description": "Establece una nueva contraseña para tu cuenta"
+  },
+  {
+    "source": "src/app/(store)/returns/page.tsx",
+    "layout": "_store",
+    "url": "/returns",
+    "routePath": "/_store/returns/",
+    "title": "Devoluciones y Reembolsos",
+    "description": "Conoce nuestra política de devoluciones y reembolsos"
+  },
+  {
+    "source": "src/app/(store)/shipping/page.tsx",
+    "layout": "_store",
+    "url": "/shipping",
+    "routePath": "/_store/shipping/",
+    "title": "Envíos",
+    "description": "Opciones de envío, tiempos de entrega y tarifas"
+  },
+  {
+    "source": "src/app/(store)/store/page.tsx",
+    "layout": "_store",
+    "url": "/store",
+    "routePath": "/_store/store/",
+    "title": "Inicio",
+    "description": "Bienvenido a nuestra tienda: explora colecciones y productos destacados"
+  },
+  {
+    "source": "src/app/(store)/terms/page.tsx",
+    "layout": "_store",
+    "url": "/terms",
+    "routePath": "/_store/terms/",
+    "title": "Términos de Servicio",
+    "description": "Nuestros términos y condiciones del servicio"
+  },
+  {
+    "source": "src/app/admin/appointments/page.tsx",
+    "layout": "_admin",
+    "url": "/admin/appointments",
+    "routePath": "/_admin/admin/appointments/",
+    "title": "Super Admin",
+    "description": "Super administration dashboard"
+  },
+  {
+    "source": "src/app/admin/banners/page.tsx",
+    "layout": "_admin",
+    "url": "/admin/banners",
+    "routePath": "/_admin/admin/banners/",
+    "title": "Super Admin",
+    "description": "Super administration dashboard"
+  },
+  {
+    "source": "src/app/admin/categories/page.tsx",
+    "layout": "_admin",
+    "url": "/admin/categories",
+    "routePath": "/_admin/admin/categories/",
+    "title": "Super Admin",
+    "description": "Super administration dashboard"
+  },
+  {
+    "source": "src/app/admin/coupons/page.tsx",
+    "layout": "_admin",
+    "url": "/admin/coupons",
+    "routePath": "/_admin/admin/coupons/",
+    "title": "Super Admin",
+    "description": "Super administration dashboard"
+  },
+  {
+    "source": "src/app/admin/features/page.tsx",
+    "layout": "_admin",
+    "url": "/admin/features",
+    "routePath": "/_admin/admin/features/",
+    "title": "Super Admin",
+    "description": "Super administration dashboard"
+  },
+  {
+    "source": "src/app/admin/logs/page.tsx",
+    "layout": "_admin",
+    "url": "/admin/logs",
+    "routePath": "/_admin/admin/logs/",
+    "title": "Super Admin",
+    "description": "Super administration dashboard"
+  },
+  {
+    "source": "src/app/admin/loyalty/page.tsx",
+    "layout": "_admin",
+    "url": "/admin/loyalty",
+    "routePath": "/_admin/admin/loyalty/",
+    "title": "Fidelización global | Superadministración",
+    "description": "Consulta las campañas de fidelización de todas las organizaciones"
+  },
+  {
+    "source": "src/app/admin/page.tsx",
+    "layout": "_admin",
+    "url": "/admin",
+    "routePath": "/_admin/admin/",
+    "title": "Super Admin",
+    "description": "Super administration dashboard"
+  },
+  {
+    "source": "src/app/admin/products/page.tsx",
+    "layout": "_admin",
+    "url": "/admin/products",
+    "routePath": "/_admin/admin/products/",
+    "title": "Super Admin",
+    "description": "Super administration dashboard"
+  },
+  {
+    "source": "src/app/admin/roles/page.tsx",
+    "layout": "_admin",
+    "url": "/admin/roles",
+    "routePath": "/_admin/admin/roles/",
+    "title": "Super Admin",
+    "description": "Super administration dashboard"
+  },
+  {
+    "source": "src/app/admin/services/page.tsx",
+    "layout": "_admin",
+    "url": "/admin/services",
+    "routePath": "/_admin/admin/services/",
+    "title": "Super Admin",
+    "description": "Super administration dashboard"
+  },
+  {
+    "source": "src/app/admin/sliders/page.tsx",
+    "layout": "_admin",
+    "url": "/admin/sliders",
+    "routePath": "/_admin/admin/sliders/",
+    "title": "Super Admin",
+    "description": "Super administration dashboard"
+  },
+  {
+    "source": "src/app/admin/staff/page.tsx",
+    "layout": "_admin",
+    "url": "/admin/staff",
+    "routePath": "/_admin/admin/staff/",
+    "title": "Super Admin",
+    "description": "Super administration dashboard"
+  },
+  {
+    "source": "src/app/admin/tenants/page.tsx",
+    "layout": "_admin",
+    "url": "/admin/tenants",
+    "routePath": "/_admin/admin/tenants/",
+    "title": "Super Admin",
+    "description": "Super administration dashboard"
+  },
+  {
+    "source": "src/app/admin/users/page.tsx",
+    "layout": "_admin",
+    "url": "/admin/users",
+    "routePath": "/_admin/admin/users/",
+    "title": "Super Admin",
+    "description": "Super administration dashboard"
+  },
+  {
+    "source": "src/app/admin/whatsapp/page.tsx",
+    "layout": "_admin",
+    "url": "/admin/whatsapp",
+    "routePath": "/_admin/admin/whatsapp/",
+    "title": "WhatsApp Configuration | Admin",
+    "description": "Gestiona la integración con WhatsApp Business API"
+  },
+  {
+    "source": "src/app/booking-admin/appearance/page.tsx",
+    "layout": "_bookingAdmin",
+    "url": "/booking-admin/appearance",
+    "routePath": "/_bookingAdmin/booking-admin/appearance/",
+    "title": "Apariencia",
+    "description": "Panel de administración de reservas"
+  },
+  {
+    "source": "src/app/booking-admin/appointments/[id]/approve/page.tsx",
+    "layout": "_bookingAdmin",
+    "url": "/booking-admin/appointments/[id]/approve",
+    "routePath": "/_bookingAdmin/booking-admin/appointments/$id/approve/",
+    "title": "Aprobar cita",
+    "description": "Procesando la aprobación de la cita"
+  },
+  {
+    "source": "src/app/booking-admin/appointments/[id]/reject/page.tsx",
+    "layout": "_bookingAdmin",
+    "url": "/booking-admin/appointments/[id]/reject",
+    "routePath": "/_bookingAdmin/booking-admin/appointments/$id/reject/",
+    "title": "Rechazar cita",
+    "description": "Procesando el rechazo de la cita"
+  },
+  {
+    "source": "src/app/booking-admin/appointments/page.tsx",
+    "layout": "_bookingAdmin",
+    "url": "/booking-admin/appointments",
+    "routePath": "/_bookingAdmin/booking-admin/appointments/",
+    "title": "Citas",
+    "description": "Panel de administración de reservas"
+  },
+  {
+    "source": "src/app/booking-admin/banners/page.tsx",
+    "layout": "_bookingAdmin",
+    "url": "/booking-admin/banners",
+    "routePath": "/_bookingAdmin/booking-admin/banners/",
+    "title": "Anuncios",
+    "description": "Panel de administración de reservas"
+  },
+  {
+    "source": "src/app/booking-admin/categories/page.tsx",
+    "layout": "_bookingAdmin",
+    "url": "/booking-admin/categories",
+    "routePath": "/_bookingAdmin/booking-admin/categories/",
+    "title": "Categorías de reservas",
+    "description": "Panel de administración de reservas"
+  },
+  {
+    "source": "src/app/booking-admin/coupons/page.tsx",
+    "layout": "_bookingAdmin",
+    "url": "/booking-admin/coupons",
+    "routePath": "/_bookingAdmin/booking-admin/coupons/",
+    "title": "Gestión de cupones | Administración de reservas",
+    "description": "Administra cupones de descuento para citas"
+  },
+  {
+    "source": "src/app/booking-admin/hours/page.tsx",
+    "layout": "_bookingAdmin",
+    "url": "/booking-admin/hours",
+    "routePath": "/_bookingAdmin/booking-admin/hours/",
+    "title": "Horario",
+    "description": "Panel de administración de reservas"
+  },
+  {
+    "source": "src/app/booking-admin/loyalty/page.tsx",
+    "layout": "_bookingAdmin",
+    "url": "/booking-admin/loyalty",
+    "routePath": "/_bookingAdmin/booking-admin/loyalty/",
+    "title": "Fidelización | Administración de reservas",
+    "description": "Administra las campañas de fidelización de la organización"
+  },
+  {
+    "source": "src/app/booking-admin/page.tsx",
+    "layout": "_bookingAdmin",
+    "url": "/booking-admin",
+    "routePath": "/_bookingAdmin/booking-admin/",
+    "title": "Administración de reservas",
+    "description": "Panel de administración de reservas"
+  },
+  {
+    "source": "src/app/booking-admin/roles/page.tsx",
+    "layout": "_bookingAdmin",
+    "url": "/booking-admin/roles",
+    "routePath": "/_bookingAdmin/booking-admin/roles/",
+    "title": "Roles de reservas",
+    "description": "Panel de administración de reservas"
+  },
+  {
+    "source": "src/app/booking-admin/services/page.tsx",
+    "layout": "_bookingAdmin",
+    "url": "/booking-admin/services",
+    "routePath": "/_bookingAdmin/booking-admin/services/",
+    "title": "Servicios de reservas",
+    "description": "Panel de administración de reservas"
+  },
+  {
+    "source": "src/app/booking-admin/sliders/page.tsx",
+    "layout": "_bookingAdmin",
+    "url": "/booking-admin/sliders",
+    "routePath": "/_bookingAdmin/booking-admin/sliders/",
+    "title": "Carruseles",
+    "description": "Panel de administración de reservas"
+  },
+  {
+    "source": "src/app/booking-admin/staff/page.tsx",
+    "layout": "_bookingAdmin",
+    "url": "/booking-admin/staff",
+    "routePath": "/_bookingAdmin/booking-admin/staff/",
+    "title": "Personal de reservas",
+    "description": "Panel de administración de reservas"
+  },
+  {
+    "source": "src/app/booking-admin/users/page.tsx",
+    "layout": "_bookingAdmin",
+    "url": "/booking-admin/users",
+    "routePath": "/_bookingAdmin/booking-admin/users/",
+    "title": "Usuarios de reservas",
+    "description": "Panel de administración de reservas"
+  },
+  {
+    "source": "src/app/booking-admin/whatsapp/page.tsx",
+    "layout": "_bookingAdmin",
+    "url": "/booking-admin/whatsapp",
+    "routePath": "/_bookingAdmin/booking-admin/whatsapp/",
+    "title": "Configuración de WhatsApp | Administración",
+    "description": "Gestiona la integración con WhatsApp Business API"
+  },
+  {
+    "source": "src/app/onboarding/tenant/page.tsx",
+    "layout": null,
+    "url": "/onboarding/tenant",
+    "routePath": "/onboarding/tenant/",
+    "title": "Lanzar nueva instancia",
+    "description": "Configura una nueva instancia de negocio en la plataforma"
+  },
+  {
+    "source": "src/app/page.tsx",
+    "layout": null,
+    "url": "/",
+    "routePath": "/",
+    "title": "XCIX - Tu plataforma de negocios",
+    "description": "Soluciones de comercio electrónico y reservas en una sola plataforma"
+  },
+  {
+    "source": "src/app/profile/page.tsx",
+    "layout": null,
+    "url": "/profile",
+    "routePath": "/profile/",
+    "title": "Mi Perfil",
+    "description": "Gestiona la configuración y preferencias de tu cuenta"
+  },
+  {
+    "source": "src/app/store-admin/appearance/page.tsx",
+    "layout": "_storeAdmin",
+    "url": "/store-admin/appearance",
+    "routePath": "/_storeAdmin/store-admin/appearance/",
+    "title": "Apariencia",
+    "description": "Panel de administración de la tienda"
+  },
+  {
+    "source": "src/app/store-admin/banners/page.tsx",
+    "layout": "_storeAdmin",
+    "url": "/store-admin/banners",
+    "routePath": "/_storeAdmin/store-admin/banners/",
+    "title": "Anuncios",
+    "description": "Panel de administración de la tienda"
+  },
+  {
+    "source": "src/app/store-admin/categories/page.tsx",
+    "layout": "_storeAdmin",
+    "url": "/store-admin/categories",
+    "routePath": "/_storeAdmin/store-admin/categories/",
+    "title": "Categorías",
+    "description": "Panel de administración de la tienda"
+  },
+  {
+    "source": "src/app/store-admin/coupons/page.tsx",
+    "layout": "_storeAdmin",
+    "url": "/store-admin/coupons",
+    "routePath": "/_storeAdmin/store-admin/coupons/",
+    "title": "Cupones",
+    "description": "Panel de administración de la tienda"
+  },
+  {
+    "source": "src/app/store-admin/orders/page.tsx",
+    "layout": "_storeAdmin",
+    "url": "/store-admin/orders",
+    "routePath": "/_storeAdmin/store-admin/orders/",
+    "title": "Pedidos",
+    "description": "Panel de administración de la tienda"
+  },
+  {
+    "source": "src/app/store-admin/page.tsx",
+    "layout": "_storeAdmin",
+    "url": "/store-admin",
+    "routePath": "/_storeAdmin/store-admin/",
+    "title": "Administración de la Tienda",
+    "description": "Panel de administración de la tienda"
+  },
+  {
+    "source": "src/app/store-admin/products/page.tsx",
+    "layout": "_storeAdmin",
+    "url": "/store-admin/products",
+    "routePath": "/_storeAdmin/store-admin/products/",
+    "title": "Productos",
+    "description": "Panel de administración de la tienda"
+  },
+  {
+    "source": "src/app/store-admin/roles/page.tsx",
+    "layout": "_storeAdmin",
+    "url": "/store-admin/roles",
+    "routePath": "/_storeAdmin/store-admin/roles/",
+    "title": "Roles de tienda",
+    "description": "Panel de administración de la tienda"
+  },
+  {
+    "source": "src/app/store-admin/sliders/page.tsx",
+    "layout": "_storeAdmin",
+    "url": "/store-admin/sliders",
+    "routePath": "/_storeAdmin/store-admin/sliders/",
+    "title": "Carruseles",
+    "description": "Panel de administración de la tienda"
+  },
+  {
+    "source": "src/app/store-admin/users/page.tsx",
+    "layout": "_storeAdmin",
+    "url": "/store-admin/users",
+    "routePath": "/_storeAdmin/store-admin/users/",
+    "title": "Usuarios",
+    "description": "Panel de administración de la tienda"
+  },
+  {
+    "source": "src/app/store-admin/whatsapp/page.tsx",
+    "layout": "_storeAdmin",
+    "url": "/store-admin/whatsapp",
+    "routePath": "/_storeAdmin/store-admin/whatsapp/",
+    "title": "Configuración de WhatsApp | Administración",
+    "description": "Gestiona la integración con WhatsApp Business API"
+  }
+]

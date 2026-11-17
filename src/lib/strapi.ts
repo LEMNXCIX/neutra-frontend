@@ -1,4 +1,7 @@
-import "server-only";
+// This module is loaded only from Start server-fn boundaries (see
+// src/routes/_store.tsx); Start's import protection replaces Next's
+// `server-only` marker, which Vite cannot resolve outside a React Server
+// Component build.
 import { getRequestHeader } from "@tanstack/react-start/server";
 
 const STRAPI_URL = process.env.STRAPI_URL ?? "http://localhost:1337";
