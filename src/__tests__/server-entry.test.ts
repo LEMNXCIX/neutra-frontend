@@ -148,4 +148,38 @@ describe("server entry", () => {
             await reader.cancel();
         }
     });
+
+    it("clears the SSE heartbeat and listener when the client disconnects", async () => {
+        const { contentRevalidatedListenerCount } = await import(
+            "@/lib/content-cache"
+        );
+        const baseline = contentRevalidatedListenerCount();
+        const clearInterval = vi.spyOn(globalThis, "clearInterval");
+        const controller = new AbortController();
+
+        const response = await serverFetch(
+            new Request("http://localhost:3001/api/revalidate/events", {
+                signal: controller.signal,
+            }),
+        );
+        const reader = response.body?.getReader();
+        if (!reader) throw new Error("SSE response must have a body");
+
+        try {
+            await reader.read(); // ": connected" flush
+            expect(contentRevalidatedListenerCount()).toBe(baseline + 1);
+
+            // Simulate the Node adapter's disconnect bridge: abort the signal
+            // that the SSE handler attached its cleanup to.
+            controller.abort();
+
+            const { done } = await reader.read();
+            expect(done).toBe(true);
+            expect(contentRevalidatedListenerCount()).toBe(baseline);
+            expect(clearInterval).toHaveBeenCalled();
+        } finally {
+            await reader.cancel().catch(() => {});
+            clearInterval.mockRestore();
+        }
+    });
 });

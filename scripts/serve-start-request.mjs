@@ -1,8 +1,26 @@
 /** Node HTTP Request -> Web Request adapter used by scripts/serve-start.mjs.
  *  Kept separate so the body handling has a runnable regression test. */
+
+/**
+ * Tie a Web Request's AbortSignal to the Node request/response lifecycle.
+ *
+ * A client disconnect fires `aborted` on the IncomingMessage and `close` on the
+ * ServerResponse. Without this bridge the Web Request handed to Start has a
+ * signal nobody aborts, so a long-lived stream (the SSE invalidation feed)
+ * keeps its heartbeat timer and event listener alive for every gone browser.
+ */
+export function createRequestAbortController(req, res) {
+    const controller = new AbortController();
+    const abort = () => controller.abort();
+    req.once("aborted", abort);
+    res.once("close", abort);
+    return controller;
+}
+
 export async function toWebRequest(
     req,
     port = Number(process.env.PORT ?? 3001),
+    signal,
 ) {
     const host = req.headers.host ?? `localhost:${port}`;
     const url = new URL(req.url ?? "/", `http://${host}`);
@@ -28,5 +46,5 @@ export async function toWebRequest(
         });
     }
 
-    return new Request(url, { method, headers, body });
+    return new Request(url, { method, headers, body, signal });
 }

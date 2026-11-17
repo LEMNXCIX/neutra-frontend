@@ -98,3 +98,9 @@ export function clearContentCache(): void {
 export function contentCacheSize(): number {
     return entries.size;
 }
+
+/** Test helper: number of live revalidation subscribers. Used to prove a
+ *  disconnected SSE stream unsubscribes instead of leaking a listener. */
+export function contentRevalidatedListenerCount(): number {
+    return listeners.size;
+}

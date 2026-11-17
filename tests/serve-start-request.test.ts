@@ -6,7 +6,10 @@
  */
 import { EventEmitter } from "node:events";
 import { describe, expect, it } from "vitest";
-import { toWebRequest } from "../scripts/serve-start-request.mjs";
+import {
+    createRequestAbortController,
+    toWebRequest,
+} from "../scripts/serve-start-request.mjs";
 
 function nodeRequest(method: string, chunks: string[]): EventEmitter {
     const req = new EventEmitter() as EventEmitter & {
@@ -48,5 +51,44 @@ describe("serve-start request adapter", () => {
         req.headers["set-cookie"] = ["a=1", "b=2"];
         const request = await toWebRequest(req, 3001);
         expect(request.headers.getSetCookie()).toEqual(["a=1", "b=2"]);
+    });
+
+    it("forwards the lifecycle signal into the Web Request", async () => {
+        const controller = new AbortController();
+        const request = await toWebRequest(
+            nodeRequest("POST", ["{}"]),
+            3001,
+            controller.signal,
+        );
+
+        // Request wraps the supplied signal in a dependent signal, so identity
+        // is not preserved — but aborting the source must propagate to it.
+        let aborted = false;
+        request.signal.addEventListener("abort", () => {
+            aborted = true;
+        });
+        expect(request.signal.aborted).toBe(false);
+        controller.abort();
+        expect(aborted).toBe(true);
+        expect(request.signal.aborted).toBe(true);
+    });
+
+    it("aborts the signal when the Node response closes (client disconnect)", async () => {
+        const req = nodeRequest("GET", []);
+        const res = new EventEmitter();
+        const controller = createRequestAbortController(req, res);
+
+        expect(controller.signal.aborted).toBe(false);
+        res.emit("close");
+        expect(controller.signal.aborted).toBe(true);
+    });
+
+    it("also aborts when the incoming request reports an aborted client", () => {
+        const req = nodeRequest("GET", []);
+        const res = new EventEmitter();
+        const controller = createRequestAbortController(req, res);
+
+        req.emit("aborted");
+        expect(controller.signal.aborted).toBe(true);
     });
 });
