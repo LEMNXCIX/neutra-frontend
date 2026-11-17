@@ -23,37 +23,54 @@ export function useSearchParams(): URLSearchParams {
 const isExternal = (to: string): boolean =>
     /^(?:[a-z][a-z\d+.-]*:|\/\/)/i.test(to);
 
+/**
+ * `next/navigation` accepted `"/products?category=shoes"` as a single string.
+ * TanStack Router needs the pathname and the search object separately: passing
+ * the whole string as `to` makes buildLocation treat the query as part of the
+ * pathname and produces `search: {}`, so route matching/loaderDeps see no
+ * filters. Splitting here keeps every existing call site working.
+ */
+export function parseNavigationTarget(to: string, pathname: string) {
+    const [pathAndQuery, hash] = to.split("#");
+    const [rawPath, rawQuery] = pathAndQuery.split("?");
+    return {
+        to: rawPath || pathname,
+        search:
+            rawQuery === undefined
+                ? undefined
+                : Object.fromEntries(new URLSearchParams(rawQuery)),
+        hash: hash || undefined,
+    };
+}
+
 export function useRouter() {
     const navigate = useNavigate();
     const router = useTanStackRouter();
     const pathname = usePathname();
 
-    return useMemo(
-        () => ({
-            push: (to: string) => {
-                if (isExternal(to)) {
-                    window.location.assign(to);
-                    return;
-                }
-                navigate({
-                    to: (to.startsWith("?") ? `${pathname}${to}` : to) as never,
-                });
-            },
-            replace: (to: string) => {
-                if (isExternal(to)) {
-                    window.location.replace(to);
-                    return;
-                }
-                navigate({
-                    to: (to.startsWith("?") ? `${pathname}${to}` : to) as never,
-                    replace: true,
-                });
-            },
+    return useMemo(() => {
+        const go = (target: string, replace: boolean) => {
+            if (isExternal(target)) {
+                if (replace) window.location.replace(target);
+                else window.location.assign(target);
+                return;
+            }
+            const parsed = parseNavigationTarget(target, pathname);
+            navigate({
+                to: parsed.to as never,
+                ...(parsed.search ? { search: parsed.search as never } : {}),
+                ...(parsed.hash ? { hash: parsed.hash } : {}),
+                ...(replace ? { replace: true } : {}),
+            });
+        };
+
+        return {
+            push: (to: string) => go(to, false),
+            replace: (to: string) => go(to, true),
             refresh: () => router.invalidate(),
             back: () => router.history.back(),
             forward: () => router.history.forward(),
             prefetch: () => {},
-        }),
-        [navigate, pathname, router],
-    );
+        };
+    }, [navigate, pathname, router]);
 }

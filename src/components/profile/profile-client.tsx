@@ -1,6 +1,5 @@
 "use client";
 
-import { Link } from "@tanstack/react-router";
 import {
     Camera,
     Edit,
@@ -26,6 +25,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { SmartLink } from "@/components/ui/smart-link";
 import { useRouter } from "@/lib/navigation";
 import { getTenantUrl } from "@/lib/tenant";
 import type { Appointment } from "@/services/booking.service";
@@ -276,15 +276,15 @@ export function ProfileClient({
                                         variant="outline"
                                         className="h-14 px-6 rounded-xl font-bold border-2 border-border hover:border-primary hover:text-primary transition-[color,background-color,border-color,box-shadow,opacity,transform] hover:-translate-y-0.5"
                                     >
-                                        <Link
-                                            to={getTenantUrl(tenant.slug)}
+                                        <SmartLink
+                                            href={getTenantUrl(tenant.slug)}
                                             className="flex items-center gap-3"
                                         >
                                             <span>{tenant.name}</span>
                                             <Badge className="bg-primary/10 text-primary text-[10px] font-bold tracking-widest px-3 py-1 rounded-full border-none">
                                                 {tenant.type}
                                             </Badge>
-                                        </Link>
+                                        </SmartLink>
                                     </Button>
                                 ))}
                             </div>

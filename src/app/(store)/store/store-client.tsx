@@ -8,6 +8,7 @@ import PromoSlider from "@/components/promo-slider";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { SmartLink } from "@/components/ui/smart-link";
 
 import { useFeatures } from "@/hooks/useFeatures";
 
@@ -111,10 +112,12 @@ function StoreHero({
                                 className="h-14 px-10 text-base font-bold rounded-xl shadow-lg shadow-primary/20 hover:-translate-y-0.5 transition-[color,background-color,border-color,box-shadow,opacity,transform]"
                                 asChild
                             >
-                                <Link to={cms?.heroCtaHref ?? "/products"}>
+                                <SmartLink
+                                    href={cms?.heroCtaHref ?? "/products"}
+                                >
                                     {cms?.heroCtaLabel ?? "Ver Colección"}
                                     <ArrowRight className="ml-2 size-5" />
-                                </Link>
+                                </SmartLink>
                             </Button>
                         </div>
                     </div>
@@ -288,13 +291,13 @@ function StoreCta({ cms }: { cms?: HomeCms | null }) {
                    shadow-2xl transition-[color,background-color,border-color,box-shadow,opacity,transform] hover:-translate-y-1"
                         asChild
                     >
-                        <Link
-                            to={cms?.ctaPrimaryHref ?? "/register"}
+                        <SmartLink
+                            href={cms?.ctaPrimaryHref ?? "/register"}
                             className="flex items-center gap-3"
                         >
                             {cms?.ctaPrimaryLabel ?? "Reclamar Descuento"}
                             <ArrowRight className="size-6" />
-                        </Link>
+                        </SmartLink>
                     </Button>
 
                     <Button
@@ -304,9 +307,9 @@ function StoreCta({ cms }: { cms?: HomeCms | null }) {
                    hover:bg-background hover:text-foreground transition-[color,background-color,border-color,box-shadow,opacity,transform]"
                         asChild
                     >
-                        <Link to={cms?.ctaSecondaryHref ?? "/products"}>
+                        <SmartLink href={cms?.ctaSecondaryHref ?? "/products"}>
                             {cms?.ctaSecondaryLabel ?? "Ver Novedades"}
-                        </Link>
+                        </SmartLink>
                     </Button>
                 </div>
             </div>

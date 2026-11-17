@@ -30,6 +30,7 @@ import {
     SheetTitle,
     SheetTrigger,
 } from "@/components/ui/sheet";
+import { SmartLink } from "@/components/ui/smart-link";
 import { useCart } from "@/hooks/use-cart";
 import { useRouter } from "@/lib/navigation";
 import { readJsonResponse } from "@/lib/response";
@@ -518,9 +519,11 @@ function MobileMenuSheet({
                                                             .map((c) => (
                                                                 <Link
                                                                     key={c.id}
-                                                                    to={
-                                                                        `/products?category=${encodeURIComponent(c.id)}` as "/products"
-                                                                    }
+                                                                    to="/products"
+                                                                    search={{
+                                                                        category:
+                                                                            c.id,
+                                                                    }}
                                                                     onClick={() =>
                                                                         dispatch(
                                                                             {
@@ -868,8 +871,8 @@ function ListItem({
     return (
         <li {...props}>
             <NavigationMenuLink asChild>
-                <Link
-                    to={href}
+                <SmartLink
+                    href={href}
                     className="block select-none space-y-1 rounded-xl p-3 leading-none no-underline outline-none transition-colors hover:bg-muted"
                 >
                     <div className="text-sm font-bold leading-none">
@@ -878,7 +881,7 @@ function ListItem({
                     <p className="line-clamp-2 text-xs leading-snug text-muted-foreground font-medium">
                         {children}
                     </p>
-                </Link>
+                </SmartLink>
             </NavigationMenuLink>
         </li>
     );

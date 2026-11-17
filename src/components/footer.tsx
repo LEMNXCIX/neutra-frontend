@@ -106,9 +106,8 @@ export default function Footer({
                                 {categories.map((category) => (
                                     <li key={category.id}>
                                         <Link
-                                            to={
-                                                `/products?category=${encodeURIComponent(category.id)}` as "/products"
-                                            }
+                                            to="/products"
+                                            search={{ category: category.id }}
                                             className="text-sm font-medium text-muted-foreground hover:text-primary transition-[color,background-color,border-color,box-shadow,opacity,transform] flex items-center group"
                                         >
                                             <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-[color,background-color,border-color,box-shadow,opacity,transform]" />
