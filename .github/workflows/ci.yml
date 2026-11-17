@@ -32,3 +32,10 @@ jobs:
         run: npm run build
         env:
           NEXT_PUBLIC_API_URL: http://localhost:4000/api
+
+      # New stack is built alongside Next until the final cutover; script
+      # names above are unchanged so parity fixtures can still be captured.
+      - name: Build (TanStack Start)
+        run: npm run build:start
+        env:
+          BACKEND_API_URL: http://localhost:4000/api

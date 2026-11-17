@@ -10,6 +10,8 @@
             "**/*.mjs",
             "!**/node_modules",
             "!**/.next",
+            "!**/dist",
+            "!**/routeTree.gen.ts",
             "!**/coverage",
             "!**/.git",
             "!.playwright-mcp"

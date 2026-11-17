@@ -23,6 +23,8 @@
 
 # production
 /build
+/dist/
+/src/routeTree.gen.ts
 
 # misc
 .DS_Store
