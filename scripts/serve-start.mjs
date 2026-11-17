@@ -1,5 +1,6 @@
 import { createServer } from "node:http";
 import entry from "../dist/server/server.mjs";
+import { webHeadersToNodeHeaders } from "./serve-start-headers.mjs";
 
 const PORT = Number(process.env.PORT ?? 3001);
 
@@ -35,7 +36,7 @@ createServer((req, res) => {
         .then(async (response) => {
             res.writeHead(
                 response.status,
-                Object.fromEntries(response.headers),
+                webHeadersToNodeHeaders(response.headers),
             );
             if (!response.body) {
                 res.end();
