@@ -13,7 +13,6 @@ import {
     User,
     XCircle,
 } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
 import type React from "react";
 import { Suspense, useReducer, useSyncExternalStore } from "react";
 import { toast } from "sonner";
@@ -47,6 +46,7 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { useConfirm } from "@/hooks/use-confirm";
+import { useRouter, useSearchParams } from "@/lib/navigation";
 import { readJsonResponse } from "@/lib/response";
 import type {
     Appointment,

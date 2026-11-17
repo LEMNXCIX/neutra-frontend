@@ -1,7 +1,7 @@
 "use client";
 
+import { Link } from "@tanstack/react-router";
 import { Calendar, PlusCircle, ShoppingCart } from "lucide-react";
-import Link from "next/link";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import FooterWrapper from "@/components/footer-wrapper";
 import { NeutralNavigation } from "@/components/neutral-navigation";
@@ -96,7 +96,7 @@ export function LandingPageClient() {
                                     </a>
                                 ))}
                             <Link
-                                href="/onboarding/tenant"
+                                to="/onboarding/tenant"
                                 className="flex items-center justify-center gap-3 px-8 py-4 font-semibold text-sm bg-primary text-primary-foreground hover:opacity-90 transition-[color,background-color,border-color,box-shadow,opacity,transform] rounded-xl shadow-md hover:-translate-y-0.5"
                             >
                                 <PlusCircle className="size-4" />
@@ -110,7 +110,7 @@ export function LandingPageClient() {
                                 className="h-14 px-10 rounded-xl font-bold text-sm shadow-lg shadow-primary/20"
                                 asChild
                             >
-                                <Link href="/register">Comenzar ahora</Link>
+                                <Link to="/register">Comenzar ahora</Link>
                             </Button>
                             <Button
                                 variant="outline"
@@ -118,7 +118,7 @@ export function LandingPageClient() {
                                 className="h-14 px-10 rounded-xl font-bold text-sm"
                                 asChild
                             >
-                                <Link href="/login">Acceso seguro</Link>
+                                <Link to="/login">Acceso seguro</Link>
                             </Button>
                         </div>
                     )}

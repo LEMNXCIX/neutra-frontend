@@ -121,20 +121,24 @@ vi.mock("@tanstack/react-router", async (importOriginal) => {
             useSearch: () => mocks.search,
             useNavigate: () => vi.fn(),
         }),
-        Link: ({ to, children, ...rest }: any) =>
-            createElement("a", { href: to, ...rest }, children),
+        Link: ({ to, params, children, ...rest }: any) =>
+            createElement(
+                "a",
+                {
+                    href: to.replace(
+                        /\$([A-Za-z0-9_]+)/g,
+                        (_m: string, key: string) =>
+                            String(params?.[key] ?? ""),
+                    ),
+                    ...rest,
+                },
+                children,
+            ),
     };
 });
 
-// Next shims so reused components render under plain React.
-vi.mock("next/link", () => ({
-    default: ({ href, children, ...rest }: any) =>
-        createElement("a", { href, ...rest }, children),
-}));
-vi.mock("next/image", () => ({
-    default: (props: any) => createElement("img", props),
-}));
-vi.mock("next/navigation", () => ({
+// Navigation shims so reused components render under plain React.
+vi.mock("@/lib/navigation", () => ({
     useRouter: () => ({ push: vi.fn(), replace: vi.fn(), prefetch: vi.fn() }),
     useSearchParams: () => new URLSearchParams(mocks.search),
     usePathname: () => "/",

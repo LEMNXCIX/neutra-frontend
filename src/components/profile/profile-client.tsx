@@ -1,5 +1,6 @@
 "use client";
 
+import { Link } from "@tanstack/react-router";
 import {
     Camera,
     Edit,
@@ -8,9 +9,6 @@ import {
     User as Shield,
     UserCircle,
 } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import type React from "react";
 import { useReducer, useRef, useSyncExternalStore } from "react";
 import { toast } from "sonner";
@@ -28,6 +26,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useRouter } from "@/lib/navigation";
 import { getTenantUrl } from "@/lib/tenant";
 import type { Appointment } from "@/services/booking.service";
 import { useAuthStore } from "@/store/auth-store";
@@ -177,7 +176,7 @@ export function ProfileClient({
                         <div className="relative group">
                             <div className="absolute inset-0 bg-primary/20 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
                             {user.avatar ? (
-                                <Image
+                                <img
                                     src={user.avatar}
                                     alt={user.name}
                                     width={128}
@@ -278,7 +277,7 @@ export function ProfileClient({
                                         className="h-14 px-6 rounded-xl font-bold border-2 border-border hover:border-primary hover:text-primary transition-[color,background-color,border-color,box-shadow,opacity,transform] hover:-translate-y-0.5"
                                     >
                                         <Link
-                                            href={getTenantUrl(tenant.slug)}
+                                            to={getTenantUrl(tenant.slug)}
                                             className="flex items-center gap-3"
                                         >
                                             <span>{tenant.name}</span>

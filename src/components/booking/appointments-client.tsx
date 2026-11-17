@@ -1,5 +1,6 @@
 "use client";
 
+import { Link } from "@tanstack/react-router";
 import {
     AlertCircle,
     Briefcase,
@@ -10,7 +11,6 @@ import {
     User as UserIcon,
     XCircle,
 } from "lucide-react";
-import Link from "next/link";
 import { useState } from "react";
 import { CancelAppointmentDialog } from "@/components/booking/cancel-appointment-dialog";
 import { StatusUpdateDialog } from "@/components/booking/status-update-dialog";
@@ -67,7 +67,8 @@ function AppointmentCardHeader({
         <CardHeader className="pb-3">
             <div className="flex justify-between items-start">
                 <Link
-                    href={`/appointments/${appointment.id}`}
+                    to="/appointments/$id"
+                    params={{ id: appointment.id }}
                     className="space-y-1 group flex-1"
                 >
                     <CardTitle className="text-xl group-hover:text-primary transition-colors">
@@ -455,7 +456,7 @@ export function AppointmentsClient({
                                         variant="outline"
                                         className="mt-4"
                                     >
-                                        <Link href="/services">
+                                        <Link to="/services">
                                             Reservar un servicio
                                         </Link>
                                     </Button>
@@ -490,7 +491,7 @@ export function AppointmentsClient({
                             </p>
                         </div>
                         <Button asChild size="lg">
-                            <Link href="/services">Ver Servicios</Link>
+                            <Link to="/services">Ver Servicios</Link>
                         </Button>
                     </CardContent>
                 </Card>

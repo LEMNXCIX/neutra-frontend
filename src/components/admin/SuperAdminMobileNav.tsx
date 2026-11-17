@@ -18,9 +18,9 @@ import {
     Users,
     Zap,
 } from "lucide-react";
-import { usePathname } from "next/navigation";
 import { MobileAdminNav } from "@/components/admin/shared/MobileAdminNav";
 import type { NavItem } from "@/config/admin-navigation";
+import { usePathname } from "@/lib/navigation";
 
 const ICON_MAP: Record<string, LucideIcon> = {
     LayoutDashboard,

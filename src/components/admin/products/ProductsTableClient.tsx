@@ -9,7 +9,6 @@ import {
     Upload,
     X,
 } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
 import type React from "react";
 import { Suspense, useReducer, useRef } from "react";
 import { toast } from "sonner";
@@ -56,6 +55,7 @@ import {
 import { useConfirm } from "@/hooks/use-confirm";
 import { api } from "@/lib/api-client";
 import { reportError } from "@/lib/error-reporting";
+import { useRouter, useSearchParams } from "@/lib/navigation";
 import type { Product } from "@/types/product.types";
 
 const getStockBadge = (stock: number) => {

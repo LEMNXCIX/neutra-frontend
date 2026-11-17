@@ -1,8 +1,7 @@
 "use client";
 
+import { Link } from "@tanstack/react-router";
 import { Building2, LayoutDashboard, LogIn, Menu } from "lucide-react";
-import Link from "next/link";
-import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import Logo from "@/components/logo";
 import { Button } from "@/components/ui/button";
@@ -14,6 +13,7 @@ import {
     SheetTrigger,
 } from "@/components/ui/sheet";
 import { getTenantUrl } from "@/lib/tenant";
+import { useTheme } from "@/providers/theme-provider";
 import { tenantService } from "@/services/tenant.service";
 import { useAuthStore } from "@/store/auth-store";
 import { useTenantStore } from "@/store/tenant-store";
@@ -66,7 +66,7 @@ export function NeutralNavigation() {
                                 className="text-foreground relative z-10 transition-transform group-hover:scale-110 duration-300"
                             />
                         </div>
-                        <Link href="/">
+                        <Link to="/">
                             <h1 className="text-2xl font-bold tracking-tight text-foreground leading-none">
                                 XCIX
                             </h1>
@@ -105,7 +105,7 @@ export function NeutralNavigation() {
                     {!isAdmin && user && isSuperAdminContext && (
                         <div className="hidden md:flex items-center gap-4">
                             <Link
-                                href="/onboarding/tenant"
+                                to="/onboarding/tenant"
                                 className="flex items-center gap-2 text-xs font-semibold hover:text-primary transition-colors text-foreground uppercase tracking-wider"
                             >
                                 <Building2 size={16} />
@@ -120,7 +120,7 @@ export function NeutralNavigation() {
                     <div className="hidden md:flex items-center gap-6">
                         {user ? (
                             <Link
-                                href="/profile"
+                                to="/profile"
                                 className="text-xs font-semibold hover:text-primary transition-colors text-foreground uppercase tracking-wider"
                             >
                                 {user.name}
@@ -128,13 +128,13 @@ export function NeutralNavigation() {
                         ) : (
                             <>
                                 <Link
-                                    href="/login"
+                                    to="/login"
                                     className="text-xs font-semibold hover:text-primary transition-colors flex items-center gap-2 text-foreground uppercase tracking-wider"
                                 >
                                     <LogIn size={14} /> Acceder
                                 </Link>
                                 <Link
-                                    href="/register"
+                                    to="/register"
                                     className="px-5 py-2 bg-primary text-primary-foreground text-xs font-bold rounded-lg hover:opacity-90 transition-[color,background-color,border-color,box-shadow,opacity,transform] uppercase tracking-wider shadow-sm"
                                 >
                                     Únete a la red
@@ -234,7 +234,7 @@ export function NeutralNavigation() {
                                             <nav className="flex flex-col gap-1">
                                                 {user ? (
                                                     <Link
-                                                        href="/profile"
+                                                        to="/profile"
                                                         onClick={() =>
                                                             setIsMobileMenuOpen(
                                                                 false,
@@ -247,7 +247,7 @@ export function NeutralNavigation() {
                                                 ) : (
                                                     <>
                                                         <Link
-                                                            href="/login"
+                                                            to="/login"
                                                             onClick={() =>
                                                                 setIsMobileMenuOpen(
                                                                     false,
@@ -258,7 +258,7 @@ export function NeutralNavigation() {
                                                             Iniciar sesión
                                                         </Link>
                                                         <Link
-                                                            href="/register"
+                                                            to="/register"
                                                             onClick={() =>
                                                                 setIsMobileMenuOpen(
                                                                     false,

@@ -4,13 +4,13 @@ import {
     Outlet,
     Scripts,
 } from "@tanstack/react-router";
-import { ThemeProvider } from "next-themes";
 import { AuthInitializer } from "@/components/auth-initializer";
 import { SWRegistration } from "@/components/sw-registration";
 import { Toaster } from "@/components/ui/sonner";
 import { FeatureProvider } from "@/providers/feature-provider";
 import { QueryProvider } from "@/providers/query-provider";
 import { TenantThemeProvider } from "@/providers/tenant-theme-provider";
+import { ThemeProvider } from "@/providers/theme-provider";
 
 /**
  * The document shell used by TanStack Start for every request. `children` is
@@ -21,7 +21,22 @@ export function RootDocument({ children }: { children: React.ReactNode }) {
     return (
         <html lang="es" suppressHydrationWarning>
             <head>
+                <link rel="preconnect" href="https://fonts.googleapis.com" />
+                <link
+                    rel="preconnect"
+                    href="https://fonts.gstatic.com"
+                    crossOrigin="anonymous"
+                />
+                <link
+                    rel="stylesheet"
+                    href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap"
+                />
                 <HeadContent />
+                <script
+                    dangerouslySetInnerHTML={{
+                        __html: 'try{var t=localStorage.getItem("theme");if(t==="dark"||(!t&&window.matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.classList.add("dark");else document.documentElement.classList.remove("dark")}catch(e){}',
+                    }}
+                />
             </head>
             <body className="font-sans antialiased">
                 <ThemeProvider

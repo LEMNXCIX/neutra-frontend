@@ -1,7 +1,7 @@
 "use client";
+
+import { Link } from "@tanstack/react-router";
 import { Eye, Loader2, Package, PackageOpen, ShoppingCart } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -66,18 +66,17 @@ export default function ProductGrid({
                             <div className="flex flex-col sm:flex-row gap-8 p-8">
                                 {/* Image */}
                                 <Link
-                                    href={`/products/${p.id}`}
+                                    to="/products/$id"
+                                    params={{ id: p.id }}
                                     className="flex-shrink-0 w-full sm:w-64 h-64 relative overflow-hidden rounded-xl bg-muted"
                                 >
                                     {p.image ? (
-                                        <Image
+                                        <img
                                             src={p.image}
                                             alt={
                                                 p.title || "Imagen del producto"
                                             }
-                                            fill
-                                            sizes="256px"
-                                            className="object-cover transition-transform duration-700 group-hover:scale-110"
+                                            className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                                         />
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center">
@@ -113,7 +112,8 @@ export default function ProductGrid({
                                                 )}
                                                 <h3 className="text-3xl font-bold tracking-tight text-foreground">
                                                     <Link
-                                                        href={`/products/${p.id}`}
+                                                        to="/products/$id"
+                                                        params={{ id: p.id }}
                                                         className="hover:text-primary transition-colors"
                                                     >
                                                         {p.title}
@@ -165,7 +165,10 @@ export default function ProductGrid({
                                             asChild
                                             className="h-14 px-10 rounded-xl font-bold border-2 border-border hover:bg-muted transition-[color,background-color,border-color,box-shadow,opacity,transform]"
                                         >
-                                            <Link href={`/products/${p.id}`}>
+                                            <Link
+                                                to="/products/$id"
+                                                params={{ id: p.id }}
+                                            >
                                                 <Eye className="mr-2 size-4" />
                                                 Ver detalles
                                             </Link>
@@ -195,16 +198,15 @@ export default function ProductGrid({
                     >
                         {/* Product Image */}
                         <Link
-                            href={`/products/${p.id}`}
+                            to="/products/$id"
+                            params={{ id: p.id }}
                             className="block relative aspect-[4/5] overflow-hidden bg-muted"
                         >
                             {p.image ? (
-                                <Image
+                                <img
                                     src={p.image}
                                     alt={p.title || "Imagen del producto"}
-                                    fill
-                                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                                    className="object-cover transition-transform duration-1000 group-hover:scale-110"
+                                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-1000 group-hover:scale-110"
                                 />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center bg-muted/30">
@@ -247,7 +249,10 @@ export default function ProductGrid({
 
                                 {/* Title */}
                                 <h3 className="text-xl font-bold tracking-tight line-clamp-1 group-hover:text-primary transition-colors leading-none">
-                                    <Link href={`/products/${p.id}`}>
+                                    <Link
+                                        to="/products/$id"
+                                        params={{ id: p.id }}
+                                    >
                                         {p.title}
                                     </Link>
                                 </h3>

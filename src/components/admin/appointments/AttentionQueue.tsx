@@ -9,7 +9,6 @@ import {
     UserX,
     XCircle,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -18,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
 import { useConfirm } from "@/hooks/use-confirm";
+import { useRouter } from "@/lib/navigation";
 import type {
     Appointment,
     AppointmentStatus,

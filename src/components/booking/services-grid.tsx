@@ -1,7 +1,6 @@
 "use client";
 
 import { CalendarSearch } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,6 +12,7 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
+import { useRouter } from "@/lib/navigation";
 import type { Service } from "@/services/booking.service";
 
 interface ServicesGridProps {

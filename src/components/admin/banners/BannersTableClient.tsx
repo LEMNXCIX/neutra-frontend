@@ -1,6 +1,5 @@
 "use client";
 import { CheckCircle2, Edit, Flag, Plus, Trash2, XCircle } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
 import {
     Suspense,
     useCallback,
@@ -52,6 +51,7 @@ import {
 } from "@/components/ui/table";
 import { useConfirm } from "@/hooks/use-confirm";
 import { reportError } from "@/lib/error-reporting";
+import { useRouter, useSearchParams } from "@/lib/navigation";
 import { bannersService } from "@/services/banners.service";
 import type { Banner } from "@/types/banner.types";
 

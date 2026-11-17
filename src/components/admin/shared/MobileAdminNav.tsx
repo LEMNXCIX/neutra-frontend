@@ -1,7 +1,7 @@
 "use client";
 
+import { Link } from "@tanstack/react-router";
 import type { LucideIcon } from "lucide-react";
-import Link from "next/link";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import type { NavItem } from "@/config/admin-navigation";
 import { cn } from "@/lib/utils";
@@ -31,7 +31,7 @@ export function MobileAdminNav({
                         return (
                             <Link
                                 key={href}
-                                href={href}
+                                to={href}
                                 className={cn(
                                     "flex flex-col items-center justify-center min-w-[64px] h-12 rounded-lg transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-300",
                                     isActive

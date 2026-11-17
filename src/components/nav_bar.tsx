@@ -1,4 +1,5 @@
 "use client";
+import { Link } from "@tanstack/react-router";
 import {
     ArrowRight,
     LayoutDashboard,
@@ -9,15 +10,11 @@ import {
     ShoppingBagIcon,
     User,
 } from "lucide-react";
-import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { useTheme } from "next-themes";
 import type React from "react";
 import { useEffect, useReducer, useRef } from "react";
 import Logo from "@/components/logo";
 import { UserAccountSummary } from "@/components/shared/UserAccountSummary";
 import { Badge } from "@/components/ui/badge";
-import Link from "@/components/ui/link";
 import {
     NavigationMenu,
     NavigationMenuContent,
@@ -34,8 +31,10 @@ import {
     SheetTrigger,
 } from "@/components/ui/sheet";
 import { useCart } from "@/hooks/use-cart";
+import { useRouter } from "@/lib/navigation";
 import { readJsonResponse } from "@/lib/response";
 import { cn } from "@/lib/utils";
+import { useTheme } from "@/providers/theme-provider";
 import { useAuthStore } from "@/store/auth-store";
 import type { Category } from "@/types/category.types";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
@@ -113,7 +112,7 @@ function DesktopMenuItems({ categories }: { categories: Category[] }) {
                         "bg-transparent font-semibold text-xs tracking-tight hover:bg-muted transition-colors rounded-lg",
                     )}
                 >
-                    <Link href="/products">Productos</Link>
+                    <Link to="/products">Productos</Link>
                 </NavigationMenuLink>
             </NavigationMenuItem>
 
@@ -232,7 +231,8 @@ function DesktopSearchWithResults({
                             ).map((product) => (
                                 <Link
                                     key={product.id}
-                                    href={`/products/${product.id}`}
+                                    to="/products/$id"
+                                    params={{ id: product.id }}
                                     className="flex items-center gap-4 p-3 hover:bg-muted transition-[color,background-color,border-color,box-shadow,opacity,transform] rounded-xl group"
                                     onClick={() => {
                                         dispatch({
@@ -247,7 +247,7 @@ function DesktopSearchWithResults({
                                 >
                                     <div className="size-12 bg-muted rounded-lg overflow-hidden shrink-0 border border-border/50">
                                         {product.image ? (
-                                            <Image
+                                            <img
                                                 src={product.image}
                                                 alt={product.name}
                                                 width={48}
@@ -351,7 +351,7 @@ function UserMenuDropdown({
                     asChild
                 >
                     <Link
-                        href="/profile"
+                        to="/profile"
                         className="flex items-center gap-3 font-semibold text-sm w-full"
                     >
                         <User size={16} className="opacity-70" /> Mi Perfil
@@ -492,7 +492,7 @@ function MobileMenuSheet({
                                         </span>
                                         <div className="grid gap-3">
                                             <Link
-                                                href="/products"
+                                                to="/products"
                                                 onClick={() =>
                                                     dispatch({
                                                         type: "SET_IS_OPEN",
@@ -518,7 +518,9 @@ function MobileMenuSheet({
                                                             .map((c) => (
                                                                 <Link
                                                                     key={c.id}
-                                                                    href={`/products?category=${encodeURIComponent(c.id)}`}
+                                                                    to={
+                                                                        `/products?category=${encodeURIComponent(c.id)}` as "/products"
+                                                                    }
                                                                     onClick={() =>
                                                                         dispatch(
                                                                             {
@@ -760,7 +762,7 @@ export function Navigation({
                                 />
                             </div>
                         </div>
-                        <Link href="/" className="ml-3">
+                        <Link to="/" className="ml-3">
                             <div className="flex flex-col leading-tight">
                                 <span
                                     className={cn(
@@ -800,7 +802,7 @@ export function Navigation({
                     <div className="flex items-center gap-2">
                         {user?.isAdmin && (
                             <Link
-                                href="/admin"
+                                to="/admin"
                                 className="p-2.5 hover:bg-muted transition-[color,background-color,border-color,box-shadow,opacity,transform] rounded-full group"
                             >
                                 <LayoutDashboard className="size-5 opacity-70 group-hover:opacity-100 group-hover:text-primary transition-[color,background-color,border-color,box-shadow,opacity,transform]" />
@@ -809,7 +811,7 @@ export function Navigation({
 
                         {!minimal && (
                             <Link
-                                href="/cart"
+                                to="/cart"
                                 className="relative p-2.5 hover:bg-muted transition-[color,background-color,border-color,box-shadow,opacity,transform] rounded-full group"
                             >
                                 <ShoppingBagIcon className="size-5 opacity-70 group-hover:opacity-100 group-hover:text-primary transition-[color,background-color,border-color,box-shadow,opacity,transform]" />
@@ -828,7 +830,7 @@ export function Navigation({
                                 router={router}
                             />
                         ) : (
-                            <Link href="/login" className="ml-1">
+                            <Link to="/login" className="ml-1">
                                 <Button
                                     variant="default"
                                     className="h-10 rounded-full px-6 font-bold text-xs shadow-md shadow-primary/20"
@@ -867,7 +869,7 @@ function ListItem({
         <li {...props}>
             <NavigationMenuLink asChild>
                 <Link
-                    href={href}
+                    to={href}
                     className="block select-none space-y-1 rounded-xl p-3 leading-none no-underline outline-none transition-colors hover:bg-muted"
                 >
                     <div className="text-sm font-bold leading-none">

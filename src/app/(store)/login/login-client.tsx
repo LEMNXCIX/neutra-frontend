@@ -1,4 +1,5 @@
 "use client";
+import { Link } from "@tanstack/react-router";
 import {
     AlertCircle,
     ArrowRight,
@@ -7,8 +8,6 @@ import {
     LogIn,
     Mail,
 } from "lucide-react";
-import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
 import type React from "react";
 import { Suspense, useState } from "react";
 import { AuthBrandHeader } from "@/components/auth/AuthBrandHeader";
@@ -26,6 +25,7 @@ import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Separator } from "@/components/ui/separator";
 import { errorMessageFrom } from "@/lib/error-messages";
+import { useRouter, useSearchParams } from "@/lib/navigation";
 import { useAuthStore } from "@/store/auth-store";
 
 export function LoginForm() {
@@ -113,7 +113,7 @@ export function LoginForm() {
                                     Contraseña
                                 </Label>
                                 <Link
-                                    href="/forgot-password"
+                                    to="/forgot-password"
                                     className="text-xs font-semibold text-primary hover:underline underline-offset-4"
                                 >
                                     ¿Te olvidaste?
@@ -176,7 +176,7 @@ export function LoginForm() {
                                 className="w-full h-12 rounded-xl border-border font-bold text-xs transition-[color,background-color,border-color,box-shadow,opacity,transform] hover:bg-muted"
                                 asChild
                             >
-                                <Link href="/register">Crear Nueva Cuenta</Link>
+                                <Link to="/register">Crear Nueva Cuenta</Link>
                             </Button>
                         </div>
                     </form>

@@ -9,8 +9,6 @@ import {
     Shield,
     Trash2,
 } from "lucide-react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-
 import type React from "react";
 import { Suspense, useReducer, useRef, useSyncExternalStore } from "react";
 import { toast } from "sonner";
@@ -42,6 +40,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useConfirm } from "@/hooks/use-confirm";
 import { reportError } from "@/lib/error-reporting";
+import { usePathname, useRouter, useSearchParams } from "@/lib/navigation";
 import { permissionsService } from "@/services/permissions.service";
 import { rolesService } from "@/services/roles.service";
 import type { Permission } from "@/types/permission.types";

@@ -11,8 +11,6 @@ import {
     XCircle,
     Zap,
 } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
-
 import type React from "react";
 import { Suspense, useReducer, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -58,6 +56,7 @@ import {
 } from "@/components/ui/table";
 import { useConfirm } from "@/hooks/use-confirm";
 import { reportError } from "@/lib/error-reporting";
+import { useRouter, useSearchParams } from "@/lib/navigation";
 import { bookingService, type Service } from "@/services/booking.service";
 import { couponsService } from "@/services/coupons.service";
 import {

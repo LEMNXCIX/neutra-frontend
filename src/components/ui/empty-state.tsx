@@ -1,5 +1,5 @@
+import { Link } from "@tanstack/react-router";
 import { type LucideIcon, PackageOpen } from "lucide-react";
-import Link from "next/link";
 import type React from "react";
 import { Button } from "@/components/ui/button";
 
@@ -47,7 +47,7 @@ export function EmptyState({
                     size="lg"
                     className="h-12 px-10 rounded-full font-bold shadow-xl shadow-primary/10 hover:shadow-primary/20 transition-[color,background-color,border-color,box-shadow,opacity,transform] hover:scale-105 active:scale-95"
                 >
-                    <Link href={actionHref}>{actionLabel}</Link>
+                    <Link to={actionHref}>{actionLabel}</Link>
                 </Button>
             ) : null}
         </div>

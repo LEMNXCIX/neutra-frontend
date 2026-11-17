@@ -1,6 +1,5 @@
 "use client";
 import { Edit, Folder, Package, Plus, Trash2, TrendingUp } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useReducer, useRef, useSyncExternalStore } from "react";
 import { toast } from "sonner";
 import { AdminStatCard as StatCard } from "@/components/admin/shared/AdminStatCard";
@@ -45,6 +44,7 @@ import {
 import { useConfirm } from "@/hooks/use-confirm";
 import { api } from "@/lib/api-client";
 import { reportError } from "@/lib/error-reporting";
+import { useRouter, useSearchParams } from "@/lib/navigation";
 import type { Category } from "@/types/category.types";
 
 type CategoryWithCount = Category & {

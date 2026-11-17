@@ -1,7 +1,7 @@
 "use client";
 
+import { Link } from "@tanstack/react-router";
 import { Calendar, Eye, Package, ShoppingBag } from "lucide-react";
-import Link from "next/link";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -55,7 +55,7 @@ export function OrderHistory({ initialOrders }: OrderHistoryProps) {
                         size="lg"
                         className="rounded-xl px-8 font-bold"
                     >
-                        <Link href="/">Explorar Productos</Link>
+                        <Link to="/">Explorar Productos</Link>
                     </Button>
                 </CardContent>
             </Card>
@@ -149,12 +149,13 @@ export function OrderHistory({ initialOrders }: OrderHistoryProps) {
                                     className="rounded-xl font-bold px-6 h-12"
                                     asChild
                                 >
-                                    <a
-                                        href={`/orders/${o.id}`}
+                                    <Link
+                                        to="/orders/$id"
+                                        params={{ id: o.id }}
                                         className="flex items-center gap-2"
                                     >
                                         <Eye className="size-4" /> Ver detalles
-                                    </a>
+                                    </Link>
                                 </Button>
                             </div>
                             {expanded === o.id && (

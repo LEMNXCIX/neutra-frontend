@@ -1,5 +1,6 @@
 "use client";
 
+import { Link } from "@tanstack/react-router";
 import {
     AlertCircle,
     ArrowLeft,
@@ -7,7 +8,6 @@ import {
     CheckCircle2,
     Mail,
 } from "lucide-react";
-import Link from "next/link";
 import type React from "react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -95,7 +95,7 @@ export function ForgotPasswordPageClient() {
                     </CardContent>
                     <CardFooter className="justify-center border-t border-border/50 p-6 bg-muted/10">
                         <Link
-                            href="/login"
+                            to="/login"
                             className="flex items-center text-xs font-semibold text-muted-foreground hover:text-primary transition-colors"
                         >
                             <ArrowLeft className="mr-2 size-4" />
@@ -178,7 +178,7 @@ export function ForgotPasswordPageClient() {
                     </CardContent>
                     <CardFooter className="flex flex-col gap-4 border-t border-border/50 p-6 bg-muted/10">
                         <Link
-                            href="/login"
+                            to="/login"
                             className="flex items-center text-xs font-semibold text-muted-foreground hover:text-primary transition-colors"
                         >
                             <ArrowLeft className="mr-2 size-4" />

@@ -8,7 +8,6 @@ import {
     Upload,
     XCircle,
 } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
 import type React from "react";
 import {
     Suspense,
@@ -61,6 +60,7 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { useConfirm } from "@/hooks/use-confirm";
+import { useRouter, useSearchParams } from "@/lib/navigation";
 import { slidersService } from "@/services/sliders.service";
 import type { Slideshow } from "@/types/slide.types";
 

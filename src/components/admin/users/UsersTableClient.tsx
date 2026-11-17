@@ -1,7 +1,5 @@
 "use client";
 import { Edit, Shield, UserCircle, UserCog, Users } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
-
 import type React from "react";
 import {
     Suspense,
@@ -49,6 +47,7 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { reportError } from "@/lib/error-reporting";
+import { useRouter, useSearchParams } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
 import { tenantService } from "@/services/tenant.service";
 import { usersService } from "@/services/users.service";

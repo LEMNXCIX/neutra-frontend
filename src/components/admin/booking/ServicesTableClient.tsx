@@ -1,7 +1,6 @@
 "use client";
 
 import { Clock, DollarSign, Edit, Tag, Trash2 } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
 import type React from "react";
 import { Suspense, useCallback, useEffect, useReducer } from "react";
 import { toast } from "sonner";
@@ -39,6 +38,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useConfirm } from "@/hooks/use-confirm";
 import { reportError } from "@/lib/error-reporting";
+import { useRouter, useSearchParams } from "@/lib/navigation";
 import { bookingService, type Service } from "@/services/booking.service";
 import { categoriesService } from "@/services/categories.service";
 import type { Category } from "@/types/category.types";

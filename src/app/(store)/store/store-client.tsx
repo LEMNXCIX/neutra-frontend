@@ -1,7 +1,7 @@
 "use client";
 
+import { Link } from "@tanstack/react-router";
 import { ArrowRight, Box, Heart, Shield, Tag, Truck, Zap } from "lucide-react";
-import Link from "next/link";
 import BannerBar from "@/components/banner-bar";
 import FeaturedProducts from "@/components/featured-products";
 import PromoSlider from "@/components/promo-slider";
@@ -111,7 +111,7 @@ function StoreHero({
                                 className="h-14 px-10 text-base font-bold rounded-xl shadow-lg shadow-primary/20 hover:-translate-y-0.5 transition-[color,background-color,border-color,box-shadow,opacity,transform]"
                                 asChild
                             >
-                                <Link href={cms?.heroCtaHref ?? "/products"}>
+                                <Link to={cms?.heroCtaHref ?? "/products"}>
                                     {cms?.heroCtaLabel ?? "Ver Colección"}
                                     <ArrowRight className="ml-2 size-5" />
                                 </Link>
@@ -171,7 +171,7 @@ function StoreFeaturedProducts({
                                 asChild
                             >
                                 <Link
-                                    href="/products"
+                                    to="/products"
                                     className="flex items-center gap-2"
                                 >
                                     Ver Catálogo Completo{" "}
@@ -188,7 +188,7 @@ function StoreFeaturedProducts({
                                 className="w-full h-14 rounded-xl font-bold border-border"
                                 asChild
                             >
-                                <Link href="/products">
+                                <Link to="/products">
                                     Ver Todos los Productos
                                 </Link>
                             </Button>
@@ -289,7 +289,7 @@ function StoreCta({ cms }: { cms?: HomeCms | null }) {
                         asChild
                     >
                         <Link
-                            href={cms?.ctaPrimaryHref ?? "/register"}
+                            to={cms?.ctaPrimaryHref ?? "/register"}
                             className="flex items-center gap-3"
                         >
                             {cms?.ctaPrimaryLabel ?? "Reclamar Descuento"}
@@ -304,7 +304,7 @@ function StoreCta({ cms }: { cms?: HomeCms | null }) {
                    hover:bg-background hover:text-foreground transition-[color,background-color,border-color,box-shadow,opacity,transform]"
                         asChild
                     >
-                        <Link href={cms?.ctaSecondaryHref ?? "/products"}>
+                        <Link to={cms?.ctaSecondaryHref ?? "/products"}>
                             {cms?.ctaSecondaryLabel ?? "Ver Novedades"}
                         </Link>
                     </Button>

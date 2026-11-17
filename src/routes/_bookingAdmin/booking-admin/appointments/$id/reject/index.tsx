@@ -1,7 +1,7 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 
-const rejectAppointment = createServerFn({ method: "GET" })
+const rejectAppointment = createServerFn({ method: "POST" })
     .validator((data: { id: string }) => data)
     .handler(async ({ data }) => {
         const { apiClient } = await import("@/lib/api-client");
@@ -18,7 +18,9 @@ const rejectAppointment = createServerFn({ method: "GET" })
 export const Route = createFileRoute(
     "/_bookingAdmin/booking-admin/appointments/$id/reject/",
 )({
-    loader: async ({ params }) => {
+    loader: async ({ params, preload }) => {
+        // Intent preload must never commit the status change.
+        if (preload) return;
         await rejectAppointment({ data: { id: params.id } });
         throw redirect({ to: "/booking-admin/appointments" });
     },

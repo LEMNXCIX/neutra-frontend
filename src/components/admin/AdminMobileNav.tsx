@@ -18,10 +18,10 @@ import {
     UserCog,
     Users,
 } from "lucide-react";
-import { usePathname } from "next/navigation";
 import { MobileAdminNav } from "@/components/admin/shared/MobileAdminNav";
 import type { NavItem } from "@/config/admin-navigation";
 import { useFeatures } from "@/hooks/useFeatures";
+import { usePathname } from "@/lib/navigation";
 import { useAuthStore } from "@/store/auth-store";
 
 const ICON_MAP: Record<string, LucideIcon> = {

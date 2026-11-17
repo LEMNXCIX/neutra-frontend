@@ -1,7 +1,7 @@
 "use client";
 
+import { Link } from "@tanstack/react-router";
 import { ArrowRight, Mail } from "lucide-react";
-import Link from "next/link";
 import Logo from "@/components/logo";
 import type { Category } from "@/types/category.types";
 
@@ -96,7 +96,7 @@ export default function Footer({
                             <ul className="space-y-3">
                                 <li>
                                     <Link
-                                        href="/products"
+                                        to="/products"
                                         className="text-sm font-medium text-muted-foreground hover:text-primary transition-[color,background-color,border-color,box-shadow,opacity,transform] flex items-center group"
                                     >
                                         <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-[color,background-color,border-color,box-shadow,opacity,transform]" />
@@ -106,7 +106,9 @@ export default function Footer({
                                 {categories.map((category) => (
                                     <li key={category.id}>
                                         <Link
-                                            href={`/products?category=${encodeURIComponent(category.id)}`}
+                                            to={
+                                                `/products?category=${encodeURIComponent(category.id)}` as "/products"
+                                            }
                                             className="text-sm font-medium text-muted-foreground hover:text-primary transition-[color,background-color,border-color,box-shadow,opacity,transform] flex items-center group"
                                         >
                                             <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-[color,background-color,border-color,box-shadow,opacity,transform]" />
@@ -126,7 +128,7 @@ export default function Footer({
                         <ul className="space-y-3">
                             <li>
                                 <Link
-                                    href="/contact"
+                                    to="/contact"
                                     className="text-sm font-medium text-muted-foreground hover:text-primary transition-[color,background-color,border-color,box-shadow,opacity,transform] flex items-center group"
                                 >
                                     <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-[color,background-color,border-color,box-shadow,opacity,transform]" />
@@ -137,7 +139,7 @@ export default function Footer({
                                 <>
                                     <li>
                                         <Link
-                                            href="/shipping"
+                                            to="/shipping"
                                             className="text-sm font-medium text-muted-foreground hover:text-primary transition-[color,background-color,border-color,box-shadow,opacity,transform] flex items-center group"
                                         >
                                             <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-[color,background-color,border-color,box-shadow,opacity,transform]" />
@@ -146,7 +148,7 @@ export default function Footer({
                                     </li>
                                     <li>
                                         <Link
-                                            href="/returns"
+                                            to="/returns"
                                             className="text-sm font-medium text-muted-foreground hover:text-primary transition-[color,background-color,border-color,box-shadow,opacity,transform] flex items-center group"
                                         >
                                             <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-[color,background-color,border-color,box-shadow,opacity,transform]" />
@@ -155,7 +157,7 @@ export default function Footer({
                                     </li>
                                     <li>
                                         <Link
-                                            href="/faq"
+                                            to="/faq"
                                             className="text-sm font-medium text-muted-foreground hover:text-primary transition-[color,background-color,border-color,box-shadow,opacity,transform] flex items-center group"
                                         >
                                             <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-[color,background-color,border-color,box-shadow,opacity,transform]" />
@@ -175,7 +177,7 @@ export default function Footer({
                         <ul className="space-y-3">
                             <li>
                                 <Link
-                                    href="/about"
+                                    to="/about"
                                     className="text-sm font-medium text-muted-foreground hover:text-primary transition-[color,background-color,border-color,box-shadow,opacity,transform] flex items-center group"
                                 >
                                     <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-[color,background-color,border-color,box-shadow,opacity,transform]" />
@@ -184,7 +186,7 @@ export default function Footer({
                             </li>
                             <li>
                                 <Link
-                                    href="/careers"
+                                    to="/careers"
                                     className="text-sm font-medium text-muted-foreground hover:text-primary transition-[color,background-color,border-color,box-shadow,opacity,transform] flex items-center group"
                                 >
                                     <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-[color,background-color,border-color,box-shadow,opacity,transform]" />
@@ -193,7 +195,7 @@ export default function Footer({
                             </li>
                             <li>
                                 <Link
-                                    href="/privacy"
+                                    to="/privacy"
                                     className="text-sm font-medium text-muted-foreground hover:text-primary transition-[color,background-color,border-color,box-shadow,opacity,transform] flex items-center group"
                                 >
                                     <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-[color,background-color,border-color,box-shadow,opacity,transform]" />
@@ -202,7 +204,7 @@ export default function Footer({
                             </li>
                             <li>
                                 <Link
-                                    href="/terms"
+                                    to="/terms"
                                     className="text-sm font-medium text-muted-foreground hover:text-primary transition-[color,background-color,border-color,box-shadow,opacity,transform] flex items-center group"
                                 >
                                     <ArrowRight className="size-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-[color,background-color,border-color,box-shadow,opacity,transform]" />

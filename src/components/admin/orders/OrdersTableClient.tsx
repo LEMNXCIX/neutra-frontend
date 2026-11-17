@@ -1,6 +1,5 @@
 "use client";
 import { Eye, Package, ShoppingCart, TrendingUp, Truck } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useReducer, useSyncExternalStore } from "react";
 import { toast } from "sonner";
 import { AdminStatCard as StatCard } from "@/components/admin/shared/AdminStatCard";
@@ -32,6 +31,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
+import { useRouter, useSearchParams } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
 import type { Order, OrderStatus } from "@/types/order.types";
 

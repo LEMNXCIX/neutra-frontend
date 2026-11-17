@@ -13,6 +13,7 @@ export default defineConfig({
         include: [
             "src/**/*.test.ts",
             "src/**/*.test.tsx",
+            "tests/*.test.ts",
             "tests/parity/**/*.test.ts",
         ],
         exclude: ["node_modules", ".next"],

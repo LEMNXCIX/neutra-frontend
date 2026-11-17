@@ -10,7 +10,6 @@ import {
     SlidersHorizontal,
     X,
 } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
 import type React from "react";
 import { Suspense, useReducer, useTransition } from "react";
 import ProductGrid from "@/components/product-grid";
@@ -24,6 +23,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { useRouter, useSearchParams } from "@/lib/navigation";
 import type { Category } from "@/types/category.types";
 
 type Product = {

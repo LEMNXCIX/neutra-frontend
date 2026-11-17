@@ -1,4 +1,5 @@
 "use client";
+import { Link } from "@tanstack/react-router";
 import {
     AlertCircle,
     ArrowRight,
@@ -9,8 +10,6 @@ import {
     User,
     UserPlus,
 } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import type React from "react";
 import { useReducer } from "react";
 import { AuthBrandHeader } from "@/components/auth/AuthBrandHeader";
@@ -29,6 +28,7 @@ import { PasswordInput } from "@/components/ui/password-input";
 import { Separator } from "@/components/ui/separator";
 import { firstErrorCode } from "@/lib/error-messages";
 import { reportError } from "@/lib/error-reporting";
+import { useRouter } from "@/lib/navigation";
 import { PASSWORD_MIN_LENGTH } from "@/lib/password-policy";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/auth-store";
@@ -355,7 +355,7 @@ export function RegisterPageClient() {
         would point them at a flow that cannot help. */}
                                     {state.errorCode === RECOVERY_LINK_CODE && (
                                         <Link
-                                            href="/forgot-password"
+                                            to="/forgot-password"
                                             className="mt-1 inline-block text-xs font-semibold underline underline-offset-2"
                                         >
                                             ¿Olvidaste tu contraseña?
@@ -401,9 +401,7 @@ export function RegisterPageClient() {
                                     className="w-full h-12 rounded-xl border-border font-bold text-xs transition-[color,background-color,border-color,box-shadow,opacity,transform] hover:bg-muted"
                                     asChild
                                 >
-                                    <Link href="/login">
-                                        Identificar Sesión
-                                    </Link>
+                                    <Link to="/login">Identificar Sesión</Link>
                                 </Button>
                             </div>
                         </form>

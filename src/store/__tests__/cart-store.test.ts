@@ -17,7 +17,7 @@ vi.mock("@/hooks/use-cart", () => ({
 vi.mock("@/hooks/useFeatures", () => ({
     useFeatures: () => ({ isFeatureEnabled: () => true }),
 }));
-vi.mock("next/navigation", () => ({
+vi.mock("@/lib/navigation", () => ({
     useRouter: () => ({ push: componentMocks.routerPush }),
 }));
 vi.mock("@/lib/api-fetch", () => ({
