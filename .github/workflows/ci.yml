@@ -49,11 +49,16 @@ jobs:
       - name: Error-code coverage + parity fixtures + static gates
         run: npx vitest run src/lib/__tests__/error-codes.test.ts tests/parity/full.test.ts
 
-      - name: Docker smoke (tenant headers)
+      - name: Docker smoke (real Host header tenant routing)
         run: |
+          # Stub the tenant-config backend so a real Host header resolves.
+          node scripts/smoke-backend.mjs &
+          SMOKE_BACKEND_PID=$!
+          trap 'kill "$SMOKE_BACKEND_PID" 2>/dev/null || true' EXIT
           docker build -t neutra-start:ci .
           docker run -d --name neutra-start-smoke -p 3001:3001 \
-            -e BACKEND_API_URL=http://localhost:4000/api \
+            --add-host host.docker.internal:host-gateway \
+            -e BACKEND_API_URL=http://host.docker.internal:4001/api \
             -e REVALIDATE_SECRET= \
             neutra-start:ci
           for i in $(seq 1 30); do
@@ -64,11 +69,31 @@ jobs:
             if [ "$code" != "000" ] && [ -n "$code" ]; then break; fi
             sleep 2
           done
+          # HTTP contract is unchanged (and no tenant headers are needed).
           response=$(curl -fsS -X POST http://localhost:3001/api/revalidate \
             -H 'content-type: application/json' \
-            -H 'x-tenant-slug: store' \
-            -H 'x-tenant-id: tenant-1' \
             -d '{"entry":{"tenantId":"tenant-1"}}')
-          echo "smoke response: $response"
+          echo "revalidate smoke: $response"
           echo "$response" | grep -q '"revalidated":"content:tenant-1"'
+
+          # Store tenant: real Host header must set the tenant cookie and serve
+          # the rewritten /store landing page.
+          store_code=$(curl -sS -D /tmp/store.headers -o /tmp/store-landing.html \
+            -w '%{http_code}' http://localhost:3001/ \
+            -H 'Host: storeco.localhost:3001')
+          echo "store landing status: $store_code"
+          test "$store_code" = "200"
+          grep -qi 'set-cookie: tenant-slug=storeco' /tmp/store.headers
+          grep -qi 'Envío gratis' /tmp/store-landing.html
+
+          # Booking tenant: the old "/booking" rewrite was not a real route and
+          # returned 404. This assertion catches that regression.
+          book_code=$(curl -sS -D /tmp/booking.headers -o /tmp/booking-landing.html \
+            -w '%{http_code}' http://localhost:3001/ \
+            -H 'Host: bookco.localhost:3001')
+          echo "booking landing status: $book_code"
+          test "$book_code" = "200"
+          grep -qi 'set-cookie: tenant-slug=bookco' /tmp/booking.headers
+          grep -qi 'Reserva' /tmp/booking-landing.html
+
           docker rm -f neutra-start-smoke

@@ -2,10 +2,11 @@
 
 Multi-tenant storefront + booking + admin frontend on **TanStack Start** (React
 Router + Vite). The custom server entry (`src/server.ts`) resolves the tenant
-from the request subdomain, injects `x-tenant-slug` / `x-tenant-id` for every
-downstream call, and forwards `/api/webhooks/*` to the backend unchanged.
-Everything under `/api` is a BFF route handler: browser traffic reaches the
-backend only through it.
+strictly from the request's `Host` subdomain, overwrites `x-tenant-slug` /
+`x-tenant-id` for every downstream call, and forwards `/api/webhooks/*` to the
+backend unchanged. Client-supplied `x-tenant-*` headers are never trusted for
+identity. Everything under `/api` is a BFF route handler: browser traffic
+reaches the backend only through it.
 
 ## Getting started
 
@@ -32,9 +33,12 @@ via the `x-revalidate-secret` header.
 
 ## Tenants
 
-Tenant identity comes from the subdomain, never from the port. Both the LAN
-nip.io host and the loopback `*.localhost` host resolve the same way; the root
-host without a subdomain is the superadmin surface.
+Tenant identity comes from the subdomain, never from the port or from a
+client-supplied `x-tenant-slug` / `x-tenant-id` header: those headers are
+overwritten with the `Host`-derived values before anything downstream sees them.
+Use a real `Host` header when testing a tenant (see the smoke below). Both the
+LAN nip.io host and the loopback `*.localhost` host resolve the same way; the
+root host without a subdomain is the superadmin surface.
 
 | URL | Resolves to |
 | --- | --- |
@@ -78,8 +82,16 @@ tag, invalidates server-side registered TanStack Query clients
 (`src/lib/query-invalidation.ts`) and emits a revalidation event. The custom
 server entry exposes that event stream at `GET /api/revalidate/events` (SSE),
 which the browser `QueryProvider` subscribes to so its own QueryClient refetches
-too. The HTTP contract — secret check, payload validation and the
+too. The stream is scoped to the caller's `Host`-derived tenant, so no tenant
+sees another's tag or id. **Trust boundary:** the SSE endpoint is not
+authenticated — deploy it behind the trusted edge (the same host rules as the
+app) or add an auth guard before exposing it to untrusted clients. The HTTP
+contract — secret check, payload validation and the
 `{ ok, revalidated }` / `{ ok: false }` responses — is unchanged.
+
+The server entry also ports the original proxy's UX rewrites: tenant `/` maps
+to `/store` (store) or `/home` (booking), and `/admin…` maps to `/store-admin…`
+or `/booking-admin…` respectively. The superadmin keeps `/` and `/admin`.
 
 The cache and the event stream are process-local: in a multi-replica deployment
 the webhook invalidates only the replica that receives it, and other replicas
@@ -94,7 +106,8 @@ Run all gates locally before cutover:
 npm test                 # Vitest suite + full parity sweep + cutover gates
 npm run build            # Vite / TanStack Start production build
 npm run check            # Biome CI (formatting + lint rules, no writes)
-npm run typecheck        # tsc --noEmit
+npm run typecheck        # pretypecheck generates src/routeTree.gen.ts, then tsc --noEmit
+npm run route:generate   # generate the route tree alone (clean-checkout fix)
 npx vitest run tests/parity/full.test.ts   # parity fixtures + static gates
 npm run parity:capture   # optional: refresh fixtures from a live server
 npm run parity:compare   # compare a running server against fixtures
@@ -112,7 +125,7 @@ sweep as evidence that the rewrite preserved the mocked contract and routing
 surface, not as proof of real Next parity. A live capture against the retired
 Next app (before it is stopped) is still the stronger pre-cutover check.
 
-The full suite (`463 passing, 3 skipped` at the time of writing) plus
+The full suite (`472 passing, 3 skipped` at the time of writing) plus
 build/check/typecheck, the zero-Next gates in `tests/no-next-imports.test.ts`
 and `tests/parity/full.test.ts`, and the Docker smoke below are the available
 cutover evidence.
@@ -120,20 +133,29 @@ cutover evidence.
 ### Docker smoke
 
 ```bash
+# Stub the tenant-config backend so a real Host header resolves a tenant.
+node scripts/smoke-backend.mjs &          # listens on :4001
 docker build -t neutra-start:verify .
 docker run -d --name neutra-start-smoke -p 3001:3001 \
-  -e BACKEND_API_URL=http://localhost:4000/api \
+  --add-host host.docker.internal:host-gateway \
+  -e BACKEND_API_URL=http://host.docker.internal:4001/api \
   neutra-start:verify
 curl -sS -X POST http://localhost:3001/api/revalidate \
   -H 'content-type: application/json' \
-  -H 'x-tenant-slug: store' -H 'x-tenant-id: tenant-1' \
   -d '{"entry":{"tenantId":"tenant-1"}}'
 # => {"ok":true,"revalidated":"content:tenant-1"}
-docker rm -f neutra-start-smoke
+
+# Tenant routing uses a REAL Host header, not x-tenant-* headers.
+curl -sS -o /tmp/booking.html -w '%{http_code}\n' \
+  http://localhost:3001/ -H 'Host: bookco.localhost:3001'
+# => 200, with set-cookie: tenant-slug=bookco and the /home landing page.
+kill %1; docker rm -f neutra-start-smoke
 ```
 
-The smoke deliberately sends both tenant headers; the server entry must accept
-them and the BFF must still return the unchanged revalidation contract.
+The smoke sends a real tenant `Host` header: the server entry must resolve the
+tenant from it, set its cookie and serve the rewritten landing page. A rewrite
+to a non-existent route (e.g. booking `/` → `/booking`) would return 404 and
+fail the smoke. The revalidation POST keeps its unchanged BFF contract.
 
 ## Cutover and rollback
 

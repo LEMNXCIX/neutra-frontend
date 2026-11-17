@@ -13,6 +13,8 @@
     "lint:fix": "biome check --write",
     "format": "biome format --write",
     "check": "biome ci",
+    "route:generate": "node scripts/generate-route-tree.mjs",
+    "pretypecheck": "npm run route:generate",
     "typecheck": "tsc --noEmit",
     "test-local": "node tests/test-session.js && node tests/test-orders.js && node tests/test-auth-login-route.js",
     "test": "vitest run",

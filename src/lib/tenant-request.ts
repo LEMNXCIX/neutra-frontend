@@ -166,30 +166,29 @@ export async function resolveTenant(host: string): Promise<TenantResolution> {
 }
 
 /**
- * Resolve tenant identity from a Request's headers without cloning the Request.
+ * Resolve tenant identity strictly from the request's `Host` header.
  *
- * `new Request(request, { headers })` transfers the original body stream to the
- * clone. A middleware that only needs tenant context must use this helper:
- * cloning there consumed the body before a BFF handler could `request.json()`,
- * so every JSON POST (including the Strapi revalidate webhook) silently failed.
+ * The original Next proxy never trusted client-supplied `x-tenant-*` headers or
+ * tenant cookies for identity — a direct caller could otherwise claim any
+ * tenant. The Host is the only source of truth; `applyTenantToRequest` then
+ * overwrites the headers that downstream code reads.
+ *
+ * This helper never clones the Request: `new Request(request, { headers })`
+ * transfers the body stream, which previously broke every JSON POST (including
+ * the Strapi revalidate webhook) before a BFF handler could parse it.
  */
 export async function resolveTenantIdentity(
     request: Request,
 ): Promise<TenantResolution> {
     const host = request.headers.get("host") ?? new URL(request.url).host;
-    const tenant = await resolveTenant(host);
-    return {
-        slug: request.headers.get("x-tenant-slug") || tenant.slug,
-        moduleType: tenant.moduleType,
-        tenantId: request.headers.get("x-tenant-id") || tenant.tenantId,
-    };
+    return resolveTenant(host);
 }
 
 /**
- * Inject the resolved tenant context into a Request and return the cookies the
- * server entry should write back. Proxy-injected `x-tenant-slug`/`x-tenant-id`
- * headers win over anything else, so a stale client cookie cannot override the
- * host-derived identity.
+ * Inject the Host-derived tenant context into a Request and return the cookies
+ * the server entry should write back. Any client-supplied `x-tenant-slug` /
+ * `x-tenant-id` is overwritten (or removed) so it cannot claim another tenant.
+ * Downstream backend forwarding still uses these headers as before.
  *
  * Only the server entry calls this — it intentionally owns the body from here
  * on. Request middleware must use `resolveTenantIdentity` instead.
@@ -205,6 +204,7 @@ export async function applyTenantToRequest(
     headers.set("x-tenant-slug", slug);
     headers.set("x-module-type", tenant.moduleType);
     if (tenantId) headers.set("x-tenant-id", tenantId);
+    else headers.delete("x-tenant-id"); // never let a forged header survive
 
     const cookies = [
         `tenant-slug=${encodeURIComponent(slug)}; Path=/; SameSite=Lax`,

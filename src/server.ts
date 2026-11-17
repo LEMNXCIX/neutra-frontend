@@ -5,8 +5,14 @@ import {
 } from "@tanstack/react-start/server";
 
 import { getBackendUrl } from "./lib/backend-url";
-import { onContentRevalidated } from "./lib/content-cache";
-import { applyTenantToRequest, TenantLookupError } from "./lib/tenant-request";
+import { contentTag, onContentRevalidated } from "./lib/content-cache";
+import {
+    applyTenantToRequest,
+    type ModuleType,
+    resolveTenantIdentity,
+    TenantLookupError,
+    type TenantResolution,
+} from "./lib/tenant-request";
 
 const startHandler = createStartHandler(defaultStreamHandler);
 
@@ -14,13 +20,45 @@ const WEBHOOK_PREFIX = "/api/webhooks/";
 const REVALIDATION_EVENTS_PATH = "/api/revalidate/events";
 
 /**
+ * Port of the Next proxy's UX rewrites. Identity is already Host-derived and
+ * injected by `applyTenantToRequest`; these path aliases match the original
+ * proxy exactly:
+ *   - tenant `/` -> `/store` (store) or `/home` (booking); root keeps `/`.
+ *   - `/admin...` -> `/store-admin...` (store) or `/booking-admin...`
+ *     (booking); the superadmin keeps `/admin`.
+ */
+export function rewritePath(pathname: string, moduleType: ModuleType): string {
+    if (pathname === "/") {
+        if (moduleType === "store") return "/store";
+        if (moduleType === "booking") return "/home";
+    }
+    if (pathname.startsWith("/admin")) {
+        if (moduleType === "store") {
+            return pathname.replace(/^\/admin/, "/store-admin");
+        }
+        if (moduleType === "booking") {
+            return pathname.replace(/^\/admin/, "/booking-admin");
+        }
+    }
+    return pathname;
+}
+
+/**
  * SSE feed for browser QueryClients. The revalidate webhook runs in this
  * process; without a delivery path the browser half of the invalidation bridge
  * would never learn that Strapi published something. The endpoint is handled
  * here (not as a generated BFF route) so the 75-route API inventory stays
  * exactly the ported Next surface.
+ *
+ * Trust boundary: the stream is scoped to the caller's Host-derived tenant, so
+ * a tenant never sees another tenant's tag or id. It is NOT authenticated —
+ * deploy it behind the trusted edge (same host rules as the app) or add an auth
+ * guard before exposing the endpoint to untrusted clients.
  */
-function revalidationEventStream(request: Request): Response {
+function revalidationEventStream(
+    request: Request,
+    identity: TenantResolution,
+): Response {
     const encoder = new TextEncoder();
     let unsubscribe = () => {};
     let heartbeat: ReturnType<typeof setInterval> | undefined;
@@ -37,7 +75,12 @@ function revalidationEventStream(request: Request): Response {
             // Flush the response headers immediately; without an initial chunk
             // the Node adapter buffers them until the first real event.
             send(": connected\n\n");
+            const tenantTag = identity.tenantId
+                ? contentTag(identity.tenantId)
+                : null;
             unsubscribe = onContentRevalidated((tag) => {
+                // Never broadcast another tenant's tag or id.
+                if (!tenantTag || tag !== tenantTag) return;
                 send(`data: ${tag}\n\n`);
             });
             // Keep idle connections alive through proxies that close streams.
@@ -121,7 +164,15 @@ export const fetch = createServerEntry({
         const url = new URL(request.url);
 
         if (url.pathname === REVALIDATION_EVENTS_PATH) {
-            return revalidationEventStream(request);
+            try {
+                const identity = await resolveTenantIdentity(request);
+                return revalidationEventStream(request, identity);
+            } catch (error) {
+                if (error instanceof TenantLookupError) {
+                    return tenantErrorResponse(error);
+                }
+                throw error;
+            }
         }
 
         if (url.pathname.startsWith(WEBHOOK_PREFIX)) {
@@ -141,12 +192,9 @@ export const fetch = createServerEntry({
         }
 
         const forwardedUrl = new URL(tenantRequest.url);
-        if (forwardedUrl.pathname === "/") {
-            const moduleType = tenantRequest.headers.get("x-module-type");
-            if (moduleType === "store" || moduleType === "booking") {
-                forwardedUrl.pathname = `/${moduleType}`;
-            }
-        }
+        const moduleType = (tenantRequest.headers.get("x-module-type") ??
+            "root") as ModuleType;
+        forwardedUrl.pathname = rewritePath(forwardedUrl.pathname, moduleType);
 
         const init: RequestInit = {
             method: tenantRequest.method,

@@ -1,11 +1,15 @@
 /**
- * Custom server entry behaviour: tenant subdomain routing and webhook passthrough.
+ * Custom server entry behaviour: tenant Host-derived identity, UX rewrites,
+ * webhook passthrough and the tenant-scoped SSE feed.
  *
  * `createStartHandler` is mocked so the test can observe the exact Request the
  * Start pipeline receives (its URL and injected tenant headers) without booting
- * a router. The real handler is wired in `src/server.ts` once Vite builds it.
+ * a router. Rewritten paths are validated against the REAL generated route tree
+ * (src/routeTree.gen.ts), not just a hardcoded string, so a rewrite to a
+ * non-existent route fails the test.
  */
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { routeTree } from "@/routeTree.gen";
 
 const h = vi.hoisted(() => ({
     downstream: [] as Array<{ url: string; headers: Headers }>,
@@ -35,10 +39,26 @@ vi.stubGlobal("fetch", mockFetch);
 
 import { fetch as serverFetch } from "@/server";
 
-const tenantResponse = (type: string) => ({
+/** Every path in the real generated tree, with trailing slashes normalised. */
+type RouteNode = { options?: { path?: string }; children?: RouteNode[] };
+
+function generatedRoutePaths(): Set<string> {
+    const paths = new Set<string>();
+    const walk = (node: RouteNode) => {
+        const path = node.options?.path;
+        if (typeof path === "string") {
+            paths.add(path.length > 1 ? path.replace(/\/$/, "") : path);
+        }
+        for (const child of node.children ?? []) walk(child);
+    };
+    walk(routeTree as RouteNode);
+    return paths;
+}
+
+const configResponse = (type: string, id: string) => ({
     ok: true,
     status: 200,
-    json: async () => ({ success: true, data: { type, id: "tenant-uuid-1" } }),
+    json: async () => ({ success: true, data: { type, id } }),
 });
 
 beforeEach(() => {
@@ -54,7 +74,15 @@ beforeEach(() => {
                       ? input.toString()
                       : input.url;
             if (url.includes("/tenants/config/")) {
-                return tenantResponse("BOOKING");
+                const slug = decodeURIComponent(
+                    url.split("/tenants/config/")[1] ?? "",
+                );
+                if (slug === "storeco")
+                    return configResponse("STORE", "tenant-1");
+                if (slug === "bookco")
+                    return configResponse("BOOKING", "tenant-book");
+                // "acme" is the booking tenant used by the legacy assertion.
+                return configResponse("BOOKING", "tenant-uuid-1");
             }
             return new Response(JSON.stringify({ ok: true }), {
                 status: 200,
@@ -64,15 +92,32 @@ beforeEach(() => {
     );
 });
 
-describe("server entry", () => {
-    it("rewrites booking subdomain to /booking and sets tenant cookies", async () => {
-        const host = "booking.acme.nip.io";
-        const response = await serverFetch(
-            new Request(`http://${host}/`, { headers: { host } }),
-        );
+async function requestFor(
+    host: string,
+    pathname = "/",
+    headers: Record<string, string> = {},
+) {
+    return serverFetch(
+        new Request(`http://${host}${pathname}`, {
+            headers: { host, ...headers },
+        }),
+    );
+}
 
-        expect(h.downstream).toHaveLength(1);
-        expect(new URL(h.downstream[0].url).pathname).toBe("/booking");
+function downstreamPath(index = 0): string {
+    expect(h.downstream.length).toBeGreaterThan(index);
+    return new URL(h.downstream[index].url).pathname;
+}
+
+describe("server entry — Host-derived tenant rewrites", () => {
+    it("rewrites booking root to a real /home route and sets tenant cookies", async () => {
+        const response = await requestFor("booking.acme.nip.io");
+
+        const path = downstreamPath();
+        // The rewrite must land on a route that actually exists in the
+        // generated tree; the old (broken) "/booking" would fail here.
+        expect(generatedRoutePaths().has(path)).toBe(true);
+        expect(path).toBe("/home");
         expect(h.downstream[0].headers.get("x-tenant-slug")).toBe("acme");
         expect(h.downstream[0].headers.get("x-module-type")).toBe("booking");
 
@@ -81,6 +126,59 @@ describe("server entry", () => {
         expect(cookies).toContain("module-type=booking");
     });
 
+    it("rewrites store root to /store (also a real route)", async () => {
+        await requestFor("storeco.localhost:3001");
+        const path = downstreamPath();
+        expect(generatedRoutePaths().has(path)).toBe(true);
+        expect(path).toBe("/store");
+    });
+
+    it("keeps the superadmin root at /", async () => {
+        await requestFor("localhost:3001");
+        expect(downstreamPath()).toBe("/");
+    });
+
+    it("ports the /admin alias for store, booking and superadmin", async () => {
+        await requestFor("storeco.localhost:3001", "/admin/orders");
+        const storePath = downstreamPath();
+        expect(storePath).toBe("/store-admin/orders");
+        expect(generatedRoutePaths().has(storePath)).toBe(true);
+
+        await requestFor("booking.acme.nip.io", "/admin");
+        const bookingPath = downstreamPath(1);
+        expect(bookingPath).toBe("/booking-admin");
+        expect(generatedRoutePaths().has(bookingPath)).toBe(true);
+
+        await requestFor("localhost:3001", "/admin");
+        const rootPath = downstreamPath(2);
+        expect(rootPath).toBe("/admin");
+        expect(generatedRoutePaths().has(rootPath)).toBe(true);
+    });
+
+    it("ignores forged x-tenant-* headers: Host is the only identity source", async () => {
+        await requestFor("storeco.localhost:3001", "/", {
+            "x-tenant-slug": "victim",
+            "x-tenant-id": "victim-id",
+            "x-module-type": "booking",
+        });
+        const headers = h.downstream[0].headers;
+        expect(headers.get("x-tenant-slug")).toBe("storeco");
+        expect(headers.get("x-tenant-id")).toBe("tenant-1");
+        expect(headers.get("x-module-type")).toBe("store");
+    });
+
+    it("removes a forged x-tenant-id on the superadmin host", async () => {
+        await requestFor("localhost:3001", "/", {
+            "x-tenant-id": "forged-id",
+            "x-tenant-slug": "forged-slug",
+        });
+        const headers = h.downstream[0].headers;
+        expect(headers.get("x-tenant-id")).toBeNull();
+        expect(headers.get("x-tenant-slug")).toBe("superadmin");
+    });
+});
+
+describe("server entry — webhook passthrough", () => {
     it("passes webhook body and signature through untouched", async () => {
         const body = '{"id":"evt_1"}';
         const response = await serverFetch(
@@ -112,38 +210,47 @@ describe("server entry", () => {
         expect(response.headers.getSetCookie()).toHaveLength(0);
         expect(response.status).toBe(200);
     });
+});
 
-    it("streams revalidation events to connected browser query clients", async () => {
-        const { notifyContentRevalidated } = await import(
-            "@/lib/content-cache"
-        );
+describe("server entry — tenant-scoped SSE", () => {
+    async function openStream(host: string, signal?: AbortSignal) {
         const response = await serverFetch(
-            new Request("http://localhost:3001/api/revalidate/events"),
+            new Request(`http://${host}/api/revalidate/events`, {
+                headers: { host },
+                signal,
+            }),
         );
-
         expect(response.headers.get("content-type")).toContain(
             "text/event-stream",
         );
         expect(h.downstream).toHaveLength(0);
+        return response;
+    }
 
+    it("streams only the caller's tenant tag", async () => {
+        const { notifyContentRevalidated } = await import(
+            "@/lib/content-cache"
+        );
+        const response = await openStream("storeco.localhost:3001");
         const body = response.body;
-        expect(body).toBeDefined();
         if (!body) throw new Error("SSE response must have a body");
         const reader = body.getReader();
         try {
-            notifyContentRevalidated("content:tenant-1");
-            // The stream starts with a `: connected` comment that flushes the
-            // headers; read through it to the actual event.
+            await reader.read(); // ": connected" flush
+            notifyContentRevalidated("content:tenant-book"); // other tenant
+            notifyContentRevalidated("content:tenant-1"); // our tenant
             let received = "";
             for (
                 let attempt = 0;
-                attempt < 3 && !received.includes("data:");
+                attempt < 4 && !received.includes("data:");
                 attempt++
             ) {
-                const { value } = await reader.read();
-                received += new TextDecoder().decode(value);
+                received += new TextDecoder().decode(
+                    (await reader.read()).value,
+                );
             }
             expect(received).toContain("data: content:tenant-1");
+            expect(received).not.toContain("content:tenant-book");
         } finally {
             await reader.cancel();
         }
@@ -157,22 +264,17 @@ describe("server entry", () => {
         const clearInterval = vi.spyOn(globalThis, "clearInterval");
         const controller = new AbortController();
 
-        const response = await serverFetch(
-            new Request("http://localhost:3001/api/revalidate/events", {
-                signal: controller.signal,
-            }),
+        const response = await openStream(
+            "storeco.localhost:3001",
+            controller.signal,
         );
         const reader = response.body?.getReader();
         if (!reader) throw new Error("SSE response must have a body");
 
         try {
-            await reader.read(); // ": connected" flush
+            await reader.read();
             expect(contentRevalidatedListenerCount()).toBe(baseline + 1);
-
-            // Simulate the Node adapter's disconnect bridge: abort the signal
-            // that the SSE handler attached its cleanup to.
             controller.abort();
-
             const { done } = await reader.read();
             expect(done).toBe(true);
             expect(contentRevalidatedListenerCount()).toBe(baseline);
