@@ -62,18 +62,18 @@ function generatedKeys(): Set<RouteKey> {
 }
 
 describe("generated API route inventory", () => {
-    it("generates exactly 75 route files", () => {
-        expect(generatedFiles()).toHaveLength(75);
+    it("generates one route file per manifest entry", () => {
+        expect(generatedFiles()).toHaveLength(readManifest().length);
     });
 
-    it("records exactly 75 original routes in the manifest", () => {
-        expect(readManifest()).toHaveLength(75);
+    it("records the original 75 routes plus the two admin logs routes", () => {
+        expect(readManifest()).toHaveLength(77);
     });
 
     it("matches the original path+method set exactly", () => {
         const expected = manifestKeys();
         const actual = generatedKeys();
-        expect(expected.size).toBeGreaterThan(75);
+        expect(expected.size).toBeGreaterThan(77);
         expect([...actual].sort()).toEqual([...expected].sort());
     });
 

@@ -42,6 +42,18 @@
         ]
     },
     {
+        "path": "/api/admin/logs",
+        "methods": [
+            "GET"
+        ]
+    },
+    {
+        "path": "/api/admin/logs/stats",
+        "methods": [
+            "GET"
+        ]
+    },
+    {
         "path": "/api/admin/orders",
         "methods": [
             "GET",

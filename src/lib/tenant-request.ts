@@ -148,7 +148,9 @@ export async function resolveTenant(host: string): Promise<TenantResolution> {
         moduleType = "store";
     } else if (rawType === "booking") {
         moduleType = "booking";
-    } else if (rawType === "root") {
+    } else if (rawType === "root" || rawType === "hybrid") {
+        // The real superadmin tenant reports type HYBRID. It is the root
+        // surface and must not be treated as an unavailable tenant.
         moduleType = "root";
     } else {
         // An unrecognised module type cannot be routed safely.
