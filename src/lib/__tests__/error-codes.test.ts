@@ -159,6 +159,17 @@ describe("error message translation", () => {
         expect(firstErrorCode({})).toBeUndefined();
         expect(firstErrorCode({ errors: "not an array" })).toBeUndefined();
     });
+
+    it("never treats the backend's raw message as a translatable code", () => {
+        // The wire `message` can itself look like a code ("EMAIL_TAKEN"), but
+        // only errors[].code is the stable contract the UI may branch on.
+        expect(
+            firstErrorCode({
+                message: "EMAIL_TAKEN",
+                errors: [{ message: "EMAIL_TAKEN" }],
+            }),
+        ).toBeUndefined();
+    });
 });
 
 describe("coverage of the published backend codes", () => {

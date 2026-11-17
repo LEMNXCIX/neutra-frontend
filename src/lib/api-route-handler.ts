@@ -1,12 +1,17 @@
 /**
  * API Route Handler - Wrapper unificado para rutas API proxy
  *
- * Reduce código duplicado en las rutas /app/api/**
+ * Reduce código duplicado en las rutas /api/**
  * y proporciona logging automático con trace IDs.
+ *
+ * The BFF core is `createBffHandler`: it accepts the Start-style
+ * `{ request, params }` context and returns a Web `Response`. The older
+ * `(request, context)` factories remain as thin adapters for the still-present
+ * Next route files until Task 6 replaces them.
  */
 
-import { type NextRequest, NextResponse } from "next/server";
-import { type ApiResponse, backendFetch, type HttpMethod } from "./backend-api";
+import type { StandardResponse } from "@/types/frontend-api";
+import { type HttpMethod, serverBackendFetch } from "./backend-api";
 import { type LogContext, logger } from "./logger";
 import { extractTokenFromRequest } from "./server-auth";
 
@@ -14,9 +19,14 @@ import { extractTokenFromRequest } from "./server-auth";
 // Types
 // ============================================================================
 
+/**
+ * `req` is intentionally loose: the temporary Next route files still hand a
+ * `NextRequest` (with `nextUrl`) to the legacy factories, while Start passes a
+ * plain Web `Request`. Under Start only `Request` APIs may be used.
+ */
 export type EndpointResolver =
     | string
-    | ((req: NextRequest, params?: Record<string, string>) => string);
+    | ((req: any, params?: Record<string, string>) => string);
 
 export interface RouteConfig {
     /** HTTP method for this route */
@@ -37,8 +47,17 @@ export interface RouteConfig {
     passThroughStatus?: boolean;
 }
 
+/** The context Start passes to a route/server handler. */
+export interface BffContext {
+    request: Request;
+    params?: Record<string, string>;
+}
+
+export type BffHandler = (ctx: BffContext) => Promise<Response>;
+
+/** Next-style context kept only for the legacy route-file adapters. */
 export interface RouteContext {
-    params: Promise<Record<string, string>>;
+    params: Promise<Record<string, string>> | Record<string, string>;
 }
 
 // ============================================================================
@@ -50,11 +69,9 @@ export interface RouteContext {
  */
 const resolveEndpoint = async (
     config: RouteConfig,
-    req: NextRequest,
-    context?: RouteContext,
+    req: Request,
+    params?: Record<string, string>,
 ): Promise<string> => {
-    const params = context?.params ? await context.params : undefined;
-
     let endpoint =
         typeof config.endpoint === "function"
             ? config.endpoint(req, params)
@@ -74,9 +91,7 @@ const resolveEndpoint = async (
     return endpoint;
 };
 
-/**
- * Get default success status based on method
- */
+/** Get default success status based on method */
 const getSuccessStatus = (config: RouteConfig): number => {
     if (config.successStatus !== undefined) {
         return config.successStatus;
@@ -84,11 +99,9 @@ const getSuccessStatus = (config: RouteConfig): number => {
     return config.method === "POST" ? 201 : 200;
 };
 
-/**
- * Parse request body for mutation methods
- */
+/** Parse request body for mutation methods */
 const parseBody = async (
-    req: NextRequest,
+    req: Request,
     method: HttpMethod,
 ): Promise<unknown | undefined> => {
     if (["POST", "PUT", "PATCH"].includes(method)) {
@@ -102,21 +115,18 @@ const parseBody = async (
 };
 
 /**
- * Create standardized error response
- *
- * `errors` is forwarded from the backend instead of being dropped. The codes in
- * it are the only stable, machine-readable part of the contract: the client
- * translates the code and never shows `message`, which is written in English and
- * changes without notice. Rebuilding the envelope without it left every failure
- * looking like a generic one, no matter how specific the backend had been.
+ * Create a standardized error response for a locally thrown error (one that
+ * carried no backend envelope). `errors` is always present: its codes are the
+ * only stable, machine-readable part of the contract, and the client translates
+ * them and never shows the English `message`.
  */
 const createErrorResponse = (
     message: string,
     statusCode: number,
     traceId: string,
     errors: unknown[] = [],
-): NextResponse => {
-    return NextResponse.json(
+): Response => {
+    return Response.json(
         {
             success: false,
             statusCode,
@@ -137,90 +147,91 @@ const codesFromError = (error: unknown): unknown[] => {
     return [];
 };
 
+/** A backend envelope carried by a thrown error must be forwarded verbatim. */
+const envelopeFromError = (error: unknown): StandardResponse | null => {
+    if (!error || typeof error !== "object") return null;
+    const response = (error as { response?: unknown }).response;
+    if (!response || typeof response !== "object") return null;
+    const envelope = response as Partial<StandardResponse>;
+    if (typeof envelope.success !== "boolean") return null;
+    return envelope as StandardResponse;
+};
+
 // ============================================================================
 // Main Handler Factory
 // ============================================================================
 
 /**
- * Creates a route handler with automatic logging, error handling, and token extraction
+ * Creates a BFF handler with automatic logging, error handling and token
+ * extraction. The returned function is the shape Start route handlers expect:
  *
- * @example
- * // Simple GET endpoint
- * export const GET = createRouteHandler({
- *     method: 'GET',
- *     endpoint: '/roles'
- * });
- *
- * @example
- * // Dynamic endpoint with params
- * export const GET = createRouteHandler({
- *     method: 'GET',
- *     endpoint: (req, params) => `/roles/${params?.id}`
- * });
- *
- * @example
- * // POST with custom success status
- * export const POST = createRouteHandler({
- *     method: 'POST',
- *     endpoint: '/roles',
- *     successStatus: 201
- * });
+ * ```ts
+ * export const server = {
+ *   GET: createBffHandler("GET", "/products"),
+ * };
+ * // -> (ctx: { request, params }) => Promise<Response>
+ * ```
  */
-export function createRouteHandler(config: RouteConfig) {
-    return async (
-        req: NextRequest,
-        context?: RouteContext,
-    ): Promise<NextResponse> => {
+export function createBffHandler(
+    method: HttpMethod,
+    endpoint: EndpointResolver,
+    config: Partial<RouteConfig> = {},
+): BffHandler {
+    const routeConfig: RouteConfig = { method, endpoint, ...config };
+
+    return async ({ request, params }: BffContext): Promise<Response> => {
         const startTime = Date.now();
         let logContext: LogContext | null = null;
 
         try {
-            // Extract authentication token
-            const token = extractTokenFromRequest(req);
+            const token = extractTokenFromRequest(request);
+            const resolvedEndpoint = await resolveEndpoint(
+                routeConfig,
+                request,
+                params,
+            );
+            const body = await parseBody(request, method);
 
-            // Resolve endpoint
-            const endpoint = await resolveEndpoint(config, req, context);
-
-            // Parse body for mutation requests
-            const body = await parseBody(req, config.method);
-
-            // Create log context
-            logContext = logger.createContext(endpoint, config.method, body);
-
-            // Log request start
+            logContext = logger.createContext(resolvedEndpoint, method, body);
             logger.info(
                 logContext,
-                `API Request: ${config.method} ${endpoint}`,
+                `API Request: ${method} ${resolvedEndpoint}`,
             );
 
-            // Make backend request
-            const result: ApiResponse = await backendFetch(endpoint, {
-                method: config.method,
-                body,
-                token: token || undefined,
-            });
+            const result = await serverBackendFetch<StandardResponse | null>(
+                resolvedEndpoint,
+                {
+                    method,
+                    body,
+                    token: token || undefined,
+                },
+            );
 
             const duration = Date.now() - startTime;
 
-            // Handle unsuccessful response from backend
+            // 204 No Content: the body was never parsed, so there is nothing
+            // to wrap. Forward the empty status instead of building an envelope.
+            if (result === null) {
+                return new Response(null, { status: 204 });
+            }
+
             if (!result.success) {
-                const updatedContext = logger.withResponse(
-                    logContext,
-                    result,
-                    result.statusCode || 500,
-                    duration,
-                );
                 logger.warn(
-                    updatedContext,
+                    logger.withResponse(
+                        logContext,
+                        result,
+                        result.statusCode || 500,
+                        duration,
+                    ),
                     `API Response: Backend returned error`,
                 );
-
-                return NextResponse.json(result, {
+                // Forward the backend envelope untouched: status, errors,
+                // pagination and meta.traceId are all part of the contract.
+                return Response.json(result, {
                     status: result.statusCode || 500,
                 });
             }
 
-            // Log success
             const successContext = logger.withResponse(
                 logContext,
                 result.data,
@@ -229,18 +240,15 @@ export function createRouteHandler(config: RouteConfig) {
             );
             logger.info(successContext, `API Response: Success`);
 
-            // Return successful response (204/304 must be body-less)
-            const declaredStatus = getSuccessStatus(config);
+            const declaredStatus = getSuccessStatus(routeConfig);
             const successStatus = config.passThroughStatus
                 ? (result.statusCode ?? declaredStatus)
                 : declaredStatus;
 
             if (successStatus === 204 || successStatus === 304) {
-                return new NextResponse(null, { status: successStatus });
+                return new Response(null, { status: successStatus });
             }
-            return NextResponse.json(result, {
-                status: successStatus,
-            });
+            return Response.json(result, { status: successStatus });
         } catch (error) {
             const duration = Date.now() - startTime;
             const errorMessage =
@@ -248,19 +256,23 @@ export function createRouteHandler(config: RouteConfig) {
             const statusCode =
                 (error as { statusCode?: number })?.statusCode || 500;
 
-            // Log error
             if (logContext) {
-                const errorContext = logger.withError(
-                    logContext,
-                    error,
-                    duration,
+                logger.error(
+                    logger.withError(logContext, error, duration),
+                    `API Error: ${errorMessage}`,
                 );
-                logger.error(errorContext, `API Error: ${errorMessage}`);
             } else {
                 console.error(
                     `[API Error] Unhandled error before context creation:`,
                     error,
                 );
+            }
+
+            const backendEnvelope = envelopeFromError(error);
+            if (backendEnvelope) {
+                return Response.json(backendEnvelope, {
+                    status: backendEnvelope.statusCode || statusCode,
+                });
             }
 
             return createErrorResponse(
@@ -274,20 +286,28 @@ export function createRouteHandler(config: RouteConfig) {
 }
 
 // ============================================================================
-// Convenience Factories
+// Legacy factories (for the still-present Next route files)
 // ============================================================================
 
 /**
- * Create a simple GET handler
+ * Adapter for existing `(req, context)` route handlers. `context.params` is a
+ * Promise in Next, so await it before handing it to the BFF core.
  */
+export function createRouteHandler(config: RouteConfig) {
+    const handler = createBffHandler(config.method, config.endpoint, config);
+    return async (req: Request, context?: RouteContext): Promise<Response> => {
+        const params = context?.params ? await context.params : undefined;
+        return handler({ request: req, params });
+    };
+}
+
+/** Create a simple GET handler */
 export const createGetHandler = (
     endpoint: EndpointResolver,
     options?: Partial<RouteConfig>,
 ) => createRouteHandler({ method: "GET", endpoint, ...options });
 
-/**
- * Create a simple POST handler
- */
+/** Create a simple POST handler */
 export const createPostHandler = (
     endpoint: EndpointResolver,
     options?: Partial<RouteConfig>,
@@ -299,25 +319,19 @@ export const createPostHandler = (
         ...options,
     });
 
-/**
- * Create a simple PUT handler
- */
+/** Create a simple PUT handler */
 export const createPutHandler = (
     endpoint: EndpointResolver,
     options?: Partial<RouteConfig>,
 ) => createRouteHandler({ method: "PUT", endpoint, ...options });
 
-/**
- * Create a simple DELETE handler
- */
+/** Create a simple DELETE handler */
 export const createDeleteHandler = (
     endpoint: EndpointResolver,
     options?: Partial<RouteConfig>,
 ) => createRouteHandler({ method: "DELETE", endpoint, ...options });
 
-/**
- * Create a simple PATCH handler
- */
+/** Create a simple PATCH handler */
 export const createPatchHandler = (
     endpoint: EndpointResolver,
     options?: Partial<RouteConfig>,
@@ -336,19 +350,17 @@ export function createListWithStatsHandler(
     statsEndpoint: string,
     transform?: (data: any) => any,
 ) {
-    return async (
-        req: NextRequest,
-        context?: RouteContext,
-    ): Promise<NextResponse> => {
+    return async (req: Request, context?: RouteContext): Promise<Response> => {
         const startTime = Date.now();
         let logContext: LogContext | null = null;
 
         try {
             const token = extractTokenFromRequest(req);
+            const params = context?.params ? await context.params : undefined;
             const resolvedListEndpoint = await resolveEndpoint(
                 { method: "GET", endpoint: listEndpoint },
                 req,
-                context,
+                params,
             );
 
             logContext = logger.createContext(resolvedListEndpoint, "GET");
@@ -359,16 +371,16 @@ export function createListWithStatsHandler(
 
             // Fetch both in parallel
             const [listResult, statsResult] = await Promise.all([
-                backendFetch(resolvedListEndpoint, {
+                serverBackendFetch(resolvedListEndpoint, {
                     method: "GET",
                     token: token || undefined,
                 }).catch((err) => ({
                     success: false,
                     error: err.message,
-                    data: [],
+                    data: [] as unknown[],
                     statusCode: 500,
                 })),
-                backendFetch(statsEndpoint, {
+                serverBackendFetch(statsEndpoint, {
                     method: "GET",
                     token: token || undefined,
                 }).catch((err) => ({
@@ -382,8 +394,10 @@ export function createListWithStatsHandler(
             const duration = Date.now() - startTime;
 
             if (!listResult.success) {
-                return NextResponse.json(listResult, {
-                    status: (listResult as any).statusCode || 500,
+                return Response.json(listResult, {
+                    status:
+                        (listResult as { statusCode?: number }).statusCode ||
+                        500,
                 });
             }
 
@@ -398,8 +412,11 @@ export function createListWithStatsHandler(
                 success: true,
                 data: finalData,
                 users: finalData, // Backward compatibility for some components
-                stats: statsResult.success ? (statsResult as any).data : null,
-                pagination: (listResult as any).pagination || {
+                stats: statsResult.success
+                    ? (statsResult as { data?: unknown }).data
+                    : null,
+                pagination: (listResult as { pagination?: unknown })
+                    .pagination || {
                     currentPage: 1,
                     totalPages: 1,
                     totalItems: Array.isArray(finalData) ? finalData.length : 0,
@@ -419,7 +436,7 @@ export function createListWithStatsHandler(
                 `API Response: Success (Merged)`,
             );
 
-            return NextResponse.json(mergedResult);
+            return Response.json(mergedResult);
         } catch (error) {
             const duration = Date.now() - startTime;
             const errorMessage =

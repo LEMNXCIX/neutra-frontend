@@ -1,4 +1,4 @@
-import { headers } from "next/headers";
+import { getRequestHeader } from "@tanstack/react-start/server";
 import { cache } from "react";
 import { tenantService } from "@/services/tenant.service";
 import type { TenantBranding } from "@/types/tenant";
@@ -15,7 +15,7 @@ import type { TenantBranding } from "@/types/tenant";
 export const getTenantBrandingFromHeaders = cache(
     async (): Promise<TenantBranding | null> => {
         try {
-            const tenantSlug = (await headers()).get("x-tenant-slug");
+            const tenantSlug = getRequestHeader("x-tenant-slug");
             if (!tenantSlug) return null;
 
             const tenant = await tenantService.getBySlug(tenantSlug);
@@ -33,7 +33,7 @@ export const getTenantBrandingFromHeaders = cache(
 export const getTenantNameFromHeaders = cache(
     async (): Promise<string | null> => {
         try {
-            const tenantSlug = (await headers()).get("x-tenant-slug");
+            const tenantSlug = getRequestHeader("x-tenant-slug");
             if (!tenantSlug) return null;
 
             const tenant = await tenantService.getBySlug(tenantSlug);

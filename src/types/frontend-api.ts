@@ -6,12 +6,26 @@ export interface ErrorDetail {
     metadata?: Record<string, unknown>;
 }
 
+/** Backend pagination block (api-neutra-v2/types/api-response.ts). */
+export interface Pagination {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+}
+
+/**
+ * The backend envelope. The BFF forwards it untouched: only `errors[].code` is
+ * a stable, translatable part of the contract, so `message` is never rendered
+ * and `meta.traceId` / `pagination` must survive the round trip.
+ */
 export interface StandardResponse<T = unknown> {
     success: boolean;
     statusCode: number;
     message: string;
     data?: T;
     errors?: ErrorDetail[];
+    pagination?: Pagination;
     meta: {
         traceId: string;
         timestamp: string;

@@ -1,11 +1,11 @@
 import "server-only";
-import { headers } from "next/headers";
+import { getRequestHeader } from "@tanstack/react-start/server";
 
 const STRAPI_URL = process.env.STRAPI_URL ?? "http://localhost:1337";
 const STRAPI_TOKEN = process.env.STRAPI_TOKEN ?? "";
 
 export async function getTenantIdFromHeaders(): Promise<string | null> {
-    return (await headers()).get("x-tenant-id");
+    return getRequestHeader("x-tenant-id") ?? null;
 }
 
 /**
