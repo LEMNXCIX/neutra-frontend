@@ -474,15 +474,19 @@ function LogsDataTable({
         columns: logColumns,
         getRowId: (log) => log.id,
     });
-    const { scrollRef, virtualItems, paddingTop, paddingBottom } =
-        useVirtualRange({ count: rows.length, estimateSize: () => 72 });
+    const {
+        scrollRef,
+        virtualItems,
+        paddingTop,
+        paddingBottom,
+        measureElement,
+    } = useVirtualRange({ count: rows.length, estimateSize: () => 72 });
 
     return (
         <Card className="t-card border-none shadow-xl overflow-hidden">
             <div
                 ref={scrollRef}
-                className="hidden md:block"
-                style={{ height: 900, overflowY: "auto" }}
+                className="hidden md:block max-h-[min(900px,70vh)] overflow-y-auto"
             >
                 <Table>
                     <TableHeader className="bg-muted/50">
@@ -555,6 +559,8 @@ function LogsDataTable({
                                     return (
                                         <TableRow
                                             key={log.id}
+                                            ref={measureElement}
+                                            data-index={virtualRow.index}
                                             className="border-b border-border/50 hover:bg-muted/30 group transition-colors cursor-pointer"
                                             role="button"
                                             tabIndex={0}

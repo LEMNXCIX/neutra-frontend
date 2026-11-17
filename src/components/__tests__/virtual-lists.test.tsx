@@ -121,3 +121,68 @@ describe("virtualized log list", () => {
         expect(rows.length).toBeLessThan(50);
     });
 });
+
+describe("dynamic row measurement", () => {
+    it("chunks one product per virtual row at the base breakpoint", () => {
+        const originalWidth = window.innerWidth;
+        const setWidth = (width: number) =>
+            Object.defineProperty(window, "innerWidth", {
+                configurable: true,
+                value: width,
+            });
+        try {
+            setWidth(375); // below sm: grid-cols-1
+            const narrow = render(
+                <ProductGrid products={PRODUCTS.slice(0, 6)} />,
+            );
+            expect(
+                narrow.container.querySelectorAll("[data-virtual-row]"),
+            ).toHaveLength(6);
+            narrow.unmount();
+
+            setWidth(1200); // lg: grid-cols-3
+            const wide = render(
+                <ProductGrid products={PRODUCTS.slice(0, 6)} />,
+            );
+            expect(
+                wide.container.querySelectorAll("[data-virtual-row]"),
+            ).toHaveLength(2);
+        } finally {
+            setWidth(originalWidth);
+        }
+    });
+
+    it("derives the grid row stride from measured height, not the estimate", () => {
+        const original = Object.getOwnPropertyDescriptor(
+            HTMLElement.prototype,
+            "offsetHeight",
+        );
+        // A measured height that differs from the 520px estimate constant.
+        Object.defineProperty(HTMLElement.prototype, "offsetHeight", {
+            configurable: true,
+            get: () => 321,
+        });
+
+        try {
+            const { container } = render(
+                <ProductGrid products={PRODUCTS.slice(0, 9)} />,
+            );
+            const virtualRows =
+                container.querySelectorAll("[data-virtual-row]");
+            expect(virtualRows.length).toBeGreaterThan(1);
+            expect(virtualRows[1]).toHaveStyle({
+                transform: "translateY(321px)",
+            });
+        } finally {
+            if (original) {
+                Object.defineProperty(
+                    HTMLElement.prototype,
+                    "offsetHeight",
+                    original,
+                );
+            } else {
+                Reflect.deleteProperty(HTMLElement.prototype, "offsetHeight");
+            }
+        }
+    });
+});

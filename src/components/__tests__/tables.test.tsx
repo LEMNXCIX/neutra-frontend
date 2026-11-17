@@ -1,5 +1,7 @@
 // @vitest-environment happy-dom
 
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { act, renderHook } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { useAdminTable } from "@/components/admin/shared/useAdminTable";
@@ -139,5 +141,60 @@ describe("useAdminTable (headless admin tables)", () => {
             totalItems: 20,
             itemsPerPage: 5,
         });
+    });
+
+    it("passes every server row through with the production Infinity page size", () => {
+        const serverPage = Array.from({ length: 500 }, (_, index) => ({
+            id: `row-${index}`,
+            name: `Producto ${index}`,
+            price: index,
+        }));
+        const { result } = renderHook(() =>
+            useAdminTable({
+                data: serverPage,
+                columns,
+                getRowId: (product) => product.id,
+                enablePagination: true,
+            }),
+        );
+
+        expect(result.current.rows).toHaveLength(500);
+        expect(result.current.rows.map((row) => row.id)).toEqual(
+            serverPage.map((row) => row.id),
+        );
+        expect(result.current.adminPagination.totalItems).toBe(500);
+        expect(result.current.adminPagination.totalPages).toBe(1);
+    });
+});
+
+describe("admin table migration coverage", () => {
+    const migratedTables = [
+        "admin/appointments/AppointmentsTableClient.tsx",
+        "admin/appointments/AttentionQueue.tsx",
+        "admin/banners/BannersTableClient.tsx",
+        "admin/booking/ServicesTableClient.tsx",
+        "admin/booking/StaffTableClient.tsx",
+        "admin/categories/CategoriesTableClient.tsx",
+        "admin/coupons/CouponsTableClient.tsx",
+        "admin/features/FeaturesTable.tsx",
+        "admin/logs/logs-client.tsx",
+        "admin/loyalty/SuperAdminLoyaltyClient.tsx",
+        "admin/loyalty/TenantLoyaltyClient.tsx",
+        "admin/orders/OrdersTableClient.tsx",
+        "admin/products/ProductsTableClient.tsx",
+        "admin/roles/RolesTableClient.tsx",
+        "admin/sliders/SlidersTableClient.tsx",
+        "admin/tenants/TenantsTable.tsx",
+        "admin/users/UsersTableClient.tsx",
+    ];
+
+    it("every migrated admin table derives rows from useAdminTable", () => {
+        for (const relativePath of migratedTables) {
+            const source = readFileSync(
+                resolve(process.cwd(), "src/components", relativePath),
+                "utf8",
+            );
+            expect(source, relativePath).toMatch(/useAdminTable\s*\(/);
+        }
     });
 });

@@ -79,7 +79,10 @@ export function useAdminTable<TData extends RowData>({
         pageSize,
     });
 
-    const resolvedColumns = useMemo(() => columns ?? defaultColumns, [columns]);
+    const resolvedColumns = useMemo(
+        () => columns ?? (defaultColumns as AdminTableColumn<TData>[]),
+        [columns],
+    );
     const resolvedGetRowId = useMemo(
         () =>
             getRowId ??

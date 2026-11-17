@@ -2,7 +2,7 @@
 
 import { Link } from "@tanstack/react-router";
 import { Eye, Loader2, Package, PackageOpen, ShoppingCart } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { VirtualizedRows } from "@/components/shared/virtualization";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -20,9 +20,36 @@ type Product = {
     stock?: number;
 };
 
-const GRID_COLUMNS = 4;
+// Mirrors `grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4` so a
+// virtual row always corresponds to exactly one visual grid row.
+const GRID_COLUMNS = {
+    base: 1,
+    sm: 2,
+    lg: 3,
+    xl: 4,
+} as const;
 const GRID_ROW_HEIGHT = 520;
 const LIST_ROW_HEIGHT = 400;
+
+function useGridColumns(): number {
+    // Start at the SSR-safe value and correct it after mount to avoid a
+    // hydration mismatch on window-dependent markup.
+    const [columns, setColumns] = useState<number>(GRID_COLUMNS.xl);
+
+    useEffect(() => {
+        const sync = () => {
+            if (window.innerWidth >= 1280) setColumns(GRID_COLUMNS.xl);
+            else if (window.innerWidth >= 1024) setColumns(GRID_COLUMNS.lg);
+            else if (window.innerWidth >= 640) setColumns(GRID_COLUMNS.sm);
+            else setColumns(GRID_COLUMNS.base);
+        };
+        sync();
+        window.addEventListener("resize", sync);
+        return () => window.removeEventListener("resize", sync);
+    }, []);
+
+    return columns;
+}
 
 export default function ProductGrid({
     products,
@@ -33,6 +60,7 @@ export default function ProductGrid({
 }) {
     const { addItem } = useCart();
     const [loadingId, setLoadingId] = useState<string | null>(null);
+    const columns = useGridColumns();
 
     const handleAdd = async (id: string, title: string) => {
         setLoadingId(id);
@@ -43,15 +71,16 @@ export default function ProductGrid({
         }
     };
 
-    // The responsive grid is virtualized a row at a time so each card keeps its
-    // original markup and responsive columns inside the row.
+    // One virtual row per visual grid row at the active breakpoint. Each row's
+    // height is measured by the virtualizer, so variable card content at any
+    // width updates the sizer and positions instead of using a fixed stride.
     const gridRows = useMemo(() => {
         const rows: Product[][] = [];
-        for (let i = 0; i < products.length; i += GRID_COLUMNS) {
-            rows.push(products.slice(i, i + GRID_COLUMNS));
+        for (let i = 0; i < products.length; i += columns) {
+            rows.push(products.slice(i, i + columns));
         }
         return rows;
-    }, [products]);
+    }, [products, columns]);
 
     if (!products || products.length === 0) {
         return (
@@ -207,11 +236,11 @@ export default function ProductGrid({
         <VirtualizedRows
             items={gridRows}
             estimateSize={() => GRID_ROW_HEIGHT}
-            getItemKey={(row) => row[0]?.id ?? "row"}
+            getItemKey={(row) => `${columns}:${row[0]?.id ?? "row"}`}
             renderRow={(row, rowIndex) => (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                     {row.map((p) => {
-                        const index = rowIndex * GRID_COLUMNS + row.indexOf(p);
+                        const index = rowIndex * columns + row.indexOf(p);
                         const inStock = (p.stock ?? 0) > 0;
                         const lowStock =
                             (p.stock ?? 0) > 0 && (p.stock ?? 0) <= 5;

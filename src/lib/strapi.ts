@@ -27,11 +27,13 @@ export async function strapiFindOneByTenant<T = any>(
     if (!tenantId) return null;
     try {
         const url = `${STRAPI_URL}/api/${contentType}?status=published&filters[tenantId][$eq]=${encodeURIComponent(tenantId)}${query}`;
+        // Next's fetch `next` cache extension no longer exists; revalidation
+        // and tags are deferred to Task 14. Native fetch keeps its default
+        // cache policy, so no behavior is lost by dropping the option.
         const res = await fetch(url, {
             headers: STRAPI_TOKEN
                 ? { Authorization: `Bearer ${STRAPI_TOKEN}` }
                 : undefined,
-            next: { revalidate: 60, tags: [`content:${tenantId}`] },
         });
         if (!res.ok) return null;
         const json = await res.json();

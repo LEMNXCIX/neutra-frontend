@@ -88,6 +88,11 @@ export interface ApiRequestConfig {
     token?: string;
     timeout?: number;
     cache?: RequestCache;
+    /**
+     * @deprecated Source-compatible remnant of Next's fetch cache extension.
+     * Revalidation is log-only until Task 14 and native fetch ignores it, so
+     * the field is retained for existing callers but never forwarded.
+     */
     next?: FetchCacheConfig;
 }
 
@@ -235,7 +240,6 @@ async function request<T = unknown>(
         token,
         timeout = 30000,
         cache,
-        next,
     } = config;
 
     const url = `${getBackendUrl()}${normalizeEndpoint(endpoint)}`;
@@ -252,7 +256,6 @@ async function request<T = unknown>(
         headers: requestHeaders,
         credentials: "include",
         cache: cache || "no-store",
-        next,
     };
 
     if (typeof window === "undefined" && process.env.LOG_HEADERS === "true") {
