@@ -194,7 +194,23 @@ export const fetch = createServerEntry({
         const forwardedUrl = new URL(tenantRequest.url);
         const moduleType = (tenantRequest.headers.get("x-module-type") ??
             "root") as ModuleType;
-        forwardedUrl.pathname = rewritePath(forwardedUrl.pathname, moduleType);
+        const originalPath = forwardedUrl.pathname;
+        const rewrittenPath = rewritePath(originalPath, moduleType);
+
+        // A path rewrite cannot stay internal: the server renders the rewritten
+        // route but the browser URL remains the old one, so TanStack Router
+        // re-renders the URL's route after hydration (tenant root showed the
+        // superadmin landing page). Redirect instead so URL and route agree.
+        if (rewrittenPath !== originalPath) {
+            const location = `${rewrittenPath}${forwardedUrl.search}`;
+            return withTenantCookies(
+                new Response(null, {
+                    status: 307,
+                    headers: { Location: location },
+                }),
+                cookies,
+            );
+        }
 
         const init: RequestInit = {
             method: tenantRequest.method,

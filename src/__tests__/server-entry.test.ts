@@ -109,62 +109,66 @@ function downstreamPath(index = 0): string {
     return new URL(h.downstream[index].url).pathname;
 }
 
-describe("server entry — Host-derived tenant rewrites", () => {
-    it("rewrites booking root to a real /home route and sets tenant cookies", async () => {
+describe("server entry — Host-derived tenant routes", () => {
+    it("redirects booking root to the real /home route and sets tenant cookies", async () => {
         const response = await requestFor("booking.acme.nip.io");
 
-        const path = downstreamPath();
-        // The rewrite must land on a route that actually exists in the
-        // generated tree; the old (broken) "/booking" would fail here.
-        expect(generatedRoutePaths().has(path)).toBe(true);
-        expect(path).toBe("/home");
-        expect(h.downstream[0].headers.get("x-tenant-slug")).toBe("acme");
-        expect(h.downstream[0].headers.get("x-module-type")).toBe("booking");
+        // An internal rewrite rendered /home but hydrated as /, so the client
+        // re-rendered the superadmin landing. A 307 keeps URL and route in sync.
+        expect(response.status).toBe(307);
+        const location = response.headers.get("location");
+        expect(location).toBe("/home");
+        expect(generatedRoutePaths().has(location!)).toBe(true);
+        expect(h.downstream).toHaveLength(0);
 
         const cookies = response.headers.getSetCookie().join("; ");
         expect(cookies).toContain("tenant-slug=acme");
         expect(cookies).toContain("module-type=booking");
     });
 
-    it("rewrites store root to /store (also a real route)", async () => {
-        await requestFor("storeco.localhost:3001");
-        const path = downstreamPath();
-        expect(generatedRoutePaths().has(path)).toBe(true);
-        expect(path).toBe("/store");
+    it("redirects store root to /store (also a real route)", async () => {
+        const response = await requestFor("storeco.localhost:3001");
+        expect(response.status).toBe(307);
+        expect(response.headers.get("location")).toBe("/store");
+        expect(generatedRoutePaths().has("/store")).toBe(true);
     });
 
     it("keeps the superadmin root at /", async () => {
-        await requestFor("localhost:3001");
+        const response = await requestFor("localhost:3001");
+        expect(response.status).toBe(200);
         expect(downstreamPath()).toBe("/");
     });
 
     it("ports the /admin alias for store, booking and superadmin", async () => {
-        await requestFor("storeco.localhost:3001", "/admin/orders");
-        const storePath = downstreamPath();
-        expect(storePath).toBe("/store-admin/orders");
-        expect(generatedRoutePaths().has(storePath)).toBe(true);
+        const store = await requestFor(
+            "storeco.localhost:3001",
+            "/admin/orders",
+        );
+        expect(store.status).toBe(307);
+        expect(store.headers.get("location")).toBe("/store-admin/orders");
+        expect(generatedRoutePaths().has("/store-admin/orders")).toBe(true);
 
-        await requestFor("booking.acme.nip.io", "/admin");
-        const bookingPath = downstreamPath(1);
-        expect(bookingPath).toBe("/booking-admin");
-        expect(generatedRoutePaths().has(bookingPath)).toBe(true);
+        const booking = await requestFor("booking.acme.nip.io", "/admin");
+        expect(booking.status).toBe(307);
+        expect(booking.headers.get("location")).toBe("/booking-admin");
+        expect(generatedRoutePaths().has("/booking-admin")).toBe(true);
 
-        await requestFor("localhost:3001", "/admin");
-        const rootPath = downstreamPath(2);
-        expect(rootPath).toBe("/admin");
-        expect(generatedRoutePaths().has(rootPath)).toBe(true);
+        const root = await requestFor("localhost:3001", "/admin");
+        expect(root.status).toBe(200);
+        expect(downstreamPath()).toBe("/admin");
+        expect(generatedRoutePaths().has("/admin")).toBe(true);
     });
 
     it("ignores forged x-tenant-* headers: Host is the only identity source", async () => {
-        await requestFor("storeco.localhost:3001", "/", {
+        const response = await requestFor("storeco.localhost:3001", "/", {
             "x-tenant-slug": "victim",
             "x-tenant-id": "victim-id",
             "x-module-type": "booking",
         });
-        const headers = h.downstream[0].headers;
-        expect(headers.get("x-tenant-slug")).toBe("storeco");
-        expect(headers.get("x-tenant-id")).toBe("tenant-1");
-        expect(headers.get("x-module-type")).toBe("store");
+        const cookies = response.headers.getSetCookie().join("; ");
+        expect(cookies).toContain("tenant-slug=storeco");
+        expect(cookies).toContain("module-type=store");
+        expect(response.headers.get("location")).toBe("/store");
     });
 
     it("removes a forged x-tenant-id on the superadmin host", async () => {
