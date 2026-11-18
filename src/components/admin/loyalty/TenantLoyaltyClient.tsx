@@ -13,6 +13,7 @@ import {
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { LoyaltyCampaignForm } from "@/components/admin/loyalty/LoyaltyCampaignForm";
+import { useAdminTable } from "@/components/admin/shared/useAdminTable";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -160,6 +161,11 @@ function LoyaltyCampaignList({
         action: "activate" | "end" | "archive" | "delete",
     ) => Promise<void>;
 }) {
+    const { rows } = useAdminTable({
+        data: campaigns,
+        getRowId: (campaign) => campaign.id,
+    });
+
     return (
         <Card>
             <CardHeader>
@@ -169,13 +175,13 @@ function LoyaltyCampaignList({
                 </CardDescription>
             </CardHeader>
             <CardContent>
-                {campaigns.length === 0 ? (
+                {rows.length === 0 ? (
                     <p className="text-sm text-muted-foreground">
                         Todavía no hay campañas configuradas.
                     </p>
                 ) : (
                     <div className="space-y-4">
-                        {campaigns.map((campaign) => {
+                        {rows.map((campaign) => {
                             const status = STATUS_COPY[campaign.status];
                             return (
                                 <article

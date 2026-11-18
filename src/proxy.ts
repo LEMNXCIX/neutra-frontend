@@ -1,14 +1,13 @@
-import type { NextRequest } from "next/server";
-import { NextResponse } from "next/server";
-
 import { getBackendUrl } from "@/lib/backend-url";
 
 /**
- * Short-lived in-memory cache for tenant config (module type + tenant id).
- * Tenant types can change (e.g. store -> booking), so unlike the previous
- * cookie-based cache (1h), this keeps routing fresh while still avoiding
- * a backend fetch on every request.
+ * Tenant-resolution contract reference, ported from the Next middleware to
+ * Web-standard Request/Response. The live runtime performs the same work in
+ * `src/server.ts`; this module keeps the resolution rules under test.
  */
+
+/** Short-lived cache keyed by tenant slug. Module types can change, so the
+ *  previous one-hour cookie cache was replaced with this 60s cache. */
 const TENANT_CONFIG_TTL_MS = 60_000;
 const tenantConfigCache = new Map<
     string,
@@ -37,7 +36,6 @@ async function fetchTenantConfig(tenantSlug: string): Promise<TenantLookup> {
         if (response.status === 404) {
             return { ok: false, reason: "not_found" };
         }
-
         if (!response.ok) {
             return { ok: false, reason: "unavailable" };
         }
@@ -61,34 +59,51 @@ async function fetchTenantConfig(tenantSlug: string): Promise<TenantLookup> {
     }
 }
 
-export async function proxy(request: NextRequest) {
+/** The request/response pair produced for one incoming request. */
+export type ProxyOutcome = {
+    kind: "next" | "rewrite" | "error";
+    url?: string;
+    status: number;
+    /** Headers carrying the resolved tenant context to the downstream request. */
+    headers: Headers;
+    response: Response;
+};
+
+const appendTenantCookies = (
+    response: Response,
+    tenantSlug: string,
+    moduleType: string,
+    tenantId: string,
+): Response => {
+    const headers = new Headers(response.headers);
+    const cookie = (name: string, value: string) =>
+        `${name}=${encodeURIComponent(value)}; Path=/; SameSite=Lax`;
+    headers.append("set-cookie", cookie("tenant-slug", tenantSlug));
+    headers.append("set-cookie", cookie("module-type", moduleType));
+    if (tenantId) {
+        headers.append("set-cookie", cookie("tenant-id", tenantId));
+    }
+    return new Response(null, { status: response.status, headers });
+};
+
+export async function resolveProxy(request: Request): Promise<ProxyOutcome> {
     const hostname = request.headers.get("host") || "localhost";
-    const url = request.nextUrl;
+    const url = new URL(request.url);
 
-    // Extract subdomain
     const domain = hostname.split(":")[0];
-
-    // Initialize tenant defaults
     let tenantSlug = "superadmin";
     let moduleType = "root"; // root, store, booking
-    let tenantId = ""; // Initialize tenantId
+    let tenantId = "";
     let shouldRewrite = false;
     let rewritePath = "";
 
-    // 1. Subdomain-based routing (Works for both custom domains and subdomain.localhost)
     const hostParts = domain.split(".");
-
-    // Check if we have a subdomain (e.g., book.localhost or tenant.neunetra.com)
-    // For localhost, parts will be ['subdomain', 'localhost'] -> length 2
-    // For production, parts will be ['subdomain', 'domain', 'com'] -> length 3
     const isLocalhost =
         domain === "localhost" ||
         domain === "127.0.0.1" ||
         domain.endsWith(".localhost");
     const isIP = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(domain);
     const isNipIo = domain.endsWith(".nip.io");
-
-    // Base parts: 1 for localhost/IP, 2 for domain.com, 6 for ip.nip.io
     const basePartsCount = isNipIo ? 6 : isLocalhost || isIP ? 1 : 2;
 
     if (!isIP && hostParts.length > basePartsCount) {
@@ -101,26 +116,27 @@ export async function proxy(request: NextRequest) {
             !/^\d+$/.test(resolvedSlug)
         ) {
             tenantSlug = resolvedSlug;
-
-            // Resolve module type from the short-lived cache / backend API
             const config = await fetchTenantConfig(tenantSlug);
 
+            // Never guess a module type from the slug: an unknown name must
+            // not render another tenant's storefront.
             if (!config.ok) {
-                // Never guess a module type from the slug. Showing a storefront
-                // under a tenant name that does not exist, or under a booking
-                // name while the backend is down, serves one tenant's content
-                // under another's identity. 404 for a name the backend does not
-                // know, 503 when the backend itself cannot answer.
-                if (config.reason === "not_found") {
-                    return new NextResponse(`Unknown tenant: ${tenantSlug}`, {
-                        status: 404,
-                        headers: { "x-tenant-lookup": "not_found" },
-                    });
-                }
-                return new NextResponse("Tenant configuration unavailable", {
-                    status: 503,
-                    headers: { "x-tenant-lookup": "unavailable" },
-                });
+                const status = config.reason === "not_found" ? 404 : 503;
+                const response = new Response(
+                    config.reason === "not_found"
+                        ? `Unknown tenant: ${tenantSlug}`
+                        : "Tenant configuration unavailable",
+                    {
+                        status,
+                        headers: { "x-tenant-lookup": config.reason },
+                    },
+                );
+                return {
+                    kind: "error",
+                    status,
+                    headers: new Headers(request.headers),
+                    response,
+                };
             }
 
             moduleType = config.moduleType;
@@ -128,12 +144,6 @@ export async function proxy(request: NextRequest) {
         }
     }
 
-    // Root host with no subdomain is always the superadmin surface. Tenant
-    // identity comes from the subdomain alone; there is no port-based fallback
-    // and no slug-based guess. Local development uses subdomains too, e.g.
-    // default.localhost:3001 or book.localhost:3001.
-
-    // Default path rewrites for better UX
     if (moduleType === "store" && url.pathname === "/") {
         shouldRewrite = true;
         rewritePath = "/store";
@@ -142,74 +152,48 @@ export async function proxy(request: NextRequest) {
         rewritePath = "/home";
     }
 
-    // Clone the request headers
     const requestHeaders = new Headers(request.headers);
     requestHeaders.set("x-tenant-slug", tenantSlug);
     requestHeaders.set("x-module-type", moduleType);
     if (tenantId) requestHeaders.set("x-tenant-id", tenantId);
 
-    // Handle Admin Rewrites
-    if (url.pathname.startsWith("/admin")) {
-        let adminPath = "";
-        if (moduleType === "store") {
-            adminPath = url.pathname.replace(/^\/admin/, "/store-admin");
-        } else if (moduleType === "booking") {
-            adminPath = url.pathname.replace(/^\/admin/, "/booking-admin");
-        } else {
-            // For superadmin tenant, keep /admin as is
-            adminPath = url.pathname;
-        }
-
-        url.pathname = adminPath;
-        const response = NextResponse.rewrite(url, {
-            request: {
-                headers: requestHeaders,
-            },
-        });
-        response.cookies.set("tenant-slug", tenantSlug, { sameSite: "lax" });
-        response.cookies.set("module-type", moduleType, { sameSite: "lax" });
-        if (tenantId)
-            response.cookies.set("tenant-id", tenantId, { sameSite: "lax" });
-        return response;
-    }
-
-    // Handle rewriting if needed
-    if (shouldRewrite) {
-        url.pathname = rewritePath;
-        const response = NextResponse.rewrite(url, {
-            request: {
-                headers: requestHeaders,
-            },
-        });
-        // Set cookie for client-side access
-        response.cookies.set("tenant-slug", tenantSlug, { sameSite: "lax" });
-        response.cookies.set("module-type", moduleType, { sameSite: "lax" });
-        if (tenantId)
-            response.cookies.set("tenant-id", tenantId, { sameSite: "lax" });
-        return response;
-    }
-
-    const response = NextResponse.next({
-        request: {
+    const rewrite = (kind: "next" | "rewrite", pathname?: string) => {
+        if (pathname) url.pathname = pathname;
+        const response = appendTenantCookies(
+            new Response(null, {
+                status: 200,
+                headers: pathname
+                    ? { "x-proxy-rewrite": pathname }
+                    : { "x-proxy-continue": "1" },
+            }),
+            tenantSlug,
+            moduleType,
+            tenantId,
+        );
+        return {
+            kind,
+            url: pathname ? String(url) : undefined,
+            status: 200,
             headers: requestHeaders,
-        },
-    });
+            response,
+        } satisfies ProxyOutcome;
+    };
 
-    // Set cookie for client-side access
-    response.cookies.set("tenant-slug", tenantSlug, { sameSite: "lax" });
-    response.cookies.set("module-type", moduleType, { sameSite: "lax" });
-    if (tenantId)
-        response.cookies.set("tenant-id", tenantId, { sameSite: "lax" });
+    if (url.pathname.startsWith("/admin")) {
+        const adminPath =
+            moduleType === "store"
+                ? url.pathname.replace(/^\/admin/, "/store-admin")
+                : moduleType === "booking"
+                  ? url.pathname.replace(/^\/admin/, "/booking-admin")
+                  : url.pathname;
+        return rewrite("rewrite", adminPath);
+    }
 
-    return response;
+    if (shouldRewrite) return rewrite("rewrite", rewritePath);
+    return rewrite("next");
 }
 
-export const config = {
-    matcher: [
-        /*
-         * Match all request paths including API routes
-         * Exclude only static files and Next.js internals
-         */
-        "/((?!_next/static|_next/image|favicon.ico).*)",
-    ],
-};
+/** Web-middleware entry point: returns the Response for the resolved request. */
+export async function proxy(request: Request): Promise<Response> {
+    return (await resolveProxy(request)).response;
+}

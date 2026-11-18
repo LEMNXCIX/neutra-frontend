@@ -1,0 +1,510 @@
+[
+    {
+        "path": "/api/admin/banners",
+        "methods": [
+            "GET",
+            "POST"
+        ]
+    },
+    {
+        "path": "/api/admin/banners/$id",
+        "methods": [
+            "PUT",
+            "DELETE"
+        ]
+    },
+    {
+        "path": "/api/admin/categories",
+        "methods": [
+            "GET",
+            "POST"
+        ]
+    },
+    {
+        "path": "/api/admin/categories/$id",
+        "methods": [
+            "PUT",
+            "DELETE"
+        ]
+    },
+    {
+        "path": "/api/admin/coupons",
+        "methods": [
+            "GET",
+            "POST"
+        ]
+    },
+    {
+        "path": "/api/admin/coupons/$id",
+        "methods": [
+            "PUT",
+            "DELETE"
+        ]
+    },
+    {
+        "path": "/api/admin/logs",
+        "methods": [
+            "GET"
+        ]
+    },
+    {
+        "path": "/api/admin/logs/stats",
+        "methods": [
+            "GET"
+        ]
+    },
+    {
+        "path": "/api/admin/orders",
+        "methods": [
+            "GET",
+            "POST"
+        ]
+    },
+    {
+        "path": "/api/admin/orders/$id",
+        "methods": [
+            "GET",
+            "PUT",
+            "DELETE"
+        ]
+    },
+    {
+        "path": "/api/admin/orders/statuses",
+        "methods": [
+            "GET"
+        ]
+    },
+    {
+        "path": "/api/admin/products",
+        "methods": [
+            "GET",
+            "POST"
+        ]
+    },
+    {
+        "path": "/api/admin/products/$id",
+        "methods": [
+            "PUT",
+            "DELETE"
+        ]
+    },
+    {
+        "path": "/api/admin/sliders",
+        "methods": [
+            "GET",
+            "POST"
+        ]
+    },
+    {
+        "path": "/api/admin/sliders/$id",
+        "methods": [
+            "PUT",
+            "DELETE"
+        ]
+    },
+    {
+        "path": "/api/admin/stats/overview",
+        "methods": [
+            "GET"
+        ]
+    },
+    {
+        "path": "/api/admin/users",
+        "methods": [
+            "GET",
+            "PUT"
+        ]
+    },
+    {
+        "path": "/api/appointments",
+        "methods": [
+            "GET",
+            "POST"
+        ]
+    },
+    {
+        "path": "/api/appointments/$id",
+        "methods": [
+            "GET",
+            "DELETE"
+        ]
+    },
+    {
+        "path": "/api/appointments/$id/cancel",
+        "methods": [
+            "PUT"
+        ]
+    },
+    {
+        "path": "/api/appointments/$id/status",
+        "methods": [
+            "PUT"
+        ]
+    },
+    {
+        "path": "/api/appointments/availability",
+        "methods": [
+            "GET"
+        ]
+    },
+    {
+        "path": "/api/auth/forgot-password",
+        "methods": [
+            "POST"
+        ]
+    },
+    {
+        "path": "/api/auth/login",
+        "methods": [
+            "POST"
+        ]
+    },
+    {
+        "path": "/api/auth/logout",
+        "methods": [
+            "POST"
+        ]
+    },
+    {
+        "path": "/api/auth/me",
+        "methods": [
+            "GET"
+        ]
+    },
+    {
+        "path": "/api/auth/register",
+        "methods": [
+            "POST"
+        ]
+    },
+    {
+        "path": "/api/auth/reset-password",
+        "methods": [
+            "POST"
+        ]
+    },
+    {
+        "path": "/api/auth/validate",
+        "methods": [
+            "GET"
+        ]
+    },
+    {
+        "path": "/api/banners",
+        "methods": [
+            "GET",
+            "POST"
+        ]
+    },
+    {
+        "path": "/api/cart",
+        "methods": [
+            "GET"
+        ]
+    },
+    {
+        "path": "/api/cart/add",
+        "methods": [
+            "POST"
+        ]
+    },
+    {
+        "path": "/api/cart/clear",
+        "methods": [
+            "DELETE"
+        ]
+    },
+    {
+        "path": "/api/cart/remove",
+        "methods": [
+            "PUT"
+        ]
+    },
+    {
+        "path": "/api/cart/stats",
+        "methods": [
+            "GET"
+        ]
+    },
+    {
+        "path": "/api/categories",
+        "methods": [
+            "GET",
+            "POST"
+        ]
+    },
+    {
+        "path": "/api/categories/$id",
+        "methods": [
+            "GET",
+            "PUT",
+            "DELETE"
+        ]
+    },
+    {
+        "path": "/api/features",
+        "methods": [
+            "GET",
+            "POST"
+        ]
+    },
+    {
+        "path": "/api/features/$id",
+        "methods": [
+            "GET",
+            "PUT",
+            "DELETE"
+        ]
+    },
+    {
+        "path": "/api/loyalty/admin/campaigns",
+        "methods": [
+            "GET",
+            "POST"
+        ]
+    },
+    {
+        "path": "/api/loyalty/admin/campaigns/$campaignId",
+        "methods": [
+            "GET",
+            "DELETE",
+            "PATCH"
+        ]
+    },
+    {
+        "path": "/api/loyalty/admin/campaigns/$campaignId/activate",
+        "methods": [
+            "POST"
+        ]
+    },
+    {
+        "path": "/api/loyalty/admin/campaigns/$campaignId/archive",
+        "methods": [
+            "POST"
+        ]
+    },
+    {
+        "path": "/api/loyalty/admin/campaigns/$campaignId/end",
+        "methods": [
+            "POST"
+        ]
+    },
+    {
+        "path": "/api/loyalty/admin/summary",
+        "methods": [
+            "GET"
+        ]
+    },
+    {
+        "path": "/api/loyalty/admin/tenants",
+        "methods": [
+            "GET"
+        ]
+    },
+    {
+        "path": "/api/loyalty/me",
+        "methods": [
+            "GET"
+        ]
+    },
+    {
+        "path": "/api/loyalty/me/campaigns/$campaignId",
+        "methods": [
+            "GET"
+        ]
+    },
+    {
+        "path": "/api/loyalty/me/campaigns/$campaignId/claim",
+        "methods": [
+            "POST"
+        ]
+    },
+    {
+        "path": "/api/orders",
+        "methods": [
+            "GET",
+            "POST"
+        ]
+    },
+    {
+        "path": "/api/orders/$id",
+        "methods": [
+            "GET"
+        ]
+    },
+    {
+        "path": "/api/orders/statuses",
+        "methods": [
+            "GET"
+        ]
+    },
+    {
+        "path": "/api/orders/user",
+        "methods": [
+            "GET"
+        ]
+    },
+    {
+        "path": "/api/permissions",
+        "methods": [
+            "GET",
+            "POST"
+        ]
+    },
+    {
+        "path": "/api/permissions/$id",
+        "methods": [
+            "GET",
+            "PUT",
+            "DELETE"
+        ]
+    },
+    {
+        "path": "/api/products",
+        "methods": [
+            "GET",
+            "POST"
+        ]
+    },
+    {
+        "path": "/api/products/$id",
+        "methods": [
+            "GET",
+            "PUT",
+            "DELETE"
+        ]
+    },
+    {
+        "path": "/api/profile",
+        "methods": [
+            "GET",
+            "PUT"
+        ]
+    },
+    {
+        "path": "/api/revalidate",
+        "methods": [
+            "POST"
+        ]
+    },
+    {
+        "path": "/api/roles",
+        "methods": [
+            "GET",
+            "POST"
+        ]
+    },
+    {
+        "path": "/api/roles/$id",
+        "methods": [
+            "GET",
+            "PUT",
+            "DELETE"
+        ]
+    },
+    {
+        "path": "/api/services",
+        "methods": [
+            "GET",
+            "POST"
+        ]
+    },
+    {
+        "path": "/api/services/$id",
+        "methods": [
+            "PUT",
+            "DELETE"
+        ]
+    },
+    {
+        "path": "/api/sliders",
+        "methods": [
+            "GET"
+        ]
+    },
+    {
+        "path": "/api/staff",
+        "methods": [
+            "GET",
+            "POST"
+        ]
+    },
+    {
+        "path": "/api/staff/$id",
+        "methods": [
+            "PUT",
+            "DELETE"
+        ]
+    },
+    {
+        "path": "/api/staff/$id/services",
+        "methods": [
+            "PUT"
+        ]
+    },
+    {
+        "path": "/api/staff/me",
+        "methods": [
+            "GET"
+        ]
+    },
+    {
+        "path": "/api/tenants",
+        "methods": [
+            "GET",
+            "POST"
+        ]
+    },
+    {
+        "path": "/api/tenants/$id",
+        "methods": [
+            "GET",
+            "PUT"
+        ]
+    },
+    {
+        "path": "/api/tenants/$id/features",
+        "methods": [
+            "GET",
+            "PUT"
+        ]
+    },
+    {
+        "path": "/api/tenants/config/$slug",
+        "methods": [
+            "GET"
+        ]
+    },
+    {
+        "path": "/api/tenants/mine",
+        "methods": [
+            "GET"
+        ]
+    },
+    {
+        "path": "/api/users",
+        "methods": [
+            "GET"
+        ]
+    },
+    {
+        "path": "/api/users/$id",
+        "methods": [
+            "GET",
+            "PUT",
+            "DELETE"
+        ]
+    },
+    {
+        "path": "/api/users/$id/role",
+        "methods": [
+            "PUT"
+        ]
+    },
+    {
+        "path": "/api/users/stats",
+        "methods": [
+            "GET"
+        ]
+    }
+]

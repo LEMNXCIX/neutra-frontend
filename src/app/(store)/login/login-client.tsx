@@ -1,4 +1,7 @@
 "use client";
+import { useForm } from "@tanstack/react-form";
+import { Link } from "@tanstack/react-router";
+import { useSelector } from "@tanstack/react-store";
 import {
     AlertCircle,
     ArrowRight,
@@ -7,9 +10,6 @@ import {
     LogIn,
     Mail,
 } from "lucide-react";
-import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import type React from "react";
 import { Suspense, useState } from "react";
 import { AuthBrandHeader } from "@/components/auth/AuthBrandHeader";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -25,43 +25,75 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Separator } from "@/components/ui/separator";
-import { errorMessageFrom } from "@/lib/error-messages";
+import {
+    applyServerErrors,
+    clearFieldErrors,
+    type FieldErrorSetter,
+    inlineFieldErrors,
+} from "@/lib/form-errors";
+import { useRouter, useSearchParams } from "@/lib/navigation";
 import { useAuthStore } from "@/store/auth-store";
+
+const LOGIN_FIELDS = ["email", "password"] as const;
 
 export function LoginForm() {
     const login = useAuthStore((state) => state.login);
     const loading = useAuthStore((state) => state.loading);
     const _user = useAuthStore((state) => state.user);
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [error, setError] = useState("");
+    const [serverError, setServerError] = useState("");
     const router = useRouter();
     const searchParams = useSearchParams();
     const redirectTo = searchParams.get("redirect") || "/";
 
-    const onSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setError("");
+    const form = useForm({
+        defaultValues: {
+            email: "",
+            password: "",
+        },
+        validators: {
+            onSubmit: ({ value }) => {
+                if (!value.email || !value.password) {
+                    return "Por favor completa todos los campos";
+                }
+                return undefined;
+            },
+        },
+        onSubmit: async ({ value }) => {
+            setServerError("");
+            clearFieldErrors(LOGIN_FIELDS, setFieldServerError);
 
-        if (!email || !password) {
-            setError("Por favor completa todos los campos");
-            return;
-        }
+            try {
+                await login(value.email, value.password);
+                router.push(redirectTo);
+            } catch (err) {
+                // The backend sends a machine-readable code; the envelope message is
+                // its own and can be English, so neither is shown as-is.
+                applyServerErrors({
+                    error: err,
+                    fallback: "No pudimos iniciar sesión. Inténtalo de nuevo.",
+                    knownFields: LOGIN_FIELDS,
+                    setFormError: setServerError,
+                    setFieldError: setFieldServerError,
+                });
+            }
+        },
+    });
 
-        try {
-            await login(email, password);
-            router.push(redirectTo);
-        } catch (err) {
-            // The backend sends a machine-readable code; the envelope message is
-            // its own and can be English, so neither is shown as-is.
-            setError(
-                errorMessageFrom(
-                    err,
-                    "No pudimos iniciar sesión. Inténtalo de nuevo.",
-                ),
-            );
-        }
-    };
+    const setFieldServerError: FieldErrorSetter = (field, message) =>
+        form.setFieldMeta(field as never, (prev) => ({
+            ...prev,
+            errorMap: {
+                ...prev?.errorMap,
+                onServer: message,
+            },
+        }));
+
+    const submitError = useSelector(
+        form.store,
+        (state) => state.errorMap.onSubmit,
+    );
+    const validationMessage =
+        serverError || (typeof submitError === "string" ? submitError : "");
 
     return (
         <div className="w-full max-w-[440px] space-y-8">
@@ -82,62 +114,125 @@ export function LoginForm() {
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="pb-8">
-                    <form onSubmit={onSubmit} className="space-y-5">
-                        <div className="space-y-2">
-                            <Label
-                                htmlFor="email"
-                                className="text-xs font-semibold text-foreground ml-1"
-                            >
-                                Correo Electrónico
-                            </Label>
-                            <div className="relative group">
-                                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                                <Input
-                                    id="email"
-                                    type="email"
-                                    placeholder="juan@ejemplo.com"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform] focus:border-primary"
-                                    disabled={loading}
-                                />
-                            </div>
-                        </div>
+                    <form
+                        onSubmit={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            void form.handleSubmit();
+                        }}
+                        className="space-y-5"
+                    >
+                        <form.Field name="email">
+                            {(field) => {
+                                const hasErrors =
+                                    field.state.meta.errors.length > 0;
+                                const errors = inlineFieldErrors(
+                                    field.state.meta.errors,
+                                    validationMessage,
+                                );
+                                return (
+                                    <div className="space-y-2">
+                                        <Label
+                                            htmlFor="email"
+                                            className="text-xs font-semibold text-foreground ml-1"
+                                        >
+                                            Correo Electrónico
+                                        </Label>
+                                        <div className="relative group">
+                                            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                                            <Input
+                                                id="email"
+                                                type="email"
+                                                placeholder="juan@ejemplo.com"
+                                                value={field.state.value}
+                                                onChange={(e) =>
+                                                    field.handleChange(
+                                                        e.target.value,
+                                                    )
+                                                }
+                                                onBlur={field.handleBlur}
+                                                aria-invalid={
+                                                    hasErrors || undefined
+                                                }
+                                                className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform] focus:border-primary"
+                                                disabled={loading}
+                                            />
+                                        </div>
+                                        {errors.length > 0 && (
+                                            <p
+                                                role="alert"
+                                                className="px-1 text-xs font-semibold text-destructive"
+                                            >
+                                                {errors.join(" ")}
+                                            </p>
+                                        )}
+                                    </div>
+                                );
+                            }}
+                        </form.Field>
 
-                        <div className="space-y-2">
-                            <div className="flex justify-between items-center">
-                                <Label
-                                    htmlFor="password"
-                                    className="text-xs font-semibold text-foreground ml-1"
-                                >
-                                    Contraseña
-                                </Label>
-                                <Link
-                                    href="/forgot-password"
-                                    className="text-xs font-semibold text-primary hover:underline underline-offset-4"
-                                >
-                                    ¿Te olvidaste?
-                                </Link>
-                            </div>
-                            <PasswordInput
-                                id="password"
-                                icon={Lock}
-                                placeholder="••••••••"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform] focus:border-primary"
-                                disabled={loading}
-                            />
-                        </div>
+                        <form.Field name="password">
+                            {(field) => {
+                                const hasErrors =
+                                    field.state.meta.errors.length > 0;
+                                const errors = inlineFieldErrors(
+                                    field.state.meta.errors,
+                                    validationMessage,
+                                );
+                                return (
+                                    <div className="space-y-2">
+                                        <div className="flex justify-between items-center">
+                                            <Label
+                                                htmlFor="password"
+                                                className="text-xs font-semibold text-foreground ml-1"
+                                            >
+                                                Contraseña
+                                            </Label>
+                                            <Link
+                                                to="/forgot-password"
+                                                className="text-xs font-semibold text-primary hover:underline underline-offset-4"
+                                            >
+                                                ¿Te olvidaste?
+                                            </Link>
+                                        </div>
+                                        <PasswordInput
+                                            id="password"
+                                            icon={Lock}
+                                            placeholder="••••••••"
+                                            value={field.state.value}
+                                            onChange={(e) =>
+                                                field.handleChange(
+                                                    e.target.value,
+                                                )
+                                            }
+                                            onBlur={field.handleBlur}
+                                            aria-invalid={
+                                                hasErrors || undefined
+                                            }
+                                            className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform] focus:border-primary"
+                                            disabled={loading}
+                                        />
+                                        {errors.length > 0 && (
+                                            <p
+                                                role="alert"
+                                                className="px-1 text-xs font-semibold text-destructive"
+                                            >
+                                                {errors.join(" ")}
+                                            </p>
+                                        )}
+                                    </div>
+                                );
+                            }}
+                        </form.Field>
 
-                        {error && (
+                        {validationMessage && (
                             <Alert
                                 variant="destructive"
                                 className="border-none bg-destructive/10 text-destructive rounded-xl py-3"
                             >
                                 <AlertCircle className="size-4" />
                                 <AlertDescription className="text-xs font-semibold">
-                                    {error}
+                                    {validationMessage}
                                 </AlertDescription>
                             </Alert>
                         )}
@@ -176,7 +271,7 @@ export function LoginForm() {
                                 className="w-full h-12 rounded-xl border-border font-bold text-xs transition-[color,background-color,border-color,box-shadow,opacity,transform] hover:bg-muted"
                                 asChild
                             >
-                                <Link href="/register">Crear Nueva Cuenta</Link>
+                                <Link to="/register">Crear Nueva Cuenta</Link>
                             </Button>
                         </div>
                     </form>

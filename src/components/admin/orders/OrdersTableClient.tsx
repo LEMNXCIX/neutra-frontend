@@ -1,9 +1,9 @@
 "use client";
 import { Eye, Package, ShoppingCart, TrendingUp, Truck } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useReducer, useSyncExternalStore } from "react";
 import { toast } from "sonner";
 import { AdminStatCard as StatCard } from "@/components/admin/shared/AdminStatCard";
+import { useAdminTable } from "@/components/admin/shared/useAdminTable";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -32,6 +32,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
+import { useRouter, useSearchParams } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
 import type { Order, OrderStatus } from "@/types/order.types";
 
@@ -448,6 +449,12 @@ function OrdersDesktopTable({
     searchParams: URLSearchParams;
     router: ReturnType<typeof useRouter>;
 }) {
+    const { rows } = useAdminTable({
+        data: orders,
+        getRowId: (order) => order.id,
+        enablePagination: true,
+    });
+
     return (
         <Card className="hidden md:block">
             <CardContent className="p-0">
@@ -466,7 +473,7 @@ function OrdersDesktopTable({
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {orders.length === 0 ? (
+                            {rows.length === 0 ? (
                                 <TableRow>
                                     <TableCell
                                         colSpan={8}
@@ -476,7 +483,7 @@ function OrdersDesktopTable({
                                     </TableCell>
                                 </TableRow>
                             ) : (
-                                orders.map((o) => {
+                                rows.map((o) => {
                                     const total = calculateTotal(o);
                                     return (
                                         <TableRow
@@ -667,9 +674,15 @@ function OrdersMobileCards({
     orders: Order[];
     openOrderDetails: (order: Order) => void;
 }) {
+    const { rows } = useAdminTable({
+        data: orders,
+        getRowId: (order) => order.id,
+        enablePagination: true,
+    });
+
     return (
         <div className="flex flex-col gap-4 md:hidden">
-            {orders.length === 0 ? (
+            {rows.length === 0 ? (
                 <Card className="border-dashed t-card">
                     <CardContent className="p-12 text-center">
                         <ShoppingCart className="size-12 mx-auto text-muted-foreground/30 mb-4" />
@@ -679,7 +692,7 @@ function OrdersMobileCards({
                     </CardContent>
                 </Card>
             ) : (
-                orders.map((o) => {
+                rows.map((o) => {
                     const total = calculateTotal(o);
                     return (
                         <Card key={o.id} className="t-card overflow-hidden">

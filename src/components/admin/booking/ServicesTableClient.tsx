@@ -1,11 +1,11 @@
 "use client";
 
 import { Clock, DollarSign, Edit, Tag, Trash2 } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
 import type React from "react";
 import { Suspense, useCallback, useEffect, useReducer } from "react";
 import { toast } from "sonner";
 import { AdminEntityHeader } from "@/components/admin/shared/AdminEntityHeader";
+import { useAdminTable } from "@/components/admin/shared/useAdminTable";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -39,6 +39,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useConfirm } from "@/hooks/use-confirm";
 import { reportError } from "@/lib/error-reporting";
+import { useRouter, useSearchParams } from "@/lib/navigation";
 import { bookingService, type Service } from "@/services/booking.service";
 import { categoriesService } from "@/services/categories.service";
 import type { Category } from "@/types/category.types";
@@ -287,9 +288,14 @@ function ServicesMobileCards({
     onEdit: (service: Service) => void;
     onDelete: (id: string) => void;
 }) {
+    const { rows } = useAdminTable({
+        data: services,
+        getRowId: (service) => service.id,
+    });
+
     return (
         <div className="grid grid-cols-1 gap-4 md:hidden">
-            {services.length === 0 ? (
+            {rows.length === 0 ? (
                 <Card>
                     <CardContent className="p-8 text-center text-muted-foreground">
                         No se encontraron servicios. Crea tu primer servicio
@@ -297,7 +303,7 @@ function ServicesMobileCards({
                     </CardContent>
                 </Card>
             ) : (
-                services.map((service) => (
+                rows.map((service) => (
                     <Card key={service.id}>
                         <CardHeader className="pb-2">
                             <div className="flex justify-between items-start">
@@ -388,6 +394,11 @@ function ServicesDesktopTable({
     onEdit: (service: Service) => void;
     onDelete: (id: string) => void;
 }) {
+    const { rows } = useAdminTable({
+        data: services,
+        getRowId: (service) => service.id,
+    });
+
     return (
         <Card className="hidden md:block">
             <CardContent className="p-0">
@@ -420,7 +431,7 @@ function ServicesDesktopTable({
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {services.length === 0 ? (
+                        {rows.length === 0 ? (
                             <TableRow>
                                 <TableCell
                                     colSpan={6}
@@ -431,7 +442,7 @@ function ServicesDesktopTable({
                                 </TableCell>
                             </TableRow>
                         ) : (
-                            services.map((service) => (
+                            rows.map((service) => (
                                 <TableRow
                                     key={service.id}
                                     className="group hover:bg-muted/30 transition-colors"

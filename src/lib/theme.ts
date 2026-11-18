@@ -64,7 +64,7 @@ export const THEME_CSS_VARS = Object.values(CSS_VAR_MAP);
 /**
  * Tokens not exposed in the editor but affected by dark mode. When a tenant
  * theme is active we pin them to derived values so a leaked `.dark` class
- * (next-themes may re-add it after our provider runs) can't turn cards,
+ * (a parent theme provider may re-add it after our provider runs) can't turn cards,
  * popovers or sidebars black on a light branded page.
  */
 const DERIVED_SURFACE_VARS: Array<[string, string]> = [

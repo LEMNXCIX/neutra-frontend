@@ -18,6 +18,11 @@ import {
     X,
 } from "lucide-react";
 import React, { useCallback, useReducer } from "react";
+import { useAdminTable } from "@/components/admin/shared/useAdminTable";
+import {
+    useVirtualRange,
+    VirtualizedRows,
+} from "@/components/shared/virtualization";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -447,6 +452,14 @@ function LogsFiltersSection({
     );
 }
 
+const logColumns = [
+    { id: "id", accessorKey: "id" },
+    { id: "timestamp", accessorKey: "timestamp" },
+    { id: "level", accessorKey: "level" },
+    { id: "statusCode", accessorKey: "statusCode" },
+    { id: "url", accessorKey: "url" },
+];
+
 function LogsDataTable({
     filteredLogs,
     loading,
@@ -456,9 +469,25 @@ function LogsDataTable({
     loading: boolean;
     dispatch: React.Dispatch<LogsAction>;
 }) {
+    const { rows } = useAdminTable({
+        data: filteredLogs,
+        columns: logColumns,
+        getRowId: (log) => log.id,
+    });
+    const {
+        scrollRef,
+        virtualItems,
+        paddingTop,
+        paddingBottom,
+        measureElement,
+    } = useVirtualRange({ count: rows.length, estimateSize: () => 72 });
+
     return (
         <Card className="t-card border-none shadow-xl overflow-hidden">
-            <div className="hidden md:block">
+            <div
+                ref={scrollRef}
+                className="hidden md:block max-h-[min(900px,70vh)] overflow-y-auto"
+            >
                 <Table>
                     <TableHeader className="bg-muted/50">
                         <TableRow className="border-b border-border/50 hover:bg-transparent">
@@ -497,7 +526,7 @@ function LogsDataTable({
                                     </div>
                                 </TableCell>
                             </TableRow>
-                        ) : filteredLogs.length === 0 ? (
+                        ) : rows.length === 0 ? (
                             <TableRow>
                                 <TableCell
                                     colSpan={6}
@@ -513,136 +542,177 @@ function LogsDataTable({
                                 </TableCell>
                             </TableRow>
                         ) : (
-                            filteredLogs.map((log) => (
-                                <TableRow
-                                    key={log.id}
-                                    className="border-b border-border/50 hover:bg-muted/30 group transition-colors cursor-pointer"
-                                    role="button"
-                                    tabIndex={0}
-                                    onClick={() =>
-                                        dispatch({
-                                            type: "SET_SELECTED_LOG",
-                                            payload: log,
-                                        })
-                                    }
-                                    onKeyDown={(e) => {
-                                        if (
-                                            e.key === "Enter" ||
-                                            e.key === " "
-                                        ) {
-                                            e.preventDefault();
-                                            dispatch({
-                                                type: "SET_SELECTED_LOG",
-                                                payload: log,
-                                            });
-                                        }
-                                    }}
-                                >
-                                    <TableCell className="py-4 font-mono text-[10px]">
-                                        <div className="font-bold text-foreground">
-                                            {format(
-                                                new Date(log.timestamp),
-                                                "HH:mm:ss.SSS",
-                                            )}
-                                        </div>
-                                        <div className="text-muted-foreground">
-                                            {format(
-                                                new Date(log.timestamp),
-                                                "dd MMM yyyy",
-                                            )}
-                                        </div>
-                                    </TableCell>
-                                    <TableCell>
-                                        {getLevelBadge(log.level)}
-                                    </TableCell>
-                                    <TableCell>
-                                        <div className="flex flex-col gap-1 max-w-[400px] lg:max-w-[500px]">
-                                            <div className="font-bold text-[9px] uppercase bg-muted px-1.5 py-0.5 rounded border border-border/50 w-fit">
-                                                {log.method}
-                                            </div>
-                                            <div
-                                                className="font-mono text-[10px] truncate text-muted-foreground"
-                                                title={log.url}
+                            <>
+                                {paddingTop > 0 && (
+                                    <TableRow aria-hidden="true">
+                                        <TableCell
+                                            colSpan={6}
+                                            style={{
+                                                height: paddingTop,
+                                                padding: 0,
+                                            }}
+                                        />
+                                    </TableRow>
+                                )}
+                                {virtualItems.map((virtualRow) => {
+                                    const log = rows[virtualRow.index];
+                                    return (
+                                        <TableRow
+                                            key={log.id}
+                                            ref={measureElement}
+                                            data-index={virtualRow.index}
+                                            className="border-b border-border/50 hover:bg-muted/30 group transition-colors cursor-pointer"
+                                            role="button"
+                                            tabIndex={0}
+                                            onClick={() =>
+                                                dispatch({
+                                                    type: "SET_SELECTED_LOG",
+                                                    payload: log,
+                                                })
+                                            }
+                                            onKeyDown={(e) => {
+                                                if (
+                                                    e.key === "Enter" ||
+                                                    e.key === " "
+                                                ) {
+                                                    e.preventDefault();
+                                                    dispatch({
+                                                        type: "SET_SELECTED_LOG",
+                                                        payload: log,
+                                                    });
+                                                }
+                                            }}
+                                        >
+                                            <TableCell className="py-4 font-mono text-[10px]">
+                                                <div className="font-bold text-foreground">
+                                                    {format(
+                                                        new Date(log.timestamp),
+                                                        "HH:mm:ss.SSS",
+                                                    )}
+                                                </div>
+                                                <div className="text-muted-foreground">
+                                                    {format(
+                                                        new Date(log.timestamp),
+                                                        "dd MMM yyyy",
+                                                    )}
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>
+                                                {getLevelBadge(log.level)}
+                                            </TableCell>
+                                            <TableCell>
+                                                <div className="flex flex-col gap-1 max-w-[400px] lg:max-w-[500px]">
+                                                    <div className="font-bold text-[9px] uppercase bg-muted px-1.5 py-0.5 rounded border border-border/50 w-fit">
+                                                        {log.method}
+                                                    </div>
+                                                    <div
+                                                        className="font-mono text-[10px] truncate text-muted-foreground"
+                                                        title={log.url}
+                                                    >
+                                                        {log.url}
+                                                    </div>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell
+                                                className={`font-bold text-base ${getStatusColor(log.statusCode)}`}
                                             >
-                                                {log.url}
-                                            </div>
-                                        </div>
-                                    </TableCell>
-                                    <TableCell
-                                        className={`font-bold text-base ${getStatusColor(log.statusCode)}`}
-                                    >
-                                        {log.statusCode}
-                                    </TableCell>
-                                    <TableCell>
-                                        <div
-                                            className={`font-mono text-[10px] font-semibold px-2 py-1 rounded-md ${
-                                                log.duration > 1000
-                                                    ? "bg-rose-50 text-rose-600"
-                                                    : "bg-muted text-muted-foreground"
-                                            }`}
-                                        >
-                                            {log.duration}ms
-                                        </div>
-                                    </TableCell>
-                                    <TableCell className="text-right">
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            className="size-8 rounded-full p-0 opacity-0 group-hover:opacity-100 hover:bg-primary/10 hover:text-primary transition-[color,background-color,border-color,box-shadow,opacity,transform]"
-                                        >
-                                            <ArrowRight className="size-4" />
-                                        </Button>
-                                    </TableCell>
-                                </TableRow>
-                            ))
+                                                {log.statusCode}
+                                            </TableCell>
+                                            <TableCell>
+                                                <div
+                                                    className={`font-mono text-[10px] font-semibold px-2 py-1 rounded-md ${
+                                                        log.duration > 1000
+                                                            ? "bg-rose-50 text-rose-600"
+                                                            : "bg-muted text-muted-foreground"
+                                                    }`}
+                                                >
+                                                    {log.duration}ms
+                                                </div>
+                                            </TableCell>
+                                            <TableCell className="text-right">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="size-8 rounded-full p-0 opacity-0 group-hover:opacity-100 hover:bg-primary/10 hover:text-primary transition-[color,background-color,border-color,box-shadow,opacity,transform]"
+                                                >
+                                                    <ArrowRight className="size-4" />
+                                                </Button>
+                                            </TableCell>
+                                        </TableRow>
+                                    );
+                                })}
+                                {paddingBottom > 0 && (
+                                    <TableRow aria-hidden="true">
+                                        <TableCell
+                                            colSpan={6}
+                                            style={{
+                                                height: paddingBottom,
+                                                padding: 0,
+                                            }}
+                                        />
+                                    </TableRow>
+                                )}
+                            </>
                         )}
                     </TableBody>
                 </Table>
             </div>
 
-            <div className="md:hidden divide-y divide-border/50">
-                {filteredLogs.map((log) => (
-                    <button
-                        type="button"
-                        key={log.id}
-                        className="p-5 space-y-3 hover:bg-muted/30 active:bg-muted transition-colors group text-left w-full"
-                        onClick={() =>
-                            dispatch({ type: "SET_SELECTED_LOG", payload: log })
-                        }
-                    >
-                        <div className="flex justify-between items-start">
-                            <div className="space-y-2">
-                                <div className="flex items-center gap-2">
-                                    {getLevelBadge(log.level)}
+            <div className="md:hidden">
+                <VirtualizedRows
+                    items={rows}
+                    estimateSize={() => 150}
+                    getItemKey={(log) => log.id}
+                    contentClassName="divide-y divide-border/50"
+                    renderRow={(log) => (
+                        <button
+                            type="button"
+                            key={log.id}
+                            className="p-5 space-y-3 hover:bg-muted/30 active:bg-muted transition-colors group text-left w-full"
+                            onClick={() =>
+                                dispatch({
+                                    type: "SET_SELECTED_LOG",
+                                    payload: log,
+                                })
+                            }
+                        >
+                            <div className="flex justify-between items-start">
+                                <div className="space-y-2">
+                                    <div className="flex items-center gap-2">
+                                        {getLevelBadge(log.level)}
+                                        <span
+                                            className={`text-lg font-bold tracking-tight ${getStatusColor(log.statusCode)}`}
+                                        >
+                                            {log.statusCode}
+                                        </span>
+                                    </div>
+                                    <div className="font-bold text-[9px] uppercase bg-muted border border-border/50 px-2 py-0.5 rounded w-fit">
+                                        {log.method}
+                                    </div>
+                                </div>
+                                <div className="text-[10px] font-mono font-medium text-right text-muted-foreground uppercase">
+                                    {format(
+                                        new Date(log.timestamp),
+                                        "HH:mm:ss",
+                                    )}
+                                    <br />
                                     <span
-                                        className={`text-lg font-bold tracking-tight ${getStatusColor(log.statusCode)}`}
+                                        className={
+                                            log.duration > 1000
+                                                ? "text-rose-500 font-bold"
+                                                : ""
+                                        }
                                     >
-                                        {log.statusCode}
+                                        {log.duration}ms
                                     </span>
                                 </div>
-                                <div className="font-bold text-[9px] uppercase bg-muted border border-border/50 px-2 py-0.5 rounded w-fit">
-                                    {log.method}
-                                </div>
                             </div>
-                            <div className="text-[10px] font-mono font-medium text-right text-muted-foreground uppercase">
-                                {format(new Date(log.timestamp), "HH:mm:ss")}
-                                <br />
-                                <span
-                                    className={
-                                        log.duration > 1000
-                                            ? "text-rose-500 font-bold"
-                                            : ""
-                                    }
-                                >
-                                    {log.duration}ms
-                                </span>
+                            <div className="font-mono text-[10px] break-all leading-tight text-muted-foreground font-medium">
+                                {log.url}
                             </div>
-                        </div>
-                        <div className="font-mono text-[10px] break-all leading-tight text-muted-foreground font-medium">
-                            {log.url}
-                        </div>
-                    </button>
-                ))}
+                        </button>
+                    )}
+                />
             </div>
         </Card>
     );

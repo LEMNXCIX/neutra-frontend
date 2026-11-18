@@ -1,5 +1,6 @@
 "use client";
 
+import { Link } from "@tanstack/react-router";
 import type { LucideIcon } from "lucide-react";
 import {
     ArrowLeft,
@@ -21,13 +22,12 @@ import {
     X,
     Zap,
 } from "lucide-react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import type { NavItem } from "@/config/admin-navigation";
+import { usePathname } from "@/lib/navigation";
 
 const ICON_MAP: Record<string, LucideIcon> = {
     LayoutDashboard,
@@ -93,7 +93,7 @@ export default function SuperAdminSidebar({ items }: SuperAdminSidebarProps) {
                             : pathname.startsWith(href);
 
                         return (
-                            <Link key={href} href={href} passHref>
+                            <Link key={href} to={href}>
                                 <Button
                                     variant={isActive ? "default" : "ghost"}
                                     className={`w-full justify-start gap-3 h-10 rounded-md transition-all font-medium text-xs tracking-tight ${
@@ -122,7 +122,7 @@ export default function SuperAdminSidebar({ items }: SuperAdminSidebarProps) {
             {/* Footer */}
             <div className="p-4 text-xs">
                 <Link
-                    href="/"
+                    to="/"
                     className="text-muted-foreground hover:text-foreground font-medium flex items-center gap-2 transition-colors"
                 >
                     <ArrowLeft size={14} />{" "}

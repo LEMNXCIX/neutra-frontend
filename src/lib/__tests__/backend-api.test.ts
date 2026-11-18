@@ -5,13 +5,31 @@
  * `token=<jwt>` alone, silently dropping every other cookie in the caller's jar.
  * That is what made the admin logout path get rejected before it reached the
  * backend. The jar is now forwarded untouched.
+ *
+ * The request context now comes from Start server utilities rather than
+ * next/headers.
  */
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const mockHeaders = vi.fn();
+const ctx = vi.hoisted(() => ({
+    headers: new Headers() as Headers,
+    throwOnRead: false,
+}));
 
-vi.mock("next/headers", () => ({
-    headers: () => mockHeaders(),
+vi.mock("@tanstack/react-start/server", () => ({
+    getRequest: () => {
+        if (ctx.throwOnRead) throw new Error("no request scope");
+        return { headers: ctx.headers };
+    },
+    getRequestHeader: (name: string) => ctx.headers.get(name) ?? undefined,
+    getCookie: (name: string) => {
+        const jar = ctx.headers.get("cookie") ?? "";
+        for (const pair of jar.split(";")) {
+            const [key, ...value] = pair.trim().split("=");
+            if (key === name) return decodeURIComponent(value.join("="));
+        }
+        return undefined;
+    },
 }));
 
 import { backendFetch } from "@/lib/backend-api";
@@ -28,20 +46,24 @@ const requestHeadersOf = (): Record<string, string> => {
     return init.headers as Record<string, string>;
 };
 
+const setRequestHeaders = (headers: Record<string, string> = {}) => {
+    ctx.headers = new Headers(headers);
+};
+
 beforeEach(() => {
     vi.clearAllMocks();
+    ctx.throwOnRead = false;
+    setRequestHeaders();
     vi.stubEnv("BACKEND_API_URL", "http://localhost:4001/api");
+    vi.stubEnv("LOG_HEADERS", "");
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(okResponse()));
-    mockHeaders.mockResolvedValue(new Headers());
 });
 
 describe("backendFetch cookie contract", () => {
     it("forwards the whole incoming cookie jar, not just the token", async () => {
-        mockHeaders.mockResolvedValue(
-            new Headers({
-                cookie: "token=jwt-value; tenant-slug=default; refresh=abc",
-            }),
-        );
+        setRequestHeaders({
+            cookie: "token=jwt-value; tenant-slug=default; refresh=abc",
+        });
 
         await backendFetch("/auth/logout", {
             method: "POST",
@@ -55,9 +77,7 @@ describe("backendFetch cookie contract", () => {
 
     it("does not warn when a jar was available", async () => {
         const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
-        mockHeaders.mockResolvedValue(
-            new Headers({ cookie: "token=jwt-value" }),
-        );
+        setRequestHeaders({ cookie: "token=jwt-value" });
 
         await backendFetch("/auth/logout", {
             method: "POST",
@@ -90,9 +110,7 @@ describe("backendFetch cookie contract", () => {
     it("never puts a credential in a log line", async () => {
         const log = vi.spyOn(console, "log").mockImplementation(() => {});
         vi.stubEnv("LOG_HEADERS", "true");
-        mockHeaders.mockResolvedValue(
-            new Headers({ cookie: "token=super-secret-jwt" }),
-        );
+        setRequestHeaders({ cookie: "token=super-secret-jwt" });
 
         await backendFetch("/products");
 
@@ -106,12 +124,10 @@ describe("backendFetch cookie contract", () => {
 
 describe("backendFetch tenant contract", () => {
     it("forwards x-tenant-slug and x-tenant-id from the request context", async () => {
-        mockHeaders.mockResolvedValue(
-            new Headers({
-                "x-tenant-slug": "booking1",
-                "x-tenant-id": "tenant-uuid-1",
-            }),
-        );
+        setRequestHeaders({
+            "x-tenant-slug": "booking1",
+            "x-tenant-id": "tenant-uuid-1",
+        });
 
         await backendFetch("/appointments");
 
@@ -125,13 +141,11 @@ describe("backendFetch tenant contract", () => {
             "NEXT_PUBLIC_DEFAULT_TENANT",
             "default-tenant-00000000-0000-0000-0000-000000000001",
         );
-        mockHeaders.mockResolvedValue(
-            new Headers({
-                "x-tenant-slug": "booking1",
-                "x-tenant-id":
-                    "default-tenant-00000000-0000-0000-0000-000000000001",
-            }),
-        );
+        setRequestHeaders({
+            "x-tenant-slug": "booking1",
+            "x-tenant-id":
+                "default-tenant-00000000-0000-0000-0000-000000000001",
+        });
 
         await backendFetch("/appointments");
 
@@ -170,9 +184,7 @@ describe("backendFetch url contract", () => {
 
 describe("backendFetch original origin contract", () => {
     it("forwards x-original-origin from the Origin header", async () => {
-        mockHeaders.mockResolvedValue(
-            new Headers({ origin: "https://booking1.neunetra.com" }),
-        );
+        setRequestHeaders({ origin: "https://booking1.neunetra.com" });
 
         await backendFetch("/appointments");
 
@@ -182,11 +194,9 @@ describe("backendFetch original origin contract", () => {
     });
 
     it("falls back to the referer origin when Origin is absent", async () => {
-        mockHeaders.mockResolvedValue(
-            new Headers({
-                referer: "https://default.neunetra.com/store?page=2",
-            }),
-        );
+        setRequestHeaders({
+            referer: "https://default.neunetra.com/store?page=2",
+        });
 
         await backendFetch("/services");
 
@@ -196,12 +206,10 @@ describe("backendFetch original origin contract", () => {
     });
 
     it("reconstructs from host and forwarded proto when both are absent", async () => {
-        mockHeaders.mockResolvedValue(
-            new Headers({
-                host: "booking1.localhost:3001",
-                "x-forwarded-proto": "https",
-            }),
-        );
+        setRequestHeaders({
+            host: "booking1.localhost:3001",
+            "x-forwarded-proto": "https",
+        });
 
         await backendFetch("/services");
 
@@ -211,7 +219,7 @@ describe("backendFetch original origin contract", () => {
     });
 
     it("omits the header when the request carries no host information", async () => {
-        mockHeaders.mockResolvedValue(new Headers());
+        setRequestHeaders();
 
         await backendFetch("/services");
 

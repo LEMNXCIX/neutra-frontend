@@ -9,8 +9,10 @@ RUN npm install
 # Copy source
 COPY . .
 
-# Expose port
-EXPOSE 3000
+ENV PORT=3001
+
+# Expose the TanStack Start dev server port
+EXPOSE 3001
 
 # Start development server
-CMD ["npm", "run", "dev"]
+CMD ["npm", "run", "dev:start"]

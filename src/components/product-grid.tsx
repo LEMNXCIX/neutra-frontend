@@ -1,8 +1,9 @@
 "use client";
+
+import { Link } from "@tanstack/react-router";
 import { Eye, Loader2, Package, PackageOpen, ShoppingCart } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { VirtualizedRows } from "@/components/shared/virtualization";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -19,6 +20,37 @@ type Product = {
     stock?: number;
 };
 
+// Mirrors `grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4` so a
+// virtual row always corresponds to exactly one visual grid row.
+const GRID_COLUMNS = {
+    base: 1,
+    sm: 2,
+    lg: 3,
+    xl: 4,
+} as const;
+const GRID_ROW_HEIGHT = 520;
+const LIST_ROW_HEIGHT = 400;
+
+function useGridColumns(): number {
+    // Start at the SSR-safe value and correct it after mount to avoid a
+    // hydration mismatch on window-dependent markup.
+    const [columns, setColumns] = useState<number>(GRID_COLUMNS.xl);
+
+    useEffect(() => {
+        const sync = () => {
+            if (window.innerWidth >= 1280) setColumns(GRID_COLUMNS.xl);
+            else if (window.innerWidth >= 1024) setColumns(GRID_COLUMNS.lg);
+            else if (window.innerWidth >= 640) setColumns(GRID_COLUMNS.sm);
+            else setColumns(GRID_COLUMNS.base);
+        };
+        sync();
+        window.addEventListener("resize", sync);
+        return () => window.removeEventListener("resize", sync);
+    }, []);
+
+    return columns;
+}
+
 export default function ProductGrid({
     products,
     viewMode = "grid",
@@ -28,6 +60,7 @@ export default function ProductGrid({
 }) {
     const { addItem } = useCart();
     const [loadingId, setLoadingId] = useState<string | null>(null);
+    const columns = useGridColumns();
 
     const handleAdd = async (id: string, title: string) => {
         setLoadingId(id);
@@ -37,6 +70,17 @@ export default function ProductGrid({
             setLoadingId(null);
         }
     };
+
+    // One virtual row per visual grid row at the active breakpoint. Each row's
+    // height is measured by the virtualizer, so variable card content at any
+    // width updates the sizer and positions instead of using a fixed stride.
+    const gridRows = useMemo(() => {
+        const rows: Product[][] = [];
+        for (let i = 0; i < products.length; i += columns) {
+            rows.push(products.slice(i, i + columns));
+        }
+        return rows;
+    }, [products, columns]);
 
     if (!products || products.length === 0) {
         return (
@@ -52,8 +96,11 @@ export default function ProductGrid({
 
     if (viewMode === "list") {
         return (
-            <div className="space-y-6">
-                {products.map((p, index) => {
+            <VirtualizedRows
+                items={products}
+                estimateSize={() => LIST_ROW_HEIGHT}
+                getItemKey={(product) => product.id}
+                renderRow={(p, index) => {
                     const inStock = (p.stock ?? 0) > 0;
                     const lowStock = (p.stock ?? 0) > 0 && (p.stock ?? 0) <= 5;
 
@@ -66,18 +113,17 @@ export default function ProductGrid({
                             <div className="flex flex-col sm:flex-row gap-8 p-8">
                                 {/* Image */}
                                 <Link
-                                    href={`/products/${p.id}`}
+                                    to="/products/$id"
+                                    params={{ id: p.id }}
                                     className="flex-shrink-0 w-full sm:w-64 h-64 relative overflow-hidden rounded-xl bg-muted"
                                 >
                                     {p.image ? (
-                                        <Image
+                                        <img
                                             src={p.image}
                                             alt={
                                                 p.title || "Imagen del producto"
                                             }
-                                            fill
-                                            sizes="256px"
-                                            className="object-cover transition-transform duration-700 group-hover:scale-110"
+                                            className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                                         />
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center">
@@ -113,7 +159,8 @@ export default function ProductGrid({
                                                 )}
                                                 <h3 className="text-3xl font-bold tracking-tight text-foreground">
                                                     <Link
-                                                        href={`/products/${p.id}`}
+                                                        to="/products/$id"
+                                                        params={{ id: p.id }}
                                                         className="hover:text-primary transition-colors"
                                                     >
                                                         {p.title}
@@ -165,7 +212,10 @@ export default function ProductGrid({
                                             asChild
                                             className="h-14 px-10 rounded-xl font-bold border-2 border-border hover:bg-muted transition-[color,background-color,border-color,box-shadow,opacity,transform]"
                                         >
-                                            <Link href={`/products/${p.id}`}>
+                                            <Link
+                                                to="/products/$id"
+                                                params={{ id: p.id }}
+                                            >
                                                 <Eye className="mr-2 size-4" />
                                                 Ver detalles
                                             </Link>
@@ -175,115 +225,135 @@ export default function ProductGrid({
                             </div>
                         </Card>
                     );
-                })}
-            </div>
+                }}
+                rowClassName="pb-6"
+            />
         );
     }
 
     // Grid View - Professional Minimalist Style
     return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {products.map((p, index) => {
-                const inStock = (p.stock ?? 0) > 0;
-                const lowStock = (p.stock ?? 0) > 0 && (p.stock ?? 0) <= 5;
+        <VirtualizedRows
+            items={gridRows}
+            estimateSize={() => GRID_ROW_HEIGHT}
+            getItemKey={(row) => `${columns}:${row[0]?.id ?? "row"}`}
+            renderRow={(row, rowIndex) => (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                    {row.map((p) => {
+                        const index = rowIndex * columns + row.indexOf(p);
+                        const inStock = (p.stock ?? 0) > 0;
+                        const lowStock =
+                            (p.stock ?? 0) > 0 && (p.stock ?? 0) <= 5;
 
-                return (
-                    <Card
-                        key={p.id}
-                        className="group overflow-hidden border-none shadow-lg hover:shadow-2xl transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-500 rounded-[2rem] bg-background animate-in fade-in slide-in-from-bottom-4 fill-mode-both relative"
-                        style={{ animationDelay: `${index * 50}ms` }}
-                    >
-                        {/* Product Image */}
-                        <Link
-                            href={`/products/${p.id}`}
-                            className="block relative aspect-[4/5] overflow-hidden bg-muted"
-                        >
-                            {p.image ? (
-                                <Image
-                                    src={p.image}
-                                    alt={p.title || "Imagen del producto"}
-                                    fill
-                                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                                    className="object-cover transition-transform duration-1000 group-hover:scale-110"
-                                />
-                            ) : (
-                                <div className="w-full h-full flex items-center justify-center bg-muted/30">
-                                    <Package className="size-16 text-muted-foreground/20" />
-                                </div>
-                            )}
-
-                            {/* Status Badges */}
-                            <div className="absolute top-4 right-4 flex flex-col gap-2 z-10">
-                                {!inStock && (
-                                    <Badge
-                                        variant="destructive"
-                                        className="rounded-full px-3 py-1 font-bold text-[10px] uppercase tracking-widest shadow-xl border-2 border-background"
-                                    >
-                                        Agotado
-                                    </Badge>
-                                )}
-                                {lowStock && inStock && (
-                                    <Badge className="bg-destructive text-destructive-foreground rounded-full px-3 py-1 font-bold text-[10px] uppercase tracking-widest shadow-xl border-2 border-background">
-                                        Últimas {p.stock}
-                                    </Badge>
-                                )}
-                            </div>
-
-                            {/* View Overlay */}
-                            <div className="absolute inset-0 bg-foreground/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center backdrop-blur-[1px]">
-                                <div className="px-6 py-3 bg-background text-foreground border border-foreground/10 rounded-full font-bold text-[10px] uppercase tracking-widest translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
-                                    Ver producto →
-                                </div>
-                            </div>
-                        </Link>
-
-                        {/* Content Section */}
-                        <CardContent className="p-6 space-y-6">
-                            <div className="space-y-1">
-                                {/* Category */}
-                                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
-                                    {p.category || "General"}
-                                </p>
-
-                                {/* Title */}
-                                <h3 className="text-xl font-bold tracking-tight line-clamp-1 group-hover:text-primary transition-colors leading-none">
-                                    <Link href={`/products/${p.id}`}>
-                                        {p.title}
-                                    </Link>
-                                </h3>
-                            </div>
-
-                            {/* Price & Action */}
-                            <div className="space-y-4 pt-4 border-t border-border/50">
-                                <div className="flex items-center justify-between">
-                                    <div className="text-2xl font-bold text-foreground">
-                                        ${p.price}
-                                    </div>
-                                </div>
-
-                                <Button
-                                    onClick={() => handleAdd(p.id, p.title)}
-                                    disabled={loadingId === p.id || !inStock}
-                                    className="w-full h-14 bg-foreground text-background hover:bg-foreground/90 font-bold uppercase tracking-widest text-[11px] rounded-xl transition-[color,background-color,border-color,box-shadow,opacity,transform] shadow-xl shadow-foreground/5"
-                                    size="lg"
+                        return (
+                            <Card
+                                key={p.id}
+                                className="group overflow-hidden border-none shadow-lg hover:shadow-2xl transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-500 rounded-[2rem] bg-background animate-in fade-in slide-in-from-bottom-4 fill-mode-both relative"
+                                style={{ animationDelay: `${index * 50}ms` }}
+                            >
+                                {/* Product Image */}
+                                <Link
+                                    to="/products/$id"
+                                    params={{ id: p.id }}
+                                    className="block relative aspect-[4/5] overflow-hidden bg-muted"
                                 >
-                                    {loadingId === p.id ? (
-                                        <div className="flex items-center gap-2">
-                                            <Loader2 className="size-4 animate-spin" />
-                                            <span>Procesando</span>
-                                        </div>
+                                    {p.image ? (
+                                        <img
+                                            src={p.image}
+                                            alt={
+                                                p.title || "Imagen del producto"
+                                            }
+                                            className="absolute inset-0 h-full w-full object-cover transition-transform duration-1000 group-hover:scale-110"
+                                        />
                                     ) : (
-                                        <div className="flex items-center gap-2">
-                                            <ShoppingCart className="size-4" />
-                                            <span>Agregar al Carrito</span>
+                                        <div className="w-full h-full flex items-center justify-center bg-muted/30">
+                                            <Package className="size-16 text-muted-foreground/20" />
                                         </div>
                                     )}
-                                </Button>
-                            </div>
-                        </CardContent>
-                    </Card>
-                );
-            })}
-        </div>
+
+                                    {/* Status Badges */}
+                                    <div className="absolute top-4 right-4 flex flex-col gap-2 z-10">
+                                        {!inStock && (
+                                            <Badge
+                                                variant="destructive"
+                                                className="rounded-full px-3 py-1 font-bold text-[10px] uppercase tracking-widest shadow-xl border-2 border-background"
+                                            >
+                                                Agotado
+                                            </Badge>
+                                        )}
+                                        {lowStock && inStock && (
+                                            <Badge className="bg-destructive text-destructive-foreground rounded-full px-3 py-1 font-bold text-[10px] uppercase tracking-widest shadow-xl border-2 border-background">
+                                                Últimas {p.stock}
+                                            </Badge>
+                                        )}
+                                    </div>
+
+                                    {/* View Overlay */}
+                                    <div className="absolute inset-0 bg-foreground/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center backdrop-blur-[1px]">
+                                        <div className="px-6 py-3 bg-background text-foreground border border-foreground/10 rounded-full font-bold text-[10px] uppercase tracking-widest translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+                                            Ver producto →
+                                        </div>
+                                    </div>
+                                </Link>
+
+                                {/* Content Section */}
+                                <CardContent className="p-6 space-y-6">
+                                    <div className="space-y-1">
+                                        {/* Category */}
+                                        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
+                                            {p.category || "General"}
+                                        </p>
+
+                                        {/* Title */}
+                                        <h3 className="text-xl font-bold tracking-tight line-clamp-1 group-hover:text-primary transition-colors leading-none">
+                                            <Link
+                                                to="/products/$id"
+                                                params={{ id: p.id }}
+                                            >
+                                                {p.title}
+                                            </Link>
+                                        </h3>
+                                    </div>
+
+                                    {/* Price & Action */}
+                                    <div className="space-y-4 pt-4 border-t border-border/50">
+                                        <div className="flex items-center justify-between">
+                                            <div className="text-2xl font-bold text-foreground">
+                                                ${p.price}
+                                            </div>
+                                        </div>
+
+                                        <Button
+                                            onClick={() =>
+                                                handleAdd(p.id, p.title)
+                                            }
+                                            disabled={
+                                                loadingId === p.id || !inStock
+                                            }
+                                            className="w-full h-14 bg-foreground text-background hover:bg-foreground/90 font-bold uppercase tracking-widest text-[11px] rounded-xl transition-[color,background-color,border-color,box-shadow,opacity,transform] shadow-xl shadow-foreground/5"
+                                            size="lg"
+                                        >
+                                            {loadingId === p.id ? (
+                                                <div className="flex items-center gap-2">
+                                                    <Loader2 className="size-4 animate-spin" />
+                                                    <span>Procesando</span>
+                                                </div>
+                                            ) : (
+                                                <div className="flex items-center gap-2">
+                                                    <ShoppingCart className="size-4" />
+                                                    <span>
+                                                        Agregar al Carrito
+                                                    </span>
+                                                </div>
+                                            )}
+                                        </Button>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        );
+                    })}
+                </div>
+            )}
+        />
     );
 }

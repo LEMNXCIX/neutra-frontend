@@ -1,7 +1,7 @@
 "use client";
 
-import { usePathname, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useReducer, useRef, useTransition } from "react";
+import { usePathname, useSearchParams } from "@/lib/navigation";
 
 type ProgressState = {
     navigating: boolean;

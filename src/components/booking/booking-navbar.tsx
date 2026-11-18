@@ -1,8 +1,6 @@
 "use client";
+import { Link } from "@tanstack/react-router";
 import { ArrowRight, Calendar, Menu, User } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useTheme } from "next-themes";
 import { useState } from "react";
 import Logo from "@/components/logo";
 import { UserAccountSummary } from "@/components/shared/UserAccountSummary";
@@ -30,7 +28,9 @@ import {
     SheetTitle,
     SheetTrigger,
 } from "@/components/ui/sheet";
+import { useRouter } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
+import { useTheme } from "@/providers/theme-provider";
 import { useAuthStore } from "@/store/auth-store";
 
 type NavItem = { label: string; href: string };
@@ -104,7 +104,7 @@ function MobileMenuSheet({
                             {navItems.map((item) => (
                                 <Link
                                     key={item.href}
-                                    href={item.href}
+                                    to={item.href}
                                     onClick={() => setIsOpen(false)}
                                     className="flex items-center justify-between p-4 bg-card border border-border shadow-sm hover:shadow-md hover:border-primary/20 transition-[color,background-color,border-color,box-shadow,opacity,transform] rounded-xl group"
                                 >
@@ -260,7 +260,7 @@ export function BookingNavbar({
                             </div>
                         </div>
                         <Link
-                            href="/"
+                            to="/"
                             className="ml-3 flex flex-col leading-tight"
                         >
                             <span className="text-lg font-bold tracking-tight">
@@ -289,9 +289,7 @@ export function BookingNavbar({
                                             "bg-transparent font-semibold text-xs tracking-tight hover:bg-muted transition-colors rounded-lg px-4",
                                         )}
                                     >
-                                        <Link href={item.href}>
-                                            {item.label}
-                                        </Link>
+                                        <Link to={item.href}>{item.label}</Link>
                                     </NavigationMenuLink>
                                 </NavigationMenuItem>
                             ))}
@@ -334,7 +332,7 @@ export function BookingNavbar({
                                         asChild
                                     >
                                         <Link
-                                            href="/appointments"
+                                            to="/appointments"
                                             className="flex items-center gap-3 font-semibold text-sm w-full"
                                         >
                                             <Calendar
@@ -349,7 +347,7 @@ export function BookingNavbar({
                                         asChild
                                     >
                                         <Link
-                                            href="/profile"
+                                            to="/profile"
                                             className="flex items-center gap-3 font-semibold text-sm w-full"
                                         >
                                             <User

@@ -16,6 +16,8 @@ import { readdirSync, readFileSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
+import { errorMessageFrom } from "@/lib/error-messages";
+
 const SRC = resolve(__dirname, "../..");
 
 /** Only client surfaces can put text in front of a user. */
@@ -123,5 +125,29 @@ describe("no raw error message reaches the user", () => {
             }
         }
         expect(offenders).toEqual([]);
+    });
+
+    it("shows only the Spanish code message, never the raw backend message", () => {
+        // The backend's envelope `message` is wire prose ("EMAIL_TAKEN"). The
+        // only stable, translatable part is errors[].code; that is what the UI
+        // path (reportError -> errorMessageFrom) must render.
+        const rendered = errorMessageFrom(
+            {
+                message: "EMAIL_TAKEN",
+                statusCode: 409,
+                errors: [
+                    {
+                        code: "AUTH_EMAIL_TAKEN_IN_OTHER_TENANT",
+                        message: "EMAIL_TAKEN",
+                    },
+                ],
+            },
+            "No pudimos completar la operación.",
+        );
+
+        expect(rendered).toContain(
+            "Ese correo ya está registrado en otro negocio",
+        );
+        expect(rendered).not.toContain("EMAIL_TAKEN");
     });
 });

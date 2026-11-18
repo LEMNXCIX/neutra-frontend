@@ -17,7 +17,7 @@ vi.mock("@/hooks/use-cart", () => ({
 vi.mock("@/hooks/useFeatures", () => ({
     useFeatures: () => ({ isFeatureEnabled: () => true }),
 }));
-vi.mock("next/navigation", () => ({
+vi.mock("@/lib/navigation", () => ({
     useRouter: () => ({ push: componentMocks.routerPush }),
 }));
 vi.mock("@/lib/api-fetch", () => ({
@@ -47,6 +47,7 @@ import { cartService } from "@/services/cart.service";
 import { couponsService } from "@/services/coupons.service";
 import { useAuthStore } from "@/store/auth-store";
 import { useCartStore } from "@/store/cart-store";
+import { cartStore } from "@/store/tanstack/cart-store";
 import { useTenantStore } from "@/store/tenant-store";
 
 const mockCart = cartService as unknown as {
@@ -404,6 +405,16 @@ describe("cart-store coupon revalidation", () => {
             isReward: true,
         });
         expect(useCartStore.getState().discount).toBe(7);
+    });
+});
+
+describe("cart-store TanStack API", () => {
+    it("exposes actions and state through the TanStack store", () => {
+        expect(typeof cartStore.actions.fetchCart).toBe("function");
+        expect(typeof cartStore.actions.applyCoupon).toBe("function");
+        cartStore.setState((prev) => ({ ...prev, discount: 3.5 }));
+        expect(cartStore.get().discount).toBe(3.5);
+        expect(useCartStore.getState().discount).toBe(3.5);
     });
 });
 

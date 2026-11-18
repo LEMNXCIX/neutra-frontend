@@ -1,8 +1,7 @@
 "use client";
 
+import { Link } from "@tanstack/react-router";
 import { Calendar, Clock, Eye, User as UserIcon } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { CancelAppointmentDialog } from "@/components/booking/cancel-appointment-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,6 +12,7 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
+import { useRouter } from "@/lib/navigation";
 import {
     APPOINTMENT_STATUS_LABELS,
     type Appointment,
@@ -71,7 +71,7 @@ export function AppointmentHistory({
                         size="lg"
                         className="rounded-xl px-8 font-bold"
                     >
-                        <Link href="/services">Ver Servicios</Link>
+                        <Link to="/services">Ver Servicios</Link>
                     </Button>
                 </CardContent>
             </Card>
@@ -174,7 +174,8 @@ export function AppointmentHistory({
                                     asChild
                                 >
                                     <Link
-                                        href={`/appointments/${a.id}`}
+                                        to="/appointments/$id"
+                                        params={{ id: a.id }}
                                         className="flex items-center gap-2"
                                     >
                                         <Eye className="size-4" /> Ver detalles

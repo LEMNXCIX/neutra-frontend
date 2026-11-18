@@ -1,19 +1,32 @@
-import { cookies } from "next/headers";
+import { getRequest } from "@tanstack/react-start/server";
 
 import { getBackendUrl } from "@/lib/backend-url";
 
+/** All cookies of the current Start request, as a `{ name: value }` map. */
+const currentCookies = (): Record<string, string> => {
+    const jar = getRequest()?.headers?.get("cookie") ?? "";
+    const cookies: Record<string, string> = {};
+    for (const pair of jar.split(";")) {
+        const separator = pair.indexOf("=");
+        if (separator < 0) continue;
+        const name = pair.slice(0, separator).trim();
+        if (!name) continue;
+        cookies[name] = decodeURIComponent(pair.slice(separator + 1).trim());
+    }
+    return cookies;
+};
+
 export async function validateAdminAccess() {
     try {
-        const cookieStore = await cookies();
-        const tokenCookie = cookieStore.get("token");
+        const cookies = currentCookies();
+        const tokenCookie = cookies.token;
 
         if (!tokenCookie) {
             return { isValid: false, user: null };
         }
 
-        const allCookies = cookieStore.getAll();
-        const cookieHeader = allCookies
-            .map((cookie) => `${cookie.name}=${cookie.value}`)
+        const cookieHeader = Object.entries(cookies)
+            .map(([name, value]) => `${name}=${value}`)
             .join("; ");
 
         const response = await fetch(`${getBackendUrl()}/auth/validate`, {
@@ -45,15 +58,12 @@ export async function validateAdminAccess() {
 }
 
 export async function extractTokenFromCookies() {
-    const cookieStore = await cookies();
-    return cookieStore.get("token")?.value || null;
+    return currentCookies().token || null;
 }
 
 export async function getCookieString() {
-    const cookieStore = await cookies();
-    const allCookies = cookieStore.getAll();
-    return allCookies
-        .map((cookie) => `${cookie.name}=${cookie.value}`)
+    return Object.entries(currentCookies())
+        .map(([name, value]) => `${name}=${value}`)
         .join("; ");
 }
 

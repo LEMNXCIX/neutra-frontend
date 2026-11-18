@@ -1,5 +1,7 @@
 "use client";
 
+import { useForm } from "@tanstack/react-form";
+import { Link } from "@tanstack/react-router";
 import {
     AlertCircle,
     ArrowLeft,
@@ -7,9 +9,6 @@ import {
     CheckCircle2,
     Lock,
 } from "lucide-react";
-import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import type React from "react";
 import { Suspense, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -25,62 +24,96 @@ import {
 import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Spinner } from "@/components/ui/spinner";
-import { reportError } from "@/lib/error-reporting";
+import {
+    applyServerErrors,
+    clearFieldErrors,
+    type FieldErrorSetter,
+    inlineFieldErrors,
+} from "@/lib/form-errors";
+import { useRouter, useSearchParams } from "@/lib/navigation";
 import { PASSWORD_MIN_LENGTH } from "@/lib/password-policy";
 import { authService } from "@/services/auth.service";
+
+const RESET_FIELDS = ["password", "confirmPassword"] as const;
+
+const validateReset = (value: {
+    password: string;
+    confirmPassword: string;
+}): string | undefined => {
+    if (value.password !== value.confirmPassword) {
+        return "Las contraseñas no coinciden";
+    }
+    if (value.password.length < PASSWORD_MIN_LENGTH) {
+        return `La contraseña debe tener al menos ${PASSWORD_MIN_LENGTH} caracteres`;
+    }
+    return undefined;
+};
 
 function ResetPasswordForm() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const token = searchParams.get("token");
 
-    const [password, setPassword] = useState("");
-    const [confirmPassword, setConfirmPassword] = useState("");
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState("");
+    const [serverError, setServerError] = useState("");
     const [success, setSuccess] = useState(false);
+
+    const form = useForm({
+        defaultValues: {
+            password: "",
+            confirmPassword: "",
+        },
+        validators: {
+            onSubmit: ({ value }) => validateReset(value),
+        },
+        onSubmitInvalid: ({ value }) => {
+            const message = validateReset(value);
+            if (message) toast.error(message);
+        },
+        onSubmit: async ({ value }) => {
+            if (!token) return;
+
+            clearFieldErrors(RESET_FIELDS, setFieldServerError);
+            setLoading(true);
+            setServerError("");
+            try {
+                await authService.resetPassword({
+                    token,
+                    newPassword: value.password,
+                });
+                setSuccess(true);
+                toast.success("Contraseña restablecida correctamente");
+                setTimeout(() => {
+                    router.push("/login");
+                }, 3000);
+            } catch (err) {
+                applyServerErrors({
+                    error: err,
+                    fallback: "No pudimos restablecer tu contraseña.",
+                    knownFields: RESET_FIELDS,
+                    setFormError: setServerError,
+                    setFieldError: setFieldServerError,
+                });
+            } finally {
+                setLoading(false);
+            }
+        },
+    });
+
+    const setFieldServerError: FieldErrorSetter = (field, message) =>
+        form.setFieldMeta(field as never, (prev) => ({
+            ...prev,
+            errorMap: {
+                ...prev?.errorMap,
+                onServer: message,
+            },
+        }));
 
     useEffect(() => {
         if (!token) {
             toast.error("Token de restablecimiento inválido o faltante");
         }
     }, [token]);
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!token) return;
-
-        if (password !== confirmPassword) {
-            toast.error("Las contraseñas no coinciden");
-            return;
-        }
-
-        if (password.length < PASSWORD_MIN_LENGTH) {
-            toast.error(
-                `La contraseña debe tener al menos ${PASSWORD_MIN_LENGTH} caracteres`,
-            );
-            return;
-        }
-
-        try {
-            setLoading(true);
-            setError("");
-            await authService.resetPassword({ token, newPassword: password });
-            setSuccess(true);
-            toast.success("Contraseña restablecida correctamente");
-            setTimeout(() => {
-                router.push("/login");
-            }, 3000);
-        } catch (error: any) {
-            setError(
-                reportError(error, "No pudimos restablecer tu contraseña.", {
-                    toast: false,
-                }),
-            );
-        } finally {
-            setLoading(false);
-        }
-    };
 
     if (!token) {
         return (
@@ -109,7 +142,7 @@ function ResetPasswordForm() {
                         className="w-full h-12 rounded-xl border-border font-bold text-xs transition-[color,background-color,border-color,box-shadow,opacity,transform] hover:bg-muted"
                         asChild
                     >
-                        <Link href="/forgot-password">
+                        <Link to="/forgot-password">
                             Solicitar un nuevo enlace →
                         </Link>
                     </Button>
@@ -142,7 +175,7 @@ function ResetPasswordForm() {
                         className="w-full h-12 rounded-xl font-bold text-sm shadow-lg shadow-primary/20 transition-[color,background-color,border-color,box-shadow,opacity,transform] hover:-translate-y-0.5"
                         asChild
                     >
-                        <Link href="/login">
+                        <Link to="/login">
                             Iniciar sesión{" "}
                             <ArrowRight className="ml-2 size-4" />
                         </Link>
@@ -164,46 +197,103 @@ function ResetPasswordForm() {
                 </CardDescription>
             </CardHeader>
             <CardContent className="px-8 pb-8">
-                <form onSubmit={handleSubmit} className="space-y-5">
-                    <div className="space-y-2">
-                        <Label
-                            htmlFor="password"
-                            className="text-xs font-semibold text-foreground ml-1"
-                        >
-                            Nueva contraseña
-                        </Label>
-                        <PasswordInput
-                            id="password"
-                            icon={Lock}
-                            required
-                            className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform] focus:border-primary"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                        />
-                    </div>
-                    <div className="space-y-2">
-                        <Label
-                            htmlFor="confirm-password"
-                            className="text-xs font-semibold text-foreground ml-1"
-                        >
-                            Confirmar contraseña
-                        </Label>
-                        <PasswordInput
-                            id="confirm-password"
-                            icon={Lock}
-                            required
-                            className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform] focus:border-primary"
-                            value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
-                        />
-                    </div>
-                    {error && (
+                <form
+                    onSubmit={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        void form.handleSubmit();
+                    }}
+                    className="space-y-5"
+                >
+                    <form.Field name="password">
+                        {(field) => {
+                            const errors = inlineFieldErrors(
+                                field.state.meta.errors,
+                                serverError,
+                            );
+                            return (
+                                <div className="space-y-2">
+                                    <Label
+                                        htmlFor="password"
+                                        className="text-xs font-semibold text-foreground ml-1"
+                                    >
+                                        Nueva contraseña
+                                    </Label>
+                                    <PasswordInput
+                                        id="password"
+                                        icon={Lock}
+                                        required
+                                        className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform] focus:border-primary"
+                                        value={field.state.value}
+                                        onChange={(e) =>
+                                            field.handleChange(e.target.value)
+                                        }
+                                        onBlur={field.handleBlur}
+                                        aria-invalid={
+                                            field.state.meta.errors.length >
+                                                0 || undefined
+                                        }
+                                    />
+                                    {errors.length > 0 && (
+                                        <p
+                                            role="alert"
+                                            className="text-xs font-semibold text-destructive"
+                                        >
+                                            {errors.join(" ")}
+                                        </p>
+                                    )}
+                                </div>
+                            );
+                        }}
+                    </form.Field>
+                    <form.Field name="confirmPassword">
+                        {(field) => {
+                            const errors = inlineFieldErrors(
+                                field.state.meta.errors,
+                                serverError,
+                            );
+                            return (
+                                <div className="space-y-2">
+                                    <Label
+                                        htmlFor="confirm-password"
+                                        className="text-xs font-semibold text-foreground ml-1"
+                                    >
+                                        Confirmar contraseña
+                                    </Label>
+                                    <PasswordInput
+                                        id="confirm-password"
+                                        icon={Lock}
+                                        required
+                                        className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform] focus:border-primary"
+                                        value={field.state.value}
+                                        onChange={(e) =>
+                                            field.handleChange(e.target.value)
+                                        }
+                                        onBlur={field.handleBlur}
+                                        aria-invalid={
+                                            field.state.meta.errors.length >
+                                                0 || undefined
+                                        }
+                                    />
+                                    {errors.length > 0 && (
+                                        <p
+                                            role="alert"
+                                            className="text-xs font-semibold text-destructive"
+                                        >
+                                            {errors.join(" ")}
+                                        </p>
+                                    )}
+                                </div>
+                            );
+                        }}
+                    </form.Field>
+                    {serverError && (
                         <Alert variant="destructive">
                             <AlertCircle
                                 className="size-4"
                                 aria-hidden="true"
                             />
-                            <AlertDescription>{error}</AlertDescription>
+                            <AlertDescription>{serverError}</AlertDescription>
                         </Alert>
                     )}
                     <Button
@@ -224,7 +314,7 @@ function ResetPasswordForm() {
             </CardContent>
             <CardFooter className="flex flex-col gap-4 border-t border-border/50 p-6 bg-muted/10">
                 <Link
-                    href="/login"
+                    to="/login"
                     className="flex items-center text-xs font-semibold text-muted-foreground hover:text-primary transition-colors"
                 >
                     <ArrowLeft className="mr-2 size-4" />

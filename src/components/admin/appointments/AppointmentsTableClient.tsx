@@ -13,10 +13,10 @@ import {
     User,
     XCircle,
 } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
 import type React from "react";
 import { Suspense, useReducer, useSyncExternalStore } from "react";
 import { toast } from "sonner";
+import { useAdminTable } from "@/components/admin/shared/useAdminTable";
 import { StatusUpdateDialog } from "@/components/booking/status-update-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -47,6 +47,7 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { useConfirm } from "@/hooks/use-confirm";
+import { useRouter, useSearchParams } from "@/lib/navigation";
 import { readJsonResponse } from "@/lib/response";
 import type {
     Appointment,
@@ -524,9 +525,15 @@ function AppointmentsMobileCards({
     handleDelete: (id: string) => void;
     onStatusUpdated: () => void;
 }) {
+    const { rows } = useAdminTable({
+        data: appointments,
+        getRowId: (appointment) => appointment.id,
+        enablePagination: true,
+    });
+
     return (
         <div className="grid grid-cols-1 gap-4 md:hidden">
-            {appointments.length === 0 ? (
+            {rows.length === 0 ? (
                 <Card className="border-dashed t-card">
                     <CardContent className="p-12 text-center">
                         <CalendarX className="size-12 mx-auto text-muted-foreground/30 mb-4" />
@@ -536,7 +543,7 @@ function AppointmentsMobileCards({
                     </CardContent>
                 </Card>
             ) : (
-                appointments.map((appointment) => (
+                rows.map((appointment) => (
                     <Card
                         key={appointment.id}
                         className="t-card overflow-hidden"
@@ -700,6 +707,12 @@ function AppointmentsDesktopTable({
     handleDelete: (id: string) => void;
     onStatusUpdated: () => void;
 }) {
+    const { rows } = useAdminTable({
+        data: appointments,
+        getRowId: (appointment) => appointment.id,
+        enablePagination: true,
+    });
+
     return (
         <Card className="t-card border-none shadow-xl overflow-hidden hidden md:block">
             <div className="overflow-x-auto">
@@ -735,7 +748,7 @@ function AppointmentsDesktopTable({
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {appointments.length === 0 ? (
+                        {rows.length === 0 ? (
                             <TableRow>
                                 <TableCell
                                     colSpan={isSuperAdmin ? 8 : 7}
@@ -745,7 +758,7 @@ function AppointmentsDesktopTable({
                                 </TableCell>
                             </TableRow>
                         ) : (
-                            appointments.map((appointment) => (
+                            rows.map((appointment) => (
                                 <TableRow
                                     key={appointment.id}
                                     className="group hover:bg-muted/30 transition-colors border-b border-border/50"

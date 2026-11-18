@@ -1,7 +1,5 @@
 "use client";
 import { Edit, Shield, UserCircle, UserCog, Users } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
-
 import type React from "react";
 import {
     Suspense,
@@ -14,6 +12,7 @@ import {
 import { toast } from "sonner";
 import { AdminStatCard as StatCard } from "@/components/admin/shared/AdminStatCard";
 import { MobileTablePagination } from "@/components/admin/shared/TablePagination";
+import { useAdminTable } from "@/components/admin/shared/useAdminTable";
 import {
     Accordion,
     AccordionContent,
@@ -49,6 +48,7 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { reportError } from "@/lib/error-reporting";
+import { useRouter, useSearchParams } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
 import { tenantService } from "@/services/tenant.service";
 import { usersService } from "@/services/users.service";
@@ -405,6 +405,12 @@ function UsersDesktopTable({
     onOpenEdit: (u: User) => void;
     onOpenRoleDialog: (u: User) => void;
 }) {
+    const { rows } = useAdminTable({
+        data: users,
+        getRowId: (user) => user.id,
+        enablePagination: true,
+    });
+
     return (
         <Card className="hidden lg:block">
             <div className="overflow-x-auto">
@@ -428,7 +434,7 @@ function UsersDesktopTable({
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {users.length === 0 ? (
+                        {rows.length === 0 ? (
                             <TableRow>
                                 <TableCell
                                     colSpan={5}
@@ -438,7 +444,7 @@ function UsersDesktopTable({
                                 </TableCell>
                             </TableRow>
                         ) : (
-                            users.map((u) => (
+                            rows.map((u) => (
                                 <TableRow
                                     key={u.id}
                                     className="group hover:bg-muted/50 transition-colors border-b border-border/50"
@@ -543,9 +549,15 @@ function UsersMobileCards({
     onOpenEdit: (u: User) => void;
     onOpenRoleDialog: (u: User) => void;
 }) {
+    const { rows } = useAdminTable({
+        data: users,
+        getRowId: (user) => user.id,
+        enablePagination: true,
+    });
+
     return (
         <div className="space-y-4 lg:hidden">
-            {users.map((u) => (
+            {rows.map((u) => (
                 <Card key={u.id} className="t-card overflow-hidden">
                     <CardContent className="p-6 space-y-6">
                         <div className="flex items-center gap-4">

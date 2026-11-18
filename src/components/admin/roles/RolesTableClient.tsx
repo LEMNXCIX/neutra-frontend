@@ -9,14 +9,13 @@ import {
     Shield,
     Trash2,
 } from "lucide-react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-
 import type React from "react";
 import { Suspense, useReducer, useRef, useSyncExternalStore } from "react";
 import { toast } from "sonner";
 import { useDebouncedCallback } from "use-debounce";
 import { AdminCardActions } from "@/components/admin/shared/AdminCardActions";
 import { AdminStatCard as StatCard } from "@/components/admin/shared/AdminStatCard";
+import { useAdminTable } from "@/components/admin/shared/useAdminTable";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -42,6 +41,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useConfirm } from "@/hooks/use-confirm";
 import { reportError } from "@/lib/error-reporting";
+import { usePathname, useRouter, useSearchParams } from "@/lib/navigation";
 import { permissionsService } from "@/services/permissions.service";
 import { rolesService } from "@/services/roles.service";
 import type { Permission } from "@/types/permission.types";
@@ -388,6 +388,12 @@ function RolesDesktopTable({
     searchParams: URLSearchParams;
     router: ReturnType<typeof useRouter>;
 }) {
+    const { rows } = useAdminTable({
+        data: roles,
+        getRowId: (role) => role.id,
+        enablePagination: true,
+    });
+
     return (
         <Card className="hidden lg:block">
             <div className="overflow-x-auto">
@@ -408,7 +414,7 @@ function RolesDesktopTable({
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {roles.length === 0 ? (
+                        {rows.length === 0 ? (
                             <TableRow>
                                 <TableCell
                                     colSpan={5}
@@ -418,7 +424,7 @@ function RolesDesktopTable({
                                 </TableCell>
                             </TableRow>
                         ) : (
-                            roles.map((role) => (
+                            rows.map((role) => (
                                 <TableRow
                                     key={role.id}
                                     className="group hover:bg-muted/50 transition-colors border-b border-border/50"
@@ -633,16 +639,22 @@ function RolesMobileCards({
     searchParams: URLSearchParams;
     router: ReturnType<typeof useRouter>;
 }) {
+    const { rows } = useAdminTable({
+        data: roles,
+        getRowId: (role) => role.id,
+        enablePagination: true,
+    });
+
     return (
         <div className="lg:hidden grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {roles.length === 0 ? (
+            {rows.length === 0 ? (
                 <Card>
                     <CardContent className="py-8 text-center text-muted-foreground">
                         No se encontraron roles
                     </CardContent>
                 </Card>
             ) : (
-                roles.map((role) => (
+                rows.map((role) => (
                     <Card key={role.id} className="overflow-hidden">
                         <CardContent className="p-4 space-y-3">
                             <div className="flex items-start justify-between">
@@ -744,6 +756,12 @@ function PermissionsDesktopTable({
     searchParams: URLSearchParams;
     router: ReturnType<typeof useRouter>;
 }) {
+    const { rows } = useAdminTable({
+        data: permissions,
+        getRowId: (permission) => permission.id,
+        enablePagination: true,
+    });
+
     return (
         <Card className="hidden lg:block">
             <div className="overflow-x-auto">
@@ -760,7 +778,7 @@ function PermissionsDesktopTable({
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {permissions.length === 0 ? (
+                        {rows.length === 0 ? (
                             <TableRow>
                                 <TableCell
                                     colSpan={3}
@@ -770,7 +788,7 @@ function PermissionsDesktopTable({
                                 </TableCell>
                             </TableRow>
                         ) : (
-                            permissions.map((permission) => (
+                            rows.map((permission) => (
                                 <TableRow
                                     key={permission.id}
                                     className="hover:bg-muted/30"
@@ -969,16 +987,22 @@ function PermissionsMobileCards({
     searchParams: URLSearchParams;
     router: ReturnType<typeof useRouter>;
 }) {
+    const { rows } = useAdminTable({
+        data: permissions,
+        getRowId: (permission) => permission.id,
+        enablePagination: true,
+    });
+
     return (
         <div className="lg:hidden grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {permissions.length === 0 ? (
+            {rows.length === 0 ? (
                 <Card>
                     <CardContent className="py-8 text-center text-muted-foreground">
                         No se encontraron permisos
                     </CardContent>
                 </Card>
             ) : (
-                permissions.map((permission) => (
+                rows.map((permission) => (
                     <Card key={permission.id} className="overflow-hidden">
                         <CardContent className="p-4 space-y-3">
                             <div>

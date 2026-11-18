@@ -1,4 +1,7 @@
 "use client";
+import { useForm } from "@tanstack/react-form";
+import { Link } from "@tanstack/react-router";
+import { useSelector } from "@tanstack/react-store";
 import {
     AlertCircle,
     ArrowRight,
@@ -9,10 +12,7 @@ import {
     User,
     UserPlus,
 } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import type React from "react";
-import { useReducer } from "react";
+import { useState } from "react";
 import { AuthBrandHeader } from "@/components/auth/AuthBrandHeader";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -28,7 +28,13 @@ import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Separator } from "@/components/ui/separator";
 import { firstErrorCode } from "@/lib/error-messages";
-import { reportError } from "@/lib/error-reporting";
+import {
+    applyServerErrors,
+    clearFieldErrors,
+    type FieldErrorSetter,
+    inlineFieldErrors,
+} from "@/lib/form-errors";
+import { useRouter } from "@/lib/navigation";
 import { PASSWORD_MIN_LENGTH } from "@/lib/password-policy";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/auth-store";
@@ -40,6 +46,13 @@ import { useAuthStore } from "@/store/auth-store";
  */
 const RECOVERY_LINK_CODE = "AUTH_EMAIL_TAKEN_IN_OTHER_TENANT";
 
+const REGISTER_FIELDS = [
+    "name",
+    "email",
+    "password",
+    "confirmPassword",
+] as const;
+
 const getPasswordStrength = (pass: string) => {
     if (pass.length === 0) return { strength: 0, label: "", color: "" };
     if (pass.length < PASSWORD_MIN_LENGTH)
@@ -49,113 +62,108 @@ const getPasswordStrength = (pass: string) => {
     return { strength: 3, label: "Fuerte", color: "bg-emerald-500" };
 };
 
-type RegisterState = {
+/**
+ * The three client-side rules, in the same order they were checked before the
+ * form moved to TanStack Form. Returning the message from a validator keeps the
+ * copy in one place: it is shown in the alert and blocks `onSubmit`.
+ */
+const validateRegistration = (value: {
     name: string;
     email: string;
     password: string;
     confirmPassword: string;
-    error: string;
-    /** Backend `code` behind `error`, empty when there is none to branch on. */
-    errorCode: string;
-};
-
-type RegisterAction =
-    | {
-          type: "SET_FIELD";
-          field: keyof Omit<RegisterState, "error" | "errorCode">;
-          value: string;
-      }
-    | { type: "SET_ERROR"; value: string; code?: string }
-    | { type: "CLEAR_ERROR" };
-
-const registerReducer = (
-    state: RegisterState,
-    action: RegisterAction,
-): RegisterState => {
-    switch (action.type) {
-        case "SET_FIELD":
-            return {
-                ...state,
-                [action.field]: action.value,
-                error: "",
-                errorCode: "",
-            };
-        case "SET_ERROR":
-            return {
-                ...state,
-                error: action.value,
-                errorCode: action.code ?? "",
-            };
-        case "CLEAR_ERROR":
-            return { ...state, error: "", errorCode: "" };
-        default:
-            return state;
+}): string | undefined => {
+    if (
+        !value.name ||
+        !value.email ||
+        !value.password ||
+        !value.confirmPassword
+    ) {
+        return "Por favor completa todos los campos";
     }
-};
-
-const initialRegisterState: RegisterState = {
-    name: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-    error: "",
-    errorCode: "",
+    if (value.password !== value.confirmPassword) {
+        return "Las contraseñas no coinciden";
+    }
+    if (value.password.length < PASSWORD_MIN_LENGTH) {
+        return `La contraseña debe tener al menos ${PASSWORD_MIN_LENGTH} caracteres`;
+    }
+    return undefined;
 };
 
 export function RegisterPageClient() {
     const register = useAuthStore((state) => state.register);
     const loading = useAuthStore((state) => state.loading);
-    const [state, dispatch] = useReducer(registerReducer, initialRegisterState);
+    const [serverError, setServerError] = useState("");
+    const [errorCode, setErrorCode] = useState("");
     const router = useRouter();
 
-    const passwordStrength = getPasswordStrength(state.password);
+    const form = useForm({
+        defaultValues: {
+            name: "",
+            email: "",
+            password: "",
+            confirmPassword: "",
+        },
+        validators: {
+            onSubmit: ({ value }) => validateRegistration(value),
+        },
+        onSubmit: async ({ value }) => {
+            clearErrors();
+            try {
+                await register(value.name, value.email, value.password);
+                router.push("/");
+            } catch (err) {
+                setErrorCode(firstErrorCode(err) ?? "");
+                applyServerErrors({
+                    error: err,
+                    fallback: "No pudimos crear tu cuenta.",
+                    knownFields: REGISTER_FIELDS,
+                    setFormError: setServerError,
+                    setFieldError: setFieldServerError,
+                });
+            }
+        },
+    });
 
-    const onSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        dispatch({ type: "CLEAR_ERROR" });
+    const setFieldServerError: FieldErrorSetter = (field, message) =>
+        form.setFieldMeta(field as never, (prev) => ({
+            ...prev,
+            errorMap: {
+                ...prev?.errorMap,
+                onServer: message,
+            },
+        }));
 
-        if (
-            !state.name ||
-            !state.email ||
-            !state.password ||
-            !state.confirmPassword
-        ) {
-            dispatch({
-                type: "SET_ERROR",
-                value: "Por favor completa todos los campos",
-            });
-            return;
-        }
-
-        if (state.password !== state.confirmPassword) {
-            dispatch({
-                type: "SET_ERROR",
-                value: "Las contraseñas no coinciden",
-            });
-            return;
-        }
-
-        if (state.password.length < PASSWORD_MIN_LENGTH) {
-            dispatch({
-                type: "SET_ERROR",
-                value: `La contraseña debe tener al menos ${PASSWORD_MIN_LENGTH} caracteres`,
-            });
-            return;
-        }
-
-        try {
-            await register(state.name, state.email, state.password);
-            router.push("/");
-        } catch (err) {
-            dispatch({
-                type: "SET_ERROR",
-                value: reportError(err, "No pudimos crear tu cuenta.", {
-                    toast: false,
-                }),
-                code: firstErrorCode(err),
-            });
-        }
+    const clearErrors = () => {
+        setServerError("");
+        setErrorCode("");
+        form.setErrorMap({ ...form.state.errorMap, onSubmit: undefined });
+        clearFieldErrors(REGISTER_FIELDS, setFieldServerError);
     };
+
+    // Form state is read through the form store so the derived strength meter
+    // and the "passwords match" hint re-render as the user types, the same way
+    // the old reducer-driven `state.password` did.
+    const password = useSelector(form.store, (state) => state.values.password);
+    const confirmPassword = useSelector(
+        form.store,
+        (state) => state.values.confirmPassword,
+    );
+    const passwordStrength = getPasswordStrength(password);
+
+    const submitError = useSelector(
+        form.store,
+        (state) => state.errorMap.onSubmit,
+    );
+    const validationMessage =
+        serverError || (typeof submitError === "string" ? submitError : "");
+
+    const fieldErrorProps = (
+        errors: readonly unknown[],
+    ): { invalid: boolean; errors: string[] } => ({
+        invalid: errors.length > 0,
+        errors: inlineFieldErrors(errors, validationMessage),
+    });
 
     return (
         <main className="min-h-[80vh] flex items-center justify-center p-6 animate-slide-up py-20">
@@ -179,183 +187,275 @@ export function RegisterPageClient() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="pb-8">
-                        <form onSubmit={onSubmit} className="space-y-5">
+                        <form
+                            onSubmit={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                void form.handleSubmit();
+                            }}
+                            className="space-y-5"
+                        >
                             {/* Name Field */}
-                            <div className="space-y-2">
-                                <Label
-                                    htmlFor="name"
-                                    className="text-xs font-semibold text-foreground ml-1"
-                                >
-                                    Nombre completo
-                                </Label>
-                                <div className="relative group">
-                                    <User className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                                    <Input
-                                        id="name"
-                                        placeholder="Juan Pérez"
-                                        value={state.name}
-                                        onChange={(e) =>
-                                            dispatch({
-                                                type: "SET_FIELD",
-                                                field: "name",
-                                                value: e.target.value,
-                                            })
-                                        }
-                                        className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform] focus:border-primary"
-                                        disabled={loading}
-                                    />
-                                </div>
-                            </div>
+                            <form.Field name="name">
+                                {(field) => {
+                                    const { invalid, errors } = fieldErrorProps(
+                                        field.state.meta.errors,
+                                    );
+                                    return (
+                                        <div className="space-y-2">
+                                            <Label
+                                                htmlFor="name"
+                                                className="text-xs font-semibold text-foreground ml-1"
+                                            >
+                                                Nombre completo
+                                            </Label>
+                                            <div className="relative group">
+                                                <User className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                                                <Input
+                                                    id="name"
+                                                    placeholder="Juan Pérez"
+                                                    value={field.state.value}
+                                                    onChange={(e) => {
+                                                        clearErrors();
+                                                        field.handleChange(
+                                                            e.target.value,
+                                                        );
+                                                    }}
+                                                    onBlur={field.handleBlur}
+                                                    aria-invalid={
+                                                        invalid || undefined
+                                                    }
+                                                    className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform] focus:border-primary"
+                                                    disabled={loading}
+                                                />
+                                            </div>
+                                            {errors.length > 0 && (
+                                                <p
+                                                    role="alert"
+                                                    className="px-1 text-xs font-semibold text-destructive"
+                                                >
+                                                    {errors.join(" ")}
+                                                </p>
+                                            )}
+                                        </div>
+                                    );
+                                }}
+                            </form.Field>
 
                             {/* Email Field */}
-                            <div className="space-y-2">
-                                <Label
-                                    htmlFor="email"
-                                    className="text-xs font-semibold text-foreground ml-1"
-                                >
-                                    Correo Electrónico
-                                </Label>
-                                <div className="relative group">
-                                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                                    <Input
-                                        id="email"
-                                        type="email"
-                                        placeholder="juan@ejemplo.com"
-                                        value={state.email}
-                                        onChange={(e) =>
-                                            dispatch({
-                                                type: "SET_FIELD",
-                                                field: "email",
-                                                value: e.target.value,
-                                            })
-                                        }
-                                        className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform] focus:border-primary"
-                                        disabled={loading}
-                                    />
-                                </div>
-                            </div>
+                            <form.Field name="email">
+                                {(field) => {
+                                    const { invalid, errors } = fieldErrorProps(
+                                        field.state.meta.errors,
+                                    );
+                                    return (
+                                        <div className="space-y-2">
+                                            <Label
+                                                htmlFor="email"
+                                                className="text-xs font-semibold text-foreground ml-1"
+                                            >
+                                                Correo Electrónico
+                                            </Label>
+                                            <div className="relative group">
+                                                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                                                <Input
+                                                    id="email"
+                                                    type="email"
+                                                    placeholder="juan@ejemplo.com"
+                                                    value={field.state.value}
+                                                    onChange={(e) => {
+                                                        clearErrors();
+                                                        field.handleChange(
+                                                            e.target.value,
+                                                        );
+                                                    }}
+                                                    onBlur={field.handleBlur}
+                                                    aria-invalid={
+                                                        invalid || undefined
+                                                    }
+                                                    className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform] focus:border-primary"
+                                                    disabled={loading}
+                                                />
+                                            </div>
+                                            {errors.length > 0 && (
+                                                <p
+                                                    role="alert"
+                                                    className="px-1 text-xs font-semibold text-destructive"
+                                                >
+                                                    {errors.join(" ")}
+                                                </p>
+                                            )}
+                                        </div>
+                                    );
+                                }}
+                            </form.Field>
 
                             {/* Password Field */}
-                            <div className="space-y-2">
-                                <Label
-                                    htmlFor="password"
-                                    className="text-xs font-semibold text-foreground ml-1"
-                                >
-                                    Contraseña
-                                </Label>
-                                <PasswordInput
-                                    id="password"
-                                    icon={Lock}
-                                    placeholder="••••••••"
-                                    value={state.password}
-                                    onChange={(e) =>
-                                        dispatch({
-                                            type: "SET_FIELD",
-                                            field: "password",
-                                            value: e.target.value,
-                                        })
-                                    }
-                                    className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform] focus:border-primary"
-                                    disabled={loading}
-                                />
-                                {/* Password Strength Indicator */}
-                                {state.password && (
-                                    <div className="space-y-2 px-1 pt-1">
-                                        <div className="flex gap-1.5">
-                                            {[1, 2, 3].map((level) => (
-                                                <div
-                                                    key={level}
-                                                    className={cn(
-                                                        "h-1 flex-1 rounded-full transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-500",
-                                                        level <=
-                                                            passwordStrength.strength
-                                                            ? passwordStrength.color
-                                                            : "bg-muted",
-                                                    )}
-                                                />
-                                            ))}
-                                        </div>
-                                        {passwordStrength.label && (
-                                            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                                                Seguridad:{" "}
-                                                <span
-                                                    className={cn(
-                                                        passwordStrength.color.replace(
-                                                            "bg-",
-                                                            "text-",
-                                                        ),
-                                                    )}
+                            <form.Field name="password">
+                                {(field) => {
+                                    const { invalid, errors } = fieldErrorProps(
+                                        field.state.meta.errors,
+                                    );
+                                    return (
+                                        <div className="space-y-2">
+                                            <Label
+                                                htmlFor="password"
+                                                className="text-xs font-semibold text-foreground ml-1"
+                                            >
+                                                Contraseña
+                                            </Label>
+                                            <PasswordInput
+                                                id="password"
+                                                icon={Lock}
+                                                placeholder="••••••••"
+                                                value={field.state.value}
+                                                onChange={(e) => {
+                                                    clearErrors();
+                                                    field.handleChange(
+                                                        e.target.value,
+                                                    );
+                                                }}
+                                                onBlur={field.handleBlur}
+                                                aria-invalid={
+                                                    invalid || undefined
+                                                }
+                                                className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform] focus:border-primary"
+                                                disabled={loading}
+                                            />
+                                            {errors.length > 0 && (
+                                                <p
+                                                    role="alert"
+                                                    className="px-1 text-xs font-semibold text-destructive"
                                                 >
-                                                    {passwordStrength.label}
-                                                </span>
-                                            </p>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
+                                                    {errors.join(" ")}
+                                                </p>
+                                            )}
+                                            {/* Password Strength Indicator */}
+                                            {password && (
+                                                <div className="space-y-2 px-1 pt-1">
+                                                    <div className="flex gap-1.5">
+                                                        {[1, 2, 3].map(
+                                                            (level) => (
+                                                                <div
+                                                                    key={level}
+                                                                    className={cn(
+                                                                        "h-1 flex-1 rounded-full transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-500",
+                                                                        level <=
+                                                                            passwordStrength.strength
+                                                                            ? passwordStrength.color
+                                                                            : "bg-muted",
+                                                                    )}
+                                                                />
+                                                            ),
+                                                        )}
+                                                    </div>
+                                                    {passwordStrength.label && (
+                                                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                                                            Seguridad:{" "}
+                                                            <span
+                                                                className={cn(
+                                                                    passwordStrength.color.replace(
+                                                                        "bg-",
+                                                                        "text-",
+                                                                    ),
+                                                                )}
+                                                            >
+                                                                {
+                                                                    passwordStrength.label
+                                                                }
+                                                            </span>
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                }}
+                            </form.Field>
 
                             {/* Confirm Password Field */}
-                            <div className="space-y-2">
-                                <Label
-                                    htmlFor="confirmPassword"
-                                    className="text-xs font-semibold text-foreground ml-1"
-                                >
-                                    Confirmar contraseña
-                                </Label>
-                                <PasswordInput
-                                    id="confirmPassword"
-                                    icon={Lock}
-                                    placeholder="••••••••"
-                                    value={state.confirmPassword}
-                                    onChange={(e) =>
-                                        dispatch({
-                                            type: "SET_FIELD",
-                                            field: "confirmPassword",
-                                            value: e.target.value,
-                                        })
-                                    }
-                                    className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform] focus:border-primary"
-                                    disabled={loading}
-                                />
-                                {state.confirmPassword && (
-                                    <div className="flex items-center gap-2 px-1 pt-1">
-                                        {state.password ===
-                                        state.confirmPassword ? (
-                                            <>
-                                                <CheckCircle2 className="size-3 text-emerald-500" />
-                                                <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider">
-                                                    Las contraseñas coinciden
-                                                </span>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <AlertCircle className="size-3 text-rose-500" />
-                                                <span className="text-[10px] font-bold text-rose-600 uppercase tracking-wider">
-                                                    No coinciden
-                                                </span>
-                                            </>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
+                            <form.Field name="confirmPassword">
+                                {(field) => {
+                                    const { invalid, errors } = fieldErrorProps(
+                                        field.state.meta.errors,
+                                    );
+                                    return (
+                                        <div className="space-y-2">
+                                            <Label
+                                                htmlFor="confirmPassword"
+                                                className="text-xs font-semibold text-foreground ml-1"
+                                            >
+                                                Confirmar contraseña
+                                            </Label>
+                                            <PasswordInput
+                                                id="confirmPassword"
+                                                icon={Lock}
+                                                placeholder="••••••••"
+                                                value={field.state.value}
+                                                onChange={(e) => {
+                                                    clearErrors();
+                                                    field.handleChange(
+                                                        e.target.value,
+                                                    );
+                                                }}
+                                                onBlur={field.handleBlur}
+                                                aria-invalid={
+                                                    invalid || undefined
+                                                }
+                                                className="h-12 pl-11 border-muted-foreground/20 rounded-xl font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform] focus:border-primary"
+                                                disabled={loading}
+                                            />
+                                            {errors.length > 0 && (
+                                                <p
+                                                    role="alert"
+                                                    className="px-1 text-xs font-semibold text-destructive"
+                                                >
+                                                    {errors.join(" ")}
+                                                </p>
+                                            )}
+                                            {confirmPassword && (
+                                                <div className="flex items-center gap-2 px-1 pt-1">
+                                                    {password ===
+                                                    confirmPassword ? (
+                                                        <>
+                                                            <CheckCircle2 className="size-3 text-emerald-500" />
+                                                            <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider">
+                                                                Las contraseñas
+                                                                coinciden
+                                                            </span>
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <AlertCircle className="size-3 text-rose-500" />
+                                                            <span className="text-[10px] font-bold text-rose-600 uppercase tracking-wider">
+                                                                No coinciden
+                                                            </span>
+                                                        </>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                }}
+                            </form.Field>
 
                             {/* Error Alert */}
-                            {state.error && (
+                            {validationMessage && (
                                 <Alert
                                     variant="destructive"
                                     className="border-none bg-destructive/10 text-destructive rounded-xl py-3"
                                 >
                                     <AlertCircle className="size-4" />
                                     <AlertDescription className="text-xs font-semibold">
-                                        {state.error}
+                                        {validationMessage}
                                     </AlertDescription>
                                     {/* Scoped to the one code the recovery path was written for. Every other
         failure here — the form's own validation, or a different backend code —
         leaves the user with no password to recover, so offering the link
         would point them at a flow that cannot help. */}
-                                    {state.errorCode === RECOVERY_LINK_CODE && (
+                                    {errorCode === RECOVERY_LINK_CODE && (
                                         <Link
-                                            href="/forgot-password"
+                                            to="/forgot-password"
                                             className="mt-1 inline-block text-xs font-semibold underline underline-offset-2"
                                         >
                                             ¿Olvidaste tu contraseña?
@@ -401,9 +501,7 @@ export function RegisterPageClient() {
                                     className="w-full h-12 rounded-xl border-border font-bold text-xs transition-[color,background-color,border-color,box-shadow,opacity,transform] hover:bg-muted"
                                     asChild
                                 >
-                                    <Link href="/login">
-                                        Identificar Sesión
-                                    </Link>
+                                    <Link to="/login">Identificar Sesión</Link>
                                 </Button>
                             </div>
                         </form>

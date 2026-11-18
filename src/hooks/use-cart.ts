@@ -1,7 +1,7 @@
 "use client";
-import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { toast } from "sonner";
+import { useRouter } from "@/lib/navigation";
 import { useAuthStore } from "@/store/auth-store";
 import { useCartStore } from "@/store/cart-store";
 

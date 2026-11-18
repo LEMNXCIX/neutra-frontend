@@ -1,8 +1,7 @@
 "use client";
 
+import { Link } from "@tanstack/react-router";
 import { Rocket } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { TenantForm } from "@/components/admin/tenants/TenantForm";
 import Logo from "@/components/logo";
 import {
@@ -12,6 +11,7 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
+import { useRouter } from "@/lib/navigation";
 
 export function TenantOnboardingPageClient() {
     const router = useRouter();
@@ -29,7 +29,7 @@ export function TenantOnboardingPageClient() {
                 <div className="flex flex-col items-center text-center gap-6">
                     <div className="relative group">
                         <div className="absolute inset-0 bg-primary/20 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
-                        <Link href="/">
+                        <Link to="/">
                             <Logo
                                 size={80}
                                 className="text-foreground relative z-10 transition-transform hover:scale-110 duration-500"

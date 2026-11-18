@@ -8,7 +8,6 @@ import {
     Upload,
     XCircle,
 } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
 import type React from "react";
 import {
     Suspense,
@@ -25,6 +24,7 @@ import {
     MobileTablePagination,
     TablePagination,
 } from "@/components/admin/shared/TablePagination";
+import { useAdminTable } from "@/components/admin/shared/useAdminTable";
 import {
     Accordion,
     AccordionContent,
@@ -61,6 +61,7 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { useConfirm } from "@/hooks/use-confirm";
+import { useRouter, useSearchParams } from "@/lib/navigation";
 import { slidersService } from "@/services/sliders.service";
 import type { Slideshow } from "@/types/slide.types";
 
@@ -374,6 +375,12 @@ function DesktopSlidersTable({
     pagination: PaginationProps;
     onPageChange: (page: number) => void;
 }) {
+    const { rows } = useAdminTable({
+        data: sliders,
+        getRowId: (slider) => slider.id,
+        enablePagination: true,
+    });
+
     return (
         <Card className="hidden lg:block">
             <div className="overflow-x-auto">
@@ -395,7 +402,7 @@ function DesktopSlidersTable({
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {sliders.length === 0 ? (
+                        {rows.length === 0 ? (
                             <TableRow>
                                 <TableCell
                                     colSpan={5}
@@ -405,7 +412,7 @@ function DesktopSlidersTable({
                                 </TableCell>
                             </TableRow>
                         ) : (
-                            sliders.map((s) => (
+                            rows.map((s) => (
                                 <TableRow
                                     key={s.id}
                                     className="group hover:bg-muted/50 transition-colors border-b border-border/50"
@@ -526,9 +533,15 @@ function MobileSlidersCards({
     pagination: PaginationProps;
     onPageChange: (page: number) => void;
 }) {
+    const { rows } = useAdminTable({
+        data: sliders,
+        getRowId: (slider) => slider.id,
+        enablePagination: true,
+    });
+
     return (
         <div className="space-y-4 lg:hidden">
-            {sliders.map((s) => (
+            {rows.map((s) => (
                 <Card key={s.id} className="t-card overflow-hidden">
                     <CardContent className="p-0">
                         {s.img ? (

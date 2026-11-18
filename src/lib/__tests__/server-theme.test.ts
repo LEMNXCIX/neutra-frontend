@@ -3,6 +3,8 @@
  * which renders inside the root layout only. That only works if the provider is
  * mounted once at the root and if applyTenantTheme stays a no-op when there is
  * no tenant palette.
+ *
+ * The x-tenant-slug header now comes from Start server utilities.
  */
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -13,9 +15,15 @@ vi.mock("@/services/tenant.service", () => ({
     },
 }));
 
-const mockHeaders = vi.fn();
-vi.mock("next/headers", () => ({
-    headers: () => mockHeaders(),
+const ctx = vi.hoisted(() => ({
+    headers: new Headers() as Headers,
+    throwOnRead: false,
+}));
+vi.mock("@tanstack/react-start/server", () => ({
+    getRequestHeader: (name: string) => {
+        if (ctx.throwOnRead) throw new Error("no request scope");
+        return ctx.headers.get(name) ?? undefined;
+    },
 }));
 
 import {
@@ -28,7 +36,8 @@ const header = (slug: string | null) =>
 
 beforeEach(() => {
     vi.clearAllMocks();
-    mockHeaders.mockResolvedValue(header("default"));
+    ctx.throwOnRead = false;
+    ctx.headers = header("default");
     mockGetBySlug.mockResolvedValue({
         name: "Default Store",
         config: { branding: { primaryColor: "#7c3aed" } },
@@ -44,7 +53,7 @@ describe("getTenantBrandingFromHeaders", () => {
     });
 
     it("returns null when there is no tenant, e.g. superadmin", async () => {
-        mockHeaders.mockResolvedValue(header(null));
+        ctx.headers = header(null);
         await expect(getTenantBrandingFromHeaders()).resolves.toBeNull();
         expect(mockGetBySlug).not.toHaveBeenCalled();
     });
@@ -59,8 +68,8 @@ describe("getTenantBrandingFromHeaders", () => {
         await expect(getTenantBrandingFromHeaders()).resolves.toBeNull();
     });
 
-    it("returns null instead of throwing when headers() fails", async () => {
-        mockHeaders.mockRejectedValue(new Error("no request scope"));
+    it("returns null instead of throwing when there is no request scope", async () => {
+        ctx.throwOnRead = true;
         await expect(getTenantBrandingFromHeaders()).resolves.toBeNull();
     });
 });
@@ -71,7 +80,7 @@ describe("getTenantNameFromHeaders", () => {
     });
 
     it("returns null when there is no tenant", async () => {
-        mockHeaders.mockResolvedValue(header(null));
+        ctx.headers = header(null);
         await expect(getTenantNameFromHeaders()).resolves.toBeNull();
     });
 });

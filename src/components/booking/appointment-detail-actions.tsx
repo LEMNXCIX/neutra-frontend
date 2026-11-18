@@ -1,9 +1,9 @@
 "use client";
 
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { Link } from "@tanstack/react-router";
 import { CancelAppointmentDialog } from "@/components/booking/cancel-appointment-dialog";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "@/lib/navigation";
 
 interface AppointmentDetailActionsProps {
     appointmentId: string;
@@ -23,7 +23,7 @@ export function AppointmentDetailActions({
     return (
         <div className="pt-2">
             <Button asChild variant="outline" className="w-full">
-                <Link href="/contact">Ver ubicación en el mapa</Link>
+                <Link to="/contact">Ver ubicación en el mapa</Link>
             </Button>
             {(status === "PENDING" || status === "CONFIRMED") && (
                 <div className="mt-4 pt-2 border-t">

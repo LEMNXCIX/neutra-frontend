@@ -1,10 +1,10 @@
 "use client";
 import { Sparkles, X } from "lucide-react";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { bannersService } from "@/services/banners.service";
 import type { Banner } from "@/types/banner.types";
 import { Button } from "./ui/button";
+import { SmartLink } from "./ui/smart-link";
 
 // Removed local Banner type definition
 
@@ -65,9 +65,9 @@ export default function BannerBar() {
                                 className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 font-black uppercase tracking-widest text-[10px] shadow-2xl h-11 px-8 rounded-lg transition-[color,background-color,border-color,box-shadow,opacity,transform] active:scale-95"
                                 size="sm"
                             >
-                                <Link href={b.ctaUrl}>
+                                <SmartLink href={b.ctaUrl}>
                                     {b.cta || "Initialize"} →
-                                </Link>
+                                </SmartLink>
                             </Button>
                         ) : b.cta ? (
                             <span className="bg-primary-foreground text-primary px-8 py-3 rounded-lg font-black uppercase tracking-widest text-[10px] shadow-2xl">

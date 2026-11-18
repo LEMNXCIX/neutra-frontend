@@ -32,6 +32,7 @@ vi.mock("react", async (importOriginal) => {
     };
 });
 
+import { tenantStore } from "@/store/tanstack/tenant-store";
 import { tenantStoreApi, useTenantStore } from "@/store/tenant-store";
 
 const serverSnapshot = (): Record<string, unknown> => {
@@ -94,5 +95,23 @@ describe("tenant store hydration-safety contract", () => {
         // The whole point: a non-null tenantId here is what caused the
         // AppearanceClient mismatch between the Palette icon and the spinner.
         expect(serverSnapshot().tenantId).toBeNull();
+    });
+});
+
+describe("tenant store TanStack backing", () => {
+    it("keeps the TanStack store and the legacy test seam in sync", () => {
+        tenantStoreApi.set({ tenantId: "t-from-seam", moduleType: "booking" });
+        expect(tenantStore.get()).toEqual({
+            tenantId: "t-from-seam",
+            tenantSlug: null,
+            moduleType: "booking",
+        });
+
+        tenantStore.setState(() => ({
+            tenantId: "t-direct",
+            tenantSlug: null,
+            moduleType: null,
+        }));
+        expect(tenantStoreApi.get().tenantId).toBe("t-direct");
     });
 });

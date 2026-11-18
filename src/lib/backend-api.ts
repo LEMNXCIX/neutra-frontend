@@ -1,10 +1,17 @@
 /**
  * Backend API Client
- * Centralized, type-safe client for external backend communication
+ * Centralized, type-safe client for external backend communication.
+ *
+ * Request state (cookie jar, tenant headers) is read from TanStack Start's
+ * server utilities, never from next/headers.
  */
 
-import { headers as getRequestHeaders } from "next/headers";
-
+import {
+    getCookie,
+    getRequest,
+    getRequestHeader,
+} from "@tanstack/react-start/server";
+import type { StandardResponse } from "@/types/frontend-api";
 import { getBackendUrl } from "./backend-url";
 
 // ============================================================================
@@ -18,6 +25,12 @@ const TOKEN_COOKIE_NAME = "token";
  * redacted before anything reaches a log sink.
  */
 const SENSITIVE_HEADERS = new Set(["cookie", "authorization", "set-cookie"]);
+
+/** The structural shape of Next's fetch `next` option, without importing Next. */
+export interface FetchCacheConfig {
+    revalidate?: number | false;
+    tags?: string[];
+}
 
 /**
  * Derive the public origin of the incoming request so the backend can build
@@ -75,7 +88,12 @@ export interface ApiRequestConfig {
     token?: string;
     timeout?: number;
     cache?: RequestCache;
-    next?: NextFetchRequestConfig;
+    /**
+     * @deprecated Source-compatible remnant of Next's fetch cache extension.
+     * Revalidation is log-only until Task 14 and native fetch ignores it, so
+     * the field is retained for existing callers but never forwarded.
+     */
+    next?: FetchCacheConfig;
 }
 
 export interface ApiResponse<T = unknown> {
@@ -84,12 +102,27 @@ export interface ApiResponse<T = unknown> {
     error?: string;
     message?: string;
     statusCode?: number;
+    errors?: Array<{
+        code: string;
+        message: string;
+        field?: string;
+        domain?: string;
+        metadata?: unknown;
+    }>;
+    pagination?: StandardResponse["pagination"];
+    meta?: StandardResponse["meta"];
 }
 
 export interface ApiError extends Error {
     statusCode?: number;
     response?: ApiResponse;
 }
+
+/** `RequestInit` plus the bearer token and JSON body the BFF passes along. */
+export type ServerFetchInit = Omit<RequestInit, "body"> & {
+    body?: unknown;
+    token?: string;
+};
 
 // ============================================================================
 // Error Handling
@@ -108,7 +141,89 @@ class BackendApiError extends Error implements ApiError {
 }
 
 // ============================================================================
-// Core Client
+// Shared request headers
+// ============================================================================
+
+/**
+ * Build the headers every backend call carries.
+ *
+ * - the whole incoming cookie jar is forwarded (not just `token`);
+ * - proxy-injected `x-tenant-slug` / `x-tenant-id` headers win over the
+ *   tenant cookies, which can be stale after a visit to another subdomain;
+ * - the default tenant id is dropped so it cannot override a resolved slug.
+ */
+const buildRequestHeaders = (
+    explicit: Record<string, string> | undefined,
+    token: string | undefined,
+): { headers: Record<string, string>; forwardedCookieJar: boolean } => {
+    const requestHeaders: Record<string, string> = {
+        "Content-Type": "application/json",
+        ...explicit,
+    };
+
+    let forwardedCookieJar = false;
+    try {
+        const req = getRequest();
+        const h = req?.headers;
+        const cookie = h?.get("cookie");
+
+        if (cookie) {
+            requestHeaders.Cookie = cookie;
+            forwardedCookieJar = true;
+        }
+
+        if (h) {
+            // Header precedence: the proxy sets these for THIS request, so a
+            // stale client cookie must never win.
+            const slug =
+                getRequestHeader("x-tenant-slug") ??
+                h.get("x-tenant-slug") ??
+                undefined;
+            const headerTenantId =
+                getRequestHeader("x-tenant-id") ??
+                h.get("x-tenant-id") ??
+                undefined;
+            const tenantSlug = slug || getCookie("tenant-slug");
+            const tenantId = headerTenantId || getCookie("tenant-id");
+
+            if (tenantSlug) {
+                requestHeaders["x-tenant-slug"] = tenantSlug;
+            }
+
+            const defaultTenantId =
+                process.env.NEXT_PUBLIC_DEFAULT_TENANT ||
+                "default-tenant-00000000-0000-0000-0000-000000000001";
+            if (tenantId && tenantId !== defaultTenantId) {
+                requestHeaders["x-tenant-id"] = tenantId;
+            }
+
+            const originalOrigin = resolveOriginalOrigin(h);
+            if (originalOrigin) {
+                requestHeaders["x-original-origin"] = originalOrigin;
+            }
+        }
+    } catch (_e) {
+        // No Start request scope (static generation, scripts, unit tests).
+    }
+
+    // Outside a request scope, send the bare token so the call is still
+    // authenticated. Logged, because a request that authenticates differently
+    // from the rest deserves to be visible.
+    if (token && !forwardedCookieJar) {
+        requestHeaders.Cookie = `${TOKEN_COOKIE_NAME}=${token}`;
+        console.warn(
+            "[BackendApi] No incoming cookie jar; sending token-only Cookie header.",
+        );
+    }
+
+    return { headers: requestHeaders, forwardedCookieJar };
+};
+
+const normalizeEndpoint = (endpoint: string): string =>
+    endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
+
+// ============================================================================
+// Core Client (legacy helper API)
 // ============================================================================
 
 /**
@@ -125,79 +240,15 @@ async function request<T = unknown>(
         token,
         timeout = 30000,
         cache,
-        next,
     } = config;
 
-    // Normalize endpoint
-    const normalizedEndpoint = endpoint.startsWith("/")
-        ? endpoint
-        : `/${endpoint}`;
-    const url = `${getBackendUrl()}${normalizedEndpoint}`;
+    const url = `${getBackendUrl()}${normalizeEndpoint(endpoint)}`;
 
     if (typeof window === "undefined") {
         console.log(`[BackendApi] ${method} ${url}`);
     }
 
-    // Build headers
-    const requestHeaders: Record<string, string> = {
-        "Content-Type": "application/json",
-        ...headers,
-    };
-
-    // Forward the incoming cookie jar. The backend authenticates from the
-    // `token` cookie, and other cookies in the jar (tenant slug, refresh token)
-    // are equally part of the caller's session. Rebuilding `Cookie: token=<jwt>`
-    // silently dropped them, which is the root cause of the admin logout path
-    // being rejected before it reached the backend.
-    let forwardedCookieJar = false;
-    if (typeof window === "undefined") {
-        try {
-            // headers() is a promise in Next.js 15+. It throws outside a request
-            // scope, which the catch handles for static generation and tests.
-            const h = await getRequestHeaders();
-            const cookie = h?.get("cookie");
-
-            if (cookie) {
-                requestHeaders.Cookie = cookie;
-                forwardedCookieJar = true;
-            }
-
-            if (h) {
-                const tenantId = h.get("x-tenant-id");
-                const tenantSlug = h.get("x-tenant-slug");
-
-                // Prioritize slug for better resolution reliability
-                if (tenantSlug) {
-                    requestHeaders["x-tenant-slug"] = tenantSlug;
-                }
-
-                // Only forward x-tenant-id if it exists AND is not the known default ID that causes conflicts
-                const defaultTenantId =
-                    process.env.NEXT_PUBLIC_DEFAULT_TENANT ||
-                    "default-tenant-00000000-0000-0000-0000-000000000001";
-                if (tenantId && tenantId !== defaultTenantId) {
-                    requestHeaders["x-tenant-id"] = tenantId;
-                }
-
-                const originalOrigin = resolveOriginalOrigin(h);
-                if (originalOrigin) {
-                    requestHeaders["x-original-origin"] = originalOrigin;
-                }
-            }
-        } catch (_e) {
-            // next/headers might not be available in all contexts (e.g. static gen)
-        }
-    }
-
-    // No incoming jar (e.g. a server-side call outside a request scope): send the
-    // bare token so the call is still authenticated. Logged, because a request
-    // that authenticates differently from the rest deserves to be visible.
-    if (token && !forwardedCookieJar) {
-        requestHeaders.Cookie = `${TOKEN_COOKIE_NAME}=${token}`;
-        console.warn(
-            "[BackendApi] No incoming cookie jar; sending token-only Cookie header.",
-        );
-    }
+    const { headers: requestHeaders } = buildRequestHeaders(headers, token);
 
     // Build fetch options
     const fetchOptions: RequestInit = {
@@ -205,7 +256,6 @@ async function request<T = unknown>(
         headers: requestHeaders,
         credentials: "include",
         cache: cache || "no-store",
-        next,
     };
 
     if (typeof window === "undefined" && process.env.LOG_HEADERS === "true") {
@@ -294,12 +344,87 @@ async function request<T = unknown>(
 }
 
 // ============================================================================
-// HTTP Method Helpers
+// BFF / loader client — forwards the envelope untouched
 // ============================================================================
 
 /**
- * GET request
+ * Server-side backend call for BFF route handlers and Start route loaders.
+ *
+ * Contract (api-neutra-v2 §6):
+ * - 204 returns `null` and the body is never parsed;
+ * - a successful response returns the backend envelope verbatim — status,
+ *   `errors`, `pagination` and `meta.traceId` are not rebuilt;
+ * - an unsuccessful response throws `BackendApiError` carrying the verbatim
+ *   envelope in `.response` and the HTTP status in `.statusCode`. The BFF
+ *   forwards both; it never rewrites the backend's answer.
  */
+export async function serverBackendFetch<T = StandardResponse>(
+    endpoint: string,
+    init: ServerFetchInit = {},
+): Promise<T> {
+    const { token, body: rawBody, ...fetchInit } = init;
+    const url = `${getBackendUrl()}${normalizeEndpoint(endpoint)}`;
+    const explicitHeaders = fetchInit.headers
+        ? Object.fromEntries(new Headers(fetchInit.headers).entries())
+        : undefined;
+    const { headers } = buildRequestHeaders(explicitHeaders, token);
+
+    const method = (fetchInit.method as HttpMethod) || "GET";
+    let body: BodyInit | undefined;
+    if (rawBody != null && ["POST", "PUT", "PATCH"].includes(method)) {
+        // A route handler hands over the parsed JSON object.
+        body = typeof rawBody === "string" ? rawBody : JSON.stringify(rawBody);
+    }
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
+
+    try {
+        const response = await fetch(url, {
+            ...fetchInit,
+            method,
+            headers,
+            body,
+            credentials: "include",
+            cache: "no-store",
+            signal: controller.signal,
+        });
+        clearTimeout(timeoutId);
+
+        // 204 No Content has no body to parse.
+        if (response.status === 204) {
+            return null as T;
+        }
+
+        const envelope = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+            throw new BackendApiError(
+                typeof envelope?.message === "string"
+                    ? envelope.message
+                    : `Request failed with status ${response.status}`,
+                response.status,
+                envelope as ApiResponse,
+            );
+        }
+
+        return envelope as T;
+    } catch (error) {
+        clearTimeout(timeoutId);
+        if (error instanceof BackendApiError) throw error;
+        if (error instanceof Error && error.name === "AbortError") {
+            throw new BackendApiError("Request timeout", 408);
+        }
+        // Never rewrite the failure: the BFF surfaces the original message and
+        // derives the status from an explicit `statusCode` when one exists.
+        throw error;
+    }
+}
+
+// ============================================================================
+// HTTP Method Helpers
+// ============================================================================
+
 export const get = <T = unknown>(
     endpoint: string,
     token?: string,
@@ -308,9 +433,6 @@ export const get = <T = unknown>(
     return request<T>(endpoint, { method: "GET", token, headers });
 };
 
-/**
- * POST request
- */
 export const post = <T = unknown>(
     endpoint: string,
     body: unknown,
@@ -320,9 +442,6 @@ export const post = <T = unknown>(
     return request<T>(endpoint, { method: "POST", body, token, headers });
 };
 
-/**
- * PUT request
- */
 export const put = <T = unknown>(
     endpoint: string,
     body: unknown,
@@ -332,9 +451,6 @@ export const put = <T = unknown>(
     return request<T>(endpoint, { method: "PUT", body, token, headers });
 };
 
-/**
- * PATCH request
- */
 export const patch = <T = unknown>(
     endpoint: string,
     body: unknown,
@@ -344,9 +460,6 @@ export const patch = <T = unknown>(
     return request<T>(endpoint, { method: "PATCH", body, token, headers });
 };
 
-/**
- * DELETE request
- */
 export const del = <T = unknown>(
     endpoint: string,
     token?: string,

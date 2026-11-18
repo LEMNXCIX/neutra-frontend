@@ -12,6 +12,7 @@ import {
 import { useCallback, useEffect, useReducer } from "react";
 import { toast } from "sonner";
 import { AdminTableHeader } from "@/components/admin/shared/AdminTableHeader";
+import { useAdminTable } from "@/components/admin/shared/useAdminTable";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -115,6 +116,10 @@ export function FeaturesTable({
             f.key.toLowerCase().includes(state.search.toLowerCase()) ||
             f.category?.toLowerCase().includes(state.search.toLowerCase()),
     );
+    const { rows } = useAdminTable({
+        data: filteredFeatures,
+        getRowId: (feature) => feature.id,
+    });
 
     const openCreate = () => {
         dispatch({ type: "SET_EDITING_FEATURE", payload: null });
@@ -189,7 +194,7 @@ export function FeaturesTable({
                                             Cargando…
                                         </TableCell>
                                     </TableRow>
-                                ) : filteredFeatures.length === 0 ? (
+                                ) : rows.length === 0 ? (
                                     <TableRow>
                                         <TableCell
                                             colSpan={5}
@@ -199,7 +204,7 @@ export function FeaturesTable({
                                         </TableCell>
                                     </TableRow>
                                 ) : (
-                                    filteredFeatures.map((feature) => (
+                                    rows.map((feature) => (
                                         <TableRow key={feature.id}>
                                             <TableCell>
                                                 <div className="font-medium">

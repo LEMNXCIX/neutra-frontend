@@ -13,6 +13,9 @@
 # testing
 /coverage
 
+# parity fixtures captured from the pre-rewrite app (generated, not source)
+/tests/parity/fixtures/**
+
 # next.js
 /.next/
 /.next-*/
@@ -20,6 +23,8 @@
 
 # production
 /build
+/dist/
+/src/routeTree.gen.ts
 
 # misc
 .DS_Store

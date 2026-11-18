@@ -2,9 +2,9 @@
 
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { createElement, type ReactElement } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import "@testing-library/jest-dom/vitest";
-import type { ReactElement } from "react";
 
 const { mockGetQueue, mockUpdateStatus, mockRouterRefresh } = vi.hoisted(
     () => ({
@@ -13,6 +13,26 @@ const { mockGetQueue, mockUpdateStatus, mockRouterRefresh } = vi.hoisted(
         mockRouterRefresh: vi.fn(),
     }),
 );
+
+vi.mock("@tanstack/react-router", async (importOriginal) => {
+    const actual = await importOriginal<Record<string, unknown>>();
+    return {
+        ...actual,
+        Link: ({ to, params, children, ...rest }: any) =>
+            createElement(
+                "a",
+                {
+                    href: to.replace(
+                        /\$([A-Za-z0-9_]+)/g,
+                        (_m: string, key: string) =>
+                            String(params?.[key] ?? ""),
+                    ),
+                    ...rest,
+                },
+                children,
+            ),
+    };
+});
 
 vi.mock("@/services/booking.service", async (importOriginal) => {
     const actual =
@@ -27,7 +47,7 @@ vi.mock("@/services/booking.service", async (importOriginal) => {
     };
 });
 
-vi.mock("next/navigation", () => ({
+vi.mock("@/lib/navigation", () => ({
     useRouter: () => ({ refresh: mockRouterRefresh }),
 }));
 

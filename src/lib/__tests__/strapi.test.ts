@@ -1,8 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-// strapi.ts is server-only; neutralize the guard in tests
-vi.mock("server-only", () => ({}));
-
 const mockFetch = vi.fn();
 vi.stubGlobal("fetch", mockFetch);
 
@@ -10,11 +7,10 @@ vi.stubGlobal("fetch", mockFetch);
 vi.stubEnv("STRAPI_URL", "http://strapi.test");
 vi.stubEnv("STRAPI_TOKEN", "strapi-token");
 
-// next/headers is only used to read the tenant header
-vi.mock("next/headers", () => ({
-    headers: async () => ({
-        get: (name: string) => (name === "x-tenant-id" ? "tenant-1" : null),
-    }),
+// The tenant header now comes from Start server utilities.
+vi.mock("@tanstack/react-start/server", () => ({
+    getRequestHeader: (name: string) =>
+        name === "x-tenant-id" ? "tenant-1" : undefined,
 }));
 
 // STRAPI_URL is read at module load — stub before importing

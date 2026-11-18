@@ -1,5 +1,6 @@
 "use client";
 
+import { Link } from "@tanstack/react-router";
 import type { LucideIcon } from "lucide-react";
 import {
     ArrowLeft,
@@ -19,13 +20,12 @@ import {
     UserCog,
     Users,
 } from "lucide-react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import type { NavItem } from "@/config/admin-navigation";
 import { useFeatures } from "@/hooks/useFeatures";
+import { usePathname } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/auth-store";
 
@@ -116,7 +116,7 @@ export default function AdminSidebar({ items }: AdminSidebarProps) {
                                 : pathname.startsWith(href);
 
                             return (
-                                <Link key={href} href={href} passHref>
+                                <Link key={href} to={href}>
                                     <Button
                                         variant={isActive ? "default" : "ghost"}
                                         className={cn(
@@ -149,7 +149,7 @@ export default function AdminSidebar({ items }: AdminSidebarProps) {
 
             <div className="p-4 border-t border-border/50">
                 <Link
-                    href="/"
+                    to="/"
                     className="group flex items-center gap-3 px-3 py-2 text-xs font-medium text-muted-foreground hover:text-foreground transition-[color,background-color,border-color,box-shadow,opacity,transform]"
                 >
                     <ArrowLeft

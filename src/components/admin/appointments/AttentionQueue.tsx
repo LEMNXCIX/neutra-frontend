@@ -9,15 +9,16 @@ import {
     UserX,
     XCircle,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
+import { useAdminTable } from "@/components/admin/shared/useAdminTable";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
 import { useConfirm } from "@/hooks/use-confirm";
+import { useRouter } from "@/lib/navigation";
 import type {
     Appointment,
     AppointmentStatus,
@@ -80,6 +81,11 @@ export function AttentionQueue({ onRefresh }: AttentionQueueProps) {
     const [loading, setLoading] = useState(true);
     const [resolving, setResolving] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const { rows } = useAdminTable({
+        data: appointments,
+        getRowId: (appointment) => appointment.id,
+        enablePagination: true,
+    });
 
     const loadQueue = useCallback(async () => {
         setLoading(true);
@@ -191,7 +197,7 @@ export function AttentionQueue({ onRefresh }: AttentionQueueProps) {
                         <Spinner size="sm" />
                         Cargando citas...
                     </div>
-                ) : appointments.length === 0 ? (
+                ) : rows.length === 0 ? (
                     <div className="py-8 text-center">
                         <CheckCircle2 className="mx-auto mb-3 size-8 text-emerald-500/60" />
                         <p className="font-medium">
@@ -204,7 +210,7 @@ export function AttentionQueue({ onRefresh }: AttentionQueueProps) {
                     </div>
                 ) : (
                     <div className="divide-y divide-border/50">
-                        {appointments.map((appointment) => (
+                        {rows.map((appointment) => (
                             <div
                                 key={appointment.id}
                                 className="space-y-4 py-4 first:pt-0 last:pb-0"

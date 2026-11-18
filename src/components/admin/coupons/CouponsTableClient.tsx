@@ -11,8 +11,6 @@ import {
     XCircle,
     Zap,
 } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
-
 import type React from "react";
 import { Suspense, useReducer, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -21,6 +19,7 @@ import {
     MobileTablePagination,
     TablePagination,
 } from "@/components/admin/shared/TablePagination";
+import { useAdminTable } from "@/components/admin/shared/useAdminTable";
 import {
     Accordion,
     AccordionContent,
@@ -58,6 +57,7 @@ import {
 } from "@/components/ui/table";
 import { useConfirm } from "@/hooks/use-confirm";
 import { reportError } from "@/lib/error-reporting";
+import { useRouter, useSearchParams } from "@/lib/navigation";
 import { bookingService, type Service } from "@/services/booking.service";
 import { couponsService } from "@/services/coupons.service";
 import {
@@ -438,6 +438,12 @@ function CouponsDesktopTable({
     pagination: PaginationProps;
     onPageChange: (page: number) => void;
 }) {
+    const { rows } = useAdminTable({
+        data: coupons,
+        getRowId: (coupon) => coupon.id,
+        enablePagination: true,
+    });
+
     return (
         <Card className="hidden lg:block">
             <div className="overflow-x-auto">
@@ -460,7 +466,7 @@ function CouponsDesktopTable({
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {coupons.length === 0 ? (
+                        {rows.length === 0 ? (
                             <TableRow>
                                 <TableCell
                                     colSpan={6}
@@ -470,7 +476,7 @@ function CouponsDesktopTable({
                                 </TableCell>
                             </TableRow>
                         ) : (
-                            coupons.map((c) => {
+                            rows.map((c) => {
                                 const status = getCouponStatus(c);
                                 return (
                                     <TableRow
@@ -592,9 +598,15 @@ function CouponsMobileCards({
     pagination: PaginationProps;
     onPageChange: (page: number) => void;
 }) {
+    const { rows } = useAdminTable({
+        data: coupons,
+        getRowId: (coupon) => coupon.id,
+        enablePagination: true,
+    });
+
     return (
         <div className="space-y-3 lg:hidden">
-            {coupons.map((c) => {
+            {rows.map((c) => {
                 const status = getCouponStatus(c);
                 return (
                     <Card key={c.id} className="shadow-sm border-muted/50">

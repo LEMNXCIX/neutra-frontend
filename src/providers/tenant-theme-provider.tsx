@@ -29,7 +29,7 @@ function setDarkMode(enabled: boolean): void {
     if (enabled) {
         root.classList.remove("dark");
     } else {
-        // Restore next-themes preference
+        // Restore the persisted theme preference
         const systemDark =
             typeof window !== "undefined" &&
             window.matchMedia?.("(prefers-color-scheme: dark)").matches;
@@ -51,9 +51,9 @@ export function TenantThemeProvider({
         }
         setDarkMode(hasTheme);
 
-        // next-themes (parent provider) may re-add .dark after our effects
-        // run: child effects execute before parent ones. Enforce light mode
-        // while a tenant theme is active.
+        // The parent theme provider may re-add .dark after our effects run:
+        // child effects execute before parent ones. Enforce light mode while
+        // a tenant theme is active.
         let observer: MutationObserver | undefined;
         if (hasTheme) {
             observer = new MutationObserver(() => {

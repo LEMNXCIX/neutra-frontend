@@ -1,6 +1,7 @@
 // @vitest-environment happy-dom
 
 import { render, screen } from "@testing-library/react";
+import { createElement } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import "@testing-library/jest-dom/vitest";
 
@@ -8,7 +9,27 @@ const mocks = vi.hoisted(() => ({
     isFeatureEnabled: vi.fn(),
 }));
 
-vi.mock("next/navigation", () => ({
+vi.mock("@tanstack/react-router", async (importOriginal) => {
+    const actual = await importOriginal<Record<string, unknown>>();
+    return {
+        ...actual,
+        Link: ({ to, params, children, ...rest }: any) =>
+            createElement(
+                "a",
+                {
+                    href: to.replace(
+                        /\$([A-Za-z0-9_]+)/g,
+                        (_m: string, key: string) =>
+                            String(params?.[key] ?? ""),
+                    ),
+                    ...rest,
+                },
+                children,
+            ),
+    };
+});
+
+vi.mock("@/lib/navigation", () => ({
     usePathname: () => "/admin",
 }));
 

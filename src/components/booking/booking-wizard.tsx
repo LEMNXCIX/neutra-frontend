@@ -13,7 +13,6 @@ import {
     Tag,
     User,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
 import type React from "react";
 import {
     useCallback,
@@ -43,6 +42,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useFeatures } from "@/hooks/useFeatures";
 import { filterFutureSlots, isFutureSlot } from "@/lib/appointment-time";
 import { reportError } from "@/lib/error-reporting";
+import { useRouter } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
 import {
     bookingService,

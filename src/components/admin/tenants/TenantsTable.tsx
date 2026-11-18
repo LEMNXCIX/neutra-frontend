@@ -18,6 +18,7 @@ import {
 } from "react";
 import { toast } from "sonner";
 import { AdminTableHeader } from "@/components/admin/shared/AdminTableHeader";
+import { useAdminTable } from "@/components/admin/shared/useAdminTable";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -259,6 +260,10 @@ export function TenantsTable({
             t.name.toLowerCase().includes(state.search.toLowerCase()) ||
             t.slug.toLowerCase().includes(state.search.toLowerCase()),
     );
+    const { rows } = useAdminTable({
+        data: filteredTenants,
+        getRowId: (tenant) => tenant.id,
+    });
 
     const openCreate = () => {
         dispatch({ type: "SET_EDITING_TENANT", payload: null });
@@ -360,7 +365,7 @@ export function TenantsTable({
                                             Cargando…
                                         </TableCell>
                                     </TableRow>
-                                ) : filteredTenants.length === 0 ? (
+                                ) : rows.length === 0 ? (
                                     <TableRow>
                                         <TableCell
                                             colSpan={5}
@@ -370,7 +375,7 @@ export function TenantsTable({
                                         </TableCell>
                                     </TableRow>
                                 ) : (
-                                    filteredTenants.map((tenant) => (
+                                    rows.map((tenant) => (
                                         <TenantRow
                                             key={tenant.id}
                                             tenant={tenant}
@@ -388,12 +393,12 @@ export function TenantsTable({
                     <div className="md:hidden space-y-4">
                         {state.loading && state.tenants.length === 0 ? (
                             <div className="text-center py-8">Cargando…</div>
-                        ) : filteredTenants.length === 0 ? (
+                        ) : rows.length === 0 ? (
                             <div className="text-center py-8 text-muted-foreground">
                                 No se encontraron tenants
                             </div>
                         ) : (
-                            filteredTenants.map((tenant) => (
+                            rows.map((tenant) => (
                                 <TenantCard
                                     key={tenant.id}
                                     tenant={tenant}

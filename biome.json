@@ -10,6 +10,8 @@
             "**/*.mjs",
             "!**/node_modules",
             "!**/.next",
+            "!**/dist",
+            "!**/routeTree.gen.ts",
             "!**/coverage",
             "!**/.git",
             "!.playwright-mcp"
@@ -36,6 +38,7 @@
                 "noStaticElementInteractions": "warn"
             },
             "correctness": {
+                "noComponentHookFactories": "warn",
                 "noUnusedFunctionParameters": "warn",
                 "useExhaustiveDependencies": "warn"
             },

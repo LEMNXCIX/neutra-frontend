@@ -1,6 +1,5 @@
 "use client";
 import { CheckCircle2, Edit, Flag, Plus, Trash2, XCircle } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
 import {
     Suspense,
     useCallback,
@@ -16,6 +15,7 @@ import {
     MobileTablePagination,
     TablePagination,
 } from "@/components/admin/shared/TablePagination";
+import { useAdminTable } from "@/components/admin/shared/useAdminTable";
 import {
     Accordion,
     AccordionContent,
@@ -52,6 +52,7 @@ import {
 } from "@/components/ui/table";
 import { useConfirm } from "@/hooks/use-confirm";
 import { reportError } from "@/lib/error-reporting";
+import { useRouter, useSearchParams } from "@/lib/navigation";
 import { bannersService } from "@/services/banners.service";
 import type { Banner } from "@/types/banner.types";
 
@@ -370,6 +371,12 @@ function DesktopBannersTable({
     onDelete: (id: string) => void;
     onPageChange: (page: number) => void;
 }) {
+    const { rows } = useAdminTable({
+        data: banners,
+        getRowId: (banner) => banner.id,
+        enablePagination: true,
+    });
+
     return (
         <Card className="hidden lg:block">
             <div className="overflow-x-auto">
@@ -392,7 +399,7 @@ function DesktopBannersTable({
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {banners.length === 0 ? (
+                        {rows.length === 0 ? (
                             <TableRow>
                                 <TableCell
                                     colSpan={6}
@@ -402,7 +409,7 @@ function DesktopBannersTable({
                                 </TableCell>
                             </TableRow>
                         ) : (
-                            banners.map((b) => (
+                            rows.map((b) => (
                                 <TableRow
                                     key={b.id}
                                     className="group hover:bg-muted/50 transition-colors border-b border-border/50"
@@ -531,9 +538,15 @@ function MobileBannersCards({
     onDelete: (id: string) => void;
     onPageChange: (page: number) => void;
 }) {
+    const { rows } = useAdminTable({
+        data: banners,
+        getRowId: (banner) => banner.id,
+        enablePagination: true,
+    });
+
     return (
         <div className="space-y-3 lg:hidden">
-            {banners.map((b) => (
+            {rows.map((b) => (
                 <Card key={b.id} className="shadow-sm border-muted/50">
                     <CardContent className="pt-4 space-y-3">
                         <div className="flex justify-between items-start">

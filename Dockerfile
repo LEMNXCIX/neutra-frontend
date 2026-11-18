@@ -5,25 +5,27 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 
-# Copy source code and build
+# Copy source code and build with Vite / TanStack Start
 COPY . ./
-RUN npm run build
+RUN npm run build:start
 
 # ---------- Runtime image ----------
 FROM node:22-alpine
 WORKDIR /app
 
-# Copy built assets from builder
-COPY --from=builder /app/.next ./.next
+# Copy the generated client + Node server entry from the builder
+COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/next.config.ts ./next.config.ts
+COPY --from=builder /app/scripts/serve-start.mjs ./scripts/serve-start.mjs
+COPY --from=builder /app/scripts/serve-start-headers.mjs ./scripts/serve-start-headers.mjs
+COPY --from=builder /app/scripts/serve-start-request.mjs ./scripts/serve-start-request.mjs
 COPY --from=builder /app/package*.json ./
 RUN npm ci --omit=dev
 
-# Expose the Next.js default port
-EXPOSE 3000
-
 ENV NODE_ENV=production
+ENV PORT=3001
 
-# Start the production server
-CMD ["npm", "start"]
+EXPOSE 3001
+
+# Start the generated Node server on port 3001
+CMD ["npm", "run", "start:start"]

@@ -15,7 +15,6 @@ import {
     Tag,
     Trash2,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -31,6 +30,7 @@ import { Input } from "@/components/ui/input";
 import { useCart } from "@/hooks/use-cart";
 import { useFeatures } from "@/hooks/useFeatures";
 import { apiFetch } from "@/lib/api-fetch";
+import { useRouter } from "@/lib/navigation";
 import type { ContextCoupon } from "@/store/cart-store";
 
 function getBackendMessage(value: unknown, fallback: string): string {

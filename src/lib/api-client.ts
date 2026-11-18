@@ -1,6 +1,44 @@
+import { createIsomorphicFn } from "@tanstack/react-start";
 import Cookies from "js-cookie";
 import { getBackendUrl } from "@/lib/backend-url";
 import type { StandardResponse } from "@/types/frontend-api";
+
+type ServerTenantContext = {
+    tenantSlug: string | undefined;
+    tenantId: string | undefined;
+    cookieHeader: string | undefined;
+};
+
+/**
+ * Start's compiler extracts the `.server()` body from the client bundle, so
+ * the server-only request helpers stay out of browser code while this call
+ * site keeps the same values and the same no-request-scope fallback as before.
+ */
+const readServerTenantContext = createIsomorphicFn()
+    .server(async (): Promise<ServerTenantContext> => {
+        const { getRequest, getRequestHeader, getCookie } = await import(
+            "@tanstack/react-start/server"
+        );
+
+        // Prefer the x-tenant-* request headers: the proxy sets them for THIS
+        // request (always correct). Cookies can be stale — they're set on the
+        // response, so a request that follows a visit to another subdomain
+        // still carries the previous tenant's cookie.
+        return {
+            tenantSlug:
+                getRequestHeader("x-tenant-slug") || getCookie("tenant-slug"),
+            tenantId: getRequestHeader("x-tenant-id") || getCookie("tenant-id"),
+            // Forward the whole jar, not just the token cookie.
+            cookieHeader: getRequest()?.headers?.get("cookie") ?? undefined,
+        };
+    })
+    .client(
+        (): ServerTenantContext => ({
+            tenantSlug: undefined,
+            tenantId: undefined,
+            cookieHeader: undefined,
+        }),
+    );
 
 /**
  * Custom error class for API errors with context for debugging
@@ -63,31 +101,15 @@ export async function apiClient<T = unknown>(
             console.warn("[ApiClient] Failed to read cookies:", e);
         }
     } else {
-        // Server-side: use next/headers
+        // Server-side: read the Start request context through the isomorphic
+        // boundary; browser bundles only see its client implementation.
         try {
-            const {
-                cookies: nextCookies,
-                headers: nextHeaders,
-            } = require("next/headers");
-            // Prefer the x-tenant-* request headers: the proxy sets them for
-            // THIS request (always correct). Cookies can be stale — they're
-            // set on the response, so a request that follows a visit to
-            // another subdomain still carries the previous tenant's cookie.
-            const h = await nextHeaders();
-            tenantSlug = (h.get("x-tenant-slug") || undefined) as any;
-            tenantId = (h.get("x-tenant-id") || undefined) as any;
-
-            const c = await nextCookies();
-            if (!tenantSlug) tenantSlug = c.get("tenant-slug")?.value;
-            if (!tenantId) tenantId = c.get("tenant-id")?.value;
-
-            // Collect all cookies to forward them
-            const allCookies = c.getAll();
-            cookieHeader = allCookies
-                .map((cookie: any) => `${cookie.name}=${cookie.value}`)
-                .join("; ");
+            const context = await readServerTenantContext();
+            tenantSlug = context.tenantSlug;
+            tenantId = context.tenantId;
+            cookieHeader = context.cookieHeader;
         } catch (_e) {
-            // next/headers might not be available in all contexts
+            // No Start request scope (static generation, scripts, unit tests).
         }
     }
 
@@ -105,7 +127,7 @@ export async function apiClient<T = unknown>(
     };
 
     const isServer = typeof window === "undefined";
-    // Browser traffic always goes through the Next.js BFF at /api, which keeps
+    // Browser traffic always goes through the BFF at /api, which keeps
     // the backend origin and the session cookie in one place. Server-rendered
     // calls hit the backend directly, because a relative URL does not resolve.
     const baseUrl = isServer ? getBackendUrl() : "/api";

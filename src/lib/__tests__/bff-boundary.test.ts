@@ -12,7 +12,7 @@ import { join, relative, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const SRC = resolve(__dirname, "../..");
-const API_DIR = join(SRC, "app/api");
+const API_DIR = join(SRC, "routes/api");
 
 const collectRouteFiles = (dir: string): string[] =>
     readdirSync(dir).flatMap((entry) => {
@@ -26,6 +26,9 @@ const FORBIDDEN: Array<[RegExp, string]> = [
     [/localhost:4001/, "a hardcoded localhost:4001 backend address"],
     [/127\.0\.0\.1:4001/, "a hardcoded 127.0.0.1:4001 backend address"],
 ];
+
+/** Server helpers must read request state from Start, not from Next. */
+const NEXT_IMPORT = /from\s+["']next\//;
 
 describe("BFF backend address boundary", () => {
     const routeFiles = collectRouteFiles(API_DIR);
@@ -73,5 +76,27 @@ describe("BFF backend address boundary", () => {
                 `${modulePath} still reads NEXT_PUBLIC_API_URL on the server.`,
             ).toBe(false);
         }
+    });
+
+    it("BFF contract helpers no longer import next/*", () => {
+        const contractModules = [
+            "lib/api-route-handler.ts",
+            "lib/backend-api.ts",
+            "lib/api-client.ts",
+            "lib/server-auth.ts",
+            "lib/server-theme.ts",
+            "lib/strapi.ts",
+        ];
+
+        const offenders: string[] = [];
+        for (const modulePath of contractModules) {
+            const source = readFileSync(join(SRC, modulePath), "utf8");
+            if (NEXT_IMPORT.test(source)) offenders.push(modulePath);
+        }
+
+        expect(
+            offenders,
+            `use @tanstack/react-start/server utilities instead of next/*: ${offenders.join(", ")}`,
+        ).toEqual([]);
     });
 });
